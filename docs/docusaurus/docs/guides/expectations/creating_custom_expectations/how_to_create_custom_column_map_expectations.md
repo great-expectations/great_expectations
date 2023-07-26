@@ -12,13 +12,9 @@ This guide will walk you through the process of creating a custom `ColumnMapExpe
 
 <Prerequisites>
 
-- Completion of the [overview for creating Custom Expectations](./overview.md).
-
 </Prerequisites>
 
-## Steps
-
-### 1. Choose a name for your Expectation
+## Choose a name for your Expectation
 
 First, decide on a name for your own Expectation. By convention, `ColumnMapExpectations` always start with `expect_column_values_`. You can see other naming conventions in the [Expectations section](../../../contributing/style_guides/code_style.md#expectations)  of the code Style Guide.
 
@@ -27,7 +23,7 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 - `ExpectColumnValuesToEqualThree`
 - `expect_column_values_to_equal_three`
 
-### 2. Copy and rename the template file
+## Copy and rename the template file
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
@@ -58,7 +54,7 @@ cp column_map_expectation_template.py /SOME_DIRECTORY/expect_column_values_to_eq
   </div>
 </details>
 
-### 3. Generate a diagnostic checklist for your Expectation
+## Generate a diagnostic checklist for your Expectation
 
 Once you've copied and renamed the template file, you can execute it as follows.
 
@@ -84,7 +80,7 @@ Completeness checklist for ExpectColumnValuesToMatchSomeCriteria:
 
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it. This guide covers the first five steps on the checklist.
 
-### 4. Change the Expectation class name and add a docstring
+## Change the Expectation class name and add a docstring
 
 By convention, your <TechnicalTag tag="metric" text="Metric" /> class is defined first in a Custom Expectation. For now, we're going to skip to the Expectation class and begin laying the groundwork for the functionality of your Custom Expectation.
 
@@ -132,7 +128,7 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
 
 Congratulations! You're one step closer to implementing a Custom Expectation.
 
-### 5. Add example cases
+## Add example cases
 
 Next, we're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve a dual purpose:
 
@@ -178,7 +174,7 @@ For more information on tests and example cases, <br/>
 see our guide on [how to create example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
 :::
 
-### 6. Implement your Metric and connect it to your Expectation
+## Implement your Metric and connect it to your Expectation
 
 This is the stage where you implement the actual business logic for your Expectation.   
 
@@ -260,7 +256,7 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
 ...
 ```
 
-### 7. Linting
+## Linting
 
 Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, and `ruff`.
 
@@ -301,7 +297,7 @@ you may notice that we didn't implement a `_validate` method here. While we have
 Column Map Expectations come with that functionality built in; no extra `_validate` needed!
 :::
 
-### 8. Contribution (Optional)
+## Contribute (Optional)
 
 This guide will leave you with a Custom Expectation sufficient for [contribution](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) to Great Expectations at an Experimental level.
 
