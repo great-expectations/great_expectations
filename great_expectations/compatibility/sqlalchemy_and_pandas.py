@@ -71,9 +71,7 @@ def pandas_read_sql(sql, con, **kwargs) -> pd.DataFrame | Iterator[pd.DataFrame]
         dataframe
     """
     if is_version_less_than(pd.__version__, "2.0.0"):
-        if sa.sqlalchemy and is_version_greater_or_equal(
-            sa.sqlalchemy.__version__, "2.0.0"
-        ):
+        if sa and is_version_greater_or_equal(sa.__version__, "2.0.0"):
             warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
         with warnings.catch_warnings():
             # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
@@ -112,8 +110,8 @@ def pandas_read_sql_query(
         dataframe
     """
     if (
-        sa.sqlalchemy
-        and is_version_greater_or_equal(sa.sqlalchemy.__version__, "2.0.0")
+        sa
+        and is_version_greater_or_equal(sa.__version__, "2.0.0")
         and is_version_less_than(pd.__version__, "2.0.0")
     ):
         warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
