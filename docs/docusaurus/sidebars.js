@@ -194,6 +194,15 @@ module.exports = {
     },
     {
       type: 'category',
+      label: 'Concepts',
+      link: { type: 'doc', id: 'conceptual_guides/learn_lp' }, 
+      items: [
+        'conceptual_guides/expectation_classes',
+        'conceptual_guides/metricproviders',
+      ]
+    },
+    {
+      type: 'category',
       label: 'Reference',
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
@@ -271,14 +280,5 @@ module.exports = {
     { type: 'doc', id: 'changelog' },
     { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
     'contributing/contributing',
-    {
-      type: 'category',
-      label: 'Learn',
-      link: { type: 'doc', id: 'conceptual_guides/learn_lp' }, 
-      items: [
-        'conceptual_guides/expectation_classes',
-        'conceptual_guides/metricproviders',
-      ]
-    },
   ]
 }
