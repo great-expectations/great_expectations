@@ -25,7 +25,7 @@ class DraftDatasourceConfigAction(AgentAction[DraftDatasourceConfig]):
         datasource = datasource_cls(**draft_config)
         datasource.test_connection(
             test_assets=True
-        )  # raises exception if config isn't valid
+        )  # raises `TestConnectionError` on failure
         return ActionResult(id=id, type=event.type, created_resources=[])
 
     def get_draft_config(self, config_id: UUID) -> dict:
