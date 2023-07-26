@@ -22,7 +22,7 @@ If a <TechnicalTag relative="../" tag="profiler" text="Profiler" /> is used to c
 
 When a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> Validates data, it uses a Datasource (and therefore an Execution Engine) to execute one or more Batch Requests and acquire the data that the Validation is run on.
 
-When creating Custom Expectations and Metrics, often Execution Engine-specific logic is required for that Expectation or Metric. See [Custom Expectations](../guides/expectations/creating_custom_expectations/overview.md) for more information.
+When creating Custom Expectations and Metrics, often Execution Engine-specific logic is required for that Expectation or Metric. See [Custom Expectations](../guides/expectations/custom_expectations_lp.md) for more information.
 
 ## Standardized data and Expectations
 
