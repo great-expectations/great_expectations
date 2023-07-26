@@ -127,7 +127,7 @@ def yellow_trip_pandas_data_context(
     return context
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_validator_default_expectation_args__pandas(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
 
@@ -154,7 +154,7 @@ def test_validator_default_expectation_args__pandas(basic_datasource):
     print(my_validator.get_default_expectation_arguments())
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_validator_default_expectation_args__sql(
     data_context_with_simple_sql_datasource_for_testing_get_batch,
 ):
@@ -193,7 +193,7 @@ def test_validator_default_expectation_args__sql(
         )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_columns(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
@@ -221,7 +221,7 @@ def test_columns(
     assert columns == expected
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_head(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
@@ -277,7 +277,7 @@ def multi_batch_taxi_validator(
     return validator_multi_batch
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_validator_convert_to_checkpoint_validations_list(multi_batch_taxi_validator):
     validator = multi_batch_taxi_validator
 
@@ -352,7 +352,6 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 @mock.patch("great_expectations.data_context.store.ExpectationsStore.update")
 @mock.patch("great_expectations.validator.validator.Validator.cloud_mode")
 @pytest.mark.cloud
-@pytest.mark.integration
 def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     mock_cloud_mode,
     mock_expectation_store_update,
@@ -408,7 +407,7 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     assert mock_emit.call_count == 0
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_validator_can_instantiate_with_a_multi_batch_request(
     multi_batch_taxi_validator,
 ):
@@ -430,7 +429,7 @@ def test_validator_can_instantiate_with_a_multi_batch_request(
     ]
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_validator_with_bad_batchrequest(
     yellow_trip_pandas_data_context,
 ):
@@ -451,7 +450,7 @@ def test_validator_with_bad_batchrequest(
         )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_validator_batch_filter(
     multi_batch_taxi_validator,
 ):
@@ -541,7 +540,7 @@ def test_validator_batch_filter(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_custom_filter_function(
     multi_batch_taxi_validator,
 ):
@@ -574,7 +573,7 @@ def test_custom_filter_function(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-@pytest.mark.integration
+@pytest.mark.big
 def test_adding_expectation_to_validator_not_send_usage_message(
     mock_emit, multi_batch_taxi_validator
 ):
@@ -593,7 +592,7 @@ def test_adding_expectation_to_validator_not_send_usage_message(
     assert mock_emit.call_args_list == []
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_validator_load_additional_batch_to_validator(
     yellow_trip_pandas_data_context,
 ):
@@ -642,7 +641,7 @@ def test_validator_load_additional_batch_to_validator(
     assert first_batch_markers != updated_batch_markers
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_instantiate_validator_with_a_list_of_batch_requests(
     yellow_trip_pandas_data_context,
 ):
@@ -702,7 +701,7 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_graph_validate(in_memory_runtime_context, basic_datasource):
     in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
@@ -759,7 +758,7 @@ def test_graph_validate(in_memory_runtime_context, basic_datasource):
 
 
 # Tests that runtime configuration actually works during graph validation
-@pytest.mark.integration
+@pytest.mark.big
 def test_graph_validate_with_runtime_config(
     in_memory_runtime_context, basic_datasource
 ):
@@ -836,7 +835,7 @@ def test_graph_validate_with_runtime_config(
     ]
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_graph_validate_with_exception(basic_datasource):
     # noinspection PyUnusedLocal
     def mock_error(*args, **kwargs):
@@ -883,7 +882,7 @@ def test_graph_validate_with_exception(basic_datasource):
     assert result[0].expectation_config is not None
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_graph_validate_with_bad_config_catch_exceptions_false(
     in_memory_runtime_context, basic_datasource
 ):
@@ -935,7 +934,7 @@ def test_graph_validate_with_bad_config_catch_exceptions_false(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_validate_expectation(multi_batch_taxi_validator):
     validator: Validator = multi_batch_taxi_validator
     expect_column_values_to_be_between_config = validator.validate_expectation(
@@ -959,7 +958,7 @@ def test_validate_expectation(multi_batch_taxi_validator):
     }
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_validator_docstrings(multi_batch_taxi_validator):
     expectation_impl = getattr(
         multi_batch_taxi_validator, "expect_column_values_to_be_in_set", None
@@ -969,7 +968,7 @@ def test_validator_docstrings(multi_batch_taxi_validator):
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_validator_include_rendered_content_diagnostic(
     yellow_trip_pandas_data_context,
 ):
@@ -1269,7 +1268,7 @@ def _context_to_validator_and_expectation_sql(
     return validator, expectation
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_validator_result_format_config_from_validator(
     data_context_with_connection_to_metrics_db,
 ):
@@ -1294,7 +1293,7 @@ def test_validator_result_format_config_from_validator(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_validator_result_format_config_from_expectation(
     data_context_with_connection_to_metrics_db,
 ):
@@ -1318,7 +1317,7 @@ def test_validator_result_format_config_from_expectation(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_graph_validate_with_two_expectations_and_first_expectation_without_additional_configuration(
     in_memory_runtime_context, basic_datasource
 ):
@@ -1485,7 +1484,7 @@ def test_graph_validate_with_two_expectations_and_first_expectation_without_addi
     ]
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_graph_validate_with_two_expectations_and_first_expectation_with_result_format_complete(
     in_memory_runtime_context, basic_datasource
 ):

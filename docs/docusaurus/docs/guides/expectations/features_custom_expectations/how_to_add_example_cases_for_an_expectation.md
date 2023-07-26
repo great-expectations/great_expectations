@@ -10,7 +10,7 @@ This guide will help you add example cases to document and test the behavior of 
 
 <Prerequisites>
 
- - [A Custom Expectation](../creating_custom_expectations/overview.md)
+ - [A Custom Expectation](../custom_expectations_lp.md)
 
 </Prerequisites>
 

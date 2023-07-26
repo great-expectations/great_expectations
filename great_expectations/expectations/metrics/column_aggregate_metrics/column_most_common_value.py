@@ -32,7 +32,7 @@ class ColumnMostCommonValue(ColumnAggregateMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ):
-        column_value_counts = metrics.get("column.value_counts")
+        column_value_counts = metrics["column.value_counts"]
         return list(
             column_value_counts[column_value_counts == column_value_counts.max()].index
         )
@@ -46,7 +46,7 @@ class ColumnMostCommonValue(ColumnAggregateMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ):
-        column_value_counts = metrics.get("column.value_counts")
+        column_value_counts = metrics["column.value_counts"]
         return list(
             column_value_counts[column_value_counts == column_value_counts.max()].index
         )
