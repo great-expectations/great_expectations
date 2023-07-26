@@ -5,6 +5,9 @@ import shutil
 import pytest
 
 import great_expectations as gx
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
 
 pytestmark = pytest.mark.filesystem
@@ -27,7 +30,7 @@ def data_context_parameterized_expectation_suite_with_usage_statistics_enabled(
     created with DataContext.create()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "../test_fixtures")
     os.makedirs(  # noqa: PTH103

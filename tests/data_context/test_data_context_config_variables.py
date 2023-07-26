@@ -72,7 +72,7 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     # with substitution variables
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
 
     create_data_context_files(
@@ -117,7 +117,7 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
     runtime_environment = {"replace_me": value_from_runtime_override}
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     create_data_context_files(
         context_path,

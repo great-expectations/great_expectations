@@ -9,6 +9,9 @@ import pytest
 from great_expectations.core.usage_statistics.usage_statistics import (
     run_validation_operator_usage_statistics,
 )
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import get_context
@@ -184,7 +187,7 @@ def test_global_override_in_yml(tmp_path_factory, monkeypatch):
         "GE_USAGE_STATS", raising=False
     )  # Undo the project-wide test default
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
 
@@ -244,7 +247,7 @@ def test_global_override_conf_overrides_yml_and_env_variable(
         disabled_config.write(configfile)
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
 
@@ -310,7 +313,7 @@ def test_global_override_env_overrides_yml_and_conf(tmp_path_factory, monkeypatc
         disabled_config.write(configfile)
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
 
@@ -376,7 +379,7 @@ def test_global_override_yml_overrides_env_and_conf(tmp_path_factory, monkeypatc
         disabled_config.write(configfile)
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
 

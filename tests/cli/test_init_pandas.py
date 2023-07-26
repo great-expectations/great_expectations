@@ -5,6 +5,9 @@ import shutil
 import pytest
 from click.testing import CliRunner
 from freezegun import freeze_time
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
 from great_expectations.cli import cli
 from great_expectations.data_context.data_context.file_data_context import (
@@ -81,7 +84,7 @@ def test_cli_init_on_new_project(
     assert "Done generating example Expectation Suite" in stdout
     assert "Great Expectations is now set up" in stdout
 
-    assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
+    assert os.path.isdir(os.path.join(project_dir, FileDataContext.GX_DIR))
     config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
@@ -91,7 +94,7 @@ def test_cli_init_on_new_project(
     ]
     assert data_source_class == "PandasDataset"
 
-    obs_tree = gen_directory_tree_str(os.path.join(project_dir, "great_expectations"))
+    obs_tree = gen_directory_tree_str(os.path.join(project_dir, FileDataContext.GX_DIR))
 
     # Instead of monkey patching guids, just regex out the guids
     guid_safe_obs_tree = re.sub(
@@ -548,7 +551,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
         in stdout
     )
 
-    assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
+    assert os.path.isdir(os.path.join(project_dir, FileDataContext.GX_DIR))
     config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
@@ -626,7 +629,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     assert "Data Docs" in stdout
     assert "Great Expectations is now set up" in stdout
 
-    assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
+    assert os.path.isdir(os.path.join(project_dir, FileDataContext.GX_DIR))
     config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
@@ -636,7 +639,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     ]
     assert data_source_class == "PandasDataset"
 
-    obs_tree = gen_directory_tree_str(os.path.join(project_dir, "great_expectations"))
+    obs_tree = gen_directory_tree_str(os.path.join(project_dir, FileDataContext.GX_DIR))
 
     # Instead of monkey patching guids, just regex out the guids
     guid_safe_obs_tree = re.sub(

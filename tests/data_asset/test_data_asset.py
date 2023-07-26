@@ -1,5 +1,8 @@
 import os
 import shutil
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
 import pandas as pd
 import pytest
@@ -19,7 +22,7 @@ def data_context_simple_expectation_suite_with_custom_pandas_dataset(tmp_path_fa
     created with DataContext.create()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)
     asset_config_path = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "../test_fixtures")
     os.makedirs(

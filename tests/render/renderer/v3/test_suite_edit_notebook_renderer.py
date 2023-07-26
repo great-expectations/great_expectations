@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-# noinspection PyProtectedMember
 from great_expectations.cli.suite import _suite_edit_workflow
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.core.batch import BatchRequest
@@ -15,6 +14,11 @@ from great_expectations.core.expectation_suite import (
 )
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
+)
+
+# noinspection PyProtectedMember
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import (
@@ -40,7 +44,7 @@ def data_context_v3_custom_notebooks(tmp_path):
     created with DataContext.create()
     """
     project_path = tmp_path
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     expectations_dir = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "../../../test_fixtures")
     custom_notebook_assets_dir = os.path.join("v3", "notebook_assets")  # noqa: PTH118
@@ -83,7 +87,7 @@ def data_context_v3_custom_bad_notebooks(tmp_path):
     created with DataContext.create()
     """
     project_path = tmp_path
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     expectations_dir = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "../../../test_fixtures")
     custom_notebook_assets_dir = os.path.join("v3", "notebook_assets")  # noqa: PTH118

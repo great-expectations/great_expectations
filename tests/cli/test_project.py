@@ -1,4 +1,7 @@
 import os
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 import shutil
 from unittest import mock
 
@@ -26,7 +29,7 @@ def titanic_data_context_clean_usage_stats_enabled(
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
     os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
     data_path = os.path.join(context_path, "..", "data")
@@ -52,7 +55,7 @@ def titanic_data_context_v2_datasources_and_validation_operators_usage_stats_ena
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
     os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
     data_path = os.path.join(context_path, "..", "data")
