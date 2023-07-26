@@ -31,7 +31,7 @@ def test_instantiation_mean_table_columns_set_match_multi_batch_parameter_builde
     )
 
     # noinspection PyUnusedLocal
-    parameter_builder: ParameterBuilder = (
+    (
         MeanTableColumnsSetMatchMultiBatchParameterBuilder(
             name="my_name",
             data_context=data_context,

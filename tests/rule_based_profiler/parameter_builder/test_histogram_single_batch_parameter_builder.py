@@ -30,7 +30,7 @@ def test_instantiation_histogram_single_batch_parameter_builder(
     data_context: DataContext = alice_columnar_table_single_batch_context
 
     # noinspection PyUnusedLocal
-    parameter_builder_0: ParameterBuilder = HistogramSingleBatchParameterBuilder(
+    HistogramSingleBatchParameterBuilder(
         name="my_name_0",
         data_context=data_context,
     )

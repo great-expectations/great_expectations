@@ -8,8 +8,8 @@ from great_expectations.core.metric_function_types import (
 )
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.parameter_builder import (
-    UnexpectedCountStatisticsMultiBatchParameterBuilder,
     ParameterBuilder,
+    UnexpectedCountStatisticsMultiBatchParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_builder.unexpected_count_statistics_multi_batch_parameter_builder import (
     _standardize_mostly_for_single_batch,
@@ -30,7 +30,7 @@ def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder
     )
 
     # noinspection PyUnusedLocal
-    parameter_builder: ParameterBuilder = (
+    (
         UnexpectedCountStatisticsMultiBatchParameterBuilder(
             name="my_name",
             mode="unexpected_count_fraction_values",
@@ -50,7 +50,7 @@ def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder
 
     with pytest.raises(TypeError) as excinfo:
         # noinspection PyUnusedLocal,PyArgumentList
-        parameter_builder: ParameterBuilder = (
+        (
             UnexpectedCountStatisticsMultiBatchParameterBuilder(
                 name="my_name",
                 data_context=data_context,
@@ -64,7 +64,7 @@ def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder
 
     with pytest.raises(TypeError) as excinfo:
         # noinspection PyUnusedLocal,PyArgumentList
-        parameter_builder: ParameterBuilder = (
+        (
             UnexpectedCountStatisticsMultiBatchParameterBuilder(
                 name="my_name",
                 unexpected_count_parameter_builder_name="my_unexpected_count",
