@@ -187,9 +187,9 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path: str = os.path.join(
+    context_path: str = os.path.join(  # noqa: PTH118
         project_path, FileDataContext.GX_DIR
-    )  # noqa: PTH118
+    )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )

@@ -976,9 +976,9 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
-    context_path: str = os.path.join(
+    context_path: str = os.path.join(  # noqa: PTH118
         project_path, FileDataContext.GX_DIR
-    )  # noqa: PTH118
+    )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -1597,9 +1597,9 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
-    context_path: str = os.path.join(
+    context_path: str = os.path.join(  # noqa: PTH118
         project_path, FileDataContext.GX_DIR
-    )  # noqa: PTH118
+    )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -2525,9 +2525,9 @@ def site_builder_data_context_with_html_store_titanic_random(
         ),
     )
     context = get_context(
-        context_root_dir=os.path.join(
+        context_root_dir=os.path.join(  # noqa: PTH118
             project_dir, FileDataContext.GX_DIR
-        )  # noqa: PTH118
+        )
     )
 
     context.add_datasource(
@@ -2608,9 +2608,9 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
         ),
     )
     context = get_context(
-        context_root_dir=os.path.join(
+        context_root_dir=os.path.join(  # noqa: PTH118
             project_dir, FileDataContext.GX_DIR
-        )  # noqa: PTH118
+        )
     )
 
     context.add_datasource(
@@ -2656,9 +2656,9 @@ def v20_project_directory(tmp_path_factory):
     GX config_version: 2 project for testing upgrade helper
     """
     project_path = str(tmp_path_factory.mktemp("v20_project"))
-    context_root_dir = os.path.join(
+    context_root_dir = os.path.join(  # noqa: PTH118
         project_path, FileDataContext.GX_DIR
-    )  # noqa: PTH118
+    )
     shutil.copytree(
         file_relative_path(
             __file__, "./test_fixtures/upgrade_helper/great_expectations_v20_project/"
@@ -7396,9 +7396,9 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(
+    context_path: str = os.path.join(  # noqa: PTH118
         project_path, FileDataContext.GX_DIR
-    )  # noqa: PTH118
+    )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -7477,9 +7477,9 @@ def bobby_columnar_table_multi_batch_probabilistic_data_context(
     tmp_path_factory,
 ) -> FileDataContext:
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(
+    context_path: str = os.path.join(  # noqa: PTH118
         project_path, FileDataContext.GX_DIR
-    )  # noqa: PTH118
+    )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -7648,9 +7648,9 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(
+    context_path: str = os.path.join(  # noqa: PTH118
         project_path, FileDataContext.GX_DIR
-    )  # noqa: PTH118
+    )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -7836,9 +7836,9 @@ def quentin_columnar_table_multi_batch_data_context(
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(
+    context_path: str = os.path.join(  # noqa: PTH118
         project_path, FileDataContext.GX_DIR
-    )  # noqa: PTH118
+    )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )

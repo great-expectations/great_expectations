@@ -52,9 +52,9 @@ def yellow_trip_pandas_data_context(
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(
+    context_path: str = os.path.join(  # noqa: PTH118
         project_path, FileDataContext.GX_DIR
-    )  # noqa: PTH118
+    )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
