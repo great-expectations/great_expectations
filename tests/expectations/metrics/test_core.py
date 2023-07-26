@@ -1171,7 +1171,7 @@ def test_column_partition_metric_pd():
 
 
 @pytest.mark.sqlite
-def test_column_partition_metric_sa(sa):
+def test_column_partition_metric_sa(sa):  # noqa: PLR0915
     """
     Test of "column.partition" metric for both, standard numeric column and "datetime.datetime" valued column.
 
@@ -1406,7 +1406,7 @@ def test_column_partition_metric_sa(sa):
 
 
 @pytest.mark.spark
-def test_column_partition_metric_spark(spark_session):
+def test_column_partition_metric_spark(spark_session):  # noqa: PLR0915
     """
     Test of "column.partition" metric for both, standard numeric column and "datetime.datetime" valued column.
 
@@ -3107,7 +3107,7 @@ def test_table_metric_pd(caplog):
 
 
 @pytest.mark.big
-def test_map_column_pairs_equal_metric_pd():
+def test_map_column_pairs_equal_metric_pd():  # noqa: PLR0915
     engine = build_pandas_engine(
         pd.DataFrame(
             data={
@@ -3357,7 +3357,7 @@ def test_table_metric_sa(sa):
 
 
 @pytest.mark.sqlite
-def test_map_column_pairs_equal_metric_sa(sa):
+def test_map_column_pairs_equal_metric_sa(sa):  # noqa: PLR0915
     engine = build_sa_execution_engine(
         pd.DataFrame(
             data={
@@ -3572,7 +3572,7 @@ def test_map_column_pairs_equal_metric_sa(sa):
 
 
 @pytest.mark.spark
-def test_map_column_pairs_equal_metric_spark(spark_session):
+def test_map_column_pairs_equal_metric_spark(spark_session):  # noqa: PLR0915
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -5192,7 +5192,7 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
 
 
 @pytest.mark.big
-def test_map_multicolumn_sum_equal_pd():
+def test_map_multicolumn_sum_equal_pd():  # noqa: PLR0915
     engine = build_pandas_engine(
         pd.DataFrame(
             data={"a": [0, 1, 2], "b": [5, 4, 3], "c": [0, 0, 1], "d": [7, 8, 9]}
@@ -5404,7 +5404,7 @@ def test_map_multicolumn_sum_equal_pd():
 
 
 @pytest.mark.sqlite
-def test_map_multicolumn_sum_equal_sa(sa):
+def test_map_multicolumn_sum_equal_sa(sa):  # noqa: PLR0915
     engine = build_sa_execution_engine(
         pd.DataFrame(
             data={"a": [0, 1, 2], "b": [5, 4, 3], "c": [0, 0, 1], "d": [7, 8, 9]}
@@ -5606,7 +5606,7 @@ def test_map_multicolumn_sum_equal_sa(sa):
 
 
 @pytest.mark.spark
-def test_map_multicolumn_sum_equal_spark(spark_session):
+def test_map_multicolumn_sum_equal_spark(spark_session):  # noqa: PLR0915
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -5811,7 +5811,7 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
 
 
 @pytest.mark.big
-def test_map_compound_columns_unique_pd():
+def test_map_compound_columns_unique_pd():  # noqa: PLR0915
     engine = build_pandas_engine(
         pd.DataFrame(data={"a": [0, 1, 1], "b": [1, 2, 3], "c": [0, 2, 2]})
     )
@@ -6017,7 +6017,7 @@ def test_map_compound_columns_unique_pd():
 
 
 @pytest.mark.sqlite
-def test_map_compound_columns_unique_sa(sa):
+def test_map_compound_columns_unique_sa(sa):  # noqa: PLR0915
     engine = build_sa_execution_engine(
         pd.DataFrame(data={"a": [0, 1, 1], "b": [1, 2, 3], "c": [0, 2, 2]}),
         sa,
@@ -6252,7 +6252,7 @@ def test_map_compound_columns_unique_sa(sa):
 
 
 @pytest.mark.big
-def test_map_compound_columns_unique_spark(spark_session):
+def test_map_compound_columns_unique_spark(spark_session):  # noqa: PLR0915
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(data={"a": [0, 1, 1], "b": [1, 2, 3], "c": [0, 2, 2]}),
@@ -6451,7 +6451,7 @@ def test_map_compound_columns_unique_spark(spark_session):
 
 
 @pytest.mark.big
-def test_map_select_column_values_unique_within_record_pd():
+def test_map_select_column_values_unique_within_record_pd():  # noqa: PLR0915
     engine = build_pandas_engine(
         pd.DataFrame(
             data={
@@ -6702,7 +6702,7 @@ def test_map_select_column_values_unique_within_record_pd():
 
 
 @pytest.mark.sqlite
-def test_map_select_column_values_unique_within_record_sa(sa):
+def test_map_select_column_values_unique_within_record_sa(sa):  # noqa: PLR0915
     engine = build_sa_execution_engine(
         pd.DataFrame(
             data={
@@ -6916,7 +6916,9 @@ def test_map_select_column_values_unique_within_record_sa(sa):
 
 
 @pytest.mark.spark
-def test_map_select_column_values_unique_within_record_spark(spark_session):
+def test_map_select_column_values_unique_within_record_spark(  # noqa: PLR0915 # 56
+    spark_session,
+):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(

@@ -230,9 +230,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
 
     with pytest.raises(gx_exceptions.MetricResolutionError) as e:
         # noinspection PyUnusedLocal
-        validator.validate(
-            **runtime_environment_arguments
-        )
+        validator.validate(**runtime_environment_arguments)
     assert e.value.message == expected_exception_message
 
     # Test calling "validator.expect_*" through "validator.validate_expectation()".
@@ -424,7 +422,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @pytest.mark.spark
-def test_result_format_configured_no_set_default_override(
+def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
     mock_emit, in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
