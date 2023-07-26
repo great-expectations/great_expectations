@@ -7,6 +7,7 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
+from great_expectations.compatibility import pyspark
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
@@ -18,7 +19,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.validator.validator import Validator
-from great_expectations.compatibility import pyspark
 
 logger = logging.getLogger(__name__)
 
@@ -230,7 +230,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
 
     with pytest.raises(gx_exceptions.MetricResolutionError) as e:
         # noinspection PyUnusedLocal
-        validator_validation: ExpectationSuiteValidationResult = validator.validate(
+        validator.validate(
             **runtime_environment_arguments
         )
     assert e.value.message == expected_exception_message

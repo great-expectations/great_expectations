@@ -1,16 +1,11 @@
-from typing import Optional, cast
+from typing import TYPE_CHECKING, Optional, cast
 
-import pandas as pd
 import pytest
 
 # noinspection PyUnresolvedReferences
-from contrib.experimental.great_expectations_experimental.expectations.expect_queried_column_value_frequency_to_meet_threshold import (
-    ExpectQueriedColumnValueFrequencyToMeetThreshold,
-)
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.data_context import DataContext
 from great_expectations.self_check.util import (
-    build_spark_validator_with_data,
     get_test_validator_with_data,
 )
 from great_expectations.util import build_in_memory_runtime_context
@@ -18,6 +13,9 @@ from great_expectations.validator.validator import (
     ExpectationValidationResult,
     Validator,
 )
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 sqlite_runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
     datasource_name="my_sqlite_db_datasource",
@@ -318,7 +316,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite_multi_va
             )
         )
 
-    assert result["success"] == True and result["result"]["observed_value"] == [
+    assert result["success"] is True and result["result"]["observed_value"] == [
         0.6393939393939394,
         0.3606060606060606,
     ]

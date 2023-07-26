@@ -9,7 +9,6 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.self_check.util import (
-    build_pandas_validator_with_data,
     build_sa_validator_with_data,
     get_test_validator_with_data,
 )

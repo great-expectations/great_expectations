@@ -3,9 +3,9 @@ from typing import Any, Dict
 
 import pytest
 
-import great_expectations.core.expectation_configuration as expectation_configuration
-import great_expectations.expectations.expectation as expectation
+from great_expectations.core import expectation_configuration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.expectations import expectation
 
 
 class FakeMulticolumnExpectation(expectation.MulticolumnMapExpectation):
@@ -139,4 +139,4 @@ def test_multicolumn_expectation_validation_errors_with_bad_mostly(
     fake_expectation_cls, config
 ):
     with pytest.raises(InvalidExpectationConfigurationError):
-        fake_expectation = fake_expectation_cls(config)
+        fake_expectation_cls(config)

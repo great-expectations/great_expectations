@@ -1,12 +1,8 @@
-from typing import Optional, cast
+from typing import TYPE_CHECKING, Optional, cast
 
-import pandas as pd
 import pytest
 
 # noinspection PyUnresolvedReferences
-from contrib.experimental.great_expectations_experimental.expectations.expect_queried_table_row_count_to_be import (
-    ExpectQueriedTableRowCountToBe,
-)
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.data_context import DataContext
 from great_expectations.self_check.util import get_test_validator_with_data
@@ -15,6 +11,9 @@ from great_expectations.validator.validator import (
     ExpectationValidationResult,
     Validator,
 )
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 sqlite_runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
     datasource_name="my_sqlite_db_datasource",

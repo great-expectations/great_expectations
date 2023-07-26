@@ -1,7 +1,7 @@
 import copy
 import datetime
-from decimal import Decimal
 import logging
+from decimal import Decimal
 from typing import Dict, Tuple, Union
 
 import numpy as np
@@ -9,6 +9,10 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core.batch import Batch
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
@@ -23,8 +27,6 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.compatibility import pyspark
-from great_expectations.compatibility import sqlalchemy
 from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
 )
@@ -38,10 +40,6 @@ from great_expectations.util import isclose
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
-
-from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
-    add_dataframe_to_db,
-)
 
 
 @pytest.mark.unit

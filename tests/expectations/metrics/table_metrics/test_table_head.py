@@ -1,20 +1,18 @@
-from types import ModuleType
-from typing import Optional
 
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
+import pandas as pd
+import pytest
+
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.self_check.util import build_sa_execution_engine
-import pandas as pd
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.expectations.metrics.table_metrics.table_head import TableHead
-import pytest
-from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from tests.test_utils import get_sqlite_temp_table_names_from_engine
 
 

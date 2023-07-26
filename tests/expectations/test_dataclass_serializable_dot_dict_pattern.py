@@ -252,7 +252,7 @@ def test_can_have_optional_arguments():
             # "qux": -100, #Optional property
         }
     )
-    assert my_B.qux == None
+    assert my_B.qux is None
 
 
 @pytest.mark.unit
@@ -392,7 +392,7 @@ def test_to_raw_dict_works_recursively():
 
     # Make sure it's a dictionary, not a DictDot
     assert type(C_dict) == dict
-    assert isinstance(C_dict, DictDot) == False
+    assert isinstance(C_dict, DictDot) is False
     # Dictionaries don't support dot notation.
     with raises(AttributeError):
         C_dict.A_list
