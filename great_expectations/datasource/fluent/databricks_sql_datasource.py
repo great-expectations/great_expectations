@@ -11,6 +11,7 @@ from great_expectations.compatibility.sqlalchemy import (
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.config_str import ConfigStr
+from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.sql_datasource import (
     SQLDatasource,
 )
@@ -88,6 +89,14 @@ class DatabricksSQLDatasource(SQLDatasource):
 
     type: Literal["databricks_sql"] = "databricks_sql"  # type: ignore[assignment]
     connection_string: Union[ConfigStr, DatabricksDsn]
+
+    def test_connection(self, test_assets: bool = True) -> None:
+        try:
+            super().test_connection(test_assets)
+        except TestConnectionError as e:
+            raise TestConnectionError(
+                f"Could not connect to Databricks - please ensure you've installed necessary dependencies with `pip install great_expectations[databricks]`.\n\n{str(e)}"
+            ) from e
 
     def _create_engine(self) -> sqlalchemy.Engine:
         model_dict = self.dict(
