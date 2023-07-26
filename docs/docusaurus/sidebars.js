@@ -91,7 +91,6 @@ module.exports = {
           label: 'Create Custom Expectations',
           link: { type: 'doc', id: 'guides/expectations/custom_expectations_lp' },
           items: [
-            'guides/expectations/creating_custom_expectations/overview',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations',
