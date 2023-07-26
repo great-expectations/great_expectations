@@ -9,13 +9,12 @@ from great_expectations.agent.models import (
 )
 from great_expectations.compatibility.sqlalchemy import inspect
 from great_expectations.core.http import create_session
-from great_expectations.data_context.types.base import GXCloudConfig
-from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.datasource.fluent import SQLDatasource
 from great_expectations.exceptions import GXCloudError
 
 if TYPE_CHECKING:
     from great_expectations.compatibility.sqlalchemy.engine import Inspector
+    from great_expectations.data_context.types.base import GXCloudConfig
 
 
 class ListTableNamesAction(AgentAction[ListTableNamesEvent]):
