@@ -268,9 +268,9 @@ def test_unspecified_cardinality_limit(
 
     with pytest.raises(ProfilerConfigurationError) as excinfo:
         # noinspection PyUnusedLocal,PyArgumentList
-        CategoricalColumnDomainBuilder(data_context=data_context).get_domains(
-            rule_name="my_rule", batch_request=batch_request
-        )
+    _: List[Domain] = CategoricalColumnDomainBuilder(
+            data_context=data_context
+        ).get_domains(rule_name="my_rule", batch_request=batch_request)
 
     assert "Please pass ONE of the following parameters" in str(excinfo.value)
     assert "you passed 0 parameters" in str(excinfo.value)
