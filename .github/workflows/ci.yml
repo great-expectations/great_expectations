@@ -148,11 +148,11 @@ jobs:
           # creating new named configuration
           ./google-cloud-sdk/bin/gcloud config configurations create ge-oss-ci-cd-configurations
           # setting account config using project and service account info
-          ./google-cloud-sdk/bin/gcloud config set account account-for-azure-tests --project=$(GE_TEST_GCP_PROJECT) --access-token-file=$(GOOGLE_APPLICATION_CREDENTIALS)
+          ./google-cloud-sdk/bin/gcloud config set account account-for-azure-tests --project=$GE_TEST_GCP_PROJECT --access-token-file=$GOOGLE_APPLICATION_CREDENTIALS
           # Pass the configured Cloud SDK authentication to gsutil.
           ./google-cloud-sdk/bin/gcloud config set pass_credentials_to_gsutil True
           # Authorize access to Google Cloud with a service account
-          ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$(GOOGLE_APPLICATION_CREDENTIALS)
+          ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 
       - name: Install dependencies
         run: |
