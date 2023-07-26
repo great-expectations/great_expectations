@@ -44,7 +44,7 @@ class RunColumnDescriptiveMetricsEvent(EventBase):
     data_asset_name: str
 
 
-class TestDatasourceConfig(EventBase):
+class DraftDatasourceConfig(EventBase):
     type: Literal["test_datasource_config"] = "test_datasource_config"
     config_id: UUID
 
@@ -59,7 +59,7 @@ Event = Annotated[
         RunMissingnessDataAssistantEvent,
         RunCheckpointEvent,
         RunColumnDescriptiveMetricsEvent,
-        TestDatasourceConfig,
+        DraftDatasourceConfig,
         UnknownEvent,
     ],
     Field(discriminator="type"),

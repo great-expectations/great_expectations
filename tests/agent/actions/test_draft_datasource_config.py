@@ -5,10 +5,10 @@ from uuid import UUID
 import pytest
 
 from great_expectations.agent.actions.test_draft_datasource_config import (
-    TestDraftDatasourceConfigAction,
+    DraftDatasourceConfigAction,
 )
 from great_expectations.agent.agent import GxAgentEnvVars
-from great_expectations.agent.models import TestDatasourceConfig
+from great_expectations.agent.models import DraftDatasourceConfig
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource.fluent import SQLDatasource
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
@@ -62,9 +62,9 @@ def test_test_draft_datasource_config_success(context, mocker):
     response.ok = True
     response.json.return_value = build_payload(config=datasource_config, id=config_id)
     env_vars = GxAgentEnvVars()
-    action = TestDraftDatasourceConfigAction(context=context)
+    action = DraftDatasourceConfigAction(context=context)
     job_id = UUID("87657a8e-f65e-4e64-b21f-e83a54738b75")
-    event = TestDatasourceConfig(config_id=config_id)
+    event = DraftDatasourceConfig(config_id=config_id)
     expected_url = f"{env_vars.gx_cloud_base_url}/organizations/{env_vars.gx_cloud_organization_id}/draft-configs/{config_id}"
 
     action_result = action.run(event=event, id=str(job_id))
@@ -86,9 +86,9 @@ def test_test_draft_datasource_config_failure(context, mocker):
     response.ok = True
     response.json.return_value = build_payload(config=datasource_config, id=config_id)
     env_vars = GxAgentEnvVars()
-    action = TestDraftDatasourceConfigAction(context=context)
+    action = DraftDatasourceConfigAction(context=context)
     job_id = UUID("87657a8e-f65e-4e64-b21f-e83a54738b75")
-    event = TestDatasourceConfig(config_id=config_id)
+    event = DraftDatasourceConfig(config_id=config_id)
     expected_url = f"{env_vars.gx_cloud_base_url}/organizations/{env_vars.gx_cloud_organization_id}/draft-configs/{config_id}"
     datasource_cls = MagicMock(autospec=SQLDatasource)
     context.sources.type_lookup = {ds_type: datasource_cls}
@@ -109,9 +109,9 @@ def test_test_draft_datasource_config_raises_for_non_fds(context, mocker):
     response.ok = True
     response.json.return_value = build_payload(config=datasource_config, id=config_id)
     env_vars = GxAgentEnvVars()
-    action = TestDraftDatasourceConfigAction(context=context)
+    action = DraftDatasourceConfigAction(context=context)
     job_id = UUID("87657a8e-f65e-4e64-b21f-e83a54738b75")
-    event = TestDatasourceConfig(config_id=config_id)
+    event = DraftDatasourceConfig(config_id=config_id)
     expected_url = f"{env_vars.gx_cloud_base_url}/organizations/{env_vars.gx_cloud_organization_id}/draft-configs/{config_id}"
 
     with pytest.raises(ValueError, match="fluent-style datasource"):
@@ -129,9 +129,9 @@ def test_test_draft_datasource_config_raises_for_unknown_type(context, mocker):
     response.ok = True
     response.json.return_value = build_payload(config=datasource_config, id=config_id)
     env_vars = GxAgentEnvVars()
-    action = TestDraftDatasourceConfigAction(context=context)
+    action = DraftDatasourceConfigAction(context=context)
     job_id = UUID("87657a8e-f65e-4e64-b21f-e83a54738b75")
-    event = TestDatasourceConfig(config_id=config_id)
+    event = DraftDatasourceConfig(config_id=config_id)
     expected_url = f"{env_vars.gx_cloud_base_url}/organizations/{env_vars.gx_cloud_organization_id}/draft-configs/{config_id}"
     context.sources.type_lookup = dict()
 
@@ -150,9 +150,9 @@ def test_test_draft_datasource_config_raises_for_cloud_backend_error(context, mo
     response.ok = False
     response.json.return_value = build_payload(config=datasource_config, id=config_id)
     env_vars = GxAgentEnvVars()
-    action = TestDraftDatasourceConfigAction(context=context)
+    action = DraftDatasourceConfigAction(context=context)
     job_id = UUID("87657a8e-f65e-4e64-b21f-e83a54738b75")
-    event = TestDatasourceConfig(config_id=config_id)
+    event = DraftDatasourceConfig(config_id=config_id)
     expected_url = f"{env_vars.gx_cloud_base_url}/organizations/{env_vars.gx_cloud_organization_id}/draft-configs/{config_id}"
 
     with pytest.raises(RuntimeError, match="error while connecting to GX-Cloud"):
