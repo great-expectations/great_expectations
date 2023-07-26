@@ -1,7 +1,7 @@
 """
 To run this code as a local test, use the following console command:
 ```
-pytest -v --docs-tests -m integration -k "how_to_quickly_connect_to_a_single_file_with_pandas" tests/integration/test_script_runner.py
+pytest -v --docs-tests -k "how_to_quickly_connect_to_a_single_file_with_pandas" tests/integration/test_script_runner.py
 ```
 """
 

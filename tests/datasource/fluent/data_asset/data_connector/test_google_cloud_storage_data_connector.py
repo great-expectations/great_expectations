@@ -306,7 +306,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 
 
 # TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
-# @pytest.mark.integration
+# @pytest.mark.big
 # @mock.patch(
 #     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 # )

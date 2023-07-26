@@ -48,6 +48,7 @@ def test_expect_table_row_count_to_be_between_runtime_custom_query_no_temp_table
     )
 
 
+@pytest.mark.spark
 def test_expect_table_row_count_to_be_between_runtime_custom_query_with_where_no_temp_table_sa(
     titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):

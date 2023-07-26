@@ -264,7 +264,7 @@ class ExpectTableChecksumToEqualOtherTable(BatchExpectation):
     """Expect the checksum for one batch table to equal the checksum of another table.
 
     expect_table_checksum_to_equal_other_table is a \
-    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
+    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     Args:
         other_table_name (str): \

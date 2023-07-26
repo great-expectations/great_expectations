@@ -35,6 +35,14 @@ class RunCheckpointEvent(EventBase):
     type: Literal["run_checkpoint_request.received"] = "run_checkpoint_request.received"
 
 
+class RunColumnDescriptiveMetricsEvent(EventBase):
+    type: Literal[
+        "column_descriptive_metrics_request.received"
+    ] = "column_descriptive_metrics_request.received"
+    datasource_name: str
+    data_asset_name: str
+
+
 class UnknownEvent(EventBase):
     type: Literal["unknown_event"] = "unknown_event"
 
@@ -44,6 +52,7 @@ Event = Annotated[
         RunOnboardingDataAssistantEvent,
         RunMissingnessDataAssistantEvent,
         RunCheckpointEvent,
+        RunColumnDescriptiveMetricsEvent,
         UnknownEvent,
     ],
     Field(discriminator="type"),
