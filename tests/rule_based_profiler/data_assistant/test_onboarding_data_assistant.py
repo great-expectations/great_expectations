@@ -378,6 +378,7 @@ def test_onboarding_data_assistant_should_fail_forward(
         assert mock_run.call_count == num_rules
         assert call_count == num_rules
 
+
 @pytest.mark.big
 @pytest.mark.slow  # 39.26s
 def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
