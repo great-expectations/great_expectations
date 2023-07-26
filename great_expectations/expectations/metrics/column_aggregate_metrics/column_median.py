@@ -115,7 +115,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         # in the degenerate case when n_values = 0
 
         """Spark Median Implementation"""
-        table_row_count = metrics.get("table.row_count")
+        table_row_count = metrics["table.row_count"]
         result = df.approxQuantile(
             column, [0.5, 0.5 + (1 / (2 + (2 * table_row_count)))], 0
         )
