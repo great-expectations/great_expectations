@@ -7,11 +7,11 @@ import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Batch is a selection of records from a <TechnicalTag relative="../" tag="data_asset" text="Data Asset" />.
 
-A Batch provides a consistent interface for describing specific data from any <TechnicalTag relative="../" tag="datasource" text="Datasource" />, to support building <TechnicalTag relative="../" tag="metric" text="Metrics" />, <TechnicalTag relative="../" tag="validation" text="Validation" />, and <TechnicalTag relative="../" tag="profiling" text="Profiling" />.
+A Batch provides a consistent interface for describing specific data from any <TechnicalTag relative="../" tag="datasource" text="Data Source" />, to support building <TechnicalTag relative="../" tag="metric" text="Metrics" />, <TechnicalTag relative="../" tag="validation" text="Validation" />, and <TechnicalTag relative="../" tag="profiling" text="Profiling" />.
 
 Batches are designed to be "MECE" -- mutually exclusive and collectively exhaustive partitions of Data Assets. However, in many cases the same *underlying data* could be present in multiple batches, for example if an analyst runs an analysis against an entire table of data each day, with only a fraction of new records being added.
 
-Consequently, the best way to understand what "makes a Batch a Batch" is the act of attending to it. Once you have defined how a Datasource's data should be sliced (even if that is to define a single slice containing all of the data in the Data Asset), you have determined what makes those particular Batches "a Batch."  The Batch is the fundamental unit that Great Expectations will validate and about which it will collect metrics.
+Consequently, the best way to understand what "makes a Batch a Batch" is the act of attending to it. Once you have defined how a Data Source's data should be sliced (even if that is to define a single slice containing all of the data in the Data Asset), you have determined what makes those particular Batches "a Batch."  The Batch is the fundamental unit that Great Expectations will validate and about which it will collect metrics.
 
 ## Relationship to other objects
 

@@ -65,15 +65,15 @@ The following examples connect to .csv data. However, GX supports most of the Pa
 
 <ImportGxAndInstantiateADataContext />
 
-### Create a Datasource
+### Create a Data Source
 
-The following information is required when you create an Amazon S3 Datasource:
+The following information is required when you create an Amazon S3 Data Source:
 
-- `name`: The Datasource name. In the following examples, this is `"my_s3_datasource"`
+- `name`: The Data Source name. In the following examples, this is `"my_s3_datasource"`
 
 - `bucket_name`: The Amazon S3 bucket name.
 
-- `boto3_options`: Optional. Additional options for the Datasource. In the following examples, the default values are used.
+- `boto3_options`: Optional. Additional options for the Data Source. In the following examples, the default values are used.
 
 1. Run the following Python code to define `name`, `bucket_name` and `boto3_options`:
 
@@ -88,12 +88,12 @@ The following information is required when you create an Amazon S3 Datasource:
 
     :::
 
-2. Run the following Python code to pass `name`, `bucket_name`, and `boto3_options` as parameters when you create your Datasource::
+2. Run the following Python code to pass `name`, `bucket_name`, and `boto3_options` as parameters when you create your Data Source::
 
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_pandas.py create_datasource"
     ```
 
-### Add data to the Datasource as a Data Asset
+### Add data to the Data Source as a Data Asset
 
 Run the following Python code:
 
@@ -124,15 +124,15 @@ The following examples connect to .csv data.
 
 <ImportGxAndInstantiateADataContext />
 
-### Create a Datasource
+### Create a Data Source
 
-The following information is required when you create an Amazon S3 Datasource:
+The following information is required when you create an Amazon S3 Data Source:
 
-- `name`: The Datasource name. In the following examples, this is `"my_s3_datasource"`
+- `name`: The Data Source name. In the following examples, this is `"my_s3_datasource"`
 
 - `bucket_name`: The Amazon S3 bucket name.
 
-- `boto3_options`: Optional. Additional options for the Datasource. In the following examples, the default values are used.
+- `boto3_options`: Optional. Additional options for the Data Source. In the following examples, the default values are used.
 
 1. Run the following Python code to define `name`, `bucket_name`, and `boto3_options`:
 
@@ -147,12 +147,12 @@ The following information is required when you create an Amazon S3 Datasource:
 
     :::
 
-2. Run the following Python code to pass `name`, `bucket_name`, and `boto3_options` as parameters when you create your Datasource::
+2. Run the following Python code to pass `name`, `bucket_name`, and `boto3_options` as parameters when you create your Data Source::
 
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_spark.py create_datasource"
     ```
 
-### Add data to the Datasource as a Data Asset
+### Add data to the Data Source as a Data Asset
 
 Run the following Python code:
 
@@ -198,11 +198,11 @@ Connect to Source Data on Microsoft Azure Blob Storage.
 
 <ImportGxAndInstantiateADataContext />
 
-### Create a Datasource
+### Create a Data Source
 
-The following information is required when you create a Microsoft Azure Blob Storage Datasource:
+The following information is required when you create a Microsoft Azure Blob Storage Data Source:
 
-- `name`: The Datasource name. In the following examples, this is `"my_datasource"`.
+- `name`: The Data Source name. In the following examples, this is `"my_datasource"`.
 
 - `azure_options`: Authentication settings.
 
@@ -210,7 +210,7 @@ The following information is required when you create a Microsoft Azure Blob Sto
 
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py define_add_pandas_abs_args"
     ```
-2. Run the following Python code to pass `name` and `azure_options` as parameters when you create your Datasource:
+2. Run the following Python code to pass `name` and `azure_options` as parameters when you create your Data Source:
 
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py create_datasource"
     ```
@@ -219,7 +219,7 @@ The following information is required when you create a Microsoft Azure Blob Sto
     In the previous example, the value for `account_url` is substituted for the contents of the `AZURE_STORAGE_CONNECTION_STRING` key you configured when you [installed GX and set up your Azure Blob Storage dependencies](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs).
     :::
 
-### Add data to the Datasource as a Data Asset
+### Add data to the Data Source as a Data Asset
 
 <AbsFluentAddDataAssetConfigKeys />
 
@@ -252,11 +252,11 @@ The following information is required when you create a Microsoft Azure Blob Sto
 
 <ImportGxAndInstantiateADataContext />
 
-### Create a Datasource
+### Create a Data Source
 
-The following information is required when you create a Microsoft Azure Blob Storage Datasource:
+The following information is required when you create a Microsoft Azure Blob Storage Data Source:
 
-- `name`: The Datasource name. In the following examples, this is `"my_datasource"`.
+- `name`: The Data Source name. In the following examples, this is `"my_datasource"`.
 
 - `azure_options`: Authentication settings.
 
@@ -264,7 +264,7 @@ The following information is required when you create a Microsoft Azure Blob Sto
 
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_spark.py define_add_spark_abs_args"
     ```
-2. Run the following Python code to pass `name` and `azure_options` as parameters when you create your Datasource:
+2. Run the following Python code to pass `name` and `azure_options` as parameters when you create your Data Source:
 
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_spark.py create_datasource"
     ```
@@ -273,7 +273,7 @@ The following information is required when you create a Microsoft Azure Blob Sto
     In the previous example, the value for `account_url` is substituted for the contents of the `AZURE_STORAGE_CONNECTION_STRING` key you configured when you [installed GX and set up your Azure Blob Storage dependencies](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs).
     :::
 
-### Add data to the Datasource as a Data Asset
+### Add data to the Data Source as a Data Asset
 
 <AbsFluentAddDataAssetConfigKeys />
 
@@ -321,27 +321,27 @@ The following examples connect to .csv data. However, GX supports most of the Pa
 
 <ImportGxAndInstantiateADataContext />
 
-### Create a Datasource
+### Create a Data Source
 
-The following information is required when you create a GCS Datasource:
+The following information is required when you create a GCS Data Source:
 
-- `name`: The Datasource name. In the following examples, this is `"my_gcs_datasource"`.
+- `name`: The Data Source name. In the following examples, this is `"my_gcs_datasource"`.
 
 - `bucket_or_name`: The GCS bucket or instance name.
 
-- `gcs_options`: Optional. Additional options for the Datasource. In the following examples, the default values are used.
+- `gcs_options`: Optional. Additional options for the Data Source. In the following examples, the default values are used.
 
 1. Run the following Python code to define `name`, `bucket_or_name`, and `gcs_options`:
 
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_pandas.py define_add_pandas_gcs_args"
     ```
 
-2. Run the following Python code to pass `name`, `bucket_or_name`, and `gcs_options` as parameters when you create your Datasource:
+2. Run the following Python code to pass `name`, `bucket_or_name`, and `gcs_options` as parameters when you create your Data Source:
 
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_pandas.py create_datasource"
     ```
 
-### Add GCS data to the Datasource as a Data Asset
+### Add GCS data to the Data Source as a Data Asset
 
 Run the following Python code:
 
@@ -379,27 +379,27 @@ Use Spark to connect to Source Data stored on GCS.  The following examples conne
 
 <ImportGxAndInstantiateADataContext />
 
-### Create a Datasource
+### Create a Data Source
 
-The following information is required when you create a GCS Datasource:
+The following information is required when you create a GCS Data Source:
 
-- `name`: The Datasource name. In the following examples, this is `"my_gcs_datasource"`.
+- `name`: The Data Source name. In the following examples, this is `"my_gcs_datasource"`.
 
 - `bucket_or_name`: The GCS bucket or instance name.
 
-- `gcs_options`: Optional. Additional options for the Datasource. In the following examples, the default values are used.
+- `gcs_options`: Optional. Additional options for the Data Source. In the following examples, the default values are used.
 
 1. Run the following Python code to define `name`, `bucket_or_name`, and `gcs_options`:
 
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_spark.py define_add_spark_gcs_args"
     ```
 
-2. Run the following Python code to pass `name`, `bucket_or_name`, and `gcs_options` as parameters when you create your Datasource:
+2. Run the following Python code to pass `name`, `bucket_or_name`, and `gcs_options` as parameters when you create your Data Source:
 
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_spark.py create_datasource"
     ```
 
-### Add GCS data to the Datasource as a Data Asset
+### Add GCS data to the Data Source as a Data Asset
 
 Run the following Python code:
 
@@ -488,13 +488,13 @@ Run the following Python code to read the data in individual files directly into
 
 <ImportGxAndInstantiateADataContext />
 
-### Create a Datasource
+### Create a Data Source
 
-The following information is required when you create a Filesystem Datasource:
+The following information is required when you create a Filesystem Data Source:
 
-- `name`: The Datasource name.
+- `name`: The Data Source name.
 
-- `base_directory`: The path to the folder containing the files the Datasource connects to.
+- `base_directory`: The path to the folder containing the files the Data Source connects to.
 
 1. Run the following Python code to define `name` and `base_directory` and store the information in the Python variables `datasource_name` and `path_to_folder_containing_csv_files`:
 
@@ -503,18 +503,18 @@ The following information is required when you create a Filesystem Datasource:
 
 <InfoFilesystemDatasourceRelativeBasePaths />
 
-2. Run the following Python code to pass `name` and `base_directory` as parameters when you create your Datasource:
+2. Run the following Python code to pass `name` and `base_directory` as parameters when you create your Data Source:
 
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py create_datasource"
     ```
 
 <TipFilesystemDatasourceNestedSourceDataFolders />
 
-### Add a Data Asset to the Datasource
+### Add a Data Asset to the Data Source
 
 A Data Asset requires the following information to be defined:
 
-- `name`: The Data Asset name. Helpful when you define multiple Data Assets in the same Datasource.
+- `name`: The Data Asset name. Helpful when you define multiple Data Assets in the same Data Source.
 
 - `batching_regex`: A regular expression that matches the files to be included in the Data Asset.
 
@@ -562,13 +562,13 @@ For more information on Pandas `read_*` methods, see [the Pandas Input/output do
 
 <ImportGxAndInstantiateADataContext />
 
-### Create a Datasource
+### Create a Data Source
 
-The following information is required when you create a Filesystem Datasource:
+The following information is required when you create a Filesystem Data Source:
 
-- `name`: The Datasource name.
+- `name`: The Data Source name.
 
-- `base_directory`: The path to the folder containing the files the Datasource connects to.
+- `base_directory`: The path to the folder containing the files the Data Source connects to.
 
 1. Run the following Python code to define `name` and `base_directory` and store the information in the Python variables `datasource_name` and `path_to_folder_containing_csv_files`:
 
@@ -577,18 +577,18 @@ The following information is required when you create a Filesystem Datasource:
 
     <InfoFilesystemDatasourceRelativeBasePaths />
 
-2. Run the following Python code to pass `name` and `base_directory` as parameters when you create your Datasource:
+2. Run the following Python code to pass `name` and `base_directory` as parameters when you create your Data Source:
 
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_spark.py create_datasource"
     ```
 
     <TipFilesystemDatasourceNestedSourceDataFolders />
 
-### Add a Data Asset to the Datasource
+### Add a Data Asset to the Data Source
 
 A Data Asset requires the following information to be defined:
 
-- `name`: The Data Asset name. Helpful when you define multiple Data Assets in the same Datasource.
+- `name`: The Data Asset name. Helpful when you define multiple Data Assets in the same Data Source.
 
 - `batching_regex`: A regular expression that matches the files to be included in the Data Asset.
 

@@ -13,7 +13,7 @@ Expectation Suite, which you can then adjust to be suited for your specific need
 <Prerequisites>
 
 - A [configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
-- An understanding of how to [configure a Datasource](../../connecting_to_your_data/connect_to_data_lp.md).
+- An understanding of how to [configure a Data Source](../../connecting_to_your_data/connect_to_data_lp.md).
 - An understanding of how to [configure a Batch Request](/docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource).
 
 </Prerequisites>
@@ -21,10 +21,10 @@ Expectation Suite, which you can then adjust to be suited for your specific need
 ## Prepare your Batch Request
 
 Data Assistants excel at automating the Profiling process across multiple Batches. Therefore, for this guide you will
- be using a Batch Request that covers multiple Batches. For the purposes of this demo, the Datasource that our Batch
+ be using a Batch Request that covers multiple Batches. For the purposes of this demo, the Data Source that our Batch
  Request queries will consist of a sample of the New York taxi trip data.
 
-This is the configuration that you will use for your `Datasource`:
+This is the configuration that you will use for your `Data Source`:
 
 ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py datasource_config"
 ```
@@ -35,7 +35,7 @@ And this is the configuration that you will use for your `BatchRequest`:
 ```
 
 :::caution
-The Onboarding Data Assistant will run a high volume of queries against your `Datasource`. Data Assistant performance
+The Onboarding Data Assistant will run a high volume of queries against your `Data Source`. Data Assistant performance
   can vary significantly depending on the number of Batches, count of records per Batch, and network latency. It is
   recommended that you start with a smaller `BatchRequest` if you find that Data Assistant runtimes are too long.
 :::

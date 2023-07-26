@@ -8,13 +8,13 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-Use the information provided here to learn how you can use Great Expectations (GX) with a SQL Datasource. The following examples use a [PostgreSQL Database](https://www.postgresql.org/).
+Use the information provided here to learn how you can use Great Expectations (GX) with a SQL Data Source. The following examples use a [PostgreSQL Database](https://www.postgresql.org/).
 
 To use GX with PostgreSQL Database, you'll complete the following tasks:
 
 - Load data
 - Instantiate a <TechnicalTag tag="data_context" text="Data Context" />
-- Create a <TechnicalTag tag="datasource" text="Datasource" /> and a <TechnicalTag tag="data_asset" text="Data Asset" />
+- Create a <TechnicalTag tag="datasource" text="Data Source" /> and a <TechnicalTag tag="data_asset" text="Data Asset" />
 - Create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />
 - Validate data using a <TechnicalTag tag="checkpoint" text="Checkpoint" />
 
@@ -63,7 +63,7 @@ Run the following code to create a <TechnicalTag tag="data_context" text="Data C
 
   Replace the connection string with the connection string for your database. For additional information about other connection methods, see [How to configure credentials](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials/). In this example, existing New York City taxi cab data is being used.
 
-2. Run the following command to create a <TechnicalTag tag='datasource' text='Datasource' /> to represent the data available in your PostgreSQL database:
+2. Run the following command to create a <TechnicalTag tag='datasource' text='Data Source' /> to represent the data available in your PostgreSQL database:
 
   ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add_datasource"
   ```
@@ -137,5 +137,5 @@ context.open_data_docs()
 
 ## Next steps
 
-Now that you've created and saved a Data Context, Datasource, Data Asset, Expectation Suite, and Checkpoint, see [Validate data by running a Checkpoint](https://docs.greatexpectations.io/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) 
+Now that you've created and saved a Data Context, Data Source, Data Asset, Expectation Suite, and Checkpoint, see [Validate data by running a Checkpoint](https://docs.greatexpectations.io/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) 
 to create a script to run the Checkpoint without the need to recreate your Data Assets and Expectations.

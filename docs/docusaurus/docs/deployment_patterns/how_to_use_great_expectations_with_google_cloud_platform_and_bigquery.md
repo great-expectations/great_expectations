@@ -38,7 +38,7 @@ This guide will help you integrate Great Expectations (GX) with [Google Cloud Pl
 
 We recommend that you use Great Expectations in GCP by using the following services:
   - [Google Cloud Composer](https://cloud.google.com/composer) (GCC) for managing workflow orchestration including validating your data. GCC is built on [Apache Airflow](https://airflow.apache.org/).
-  - [BigQuery](https://cloud.google.com/bigquery) or files in [Google Cloud Storage](https://cloud.google.com/storage) (GCS) as your <TechnicalTag tag="datasource" text="Datasource"/>
+  - [BigQuery](https://cloud.google.com/bigquery) or files in [Google Cloud Storage](https://cloud.google.com/storage) (GCS) as your <TechnicalTag tag="datasource" text="Data Source"/>
   - [GCS](https://cloud.google.com/storage) for storing metadata (<TechnicalTag tag="expectation_suite" text="Expectation Suites"/>, <TechnicalTag tag="validation_result" text="Validation Results"/>, <TechnicalTag tag="data_docs" text="Data Docs"/>)
   - [Google App Engine](https://cloud.google.com/appengine) (GAE) for hosting and controlling access to <TechnicalTag tag="data_docs" text="Data Docs"/>.
 
@@ -153,9 +153,9 @@ Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Cont
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py datasource"
 ```
 
-In the example, we have added a Datasource that connects to data in GCS using a Pandas dataframe. The name of the new datasource is `gcs_datasource` and it refers to a GCS bucket named `test_docs_data`.
+In the example, we have added a Data Source that connects to data in GCS using a Pandas dataframe. The name of the new datasource is `gcs_datasource` and it refers to a GCS bucket named `test_docs_data`.
 
-For more details on how to configure the Datasource, and additional information on authentication, please refer to [How to connect to data on GCS using Pandas
+For more details on how to configure the Data Source, and additional information on authentication, please refer to [How to connect to data on GCS using Pandas
 ](/docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/pandas)
 
 </TabItem>
@@ -168,14 +168,14 @@ In order to support tables that are created as the result of queries in BigQuery
 :::
 
 
-Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Context" /> that was initialized in the previous section, create a Datasource that will connect to data in BigQuery,
+Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Context" /> that was initialized in the previous section, create a Data Source that will connect to data in BigQuery,
 
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_datasource"
 ```
 
-In the example, we have created a Datasource named `my_bigquery_datasource`, using the `add_or_update_sql` method and passing in a connection string.
+In the example, we have created a Data Source named `my_bigquery_datasource`, using the `add_or_update_sql` method and passing in a connection string.
 
-To configure the BigQuery Datasource, see [How to connect to a BigQuery database](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery).
+To configure the BigQuery Data Source, see [How to connect to a BigQuery database](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery).
 
 </TabItem>
 </Tabs>
@@ -190,7 +190,7 @@ To configure the BigQuery Datasource, see [How to connect to a BigQuery database
   ]}>
 <TabItem value="gcs">
 
-Add a CSV `Asset` to your `Datasource` by using the `add_csv_asset` function.
+Add a CSV `Asset` to your `Data Source` by using the `add_csv_asset` function.
 
 First, configure the `prefix` and `batching_regex`. The `prefix` is for the path in the GCS bucket where we can find our files. The `batching_regex` is a regular expression that indicates which files to treat as Batches in the Asset, and how to identify them.
 
@@ -206,7 +206,7 @@ test_docs_data/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-03.
 ```
 The `batching_regex` pattern will match the 4 digits of the year portion and assign it to the `year` domain, and match the 2 digits of the month portion and assign it to the `month` domain.
 
-Next we can add an `Asset` named `csv_taxi_gcs_asset` to our Datasource by using the `add_csv_asset` function. 
+Next we can add an `Asset` named `csv_taxi_gcs_asset` to our Data Source by using the `add_csv_asset` function. 
 
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py asset"
 ```
@@ -214,7 +214,7 @@ Next we can add an `Asset` named `csv_taxi_gcs_asset` to our Datasource by using
 </TabItem>
 <TabItem value="bigquery">
 
-Add a BigQuery `Asset` into your `Datasource` either as a table asset or query asset.
+Add a BigQuery `Asset` into your `Data Source` either as a table asset or query asset.
 
 In the first example, a table `Asset` named `my_table_asset` is built by naming the table in our BigQuery Database, which is `taxi_data` in our case. 
 

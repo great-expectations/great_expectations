@@ -1,21 +1,21 @@
-A new Datasource can be configured in Python as a dictionary with a specific set of keys.  We will build our Datasource configuration from scratch in this guide, although you can just as easily modify an existing one.
+A new Data Source can be configured in Python as a dictionary with a specific set of keys.  We will build our Data Source configuration from scratch in this guide, although you can just as easily modify an existing one.
 
 To start, create an empty dictionary.  You will be populating it with keys as you go forward.
 
-At this point, the configuration for your Datasource is merely:
+At this point, the configuration for your Data Source is merely:
 
 ```python name="datasource_configuration_empty_dictionary"
 ```
 
-However, from this humble beginning you will be able to build a full Datasource configuration.
+However, from this humble beginning you will be able to build a full Data Source configuration.
 
-#### The keys needed for your Datasource configuration
+#### The keys needed for your Data Source configuration
 
-At the top level, your Datasource's configuration will need the following keys:
-- `name`: The name of the Datasource, which will be used to reference the datasource in Batch Requests.
-- `class_name`: The name of the Python class instantiated by the Datasource.  Typically, this will be the `Datasource` class.
+At the top level, your Data Source's configuration will need the following keys:
+- `name`: The name of the Data Source, which will be used to reference the datasource in Batch Requests.
+- `class_name`: The name of the Python class instantiated by the Data Source.  Typically, this will be the `Data Source` class.
 - `module_name`: the name of the module that contains the Class definition indicated by `class_name`.
-- `execution_engine`: a dictionary containing the `class_name` and `module_name` of the Execution Engine instantiated by the Datasource.
-- `data_connectors`: the configurations for any Data Connectors and their associated Data Assets that you want to have available when utilizing the Datasource.
+- `execution_engine`: a dictionary containing the `class_name` and `module_name` of the Execution Engine instantiated by the Data Source.
+- `data_connectors`: the configurations for any Data Connectors and their associated Data Assets that you want to have available when utilizing the Data Source.
 
-In the following steps we will add those keys and their corresponding values to your currently empty Datasource configuration dictionary.
+In the following steps we will add those keys and their corresponding values to your currently empty Data Source configuration dictionary.

@@ -55,7 +55,7 @@ For more information, see [Host and share Data Docs](/docs/guides/setup/configur
 
 ## Datasources
 
-![Datasource overview](./images_overview/datasource_flowchart.png)
+![Data Source overview](./images_overview/datasource_flowchart.png)
 
 Datasources connect GX to source data such as CSV files in a folder, a PostgreSQL database hosted on AWS, or any combination of data formats and environments. Regardless of the format of your source data or where it resides, Datasources provide GX with a unified API for working with it.
 
@@ -63,9 +63,9 @@ For more information, see [Connect to data](/docs/guides/connecting_to_your_data
 
 ### Data Assets and Batches
 
-Data Assets are collections of records within a Datasource.  While a Datasource tells GX how to connect to your source data, Data Assets tell GX how to organize that data. Although the records in your Data Assets can correspond directly to the contents of tables or files in your source data they do not necessarily need to. For instance, you could combine multiple tables worth of records in a SQL Datasource into a single Query Data Asset that joins the tables in question.  For a File Datasource, you could use regular expressions to define a Data Asset as the contents of all of the `.csv` files in a specific subfolder.
+Data Assets are collections of records within a Data Source.  While a Data Source tells GX how to connect to your source data, Data Assets tell GX how to organize that data. Although the records in your Data Assets can correspond directly to the contents of tables or files in your source data they do not necessarily need to. For instance, you could combine multiple tables worth of records in a SQL Data Source into a single Query Data Asset that joins the tables in question.  For a File Data Source, you could use regular expressions to define a Data Asset as the contents of all of the `.csv` files in a specific subfolder.
 
-Data Assets can be further partitioned into Batches.  Batches are unique subsets of records within a Data Asset.  For example, say you have a Data Asset in a SQL Datasource that consists of all records from last year in a given table.  You could then partition those records into Batches of data that correspond to the records for individual months of that year.
+Data Assets can be further partitioned into Batches.  Batches are unique subsets of records within a Data Asset.  For example, say you have a Data Asset in a SQL Data Source that consists of all records from last year in a given table.  You could then partition those records into Batches of data that correspond to the records for individual months of that year.
 
 For more information, see [Manage Data Assets](/docs/guides/connecting_to_your_data/manage_data_assets_lp).
 
