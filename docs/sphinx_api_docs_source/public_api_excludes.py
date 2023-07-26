@@ -777,4 +777,11 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
             "great_expectations/experimental/metric_repository/cloud_data_store.py"
         ),
     ),
+    IncludeExcludeDefinition(
+        reason="Run is not included in the public API.",
+        name="run",
+        filepath=pathlib.Path(
+            "great_expectations/agent/actions/test_draft_datasource_config.py"
+        ),
+    ),
 ]
