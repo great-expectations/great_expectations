@@ -3,7 +3,7 @@ from uuid import UUID
 import pydantic
 
 from great_expectations.agent.actions import ActionResult, AgentAction
-from great_expectations.agent.agent import GxAgentConfigSettings
+from great_expectations.agent.agent import GxAgentEnvVars
 from great_expectations.agent.models import TestDatasourceConfig
 from great_expectations.core.http import create_session
 
@@ -30,7 +30,7 @@ class TestDraftDatasourceConfigAction(AgentAction[TestDatasourceConfig]):
 
     def get_draft_config(self, config_id: UUID) -> dict:
         try:
-            config = GxAgentConfigSettings()
+            config = GxAgentEnvVars()
         except pydantic.ValidationError as validation_err:
             raise RuntimeError(
                 f"Missing or badly formed environment variable\n{validation_err.errors()}"
