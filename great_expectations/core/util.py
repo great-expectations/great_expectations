@@ -451,7 +451,7 @@ def ensure_json_serializable(data) -> None:  # noqa: C901, PLR0911, PLR0912
         # test_obj[key] = test_obj[key].tolist()
         # If we have an array or index, convert it first to a list--causing coercion to float--and then round
         # to the number of digits for which the string representation will equal the float representation
-        _ = [ensure_json_serializable(x) for x in data.tolist()]
+        _ = [ensure_json_serializable(x) for x in data.tolist()]  # type: ignore[func-returns-value]
         return
 
     if isinstance(data, (datetime.datetime, datetime.date)):
@@ -502,7 +502,7 @@ def ensure_json_serializable(data) -> None:  # noqa: C901, PLR0911, PLR0912
         ]
         return
 
-    if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function]
+    if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
         return ensure_json_serializable(
