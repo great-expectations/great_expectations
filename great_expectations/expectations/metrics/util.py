@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple, overload
 
 import numpy as np
 from dateutil.parser import parse
@@ -122,15 +122,16 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
             dialect.dialect,
             snowflake.sqlalchemy.snowdialect.SnowflakeDialect,
         ):
-            # if positive:
-            #     return BinaryExpression(column, literal(regex), custom_op("RLIKE"))
-            # else:
-            #     return BinaryExpression(column, literal(regex), custom_op("NOT RLIKE"))
-
-            # While the snowflake docs mention having regex-related functions, they don't
-            # seem to work with the Python driver
-            # https://docs.snowflake.com/en/sql-reference/functions/regexp.html
-            return None
+            if positive:
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("REGEXP")
+                )
+            else:
+                return sqlalchemy.BinaryExpression(
+                    column,
+                    sqlalchemy.literal(regex),
+                    sqlalchemy.custom_op("NOT REGEXP"),
+                )
     except (
         AttributeError,
         TypeError,
@@ -608,7 +609,7 @@ def column_reflection_fallback(  # noqa: PLR0915
 
 def get_dbms_compatible_metric_domain_kwargs(
     metric_domain_kwargs: dict,
-    batch_columns_list: List[str | sqlalchemy.quoted_name],
+    batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
 ) -> dict:
     """
     This method checks "metric_domain_kwargs" and updates values of "Domain" keys based on actual "Batch" columns.  If
@@ -657,7 +658,7 @@ def get_dbms_compatible_metric_domain_kwargs(
 @overload
 def get_dbms_compatible_column_names(
     column_names: str,
-    batch_columns_list: List[str | sqlalchemy.quoted_name],
+    batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
     error_message_template: str = ...,
 ) -> str | sqlalchemy.quoted_name:
     ...
@@ -666,7 +667,7 @@ def get_dbms_compatible_column_names(
 @overload
 def get_dbms_compatible_column_names(
     column_names: List[str],
-    batch_columns_list: List[str | sqlalchemy.quoted_name],
+    batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
     error_message_template: str = ...,
 ) -> List[str | sqlalchemy.quoted_name]:
     ...
@@ -674,7 +675,7 @@ def get_dbms_compatible_column_names(
 
 def get_dbms_compatible_column_names(
     column_names: List[str] | str,
-    batch_columns_list: List[str | sqlalchemy.quoted_name],
+    batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
 ) -> List[str | sqlalchemy.quoted_name] | str | sqlalchemy.quoted_name:
     """
@@ -730,7 +731,7 @@ def verify_column_names_exist(
 
 def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
     column_names: List[str] | str,
-    batch_columns_list: List[str | sqlalchemy.quoted_name],
+    batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
     verify_only: bool = False,
 ) -> List[Tuple[str, str | sqlalchemy.quoted_name]] | None:

@@ -406,7 +406,7 @@ class TestIsEquivalentTo:
         return_value = suite_with_single_expectation.isEquivalentTo(UnsupportedClass())
         assert return_value == NotImplemented
 
-    @pytest.mark.integration
+    @pytest.mark.unit
     def test_is_equivalent_to_expectation_suite_classes_true_with_changes_to_non_considered_attributes(
         self, suite_with_single_expectation: ExpectationSuite
     ):
@@ -424,7 +424,7 @@ class TestIsEquivalentTo:
             suite_with_single_expectation
         )
 
-    @pytest.mark.integration
+    @pytest.mark.unit
     def test_is_equivalent_to_expectation_suite_classes_false(
         self, suite_with_single_expectation: ExpectationSuite
     ):
@@ -444,7 +444,7 @@ class TestIsEquivalentTo:
             suite_with_single_expectation
         )
 
-    @pytest.mark.integration
+    @pytest.mark.unit
     def test_is_equivalent_to_expectation_suite_classes_false_multiple_equivalent_expectations(
         self, suite_with_single_expectation: ExpectationSuite
     ):

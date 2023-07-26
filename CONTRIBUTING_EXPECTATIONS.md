@@ -20,7 +20,7 @@ To submit a code change to Great Expectations for consideration, see [CONTRIBUTI
 
 - Great Expectations installed and configured for your environment. See [Great Expectations Quickstart](https://docs.greatexpectations.io/docs/tutorials/quickstart/).
 
-- A Custom Expectation. See [Creating Custom Expectations](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview/).
+- A Custom Expectation. See [Create and manage Custom Expectations](https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp).
 
 - A GitHub account.
 

@@ -227,6 +227,6 @@ To connecting GX to your source data:
 
 ## Related documentation
 
-- To initialize and instantiate a temporary Data Context, see [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context)
+- To initialize and instantiate a temporary Data Context, see [Instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
 
 
