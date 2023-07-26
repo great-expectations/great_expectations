@@ -195,7 +195,7 @@ fluent_datasources:
         table_name: my_table
   my_databricks_sql_ds:
     type: databricks_sql
-    connection_string: "databricks+connector://token:dapi123@abc-123.cloud.databricks.com:123/default_db?http_path=/sql/1.0/warehouses/abc123"
+    connection_string: "databricks://token:dapi123@abc-123.cloud.databricks.com:123/default_db?http_path=/sql/1.0/warehouses/abc123"
     assets:
       my_table_asset_wo_splitters:
         type: table
