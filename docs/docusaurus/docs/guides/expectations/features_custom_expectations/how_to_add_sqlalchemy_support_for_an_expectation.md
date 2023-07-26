@@ -12,7 +12,7 @@ This guide will help you implement native SQLAlchemy support for your <Technical
 
 <Prerequisites>
 
- - [A Custom Expectation](../creating_custom_expectations/overview.md)
+ - [A Custom Expectation](../custom_expectations_lp.md)
 
 </Prerequisites>
 
@@ -149,7 +149,7 @@ you will see the following in your Diagnostic Checklist:
 ✔ Has at least one positive and negative example case, and all test cases pass
 ```
 
-If you've already implemented the Pandas backend covered in our How-To guides for creating [Custom Expectations](../creating_custom_expectations/overview.md) 
+If you've already implemented the Pandas backend covered in our How-To guides for creating [Custom Expectations](../custom_expectations_lp.md) 
 and the Spark backend covered in our guide on [how to add Spark support for Custom Expectations](./how_to_add_spark_support_for_an_expectation.md), 
 you should see the following in your Diagnostic Checklist:
 
