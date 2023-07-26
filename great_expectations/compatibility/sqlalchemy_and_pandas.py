@@ -5,11 +5,11 @@ from typing import Callable, Iterator
 
 import pandas as pd
 
-from great_expectations.compatibility import sqlalchemy as sa
 from great_expectations.compatibility.not_imported import (
     is_version_greater_or_equal,
     is_version_less_than,
 )
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.warnings import (
     warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0,
 )
