@@ -2,8 +2,12 @@
 title: Create an Expectation Suite with the Missingness Data Assistant
 ---
 
-import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx'
+import Prerequisites from '/docs/components/_prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+
+:::note Note:
+Missingness Data Assistant is an **experimental** feature.
+:::
 
 Use the information provided here to learn how you can use the Missingness Data Assistant to profile your data and automate the creation of an Expectation Suite.
 
@@ -82,17 +86,12 @@ To run a Data Assistant, you can call the `run(...)` method for the assistant. H
 
 ## Test your Expectation Suite
 
-1. Run the following code to use a `SimpleCheckpoint` to operate with the Expectation Suite and Batch Request that you defined:
-
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py checkpoint_config"
-  ```
-
-2. Run the following code to instantiate and run a `SimpleCheckpoint`:
+  Run the following code to use a Checkpoint to operate with the Expectation Suite and Batch Request that you defined:
 
   ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py checkpoint"
   ```
 
-  You can check the `"success"` key of the `SimpleCheckpoint`'s results to verify that your Expectation Suite worked.
+  You can check the `"success"` key of the Checkpoint's results to verify that your Expectation Suite worked.
 
 ## Plot and inspect Metrics and Expectations
 
