@@ -78,7 +78,7 @@ def test_cli_init_on_new_project(
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
-    assert "Done generating example Expectation Suite" in stdout
+    assert "Done generating example Expectation Suite\x1B" in stdout
     assert "Great Expectations is now set up" in stdout
 
     assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
@@ -209,9 +209,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
         result = runner.invoke(
             cli,
             ["init"],
-            input="\n1\n1\n{}\n\n\n\n2\n{}\nmy_suite\n\n\n\n\n".format(
-                data_folder_path, csv_path
-            ),
+            input=f"\n1\n1\n{data_folder_path}\n\n\n\n2\n{csv_path}\nmy_suite\n\n\n\n\n",
             catch_exceptions=False,
         )
     assert mock_webbrowser.call_count == 1
@@ -456,7 +454,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
 
-    data_folder_path = os.path.join(project_dir, "data")
+    os.path.join(project_dir, "data")
     data_path = os.path.join(project_dir, "data", "Titanic.csv")
 
     # mangle the setup to remove all traces of any suite

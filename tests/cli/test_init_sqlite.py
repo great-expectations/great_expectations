@@ -35,7 +35,7 @@ def titanic_sqlite_db_file(sa, tmp_path_factory):
 
     engine = sa.create_engine(f"sqlite:///{db_path}", pool_recycle=3600)
     with engine.connect() as connection:
-        assert connection.execute(sa.text(f"select count(*) from titanic")).fetchall()[
+        assert connection.execute(sa.text("select count(*) from titanic")).fetchall()[
             0
         ] == (1313,)
     return db_path
@@ -549,9 +549,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
     assert (
-        "{}/great_expectations/uncommitted/data_docs/local_site/index.html".format(
-            project_dir
-        )
+        f"{project_dir}/great_expectations/uncommitted/data_docs/local_site/index.html"
         in mock_webbrowser.call_args[0][0]
     )
 
@@ -616,11 +614,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
         result = runner.invoke(
             cli,
             ["init"],
-            input="\n1\n{schema}\n{table}\nsink_me\n\n\n\n".format(
-                os.path.join(project_dir, "data/Titanic.csv"),
-                schema=default_schema,
-                table=default_table,
-            ),
+            input=f"\n1\n{default_schema}\n{default_table}\nsink_me\n\n\n\n",
             catch_exceptions=False,
         )
     stdout = result.stdout

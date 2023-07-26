@@ -11,7 +11,6 @@ from great_expectations.util import gen_directory_tree_str, is_library_loadable
 from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
-
 pytestmark = pytest.mark.cli
 
 

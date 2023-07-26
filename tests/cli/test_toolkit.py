@@ -13,7 +13,6 @@ from great_expectations.cli.toolkit import (
 from great_expectations.exceptions import UnsupportedConfigVersionError
 from great_expectations.util import get_context
 
-
 pytestmark = pytest.mark.cli
 
 
@@ -135,7 +134,7 @@ def test_parse_cli_config_file_location_posix_paths(tmp_path_factory):
             os.makedirs(test_directory, exist_ok=True)
             if expected_filename:
                 expected_filepath = os.path.join(test_directory, expected_filename)
-                with open(expected_filepath, "w") as fp:
+                with open(expected_filepath, "w"):
                     pass
 
                 output = toolkit.parse_cli_config_file_location(expected_filepath)
@@ -194,7 +193,7 @@ def test_parse_cli_config_file_location_posix_paths_existing_files_with_no_exten
             os.makedirs(test_directory, exist_ok=True)
             if expected_filename:
                 expected_filepath = os.path.join(test_directory, expected_filename)
-                with open(expected_filepath, "w") as fp:
+                with open(expected_filepath, "w"):
                     pass
 
                 output = toolkit.parse_cli_config_file_location(expected_filepath)

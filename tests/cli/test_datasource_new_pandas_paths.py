@@ -31,7 +31,6 @@ from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations.cli import cli
 
-
 pytestmark = pytest.mark.cli
 
 

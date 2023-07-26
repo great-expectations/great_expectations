@@ -14,7 +14,6 @@ from great_expectations.util import gen_directory_tree_str, get_context
 from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
-
 pytestmark = pytest.mark.cli
 
 
@@ -126,7 +125,7 @@ def test_cli_init_on_new_project(
     )
     assert "Generating example Expectation Suite..." not in stdout
     assert "Building" not in stdout
-    assert "Done generating example Expectation Suite" not in stdout
+    assert "Done generating example Expectation Suite\x1B" not in stdout
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 

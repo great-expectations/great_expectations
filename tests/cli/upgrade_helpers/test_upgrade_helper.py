@@ -20,7 +20,6 @@ from tests.cli.utils import (
     escape_ansi,
 )
 
-
 pytestmark = pytest.mark.cli
 
 

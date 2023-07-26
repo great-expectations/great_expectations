@@ -697,7 +697,7 @@ def test_using_assume_yes_flag_on_command_with_no_assume_yes_implementation(
         "my_simple_checkpoint_with_slack",
         "my_simple_template_checkpoint",
     ]
-    assert all([checkpoint_name in stdout for checkpoint_name in checkpoint_names_list])
+    assert all(checkpoint_name in stdout for checkpoint_name in checkpoint_names_list)
 
     expected_call_args_list = [
         mock.call(

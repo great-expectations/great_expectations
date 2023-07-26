@@ -3,7 +3,7 @@ import os
 import shutil
 import subprocess
 import unittest
-from typing import List, Optional, Union
+from typing import List
 from unittest import mock
 
 import nbformat
@@ -28,11 +28,6 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource import (
-    Datasource,
-    LegacyDatasource,
-    SimpleSqlalchemyDatasource,
-)
 from great_expectations.util import get_context
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
@@ -81,9 +76,7 @@ introspection:
 
     try:
         # noinspection PyUnusedLocal
-        my_sql_datasource: Optional[
-            Union[SimpleSqlalchemyDatasource, LegacyDatasource]
-        ] = context.add_datasource(
+        context.add_datasource(
             "test_sqlite_db_datasource", **yaml.load(datasource_config)
         )
     except AttributeError:
@@ -186,7 +179,7 @@ def titanic_data_context_with_spark_datasource(
         """
 
     # noinspection PyUnusedLocal
-    datasource: Datasource = context.test_yaml_config(
+    context.test_yaml_config(
         name=GETTING_STARTED_DATASOURCE_NAME,
         yaml_config=datasource_config,
         pretty_print=False,
@@ -634,7 +627,7 @@ def test_checkpoint_list_with_eight_checkpoints(
         "my_simple_checkpoint_with_slack",
         "my_simple_template_checkpoint",
     ]
-    assert all([checkpoint_name in stdout for checkpoint_name in checkpoint_names_list])
+    assert all(checkpoint_name in stdout for checkpoint_name in checkpoint_names_list)
 
     assert mock_emit.call_count == 3
 
@@ -1673,14 +1666,12 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
 
     stdout: str = result.stdout
     assert all(
-        [
-            msg in stdout
-            for msg in [
-                "Validation succeeded!",
-                "Titanic.warning",
-                "Passed",
-                "100.0 %",
-            ]
+        msg in stdout
+        for msg in [
+            "Validation succeeded!",
+            "Titanic.warning",
+            "Passed",
+            "100.0 %",
         ]
     )
 
@@ -1889,14 +1880,12 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
 
     stdout: str = result.stdout
     assert all(
-        [
-            msg in stdout
-            for msg in [
-                "Validation succeeded!",
-                "Titanic.warning",
-                "Passed",
-                "100.0 %",
-            ]
+        msg in stdout
+        for msg in [
+            "Validation succeeded!",
+            "Titanic.warning",
+            "Passed",
+            "100.0 %",
         ]
     )
 
@@ -2102,14 +2091,12 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
 
     stdout: str = result.stdout
     assert all(
-        [
-            msg in stdout
-            for msg in [
-                "Validation succeeded!",
-                "Titanic.warning",
-                "Passed",
-                "100.0 %",
-            ]
+        msg in stdout
+        for msg in [
+            "Validation succeeded!",
+            "Titanic.warning",
+            "Passed",
+            "100.0 %",
         ]
     )
 

@@ -7,11 +7,12 @@ from click.testing import CliRunner
 from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations.cli import cli
-from great_expectations.cli.cli_messages import FLUENT_DATASOURCE_LIST_WARNING
-from great_expectations.cli.cli_messages import FLUENT_DATASOURCE_DELETE_ERROR
+from great_expectations.cli.cli_messages import (
+    FLUENT_DATASOURCE_DELETE_ERROR,
+    FLUENT_DATASOURCE_LIST_WARNING,
+)
 from great_expectations.util import get_context
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks, escape_ansi
-
 
 pytestmark = pytest.mark.cli
 
@@ -203,7 +204,6 @@ def test_cli_datasource_new(
                         "group_names": ["data_asset_name"],
                         "pattern": "(.*)",
                     },
-                    "class_name": "InferredAssetFilesystemDataConnector",
                     "module_name": "great_expectations.datasource.data_connector",
                 },
                 "default_runtime_data_connector_name": {
@@ -533,7 +533,7 @@ def test_cli_list_fluent_datasource_warning(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"datasource list",
+        "datasource list",
         input="Y\n",
         catch_exceptions=False,
     )

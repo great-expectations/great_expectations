@@ -1,19 +1,17 @@
 import json
 import os
-from typing import Any, Dict, List, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 from unittest import mock
 
 import pytest
-import pandas as pd
-from _pytest.capture import CaptureResult
 from click.testing import CliRunner, Result
 
 from great_expectations.cli import cli
 from great_expectations.cli.cli_messages import (
     SUITE_EDIT_FLUENT_DATASOURCE_ERROR,
     SUITE_EDIT_FLUENT_DATASOURCE_WARNING,
-    SUITE_NEW_FLUENT_DATASOURCE_WARNING,
     SUITE_NEW_FLUENT_DATASOURCE_ERROR,
+    SUITE_NEW_FLUENT_DATASOURCE_WARNING,
 )
 from great_expectations.cli.suite import (
     _process_suite_edit_flags_and_prompt,
@@ -31,7 +29,6 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-
 from great_expectations.util import (
     deep_filter_properties_iterable,
     get_context,
@@ -46,6 +43,9 @@ from tests.render.util import (
     load_notebook_from_path,
     run_notebook,
 )
+
+if TYPE_CHECKING:
+    from _pytest.capture import CaptureResult
 
 PROFILER_CODE_CELL_USER_CONFIGURABLE_PROFILER: str = """\
 profiler = UserConfigurableProfiler(
@@ -998,9 +998,7 @@ def test_suite_edit_datasource_and_batch_request_error(
     expectation_suite_name: str = "test_suite_name"
 
     # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.add_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
+    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
     assert (
         context.list_expectation_suites()[0].expectation_suite_name
         == expectation_suite_name
@@ -1151,9 +1149,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     expectation_suite_name: str = "test_suite_name"
 
     # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.add_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
+    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
     assert (
         context.list_expectation_suites()[0].expectation_suite_name
         == expectation_suite_name
@@ -2217,9 +2213,7 @@ def test_suite_edit_interactive_batch_request_without_datasource_json_file_raise
     expectation_suite_name: str = "test_suite_name"
 
     # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.add_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
+    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
     assert (
         context.list_expectation_suites()[0].expectation_suite_name
         == expectation_suite_name
@@ -2367,7 +2361,7 @@ def test_suite_list_with_one_suite(
     expectation_suite_name: str = "test_suite_name"
 
     # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.add_expectation_suite(
+    context.add_expectation_suite(
         expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
 
@@ -2427,17 +2421,11 @@ def test_suite_list_with_multiple_suites(
     project_dir: str = context.root_directory
 
     # noinspection PyUnusedLocal
-    suite_0: ExpectationSuite = context.add_expectation_suite(
-        expectation_suite_name="a.warning"
-    )
+    context.add_expectation_suite(expectation_suite_name="a.warning")
     # noinspection PyUnusedLocal
-    suite_1: ExpectationSuite = context.add_expectation_suite(
-        expectation_suite_name="b.warning"
-    )
+    context.add_expectation_suite(expectation_suite_name="b.warning")
     # noinspection PyUnusedLocal
-    suite_2: ExpectationSuite = context.add_expectation_suite(
-        expectation_suite_name="c.warning"
-    )
+    context.add_expectation_suite(expectation_suite_name="c.warning")
 
     config_file_path: str = os.path.join(project_dir, "great_expectations.yml")
     assert os.path.exists(config_file_path)

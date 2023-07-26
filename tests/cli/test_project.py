@@ -14,7 +14,6 @@ from tests.cli.utils import (
     assert_no_logging_messages_or_tracebacks,
 )
 
-
 pytestmark = pytest.mark.cli
 
 
