@@ -50,7 +50,7 @@ class ListTableNamesAction(AgentAction[ListTableNamesEvent]):
             f"{cloud_config.organization_id}/datasources/{datasource_id}",
             json={"table_names": table_names},
         )
-        if response.status_code != 204:
+        if response.status_code != 204:  # noqa: PLR2004
             raise GXCloudError(
                 message=f"Unable to update table_names for Datasource with id={datasource_id}.",
                 response=response,
