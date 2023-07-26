@@ -18,7 +18,7 @@ def test_store_list_stores(
 ):
     project_dir = empty_data_context_stats_enabled.root_directory
     runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(project_dir))
+    monkeypatch.chdir(os.path.dirname(project_dir))  # noqa: PTH120
     result = runner.invoke(
         cli,
         "store list",

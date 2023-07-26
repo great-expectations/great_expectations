@@ -64,14 +64,20 @@ but the package `{library_name}` containing this library is not installed.
 
     assert result.exit_code == 1
 
-    assert os.path.isdir(os.path.join(basedir, "great_expectations"))
-    config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
-    assert os.path.isfile(config_path)
+    assert os.path.isdir(  # noqa: PTH112
+        os.path.join(basedir, "great_expectations")  # noqa: PTH118
+    )
+    config_path = os.path.join(  # noqa: PTH118
+        basedir, "great_expectations/great_expectations.yml"
+    )
+    assert os.path.isfile(config_path)  # noqa: PTH113
 
     config = yaml.load(open(config_path))
     assert config["datasources"] == {}
 
-    obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
+    obs_tree = gen_directory_tree_str(
+        os.path.join(basedir, "great_expectations")  # noqa: PTH118
+    )
     assert (
         obs_tree
         == """\
@@ -296,14 +302,20 @@ but the package `pyspark` containing this library is not installed.
 
     assert result.exit_code == 1
 
-    assert os.path.isdir(os.path.join(basedir, "great_expectations"))
-    config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
-    assert os.path.isfile(config_path)
+    assert os.path.isdir(  # noqa: PTH112
+        os.path.join(basedir, "great_expectations")  # noqa: PTH118
+    )
+    config_path = os.path.join(  # noqa: PTH118
+        basedir, "great_expectations/great_expectations.yml"
+    )
+    assert os.path.isfile(config_path)  # noqa: PTH113
 
     config = yaml.load(open(config_path))
     assert config["datasources"] == {}
 
-    obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
+    obs_tree = gen_directory_tree_str(
+        os.path.join(basedir, "great_expectations")  # noqa: PTH118
+    )
     assert (
         obs_tree
         == """\

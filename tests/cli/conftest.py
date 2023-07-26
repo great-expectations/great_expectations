@@ -14,7 +14,7 @@ def empty_context_with_checkpoint_v1_stats_enabled(
         monkeypatch.delenv("VAR")
         monkeypatch.delenv("MY_PARAM")
         monkeypatch.delenv("OLD_PARAM")
-    except:
+    except:  # noqa: E722
         pass
 
     monkeypatch.setenv("VAR", "test")
@@ -27,7 +27,9 @@ def empty_context_with_checkpoint_v1_stats_enabled(
     fixture_path = file_relative_path(
         __file__, f"../data_context/fixtures/contexts/{fixture_name}"
     )
-    checkpoints_file = os.path.join(root_dir, "checkpoints", fixture_name)
+    checkpoints_file = os.path.join(  # noqa: PTH118
+        root_dir, "checkpoints", fixture_name
+    )
     shutil.copy(fixture_path, checkpoints_file)
     # # noinspection PyProtectedMember
     context._save_project_config()
@@ -41,7 +43,7 @@ def v10_project_directory(tmp_path_factory):
     """
 
     project_path = str(tmp_path_factory.mktemp("v10_project"))
-    context_root_dir = os.path.join(project_path, "great_expectations")
+    context_root_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     shutil.copytree(
         file_relative_path(
             __file__, "../test_fixtures/upgrade_helper/great_expectations_v10_project/"
@@ -52,7 +54,7 @@ def v10_project_directory(tmp_path_factory):
         file_relative_path(
             __file__, "../test_fixtures/upgrade_helper/great_expectations_v1_basic.yml"
         ),
-        os.path.join(context_root_dir, "great_expectations.yml"),
+        os.path.join(context_root_dir, "great_expectations.yml"),  # noqa: PTH118
     )
     return context_root_dir
 
@@ -61,5 +63,5 @@ def v10_project_directory(tmp_path_factory):
 def misc_directory(tmp_path):
     misc_dir = tmp_path / "random"
     misc_dir.mkdir()
-    assert os.path.isabs(misc_dir)
+    assert os.path.isabs(misc_dir)  # noqa: PTH117
     return misc_dir
