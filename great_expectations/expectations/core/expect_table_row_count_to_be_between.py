@@ -41,7 +41,7 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
     """Expect the number of rows to be between two values.
 
     expect_table_row_count_to_be_between is a \
-    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
+    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     Keyword Args:
         min_value (int or None): \
