@@ -1,6 +1,9 @@
 import pathlib
 import great_expectations as gx
 import tempfile
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
 temp_dir = tempfile.TemporaryDirectory()
 full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
@@ -40,7 +43,7 @@ import pathlib
 
 context = gx.get_context(
     context_root_dir=(
-        pathlib.Path(full_path_to_project_directory) / "great_expectations"
+        pathlib.Path(full_path_to_project_directory) / FileDataContext.GX_DIR
     )
 )
 asset = context.datasources["my_pandas_datasource"].get_asset("csv_asset")
