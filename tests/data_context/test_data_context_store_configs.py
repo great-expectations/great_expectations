@@ -42,9 +42,7 @@ def totally_empty_data_context(tmp_path_factory):
         "validation_operators": {},
     }
     with open(
-        os.path.join(  # noqa: PTH118
-            project_root_dir, "great_expectations/great_expectations.yml"
-        ),
+        os.path.join(project_root_dir, "gx/great_expectations.yml"),  # noqa: PTH118
         "w",
     ) as config_file:
         yaml.dump(config, config_file)

@@ -98,8 +98,8 @@ def test_base_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_var
 @pytest.mark.unit
 def test_data_context(tmp_path: pathlib.Path, clear_env_vars):
     project_path = tmp_path / "empty_data_context"
-    project_path.mkdir()
-    gx.data_context.FileDataContext.create(project_path)
+    project_path.mkdir(parents=True)
+    FileDataContext.create(project_path)
     with working_directory(project_path):
         assert isinstance(gx.get_context(), FileDataContext)
 

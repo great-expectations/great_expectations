@@ -37,18 +37,14 @@ def test_open_docs_with_single_local_site(mock_webbrowser, empty_data_context):
     context = empty_data_context
     obs = context.get_docs_sites_urls(only_if_exists=False)
     assert len(obs) == 1
-    assert obs[0]["site_url"].endswith(
-        "great_expectations/uncommitted/data_docs/local_site/index.html"
-    )
+    assert obs[0]["site_url"].endswith("gx/uncommitted/data_docs/local_site/index.html")
     assert obs[0]["site_name"] == "local_site"
 
     context.open_data_docs(only_if_exists=False)
     assert mock_webbrowser.call_count == 1
     call = mock_webbrowser.call_args_list[0][0][0]
     assert call.startswith("file:///")
-    assert call.endswith(
-        "/great_expectations/uncommitted/data_docs/local_site/index.html"
-    )
+    assert call.endswith("/gx/uncommitted/data_docs/local_site/index.html")
 
 
 @pytest.mark.unit
@@ -90,13 +86,11 @@ def context_with_multiple_built_sites(empty_data_context):
     context.build_data_docs()
     obs = context.get_docs_sites_urls(only_if_exists=False)
     assert len(obs) == 2
-    assert obs[0]["site_url"].endswith(
-        "great_expectations/uncommitted/data_docs/local_site/index.html"
-    )
+    assert obs[0]["site_url"].endswith("gx/uncommitted/data_docs/local_site/index.html")
     assert obs[0]["site_name"] == "local_site"
 
     assert obs[1]["site_url"].endswith(
-        "great_expectations/uncommitted/data_docs/another_local_site/index.html"
+        "gx/uncommitted/data_docs/another_local_site/index.html"
     )
     assert obs[1]["site_name"] == "another_local_site"
     for site in ["local_site", "another_local_site"]:
@@ -123,13 +117,11 @@ def test_open_docs_with_two_local_sites(
     assert mock_webbrowser.call_count == 2
     first_call = mock_webbrowser.call_args_list[0][0][0]
     assert first_call.startswith("file:///")
-    assert first_call.endswith(
-        "/great_expectations/uncommitted/data_docs/local_site/index.html"
-    )
+    assert first_call.endswith("/gx/uncommitted/data_docs/local_site/index.html")
     second_call = mock_webbrowser.call_args_list[1][0][0]
     assert second_call.startswith("file:///")
     assert second_call.endswith(
-        "/great_expectations/uncommitted/data_docs/another_local_site/index.html"
+        "/gx/uncommitted/data_docs/another_local_site/index.html"
     )
 
 
@@ -144,9 +136,7 @@ def test_open_docs_with_two_local_sites_specify_open_one(
     assert mock_webbrowser.call_count == 1
     call = mock_webbrowser.call_args_list[0][0][0]
     assert call.startswith("file:///")
-    assert call.endswith(
-        "/great_expectations/uncommitted/data_docs/another_local_site/index.html"
-    )
+    assert call.endswith("/gx/uncommitted/data_docs/another_local_site/index.html")
 
 
 @pytest.fixture
@@ -188,9 +178,7 @@ def test_get_docs_sites_urls_with_two_local_sites_specify_one(
 
     url = obs[0]["site_url"]
     assert url.startswith("file:///")
-    assert url.endswith(
-        "/great_expectations/uncommitted/data_docs/another_local_site/index.html"
-    )
+    assert url.endswith("/gx/uncommitted/data_docs/another_local_site/index.html")
 
 
 @pytest.mark.unit
@@ -264,9 +252,7 @@ def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasource
 
     obs = context.get_docs_sites_urls(only_if_exists=False)
     assert len(obs) == 1
-    assert obs[0]["site_url"].endswith(
-        "great_expectations/uncommitted/data_docs/local_site/index.html"
-    )
+    assert obs[0]["site_url"].endswith("gx/uncommitted/data_docs/local_site/index.html")
 
 
 @pytest.mark.filesystem

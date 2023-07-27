@@ -242,7 +242,7 @@ class ConfigNotFoundError(DataContextError):
     """The great_expectations dir could not be found."""
 
     def __init__(self) -> None:
-        self.message = """Error: No great_expectations directory was found here!
+        self.message = """Error: No gx directory was found here!
     - Please check that you are in the correct directory or have specified the correct directory.
     - If you have never run Great Expectations in this project, please run `great_expectations init` to get started.
 """
