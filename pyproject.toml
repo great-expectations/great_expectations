@@ -337,6 +337,7 @@ convention = "google"
 "pyarrow".msg = "Please do not import azure directly, import from great_expectations.compatibility.pyarrow instead."
 
 [tool.pytest.ini_options]
+addopts = "-n auto"
 filterwarnings = [
     # Turn all warnings not explicitly filtered below into errors
     "error",
