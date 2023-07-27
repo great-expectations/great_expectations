@@ -6,6 +6,9 @@ import pytest
 
 import great_expectations as gx
 from great_expectations import DataContext
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer.checkpoint_new_notebook_renderer import (
     CheckpointNewNotebookRenderer,
@@ -25,7 +28,7 @@ def assetless_dataconnector_context(
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -36,7 +39,7 @@ def assetless_dataconnector_context(
             __file__,
             "../../test_fixtures/great_expectations_v013_no_datasource_stats_enabled.yml",
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     context = gx.get_context(context_root_dir=context_path)
     assert context.root_directory == context_path
