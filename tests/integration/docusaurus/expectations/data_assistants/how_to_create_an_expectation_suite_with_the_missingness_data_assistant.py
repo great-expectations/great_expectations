@@ -1,4 +1,4 @@
-"""Example Script: How to create an Expectation Suite with the Onboarding Data Assistant
+"""Example Script: How to create an Expectation Suite with the Missingness Data Assistant
 
 This example script is intended for use in documentation on how to use an Onboarding Data Assistant to create
 an Expectation Suite.
@@ -10,9 +10,10 @@ Comments with the tags `<snippet>` and `</snippet>` are used to ensure that if t
 the snippets that are specified for use in documentation are maintained.  These comments can be ignored by users.
 
 --documentation--
-    https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant
+    https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant
 """
 import great_expectations as gx
+from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource.fluent.interfaces import DataAsset
@@ -23,7 +24,7 @@ context = gx.get_context()
 
 # Configure your datasource (if you aren't using one that already exists)
 
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py datasource_config">
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py datasource_config">
 
 context.sources.add_pandas_filesystem(
     "taxi_multi_batch_datasource",
@@ -37,8 +38,8 @@ context.sources.add_pandas_filesystem(
 
 # Prepare an Expectation Suite
 
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py expectation_suite">
-expectation_suite_name = "my_onboarding_assistant_suite"
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py expectation_suite">
+expectation_suite_name = "my_missingness_assistant_suite"
 
 expectation_suite = context.add_or_update_expectation_suite(
     expectation_suite_name=expectation_suite_name
@@ -47,7 +48,7 @@ expectation_suite = context.add_or_update_expectation_suite(
 
 # Prepare a Batch Request
 
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py batch_request">
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py batch_request">
 all_years_asset: DataAsset = context.datasources[
     "taxi_multi_batch_datasource"
 ].get_asset("all_years")
@@ -57,9 +58,9 @@ multi_batch_all_years_batch_request: BatchRequest = (
 )
 # </snippet>
 
-# Run the Onboarding Assistant
+# Run the Missingness Assistant
 
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py exclude_column_names">
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py exclude_column_names">
 exclude_column_names = [
     "VendorID",
     "pickup_datetime",
@@ -78,8 +79,8 @@ exclude_column_names = [
 ]
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py data_assistant_result">
-data_assistant_result = context.assistants.onboarding.run(
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py data_assistant_result">
+data_assistant_result = context.assistants.missingness.run(
     batch_request=multi_batch_all_years_batch_request,
     exclude_column_names=exclude_column_names,
 )
@@ -87,19 +88,19 @@ data_assistant_result = context.assistants.onboarding.run(
 
 # Save your Expectation Suite
 
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py get_expectation_suite">
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py get_expectation_suite">
 expectation_suite = data_assistant_result.get_expectation_suite(
     expectation_suite_name=expectation_suite_name
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py save_expectation_suite">
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py save_expectation_suite">
 context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
 # </snippet>
 
 # Use a Checkpoint to verify that your new Expectation Suite works.
 
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py checkpoint">
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py checkpoint">
 checkpoint = context.add_or_update_checkpoint(
     name=f"yellow_tripdata_sample_{expectation_suite_name}",
     validations=[
@@ -122,25 +123,25 @@ assert checkpoint_result["success"] is True
 # context.open_data_docs(resource_identifier=validation_result_identifier)
 
 
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py plot_metrics">
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py plot_metrics">
 data_assistant_result.plot_metrics()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py metrics_by_domain">
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py metrics_by_domain">
 data_assistant_result.metrics_by_domain
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py plot_expectations_and_metrics">
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py plot_expectations_and_metrics">
 data_assistant_result.plot_expectations_and_metrics()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py show_expectations_by_domain_type">
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py show_expectations_by_domain_type">
 data_assistant_result.show_expectations_by_domain_type(
     expectation_suite_name=expectation_suite_name
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py show_expectations_by_expectation_type">
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py show_expectations_by_expectation_type">
 data_assistant_result.show_expectations_by_expectation_type(
     expectation_suite_name=expectation_suite_name
 )
