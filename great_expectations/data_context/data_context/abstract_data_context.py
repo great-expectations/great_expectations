@@ -963,9 +963,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None,
     ) -> None:
         if not ((datasource is None) ^ (name is None)):
-            raise ValueError(
-                "Must either pass in an existing datasource or individual constructor arguments (but not both)"
-            )
+            error_message = "Must either pass in an existing 'datasource' or individual constructor arguments"
+            if datasource and name:
+                error_message += " (but not both)"
+            raise TypeError(error_message)
 
     def _add_datasource(
         self,
@@ -2255,9 +2256,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
         if not ((checkpoint is None) ^ (name is None)):
-            raise ValueError(
-                "Must either pass in an existing checkpoint or individual constructor arguments (but not both)"
-            )
+            error_message = "Must either pass in an existing 'checkpoint' or individual constructor arguments"
+            if checkpoint and name:
+                error_message += " (but not both)"
+            raise TypeError(error_message)
 
         action_list = action_list or self._determine_default_action_list()
 
@@ -5261,7 +5263,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         ).get("data_asset_name")
 
         for expectation_suite_dependency, metrics_list in requested_metrics.items():
-            if (expectation_suite_dependency != "*") and (
+            if (expectation_suite_dependency != "*") and (  # noqa: PLR1714
                 expectation_suite_dependency != expectation_suite_name
             ):
                 continue
@@ -5925,10 +5927,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ValueError: Invalid arguments.
         """
         if expectation_suite_name is not None and expectation_suite is not None:
-            raise ValueError(
+            raise TypeError(
                 "Only one of expectation_suite_name or expectation_suite may be specified."
             )
         if expectation_suite_name is None and expectation_suite is None:
-            raise ValueError(
+            raise TypeError(
                 "One of expectation_suite_name or expectation_suite must be specified."
             )

@@ -27,6 +27,8 @@ from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     ParameterNode,
 )
+from great_expectations.rule_based_profiler.rule.rule import Rule
+from great_expectations.rule_based_profiler.rule.rule_state import RuleState
 from tests.render.util import load_notebook_from_path
 from tests.test_utils import find_strings_in_nested_obj
 
@@ -213,7 +215,7 @@ def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
     ep.preprocess(nb, {"metadata": {"path": root_dir}})
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 6.90s
 def test_onboarding_data_assistant_result_serialization(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
@@ -232,7 +234,7 @@ def test_onboarding_data_assistant_result_serialization(
     assert len(bobby_onboarding_data_assistant_result.profiler_config.rules) == 8
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -259,7 +261,7 @@ def test_onboarding_data_assistant_result_get_expectation_suite(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_onboarding_data_assistant_metrics_count(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -291,7 +293,7 @@ def test_onboarding_data_assistant_metrics_count(
     assert num_metrics == 300
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ):
@@ -317,7 +319,67 @@ def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_n
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
+def test_onboarding_data_assistant_should_fail_forward(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+    rule_state_with_domains_and_parameters,
+):
+    """When one rule fails, the rest of the rules should still be executed."""
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    num_rules = 8  # There are 8 rules in the onboarding data assistant.
+    with mock.patch(
+        "great_expectations.rule_based_profiler.rule.rule.Rule.run",
+    ) as mock_run:
+        # Set first rule to fail and the rest to pass.
+        call_count = 0
+
+        def side_effect(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                raise ValueError("This rule failed.")
+            return rule_state_with_domains_and_parameters
+
+        mock_run.side_effect = side_effect
+
+        data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+            batch_request=batch_request,
+            estimation="flag_outliers",
+            numeric_columns_rule={
+                "round_decimals": 15,
+                "false_positive_rate": 0.1,
+                "random_seed": 43792,
+            },
+            datetime_columns_rule={
+                "truncate_values": {
+                    "lower_bound": 0,
+                    "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
+                },
+                "round_decimals": 0,
+            },
+            text_columns_rule={
+                "strict_min": True,
+                "strict_max": True,
+                "success_ratio": 0.8,
+            },
+            categorical_columns_rule={
+                "false_positive_rate": 0.1,
+                # "round_decimals": 4,
+            },
+        )
+        # Although the first rule fails, the rest of the rules should still be executed.
+        assert mock_run.call_count == num_rules
+        assert call_count == num_rules
+
+
+@pytest.mark.big
 @pytest.mark.slow  # 39.26s
 def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -399,7 +461,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 38.26s
 def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
     quentin_columnar_table_multi_batch_data_context,
@@ -427,7 +489,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 25.61s
 def test_onboarding_data_assistant_plot_descriptive_notebook_execution_fails(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
@@ -453,7 +515,7 @@ def test_onboarding_data_assistant_plot_descriptive_notebook_execution_fails(
         )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 28.73s
 def test_onboarding_data_assistant_plot_descriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
@@ -475,7 +537,7 @@ def test_onboarding_data_assistant_plot_descriptive_notebook_execution(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 36.23s
 def test_onboarding_data_assistant_plot_prescriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
@@ -497,7 +559,7 @@ def test_onboarding_data_assistant_plot_prescriptive_notebook_execution(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 27.95s
 def test_onboarding_data_assistant_plot_descriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
@@ -521,7 +583,7 @@ def test_onboarding_data_assistant_plot_descriptive_theme_notebook_execution(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 35.34s
 def test_onboarding_data_assistant_plot_prescriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
@@ -547,7 +609,7 @@ def test_onboarding_data_assistant_plot_prescriptive_theme_notebook_execution(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 2.02s
 def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_table_domain_chart(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
@@ -558,7 +620,7 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_table_domain
     assert find_strings_in_nested_obj(table_domain_chart, ["Table Row Count per Batch"])
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 3.42s
 def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domain_chart(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
@@ -583,7 +645,7 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domai
     assert find_strings_in_nested_obj(column_domain_charts, columns)
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_onboarding_data_assistant_plot_metrics_include_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -597,7 +659,7 @@ def test_onboarding_data_assistant_plot_metrics_include_column_names_filters_out
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 2.74s
 def test_onboarding_data_assistant_plot_metrics_exclude_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
@@ -613,7 +675,7 @@ def test_onboarding_data_assistant_plot_metrics_exclude_column_names_filters_out
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 1.67s
 def test_onboarding_data_assistant_plot_expectations_and_metrics_include_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
@@ -630,7 +692,7 @@ def test_onboarding_data_assistant_plot_expectations_and_metrics_include_column_
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 8.26s
 def test_onboarding_data_assistant_plot_expectations_and_metrics_exclude_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
@@ -647,7 +709,7 @@ def test_onboarding_data_assistant_plot_expectations_and_metrics_exclude_column_
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_onboarding_data_assistant_plot_include_and_exclude_column_names_raises_error(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -677,7 +739,7 @@ def test_onboarding_data_assistant_result_plot_expectations_and_metrics_correctl
     assert len(column_domain_charts) == 0
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 5.63s
 def test_onboarding_data_assistant_plot_custom_theme_overrides(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
@@ -739,7 +801,7 @@ def test_onboarding_data_assistant_plot_custom_theme_overrides(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 5.61s
 def test_onboarding_data_assistant_plot_return_tooltip(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
@@ -826,7 +888,7 @@ def test_onboarding_data_assistant_plot_return_tooltip(
         assert tooltip in actual_tooltip
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 27.11s
 def test_onboarding_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
@@ -848,7 +910,7 @@ def test_onboarding_data_assistant_metrics_plot_descriptive_non_sequential_noteb
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 34.85s
 def test_onboarding_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
@@ -872,7 +934,7 @@ def test_onboarding_data_assistant_metrics_and_expectations_plot_descriptive_non
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_onboarding_data_assistant_result_empty_suite_plot_metrics_and_expectations(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ):
@@ -889,7 +951,7 @@ def test_onboarding_data_assistant_result_empty_suite_plot_metrics_and_expectati
         ), f"DataAssistantResult.plot_expectations_and_metrics raised an exception '{exc}'"
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_onboarding_data_assistant_plot_metrics_stdout(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ):

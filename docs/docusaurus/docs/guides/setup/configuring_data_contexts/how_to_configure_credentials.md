@@ -8,7 +8,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will explain how to populate credentials either through an environment variable, or configure your Great Expectations project to load credentials from either a YAML file or a secret manager.
 
-If your Great Expectations deployment is in an environment without a file system, refer to [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
+If your Great Expectations deployment is in an environment without a file system, refer to [Instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 
 ## Prerequisites
 

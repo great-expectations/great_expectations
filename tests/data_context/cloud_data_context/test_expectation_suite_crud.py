@@ -623,7 +623,7 @@ def test_add_expectation_suite_without_name_raises_error(
 ):
     context = empty_base_data_context_in_cloud_mode
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         context.add_expectation_suite(expectation_suite_name=None)
 
 
@@ -666,7 +666,7 @@ def test_add_or_update_expectation_suite_updates_existing_obj(
     mock_put.assert_called_once()  # persist resource
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_get_expectation_suite_include_rendered_content_prescriptive(
     empty_data_context,
 ):

@@ -39,7 +39,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
     """Expect the columns to match an unordered set.
 
     expect_table_columns_to_match_set is a \
-    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
+    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     Args:
         column_set (list of str): \
@@ -326,9 +326,9 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
 
             if exact_match:
                 return return_failed
-            else:
+            else:  # noqa: PLR5501
                 # Failed if there are items in the missing list (but OK to have unexpected_list)
-                if len(missing_list) > 0:  # noqa: PLR5501
+                if len(missing_list) > 0:
                     return return_failed
                 # Passed if there are no items in the missing list
                 else:

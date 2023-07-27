@@ -1373,7 +1373,7 @@ def deep_filter_properties_iterable(  # noqa: PLR0913
         # Upon unwinding the call stack, do a sanity check to ensure cleaned properties.
         keys_to_delete: List[str] = list(
             filter(
-                lambda k: k not in keep_fields  # type: ignore[arg-type]
+                lambda k: k not in keep_fields
                 and _is_to_be_removed_from_deep_filter_properties_iterable(
                     value=properties[k],
                     clean_nulls=clean_nulls,

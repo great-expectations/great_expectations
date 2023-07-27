@@ -188,8 +188,8 @@ class DataAsset:
 
                 if "result_format" in argspec:
                     all_args["result_format"] = result_format
-                else:
-                    if "result_format" in all_args:  # noqa: PLR5501
+                else:  # noqa: PLR5501
+                    if "result_format" in all_args:
                         del all_args["result_format"]
 
                 all_args = recursively_convert_to_json_serializable(all_args)

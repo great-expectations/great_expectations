@@ -470,7 +470,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
 
 
 @pytest.mark.order(index=0)
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 12.68s
 def test_case_runner_v3_api(test_case):
     if test_case["skip"]:

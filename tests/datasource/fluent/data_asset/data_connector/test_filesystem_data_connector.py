@@ -296,7 +296,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 
 # TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
 # TODO: <Alex>ALEX</Alex>
-# @pytest.mark.integration
+# @pytest.mark.big
 # @pytest.mark.slow  # creating small number of`file handles in temporary file system
 # def test_return_all_batch_definitions_sorted(tmp_path_factory):
 #     base_directory = str(

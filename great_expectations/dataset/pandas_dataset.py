@@ -566,7 +566,7 @@ Notes:
         series_B = self.get_binned_values(self[column_B], bins_B, n_bins_B)
         return pd.crosstab(series_A, columns=series_B)
 
-    def get_binned_values(self, series, bins, n_bins):
+    def get_binned_values(self, series, bins, n_bins):  # noqa: PLR0912
         """
         Get binned values of series.
 

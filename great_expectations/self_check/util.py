@@ -431,7 +431,7 @@ SQL_DIALECT_NAMES = (
     "bigquery",
     "trino",
     "redshift",
-    "clickhouse"
+    "clickhouse",
     # "athena",
     "snowflake",
 )
@@ -1224,9 +1224,8 @@ def build_sa_execution_engine(  # noqa: PLR0913
     if_exists: str = "replace",
     index: bool = False,
     dtype: Optional[dict] = None,
+    table_name: str = "test",
 ) -> SqlAlchemyExecutionEngine:
-    table_name: str = "test"
-
     # noinspection PyUnresolvedReferences
     sqlalchemy_engine: sqlalchemy.Engine = sa.create_engine("sqlite://", echo=False)
     add_dataframe_to_db(
@@ -1595,8 +1594,8 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
             checker = LockingConnectionCheck(sa, connection_string)
             if checker.is_valid() is True:
                 test_backends += ["postgresql"]
-            else:
-                if raise_exceptions_for_backends is True:  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if raise_exceptions_for_backends is True:
                     raise ValueError(
                         f"backend-specific tests are requested, but unable to connect to the database at "
                         f"{connection_string}"
@@ -2523,8 +2522,8 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                             value,
                             rtol=test["tolerance"],
                         )
-                else:
-                    if isinstance(value, dict) and "values" in value:  # noqa: PLR5501
+                else:  # noqa: PLR5501
+                    if isinstance(value, dict) and "values" in value:
                         try:
                             assert np.allclose(
                                 result["result"]["observed_value"]["values"],
