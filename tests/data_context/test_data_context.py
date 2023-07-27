@@ -77,7 +77,7 @@ def titanic_multibatch_data_context(
     project_path = tmp_path / "titanic_data_context"
     project_path.mkdir()
     project_path = str(project_path)
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -85,7 +85,7 @@ def titanic_multibatch_data_context(
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH103, PTH118
     shutil.copy(
         file_relative_path(__file__, "../test_fixtures/great_expectations_titanic.yml"),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(__file__, "../test_sets/Titanic.csv"),
@@ -118,7 +118,7 @@ def data_context_with_bad_datasource(tmp_path_factory):
     It is used by test_get_batch_multiple_datasources_do_not_scan_all()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "../test_fixtures")
     os.makedirs(  # noqa: PTH103
@@ -129,7 +129,7 @@ def data_context_with_bad_datasource(tmp_path_factory):
         os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_bad_datasource.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     return get_context(context_root_dir=context_path)
 
@@ -720,7 +720,7 @@ def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
     project_path = tmp_path / "a" / "b" / "c" / "d" / "data_context"
     project_path.mkdir(parents=True)
 
-    context_path = project_path / "great_expectations"
+    context_path = project_path / FileDataContext.GX_DIR
     context_path.mkdir()
     monkeypatch.chdir(str(context_path))
 
@@ -734,7 +734,7 @@ def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
                 "..", "test_fixtures", "great_expectations_basic.yml"
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     monkeypatch.setenv("GX_HOME", str(context_path))
     assert FileDataContext.find_context_root_dir() == str(context_path)
@@ -844,7 +844,7 @@ def test_data_context_create_does_not_raise_error_or_warning_if_ge_dir_exists(
 def empty_context(tmp_path_factory) -> FileDataContext:
     project_path = str(tmp_path_factory.mktemp("data_context"))
     FileDataContext.create(project_path)
-    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    ge_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     assert os.path.isdir(ge_dir)  # noqa: PTH112
     assert os.path.isfile(  # noqa: PTH113
         os.path.join(ge_dir, FileDataContext.GX_YML)  # noqa: PTH118
@@ -1061,7 +1061,7 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
     FileDataContext.create(project_path)
 
     # mangle the existing setup
-    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    ge_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
     shutil.rmtree(uncommitted_dir)
 
@@ -1125,7 +1125,7 @@ great_expectations/
             .ge_store_backend_id
 """
     project_path = str(tmp_path_factory.mktemp("stuff"))
-    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    ge_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
 
     FileDataContext.create(project_path)
     fixture = gen_directory_tree_str(ge_dir)
@@ -1152,7 +1152,7 @@ uncommitted/
         .ge_store_backend_id
 """
     project_path = str(tmp_path_factory.mktemp("stuff"))
-    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    ge_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
     FileDataContext.create(project_path)
     fixture = gen_directory_tree_str(uncommitted_dir)
@@ -1192,7 +1192,7 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
     FileDataContext.create(project_path)
-    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    ge_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
     config_vars_yml = os.path.join(  # noqa: PTH118
         uncommitted_dir, "config_variables.yml"
