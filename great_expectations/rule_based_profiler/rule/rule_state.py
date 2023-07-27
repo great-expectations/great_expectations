@@ -7,10 +7,10 @@ from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
-from great_expectations.validator.exception_info import ExceptionInfo
 
 if TYPE_CHECKING:
     from great_expectations.rule_based_profiler.rule.rule import Rule
+    from great_expectations.validator.exception_info import ExceptionInfo
 
 
 class RuleState:
@@ -21,7 +21,7 @@ class RuleState:
     outputs for different purposes (in raw and aggregated form) from available "Domain" objects and computed parameters.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         rule: Optional[Rule] = None,
         domains: Optional[List[Domain]] = None,
