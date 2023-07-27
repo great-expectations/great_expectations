@@ -2662,7 +2662,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             > 1
         ):
             ge_cloud_mode = getattr(  # attr not on AbstractDataContext
-                self, "ge_cloud_mode"
+                self, "ge_cloud_mode", None
             )
             raise ValueError(
                 "No more than one of expectation_suite_name,"
