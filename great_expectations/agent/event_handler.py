@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from great_expectations.agent.actions import ColumnDescriptiveMetricsAction
+from great_expectations.agent.actions import (
+    ColumnDescriptiveMetricsAction,
+    ListTableNamesAction,
+)
 from great_expectations.agent.actions.data_assistants import (
     RunMissingnessDataAssistantAction,
     RunOnboardingDataAssistantAction,
@@ -13,6 +16,7 @@ from great_expectations.agent.actions.draft_datasource_config_action import (
 from great_expectations.agent.models import (
     DraftDatasourceConfigEvent,
     Event,
+    ListTableNamesEvent,
     RunCheckpointEvent,
     RunColumnDescriptiveMetricsEvent,
     RunMissingnessDataAssistantEvent,
@@ -54,6 +58,9 @@ class EventHandler:
 
         if isinstance(event, RunMissingnessDataAssistantEvent):
             return RunMissingnessDataAssistantAction(context=self._context)
+
+        if isinstance(event, ListTableNamesEvent):
+            return ListTableNamesAction(context=self._context)
 
         if isinstance(event, RunCheckpointEvent):
             raise NotImplementedError
