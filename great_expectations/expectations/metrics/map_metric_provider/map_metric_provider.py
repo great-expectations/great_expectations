@@ -114,7 +114,7 @@ class MapMetricProvider(MetricProvider):
                 # This is not a metric.
                 continue
 
-            metric_fn_type = getattr(candidate_metric_fn, "metric_fn_type")
+            metric_fn_type = candidate_metric_fn.metric_fn_type
             if not metric_fn_type:
                 # This is not a metric (valid metrics possess exectly one metric function).
                 return

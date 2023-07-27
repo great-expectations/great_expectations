@@ -154,7 +154,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 continue
 
             if hasattr(attr_obj, "metric_engine"):
-                engine = getattr(attr_obj, "metric_engine")
+                engine = attr_obj.metric_engine
                 if not issubclass(engine, ExecutionEngine):
                     raise ValueError(
                         "metric functions must be defined with an Execution Engine"
