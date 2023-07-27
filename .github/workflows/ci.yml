@@ -169,6 +169,5 @@ jobs:
 
       - name: Run the tests
         run: |
-          pytest -v --docs-tests -m integration --bigquery tests/integration/test_script_runner.py
+          pytest -v --docs-tests --bigquery tests/integration/test_script_runner.py
 # TODO: min dep version tests
-
