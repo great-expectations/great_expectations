@@ -71,7 +71,7 @@ def test_base_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_var
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     gx.data_context.FileDataContext.create(project_path)
-    context_path = project_path / "great_expectations"
+    context_path = project_path / FileDataContext.GX_DIR
     context = gx.get_context(context_root_dir=context_path)
     assert isinstance(context, FileDataContext)
     assert context.expectations_store_name == "expectations_store"
@@ -115,7 +115,7 @@ def test_data_context_root_dir_returns_data_context(
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     gx.data_context.FileDataContext.create(project_path)
-    context_path = project_path / "great_expectations"
+    context_path = project_path / FileDataContext.GX_DIR
     assert isinstance(
         gx.get_context(context_root_dir=str(context_path)), FileDataContext
     )
@@ -269,7 +269,7 @@ def test_cloud_context_include_rendered_content(
 @pytest.mark.filesystem
 def test_get_context_with_context_root_dir_scaffolds_filesystem(tmp_path: pathlib.Path):
     root = tmp_path / "root"
-    context_root_dir = root.joinpath("great_expectations")
+    context_root_dir = root.joinpath(FileDataContext.GX_DIR)
     assert not context_root_dir.exists()
 
     context = gx.get_context(context_root_dir=context_root_dir)

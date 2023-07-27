@@ -623,7 +623,7 @@ def test_add_expectation_suite_without_name_raises_error(
 ):
     context = empty_base_data_context_in_cloud_mode
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         context.add_expectation_suite(expectation_suite_name=None)
 
 
