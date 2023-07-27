@@ -6,6 +6,9 @@ pytest -v --docs-tests -k "how_to_instantiate_a_specific_filesystem_data_context
 """
 
 import pathlib
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
 import great_expectations as gx
 
@@ -15,7 +18,7 @@ path_to_context_root_folder = "/my_gx_project/"
 # </snippet>
 
 project_root_dir = pathlib.Path.cwd().absolute()
-path_to_context_root_folder = project_root_dir / "great_expectations"
+path_to_context_root_folder = project_root_dir / FileDataContext.GX_DIR
 context = gx.data_context.FileDataContext.create(project_root_dir=project_root_dir)
 assert context
 assert context.root_directory == str(path_to_context_root_folder)
