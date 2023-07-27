@@ -4,7 +4,7 @@ module.exports = {
     {
       type: 'category',
       label: 'Get started with GX',
-      link: { type: 'doc', id: 'guides/setup/get_started_lp'},
+      link: { type: 'doc', id: 'guides/setup/get_started_lp' },
       items: [
         'tutorials/quickstart/quickstart',
         {
@@ -83,6 +83,7 @@ module.exports = {
           link: { type: 'doc', id: 'guides/expectations/profilers_data_assistants_lp' },
           items: [
             'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant',
+            'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant',
             'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers',
           ]
         },

@@ -1,4 +1,7 @@
 import os
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 import re
 import shutil
 
@@ -52,7 +55,7 @@ def test_cli_init_on_new_project(
     mock_webbrowser, caplog, monkeypatch, tmp_path_factory, titanic_sqlite_db_file, sa
 ):
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
-    ge_dir = os.path.join(project_dir, "great_expectations")
+    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
 
     database_path = os.path.join(project_dir, "titanic.db")
     shutil.copy(titanic_sqlite_db_file, database_path)
@@ -212,7 +215,7 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     mock_webbrowser, caplog, monkeypatch, tmp_path_factory, titanic_sqlite_db_file, sa
 ):
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
-    ge_dir = os.path.join(project_dir, "great_expectations")
+    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
 
     database_path = os.path.join(project_dir, "titanic.db")
     shutil.copy(titanic_sqlite_db_file, database_path)
