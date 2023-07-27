@@ -280,7 +280,6 @@ def test_get_context_with_context_root_dir_scaffolds_filesystem(tmp_path: pathli
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_get_context_with_context_root_dir_scaffolds_existing_gitignore(
     clear_env_vars, tmp_path
 ):
@@ -296,7 +295,6 @@ def test_get_context_with_context_root_dir_scaffolds_existing_gitignore(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_get_context_with_context_root_dir_scaffolds_new_gitignore(
     clear_env_vars, tmp_path
 ):
