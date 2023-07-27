@@ -819,13 +819,15 @@ class TableAsset(_SQLAsset):
     @pydantic.validator("table_name", pre=True, always=True)
     def _default_table_name(cls, table_name: str, values: dict, **kwargs) -> str:
         if not (validated_table_name := table_name or values.get("name")):
+            # TODO: if coming from `name` we should replace spaces with underscores
+            # (unless bracketed by quotes)
             raise ValueError(
                 "table_name cannot be empty and should default to name if not provided"
             )
 
         from great_expectations.compatibility import sqlalchemy
 
-        if sqlalchemy.quoted_name:
+        if cls._is_bracketed_by_quotes(validated_table_name) and sqlalchemy.quoted_name:
             return sqlalchemy.quoted_name(value=validated_table_name, quote=True)
 
         return validated_table_name
@@ -886,6 +888,21 @@ class TableAsset(_SQLAsset):
             "schema_name": self.schema_name,
             "batch_identifiers": {},
         }
+
+    @staticmethod
+    def _is_bracketed_by_quotes(target: str) -> bool:
+        """Returns True if the target string is bracketed by quotes.
+
+        Arguments:
+            target: A string to check if it is bracketed by quotes.
+
+        Returns:
+            True if the target string is bracketed by quotes.
+        """
+        for quote in ["'", '"']:
+            if target.startswith(quote) and target.endswith(quote):
+                return True
+        return False
 
 
 @public_api
