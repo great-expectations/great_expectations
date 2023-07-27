@@ -14,7 +14,7 @@ Using the following example configuration, add in the `CONNECTION_STRING` for yo
 
   <TabItem value="yaml">
 
-```python name="tests/integration/db/awsathena.py Data Source YAML config"
+```python name="tests/integration/db/awsathena.py Datasource YAML config"
 
 ```
 
@@ -22,7 +22,7 @@ Using the following example configuration, add in the `CONNECTION_STRING` for yo
 
   <TabItem value="python">
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Data Source dict config"
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Datasource dict config"
 ```
   
   </TabItem>
