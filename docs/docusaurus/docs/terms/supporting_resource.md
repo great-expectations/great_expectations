@@ -14,7 +14,7 @@ Great Expectations requires a Python compute environment and access to data, eit
 
 Supporting Resources are used throughout Great Expectations workflows.  Some are necessities for Great Expectations to operate.  Others provide convenience when performing certain tasks, and some are recommended for project security and stability.  Below you will find an outline of the major Supporting Resources, and a brief description of how and when they are used.
 
-- **Source Data Systems:** Without data to Validate, Great Expectations has no purpose.  That data can exist natively in a variety of source data systems, including filesystems, databases, and distributed clusters.
+- **source data Systems:** Without data to Validate, Great Expectations has no purpose.  That data can exist natively in a variety of source data systems, including filesystems, databases, and distributed clusters.
 - **Python:** Great Expectations is built in Python.  The objects that you create and methods that you use while working with Great Expectations will be generally be Python objects, YAML files, or JSON files.  Great Expectations cannot run without a Python environment.
 - **pip:** Pip is the standard package manager for Python.  You will use pip to install Great Expectations in your Python environment.
 - **Virtual Environments:** Virtual environments are isolated environments for projects.  The recommended best practice for using Great Expectations is to install it into a Python Virtual Environment to ensure that your Great Expectations deployment is not impacted by any other projects you may be working on, and vice versa.

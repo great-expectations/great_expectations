@@ -21,7 +21,7 @@ import Tabs from '@theme/Tabs';
 
 A Data Asset is a collection of records within a Data Source that define how Great Expectations (GX) organizes data into Batches. Use the information provided here to connect GX to SQL tables and data returned by SQL database queries and learn how to organize Batches in a SQL Data Asset.
 
- Great Expectations (GX) uses SQLAlchemy to connect to SQL Source Data, and most of the SQL dialects supported by SQLAlchemy are also supported by GX. For more information about the SQL dialects supported by SQLAlchemy, see [Dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
+ Great Expectations (GX) uses SQLAlchemy to connect to SQL source data, and most of the SQL dialects supported by SQLAlchemy are also supported by GX. For more information about the SQL dialects supported by SQLAlchemy, see [Dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
 :::caution Datasources defined with the block-config method
 
@@ -42,7 +42,7 @@ If you're using a Data Source created with the block-config method, see [How to 
 
 ## Connect to a SQL table
 
-Connect GX to a SQL table to access Source Data.
+Connect GX to a SQL table to access source data.
 
 The following code examples use a previously defined Data Source named `"my_datasource"` to connect to a SQL database.
 

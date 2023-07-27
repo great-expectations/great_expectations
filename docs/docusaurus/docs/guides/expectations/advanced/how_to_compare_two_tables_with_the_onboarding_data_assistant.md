@@ -51,7 +51,7 @@ From this data, we will create an <TechnicalTag tag="expectation_suite" text="Ex
 ```python name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py pg_batch_request"
 ```
 
-## Profile Source Data
+## Profile source data
 
 We can now use the `OnboardingDataAssistant` to profile our MySQL data defined in the `mysql_batch_request` above.
 

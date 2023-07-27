@@ -165,7 +165,7 @@ title: Changelog
 * [DOCS] Getting Started with GX ([#8143](https://github.com/great-expectations/great_expectations/pull/8143))
 * [DOCS] Sidebar updates for Getting Started ([#8196](https://github.com/great-expectations/great_expectations/pull/8196))
 * [DOCS] Get Started Section Revisions ([#8202](https://github.com/great-expectations/great_expectations/pull/8202))
-* [DOCS] Remove Connect to a Source Data System from TOC ([#8193](https://github.com/great-expectations/great_expectations/pull/8193))
+* [DOCS] Remove Connect to a source data system from TOC ([#8193](https://github.com/great-expectations/great_expectations/pull/8193))
 * [MAINTENANCE] Raise error on unsupported versions of python. ([#8158](https://github.com/great-expectations/great_expectations/pull/8158))
 * [MAINTENANCE] Reference Environment - Update Snowflake Notebook to Specify Python 3.10 ([#8167](https://github.com/great-expectations/great_expectations/pull/8167))
 * [MAINTENANCE] Refactor reference environment CLI for consistency ([#8169](https://github.com/great-expectations/great_expectations/pull/8169))

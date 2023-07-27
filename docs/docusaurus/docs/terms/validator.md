@@ -14,7 +14,7 @@ Validators are responsible for running an Expectation Suite against a <Technical
 
 ## Use cases
 
-When connecting to Data, it is often useful to verify that you have configured your <TechnicalTag relative="../" tag="datasource" text="Data Source" /> correctly.  To verify a new Data Source, you can load data from it into a Validator using a Batch Request.  Fore examples of this workflow, see [Connect to Source Data](../guides/connecting_to_your_data/connect_to_data_lp.md).
+When connecting to Data, it is often useful to verify that you have configured your <TechnicalTag relative="../" tag="datasource" text="Data Source" /> correctly.  To verify a new Data Source, you can load data from it into a Validator using a Batch Request.  Fore examples of this workflow, see [Connect to source data](../guides/connecting_to_your_data/connect_to_data_lp.md).
 
 When creating Expectations for an Expectation Suite, most workflows will have you use a Validator.  You can see this in our guide on how to create and edit Expectations with a DataAssistant or a Custom Profiler.
 

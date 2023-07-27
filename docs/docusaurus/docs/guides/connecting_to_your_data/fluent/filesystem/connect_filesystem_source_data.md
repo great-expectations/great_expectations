@@ -1,8 +1,8 @@
 ---
-sidebar_label: "Connect to filesystem Source Data"
-title: "Connect to filesystem Source Data"
+sidebar_label: "Connect to filesystem source data"
+title: "Connect to filesystem source data"
 id: connect_filesystem_source_data
-description: Connect to Source Data stored in filesystem files.
+description: Connect to source data stored in filesystem files.
 toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
@@ -24,7 +24,7 @@ import AbsFluentAddDataAssetConfigKeys from '/docs/components/connect_to_data/cl
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-Use the information provided here to connect to Source Data stored on Amazon S3, Google Cloud Storage (GCS), Microsoft Azure Blob Storage, or local filesystems. Great Expectations (GX) uses the term Source Data when referring to data in its original format, and the term Source Data System when referring to the storage location for Source Data.
+Use the information provided here to connect to source data stored on Amazon S3, Google Cloud Storage (GCS), Microsoft Azure Blob Storage, or local filesystems. Great Expectations (GX) uses the term source data when referring to data in its original format, and the term source data system when referring to the storage location for source data.
 
 <Tabs
   groupId="connect-filesystem-source-data"
@@ -37,9 +37,9 @@ Use the information provided here to connect to Source Data stored on Amazon S3,
   ]}>
 <TabItem value="amazon">
 
-## Amazon S3 Source Data
+## Amazon S3 source data
 
-Connect to Source Data on Amazon S3.
+Connect to source data on Amazon S3.
 
 <Tabs
   groupId="connect-amazon-source-data"
@@ -172,7 +172,7 @@ Run the following Python code:
 
 ## Microsoft Azure Blob Storage
 
-Connect to Source Data on Microsoft Azure Blob Storage.
+Connect to source data on Microsoft Azure Blob Storage.
 
 <Tabs
   groupId="connect-azure-source-data"
@@ -293,9 +293,9 @@ The following information is required when you create a Microsoft Azure Blob Sto
 </TabItem>
 <TabItem value="gcs">
 
-## GCS Source Data
+## GCS source data
 
-Connect to Source Data on GCS.
+Connect to source data on GCS.
 
 <Tabs
   groupId="connect-gcs-source-data"
@@ -364,7 +364,7 @@ For more information on Google Cloud and authentication, see the following:
 </TabItem>
 <TabItem value="spark">
 
-Use Spark to connect to Source Data stored on GCS.  The following examples connect to .csv data.
+Use Spark to connect to source data stored on GCS.  The following examples connect to .csv data.
 
 ### Prerequisites
 
@@ -430,9 +430,9 @@ For more information on Google Cloud and authentication, see the following:
 </TabItem>
 <TabItem value="filesystem">
 
-## Filesystem Source Data
+## Filesystem source data
 
-Connect to Source Data on a filesystem.
+Connect to source data on a filesystem.
 
 <Tabs
   groupId="connect-filesystem-source-data"

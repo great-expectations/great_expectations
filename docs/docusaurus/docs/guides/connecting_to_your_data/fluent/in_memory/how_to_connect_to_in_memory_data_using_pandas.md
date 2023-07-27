@@ -1,5 +1,5 @@
 ---
-title: Connect to in-memory Source Data using Pandas
+title: Connect to in-memory source data using Pandas
 tag: [how-to, connect to data]
 description: Connect Great Expectations to a Pandas in-memory DataFrame.
 keywords: [Great Expectations, Pandas, Filesystem]
@@ -50,7 +50,7 @@ The following information is required when you create a Pandas DataFrame Data As
 
 - `name`: The Data Source name.
 
-- `dataframe`: The Pandas DataFrame containing the Source Data.
+- `dataframe`: The Pandas DataFrame containing the source data.
 
 The DataFrame you created previously is the value you'll enter for `dataframe` parameter.  
 
