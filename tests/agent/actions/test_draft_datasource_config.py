@@ -28,7 +28,7 @@ def token():
     return "MTg0NDkyYmYtNTBiOS00ZDc1LTk3MmMtYjQ0M2NhZDA2NjJk"
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def set_required_env_vars(monkeypatch, org_id, token):
     env_vars = {
         "GX_CLOUD_ORGANIZATION_ID": org_id,
@@ -51,7 +51,7 @@ def build_payload(config: dict, id: UUID) -> dict:
     }
 
 
-def test_test_draft_datasource_config_success(context, mocker):
+def test_test_draft_datasource_config_success(context, mocker, set_required_env_vars):
     datasource_config = {"type": "pandas", "name": "test-1-2-3"}
     config_id = UUID("df02b47c-e1b8-48a8-9aaa-b6ed9c49ffa5")
     create_session = mocker.patch(
@@ -76,7 +76,7 @@ def test_test_draft_datasource_config_success(context, mocker):
     session.get.assert_called_with(expected_url)
 
 
-def test_test_draft_datasource_config_failure(context, mocker):
+def test_test_draft_datasource_config_failure(context, mocker, set_required_env_vars):
     ds_type = "sql"
     datasource_config = {"type": ds_type, "name": "test-1-2-3"}
     config_id = UUID("df02b47c-e1b8-48a8-9aaa-b6ed9c49ffa5")
@@ -102,7 +102,9 @@ def test_test_draft_datasource_config_failure(context, mocker):
     session.get.assert_called_with(expected_url)
 
 
-def test_test_draft_datasource_config_raises_for_non_fds(context, mocker):
+def test_test_draft_datasource_config_raises_for_non_fds(
+    context, mocker, set_required_env_vars
+):
     datasource_config = {"name": "test-1-2-3", "connection_string": ""}
     config_id = UUID("df02b47c-e1b8-48a8-9aaa-b6ed9c49ffa5")
     create_session = mocker.patch(
@@ -124,7 +126,9 @@ def test_test_draft_datasource_config_raises_for_non_fds(context, mocker):
     session.get.assert_called_with(expected_url)
 
 
-def test_test_draft_datasource_config_raises_for_unknown_type(context, mocker):
+def test_test_draft_datasource_config_raises_for_unknown_type(
+    context, mocker, set_required_env_vars
+):
     datasource_config = {"type": "not a datasource", "name": "test-1-2-3"}
     config_id = UUID("df02b47c-e1b8-48a8-9aaa-b6ed9c49ffa5")
     create_session = mocker.patch(
@@ -147,7 +151,9 @@ def test_test_draft_datasource_config_raises_for_unknown_type(context, mocker):
     session.get.assert_called_with(expected_url)
 
 
-def test_test_draft_datasource_config_raises_for_cloud_backend_error(context, mocker):
+def test_test_draft_datasource_config_raises_for_cloud_backend_error(
+    context, mocker, set_required_env_vars
+):
     datasource_config = {"type": "not a datasource", "name": "test-1-2-3"}
     config_id = UUID("df02b47c-e1b8-48a8-9aaa-b6ed9c49ffa5")
     create_session = mocker.patch(
