@@ -8,7 +8,6 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import StoreBackendError
 from tests import test_utils
 
-
 # module level markers
 pytestmark = pytest.mark.postgresql
 
