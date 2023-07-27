@@ -207,7 +207,11 @@ def _get_dialect_type_module(dialect):
     return dialect
 
 
-_PERSISTED_CONNECTION_DIALECTS = (GXSqlDialect.SQLITE, GXSqlDialect.MSSQL)
+_PERSISTED_CONNECTION_DIALECTS = (
+    GXSqlDialect.SQLITE,
+    GXSqlDialect.MSSQL,
+    GXSqlDialect.BIGQUERY,
+)
 
 
 def _dialect_requires_persisted_connection(
@@ -1412,6 +1416,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """
+        # this is an implicit autocommit
         with self.get_connection() as connection:
             result = connection.execute(query)
 

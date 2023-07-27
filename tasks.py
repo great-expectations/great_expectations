@@ -797,6 +797,10 @@ class TestDependencies(NamedTuple):
 
 MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "athena": TestDependencies(("reqs/requirements-dev-athena.txt",)),
+    "bigquery": TestDependencies(
+        ("reqs/requirements-dev-bigquery.txt", "reqs/requirements-dev-tests.txt"),
+        exta_pytest_args=("--bigquery",),
+    ),
     "cloud": TestDependencies(
         ("reqs/requirements-dev-cloud.txt",), exta_pytest_args=("--cloud",)
     ),
