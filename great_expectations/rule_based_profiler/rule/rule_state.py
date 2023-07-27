@@ -54,7 +54,7 @@ class RuleState:
         self._rule_execution_time = 0.0
 
         self._catch_exceptions = catch_exceptions
-        self._exception_traceback = None
+        self._exception_traceback: Optional[ExceptionInfo] = None
 
     @property
     def rule(self) -> Optional[Rule]:
