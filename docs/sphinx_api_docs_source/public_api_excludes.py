@@ -781,7 +781,7 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         reason="Run is not included in the public API.",
         name="run",
         filepath=pathlib.Path(
-            "great_expectations/agent/actions/test_draft_datasource_config.py"
+            "great_expectations/agent/actions/draft_datasource_config_action.py"
         ),
     ),
 ]
