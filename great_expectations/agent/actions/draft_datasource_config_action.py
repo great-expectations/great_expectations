@@ -4,12 +4,12 @@ import pydantic
 
 from great_expectations.agent.actions import ActionResult, AgentAction
 from great_expectations.agent.agent import GxAgentEnvVars
-from great_expectations.agent.models import DraftDatasourceConfig
+from great_expectations.agent.models import DraftDatasourceConfigEvent
 from great_expectations.core.http import create_session
 
 
-class DraftDatasourceConfigAction(AgentAction[DraftDatasourceConfig]):
-    def run(self, event: DraftDatasourceConfig, id: str) -> ActionResult:
+class DraftDatasourceConfigAction(AgentAction[DraftDatasourceConfigEvent]):
+    def run(self, event: DraftDatasourceConfigEvent, id: str) -> ActionResult:
         draft_config = self.get_draft_config(config_id=event.config_id)
         datasource_type = draft_config.get("type", None)
         if datasource_type is None:
