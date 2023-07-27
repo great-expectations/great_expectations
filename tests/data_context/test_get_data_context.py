@@ -308,7 +308,6 @@ def test_get_context_with_context_root_dir_scaffolds_new_gitignore(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_get_context_with_context_root_dir_gitignore_error(clear_env_vars, tmp_path):
     context_root_dir = tmp_path / "great_expectations"
     context_root_dir.mkdir()
