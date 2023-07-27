@@ -142,7 +142,7 @@ def file_data_context(
 ) -> FileDataContext:
     project_path = tmp_path / "file_data_context"
     project_path.mkdir()
-    context_root_dir = project_path / "great_expectations"
+    context_root_dir = project_path / FileDataContext.GX_DIR
     context = FileDataContext(
         project_config=data_context_config, context_root_dir=context_root_dir
     )
@@ -157,7 +157,7 @@ def cloud_data_context(
 ) -> CloudDataContext:
     project_path = tmp_path / "cloud_data_context"
     project_path.mkdir()
-    context_root_dir = project_path / "great_expectations"
+    context_root_dir = project_path / FileDataContext.GX_DIR
 
     cloud_data_context = CloudDataContext(
         project_config=data_context_config,

@@ -2,6 +2,9 @@ import json
 import os
 from typing import Any, Dict, List, Tuple
 from unittest import mock
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
 import pytest
 import pandas as pd
@@ -2299,9 +2302,7 @@ def test_suite_list_with_zero_suites(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
     context = empty_data_context_stats_enabled
-    config_file_path: str = os.path.join(
-        context.root_directory, "great_expectations.yml"
-    )
+    config_file_path: str = os.path.join(context.root_directory, FileDataContext.GX_YML)
     assert os.path.exists(config_file_path)
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -2360,7 +2361,7 @@ def test_suite_list_with_one_suite(
 
     project_dir: str = context.root_directory
 
-    config_file_path: str = os.path.join(project_dir, "great_expectations.yml")
+    config_file_path: str = os.path.join(project_dir, FileDataContext.GX_YML)
     assert os.path.exists(config_file_path)
 
     expectation_suite_dir_name: str = "a_dir"
@@ -2439,7 +2440,7 @@ def test_suite_list_with_multiple_suites(
         expectation_suite_name="c.warning"
     )
 
-    config_file_path: str = os.path.join(project_dir, "great_expectations.yml")
+    config_file_path: str = os.path.join(project_dir, FileDataContext.GX_YML)
     assert os.path.exists(config_file_path)
 
     runner: CliRunner = CliRunner(mix_stderr=False)
