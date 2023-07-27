@@ -21,7 +21,7 @@ The following Stores and/or Store Names will be upgraded:
 Manual Steps
 =============
 
-The following Data Sources must be upgraded manually, due to using the old Data Source format, which is being deprecated:
+The following Data Sources must be upgraded manually, due to using the old Datasource format, which is being deprecated:
 
     - Data Sources: dataset_diabetes__dir
 
