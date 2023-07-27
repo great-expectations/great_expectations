@@ -3,7 +3,7 @@ from uuid import UUID
 import pydantic
 
 from great_expectations.agent.actions import ActionResult, AgentAction
-from great_expectations.agent.agent import GxAgentEnvVars
+from great_expectations.agent.config import GxAgentEnvVars
 from great_expectations.agent.models import DraftDatasourceConfigEvent
 from great_expectations.core.http import create_session
 

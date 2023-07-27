@@ -11,6 +11,7 @@ from pydantic import AmqpDsn, AnyUrl
 
 from great_expectations import get_context
 from great_expectations.agent.actions.agent_action import ActionResult
+from great_expectations.agent.config import GxAgentEnvVars
 from great_expectations.agent.event_handler import (
     EventHandler,
 )
@@ -49,12 +50,6 @@ class GXAgentConfig(AgentBaseModel):
 
     queue: str
     connection_string: AmqpDsn
-    gx_cloud_base_url: AnyUrl = CLOUD_DEFAULT_BASE_URL  # type: ignore[assignment]
-    gx_cloud_organization_id: str
-    gx_cloud_access_token: str
-
-
-class GxAgentEnvVars(pydantic.BaseSettings):
     gx_cloud_base_url: AnyUrl = CLOUD_DEFAULT_BASE_URL  # type: ignore[assignment]
     gx_cloud_organization_id: str
     gx_cloud_access_token: str
