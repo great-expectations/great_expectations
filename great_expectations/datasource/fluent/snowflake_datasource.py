@@ -100,6 +100,24 @@ class SnowflakeDatasource(SQLDatasource):
         "warehouse",
     }
 
+    @pydantic.validator("table_name", pre=True, always=True)
+    def _default_table_name(cls, table_name: str, values: dict, **kwargs) -> str:
+        if not (validated_table_name := table_name or values.get("name")):
+            raise ValueError(
+                "table_name cannot be empty and should default to name if not provided"
+            )
+        if cls._is_bracketed_by_quotes(validated_table_name):
+            from great_expectations.compatibility import sqlalchemy
+
+            if sqlalchemy.quoted_name:
+                return sqlalchemy.quoted_name(value=validated_table_name, quote=True)
+        else:
+            # snowflake sql uses uppercase idenetiers, so we uppercase the table name
+            # sqlalchemy will auto convert them but this is more explicit
+            return validated_table_name.upper()
+
+        return validated_table_name
+
     @pydantic.root_validator
     def _check_xor_input_args(cls, values: dict) -> dict:
         # Method 1 - connection string
