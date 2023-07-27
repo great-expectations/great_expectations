@@ -808,6 +808,11 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         exta_pytest_args=("--docs-tests",),
     ),
     "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
+    "mssql": TestDependencies(
+        ("reqs/requirements-dev-mssql.txt",),
+        services=("mssql",),
+        exta_pytest_args=("--mssql",),
+    ),
     "mysql": TestDependencies(
         ("reqs/requirements-dev-mysql.txt",),
         services=("mysql",),
