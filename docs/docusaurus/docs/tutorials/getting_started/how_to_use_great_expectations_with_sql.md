@@ -77,7 +77,7 @@ Run the following code to create a <TechnicalTag tag="data_context" text="Data C
 
 4. Run the following command to build a <TechnicalTag tag="batch_request" text="Batch Request" /> using the <TechnicalTag tag="data_asset" text="Data Asset" /> you configured previously:
 
-  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py build batch request"
+  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py pg_batch_request"
   ```
 
 ## Create Expectations
