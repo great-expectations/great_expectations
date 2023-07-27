@@ -6,6 +6,9 @@ import pytest
 from freezegun import freeze_time
 
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.store import ExpectationsStore, ValidationsStore
 from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
 from great_expectations.data_context.types.resource_identifiers import (
@@ -601,7 +604,7 @@ def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory)
         file_relative_path(
             __file__, "../test_fixtures/great_expectations_custom_local_site_config.yml"
         ),
-        str(os.path.join(project_dir, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(project_dir, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     context = get_context(context_root_dir=project_dir)
     local_site_config = context._project_config.data_docs_sites.get("local_site")

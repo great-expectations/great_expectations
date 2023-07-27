@@ -6,6 +6,9 @@ pytest -v --docs-tests -k "how_to_initialize_a_filesystem_data_context_in_python
 """
 
 import pathlib
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_initialize_a_filesystem_data_context_in_python.py path_to_empty_folder">
@@ -13,7 +16,7 @@ path_to_empty_folder = "/my_gx_project/"
 # </snippet>
 
 project_root_dir = pathlib.Path.cwd().absolute()
-path_to_context_root_folder = project_root_dir / "great_expectations"
+path_to_context_root_folder = project_root_dir / FileDataContext.GX_DIR
 
 path_to_empty_folder = project_root_dir
 
