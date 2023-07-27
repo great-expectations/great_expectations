@@ -1306,8 +1306,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
             (profiler is None)
             ^ all(arg is None for arg in (name, config_version, rules))
         ):
-            raise ValueError(
-                "Must either pass in an existing profiler or individual constructor arguments (but not both)"
+            raise TypeError(
+                "Must either pass in an existing 'profiler' or individual constructor arguments (but not both)"
             )
 
         if profiler:
