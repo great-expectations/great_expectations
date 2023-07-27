@@ -4,6 +4,9 @@ import shutil
 import pytest
 
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
 
 @pytest.fixture
@@ -41,7 +44,7 @@ def v10_project_directory(tmp_path_factory):
     """
 
     project_path = str(tmp_path_factory.mktemp("v10_project"))
-    context_root_dir = os.path.join(project_path, "great_expectations")
+    context_root_dir = os.path.join(project_path, FileDataContext.GX_DIR)
     shutil.copytree(
         file_relative_path(
             __file__, "../test_fixtures/upgrade_helper/great_expectations_v10_project/"
@@ -52,7 +55,7 @@ def v10_project_directory(tmp_path_factory):
         file_relative_path(
             __file__, "../test_fixtures/upgrade_helper/great_expectations_v1_basic.yml"
         ),
-        os.path.join(context_root_dir, "great_expectations.yml"),
+        os.path.join(context_root_dir, FileDataContext.GX_YML),
     )
     return context_root_dir
 

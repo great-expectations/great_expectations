@@ -17,6 +17,9 @@ import pkg_resources
 import pytest
 from assets.scripts.build_gallery import execute_shell_command
 
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
 from tests.integration.backend_dependencies import BackendDependencies
 from tests.integration.integration_test_fixture import IntegrationTestFixture
@@ -535,7 +538,7 @@ def _execute_integration_test(  # noqa: PLR0912, PLR0915
         data_context_dir = integration_test_fixture.data_context_dir
         if data_context_dir:
             context_source_dir = base_dir / data_context_dir
-            test_context_dir = tmp_path / "great_expectations"
+            test_context_dir = tmp_path / FileDataContext.GX_DIR
             shutil.copytree(
                 context_source_dir,
                 test_context_dir,

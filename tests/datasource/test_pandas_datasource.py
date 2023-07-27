@@ -12,6 +12,9 @@ from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import (
     DataContextConfigSchema,
     DatasourceConfig,
@@ -101,7 +104,7 @@ def test_create_pandas_datasource(
     with open(
         os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
-            "great_expectations.yml",
+            FileDataContext.GX_YML,
         ),
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
@@ -155,7 +158,7 @@ def test_pandas_datasource_custom_data_asset(
     with open(
         os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
-            "great_expectations.yml",
+            FileDataContext.GX_YML,
         ),
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
