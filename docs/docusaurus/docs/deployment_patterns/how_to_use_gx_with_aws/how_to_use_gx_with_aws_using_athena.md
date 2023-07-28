@@ -130,19 +130,11 @@ import ConnectionStringAthena from '@site/docs/guides/connecting_to_your_data/da
 
 import ConfigureYourDatasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_datasource_sql_runtime_configuration.md'
 
-<!-- 2.5 Save the Datasource configuration to your DataContext -->
-
-import SaveDatasourceConfigurationToDataContext from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_save_the_datasource_configuration_to_your_datacontext.mdx'
-
 <!-- 2.6 Test your new Datasource -->
 
 import TestAthenaDatasource from '@site/docs/guides/connecting_to_your_data/database/components/_datasource_athena_test.md'
 
 <!-- Part 3: Create Expectations -->
-
-<!-- 3.1 Prepare a Batch Request, Empty Expectation Suite, and Validator -->
-
-import PrepareABatchRequestAndValidatorForCreatingExpectations from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_expectation_suite_batch_request_validator_prepare_or_reuse.md'
 
 <!-- 3.2: Use a Validator to add Expectations to the Expectation Suite -->
 
