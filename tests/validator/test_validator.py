@@ -20,6 +20,7 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.data_context.cloud_constants import GXCloudEnvironmentVariable
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -342,6 +343,14 @@ def multi_batch_taxi_validator_ge_cloud_mode(
     return validator_multi_batch
 
 
+@pytest.fixture()
+def _unset_gx_env_variables(monkeypatch: pytest.MonkeyPatch) -> None:
+    for var in GXCloudEnvironmentVariable:
+        monkeypatch.delenv(var)
+
+
+# TODO: There is something wrong with this test. It is trying to mock out cloud but if I don't
+#       unset the gx_env_varialbes (eg if i remove this fixture) this test will fail.
 @mock.patch(
     "great_expectations.data_context.data_context.AbstractDataContext.save_expectation_suite"
 )
@@ -360,6 +369,7 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     mock_emit,
     mock_context_get_suite,
     mock_context_save_suite,
+    _unset_gx_env_variables,
     multi_batch_taxi_validator_ge_cloud_mode,
     empty_data_context_stats_enabled,
 ):
