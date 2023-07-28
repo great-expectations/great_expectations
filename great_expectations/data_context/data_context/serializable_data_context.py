@@ -415,7 +415,7 @@ class SerializableDataContext(AbstractDataContext):
     ) -> str | None:
         """Search for the yml file starting here and moving upward."""
         if search_start_dir is None:
-            search_start_dir = pathlib.Path.cwd().absolute()
+            search_start_dir = pathlib.Path.cwd()
         else:
             search_start_dir = pathlib.Path(search_start_dir)
 
