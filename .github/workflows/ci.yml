@@ -117,7 +117,7 @@ jobs:
       - name: Run the tests
         run: |
           inv service -m postgresql
-          invoke ci-tests 'docs' --up-services --verbose
+          invoke ci-tests 'docs' --verbose
 
   unit-tests:
     strategy:

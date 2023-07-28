@@ -790,7 +790,7 @@ def show_automerges(ctx: Context):
 class TestDependencies(NamedTuple):
     requirement_files: tuple[str, ...]
     services: tuple[str, ...] = tuple()
-    exta_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
+    extra_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
         str, ...
     ] = tuple()
 
@@ -798,26 +798,27 @@ class TestDependencies(NamedTuple):
 MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "athena": TestDependencies(("reqs/requirements-dev-athena.txt",)),
     "cloud": TestDependencies(
-        ("reqs/requirements-dev-cloud.txt",), exta_pytest_args=("--cloud",)
+        ("reqs/requirements-dev-cloud.txt",), extra_pytest_args=("--cloud",)
     ),
     "docs": TestDependencies(
         requirement_files=(
             "reqs/requirements-dev-test.txt",
             "reqs/requirements-dev-spark.txt",
             "reqs/requirements-dev-bigquery.txt",
+            "reqs/requirements-dev-postgresql.txt",
         ),
-        exta_pytest_args=("--docs-tests",),
+        extra_pytest_args=("--docs-tests", "--postgresql", "--bigquery", "--spark"),
     ),
     "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
     "postgresql": TestDependencies(
         ("reqs/requirements-dev-postgresql.txt",),
         services=("postgresql",),
-        exta_pytest_args=("--postgresql",),
+        extra_pytest_args=("--postgresql",),
     ),
     "spark": TestDependencies(
         ("reqs/requirements-dev-spark.txt",),
-        exta_pytest_args=("--spark",),
+        extra_pytest_args=("--spark",),
     ),
 }
 
@@ -954,7 +955,7 @@ def ci_tests(
         if up_services:
             service(ctx, names=test_deps.services, markers=test_deps.services)
 
-        for extra_pytest_arg in test_deps.exta_pytest_args:
+        for extra_pytest_arg in test_deps.extra_pytest_args:
             pytest_cmds.append(extra_pytest_arg)
 
     ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
