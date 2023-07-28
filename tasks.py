@@ -825,7 +825,8 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         exta_pytest_args=("--postgresql",),
     ),
     "spark": TestDependencies(
-        ("reqs/requirements-dev-spark.txt",),
+        requirement_files=("reqs/requirements-dev-spark.txt",),
+        services=("spark",),
         exta_pytest_args=("--spark",),
     ),
     "trino": TestDependencies(
