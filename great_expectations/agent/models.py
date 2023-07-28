@@ -1,3 +1,4 @@
+import uuid
 from typing import Literal, Sequence, Union
 from uuid import UUID
 
@@ -33,7 +34,8 @@ class RunMissingnessDataAssistantEvent(RunDataAssistantEvent):
 
 
 class RunCheckpointEvent(EventBase):
-    type: Literal["run_checkpoint_request.received"] = "run_checkpoint_request.received"
+    type: Literal["run_checkpoint_request"] = "run_checkpoint_request"
+    checkpoint_id: uuid.UUID
 
 
 class RunColumnDescriptiveMetricsEvent(EventBase):
