@@ -20,7 +20,6 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.data_context.cloud_constants import GXCloudEnvironmentVariable
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
