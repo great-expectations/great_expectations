@@ -65,9 +65,10 @@ jobs:
           invoke type-check --ci --pretty
           invoke type-check --ci --pretty  --check-stub-sources
 
-  docs:
-    name: docs-bigquery
+  docs-snippets:
+    name: docs-snippets
     #if: github.event.pull_request.draft == false
+    #add more scope here
     runs-on: ubuntu-latest
     env:
       GE_TEST_GCP_CREDENTIALS: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
@@ -115,7 +116,8 @@ jobs:
 
       - name: Run the tests
         run: |
-          pytest -v --docs-tests --bigquery tests/integration/test_script_runner.py
+          inv service -m postgresql
+          invoke ci-tests 'docs' --up-services --verbose
 
   unit-tests:
     strategy:
@@ -153,7 +155,6 @@ jobs:
           # `not e2e` because 1 test & 1 fixture need access token
           - cloud and not e2e
           - filesystem
-          - docs
           - openpyxl or pyarrow or project or sqlite
           #- spark
           - postgresql
