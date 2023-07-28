@@ -41,6 +41,9 @@ def _models_and_schema_dirs() -> (
         yield model, schema_dir, f"{ds_type_name}:{model.__name__}"
 
 
+@pytest.mark.timeout(
+    2.0  # this is marked as unit so that it will run on different versions of python
+)
 @pytest.mark.unit
 @pytest.mark.parametrize(
     ["fluent_ds_or_asset_model", "schema_dir"],
