@@ -32,7 +32,7 @@ Use the information provided here to learn how to connect to in-memory source da
 
 Run the following Python code to create a Spark Datasource:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_Spark.py datasource"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py datasource"
 ```
 
 ## Read your source data into a Spark DataFrame
@@ -41,7 +41,7 @@ In the following example, a parquet file is read into a Spark DataFrame that wil
 
 Run the following Python code to create the Spark DataFrame:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_Spark.py dataframe"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py dataframe"
 ```
 
 ## Add a Data Asset to the Datasource
@@ -56,17 +56,17 @@ The DataFrame you created previously is the value you'll enter for `dataframe` p
 
 1. Run the following Python code to define the `name` parameter and store it as a Python variable:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_Spark.py name"
+    ``python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py name"
     ```
 
 2. Run the following Python code to create the Data Asset:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_Spark.py data_asset"
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py data_asset"
     ```
 
     For `dataframe` Data Assets, the `dataframe` is always specified as the argument of one API method. For example:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_Spark.py build_batch_request_with_dataframe"
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py build_batch_request_with_dataframe"
     ```
 
 ## Next steps
