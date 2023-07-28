@@ -971,6 +971,9 @@ def ci_tests(
         for extra_pytest_arg in test_deps.exta_pytest_args:
             pytest_cmds.append(extra_pytest_arg)
 
+    if marker in ["postgresql", "mssql", "mysql", "trino"]:
+        pytest_cmds[2] = "all_backends"
+
     ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
 
 
