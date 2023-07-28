@@ -825,20 +825,13 @@ class TableAsset(_SQLAsset):
                 "table_name cannot be empty and should default to name if not provided"
             )
 
-        table_name_is_qouted: bool = cls._is_bracketed_by_quotes(validated_table_name)
-
         from great_expectations.compatibility import sqlalchemy
 
         if sqlalchemy.quoted_name:
-            if table_name_is_qouted:
-                # Remove the quotes and add them back using the sqlalchemy.quoted_name function
-                # TODO: do we need to worry about nested qoutes?
-                validated_table_name = validated_table_name.strip("'").strip('"')
-
-            return sqlalchemy.quoted_name(
-                value=validated_table_name,
-                quote=table_name_is_qouted,
-            )
+            # https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.quoted_name.quote
+            # If left at its default of None, quoting behavior is applied to the
+            # identifier on a per-backend basis based on an examination of the token itself
+            return sqlalchemy.quoted_name(value=validated_table_name, quote=None)
 
         return validated_table_name
 
