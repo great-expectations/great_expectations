@@ -825,15 +825,18 @@ class TableAsset(_SQLAsset):
                 "table_name cannot be empty and should default to name if not provided"
             )
 
+        return validated_table_name
+
+    @pydantic.validator("table_name")
+    def _resolve_qouted_name(cls, table_name: str) -> str:
         from great_expectations.compatibility import sqlalchemy
 
         if sqlalchemy.quoted_name:
             # https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.quoted_name.quote
             # If left at its default of None, quoting behavior is applied to the
             # identifier on a per-backend basis based on an examination of the token itself
-            return sqlalchemy.quoted_name(value=validated_table_name, quote=None)
-
-        return validated_table_name
+            return sqlalchemy.quoted_name(value=table_name, quote=None)
+        return table_name
 
     def test_connection(self) -> None:
         """Test the connection for the TableAsset.
