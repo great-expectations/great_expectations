@@ -108,7 +108,6 @@ jobs:
           python-version: 3.8
           cache-dependency-path: |
             reqs/requirements-dev-test.txt
-            setup.py
       - name: Install dependencies
         run: |
           # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
