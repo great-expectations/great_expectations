@@ -67,7 +67,7 @@ jobs:
 
   docs:
     name: docs-bigquery
-    if: github.event.pull_request.draft == false
+    #if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     env:
       GE_TEST_GCP_CREDENTIALS: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
