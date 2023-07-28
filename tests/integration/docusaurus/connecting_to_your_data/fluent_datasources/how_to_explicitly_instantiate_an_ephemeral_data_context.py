@@ -6,6 +6,9 @@ pytest -v --docs-tests -k "how_to_explicitly_instantiate_an_ephemeral_data_conte
 """
 
 import pathlib
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py import_data_context_config_with_in_memory_store_backend">
@@ -56,5 +59,5 @@ context = context.convert_to_file_context()
 assert context
 
 project_root_dir = pathlib.Path.cwd().absolute()
-path_to_context_root_folder = project_root_dir / "great_expectations"
+path_to_context_root_folder = project_root_dir / FileDataContext.GX_DIR
 assert context.root_directory == str(path_to_context_root_folder)

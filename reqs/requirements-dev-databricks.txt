@@ -1,0 +1,2 @@
+databricks-sql-connector>=2.0.0
+sqlalchemy-databricks>=0.2.0
