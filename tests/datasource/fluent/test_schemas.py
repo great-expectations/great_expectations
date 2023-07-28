@@ -20,7 +20,7 @@ from great_expectations.datasource.fluent.sources import (
 )
 
 PANDAS_VERSION: str = pandas.__version__
-PYTHON_VERSION: float = float(sys.version.split()[0])
+PYTHON_VERSION: float = float(sys.version[:3])
 
 
 def min_supported_python() -> float:
@@ -48,7 +48,7 @@ def _models_and_schema_dirs() -> (
 
 @pytest.mark.skipif(
     PYTHON_VERSION > min_supported_python(),
-    reason=f"_sort_any_of needs to be fixed for py {PYTHON_VERSION}",
+    reason=f"_sort_any_of of nested anyOf key needs to be fixed for py {PYTHON_VERSION}",
 )
 @pytest.mark.timeout(
     2.0  # this is marked as unit so that it will run on different versions of python
