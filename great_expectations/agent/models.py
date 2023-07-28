@@ -43,6 +43,13 @@ class RunColumnDescriptiveMetricsEvent(EventBase):
     data_asset_name: str
 
 
+class ListTableNamesEvent(EventBase):
+    type: Literal[
+        "list_table_names_request.received"
+    ] = "list_table_names_request.received"
+    datasource_name: str
+
+
 class UnknownEvent(EventBase):
     type: Literal["unknown_event"] = "unknown_event"
 
@@ -53,6 +60,7 @@ Event = Annotated[
         RunMissingnessDataAssistantEvent,
         RunCheckpointEvent,
         RunColumnDescriptiveMetricsEvent,
+        ListTableNamesEvent,
         UnknownEvent,
     ],
     Field(discriminator="type"),

@@ -35,7 +35,7 @@ def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
         "../test_fixtures/great_expectations_basic_with_variables.yml",
     )
     shutil.copy(
-        ge_config_path, os.path.join(root_dir, "great_expectations.yml")  # noqa: PTH118
+        ge_config_path, os.path.join(root_dir, FileDataContext.GX_YML)  # noqa: PTH118
     )
     config_variables_path = file_relative_path(
         __file__,
@@ -72,7 +72,7 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     # with substitution variables
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
 
     create_data_context_files(
@@ -117,7 +117,7 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
     runtime_environment = {"replace_me": value_from_runtime_override}
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     create_data_context_files(
         context_path,

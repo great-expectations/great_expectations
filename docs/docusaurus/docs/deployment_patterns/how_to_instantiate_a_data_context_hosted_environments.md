@@ -10,7 +10,7 @@ The components in the ``great_expectations.yml`` file define the Validation Resu
 
 ## Configure your Data Context
  
-To use code to create a Data Context, see [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
+To use code to create a Data Context, see [Instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 
 To configure a Data Context for a specific environment, see one of the following resources:
 

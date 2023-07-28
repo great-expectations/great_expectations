@@ -8,6 +8,9 @@ from great_expectations import DataContext
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.datasource import SparkDFDatasource
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.util import is_library_loadable
@@ -65,7 +68,7 @@ def test_sparkdf_datasource_custom_data_asset(
     with open(
         os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
-            "great_expectations.yml",
+            FileDataContext.GX_YML,
         ),
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
@@ -254,7 +257,7 @@ def test_create_sparkdf_datasource(
     with open(
         os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
-            "great_expectations.yml",
+            FileDataContext.GX_YML,
         ),
     ) as configfile:
         lines = configfile.readlines()
