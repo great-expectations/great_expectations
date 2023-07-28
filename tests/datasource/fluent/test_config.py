@@ -803,6 +803,7 @@ def file_dc_config_file_with_substitutions(
 
 @pytest.mark.sqlite
 def test_config_substitution_retains_original_value_on_save(
+    unset_gx_env_variables,
     seed_ds_env_vars: tuple,
     file_dc_config_file_with_substitutions: pathlib.Path,
     sqlite_database_path: pathlib.Path,
@@ -819,8 +820,7 @@ def test_config_substitution_retains_original_value_on_save(
     from great_expectations import get_context
 
     context = get_context(
-        context_root_dir=file_dc_config_file_with_substitutions.parent,
-        ge_cloud_mode=False,
+        context_root_dir=file_dc_config_file_with_substitutions.parent
     )
 
     print(context.fluent_config)
@@ -846,6 +846,7 @@ def test_config_substitution_retains_original_value_on_save(
 
 @pytest.mark.sqlite
 def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
+    unset_gx_env_variables,
     seed_ds_env_vars: tuple,
     file_dc_config_file_with_substitutions: pathlib.Path,
     cloud_storage_get_client_doubles,
@@ -863,8 +864,7 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     from great_expectations import get_context
 
     context = get_context(
-        context_root_dir=file_dc_config_file_with_substitutions.parent,
-        ge_cloud_mode=False,
+        context_root_dir=file_dc_config_file_with_substitutions.parent
     )
 
     datasources = context.fluent_datasources
