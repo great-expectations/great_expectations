@@ -819,7 +819,8 @@ def test_config_substitution_retains_original_value_on_save(
     from great_expectations import get_context
 
     context = get_context(
-        context_root_dir=file_dc_config_file_with_substitutions.parent
+        context_root_dir=file_dc_config_file_with_substitutions.parent,
+        ge_cloud_mode=False,
     )
 
     print(context.fluent_config)
@@ -862,7 +863,8 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     from great_expectations import get_context
 
     context = get_context(
-        context_root_dir=file_dc_config_file_with_substitutions.parent
+        context_root_dir=file_dc_config_file_with_substitutions.parent,
+        ge_cloud_mode=False,
     )
 
     datasources = context.fluent_datasources
