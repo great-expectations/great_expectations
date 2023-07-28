@@ -35,7 +35,7 @@ class DraftDatasourceConfigAction(AgentAction[DraftDatasourceConfigEvent]):
             raise RuntimeError(
                 f"Missing or badly formed environment variable\n{validation_err.errors()}"
             ) from validation_err
-        resource_url = f"{config.gx_cloud_base_url}/organizations/{config.gx_cloud_organization_id}/draft-configs/{config_id}"
+        resource_url = f"{config.gx_cloud_base_url}/organizations/{config.gx_cloud_organization_id}/datasources/drafts/{config_id}"
         session = create_session(access_token=config.gx_cloud_access_token)
         response = session.get(resource_url)
         if not response.ok:
