@@ -346,7 +346,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 @pytest.fixture()
 def _unset_gx_env_variables(monkeypatch: pytest.MonkeyPatch) -> None:
     for var in GXCloudEnvironmentVariable:
-        monkeypatch.delenv(var)
+        monkeypatch.delenv(var, raising=False)
 
 
 # TODO: There is something wrong with this test. It is trying to mock out cloud but if I don't
