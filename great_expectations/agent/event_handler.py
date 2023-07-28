@@ -10,7 +10,11 @@ from great_expectations.agent.actions.data_assistants import (
     RunMissingnessDataAssistantAction,
     RunOnboardingDataAssistantAction,
 )
+from great_expectations.agent.actions.draft_datasource_config_action import (
+    DraftDatasourceConfigAction,
+)
 from great_expectations.agent.models import (
+    DraftDatasourceConfigEvent,
     Event,
     ListTableNamesEvent,
     RunCheckpointEvent,
@@ -75,6 +79,9 @@ class EventHandler:
                 batch_inspector=batch_inspector,
                 metric_repository=column_descriptive_metrics_repository,
             )
+
+        if isinstance(event, DraftDatasourceConfigEvent):
+            return DraftDatasourceConfigAction(context=self._context)
 
         # shouldn't get here
         raise UnknownEventError("Unknown message received - cannot process.")
