@@ -828,6 +828,11 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         ("reqs/requirements-dev-spark.txt",),
         exta_pytest_args=("--spark",),
     ),
+    "trino": TestDependencies(
+        ("reqs/requirements-dev-trino.txt",),
+        services=("trino",),
+        exta_pytest_args=("--trino",),
+    ),
 }
 
 
