@@ -350,7 +350,7 @@ def _unset_gx_env_variables(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 # TODO: There is something wrong with this test. It is trying to mock out cloud but if I don't
-#       unset the gx_env_varialbes (eg if i remove this fixture) this test will fail.
+#       unset the gx_env_variables (eg if i remove this fixture) this test will fail.
 @mock.patch(
     "great_expectations.data_context.data_context.AbstractDataContext.save_expectation_suite"
 )
