@@ -10,6 +10,7 @@ from sqlalchemy.engine import Inspector
 from great_expectations.agent.actions import (
     ListTableNamesAction,
 )
+from great_expectations.agent.config import GxAgentEnvVars
 from great_expectations.agent.models import ListTableNamesEvent
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource.fluent import (
@@ -31,11 +32,30 @@ def dummy_org_id() -> str:
     return "94af8c91-6e56-4f2a-9b1f-04868321c5f5"
 
 
+@pytest.fixture
+def dummy_access_token() -> str:
+    return (
+        "5a43e329ddd64ca286bf58574d17f9e1.V1"
+        ".myBie29LH0m_5CTw0RCeAtBXWb5V519lAeIq1rF4WWN4WZrJGMe0GAMcnuuwYkveR0ptvUFoeeK2zCt6NJMiSg"
+    )
+
+
+@pytest.fixture
+def mock_gx_agent_env_vars(dummy_base_url, dummy_org_id, dummy_access_token) -> None:
+    with mock.patch(
+        "great_expectations.agent.actions.list_table_names.GxAgentEnvVars"
+    ) as mock_env_vars:
+        mock_env_vars.return_value = GxAgentEnvVars(
+            gx_cloud_base_url=dummy_base_url,
+            gx_cloud_organization_id=dummy_org_id,
+            gx_cloud_access_token=dummy_access_token,
+        )
+        yield
+
+
 @pytest.fixture(scope="function")
 def context(dummy_base_url, dummy_org_id):
     mock_context = MagicMock(autospec=CloudDataContext)
-    mock_context._cloud_config.base_url = dummy_base_url
-    mock_context._cloud_config.organization_id = dummy_org_id
     return mock_context
 
 
@@ -63,7 +83,7 @@ def test_list_table_names_event_raises_for_non_sql_datasource(context, event):
 
 @responses.activate
 def test_run_list_table_names_action_returns_action_result(
-    context, event, dummy_base_url, dummy_org_id
+    context, event, dummy_base_url, dummy_org_id, mock_gx_agent_env_vars
 ):
     action = ListTableNamesAction(context=context)
     id = "096ce840-7aa8-45d1-9e64-2833948f4ae8"
