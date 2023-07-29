@@ -1,4 +1,7 @@
 import os
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 import shutil
 from unittest import mock
 
@@ -25,7 +28,7 @@ def titanic_data_context_clean_usage_stats_enabled(
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -39,7 +42,7 @@ def titanic_data_context_clean_usage_stats_enabled(
     )
     shutil.copy(
         titanic_yml_path,
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     titanic_csv_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
     shutil.copy(
@@ -57,7 +60,7 @@ def titanic_data_context_v2_datasources_and_validation_operators_usage_stats_ena
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -72,7 +75,7 @@ def titanic_data_context_v2_datasources_and_validation_operators_usage_stats_ena
     )
     shutil.copy(
         titanic_yml_path,
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     titanic_csv_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
     shutil.copy(
@@ -199,7 +202,7 @@ def test_project_check_on_project_with_missing_config_file_guides_user(
     context = titanic_data_context
     # Remove the config file.
     os.remove(  # noqa: PTH107
-        os.path.join(context.root_directory, "great_expectations.yml")  # noqa: PTH118
+        os.path.join(context.root_directory, FileDataContext.GX_YML)  # noqa: PTH118
     )
 
     runner = CliRunner(mix_stderr=False)

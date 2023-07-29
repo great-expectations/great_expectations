@@ -2,6 +2,9 @@ import json
 import os
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 from unittest import mock
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
 import pytest
 from click.testing import CliRunner, Result
@@ -2298,7 +2301,7 @@ def test_suite_list_with_zero_suites(
 ):
     context = empty_data_context_stats_enabled
     config_file_path: str = os.path.join(  # noqa: PTH118
-        context.root_directory, "great_expectations.yml"
+        context.root_directory, FileDataContext.GX_YML
     )
     assert os.path.exists(config_file_path)  # noqa: PTH110
 
@@ -2359,7 +2362,7 @@ def test_suite_list_with_one_suite(
     project_dir: str = context.root_directory
 
     config_file_path: str = os.path.join(  # noqa: PTH118
-        project_dir, "great_expectations.yml"
+        project_dir, FileDataContext.GX_YML
     )
     assert os.path.exists(config_file_path)  # noqa: PTH110
 
@@ -2434,7 +2437,7 @@ def test_suite_list_with_multiple_suites(
     context.add_expectation_suite(expectation_suite_name="c.warning")
 
     config_file_path: str = os.path.join(  # noqa: PTH118
-        project_dir, "great_expectations.yml"
+        project_dir, FileDataContext.GX_YML
     )
     assert os.path.exists(config_file_path)  # noqa: PTH110
 

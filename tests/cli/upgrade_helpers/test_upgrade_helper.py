@@ -1,5 +1,8 @@
 import json
 import os
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 import shutil
 
 import pytest
@@ -29,7 +32,7 @@ def v20_project_directory_with_v30_configuration_and_v20_checkpoints(tmp_path_fa
     GX config_version: 3 project for testing upgrade helper
     """
     project_path = str(tmp_path_factory.mktemp("v30_project"))
-    context_root_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_root_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     shutil.copytree(
         file_relative_path(
             __file__,
@@ -42,7 +45,7 @@ def v20_project_directory_with_v30_configuration_and_v20_checkpoints(tmp_path_fa
             __file__,
             "../../test_fixtures/upgrade_helper/great_expectations_v2_with_v3_configuration_without_checkpoint_store.yml",
         ),
-        os.path.join(context_root_dir, "great_expectations.yml"),  # noqa: PTH118
+        os.path.join(context_root_dir, FileDataContext.GX_YML),  # noqa: PTH118
     )
     return context_root_dir
 
@@ -53,7 +56,7 @@ def v20_project_directory_with_v30_configuration_and_no_checkpoints(tmp_path_fac
     GX config_version: 3 project for testing upgrade helper
     """
     project_path = str(tmp_path_factory.mktemp("v30_project"))
-    context_root_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_root_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     shutil.copytree(
         file_relative_path(
             __file__,
@@ -66,7 +69,7 @@ def v20_project_directory_with_v30_configuration_and_no_checkpoints(tmp_path_fac
             __file__,
             "../../test_fixtures/upgrade_helper/great_expectations_v2_with_v3_configuration_without_checkpoint_store.yml",
         ),
-        os.path.join(context_root_dir, "great_expectations.yml"),  # noqa: PTH118
+        os.path.join(context_root_dir, FileDataContext.GX_YML),  # noqa: PTH118
     )
     return context_root_dir
 
@@ -79,7 +82,7 @@ def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
         file_relative_path(
             __file__, "../../test_fixtures/upgrade_helper/great_expectations_v2.yml"
         ),
-        os.path.join(v10_project_directory, "great_expectations.yml"),  # noqa: PTH118
+        os.path.join(v10_project_directory, FileDataContext.GX_YML),  # noqa: PTH118
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
@@ -299,7 +302,7 @@ def test_project_upgrade_with_manual_steps(
             __file__,
             "../../test_fixtures/upgrade_helper/great_expectations_v1_needs_manual_upgrade.yml",
         ),
-        os.path.join(v10_project_directory, "great_expectations.yml"),  # noqa: PTH118
+        os.path.join(v10_project_directory, FileDataContext.GX_YML),  # noqa: PTH118
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
@@ -411,7 +414,7 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
             __file__,
             "../../test_fixtures/upgrade_helper/great_expectations_v1_basic_with_exception.yml",
         ),
-        os.path.join(v10_project_directory, "great_expectations.yml"),  # noqa: PTH118
+        os.path.join(v10_project_directory, FileDataContext.GX_YML),  # noqa: PTH118
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)

@@ -1,4 +1,7 @@
 import logging
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 import os
 import shutil
 import subprocess
@@ -97,7 +100,7 @@ def titanic_data_context_with_spark_datasource(
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path: str = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -112,7 +115,7 @@ def titanic_data_context_with_spark_datasource(
                 "great_expectations_v013_no_datasource_stats_enabled.yml",
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(

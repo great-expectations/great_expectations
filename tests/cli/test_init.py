@@ -1,4 +1,7 @@
 import os
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 import shutil
 from unittest import mock
 
@@ -66,7 +69,7 @@ def test_cli_init_on_new_project(
     )
 
     assert os.path.isdir(  # noqa: PTH112
-        os.path.join(project_dir, "great_expectations")  # noqa: PTH118
+        os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
     )
     config_path = os.path.join(  # noqa: PTH118
         project_dir, "great_expectations/great_expectations.yml"
@@ -77,7 +80,7 @@ def test_cli_init_on_new_project(
     assert config["datasources"] == {}
 
     obs_tree = gen_directory_tree_str(
-        os.path.join(project_dir, "great_expectations")  # noqa: PTH118
+        os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
     )
 
     assert (
@@ -176,7 +179,7 @@ def test_cancelled_cli_init_on_new_project(mock_emit, caplog, tmp_path, monkeypa
     )
 
     assert not os.path.isdir(  # noqa: PTH112
-        os.path.join(project_dir, "great_expectations")  # noqa: PTH118
+        os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
     )
     config_path = os.path.join(  # noqa: PTH118
         project_dir, "great_expectations/great_expectations.yml"
@@ -184,7 +187,7 @@ def test_cancelled_cli_init_on_new_project(mock_emit, caplog, tmp_path, monkeypa
     assert not os.path.isfile(config_path)  # noqa: PTH113
 
     obs_tree = gen_directory_tree_str(
-        os.path.join(project_dir, "great_expectations")  # noqa: PTH118
+        os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
     )
 
     assert obs_tree == ""

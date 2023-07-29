@@ -324,15 +324,20 @@ class BaseRuleBasedProfiler(ConfigPeer):
             leave=True,
             bar_format="{desc:25}{percentage:3.0f}%|{bar}{r_bar}",
         ):
-            rule_state = rule.run(
-                variables=effective_variables,
-                batch_list=batch_list,
-                batch_request=batch_request,
-                runtime_configuration=runtime_configuration,
-                reconciliation_directives=reconciliation_directives,
-                rule_state=RuleState(),
-            )
-            self.rule_states.append(rule_state)
+            try:
+                rule_state = rule.run(
+                    variables=effective_variables,
+                    batch_list=batch_list,
+                    batch_request=batch_request,
+                    runtime_configuration=runtime_configuration,
+                    reconciliation_directives=reconciliation_directives,
+                    rule_state=RuleState(),
+                )
+                self.rule_states.append(rule_state)
+            except Exception as e:
+                logger.error(
+                    f'An exception occurred while running rule "{rule.name}": {repr(e)}'
+                )
 
         return RuleBasedProfilerResult(
             fully_qualified_parameter_names_by_domain=self.get_fully_qualified_parameter_names_by_domain(),
@@ -1279,8 +1284,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
             (profiler is None)
             ^ all(arg is None for arg in (name, config_version, rules))
         ):
-            raise ValueError(
-                "Must either pass in an existing profiler or individual constructor arguments (but not both)"
+            raise TypeError(
+                "Must either pass in an existing 'profiler' or individual constructor arguments (but not both)"
             )
 
         if profiler:

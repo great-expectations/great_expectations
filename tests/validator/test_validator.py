@@ -52,7 +52,9 @@ def yellow_trip_pandas_data_context(
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path: str = os.path.join(  # noqa: PTH118
+        project_path, FileDataContext.GX_DIR
+    )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -66,11 +68,11 @@ def yellow_trip_pandas_data_context(
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
-                "great_expectations",
-                "great_expectations.yml",
+                FileDataContext.GX_DIR,
+                FileDataContext.GX_YML,
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(

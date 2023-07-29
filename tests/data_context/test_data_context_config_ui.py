@@ -1378,7 +1378,7 @@ def test_override_general_defaults(
     )
 
 
-@pytest.mark.unit
+@pytest.mark.big
 @pytest.mark.slow  # 1.81s
 def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_variable_sub(
     monkeypatch, construct_data_context_config, default_pandas_datasource_config

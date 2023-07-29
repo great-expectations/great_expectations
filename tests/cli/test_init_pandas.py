@@ -5,6 +5,9 @@ import shutil
 import pytest
 from click.testing import CliRunner
 from freezegun import freeze_time
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
 from great_expectations.cli import cli
 from great_expectations.data_context.data_context.file_data_context import (
@@ -82,7 +85,7 @@ def test_cli_init_on_new_project(
     assert "Great Expectations is now set up" in stdout
 
     assert os.path.isdir(  # noqa: PTH112
-        os.path.join(project_dir, "great_expectations")  # noqa: PTH118
+        os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
     )
     config_path = os.path.join(  # noqa: PTH118
         project_dir, "great_expectations/great_expectations.yml"
@@ -96,7 +99,7 @@ def test_cli_init_on_new_project(
     assert data_source_class == "PandasDataset"
 
     obs_tree = gen_directory_tree_str(
-        os.path.join(project_dir, "great_expectations")  # noqa: PTH118
+        os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
     )
 
     # Instead of monkey patching guids, just regex out the guids
@@ -567,7 +570,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
     )
 
     assert os.path.isdir(  # noqa: PTH112
-        os.path.join(project_dir, "great_expectations")  # noqa: PTH118
+        os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
     )
     config_path = os.path.join(  # noqa: PTH118
         project_dir, "great_expectations/great_expectations.yml"
@@ -651,7 +654,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     assert "Great Expectations is now set up" in stdout
 
     assert os.path.isdir(  # noqa: PTH112
-        os.path.join(project_dir, "great_expectations")  # noqa: PTH118
+        os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
     )
     config_path = os.path.join(  # noqa: PTH118
         project_dir, "great_expectations/great_expectations.yml"
@@ -665,7 +668,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     assert data_source_class == "PandasDataset"
 
     obs_tree = gen_directory_tree_str(
-        os.path.join(project_dir, "great_expectations")  # noqa: PTH118
+        os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
     )
 
     # Instead of monkey patching guids, just regex out the guids

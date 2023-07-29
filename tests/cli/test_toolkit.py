@@ -1,5 +1,8 @@
 import os
 import shutil
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from unittest import mock
 
 import pytest
@@ -371,7 +374,7 @@ def simulated_project_directories(tmp_path_factory):
     test_dir = tmp_path_factory.mktemp("projects", numbered=False)
     assert os.path.isabs(test_dir)  # noqa: PTH117
 
-    ge_dir = os.path.join(test_dir, "pipeline1", "great_expectations")  # noqa: PTH118
+    ge_dir = os.path.join(test_dir, "pipeline1", FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(ge_dir)  # noqa: PTH103
     assert os.path.isdir(ge_dir)  # noqa: PTH112
 
