@@ -803,7 +803,6 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "docs": TestDependencies(
         requirement_files=(
             "reqs/requirements-dev-test.txt",
-            "reqs/requirements-dev-spark.txt",
             "reqs/requirements-dev-bigquery.txt",
             "reqs/requirements-dev-postgresql.txt",
         ),
