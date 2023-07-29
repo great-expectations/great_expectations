@@ -917,6 +917,35 @@ def deps(  # noqa: PLR0913
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
+@invoke.task(iterable=["service_names", "up_services", "verbose"])
+def docs_snippet_tests(
+    ctx: Context,
+    marker: str,
+    up_services: bool = False,
+    verbose: bool = False,
+    reports: bool = False,
+):
+    pytest_cmds = [
+        "pytest",
+        "-rEf",
+    ]
+    if reports:
+        pytest_cmds.extend(["--cov=great_expectations", "--cov-report=xml"])
+
+    if verbose:
+        pytest_cmds.append("-vv")
+
+    for test_deps in _get_marker_dependencies(marker):
+        if up_services:
+            service(ctx, names=test_deps.services, markers=test_deps.services)
+
+        for extra_pytest_arg in test_deps.extra_pytest_args:
+            pytest_cmds.append(extra_pytest_arg)
+
+    pytest_cmds.append("tests/integration/test_script_runner.py")
+    ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
+
+
 @invoke.task(
     iterable=["service_names", "up_services", "verbose"],
 )
