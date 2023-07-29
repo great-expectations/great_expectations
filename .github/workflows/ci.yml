@@ -141,7 +141,7 @@ jobs:
         run: pip install -c constraints-dev.txt ".[test, snowflake]"
 
       - name: Run the unit tests
-        run: invoke tests --cloud --unit --timeout=1.5 --slowest=8
+        run: invoke ci-tests -m "unit" --timeout=1.5 --slowest=8
 
   marker-tests:
     if: github.event.pull_request.draft == false
