@@ -115,7 +115,7 @@ jobs:
 
       - name: Run the tests
         run: |
-          invoke ci-tests 'docs' --up-services --verbose
+          invoke docs-snippet-tests 'docs' --up-services --verbose
 
   unit-tests:
     strategy:

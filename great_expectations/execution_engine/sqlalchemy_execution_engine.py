@@ -1416,7 +1416,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """
-        # this is an implicit autocommit
         with self.get_connection() as connection:
             result = connection.execute(query)
 
