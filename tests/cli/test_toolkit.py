@@ -1,8 +1,5 @@
 import os
 import shutil
-from great_expectations.data_context.data_context.file_data_context import (
-    FileDataContext,
-)
 from unittest import mock
 
 import pytest
@@ -12,6 +9,9 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.toolkit import (
     get_relative_path_from_config_file_to_base_path,
     is_cloud_file_url,
+)
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
 )
 from great_expectations.exceptions import UnsupportedConfigVersionError
 from great_expectations.util import get_context

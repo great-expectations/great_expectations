@@ -5,9 +5,6 @@ import shutil
 import pytest
 from click.testing import CliRunner
 from freezegun import freeze_time
-from great_expectations.data_context.data_context.file_data_context import (
-    FileDataContext,
-)
 
 from great_expectations.cli import cli
 from great_expectations.data_context.data_context.file_data_context import (

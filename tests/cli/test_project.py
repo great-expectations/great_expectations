@@ -1,7 +1,4 @@
 import os
-from great_expectations.data_context.data_context.file_data_context import (
-    FileDataContext,
-)
 import shutil
 from unittest import mock
 
@@ -11,6 +8,9 @@ from click.testing import CliRunner
 import great_expectations as gx
 from great_expectations.cli import cli
 from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
 from tests.cli.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
