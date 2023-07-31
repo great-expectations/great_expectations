@@ -918,12 +918,15 @@ def deps(  # noqa: PLR0913
 @invoke.task(
     iterable=["service_names", "up_services", "verbose"],
 )
-def ci_tests(
+def ci_tests(  # noqa: PLR0913
     ctx: Context,
     marker: str,
     up_services: bool = False,
     verbose: bool = False,
     reports: bool = False,
+    slowest: int = 5,
+    timeout: float = 0.0,  # 0 indicates no timeout
+    xdist: bool = True,
 ):
     """
     Run tests in CI.
@@ -939,10 +942,18 @@ def ci_tests(
     """
     pytest_cmds = [
         "pytest",
+        f"--durations={slowest}",
         "-m",
         f"'{marker}'",
         "-rEf",
     ]
+
+    if xdist:
+        pytest_cmds.append("-n auto")
+
+    if timeout != 0:
+        pytest_cmds.append(f"--timeout={timeout}")
+
     if reports:
         pytest_cmds.extend(["--cov=great_expectations", "--cov-report=xml"])
 

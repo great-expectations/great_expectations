@@ -1,4 +1,5 @@
 from typing import Literal, Sequence, Union
+from uuid import UUID
 
 from pydantic import BaseModel, Extra, Field
 from typing_extensions import Annotated
@@ -43,6 +44,18 @@ class RunColumnDescriptiveMetricsEvent(EventBase):
     data_asset_name: str
 
 
+class ListTableNamesEvent(EventBase):
+    type: Literal[
+        "list_table_names_request.received"
+    ] = "list_table_names_request.received"
+    datasource_name: str
+
+
+class DraftDatasourceConfigEvent(EventBase):
+    type: Literal["test_datasource_config"] = "test_datasource_config"
+    config_id: UUID
+
+
 class UnknownEvent(EventBase):
     type: Literal["unknown_event"] = "unknown_event"
 
@@ -53,6 +66,8 @@ Event = Annotated[
         RunMissingnessDataAssistantEvent,
         RunCheckpointEvent,
         RunColumnDescriptiveMetricsEvent,
+        DraftDatasourceConfigEvent,
+        ListTableNamesEvent,
         UnknownEvent,
     ],
     Field(discriminator="type"),

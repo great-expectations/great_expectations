@@ -361,43 +361,6 @@ stages:
               eval ${PYTEST}
             displayName: 'Pytest cli'
 
-      - job: test_dependency_versions
-        dependsOn: [make_suffix, build_push]
-        condition: succeeded()
-        strategy:
-          matrix:
-            Python38:
-              python.version: '3.8'
-              constraints: 'ci/constraints-test/py38-min-install.txt'
-            Python39:
-              python.version: '3.9'
-              constraints: 'ci/constraints-test/py39-min-install.txt'
-            Python310:
-              python.version: '3.10'
-              constraints: 'ci/constraints-test/py310-min-install.txt'
-            # Pandas20:
-            #   python.version: '3.9'
-            #   constraints: 'ci/constraints-test/pandas2-min-install.txt'
-        variables:
-          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
-        steps:
-          - bash: |
-              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
-              PYTEST="docker run -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) "
-              PYTEST+="-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) -e AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION) "
-              PYTEST+="--network=host greatexpectations/test:${DOCKER_TAG} bash -c \""
-              PYTEST+="pip install --no-cache-dir --requirement reqs/requirements-dev-test.txt "
-              PYTEST+="--constraint constraints-dev.txt --constraint $(constraints) && "
-              PYTEST+="pytest --no-sqlalchemy --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistics "
-              PYTEST+="--ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py\""
-              echo ${PYTEST}
-              eval ${PYTEST}
-            displayName: 'Pytest min versions'
-            env:
-              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
-              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
-              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
-
       - job: test_usage_stats
         dependsOn: [make_suffix, build_push]
         condition: succeeded()

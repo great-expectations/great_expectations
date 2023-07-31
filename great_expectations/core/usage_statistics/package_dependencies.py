@@ -98,6 +98,7 @@ class GXDependencies:
             "pyodbc",
             "pypd",
             "pyspark",
+            "pytest-xdist",
             "pytest",
             "pytest-benchmark",
             "pytest-cov",
