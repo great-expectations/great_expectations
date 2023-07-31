@@ -538,17 +538,17 @@ def test__TestBackend__bad_dialects():
 
 @pytest.mark.unit
 def test__TestBackend__good_backends_and_dialects():
-    tb1 = TestBackend  # noqa: F841
+    tb1 = TestBackend(  # noqa: F841
         backend="pandas",
         dialects=None,
     )
 
-    tb2 = TestBackend  # noqa: F841
+    tb2 = TestBackend(  # noqa: F841
         backend="spark",
         dialects=None,
     )
 
-    tb3 = TestBackend  # noqa: F841
+    tb3 = TestBackend(  # noqa: F841
         backend="sqlalchemy",
         dialects=["sqlite", "postgresql", "mysql"],
     )
