@@ -286,7 +286,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # Spark Directory Reader Options vvv
@@ -349,7 +348,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # Spark Directory Reader Options vvv
@@ -455,7 +453,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # Spark Directory Reader Options vvv
@@ -564,7 +561,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # Spark Directory Reader Options vvv
@@ -609,7 +605,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # Spark Directory Reader Options vvv
