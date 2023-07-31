@@ -1,6 +1,9 @@
 from typing import TYPE_CHECKING, Optional, cast
 
 import pytest
+from contrib.experimental.great_expectations_experimental.expectations.expect_queried_column_value_frequency_to_meet_threshold import (
+    ExpectQueriedColumnValueFrequencyToMeetThreshold,  # noqa: F401 # needed for expectation registration
+)
 
 # noinspection PyUnresolvedReferences
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest

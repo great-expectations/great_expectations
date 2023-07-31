@@ -1,6 +1,9 @@
 from typing import TYPE_CHECKING, Optional, cast
 
 import pytest
+from contrib.experimental.great_expectations_experimental.expectations.expect_queried_table_row_count_to_be import (
+    ExpectQueriedTableRowCountToBe,  # noqa: F401 # needed for expectation registration
+)
 
 # noinspection PyUnresolvedReferences
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
