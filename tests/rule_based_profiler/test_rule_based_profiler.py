@@ -992,15 +992,12 @@ def test_run_profiler_with_dynamic_args(
     variables = {"foo": "bar"}
     rules = {"baz": "qux"}
 
-    # noinspection PyUnusedLocal
-    (
-        RuleBasedProfiler.run_profiler(
-            data_context=mock_data_context,
-            profiler_store=populated_profiler_store,
-            name=profiler_name,
-            variables=variables,
-            rules=rules,
-        )
+    rule_based_profiler_result = RuleBasedProfiler.run_profiler(  # noqa: F841
+        data_context=mock_data_context,
+        profiler_store=populated_profiler_store,
+        name=profiler_name,
+        variables=variables,
+        rules=rules,
     )
 
     assert mock_profiler_run.called
