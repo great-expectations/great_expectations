@@ -36,7 +36,7 @@ def empty_context_with_checkpoint_v1_stats_enabled(
 
 
 @pytest.fixture
-def v10_project_directory(tmp_path_factory: TempPathFactory):
+def v10_project_directory(tmp_path_factory: TempPathFactory) -> str:
     """
     GX 0.10.x project for testing upgrade helper
     """
@@ -56,11 +56,11 @@ def v10_project_directory(tmp_path_factory: TempPathFactory):
         ),
         context_root_dir / FileDataContext.GX_YML,
     )
-    return context_root_dir
+    return str(context_root_dir)
 
 
 @pytest.fixture(scope="function")
-def misc_directory(tmp_path: pathlib.Path):
+def misc_directory(tmp_path: pathlib.Path) -> pathlib.Path:
     misc_dir = tmp_path / "random"
     misc_dir.mkdir()
     assert misc_dir.is_absolute()
