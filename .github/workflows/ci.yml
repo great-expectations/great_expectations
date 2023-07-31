@@ -71,10 +71,15 @@ jobs:
     #add more scope here
     runs-on: ubuntu-latest
     env:
+      # google
       GE_TEST_GCP_CREDENTIALS: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
       GE_TEST_GCP_PROJECT: ${{secrets.GE_TEST_GCP_PROJECT}}
       GE_TEST_BIGQUERY_DATASET: ${{secrets.GE_TEST_BIGQUERY_DATASET}}
       GOOGLE_APPLICATION_CREDENTIALS: 'gcp-credentials.json'
+      # aws
+      AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+      AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
+      AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -146,9 +151,15 @@ jobs:
 
   marker-tests:
     if: github.event.pull_request.draft == false
+    env:
+      # aws
+      AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+      AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
+      AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
     strategy:
       matrix:
         markers:
+          - aws_creds
           - big
           - cli
           # `not e2e` because 1 test & 1 fixture need access token
