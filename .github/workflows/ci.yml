@@ -159,13 +159,12 @@ jobs:
     strategy:
       matrix:
         markers:
-          - aws_creds
           - big
           - cli
           # `not e2e` because 1 test & 1 fixture need access token
           - cloud and not e2e
           - filesystem
-          - openpyxl or pyarrow or project or sqlite
+          - openpyxl or pyarrow or project or sqlite or aws_creds
           #- spark
           - postgresql
           # - external_sqldialect # tests being skipped likely due to flagging system
