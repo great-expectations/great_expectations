@@ -111,7 +111,7 @@ jobs:
           - cloud and not e2e
           - filesystem
           - docs
-          - openpyxl or pyarrow or project or sqlite
+          - clickhouse or openpyxl or pyarrow or project or sqlite
           #- spark
           - postgresql
           # - external_sqldialect # tests being skipped likely due to flagging system
