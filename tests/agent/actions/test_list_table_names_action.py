@@ -10,7 +10,6 @@ from sqlalchemy.engine import Inspector
 from great_expectations.agent.actions import (
     ListTableNamesAction,
 )
-from great_expectations.agent.config import GxAgentEnvVars
 from great_expectations.agent.models import ListTableNamesEvent
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource.fluent import (
@@ -41,16 +40,16 @@ def dummy_access_token() -> str:
 
 
 @pytest.fixture
-def mock_gx_agent_env_vars(dummy_base_url, dummy_org_id, dummy_access_token) -> None:
-    with mock.patch(
-        "great_expectations.agent.actions.list_table_names.GxAgentEnvVars"
-    ) as mock_env_vars:
-        mock_env_vars.return_value = GxAgentEnvVars(
-            gx_cloud_base_url=dummy_base_url,
-            gx_cloud_organization_id=dummy_org_id,
-            gx_cloud_access_token=dummy_access_token,
-        )
-        yield
+def set_required_env_vars(
+    monkeypatch, dummy_org_id, dummy_base_url, dummy_access_token
+):
+    env_vars = {
+        "GX_CLOUD_ORGANIZATION_ID": dummy_org_id,
+        "GX_CLOUD_ACCESS_TOKEN": dummy_access_token,
+        "GX_CLOUD_BASE_URL": dummy_base_url,
+    }
+    for key, val in env_vars.items():
+        monkeypatch.setenv(name=key, value=val)
 
 
 @pytest.fixture(scope="function")
@@ -83,7 +82,7 @@ def test_list_table_names_event_raises_for_non_sql_datasource(context, event):
 
 @responses.activate
 def test_run_list_table_names_action_returns_action_result(
-    context, event, dummy_base_url, dummy_org_id, mock_gx_agent_env_vars
+    context, event, dummy_base_url, dummy_org_id, set_required_env_vars
 ):
     action = ListTableNamesAction(context=context)
     id = "096ce840-7aa8-45d1-9e64-2833948f4ae8"
