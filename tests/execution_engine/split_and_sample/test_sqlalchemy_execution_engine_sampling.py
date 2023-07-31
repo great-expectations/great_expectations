@@ -115,7 +115,6 @@ def pytest_parsed_arguments(request):
     return request.config.option
 
 
-
 # Despite being parameterized over GXSqlDialect, this test skips if the flag corresponding to that dialect isn't
 # passed in. Most of these dialects are never run in CI.
 @pytest.mark.all_backends
