@@ -2,9 +2,6 @@ import json
 import os
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 from unittest import mock
-from great_expectations.data_context.data_context.file_data_context import (
-    FileDataContext,
-)
 
 import pytest
 from click.testing import CliRunner, Result
@@ -1004,8 +1001,9 @@ def test_suite_edit_datasource_and_batch_request_error(
 
     expectation_suite_name: str = "test_suite_name"
 
-    # noinspection PyUnusedLocal
-    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
+    suite: ExpectationSuite = context.add_expectation_suite(  # noqa: F841
+        expectation_suite_name=expectation_suite_name
+    )
     assert (
         context.list_expectation_suites()[0].expectation_suite_name
         == expectation_suite_name
@@ -1155,8 +1153,9 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
 
     expectation_suite_name: str = "test_suite_name"
 
-    # noinspection PyUnusedLocal
-    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
+    suite: ExpectationSuite = context.add_expectation_suite(  # noqa: F841
+        expectation_suite_name=expectation_suite_name
+    )
     assert (
         context.list_expectation_suites()[0].expectation_suite_name
         == expectation_suite_name
@@ -2219,8 +2218,9 @@ def test_suite_edit_interactive_batch_request_without_datasource_json_file_raise
 
     expectation_suite_name: str = "test_suite_name"
 
-    # noinspection PyUnusedLocal
-    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
+    suite: ExpectationSuite = context.add_expectation_suite(  # noqa: F841
+        expectation_suite_name=expectation_suite_name
+    )
     assert (
         context.list_expectation_suites()[0].expectation_suite_name
         == expectation_suite_name
@@ -2369,8 +2369,7 @@ def test_suite_list_with_one_suite(
     expectation_suite_dir_name: str = "a_dir"
     expectation_suite_name: str = "test_suite_name"
 
-    # noinspection PyUnusedLocal
-    context.add_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(  # noqa: F841
         expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
 
@@ -2429,12 +2428,15 @@ def test_suite_list_with_multiple_suites(
 
     project_dir: str = context.root_directory
 
-    # noinspection PyUnusedLocal
-    context.add_expectation_suite(expectation_suite_name="a.warning")
-    # noinspection PyUnusedLocal
-    context.add_expectation_suite(expectation_suite_name="b.warning")
-    # noinspection PyUnusedLocal
-    context.add_expectation_suite(expectation_suite_name="c.warning")
+    suite_0: ExpectationSuite = context.add_expectation_suite(  # noqa: F841
+        expectation_suite_name="a.warning"
+    )
+    suite_1: ExpectationSuite = context.add_expectation_suite(  # noqa: F841
+        expectation_suite_name="b.warning"
+    )
+    suite_2: ExpectationSuite = context.add_expectation_suite(  # noqa: F841
+        expectation_suite_name="c.warning"
+    )
 
     config_file_path: str = os.path.join(  # noqa: PTH118
         project_dir, FileDataContext.GX_YML
@@ -2618,7 +2620,6 @@ def test_suite_delete_with_one_suite(
     expectation_suite_dir_name: str = "a_dir"
     expectation_suite_name: str = "test_suite_name"
 
-    # noinspection PyUnusedLocal
     suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
@@ -2701,7 +2702,6 @@ def test_suite_delete_canceled_with_one_suite(
     expectation_suite_dir_name: str = "a_dir"
     expectation_suite_name: str = "test_suite_name"
 
-    # noinspection PyUnusedLocal
     suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
@@ -2777,7 +2777,6 @@ def test_suite_delete_with_one_suite_assume_yes_flag(
     expectation_suite_dir_name: str = "a_dir"
     expectation_suite_name: str = "test_suite_name"
 
-    # noinspection PyUnusedLocal
     suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
