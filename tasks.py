@@ -813,12 +813,12 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "mssql": TestDependencies(
         ("reqs/requirements-dev-mssql.txt",),
         services=("mssql",),
-        exta_pytest_args=("--mssql",),
+        extra_pytest_args=("--mssql",),
     ),
     "mysql": TestDependencies(
         ("reqs/requirements-dev-mysql.txt",),
         services=("mysql",),
-        exta_pytest_args=("--mysql",),
+        extra_pytest_args=("--mysql",),
     ),
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
     "postgresql": TestDependencies(
@@ -833,7 +833,7 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "trino": TestDependencies(
         ("reqs/requirements-dev-trino.txt",),
         services=("trino",),
-        exta_pytest_args=("--trino",),
+        extra_pytest_args=("--trino",),
     ),
 }
 
