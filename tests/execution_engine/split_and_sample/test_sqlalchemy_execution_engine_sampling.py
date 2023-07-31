@@ -113,6 +113,7 @@ def pytest_parsed_arguments(request):
     return request.config.option
 
 
+@pytest.mark.all_backends
 @pytest.mark.parametrize(
     "dialect_name",
     [

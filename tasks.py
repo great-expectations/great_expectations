@@ -850,7 +850,8 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
         yield tokens[0]
     elif marker_string == "cloud and not e2e":
         yield "cloud"
-    elif marker_string == "openpyxl or pyarrow or project or sqlite":
+    elif marker_string == "athena or openpyxl or pyarrow or project or sqlite":
+        yield "athena"
         yield "openpyxl"
         yield "pyarrow"
         yield "project"
