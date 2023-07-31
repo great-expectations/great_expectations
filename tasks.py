@@ -837,11 +837,12 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
         yield tokens[0]
     elif marker_string == "cloud and not e2e":
         yield "cloud"
-    elif marker_string == "openpyxl or pyarrow or project or sqlite":
+    elif marker_string == "openpyxl or pyarrow or project or sqlite or aws_creds":
         yield "openpyxl"
         yield "pyarrow"
         yield "project"
         yield "sqlite"
+        yield "aws_creds"
     else:
         raise ValueError(f"Unable to tokenize marker string: {marker_string}")
 
