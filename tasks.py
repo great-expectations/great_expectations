@@ -807,7 +807,7 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
             "reqs/requirements-dev-postgresql.txt",
         ),
         services=("postgresql",),
-        extra_pytest_args=("--postgresql", "--bigquery", "--docs-tests"),
+        extra_pytest_args=("--postgresql", "--bigquery", "--aws", "--docs-tests"),
     ),
     "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
