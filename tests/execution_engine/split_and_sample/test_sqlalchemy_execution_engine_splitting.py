@@ -56,10 +56,7 @@ MULTIPLE_DATE_PART_DATE_PARTS += [
     )
 ]
 
-pytestmark = [
-    pytest.mark.sqlalchemy_version_compatibility,
-    pytest.mark.external_sqldialect,
-]
+pytestmark = pytest.mark.sqlalchemy_version_compatibility
 
 
 @mock.patch(
@@ -76,6 +73,7 @@ pytestmark = [
         ),
     ],
 )
+@pytest.mark.sqlite
 def test_named_date_part_methods(
     mock_split_on_date_parts: mock.MagicMock,
     splitter_method_name: str,
@@ -108,6 +106,7 @@ def test_named_date_part_methods(
     "date_parts",
     SINGLE_DATE_PART_DATE_PARTS,
 )
+@pytest.mark.sqlite
 def test_split_on_date_parts_single_date_parts(
     batch_identifiers_for_column, date_parts, sa
 ):
@@ -145,6 +144,7 @@ def test_split_on_date_parts_single_date_parts(
     "date_parts",
     MULTIPLE_DATE_PART_DATE_PARTS,
 )
+@pytest.mark.sqlite
 def test_split_on_date_parts_multiple_date_parts(
     batch_identifiers_for_column, date_parts, sa
 ):
@@ -185,6 +185,7 @@ def test_split_on_date_parts_multiple_date_parts(
     "great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.get_data_for_batch_identifiers_for_split_on_date_parts"
 )
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
+@pytest.mark.sqlite
 def test_get_data_for_batch_identifiers_year(
     mock_execution_engine: mock.MagicMock,
     mock_get_data_for_batch_identifiers_for_split_on_date_parts: mock.MagicMock,
@@ -215,6 +216,7 @@ def test_get_data_for_batch_identifiers_year(
     "great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.get_data_for_batch_identifiers_for_split_on_date_parts"
 )
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
+@pytest.mark.sqlite
 def test_get_data_for_batch_identifiers_year_and_month(
     mock_execution_engine: mock.MagicMock,
     mock_get_data_for_batch_identifiers_for_split_on_date_parts: mock.MagicMock,
@@ -242,6 +244,7 @@ def test_get_data_for_batch_identifiers_year_and_month(
     "great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.get_data_for_batch_identifiers_for_split_on_date_parts"
 )
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
+@pytest.mark.sqlite
 def test_get_data_for_batch_identifiers_year_and_month_and_day(
     mock_execution_engine: mock.MagicMock,
     mock_get_data_for_batch_identifiers_for_split_on_date_parts: mock.MagicMock,
@@ -269,6 +272,7 @@ def test_get_data_for_batch_identifiers_year_and_month_and_day(
     "date_parts",
     SINGLE_DATE_PART_DATE_PARTS,
 )
+@pytest.mark.sqlite
 def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_single_date_parts(
     date_parts, sa
 ):
@@ -318,11 +322,13 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
         pytest.param(
             "sqlite",
             "SELECT DISTINCT(CAST(EXTRACT(year FROM column_name) AS VARCHAR) || CAST (EXTRACT(month FROM column_name) AS VARCHAR)) AS concat_distinct_values, CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year, CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month FROM table_name",
+            marks=pytest.mark.sqlite,
             id="sqlite",
         ),
         pytest.param(
             "postgres",
             "SELECT DISTINCT(CONCAT(CONCAT('', CAST(EXTRACT(year FROM column_name) AS VARCHAR)), CAST(EXTRACT(month FROM column_name) AS VARCHAR))) AS concat_distinct_values, CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year, CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month FROM table_name",
+            marks=pytest.mark.postgresql,
             id="postgres",
         ),
     ],
@@ -384,6 +390,7 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
         ]
     ],
 )
+@pytest.mark.sqlite
 def test_get_splitter_method(underscore_prefix: str, splitter_method_name: str):
     data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
 
@@ -490,6 +497,7 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
         ),
     ],
 )
+@pytest.mark.sqlite
 def test_sqlite_split(
     taxi_test_cases: TaxiSplittingTestCasesBase,
     sa,
@@ -555,6 +563,7 @@ def test_sqlite_split(
         assert num_rows == test_case.num_expected_rows_in_first_batch_definition
 
 
+@pytest.mark.sqlite
 def test_sqlite_split_on_year(
     sa, in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
 ):
@@ -598,6 +607,7 @@ def test_sqlite_split_on_year(
         assert row_date.year == 2018
 
 
+@pytest.mark.sqlite
 def test_sqlite_split_and_sample_using_limit(
     sa, in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
 ):
