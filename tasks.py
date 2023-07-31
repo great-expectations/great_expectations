@@ -807,7 +807,7 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
             "reqs/requirements-dev-postgresql.txt",
         ),
         services=("postgresql",),
-        extra_pytest_args=("--postgresql", "--bigquery", "--docs-tests"),
+        extra_pytest_args=("--postgresql", "--bigquery", "--aws", "--docs-tests"),
     ),
     "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
@@ -837,11 +837,12 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
         yield tokens[0]
     elif marker_string == "cloud and not e2e":
         yield "cloud"
-    elif marker_string == "openpyxl or pyarrow or project or sqlite":
+    elif marker_string == "openpyxl or pyarrow or project or sqlite or aws_creds":
         yield "openpyxl"
         yield "pyarrow"
         yield "project"
         yield "sqlite"
+        yield "aws_creds"
     else:
         raise ValueError(f"Unable to tokenize marker string: {marker_string}")
 
