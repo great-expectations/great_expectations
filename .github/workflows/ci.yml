@@ -110,7 +110,6 @@ jobs:
           # `not e2e` because 1 test & 1 fixture need access token
           - cloud and not e2e
           - filesystem
-          # - google_creds
           - docs
           - athena or openpyxl or pyarrow or project or sqlite
           #- spark
