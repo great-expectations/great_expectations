@@ -983,7 +983,7 @@ def ci_tests(  # noqa: PLR0913
             pytest_cmds.append(extra_pytest_arg)
 
     if marker in ["postgresql", "mssql", "mysql", "trino"]:
-        pytest_cmds[2] = "all_backends"
+        pytest_cmds[3] = "all_backends"
 
     ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
 
