@@ -198,4 +198,4 @@ def test_expect_column_values_to_be_in_set_no_set(
     with pytest.raises(
         great_expectations.exceptions.exceptions.InvalidExpectationConfigurationError
     ):
-        validator.expect_column_values_to_be_in_set(column="a")
+        result = validator.expect_column_values_to_be_in_set(column="a")  # noqa: F841
