@@ -806,7 +806,7 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
             "reqs/requirements-dev-bigquery.txt",
             "reqs/requirements-dev-postgresql.txt",
         ),
-        services=("postgresql",),
+        services=("postgresql", "mssql", "mysql", "trino"),
         extra_pytest_args=(
             "--postgresql",
             "--bigquery",
