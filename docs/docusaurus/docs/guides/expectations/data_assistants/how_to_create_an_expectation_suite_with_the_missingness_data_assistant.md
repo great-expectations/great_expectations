@@ -5,8 +5,10 @@ title: Create an Expectation Suite with the Missingness Data Assistant
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-:::note Note:
-Missingness Data Assistant is an **experimental** feature.
+:::caution
+
+Missingness Data Assistant functionality is [Experimental](/docs/contributing/contributing_maturity).
+
 :::
 
 Use the information provided here to learn how you can use the Missingness Data Assistant to profile your data and automate the creation of an Expectation Suite.
