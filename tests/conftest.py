@@ -142,7 +142,6 @@ REQUIRED_MARKERS = {
     "project",
     "pyarrow",
     "spark",
-    "sqlalchemy_version_compatibility",
     "sqlite",
     "unit",
 }

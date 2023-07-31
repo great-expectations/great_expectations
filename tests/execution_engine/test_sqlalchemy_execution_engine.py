@@ -52,7 +52,11 @@ try:
 except ImportError:
     sqlalchemy = None
 
-pytestmark = pytest.mark.external_sqldialect
+
+pytestmark = [
+    pytest.mark.sqlalchemy_version_compatibility,
+    pytest.mark.external_sqldialect,
+]
 
 
 @pytest.mark.sqlite
