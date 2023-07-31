@@ -48,6 +48,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
 )
 
 if TYPE_CHECKING:
+    from sqlalchemy.sql import quoted_name  # noqa: TID251 # type-checking only
     from typing_extensions import Self
 
     from great_expectations.compatibility import sqlalchemy
@@ -802,6 +803,7 @@ class TableAsset(_SQLAsset):
 
     # Instance fields
     type: Literal["table"] = "table"
+    # TODO: quoted_name or str
     table_name: str = pydantic.Field(
         "",
         description="Name of the SQL table. Will default to the value of `name` if not provided.",
@@ -828,14 +830,26 @@ class TableAsset(_SQLAsset):
         return validated_table_name
 
     @pydantic.validator("table_name")
-    def _resolve_qouted_name(cls, table_name: str) -> str:
+    def _resolve_qouted_name(cls, table_name: str) -> str | quoted_name:
+        table_name_is_qouted: bool = cls._is_bracketed_by_quotes(table_name)
+
         from great_expectations.compatibility import sqlalchemy
 
         if sqlalchemy.quoted_name:
-            # https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.quoted_name.quote
-            # If left at its default of None, quoting behavior is applied to the
-            # identifier on a per-backend basis based on an examination of the token itself
-            return sqlalchemy.quoted_name(value=table_name, quote=None)
+            if isinstance(table_name, sqlalchemy.quoted_name):
+                return table_name
+
+            if table_name_is_qouted:
+                # https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.quoted_name.quote
+                # Remove the quotes and add them back using the sqlalchemy.quoted_name function
+                # TODO: We need to handle nested qoutes
+                table_name = table_name.strip("'").strip('"')
+
+            return sqlalchemy.quoted_name(
+                value=table_name,
+                quote=table_name_is_qouted,
+            )
+
         return table_name
 
     def test_connection(self) -> None:
