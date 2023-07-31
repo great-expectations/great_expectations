@@ -80,6 +80,9 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
       AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      # azure
+      AZURE_ACCESS_KEY: ${{secrets.AZURE_ACCESS_KEY}}
+      AZURE_CREDENTIAL: ${{secrets.AZURE_CREDENTIAL}}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -117,7 +120,7 @@ jobs:
       - name: Install dependencies
         run: |
           # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
-          pip install --constraint constraints-dev.txt ".[test, bigquery, sqlalchemy1, postgresql, mysql, mssql, trino]" pytest-azurepipelines "pandas<2.0.0"
+          pip install --constraint constraints-dev.txt ".[test, bigquery, sqlalchemy1, postgresql, mysql, mssql, trino, azure]" pytest-azurepipelines "pandas<2.0.0"
 
       - name: Run the tests
         run: |
