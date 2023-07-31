@@ -131,7 +131,7 @@ def test_cli_init_on_new_project(
     )
     assert "Generating example Expectation Suite..." not in stdout
     assert "Building" not in stdout
-    assert "Done generating example Expectation Suite\x1B" not in stdout
+    assert "Done generating example Expectation Suite" not in stdout
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
