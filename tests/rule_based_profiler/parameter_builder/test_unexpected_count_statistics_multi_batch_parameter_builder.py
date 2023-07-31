@@ -2,10 +2,10 @@ from typing import List, Optional
 
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
+from great_expectations.data_context import AbstractDataContext
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
@@ -25,12 +25,11 @@ pytestmark = pytest.mark.big
 def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
+    data_context: AbstractDataContext = (
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 
-    # noinspection PyUnusedLocal
-    (
+    parameter_builder: ParameterBuilder = (  # noqa: F841
         UnexpectedCountStatisticsMultiBatchParameterBuilder(
             name="my_name",
             mode="unexpected_count_fraction_values",
@@ -44,13 +43,12 @@ def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder
 def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder_builder_required_arguments_absent(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
+    data_context: AbstractDataContext = (
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 
     with pytest.raises(TypeError) as excinfo:
-        # noinspection PyUnusedLocal,PyArgumentList
-        (
+        parameter_builder: ParameterBuilder = (
             UnexpectedCountStatisticsMultiBatchParameterBuilder(
                 name="my_name",
                 data_context=data_context,
@@ -64,7 +62,7 @@ def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder
 
     with pytest.raises(TypeError) as excinfo:
         # noinspection PyUnusedLocal,PyArgumentList
-        (
+        parameter_builder: ParameterBuilder = (  # noqa: F841
             UnexpectedCountStatisticsMultiBatchParameterBuilder(
                 name="my_name",
                 unexpected_count_parameter_builder_name="my_unexpected_count",
@@ -81,7 +79,7 @@ def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder
 def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_serialized_keys_no_evaluation_parameter_builder_configs(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
+    data_context: AbstractDataContext = (
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 
@@ -115,7 +113,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
 def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_serialized_keys_with_evaluation_parameter_builder_configs(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
+    data_context: AbstractDataContext = (
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 
