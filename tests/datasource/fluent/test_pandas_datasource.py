@@ -7,7 +7,6 @@ import pathlib
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Callable, Type
 
-import pandas as pd
 import pydantic
 import pytest
 from pytest import MonkeyPatch, param
@@ -32,6 +31,8 @@ from great_expectations.util import camel_to_snake
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
+    import pandas as pd
+
     from great_expectations.data_context import AbstractDataContext
 
 
@@ -50,17 +51,6 @@ def pandas_datasource() -> PandasDatasource:
     return PandasDatasource(  # type: ignore[call-arg] # type field not required
         name="pandas_datasource",
     )
-
-
-@pytest.fixture
-def csv_path() -> pathlib.Path:
-    relative_path = pathlib.Path(
-        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-    )
-    abs_csv_path = (
-        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    )
-    return abs_csv_path
 
 
 @pytest.fixture
@@ -111,9 +101,7 @@ class TestDynamicPandasAssets:
             param("read_csv"),
             param("read_excel"),
             param("read_feather"),
-            param(
-                "read_fwf", marks=pytest.mark.xfail(reason="unhandled type annotation")
-            ),
+            param("read_fwf"),
             param("read_gbq"),
             param("read_hdf"),
             param("read_html"),
@@ -310,11 +298,7 @@ class TestDynamicPandasAssets:
             param("read_csv", {"filepath_or_buffer": "valid_file_path"}),
             param("read_excel", {"io": "valid_file_path"}),
             param("read_feather", {"path": "valid_file_path"}),
-            param(
-                "read_fwf",
-                {"filepath_or_buffer": "valid_file_path"},
-                marks=pytest.mark.xfail(reason="unhandled type annotation"),
-            ),
+            param("read_fwf", {"filepath_or_buffer": "valid_file_path"}),
             param("read_gbq", {"query": "SELECT * FROM my_table"}),
             param("read_hdf", {"path_or_buf": "valid_file_path"}),
             param("read_html", {"io": "valid_file_path"}),
@@ -383,6 +367,7 @@ class TestDynamicPandasAssets:
             assert getattr(asset, positional_arg_name) == positional_arg
 
 
+@pytest.mark.filesystem
 def test_default_pandas_datasource_get_and_set(
     empty_data_context: AbstractDataContext, valid_file_path: pathlib.Path
 ):
@@ -433,6 +418,7 @@ def test_default_pandas_datasource_get_and_set(
             assert asset["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME
 
 
+@pytest.mark.filesystem
 def test_default_pandas_datasource_name_conflict(
     empty_data_context: AbstractDataContext,
 ):
@@ -450,13 +436,18 @@ def test_default_pandas_datasource_name_conflict(
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
 
 
-def test_dataframe_asset(empty_data_context: AbstractDataContext, test_df_pandas):
+@pytest.mark.filesystem
+def test_dataframe_asset(
+    empty_data_context: AbstractDataContext, test_df_pandas: pd.DataFrame
+):
     # validates that a dataframe object is passed
-    with pytest.raises(pydantic.ValidationError) as exc_info:
+    with pytest.raises(ValueError) as exc_info:
         _ = empty_data_context.sources.pandas_default.read_dataframe(dataframe={})
 
-    errors_dict = exc_info.value.errors()[0]
-    assert errors_dict["loc"][0] == "dataframe"
+    assert (
+        'Cannot execute "PandasDatasource.read_dataframe()" without a valid "dataframe" argument.'
+        in str(exc_info.value)
+    )
 
     # correct working behavior with read method
     validator = empty_data_context.sources.pandas_default.read_dataframe(
@@ -473,17 +464,19 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext, test_df_pandas
     # correct working behavior with add method
     dataframe_asset_name = "my_dataframe_asset"
     dataframe_asset = empty_data_context.sources.pandas_default.add_dataframe_asset(
-        name=dataframe_asset_name, dataframe=test_df_pandas
+        name=dataframe_asset_name
     )
     assert isinstance(dataframe_asset, DataFrameAsset)
     assert dataframe_asset.name == "my_dataframe_asset"
     assert len(empty_data_context.sources.pandas_default.assets) == 2
+    _ = dataframe_asset.build_batch_request(dataframe=test_df_pandas)
     assert all(
         asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
         for asset in empty_data_context.sources.pandas_default.assets
     )
 
 
+@pytest.mark.filesystem
 def test_pandas_data_asset_batch_metadata(
     empty_data_context: AbstractDataContext, valid_file_path: pathlib.Path
 ):
@@ -524,14 +517,14 @@ def test_pandas_data_asset_batch_metadata(
     assert batch_list[0].metadata == substituted_batch_metadata
 
 
+@pytest.mark.filesystem
 def test_build_batch_request_raises_if_missing_dataframe(
     empty_data_context: AbstractDataContext,
 ):
-    df = pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
     dataframe_asset = empty_data_context.sources.add_or_update_pandas(
         name="fluent_pandas_datasource"
-    ).add_dataframe_asset(name="my_df_asset", dataframe=df)
-    dataframe_asset.dataframe = None
+    ).add_dataframe_asset(name="my_df_asset")
+
     with pytest.raises(ValueError) as e:
         dataframe_asset.build_batch_request()
 

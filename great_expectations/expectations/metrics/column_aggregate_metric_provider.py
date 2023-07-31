@@ -3,7 +3,7 @@ from functools import wraps
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Type, Union
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
@@ -23,7 +23,7 @@ from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
 from great_expectations.expectations.metrics.util import (
-    get_dbms_compatible_column_names,
+    get_dbms_compatible_metric_domain_kwargs,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -59,7 +59,7 @@ def column_aggregate_value(
         def wrapper(metric_fn: Callable):
             @metric_value(engine=PandasExecutionEngine)
             @wraps(metric_fn)
-            def inner_func(
+            def inner_func(  # noqa: PLR0913
                 cls,
                 execution_engine: PandasExecutionEngine,
                 metric_domain_kwargs: dict,
@@ -71,6 +71,11 @@ def column_aggregate_value(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
                 )
 
+                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    batch_columns_list=metrics["table.columns"],
+                )
+
                 df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
@@ -78,11 +83,6 @@ def column_aggregate_value(
                 column_name: Union[
                     str, sqlalchemy.quoted_name
                 ] = accessor_domain_kwargs["column"]
-
-                column_name = get_dbms_compatible_column_names(
-                    column_names=column_name,
-                    batch_columns_list=metrics["table.columns"],
-                )
 
                 if filter_column_isnull:
                     df = df[df[column_name].notnull()]
@@ -135,7 +135,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 domain_type=domain_type,
             )
             @wraps(metric_fn)
-            def inner_func(
+            def inner_func(  # noqa: PLR0913
                 cls,
                 execution_engine: SqlAlchemyExecutionEngine,
                 metric_domain_kwargs: dict,
@@ -146,6 +146,12 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
                 )
+
+                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    batch_columns_list=metrics["table.columns"],
+                )
+
                 if filter_column_isnull:
                     compute_domain_kwargs = execution_engine.add_column_row_condition(
                         metric_domain_kwargs
@@ -164,11 +170,6 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 column_name: Union[
                     str, sqlalchemy.quoted_name
                 ] = accessor_domain_kwargs["column"]
-
-                column_name = get_dbms_compatible_column_names(
-                    column_names=column_name,
-                    batch_columns_list=metrics["table.columns"],
-                )
 
                 sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
 
@@ -198,7 +199,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 domain_type=domain_type,
             )
             @wraps(metric_fn)
-            def inner_func(
+            def inner_func(  # noqa: PLR0913
                 cls,
                 execution_engine: SparkDFExecutionEngine,
                 metric_domain_kwargs: dict,
@@ -208,6 +209,11 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
             ):
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+                )
+
+                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    batch_columns_list=metrics["table.columns"],
                 )
 
                 if filter_column_isnull:
@@ -229,11 +235,6 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 column_name: Union[
                     str, sqlalchemy.quoted_name
                 ] = accessor_domain_kwargs["column"]
-
-                column_name = get_dbms_compatible_column_names(
-                    column_names=column_name,
-                    batch_columns_list=metrics["table.columns"],
-                )
 
                 column = data[column_name]
                 metric_aggregate = metric_fn(

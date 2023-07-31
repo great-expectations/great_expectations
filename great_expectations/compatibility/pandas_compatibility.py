@@ -9,7 +9,7 @@ from great_expectations.compatibility.not_imported import (
 )
 
 
-def execute_pandas_to_datetime(
+def execute_pandas_to_datetime(  # noqa: PLR0913
     arg,
     errors: Literal["raise", "coerce", "ignore"] = "raise",
     dayfirst: bool = False,
@@ -58,7 +58,7 @@ def execute_pandas_to_datetime(
             origin=origin,
             cache=cache,
         )
-    else:
+    else:  # noqa: PLR5501
         # pandas is 2.0.0 or greater
         if format is None:
             format = "mixed"

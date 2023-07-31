@@ -20,6 +20,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationBackendTestResultCounts,
 )
 from great_expectations.data_context.data_context import DataContext
+from great_expectations.exceptions.exceptions import ExpectationNotFoundError
 from great_expectations.expectations.expectation import Expectation
 
 logger = logging.getLogger(__name__)
@@ -64,7 +65,7 @@ def execute_shell_command(command: str) -> int:
     :param command: bash command -- as if typed in a shell/Terminal window
     :return: status code -- 0 if successful; all other values (1 is the most common) indicate an error
     """
-    cwd: str = os.getcwd()
+    cwd: str = os.getcwd()  # noqa: PTH109
 
     path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
     env: dict = dict(os.environ, PATH=path_env_var)
@@ -84,9 +85,8 @@ def execute_shell_command(command: str) -> int:
             check=True,
             encoding=None,
             errors=None,
-            text=None,
+            text=True,
             env=env,
-            universal_newlines=True,
         )
         sh_out: str = res.stdout.strip()
         logger.info(sh_out)
@@ -133,9 +133,9 @@ def get_expectations_info_dict(
     rx = re.compile(r".*?([A-Za-z]+?Expectation\b).*")
     result = {}
     files_found = []
-    oldpwd = os.getcwd()
+    oldpwd = os.getcwd()  # noqa: PTH109
     os.chdir(f"..{os.path.sep}..")
-    repo_path = os.getcwd()
+    repo_path = os.getcwd()  # noqa: PTH109
     logger.debug("Finding requested Expectation files in the repo")
 
     if only_these_expectations:
@@ -145,7 +145,7 @@ def get_expectations_info_dict(
     if include_core:
         files_found.extend(
             glob(
-                os.path.join(
+                os.path.join(  # noqa: PTH118
                     repo_path,
                     "great_expectations",
                     "expectations",
@@ -158,14 +158,18 @@ def get_expectations_info_dict(
     if include_contrib:
         files_found.extend(
             glob(
-                os.path.join(repo_path, "contrib", "**", "expect_*.py"),
+                os.path.join(repo_path, "contrib", "**", "expect_*.py"),  # noqa: PTH118
                 recursive=True,
             )
         )
 
     for file_path in sorted(files_found):
-        file_path = file_path.replace(f"{repo_path}{os.path.sep}", "")
-        expectation_name = os.path.basename(file_path).replace(".py", "")
+        file_path = (  # noqa: PLW2901 # `for` loop variable overwritten
+            file_path.replace(f"{repo_path}{os.path.sep}", "")
+        )
+        expectation_name = os.path.basename(file_path).replace(  # noqa: PTH119
+            ".py", ""
+        )
         if only_these_expectations and expectation_name not in only_these_expectations:
             continue
         if (
@@ -174,7 +178,9 @@ def get_expectations_info_dict(
         ):
             continue
 
-        package_name = os.path.basename(os.path.dirname(os.path.dirname(file_path)))
+        package_name = os.path.basename(  # noqa: PTH119
+            os.path.dirname(os.path.dirname(file_path))  # noqa: PTH120
+        )  # ,
         if package_name == "expectations":
             package_name = "core"
 
@@ -183,18 +189,22 @@ def get_expectations_info_dict(
         sys_path = ""
         if package_name != "core":
             requirements = get_contrib_requirements(file_path)["requirements"]
-            parent_dir = os.path.dirname(os.path.dirname(file_path))
-            grandparent_dir = os.path.dirname(parent_dir)
+            parent_dir = os.path.dirname(os.path.dirname(file_path))  # noqa: PTH120
+            grandparent_dir = os.path.dirname(parent_dir)  # noqa: PTH120
 
             if package_name == "great_expectations_experimental":
                 import_module_args = (
                     f"expectations.{expectation_name}",
                     "great_expectations_experimental",
                 )
-                sys_path = os.path.join(f"..{os.path.sep}..", parent_dir)
+                sys_path = os.path.join(  # noqa: PTH118
+                    f"..{os.path.sep}..", parent_dir
+                )
             else:
                 import_module_args = (f"{package_name}.expectations",)
-                sys_path = os.path.join(f"..{os.path.sep}..", grandparent_dir)
+                sys_path = os.path.join(  # noqa: PTH118
+                    f"..{os.path.sep}..", grandparent_dir
+                )
 
         updated_at_cmd = f'git log -1 --format="%ai %ar" -- {repr(file_path)}'
         created_at_cmd = (
@@ -247,9 +257,7 @@ def install_necessary_requirements(requirements) -> list:
     parsed_requirements = pkg_resources.parse_requirements(requirements)
     installed = []
     for req in parsed_requirements:
-        is_satisfied = any(
-            [installed_pkg in req for installed_pkg in installed_packages]
-        )
+        is_satisfied = any(installed_pkg in req for installed_pkg in installed_packages)
         if not is_satisfied:
             logger.debug(f"Executing command: 'pip install \"{req}\"'")
             status_code = execute_shell_command(f'pip install "{req}"')
@@ -263,7 +271,7 @@ def uninstall_requirements(requirements):
     """Uninstall any requirements that were added to the venv"""
     print("\n\n\n=== (Uninstalling) ===")
     logger.info(
-        f"Uninstalling packages that were installed while running this script..."
+        "Uninstalling packages that were installed while running this script..."
     )
     for req in requirements:
         logger.debug(f"Executing command: 'pip uninstall -y \"{req}\"'")
@@ -286,7 +294,7 @@ def get_expectation_instances(expectations_info):
         if import_module_args:
             try:
                 importlib.import_module(*import_module_args)
-            except (ModuleNotFoundError, ImportError, Exception) as e:
+            except (ModuleNotFoundError, ImportError, Exception):
                 logger.error(f"Failed to load expectation_name: {expectation_name}")
                 print(traceback.format_exc())
                 expectation_tracebacks.write(
@@ -295,11 +303,22 @@ def get_expectation_instances(expectations_info):
                 expectation_tracebacks.write(traceback.format_exc())
                 continue
 
-        expectation_instances[
-            expectation_name
-        ] = great_expectations.expectations.registry.get_expectation_impl(
-            expectation_name
-        )()
+        try:
+            expectation_instances[
+                expectation_name
+            ] = great_expectations.expectations.registry.get_expectation_impl(
+                expectation_name
+            )()
+        except ExpectationNotFoundError:
+            logger.error(
+                f"Failed to get Expectation implementation from registry: {expectation_name}"
+            )
+            print(traceback.format_exc())
+            expectation_tracebacks.write(
+                f"\n\n----------------\n{expectation_name} ({expectations_info[expectation_name]['package']})\n"
+            )
+            expectation_tracebacks.write(traceback.format_exc())
+            continue
     return expectation_instances
 
 
@@ -318,7 +337,7 @@ def combine_backend_results(
 
         bad_key_names = []
         for fname in found_full_backend_files:
-            with open(fname, "r") as fp:
+            with open(fname) as fp:
                 text = fp.read()
             data = json.loads(text)
 
@@ -358,7 +377,6 @@ def combine_backend_results(
                 examples=diagnostic_object.examples,
                 tests=diagnostic_object.tests,
                 backend_test_result_counts=backend_test_result_counts_object,
-                execution_engines=diagnostic_object.execution_engines,
             )
             expectations_info[expectation_name][
                 "maturity_checklist"
@@ -424,15 +442,15 @@ def get_contrib_requirements(filepath: str) -> Dict:
     return requirements_info
 
 
-def build_gallery(
+def build_gallery(  # noqa: C901 - 17
     only_combine: bool = False,
     include_core: bool = True,
     include_contrib: bool = True,
     ignore_suppress: bool = False,
     ignore_only_for: bool = False,
     outfile_name: str = "",
-    only_these_expectations: List[str] = [],
-    only_consider_these_backends: List[str] = [],
+    only_these_expectations: List[str] | None = None,
+    only_consider_these_backends: List[str] | None = None,
     context: Optional[DataContext] = None,
 ) -> None:
     """
@@ -449,7 +467,11 @@ def build_gallery(
         None
 
     """
-    requirements_dict = {}
+    if only_these_expectations is None:
+        only_these_expectations = []
+    if only_consider_these_backends is None:
+        only_consider_these_backends = []
+
     if only_combine:
         include_core = True
         include_contrib = True
@@ -484,7 +506,7 @@ def build_gallery(
     contrib_requirements_set = set()
     for _info in expectations_info.values():
         contrib_requirements_set.update(_info["requirements"])
-    installed = install_necessary_requirements(list(contrib_requirements_set))
+    _ = install_necessary_requirements(list(contrib_requirements_set))
 
     # Get Expectation instances and run diagnostics
     expectation_instances = get_expectation_instances(expectations_info)
@@ -521,7 +543,7 @@ def build_gallery(
                 expectation_docstrings.write(
                     f"{diagnostics['description']['docstring']}\n"
                 )
-        except:
+        except Exception:
             logger.error(f"Failed to run diagnostics for: {expectation_name}")
             print(traceback.format_exc())
             expectation_tracebacks.write(
@@ -555,7 +577,7 @@ def build_gallery(
                         "backend_test_result_counts": [test_result_counts],
                     }
 
-            except TypeError as e:
+            except TypeError:
                 logger.error(f"Failed to create JSON for: {expectation_name}")
                 print(traceback.format_exc())
                 expectation_tracebacks.write(
@@ -622,11 +644,11 @@ def format_docstring_to_markdown(docstr: str) -> str:
             in_code_block = False
             first_code_indentation = None
             clean_docstr_list.append(line)
-        else:
+        else:  # noqa: PLR5501
             if in_code_block:
                 # Determine the number of spaces indenting the first line of code so they can be removed from all lines
                 # in the code block without wrecking the hierarchical indentation levels of future lines.
-                if first_code_indentation == None and line.strip() != "":
+                if first_code_indentation is None and line.strip() != "":
                     first_code_indentation = len(
                         re.match(r"\s*", original_line, re.UNICODE).group(0)
                     )
@@ -649,8 +671,10 @@ def format_docstring_to_markdown(docstr: str) -> str:
 
 def _disable_progress_bars() -> Tuple[str, DataContext]:
     """Return context_dir and context that was created"""
-    context_dir = os.path.join(os.path.sep, "tmp", f"gx-context-{os.getpid()}")
-    os.makedirs(context_dir)
+    context_dir = os.path.join(  # noqa: PTH118
+        os.path.sep, "tmp", f"gx-context-{os.getpid()}"
+    )
+    os.makedirs(context_dir)  # noqa: PTH103
     context = DataContext.create(context_dir, usage_statistics_enabled=False)
     context.variables.progress_bars = {
         "globally": False,
@@ -664,7 +688,6 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
 @click.command()
 @click.option(
     "--only-combine",
-    "-O",
     "only_combine",
     is_flag=True,
     default=False,
@@ -713,13 +736,37 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
     "--backends",
     "-b",
     "backends",
-    help="Backends to consider running tests against (comma-separated)",
+    help=(
+        "Comma-separated names of backends (in a single string) to consider "
+        "running tests against (bigquery, mssql, mysql, pandas, postgresql, "
+        "redshift, snowflake, spark, sqlite, trino)"
+    ),
 )
 @click.argument("args", nargs=-1)
 def main(**kwargs):
-    """Find all Expectations, run their diagnostics methods, and generate expectation_library_v2--staging.json
+    """Find Expectations, run their diagnostics methods, and generate JSON files with test result summaries for each backend
 
     - args: snake_name of specific Expectations to include (useful for testing)
+
+    By default, all core and contrib Expectations are found and tested against
+    every backend that can be connected to. If any specific Expectation names
+    are passed in, only those Expectations will be tested.
+
+    If all Expectations are included and there are no test running modifiers
+    specified, the JSON files with tests result summaries will have the "full"
+    suffix. If test running modifiers are specified (--ignore-suppress or
+    --ignore-only-for), the JSON files will have the "nonstandard" suffix. If
+    any Expectations are excluded, the JSON files will have the "partial"
+    suffix.
+
+    If all {backend}_full.json files are present and the --only-combine option
+    is used, then the complete JSON file for the expectation gallery (including
+    a lot of metadata for each Expectation) will be written to outfile_name
+    (default: expectation_library_v2--staging.json).
+
+    If running locally (i.e. not in CI), you can run docker containers for
+    mssql, mysql, postgresql, and trino. Simply navigate to
+    assets/docker/{backend} and run `docker-compose up -d`
     """
     backends = []
     if kwargs["backends"]:
@@ -742,13 +789,13 @@ def main(**kwargs):
     tracebacks = expectation_tracebacks.getvalue()
     checklists = expectation_checklists.getvalue()
     docstrings = expectation_docstrings.getvalue()
-    if tracebacks != "":
+    if tracebacks:
         with open("./gallery-tracebacks.txt", "w") as outfile:
             outfile.write(tracebacks)
-    if checklists != "":
+    if checklists:
         with open("./checklists.txt", "w") as outfile:
             outfile.write(checklists)
-    if docstrings != "":
+    if docstrings:
         with open("./docstrings.txt", "w") as outfile:
             outfile.write(docstrings)
 

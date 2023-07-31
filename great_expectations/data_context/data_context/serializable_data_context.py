@@ -89,7 +89,9 @@ class SerializableDataContext(AbstractDataContext):
         """
         raise NotImplementedError
 
-    def _check_for_usage_stats_sync(self, project_config: DataContextConfig) -> bool:
+    def _check_for_usage_stats_sync(  # noqa: PLR0911
+        self, project_config: DataContextConfig
+    ) -> bool:
         """
         If there are differences between the DataContextConfig used to instantiate
         the DataContext and the DataContextConfig assigned to `self.config`, we want
@@ -265,8 +267,13 @@ class SerializableDataContext(AbstractDataContext):
     def _scaffold_directories(cls, base_dir: PathStr) -> None:
         """Safely create GE directories for a new project."""
         os.makedirs(base_dir, exist_ok=True)  # noqa: PTH103
-        with open(os.path.join(base_dir, ".gitignore"), "w") as f:  # noqa: PTH118
-            f.write("uncommitted/")
+
+        try:
+            cls._scaffold_gitignore(base_dir)
+        except Exception as e:
+            raise gx_exceptions.GitIgnoreScaffoldingError(
+                f"Could not create .gitignore in {base_dir} because of an error: {e}"
+            )
 
         for directory in cls.BASE_DIRECTORIES:
             if directory == "plugins":
@@ -274,7 +281,7 @@ class SerializableDataContext(AbstractDataContext):
                 os.makedirs(plugins_dir, exist_ok=True)  # noqa: PTH103
                 os.makedirs(  # noqa: PTH103
                     os.path.join(plugins_dir, "custom_data_docs"),  # noqa: PTH118
-                    exist_ok=True,  # noqa: PTH118
+                    exist_ok=True,
                 )
                 os.makedirs(  # noqa: PTH103
                     os.path.join(  # noqa: PTH118
@@ -309,6 +316,19 @@ class SerializableDataContext(AbstractDataContext):
             os.makedirs(new_directory_path, exist_ok=True)  # noqa: PTH103
 
     @classmethod
+    def _scaffold_gitignore(cls, base_dir: PathStr) -> None:
+        """Make sure .gitignore exists and contains uncommitted/"""
+        gitignore = pathlib.Path(base_dir) / ".gitignore"
+
+        if gitignore.is_file():
+            lines = gitignore.read_text().splitlines()
+            if "uncommited/" in lines:
+                return
+
+        with open(gitignore, "a") as f:
+            f.write("\nuncommitted/")
+
+    @classmethod
     def _scaffold_custom_data_docs(cls, plugins_dir: PathStr) -> None:
         """Copy custom data docs templates"""
         styles_template = file_relative_path(
@@ -334,7 +354,7 @@ class SerializableDataContext(AbstractDataContext):
             )
             if os.path.isdir(  # noqa: PTH112
                 gx_home_environment
-            ) and os.path.isfile(  # noqa: PTH112, PTH113
+            ) and os.path.isfile(  # noqa: PTH113
                 os.path.join(gx_home_environment, cls.GX_YML)  # noqa: PTH118
             ):
                 result = gx_home_environment

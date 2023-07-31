@@ -7,9 +7,15 @@ from great_expectations.cli import cli
 from great_expectations.cli.python_subprocess import (
     execute_shell_command_with_progress_polling,
 )
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.util import gen_directory_tree_str, is_library_loadable
 from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+
+
+pytestmark = pytest.mark.cli
 
 
 def _library_not_loaded_test(
@@ -62,14 +68,14 @@ but the package `{library_name}` containing this library is not installed.
 
     assert result.exit_code == 1
 
-    assert os.path.isdir(os.path.join(basedir, "great_expectations"))
+    assert os.path.isdir(os.path.join(basedir, FileDataContext.GX_DIR))
     config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
     config = yaml.load(open(config_path))
     assert config["datasources"] == {}
 
-    obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
+    obs_tree = gen_directory_tree_str(os.path.join(basedir, FileDataContext.GX_DIR))
     assert (
         obs_tree
         == """\
@@ -294,14 +300,14 @@ but the package `pyspark` containing this library is not installed.
 
     assert result.exit_code == 1
 
-    assert os.path.isdir(os.path.join(basedir, "great_expectations"))
+    assert os.path.isdir(os.path.join(basedir, FileDataContext.GX_DIR))
     config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
     config = yaml.load(open(config_path))
     assert config["datasources"] == {}
 
-    obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
+    obs_tree = gen_directory_tree_str(os.path.join(basedir, FileDataContext.GX_DIR))
     assert (
         obs_tree
         == """\

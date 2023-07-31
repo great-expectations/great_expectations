@@ -1,15 +1,20 @@
 from __future__ import annotations
 
+import warnings
+
 from great_expectations.compatibility.not_imported import NotImported
 
 SPARK_NOT_IMPORTED = NotImported(
     "pyspark is not installed, please 'pip install pyspark'"
 )
 
-try:
-    import pyspark
-except ImportError:
-    pyspark = SPARK_NOT_IMPORTED  # type: ignore[assignment]
+with warnings.catch_warnings():
+    # DeprecationWarning: typing.io is deprecated, import directly from typing instead. typing.io will be removed in Python 3.12.
+    warnings.simplefilter(action="ignore", category=DeprecationWarning)
+    try:
+        import pyspark
+    except ImportError:
+        pyspark = SPARK_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
     from pyspark.sql import functions

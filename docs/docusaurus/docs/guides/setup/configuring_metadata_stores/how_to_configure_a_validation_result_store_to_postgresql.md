@@ -107,7 +107,7 @@ store_backend:
       username: '<your_username>'
 ```
 
-## 5. Confirm the Validation Results Store is correctly configured
+## 5. Confirm the Validation Results Store is configured correctly
 
 [Run a Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results store in PostgreSQL, and then visualize the results by [re-building Data Docs](../../../terms/data_docs.md).
 

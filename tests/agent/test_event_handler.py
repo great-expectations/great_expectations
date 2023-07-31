@@ -1,76 +1,86 @@
-from typing import Literal
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock
+from uuid import uuid4
 
 import pytest
 
 from great_expectations.agent.event_handler import EventHandler, UnknownEventError
-from great_expectations.agent.message_service.subscriber import EventContext
 from great_expectations.agent.models import (
-    EventBase,
+    DraftDatasourceConfigEvent,
     RunCheckpointEvent,
-    RunDataAssistantEvent,
+    RunMissingnessDataAssistantEvent,
+    RunOnboardingDataAssistantEvent,
+    UnknownEvent,
 )
 from great_expectations.data_context import CloudDataContext
 
+pytestmark = pytest.mark.unit
+
 
 def test_event_handler_raises_for_unknown_event():
-    class NotARealEvent(EventBase):
-        type: Literal["not-a-real-event"] = "not-a-real-event"
-
-    event = NotARealEvent()
+    event = UnknownEvent()
     correlation_id = "74842258-803a-48ca-8921-eaf2802c14e2"
     context = MagicMock(autospec=CloudDataContext)
-    processed_successfully = Mock()
-    processed_with_failures = Mock()
-    redeliver_message = Mock()
-    event_context = EventContext(
-        event=event,
-        correlation_id=correlation_id,
-        processed_successfully=processed_successfully,
-        processed_with_failures=processed_with_failures,
-        redeliver_message=redeliver_message,
-    )
     handler = EventHandler(context=context)
 
     with pytest.raises(UnknownEventError):
-        handler.handle_event(event_context)
+        handler.handle_event(event=event, id=correlation_id)
 
 
-def test_event_handler_handles_run_data_assistant_event():
-    event = RunDataAssistantEvent()
+def test_event_handler_handles_run_missingness_data_assistant_event(mocker):
+    action = mocker.patch(
+        "great_expectations.agent.event_handler.RunMissingnessDataAssistantAction"
+    )
+    event = RunMissingnessDataAssistantEvent(
+        datasource_name="test-datasource",
+        data_asset_name="test-data-asset",
+    )
     correlation_id = "74842258-803a-48ca-8921-eaf2802c14e2"
     context = MagicMock(autospec=CloudDataContext)
-    processed_successfully = Mock()
-    processed_with_failures = Mock()
-    redeliver_message = Mock()
-    event_context = EventContext(
-        event=event,
-        correlation_id=correlation_id,
-        processed_successfully=processed_successfully,
-        processed_with_failures=processed_with_failures,
-        redeliver_message=redeliver_message,
-    )
     handler = EventHandler(context=context)
 
-    with pytest.raises(NotImplementedError):
-        handler.handle_event(event_context)
+    handler.handle_event(event=event, id=correlation_id)
+
+    action.assert_called_with(context=context)
+    action().run.assert_called_with(event=event, id=correlation_id)
+
+
+def test_event_handler_handles_run_onboarding_data_assistant_event(mocker):
+    action = mocker.patch(
+        "great_expectations.agent.event_handler.RunOnboardingDataAssistantAction"
+    )
+    event = RunOnboardingDataAssistantEvent(
+        datasource_name="test-datasource", data_asset_name="test-data-asset"
+    )
+    correlation_id = "74842258-803a-48ca-8921-eaf2802c14e2"
+    context = MagicMock(autospec=CloudDataContext)
+    handler = EventHandler(context=context)
+
+    handler.handle_event(event=event, id=correlation_id)
+
+    action.assert_called_with(context=context)
+    action().run.assert_called_with(event=event, id=correlation_id)
 
 
 def test_event_handler_handles_run_checkpoint_event():
     event = RunCheckpointEvent()
     correlation_id = "74842258-803a-48ca-8921-eaf2802c14e2"
     context = MagicMock(autospec=CloudDataContext)
-    processed_successfully = Mock()
-    processed_with_failures = Mock()
-    redeliver_message = Mock()
-    event_context = EventContext(
-        event=event,
-        correlation_id=correlation_id,
-        processed_successfully=processed_successfully,
-        processed_with_failures=processed_with_failures,
-        redeliver_message=redeliver_message,
-    )
     handler = EventHandler(context=context)
 
     with pytest.raises(NotImplementedError):
-        handler.handle_event(event_context)
+        handler.handle_event(event=event, id=correlation_id)
+
+
+def test_event_handler_handles_draft_config_event(mocker):
+    action = mocker.patch(
+        "great_expectations.agent.event_handler.DraftDatasourceConfigAction"
+    )
+    event = DraftDatasourceConfigEvent(config_id=uuid4())
+    correlation_id = "74842258-803a-48ca-8921-eaf2802c14e2"
+    context = MagicMock(autospec=CloudDataContext)
+    handler = EventHandler(context=context)
+
+    handler.handle_event(event=event, id=correlation_id)
+
+    action.assert_called_with(context=context)
+    action.return_value.run.assert_called_with(event=event, id=correlation_id)

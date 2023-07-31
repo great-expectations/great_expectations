@@ -2,281 +2,96 @@ module.exports = {
   docs: [
     'intro',
     {
-      type: 'doc', id: 'tutorials/quickstart/quickstart', label: 'Quickstart'
+      type: 'category',
+      label: 'Get started with GX',
+      link: { type: 'doc', id: 'guides/setup/get_started_lp' },
+      items: [
+        'tutorials/quickstart/quickstart',
+        {
+          type: 'doc', id: 'conceptual_guides/gx_overview', label: 'GX Overview'
+        },
+        'tutorials/getting_started/how_to_use_great_expectations_in_databricks',
+        'tutorials/getting_started/how_to_use_great_expectations_with_sql',
+      ]
     },
     {
       type: 'category',
-      label: 'Setting up a GX environment',
-      link: { type: 'doc', id: 'guides/setup/setup_overview' },
+      label: 'Configure your GX environment',
+      link: { type: 'doc', id: 'guides/setup/setup_overview_lp' },
       items: [
+        'guides/setup/setup_overview',
+        'guides/setup/installation/install_gx',
         {
           type: 'category',
-          label: 'Installation and dependencies',
+          label: 'Configure Data Contexts',
+          link: { type: 'doc', id: 'guides/setup/configure_data_contexts_lp' },
           items: [
-            {
-              type: 'html',
-              value: '<h4>For use with local filesystems</h4>',
-              defaultStyle: true
-            },
-            'guides/setup/installation/local',
-            {
-              type: 'html',
-              value: '<h4>For use in hosted environments</h4>',
-              defaultStyle: true
-            },
-            'guides/setup/installation/hosted_environment',
-            {
-              type: 'html',
-              value: '<h4>For use with cloud storage</h4>',
-              defaultStyle: true
-            },
-            {
-              type: 'doc',
-              id: 'guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3'
-            },
-            {
-              type: 'doc',
-              id: 'guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs'
-            },
-            {
-              type: 'doc',
-              id: 'guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs'
-            },
-            {
-              type: 'html',
-              value: '<h4>For use with SQL Databases</h4>',
-              defaultStyle: true
-            },
-            {
-              type: 'doc',
-              id: 'guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases'
-            }
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Data Contexts',
-          items: [
-            {
-              type: 'html',
-              value: '<h4>Quickstart Data Context</h4>',
-              defaultStyle: true
-            },
-            {
-              type: 'doc',
-              id: 'guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context',
-              label: 'How to quickly instantiate a Data Context'
-            },
-            {
-              type: 'html',
-              value: '<h4>Filesystem Data Contexts</h4>',
-              defaultStyle: true
-            },
-            {
-              type: 'doc',
-              id: 'guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python',
-              label: 'How to initialize a Filesystem Data Context in Python'
-            },
-            {
-              type: 'doc',
-              id: 'guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context',
-              label: 'How to instantiate a specific Filesystem Data Context'
-            },
-            {
-              type: 'html',
-              value: '<h4>In-memory Data Contexts</h4>',
-              defaultStyle: true
-            },
-            'guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context',
+            'guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context',
             'guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context',
-            {
-              type: 'html',
-              value: '<h4>Data Context Configuration</h4>',
-              defaultStyle: true
-            },
-            'guides/setup/configuring_data_contexts/how_to_configure_credentials'
+            'guides/setup/configuring_data_contexts/how_to_configure_credentials',
           ]
         },
-        {
-          type: 'category',
-          label: 'Metadata Stores',
-          items: [
-            {
-              type: 'category',
-              label: 'Expectation Stores',
-              items: [
-                'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3',
-                'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage',
-                'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs',
-                'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem',
-                'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Validation Result Stores',
-              items: [
-                'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3',
-                'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage',
-                'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs',
-                'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem',
-                'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_to_postgresql'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Metric Stores',
-              items: [
-                'guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore'
-              ]
-            }
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Data Docs',
-          items: [
-            'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem',
-            'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage',
-            'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs',
-            'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3'
-          ]
-        },
-        { type: 'doc', id: 'guides/setup/index', label: 'Index' }
+        'guides/setup/configuring_metadata_stores/configure_expectation_stores',
+        'guides/setup/configuring_metadata_stores/configure_result_stores',
+        'guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore',
+        'guides/setup/configuring_data_docs/host_and_share_data_docs',
       ]
     },
     {
       type: 'category',
-      label: 'Connecting to data',
-      link: { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_overview' },
+      label: 'Connect to Source Data',
+      link: { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_lp' },
       items: [
+        'guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data',
+        'guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas',
+        'guides/connecting_to_your_data/fluent/database/connect_sql_source_data',
         {
           type: 'category',
-          label: 'Filesystem Datasources',
+          label: 'Manage Data Assets',
+          link: { type: 'doc', id: 'guides/connecting_to_your_data/manage_data_assets_lp' },
           items: [
-            {
-              type: 'html',
-              value: '<h4>Local Filesystems</h4>',
-              defaultStyle: true
-            },
-            'guides/connecting_to_your_data/fluent/filesystem/how_to_quickly_connect_to_a_single_file_with_pandas',
-            'guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas',
-            'guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark',
-            {
-              type: 'html',
-              value: '<h4>Google Cloud Storage</h4>',
-              defaultStyle: true
-            },
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_pandas',
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_spark',
-            {
-              type: 'html',
-              value: '<h4>Azure Blob Storage</h4>',
-              defaultStyle: true
-            },
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_pandas',
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_spark',
-            {
-              type: 'html',
-              value: '<h4>Amazon Web Services S3</h4>',
-              defaultStyle: true
-            },
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_pandas',
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_spark'
-          ]
-        },
-        {
-          type: 'category',
-          label: 'In-memory Datasources',
-          items: [
-            'guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas'
-          ]
-        },
-        {
-          type: 'category',
-          label: 'SQL Datasources',
-          items: [
-            {
-              type: 'html',
-              value: '<h4>General SQL Datasources</h4>',
-              defaultStyle: true
-            },
-            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data',
-            {
-              type: 'html',
-              value: '<h4>Specific SQL dialects</h4>',
-              defaultStyle: true
-            },
-            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data',
-            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data'
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Working with Data Assets',
-          items: [
-            {
-              type: 'html',
-              value: '<h4>All Data Assets</h4>',
-              defaultStyle: true
-            },
             'guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset',
-            {
-              type: 'html',
-              value: '<h4>Filesystem Data Assets</h4>',
-              defaultStyle: true
-            },
             'guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset',
-            {
-              type: 'html',
-              value: '<h4>SQL Data Assets</h4>',
-              defaultStyle: true
-            },
-            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table',
-            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query',
-            'guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset'
+            'guides/connecting_to_your_data/fluent/database/sql_data_assets',
           ]
         },
-        { type: 'doc', id: 'guides/connecting_to_your_data/index', label: 'Index' }
       ]
     },
     {
       type: 'category',
-      label: 'Creating Expectations',
-      link: { type: 'doc', id: 'guides/expectations/create_expectations_overview' },
+      label: 'Create Expectations',
+      link: { type: 'doc', id: 'guides/expectations/expectations_lp' },
       items: [
+        'guides/expectations/create_expectations_overview',
         {
           type: 'category',
-          label: 'Core skills',
+          label: 'Manage Expectations and Expectation Suites',
+          link: { type: 'doc', id: 'guides/expectations/create_manage_expectations_lp' },
           items: [
             'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
             'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
             'guides/expectations/how_to_edit_an_existing_expectationsuite',
-            { type: 'doc', id: 'guides/expectations/how_to_use_auto_initializing_expectations' }
+            'guides/expectations/how_to_use_auto_initializing_expectations',
+            'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
+            'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
+            'guides/expectations/advanced/how_to_compare_two_tables_with_the_onboarding_data_assistant',
           ]
         },
         {
           type: 'category',
           label: 'Profilers and Data Assistants',
+          link: { type: 'doc', id: 'guides/expectations/profilers_data_assistants_lp' },
           items: [
             'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant',
-            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers'
+            'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant',
+            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers',
           ]
         },
         {
           type: 'category',
-          label: 'Advanced skills',
+          label: 'Create Custom Expectations',
+          link: { type: 'doc', id: 'guides/expectations/custom_expectations_lp' },
           items: [
-            'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
-            'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
-            'guides/expectations/advanced/how_to_compare_two_tables_with_the_onboarding_data_assistant'
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Creating Custom Expectations',
-          items: [
-            'guides/expectations/creating_custom_expectations/overview',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations',
@@ -287,98 +102,103 @@ module.exports = {
             'guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
             'guides/expectations/creating_custom_expectations/how_to_add_support_for_the_auto_initializing_framework_to_a_custom_expectation',
-            'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
-            {
-              type: 'category',
-              label: 'Adding Features to Custom Expectations',
-              items: [
-                'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
-                'guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation',
-                'guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
-                'guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
-                'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation'
-              ]
-            }
           ]
         },
-        { type: 'doc', id: 'guides/expectations/index', label: 'Index' }
+        {
+          type: 'category',
+          label: 'Add Features to Custom Expectations',
+          link: { type: 'doc', id: 'guides/expectations/add_features_custom_expectations_lp' },
+          items: [
+            'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
+            'guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation',
+            'guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
+            'guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
+            'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation',
+            'guides/expectations/creating_custom_expectations/add_custom_parameters',
+          ]
+        },
+        'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
       ]
     },
     {
       type: 'category',
-      label: 'Validating data',
-      link: { type: 'doc', id: 'guides/validation/validate_data_overview' },
+      label: 'Validate Data',
+      link: { type: 'doc', id: 'guides/validation/validate_data_lp' },
       items: [
+        'guides/validation/validate_data_overview',
         {
           type: 'category',
-          label: 'Core skills',
+          label: 'Manage Checkpoints',
+          link: { type: 'doc', id: 'guides/validation/checkpoints/checkpoint_lp' },
           items: [
-            'guides/validation/how_to_validate_data_by_running_a_checkpoint'
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Checkpoints',
-          items: [
-            'guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
             'guides/validation/checkpoints/how_to_create_a_new_checkpoint',
             'guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config',
-            'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint'
+            'guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
+            'guides/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint',
+            'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint',
+            'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
           ]
         },
         {
           type: 'category',
-          label: 'Actions',
+          label: 'Configure Actions',
+          link: { type: 'doc', id: 'guides/validation/validation_actions/actions_lp' },
           items: [
             'guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action',
             'guides/validation/validation_actions/how_to_collect_openlineage_metadata_using_a_validation_action',
             'guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action',
             'guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action',
-            'guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action'
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Advanced',
-          items: [
-            'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
+            'guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action',
             'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
-            'guides/validation/advanced/how_to_validate_data_without_a_checkpoint'
           ]
         },
-        { type: 'doc', id: 'guides/validation/index', label: 'Index' }
       ]
     },
     {
       type: 'category',
-      label: 'Integration guides',
-      link: { type: 'doc', id: 'deployment_patterns/integrations_and_howtos_overview' },
+      label: 'Integrations',
+      link: {
+        type: 'generated-index',
+        title: 'Integrations',
+        description: 'Integrate Great Expectations (GX) with commonly used data engineering tools.',
+      },
       items: [
         {
           type: 'category',
-          label: 'Using Great Expectations with AWS',
+          label: 'Amazon Web Services (AWS)',
+          link: {
+            type: 'doc',
+            id: 'deployment_patterns/aws_lp',
+          },
           items: [
             'deployment_patterns/how_to_use_great_expectations_in_aws_glue',
-            { label: 'How to use Great Expectations with AWS using S3 and Pandas', type: 'doc', id: 'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_cloud_storage_and_pandas' },
-            { label: 'How to use Great Expectations with AWS using S3 and Spark', type: 'doc', id: 'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_s3_and_spark' },
-            { label: 'How to use Great Expectations with AWS using Athena', type: 'doc', id: 'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_athena' },
-            { label: 'How to use Great Expectations with AWS using Redshift', type: 'doc', id: 'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_redshift' }
-          ]
+            'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
+            'deployment_patterns/how_to_use_great_expectations_in_emr_serverless',
+            'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_cloud_storage_and_pandas',
+            'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_s3_and_spark',
+            'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_athena',
+            'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_redshift',
+          ],
         },
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
-        'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_use_great_expectations_with_airflow',
-        'deployment_patterns/how_to_use_great_expectations_in_databricks',
-        { type: 'doc', id: 'integrations/integration_datahub' },
+        'integrations/integration_datahub',
         'deployment_patterns/how_to_use_great_expectations_in_deepnote',
         'deployment_patterns/how_to_use_great_expectations_in_flyte',
         'deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery',
         'deployment_patterns/how_to_use_great_expectations_with_meltano',
         'deployment_patterns/how_to_use_great_expectations_with_prefect',
         'deployment_patterns/how_to_use_great_expectations_with_ydata_synthetic',
-        'deployment_patterns/how_to_use_great_expectations_in_emr_serverless',
-        { type: 'doc', id: 'integrations/integration_zenml' },
-        { type: 'doc', id: 'deployment_patterns/index', label: 'Index' }
+        'integrations/integration_zenml',
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Concepts',
+      link: { type: 'doc', id: 'conceptual_guides/learn_lp' }, 
+      items: [
+        'conceptual_guides/expectation_classes',
+        'conceptual_guides/metricproviders',
       ]
     },
     {
@@ -386,9 +206,9 @@ module.exports = {
       label: 'Reference',
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
-    'contributing/contributing_maturity',
-    'reference/customize_your_deployment',
-    'reference/usage_statistics',
+        'contributing/contributing_maturity',
+        'reference/customize_your_deployment',
+        'reference/usage_statistics',
         {
           type: 'category',
           label: 'API documentation',
@@ -402,7 +222,7 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Glossary of Terms',
+          label: 'Glossary',
           link: { type: 'doc', id: 'glossary' },
           items: [
             'terms/action',

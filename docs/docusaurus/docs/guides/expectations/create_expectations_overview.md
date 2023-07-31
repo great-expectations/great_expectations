@@ -1,20 +1,11 @@
 ---
-title: "Create Expectations: Overview"
+sidebar_label: 'Expectation creation workflow'
+title: 'Expectation creation workflow'
+id: create_expectations_overview
+description: An overview of the process for creating and managing Expectations and Expectation Suites.
 ---
-# [![Create Expectations Icon](../../images/universal_map/Flask-active.png)](./create_expectations_overview.md) Create Expectations: Overview
 
-import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-
-<!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->
-
-<UniversalMap setup='inactive' connect='inactive' create='active' validate='inactive'/>
-
-## Prerequisites
-
-- Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md)
-
-## Workflows
 
 The following image shows the four workflows you can follow to create <TechnicalTag tag="expectation" text="Expectations" />:
 
@@ -28,7 +19,7 @@ In this workflow, you work in a Python interpreter or Jupyter Notebook.  You use
 
 ### Create Expectations with Data Assistants
 
-In this workflow, you use a <TechnicalTag tag="data_assistant" text="Data Assistant" /> to generate Expectations based on the input data you provide.  You can preview the Metrics that these Expectations are based on, and you save can the generated Expectations as an Expectation Suite in an Expectation Store. 
+In this workflow, you use a <TechnicalTag tag="data_assistant" text="Data Assistant" /> to generate Expectations based on the input data you provide.  You can preview the Metrics that these Expectations are based on, and you can save the generated Expectations as an Expectation Suite in an Expectation Store. 
 
 As with creating Expectations interactively, you start with your Data Context.  However, you work in a Python environment, so you need to load or create your Data Context as an instantiated object.  Next, you create a Batch Request to specify the data you would like to <TechnicalTag tag="profiling" text="Profile" /> with your Data Assistant.  Once you have a <TechnicalTag tag="batch_request" text="Batch Request" /> configured you will use it as the input for the run method of your Data Assistant, which can be accessed from your Data Context object.  Once the Data Assistant has run, you will be able to review the results and save the generated Expectations to an empty Expectation Suite.
 

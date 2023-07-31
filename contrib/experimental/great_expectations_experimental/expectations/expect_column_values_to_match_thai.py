@@ -12,7 +12,7 @@ from great_expectations.expectations.regex_based_column_map_expectation import (
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToMatchThai(RegexBasedColumnMapExpectation):
-    """Expect a value of column to contain Thai Language
+    """Expect column values to contain Thai Language.
 
     Args:
         column (str): \
@@ -32,6 +32,7 @@ class ExpectColumnValuesToMatchThai(RegexBasedColumnMapExpectation):
                 "english": ["hello", "world"],
                 "thai": ["สวัสดี", "ชาวโลก"],
             },
+            "only_for": ["pandas", "spark"],
             "tests": [
                 {
                     "title": "positive_test",
@@ -50,16 +51,6 @@ class ExpectColumnValuesToMatchThai(RegexBasedColumnMapExpectation):
                         "success": False,
                     },
                     "include_in_gallery": True,
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "spark",
-                    "dialects": None,
                 },
             ],
         }

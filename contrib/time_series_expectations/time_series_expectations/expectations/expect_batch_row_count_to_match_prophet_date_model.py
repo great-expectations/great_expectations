@@ -14,7 +14,7 @@ from time_series_expectations.expectations.prophet_model_deserializer import (
 
 
 class ExpectBatchRowCountToMatchProphetDateModel(BatchExpectation):
-    """This Expectation checks to see if the number of rows in a Batch matches the predictions of a prophet model for a given date.
+    """Expect the number of rows in a batch to match the predictions of a prophet model for a given date.
 
     expect_batch_row_count_to_match_prophet_date_model is a [BatchExpectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations)
 
@@ -55,6 +55,7 @@ class ExpectBatchRowCountToMatchProphetDateModel(BatchExpectation):
     examples = [
         {
             "data": {"foo": range(100)},
+            "only_for": ["pandas"],
             "tests": [
                 {
                     "title": "positive_test",
@@ -70,15 +71,10 @@ class ExpectBatchRowCountToMatchProphetDateModel(BatchExpectation):
                     },
                 }
             ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-            ],
         },
         {
             "data": {"foo": range(50)},
+            "only_for": ["pandas"],
             "tests": [
                 {
                     "title": "negative_test",
@@ -93,12 +89,6 @@ class ExpectBatchRowCountToMatchProphetDateModel(BatchExpectation):
                         "observed_value": 50,
                     },
                 }
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
             ],
         },
     ]

@@ -1,20 +1,14 @@
 ---
-title: "Validate Data: Overview"
+title: "Data Validation workflow"
 ---
-# [![Create Expectations Icon](../../images/universal_map/Checkmark-active.png)](./validate_data_overview.md) Validate Data: Overview
 
-import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-
-<!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->
-
-<UniversalMap setup='inactive' connect='inactive' create='inactive' validate='active'/>
 
 Great Expectations recommends using Checkpoints to validate data.  Checkpoints validate data, save <TechnicalTag tag="validation_result" text="Validation Results" />, run any <TechnicalTag tag="action" text="Actions" /> you have specified, and finally, create <TechnicalTag tag="data_docs" text="Data Docs" /> with their results.  A Checkpoint can be reused to <TechnicalTag tag="validation" text="Validate" /> data in the future, and you can create and configure additional Checkpoints for different business requirements.
 
 ![How a Checkpoint works](../../images/universal_map/overviews/how_a_checkpoint_works.png)
 
-After you've created your Checkpoint, configured it, and specified the Actions you want it to take based on the Validation Results, all you will need to do in the future run the Checkpoint.
+After you've created your Checkpoint, configured it, and specified the Actions you want it to take based on the Validation Results, all you'll need to do in the future is run the Checkpoint.
 
 ## Prerequisites
 
@@ -38,7 +32,7 @@ For more information on adding Batch Requests and Expectation Suites to a Checkp
 
 ### Checkpoints and Actions
 
-Actions are optional and are executed after a Checkpoint validates data. Some of the more common Actions include updating Data Docs, sending emails, posting Slack notifications, or sending custom notifications. You can create custom Actions to complete business specific actions after a Checkpoint Validates. For more information about Actions, see [Validation Actions](./index.md#validation-actions).
+Actions are optional and are executed after a Checkpoint validates data. Some of the more common Actions include updating Data Docs, sending emails, posting Slack notifications, or sending custom notifications. You can create custom Actions to complete business specific actions after a Checkpoint Validates. For more information about Actions, see [Configure Actions](./validation_actions/actions_lp.md).
 
 ## Run your Checkpoint
 
@@ -52,4 +46,4 @@ For more information, see the <TechnicalTag tag="data_docs" text="Data Docs"/> d
 
 ## Checkpoint reuse
 
-After your Checkpoint is created, and you have used it to validate data, you can reuse it in a Python script. If you want your Checkpoint to run on a schedule, see [How to deploy a scheduled Checkpoint with cron](./advanced/how_to_deploy_a_scheduled_checkpoint_with_cron.md). If your pipeline architecture supports it, you can your run Checkpoints with Python scripts.  Regardless of the method you use to run your Checkpoint, Actions let you customize what is done with the generated Validation Results. 
+After your Checkpoint is created, and you have used it to validate data, you can reuse it in a Python script. If you want your Checkpoint to run on a schedule, see [How to deploy a scheduled Checkpoint with cron](./advanced/how_to_deploy_a_scheduled_checkpoint_with_cron.md). If your pipeline architecture supports it, you can run your Checkpoints with Python scripts.  Regardless of the method you use to run your Checkpoint, Actions let you customize what is done with the generated Validation Results. 

@@ -78,76 +78,8 @@ stages:
               invoke lint || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
-  - stage: custom_checks
-    pool:
-      vmImage: 'ubuntu-latest'
-
-    jobs:
-    - job: static_type_check
-      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-      steps:
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: 3.8
-        displayName: 'Use Python 3.8'
-      - script: |
-          python -m pip install --upgrade pip
-          pip install --requirement requirements-types.txt
-        name: InstallDependencies
-      - script: |
-          invoke type-check --ci --pretty
-        name: StaticTypeCheck
-      - script: |
-          # initial run doesn't check `.pyi` source files
-          invoke type-check --ci --pretty --check-stub-sources
-        name: TypeCheckStubSourceFiles
-    - job: docstring_linter
-      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-      steps:
-      - script: |
-          pip install --requirement reqs/requirements-dev-test.txt
-          invoke docstrings
-        name: DocstringLinter
-
-    - job: unused_import_checker
-      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-      steps:
-      - script: |
-          pip install $(grep -E '^(ruff)' reqs/requirements-dev-contrib.txt)
-          # https://www.flake8rules.com/rules/F401.html - Prunes the dgtest graph to improve accuracy
-          ruff --select F401 great_expectations tests
-        name: UnusedImportChecker
-
-    - job: line_number_snippet_checker
-      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-      steps:
-        - script: |
-            python ci/checks/check_no_line_number_snippets.py
-          name: LineNumberSnippetChecker
-
-    - job: name_tag_snippet_checker
-      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-      steps:
-        - script: |
-            python ci/checks/check_only_name_tag_snippets.py
-          name: NameTagSnippetChecker
-
-    - job: check_repo_root_size
-      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-      steps:
-        - script: ./ci/checks/check_repo_root_size.sh
-          name: CheckRepoRootSize
-
-    - job: public_api_report
-      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-      steps:
-        - script: |
-            pip install --requirement reqs/requirements-dev-test.txt
-            invoke public-api
-          name: PublicAPIReport
-
   - stage: docker_tests
-    dependsOn: [lint, custom_checks]
+    dependsOn: [lint]
     condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
     pool:
       vmImage: 'ubuntu-latest'
@@ -183,6 +115,8 @@ stages:
               python.version: '3.9'
             Python310:
               python.version: '3.10'
+            Python311:
+              python.version: '3.11'
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
           GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
@@ -196,7 +130,6 @@ stages:
               CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${DOCKER_TAG} "
               CMD+="--target test --build-arg PYTHON_VERSION=$(python.version) "
               CMD+="--build-arg GE_USAGE_STATISTICS_URL=\"$(GE_USAGE_STATISTICS_URL)\" "
-              CMD+="--build-arg SQLALCHEMY_WARN_20=true "
               CMD+="--build-arg SOURCE=github --build-arg BRANCH=\"${BRANCH_NAME}\" ."
               echo ${CMD}
               eval ${CMD}
@@ -229,6 +162,8 @@ stages:
               python.version: '3.9'
             Python310:
               python.version: '3.10'
+            Python311:
+              python.version: '3.11'
         services:
           postgres: postgres
         variables:
@@ -411,6 +346,8 @@ stages:
               python.version: '3.9'
             Python310:
               python.version: '3.10'
+            Python311:
+              python.version: '3.11'
         services:
           postgres: postgres
         variables:
@@ -423,44 +360,6 @@ stages:
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest cli'
-
-      - job: test_dependency_versions
-        dependsOn: [make_suffix, build_push]
-        condition: succeeded()
-        strategy:
-          matrix:
-            Python38:
-              python.version: '3.8'
-              constraints: 'ci/constraints-test/py38-min-install.txt'
-            Python39:
-              python.version: '3.9'
-              constraints: 'ci/constraints-test/py39-min-install.txt'
-            Python310:
-              python.version: '3.10'
-              constraints: 'ci/constraints-test/py310-min-install.txt'
-            # Pandas20:
-            #   python.version: '3.9'
-            #   constraints: 'ci/constraints-test/pandas2-min-install.txt'
-        variables:
-          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
-        steps:
-          - bash: |
-              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
-              PYTEST="docker run -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) "
-              PYTEST+="-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) -e AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION) "
-              PYTEST+="--network=host greatexpectations/test:${DOCKER_TAG} bash -c \""
-              PYTEST+="pip install --no-cache-dir --requirement requirements-dev.txt "
-              PYTEST+="--requirement reqs/requirements-dev-test.txt --constraint constraints-dev.txt "
-              PYTEST+="--constraint $(constraints) && "
-              PYTEST+="pytest --no-sqlalchemy --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistic "
-              PYTEST+="--ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py\""
-              echo ${PYTEST}
-              eval ${PYTEST}
-            displayName: 'Pytest min versions'
-            env:
-              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
-              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
-              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
 
       - job: test_usage_stats
         dependsOn: [make_suffix, build_push]
@@ -533,6 +432,8 @@ stages:
              python.version: '3.9'
            Python310:
              python.version: '3.10'
+           Python311:
+             python.version: '3.11'
 
         steps:
          - task: UsePythonVersion@0
@@ -554,7 +455,7 @@ stages:
   - stage: db_integration
     pool:
       vmImage: 'ubuntu-latest'
-    dependsOn: [lint, import_ge, custom_checks]
+    dependsOn: [lint, import_ge]
     jobs:
       - job: mssql
         condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
@@ -592,35 +493,40 @@ stages:
                 --cov-report=html
             displayName: 'Pytest mssql'
 
-  - stage: airflow_provider
-    dependsOn: [lint, import_ge, custom_checks]
-    pool:
-      vmImage: 'ubuntu-latest'
+  # 2023-07-18 - Chetan - these are being disabled due to a test failure introduced by the provider
+  # GitHub issue requiring resolution: https://github.com/astronomer/airflow-provider-great-expectations/issues/114
 
-    jobs:
-      - job: run_airflow_provider_tests
-        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+  # - stage: airflow_provider
+  #   dependsOn: [lint, import_ge]
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-        strategy:
-          matrix:
-            Python38:
-              python.version: '3.8'
-            Python39:
-              python.version: '3.9'
-            Python310:
-              python.version: '3.10'
+  #   jobs:
+  #     - job: run_airflow_provider_tests
+  #       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       strategy:
+  #         matrix:
+  #           Python38:
+  #             python.version: '3.8'
+  #           Python39:
+  #             python.version: '3.9'
+  #           Python310:
+  #             python.version: '3.10'
+  #           Python311:
+  #             python.version: '3.11'
 
-          - script: ./ci/checks/run_gx_airflow_operator_tests.sh
-            name: RunAirflowProviderTests
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
+
+  #         - script: ./ci/checks/run_gx_airflow_operator_tests.sh
+  #           name: RunAirflowProviderTests
 
   - stage: test_build_docs
-    dependsOn: [lint, import_ge, custom_checks]
+    dependsOn: [lint, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -636,12 +542,14 @@ stages:
 
           - script: cd docs/docusaurus && yarn install && bash ../build_docs
             name: TestBuildDocs
+            env:
+              NODE_OPTIONS: --max_old_space_size=4096
 
   - stage: deploy
     condition: and(succeeded(), eq(variables.isRelease, true))
     pool:
       vmImage: 'ubuntu-latest'
-    dependsOn: [import_ge, custom_checks, lint, db_integration, docker_tests]
+    dependsOn: [import_ge, lint, db_integration, docker_tests]
     jobs:
       - job: deploy
         variables:

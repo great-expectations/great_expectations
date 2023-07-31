@@ -36,12 +36,12 @@ The following table details Great Expectations readiness levels. Great Expectati
 
 ## Expectation contributions
 
-[Creating Custom Expectations](../guides/expectations/creating_custom_expectations/overview.md) explains how you can create an Expectation with an experimental status. The `print_diagnostic_checklist()` method provides you with a list of requirements that you must meet to move your Expectation from experimental to beta, and then to production. The first five requirements are required for experimental status, the following three are required for beta status, and the final two are required for production status.
+[Create and manage Custom Expectations](../guides/expectations/custom_expectations_lp.md) explains how you can create an Expectation with an experimental status. The `print_diagnostic_checklist()` method provides you with a list of requirements that you must meet to move your Expectation from experimental to beta, and then to production. The first five requirements are required for experimental status, the following three are required for beta status, and the final two are required for production status.
 
 | Criteria                                 | <i class="fas fa-circle" style={{color: "#dc3545"}}></i> Experimental <br/>Try, but do not rely | <i class="fas fa-circle" style={{color: "#ffc107"}}></i> Beta <br/>Ready for early adopters | <i class="fas fa-check-circle" style={{color: "#28a745"}}></i> Production <br/>Ready for general use |
 |------------------------------------------|:------------------------------------:|:--------------------------------:|:-----------------------------------:|
 | Has a valid library_metadata object            | &#10004; | &#10004; | &#10004; |
-| Has a docstring, including a one-line short description | &#10004; | &#10004; | &#10004; |
+| Has a docstring, including a one-line short description that begins with "Expect" and ends with a period | &#10004; | &#10004; | &#10004; |
 | Has at least one positive and negative example case, and all test cases pass | &#10004; | &#10004; | &#10004; |
 | Has core logic and passes tests on at least one Execution Engine | &#10004; | &#10004; | &#10004; |
 | Passes all linting checks | &#10004; | &#10004; | &#10004; |

@@ -37,7 +37,7 @@ def test_profiler_store_set_adds_valid_key(
     assert len(empty_profiler_store.list_keys()) == 1
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_profiler_store_integration(
     empty_data_context: DataContext,
     profiler_store_name: str,

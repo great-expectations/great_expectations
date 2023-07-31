@@ -54,7 +54,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
     }
     cardinality_limit_modes: Type[CardinalityLimitMode] = CardinalityLimitMode
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,

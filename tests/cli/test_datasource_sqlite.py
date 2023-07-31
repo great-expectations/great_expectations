@@ -12,6 +12,9 @@ from great_expectations.util import get_context
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks, escape_ansi
 
 
+pytestmark = pytest.mark.cli
+
+
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -34,7 +37,7 @@ def test_cli_datasource_new_connection_string(
     result = runner.invoke(
         cli,
         "datasource new",
-        input="y\n2\n8\n",
+        input="y\n2\n9\n",
         catch_exceptions=False,
     )
     stdout = result.stdout

@@ -7,7 +7,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,  # noqa: TCH001
+    ParameterContainer,
 )
 from great_expectations.types import SerializableDictDot
 

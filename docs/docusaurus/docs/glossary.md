@@ -1,11 +1,7 @@
 ---
 id: glossary
-title: "Glossary of Terms"
+title: "Glossary"
 ---
-
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 [**Action:**](./terms/action.md) A Python class with a run method that takes a Validation Result and does something with it
 
@@ -46,6 +42,8 @@ import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 [**Expectation Suite:**](./terms/expectation_suite.md) A collection of verifiable assertions about data.
 
 [**Metric:**](./terms/metric.md) A computed attribute of data such as the mean of a column.
+
+[**MetricProviders:**](./conceptual_guides/metricproviders.md) Generate and register Metrics to support Expectations, and they are an important part of the Expectation software development kit (SDK).
 
 [**Metric Store:**](./terms/metric_store.md) A connector to store and retrieve information about computed attributes of data, such as the mean of a column.
 

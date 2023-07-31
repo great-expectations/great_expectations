@@ -12,7 +12,7 @@ from great_expectations.agent.message_service.asyncio_rabbit_mq_client import (
     AsyncRabbitMQClient,
     OnMessagePayload,
 )
-from great_expectations.agent.models import Event
+from great_expectations.agent.models import Event, UnknownEvent
 
 
 @dataclass(frozen=True)
@@ -20,7 +20,7 @@ class EventContext:
     """An Event with related properties and actions.
 
     Attributes:
-        event: Pydantic model of type Event if parsable, None if not
+        event: Pydantic model of type Event
         correlation_id: stable identifier for this Event over its lifecycle
         processed_successfully: callable to signal that the event was
             processed successfully and can be removed from the queue.
@@ -30,7 +30,7 @@ class EventContext:
             try to deliver this message again.
     """
 
-    event: Union[Event, None]
+    event: Event
     correlation_id: str
     processed_successfully: Callable[[], None]
     processed_with_failures: Callable[[], None]
@@ -100,11 +100,11 @@ class Subscriber:
             payload: dataclass containing required message attributes
             on_message: the caller-provided callback
         """
-        event: Union[Event, None]
+        event: Event
         try:
             event = pydantic.parse_raw_as(Event, payload.body)  # type: ignore[arg-type]
         except (pydantic.ValidationError, JSONDecodeError):
-            event = None
+            event = UnknownEvent()
 
         # Allow the caller to determine whether to ack/nack this message,
         # even if the processing occurs in another thread.
@@ -146,7 +146,7 @@ class Subscriber:
             self._reconnect_delay = 0
         else:
             self._reconnect_delay += 1
-        if self._reconnect_delay > 30:
+        if self._reconnect_delay > 30:  # noqa: PLR2004
             self._reconnect_delay = 30
         return self._reconnect_delay
 

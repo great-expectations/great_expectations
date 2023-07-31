@@ -1,4 +1,7 @@
 import os
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 import shutil
 from unittest import mock
 
@@ -15,6 +18,9 @@ from tests.cli.utils import (
 )
 
 
+pytestmark = pytest.mark.cli
+
+
 @pytest.fixture
 def titanic_data_context_clean_usage_stats_enabled(
     tmp_path_factory, monkeypatch
@@ -23,7 +29,7 @@ def titanic_data_context_clean_usage_stats_enabled(
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
     os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
     data_path = os.path.join(context_path, "..", "data")
@@ -32,7 +38,7 @@ def titanic_data_context_clean_usage_stats_enabled(
         __file__, "../test_fixtures/great_expectations_v013clean_titanic.yml"
     )
     shutil.copy(
-        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+        titanic_yml_path, str(os.path.join(context_path, FileDataContext.GX_YML))
     )
     titanic_csv_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
     shutil.copy(
@@ -49,7 +55,7 @@ def titanic_data_context_v2_datasources_and_validation_operators_usage_stats_ena
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
     os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
     data_path = os.path.join(context_path, "..", "data")
@@ -59,7 +65,7 @@ def titanic_data_context_v2_datasources_and_validation_operators_usage_stats_ena
         __file__, "../test_fixtures/great_expectations_v013_titanic.yml"
     )
     shutil.copy(
-        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+        titanic_yml_path, str(os.path.join(context_path, FileDataContext.GX_YML))
     )
     titanic_csv_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
     shutil.copy(
@@ -184,7 +190,7 @@ def test_project_check_on_project_with_missing_config_file_guides_user(
 ):
     context = titanic_data_context
     # Remove the config file.
-    os.remove(os.path.join(context.root_directory, "great_expectations.yml"))
+    os.remove(os.path.join(context.root_directory, FileDataContext.GX_YML))
 
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))

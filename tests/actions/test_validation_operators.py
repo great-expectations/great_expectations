@@ -1,5 +1,4 @@
 # TODO: ADD TESTS ONCE GET_BATCH IS INTEGRATED!
-
 import dateutil.parser
 import pandas as pd
 import pytest
@@ -7,6 +6,9 @@ from freezegun import freeze_time
 
 import great_expectations as gx
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.self_check.util import modify_locale
 from great_expectations.util import get_context
 from great_expectations.validation_operators.validation_operators import (
@@ -52,7 +54,7 @@ def warning_failure_validation_operator_data_context(
     tmp_path_factory,
     filesystem_csv_4,
 ):
-    project_path = str(tmp_path_factory.mktemp("great_expectations"))
+    project_path = str(tmp_path_factory.mktemp(FileDataContext.GX_DIR))
 
     # NOTE: This setup is almost identical to test_DefaultDataContextAwareValidationOperator.
     # Consider converting to a single fixture.
@@ -122,6 +124,7 @@ def warning_failure_validation_operator_data_context(
 @pytest.mark.filterwarnings(
     "ignore:System time is way off:urllib3.exceptions.SystemTimeWarning:urllib3"
 )
+@pytest.mark.filesystem
 def test_errors_warnings_validation_operator_run_slack_query(
     warning_failure_validation_operator_data_context, assets_to_validate
 ):
@@ -215,6 +218,7 @@ def test_errors_warnings_validation_operator_run_slack_query(
     assert slack_query == expected_slack_query
 
 
+@pytest.mark.filesystem
 def test_errors_warnings_validation_operator_failed_vo_result(
     warning_failure_validation_operator_data_context, assets_to_validate
 ):
@@ -278,6 +282,7 @@ def test_errors_warnings_validation_operator_failed_vo_result(
     assert not return_obj_2.success
 
 
+@pytest.mark.filesystem
 def test_errors_warnings_validation_operator_succeeded_vo_result_with_only_failed_warning_suite(
     warning_failure_validation_operator_data_context, assets_to_validate
 ):
@@ -341,6 +346,7 @@ def test_errors_warnings_validation_operator_succeeded_vo_result_with_only_faile
     assert return_obj_2.success
 
 
+@pytest.mark.filesystem
 def test_passing_run_id_as_a_parameter_to_warning_and_failure_vo(
     warning_failure_validation_operator_data_context, assets_to_validate
 ):

@@ -77,6 +77,15 @@
             "default": "infer",
             "anyOf": [
                 {
+                    "enum": [
+                        "infer",
+                        "gzip",
+                        "bz2",
+                        "zip",
+                        "xz",
+                        "zstd",
+                        "tar"
+                    ],
                     "type": "string"
                 },
                 {

@@ -1,21 +1,46 @@
-from typing import List
+from __future__ import annotations
 
-from pydantic import BaseModel
+from typing import TYPE_CHECKING
 
-from great_expectations.agent.message_service.subscriber import EventContext
-from great_expectations.agent.models import RunCheckpointEvent, RunDataAssistantEvent
-from great_expectations.data_context import CloudDataContext
+from great_expectations.agent.actions import (
+    ColumnDescriptiveMetricsAction,
+    ListTableNamesAction,
+)
+from great_expectations.agent.actions.data_assistants import (
+    RunMissingnessDataAssistantAction,
+    RunOnboardingDataAssistantAction,
+)
+from great_expectations.agent.actions.draft_datasource_config_action import (
+    DraftDatasourceConfigAction,
+)
+from great_expectations.agent.models import (
+    DraftDatasourceConfigEvent,
+    Event,
+    ListTableNamesEvent,
+    RunCheckpointEvent,
+    RunColumnDescriptiveMetricsEvent,
+    RunMissingnessDataAssistantEvent,
+    RunOnboardingDataAssistantEvent,
+)
+from great_expectations.experimental.metric_repository.batch_inspector import (
+    BatchInspector,
+)
+from great_expectations.experimental.metric_repository.cloud_data_store import (
+    CloudDataStore,
+)
+from great_expectations.experimental.metric_repository.column_descriptive_metrics_metric_retriever import (
+    ColumnDescriptiveMetricsMetricRetriever,
+)
+from great_expectations.experimental.metric_repository.metric_repository import (
+    MetricRepository,
+)
 
-
-class CreatedResource(BaseModel):
-    type: str
-    id: str
-
-
-class EventHandlerResult(BaseModel):
-    id: str
-    type: str
-    created_resources: List[CreatedResource]
+if TYPE_CHECKING:
+    from great_expectations.agent.actions.agent_action import ActionResult, AgentAction
+    from great_expectations.data_context import CloudDataContext
+    from great_expectations.experimental.metric_repository.metric_retriever import (
+        MetricRetriever,
+    )
 
 
 class EventHandler:
@@ -26,28 +51,46 @@ class EventHandler:
     def __init__(self, context: CloudDataContext) -> None:
         self._context = context
 
-    def handle_event(self, event_context: EventContext) -> EventHandlerResult:
-        """Pass event to the correct handler."""
-        if isinstance(event_context.event, RunDataAssistantEvent):
-            return self._handle_run_data_assistant(event_context)
-        elif isinstance(event_context.event, RunCheckpointEvent):
-            return self._handle_run_checkpoint(event_context)
-        else:
-            # shouldn't get here
-            raise UnknownEventError("Unknown message received - cannot process.")
+    def get_event_action(self, event: Event) -> AgentAction:
+        """Get the action that should be run for the given event."""
+        if isinstance(event, RunOnboardingDataAssistantEvent):
+            return RunOnboardingDataAssistantAction(context=self._context)
 
-    def _handle_run_data_assistant(
-        self, event_context: EventContext
-    ) -> EventHandlerResult:
-        """Action that occurs when a RunDataAssistant event is received."""
-        # print("starting long process")
-        # time.sleep(60)
-        # print("finished long process")
-        raise NotImplementedError
+        if isinstance(event, RunMissingnessDataAssistantEvent):
+            return RunMissingnessDataAssistantAction(context=self._context)
 
-    def _handle_run_checkpoint(self, event_context: EventContext) -> EventHandlerResult:
-        """Action that occurs when a RunCheckpointEvent event is received."""
-        raise NotImplementedError
+        if isinstance(event, ListTableNamesEvent):
+            return ListTableNamesAction(context=self._context)
+
+        if isinstance(event, RunCheckpointEvent):
+            raise NotImplementedError
+
+        if isinstance(event, RunColumnDescriptiveMetricsEvent):
+            metric_retrievers: list[MetricRetriever] = [
+                ColumnDescriptiveMetricsMetricRetriever(self._context)
+            ]
+            batch_inspector = BatchInspector(self._context, metric_retrievers)
+            cloud_data_store = CloudDataStore(self._context)
+            column_descriptive_metrics_repository = MetricRepository(
+                data_store=cloud_data_store
+            )
+            return ColumnDescriptiveMetricsAction(
+                context=self._context,
+                batch_inspector=batch_inspector,
+                metric_repository=column_descriptive_metrics_repository,
+            )
+
+        if isinstance(event, DraftDatasourceConfigEvent):
+            return DraftDatasourceConfigAction(context=self._context)
+
+        # shouldn't get here
+        raise UnknownEventError("Unknown message received - cannot process.")
+
+    def handle_event(self, event: Event, id: str) -> ActionResult:
+        """Transform an Event into an ActionResult."""
+        action = self.get_event_action(event=event)
+        action_result = action.run(event=event, id=id)
+        return action_result
 
 
 class UnknownEventError(Exception):

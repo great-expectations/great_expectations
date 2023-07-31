@@ -1,5 +1,8 @@
 import os
 import shutil
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from unittest import mock
 
 import pytest
@@ -12,6 +15,9 @@ from great_expectations.cli.toolkit import (
 )
 from great_expectations.exceptions import UnsupportedConfigVersionError
 from great_expectations.util import get_context
+
+
+pytestmark = pytest.mark.cli
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -365,7 +371,7 @@ def simulated_project_directories(tmp_path_factory):
     test_dir = tmp_path_factory.mktemp("projects", numbered=False)
     assert os.path.isabs(test_dir)
 
-    ge_dir = os.path.join(test_dir, "pipeline1", "great_expectations")
+    ge_dir = os.path.join(test_dir, "pipeline1", FileDataContext.GX_DIR)
     os.makedirs(ge_dir)
     assert os.path.isdir(ge_dir)
 

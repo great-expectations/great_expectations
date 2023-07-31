@@ -23,7 +23,7 @@ Data Docs will be served using an Azure Blob Storage static website with restric
 - Create a [storage account](https://docs.microsoft.com/en-us/azure/storage).
 - In settings select [Static website](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website-host) to display the configuration page for static websites.
 - Select **Enabled** to enable static website hosting for the storage account.
-- Write "index.html" in Index document.
+- Write "index.html" in the Index document.
 
 Note the Primary endpoint url. Your team will be able to consult your data doc on this url when you have finished this tutorial. You could also map a custom domain to this endpoint.
 A container called ``$web`` should have been created in your storage account.

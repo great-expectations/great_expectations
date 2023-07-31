@@ -4,13 +4,11 @@ import copy
 import inspect
 import logging
 from decimal import Decimal
-from typing import Union
+from typing import TYPE_CHECKING, Union
 from unittest import mock
 
 import pandas as pd
 import pytest
-from _pytest.fixtures import FixtureRequest
-from marshmallow import Schema
 
 from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
@@ -35,6 +33,10 @@ from great_expectations.util import (
     filter_properties_dict,
     requires_lossy_conversion,
 )
+
+if TYPE_CHECKING:
+    from _pytest.fixtures import FixtureRequest
+    from marshmallow import Schema
 
 
 @pytest.fixture
@@ -307,6 +309,7 @@ def test_lossy_conversion():
 
 
 # TODO add unittests for convert_to_json_serializable() and ensure_json_serializable()
+@pytest.mark.spark
 def test_serialization_of_spark_df(spark_session):
     df = pd.DataFrame({"a": [1, 2, 3]})
     sdf = spark_session.createDataFrame(df)
@@ -343,7 +346,7 @@ def test_batch_request_deepcopy():
     )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_checkpoint_config_deepcopy(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
     monkeypatch,
@@ -477,7 +480,7 @@ def test_checkpoint_config_deepcopy(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_checkpoint_config_print(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
     monkeypatch,
@@ -741,7 +744,7 @@ def test_checkpoint_config_print(
                 ],
             ),
             {
-                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
+                "action_list": [],
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -789,7 +792,7 @@ def test_checkpoint_config_print(
                 ],
             ),
             {
-                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
+                "action_list": [],
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -839,7 +842,7 @@ def test_checkpoint_config_print(
                 ],
             ),
             {
-                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
+                "action_list": [],
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -889,7 +892,7 @@ def test_checkpoint_config_print(
                 ],
             ),
             {
-                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
+                "action_list": [],
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -942,7 +945,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
         pytest.param(
             "checkpoint_config_spark",
             {
-                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
+                "action_list": [],
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -978,7 +981,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
         pytest.param(
             "checkpoint_config_with_schema_spark",
             {
-                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
+                "action_list": [],
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -1031,7 +1034,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
         ),
     ],
 )
-@pytest.mark.integration
+@pytest.mark.spark
 def test_checkpoint_config_and_nested_objects_are_serialized_spark(
     checkpoint_config_fixture_name: str,
     expected_serialized_checkpoint_config: dict,
@@ -1180,7 +1183,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized_spark(
         ),
     ],
 )
-@pytest.mark.integration
+@pytest.mark.spark
 def test_datasource_config_and_nested_objects_are_serialized_spark(
     datasource_config: Union[DatasourceConfig, str],
     expected_serialized_datasource_config: dict,
@@ -1249,7 +1252,7 @@ def test_datasource_config_and_nested_objects_are_serialized_spark(
         ),
     ],
 )
-@pytest.mark.integration
+@pytest.mark.spark
 def test_data_connector_and_nested_objects_are_serialized_spark(
     data_connector_config: DataConnectorConfig,
     expected_serialized_data_connector_config: dict,
@@ -1315,7 +1318,7 @@ def test_data_connector_and_nested_objects_are_serialized_spark(
         ),
     ],
 )
-@pytest.mark.integration
+@pytest.mark.spark
 def test_asset_and_nested_objects_are_serialized_spark(
     asset_config: AssetConfig,
     expected_serialized_asset_config: dict,

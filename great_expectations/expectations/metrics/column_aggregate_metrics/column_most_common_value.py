@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -24,7 +24,7 @@ class ColumnMostCommonValue(ColumnAggregateMetricProvider):
         return mode_list
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -32,13 +32,13 @@ class ColumnMostCommonValue(ColumnAggregateMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ):
-        column_value_counts = metrics.get("column.value_counts")
+        column_value_counts = metrics["column.value_counts"]
         return list(
             column_value_counts[column_value_counts == column_value_counts.max()].index
         )
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -46,7 +46,7 @@ class ColumnMostCommonValue(ColumnAggregateMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ):
-        column_value_counts = metrics.get("column.value_counts")
+        column_value_counts = metrics["column.value_counts"]
         return list(
             column_value_counts[column_value_counts == column_value_counts.max()].index
         )

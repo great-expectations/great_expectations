@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -39,7 +39,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
     """Expect the columns to match an unordered set.
 
     expect_table_columns_to_match_set is a \
-    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
+    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     Args:
         column_set (list of str): \
@@ -326,7 +326,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
 
             if exact_match:
                 return return_failed
-            else:
+            else:  # noqa: PLR5501
                 # Failed if there are items in the missing list (but OK to have unexpected_list)
                 if len(missing_list) > 0:
                     return return_failed

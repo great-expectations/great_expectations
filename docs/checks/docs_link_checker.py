@@ -2,7 +2,7 @@
 """A command-line tool used to check links in docusaurus markdown documentation
 
 To check all of our markdown documentation, from the repo root run:
-python scripts/docs_link_checker.py -p docs -r docs -s docs --skip-external
+python ./docs/checks/docs_link_checker.py -p docs -r docs -s docs --skip-external
 
 The above command:
     - -p docs (also --path): The path to the markdown files you want to check. For example, if you wanted to check only the tutorial files, you could specify docs/tutorials

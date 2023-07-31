@@ -284,30 +284,34 @@ def test_add_datasource_with_existing_datasource(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "datasource,datasource_name",
+    "datasource, datasource_name, error_message",
     [
         pytest.param(
             mock.MagicMock(),
             "my_datasource",
+            "an existing 'datasource' or individual constructor arguments (but not both)",
             id="both datasource and name",
         ),
-        pytest.param(None, None, id="neither datasource nor name"),
+        pytest.param(
+            None,
+            None,
+            "an existing 'datasource' or individual constructor arguments",
+            id="neither datasource nor name",
+        ),
     ],
 )
 def test_add_datasource_conflicting_args_failure(
     in_memory_data_context: EphemeralDataContextSpy,
     datasource: mock.MagicMock | None,
     datasource_name: str | None,
+    error_message: str,
 ):
     context = in_memory_data_context
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(TypeError) as e:
         context.add_datasource(datasource=datasource, name=datasource_name)
 
-    assert (
-        "an existing datasource or individual constructor arguments (but not both)"
-        in str(e.value)
-    )
+    assert error_message in str(e.value)
     assert context.datasource_store.save_count == 0
 
 
@@ -463,30 +467,34 @@ def test_add_or_update_datasource_adds_successfully(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "datasource,datasource_name",
+    "datasource, datasource_name, error_message",
     [
         pytest.param(
             mock.MagicMock(),
             "my_datasource",
+            "an existing 'datasource' or individual constructor arguments (but not both)",
             id="both datasource and name",
         ),
-        pytest.param(None, None, id="neither datasource nor name"),
+        pytest.param(
+            None,
+            None,
+            "an existing 'datasource' or individual constructor arguments",
+            id="neither datasource nor name",
+        ),
     ],
 )
 def test_add_or_update_datasource_conflicting_args_failure(
     in_memory_data_context: EphemeralDataContextSpy,
     datasource: mock.MagicMock | None,
     datasource_name: str | None,
+    error_message: str,
 ):
     context = in_memory_data_context
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(TypeError) as e:
         context.add_or_update_datasource(datasource=datasource, name=datasource_name)
 
-    assert (
-        "an existing datasource or individual constructor arguments (but not both)"
-        in str(e.value)
-    )
+    assert error_message in str(e.value)
     assert context.expectations_store.save_count == 0
 
 
@@ -597,7 +605,7 @@ def test_add_expectation_suite_conflicting_args_failure(
 ):
     context = in_memory_data_context
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         context.add_expectation_suite(
             expectation_suite=suite, expectation_suite_name=suite_name
         )
@@ -767,7 +775,7 @@ def test_add_or_update_expectation_suite_conflicting_args_failure(
 ):
     context = in_memory_data_context
 
-    with pytest.raises((ValueError, AssertionError)):
+    with pytest.raises((TypeError, AssertionError)):
         context.add_or_update_expectation_suite(
             expectation_suite=suite, expectation_suite_name=suite_name
         )
@@ -824,30 +832,34 @@ def test_add_profiler_namespace_collision_raises_deprecation(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "profiler,profiler_name",
+    "profiler, profiler_name, error_message",
     [
         pytest.param(
             mock.MagicMock(),
             "my_rbp",
+            "an existing 'profiler' or individual constructor arguments (but not both)",
             id="both profiler and profiler_name",
         ),
-        pytest.param(None, None, id="neither profiler nor profiler_name"),
+        pytest.param(
+            None,
+            None,
+            "an existing 'profiler' or individual constructor arguments",
+            id="neither profiler nor profiler_name",
+        ),
     ],
 )
 def test_add_profiler_conflicting_args_failure(
     in_memory_data_context: EphemeralDataContextSpy,
     profiler: mock.MagicMock | None,
     profiler_name: str | None,
+    error_message: str,
 ):
     context = in_memory_data_context
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(TypeError) as e:
         context.add_profiler(profiler=profiler, name=profiler_name)
 
-    assert (
-        "an existing profiler or individual constructor arguments (but not both)"
-        in str(e.value)
-    )
+    assert error_message in str(e.value)
     assert context.profiler_store.save_count == 0
 
 
@@ -981,30 +993,34 @@ def test_add_or_update_profiler_updates_successfully(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "profiler,profiler_name",
+    "profiler, profiler_name, error_message",
     [
         pytest.param(
             mock.MagicMock(),  # Only care about the presence of the value (no need to construct a full RBP obj)
             "my_rbp",
+            "an existing 'profiler' or individual constructor arguments (but not both)",
             id="both profiler and profiler_name",
         ),
-        pytest.param(None, None, id="neither profiler nor profiler_name"),
+        pytest.param(
+            None,
+            None,
+            "an existing 'profiler' or individual constructor arguments",
+            id="neither profiler nor profiler_name",
+        ),
     ],
 )
 def test_add_or_update_profiler_conflicting_args_failure(
     in_memory_data_context: EphemeralDataContextSpy,
     profiler: mock.MagicMock | None,
     profiler_name: str | None,
+    error_message: str,
 ):
     context = in_memory_data_context
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(TypeError) as e:
         context.add_or_update_profiler(profiler=profiler, name=profiler_name)
 
-    assert (
-        "an existing profiler or individual constructor arguments (but not both)"
-        in str(e.value)
-    )
+    assert error_message in str(e.value)
     assert context.profiler_store.save_count == 0
 
 
@@ -1040,14 +1056,20 @@ def test_add_checkpoint_namespace_collision_raises_deprecation(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "checkpoint, checkpoint_name",
+    "checkpoint, checkpoint_name, error_message",
     [
         pytest.param(
             mock.MagicMock(),
             "my_checkpoint_name",
+            "an existing 'checkpoint' or individual constructor arguments (but not both)",
             id="both checkpoint and checkpoint_name",
         ),
-        pytest.param(None, None, id="neither checkpoint nor checkpoint_name"),
+        pytest.param(
+            None,
+            None,
+            "an existing 'checkpoint' or individual constructor arguments",
+            id="neither checkpoint nor checkpoint_name",
+        ),
     ],
 )
 def test_add_checkpoint_conflicting_args_failure(
@@ -1055,19 +1077,17 @@ def test_add_checkpoint_conflicting_args_failure(
     # Only care about the presence of the value (no need to construct a full Checkpoint obj)
     checkpoint: mock.MagicMock | None,
     checkpoint_name: str | None,
+    error_message: str,
 ):
     context = in_memory_data_context
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(TypeError) as e:
         context.add_checkpoint(
             checkpoint=checkpoint,
             name=checkpoint_name,
         )
 
-    assert (
-        "an existing checkpoint or individual constructor arguments (but not both)"
-        in str(e.value)
-    )
+    assert error_message in str(e.value)
     assert context.checkpoint_store.save_count == 0
 
 
@@ -1149,7 +1169,8 @@ def test_add_or_update_checkpoint_adds_successfully(
         actual_config.expectation_suite_name
         == checkpoint_config["expectation_suite_name"]
     )
-    assert actual_config.validations == checkpoint_config["validations"]
+    actual_validations = [v.to_dict() for v in actual_config.validations]
+    assert actual_validations == checkpoint_config["validations"]
     assert context.checkpoint_store.save_count == 1
 
 
@@ -1169,18 +1190,29 @@ def test_add_or_update_checkpoint_adds_successfully(
                 "profilers": [],
                 "runtime_configuration": {},
                 "validations": [
-                    {"expectation_suite_name": "taxi.demo_pass"},
                     {
+                        "name": None,
+                        "id": None,
+                        "expectation_suite_name": "taxi.demo_pass",
+                        "expectation_suite_ge_cloud_id": None,
+                        "batch_request": None,
+                    },
+                    {
+                        "name": None,
+                        "id": None,
+                        "expectation_suite_name": None,
+                        "expectation_suite_ge_cloud_id": None,
                         "batch_request": {
                             "datasource_name": "oss_test_datasource",
                             "data_connector_name": "oss_test_data_connector",
                             "data_asset_name": "users",
-                        }
+                        },
                     },
                 ],
             },
             CheckpointConfig(
                 **{
+                    "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                     "batch_request": {},
                     "class_name": "Checkpoint",
                     "config_version": 1.0,
@@ -1191,13 +1223,23 @@ def test_add_or_update_checkpoint_adds_successfully(
                     "profilers": [],
                     "runtime_configuration": {},
                     "validations": [
-                        {"expectation_suite_name": "taxi.demo_pass"},
                         {
+                            "name": None,
+                            "id": None,
+                            "expectation_suite_name": "taxi.demo_pass",
+                            "expectation_suite_ge_cloud_id": None,
+                            "batch_request": None,
+                        },
+                        {
+                            "name": None,
+                            "id": None,
+                            "expectation_suite_name": None,
+                            "expectation_suite_ge_cloud_id": None,
                             "batch_request": {
                                 "datasource_name": "oss_test_datasource",
                                 "data_connector_name": "oss_test_data_connector",
                                 "data_asset_name": "users",
-                            }
+                            },
                         },
                     ],
                 }
@@ -1219,6 +1261,7 @@ def test_add_or_update_checkpoint_adds_successfully(
             },
             CheckpointConfig(
                 **{
+                    "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                     "batch_request": {},
                     "class_name": "Checkpoint",
                     "config_version": 1.0,
@@ -1285,14 +1328,20 @@ def test_add_or_update_checkpoint_existing_checkpoint_updates_successfully(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "checkpoint, checkpoint_name",
+    "checkpoint, checkpoint_name, error_message",
     [
         pytest.param(
             mock.MagicMock(),
             "my_checkpoint_name",
+            "an existing 'checkpoint' or individual constructor arguments (but not both)",
             id="both checkpoint and checkpoint_name",
         ),
-        pytest.param(None, None, id="neither checkpoint nor checkpoint_name"),
+        pytest.param(
+            None,
+            None,
+            "an existing 'checkpoint' or individual constructor arguments",
+            id="neither checkpoint nor checkpoint_name",
+        ),
     ],
 )
 def test_add_or_update_checkpoint_conflicting_args_failure(
@@ -1300,17 +1349,15 @@ def test_add_or_update_checkpoint_conflicting_args_failure(
     # Only care about the presence of the value (no need to construct a full Checkpoint obj)
     checkpoint: mock.MagicMock | None,
     checkpoint_name: str | None,
+    error_message: str,
 ):
     context = in_memory_data_context
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(TypeError) as e:
         context.add_or_update_checkpoint(
             checkpoint=checkpoint,
             name=checkpoint_name,
         )
 
-    assert (
-        "an existing checkpoint or individual constructor arguments (but not both)"
-        in str(e.value)
-    )
+    assert error_message in str(e.value)
     assert context.checkpoint_store.save_count == 0

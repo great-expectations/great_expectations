@@ -3,7 +3,7 @@ from functools import wraps
 from typing import Callable, Dict, Optional, Tuple, Type, Union
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
@@ -34,7 +34,7 @@ def metric_value(
     the value of the requested metric.
 
     ---Documentation---
-        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
+        - https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp
 
     Args:
         engine: the *type* of ExecutionEngine that this partial supports

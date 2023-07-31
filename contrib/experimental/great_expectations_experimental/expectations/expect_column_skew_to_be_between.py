@@ -3,7 +3,7 @@ import traceback
 from typing import Any, Dict, Tuple
 
 import numpy as np
-import scipy.stats as stats
+from scipy import stats
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.pyspark import functions as F
@@ -66,19 +66,18 @@ class ColumnSkew(ColumnAggregateMetricProvider):
 
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
-        sqlalchemy_engine = execution_engine.engine
-        dialect = sqlalchemy_engine.dialect
+        dialect = execution_engine.dialect
 
         column_mean = _get_query_result(
             func=sa.func.avg(column * 1.0),
             selectable=selectable,
-            sqlalchemy_engine=sqlalchemy_engine,
+            execution_engine=execution_engine,
         )
 
         column_count = _get_query_result(
             func=sa.func.count(column),
             selectable=selectable,
-            sqlalchemy_engine=sqlalchemy_engine,
+            execution_engine=execution_engine,
         )
 
         if dialect.name.lower() == "mssql":
@@ -89,13 +88,13 @@ class ColumnSkew(ColumnAggregateMetricProvider):
         column_std = _get_query_result(
             func=standard_deviation,
             selectable=selectable,
-            sqlalchemy_engine=sqlalchemy_engine,
+            execution_engine=execution_engine,
         )
 
         column_third_moment = _get_query_result(
             func=sa.func.sum(sa.func.pow(column - column_mean, 3)),
             selectable=selectable,
-            sqlalchemy_engine=sqlalchemy_engine,
+            execution_engine=execution_engine,
         )
 
         column_skew = column_third_moment / (column_std**3) / (column_count - 1)
@@ -105,11 +104,13 @@ class ColumnSkew(ColumnAggregateMetricProvider):
             return column_skew
 
 
-def _get_query_result(func, selectable, sqlalchemy_engine):
+def _get_query_result(func, selectable, execution_engine: SqlAlchemyExecutionEngine):
     simple_query: sqlalchemy.Select = sa.select(func).select_from(selectable)
 
     try:
-        result: sqlalchemy.Row = sqlalchemy_engine.execute(simple_query).fetchone()[0]
+        result: sqlalchemy.Row = execution_engine.execute_query(
+            simple_query
+        ).fetchone()[0]
         return result
     except sqlalchemy.ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."

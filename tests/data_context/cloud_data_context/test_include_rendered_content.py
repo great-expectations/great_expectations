@@ -39,7 +39,7 @@ def test_cloud_backed_data_context_add_or_update_expectation_suite_include_rende
 
     empty_expectation_suite = ExpectationSuite(expectation_suite_name="test_suite")
     with mock.patch(
-        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.has_key"
+        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend._get"
     ), mock.patch(
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend._set",
         return_value=cloud_ref,
@@ -97,7 +97,6 @@ def test_cloud_backed_data_context_add_or_update_expectation_suite_include_rende
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
 def test_cloud_backed_data_context_expectation_validation_result_include_rendered_content(
     empty_cloud_data_context: CloudDataContext,
 ) -> None:

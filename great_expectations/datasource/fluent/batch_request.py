@@ -15,7 +15,6 @@ import pydantic
 from pydantic import StrictStr
 from pydantic.json import pydantic_encoder
 from pydantic.schema import default_ref_template
-from typing_extensions import TypeAlias
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.batch_filter import (
@@ -24,6 +23,8 @@ from great_expectations.datasource.data_connector.batch_filter import (
 )
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
 
@@ -130,7 +131,7 @@ class BatchRequest(pydantic.BaseModel):
         return options
 
     @public_api
-    def json(
+    def json(  # noqa: PLR0913
         self,
         *,
         include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
@@ -162,7 +163,7 @@ class BatchRequest(pydantic.BaseModel):
         )
 
     @public_api
-    def dict(
+    def dict(  # noqa: PLR0913
         self,
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,

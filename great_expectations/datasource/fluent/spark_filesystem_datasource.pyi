@@ -1,37 +1,32 @@
-from __future__ import annotations
-
 import pathlib
 import re
 from logging import Logger
-from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Type, Union
+from typing import ClassVar, Literal, Optional, Type, Union
 
 from great_expectations.compatibility.pyspark import (
-    types as pyspark_types,  # noqa: TCH001
+    types as pyspark_types,
 )
-from great_expectations.datasource.fluent import _SparkFilePathDatasource
+from great_expectations.datasource.fluent import BatchMetadata, _SparkFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.datasource.fluent import BatchMetadata
-    from great_expectations.datasource.fluent.interfaces import (
-        SortersDefinition,
-    )
-    from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        CSVAsset,
-        DeltaAsset,
-        DirectoryCSVAsset,
-        DirectoryDeltaAsset,
-        DirectoryJSONAsset,
-        DirectoryORCAsset,
-        DirectoryParquetAsset,
-        DirectoryTextAsset,
-        JSONAsset,
-        ORCAsset,
-        ParquetAsset,
-        TextAsset,
-    )
+from great_expectations.datasource.fluent.interfaces import (
+    SortersDefinition,
+)
+from great_expectations.datasource.fluent.spark_file_path_datasource import (
+    CSVAsset,
+    DeltaAsset,
+    DirectoryCSVAsset,
+    DirectoryDeltaAsset,
+    DirectoryJSONAsset,
+    DirectoryORCAsset,
+    DirectoryParquetAsset,
+    DirectoryTextAsset,
+    JSONAsset,
+    ORCAsset,
+    ParquetAsset,
+    TextAsset,
+)
 
 logger: Logger
 
@@ -44,7 +39,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
 
     base_directory: pathlib.Path
     data_context_root_directory: Optional[pathlib.Path] = None
-    def add_csv_asset(
+    def add_csv_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -147,7 +142,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # CSV Specific Options ^^^
         # ^^^ pyspark Docs <> Source Code mismatch
     ) -> CSVAsset: ...
-    def add_directory_csv_asset(
+    def add_directory_csv_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -252,7 +247,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # CSV Specific Options ^^^
         # ^^^ pyspark Docs <> Source Code mismatch
     ) -> DirectoryCSVAsset: ...
-    def add_parquet_asset(
+    def add_parquet_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -286,7 +281,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # Spark Generic File Reader Options ^^^
         # ^^^ pyspark Docs <> Source Code mismatch
     ) -> ParquetAsset: ...
-    def add_directory_parquet_asset(
+    def add_directory_parquet_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -323,7 +318,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # Spark Generic File Reader Options ^^^
         # ^^^ pyspark Docs <> Source Code mismatch
     ) -> DirectoryParquetAsset: ...
-    def add_orc_asset(
+    def add_orc_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -349,7 +344,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # Spark Generic File Reader Options ^^^
         # ^^^ pyspark Docs <> Source Code mismatch
     ) -> ORCAsset: ...
-    def add_directory_orc_asset(
+    def add_directory_orc_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -378,7 +373,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # Spark Generic File Reader Options ^^^
         # ^^^ pyspark Docs <> Source Code mismatch
     ) -> DirectoryORCAsset: ...
-    def add_json_asset(
+    def add_json_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -455,7 +450,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # JSON Specific Options ^^^
         # ^^^ pyspark Docs <> Source Code mismatch
     ) -> JSONAsset: ...
-    def add_directory_json_asset(
+    def add_directory_json_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -535,7 +530,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # JSON Specific Options ^^^
         # ^^^ pyspark Docs <> Source Code mismatch
     ) -> DirectoryJSONAsset: ...
-    def add_text_asset(
+    def add_text_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -564,7 +559,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # Spark Generic File Reader Options ^^^
         # ^^^ pyspark Docs <> Source Code mismatch
     ) -> TextAsset: ...
-    def add_directory_text_asset(
+    def add_directory_text_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -596,7 +591,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # Spark Generic File Reader Options ^^^
         # ^^^ pyspark Docs <> Source Code mismatch
     ) -> DirectoryTextAsset: ...
-    def add_delta_asset(
+    def add_delta_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -609,7 +604,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         version_as_of: Optional[str] = None,
         # Delta Specific Options ^^^
     ) -> DeltaAsset: ...
-    def add_delta_directory_asset(
+    def add_delta_directory_asset(  # noqa: PLR0913
         self,
         name: str,
         *,

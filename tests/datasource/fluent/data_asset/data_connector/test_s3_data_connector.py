@@ -29,12 +29,12 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 try:
-    import boto3  # noqa: disable=E0602
+    import boto3  # : disable=E0602
 except ImportError:
     logger.debug("Unable to load boto3; install optional boto3 dependency for support.")
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock_s3
 def test_basic_instantiation():
     region_name: str = "us-east-1"
@@ -80,7 +80,7 @@ def test_basic_instantiation():
     assert my_data_connector.get_unmatched_data_reference_count() == 0
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock_s3
 def test_instantiation_batching_regex_does_not_match_paths():
     region_name: str = "us-east-1"
@@ -126,7 +126,7 @@ def test_instantiation_batching_regex_does_not_match_paths():
     assert my_data_connector.get_unmatched_data_reference_count() == 3
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock_s3
 def test_return_all_batch_definitions_unsorted():
     region_name: str = "us-east-1"
@@ -325,7 +325,7 @@ def test_return_all_batch_definitions_unsorted():
 
 # TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
 # TODO: <Alex>ALEX</Alex>
-# @pytest.mark.integration
+# @pytest.mark.big
 # @mock_s3
 # def test_return_all_batch_definitions_sorted():
 #     region_name: str = "us-east-1"
@@ -523,7 +523,7 @@ def test_return_all_batch_definitions_unsorted():
 # TODO: <Alex>ALEX</Alex>
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock_s3
 def test_return_only_unique_batch_definitions():
     region_name: str = "us-east-1"
@@ -609,7 +609,7 @@ def test_return_only_unique_batch_definitions():
     assert expected == unsorted_batch_definition_list
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock_s3
 def test_alpha():
     region_name: str = "us-east-1"
@@ -680,7 +680,7 @@ def test_alpha():
     assert len(my_batch_definition_list) == 1
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock_s3
 def test_foxtrot():
     region_name: str = "us-east-1"
@@ -815,7 +815,7 @@ def test_foxtrot():
 
 # TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
 # TODO: <Alex>ALEX</Alex>
-# @pytest.mark.integration
+# @pytest.mark.big
 # @mock_s3
 # def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_group(
 #     tmp_path_factory,
@@ -892,6 +892,7 @@ def test_foxtrot():
 # TODO: <Alex>ALEX</Alex>
 
 
+@pytest.mark.unit
 def test_sanitize_prefix_behaves_the_same_as_local_files():
     def check_sameness(prefix, expected_output):
         s3_sanitized = sanitize_prefix_for_gcs_and_s3(text=prefix)

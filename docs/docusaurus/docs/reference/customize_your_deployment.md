@@ -26,8 +26,8 @@ The simplest way to manage your Great Expectations configuration is usually by c
 
 Here’s how to handle each of those cases:
 
-* [How to configure credentials](../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
-* [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context)
+* [Configure credentials](../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
+* [Instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
 
 ## Options for storing Expectations
 Many teams find it convenient to store Expectations in Git. Essentially, this approach treats Expectations like test fixtures: they live adjacent to code and are stored within version control. Git acts as a collaboration tool and source of record.
@@ -52,7 +52,7 @@ By default, Validation Results are stored locally, in an uncommitted directory. 
 ## Reference Architectures
 
 * [How to instantiate a Data Context on an EMR Spark cluster](../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-* [How to use Great Expectations in Databricks](../deployment_patterns/how_to_use_great_expectations_in_databricks.md)
+* [How to use Great Expectations in Databricks](../tutorials/getting_started/how_to_use_great_expectations_in_databricks.md)
 
 ## Connecting to Data
 Great Expectations allows you to connect to data in a wide variety of sources, and the list is constantly getting longer. If you have an idea for a source not listed here, please speak up in the public discussion forum.
@@ -85,7 +85,7 @@ Most teams will want to configure various Checkpoints and Validation Actions as 
 * [How to trigger Email as a Validation Action](../guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action.md)
 * [How to deploy a scheduled Checkpoint with cron](../guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron.md)
 * [How to get Data Docs URLs for custom Validation Actions](../guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions.md)
-* [How to validate data without a Checkpoint](../guides/validation/advanced/how_to_validate_data_without_a_checkpoint.md)
+* [How to pass an in-memory DataFrame to a Checkpoint](../guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.md)
 * [How to run a Checkpoint in Airflow](../deployment_patterns/how_to_use_great_expectations_with_airflow.md)
 
 ## Not interested in managing your own configuration or infrastructure?

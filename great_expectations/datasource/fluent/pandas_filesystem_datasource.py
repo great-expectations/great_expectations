@@ -29,6 +29,11 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     data_connector_type: ClassVar[
         Type[FilesystemDataConnector]
     ] = FilesystemDataConnector
+    # these fields should not be passed to the execution engine
+    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
+        "base_directory",
+        "data_context_root_directory",
+    }
 
     # instance attributes
     type: Literal["pandas_filesystem"] = "pandas_filesystem"

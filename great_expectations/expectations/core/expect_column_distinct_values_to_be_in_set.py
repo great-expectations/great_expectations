@@ -4,11 +4,11 @@ import altair as alt
 import pandas as pd
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     InvalidExpectationConfigurationError,
@@ -278,18 +278,18 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
             }
         )
 
-        if len(values) > 60:
+        if len(values) > 60:  # noqa: PLR2004
             return None
         else:
             chart_pixel_width = (len(values) / 60.0) * 500
-            if chart_pixel_width < 250:
+            if chart_pixel_width < 250:  # noqa: PLR2004
                 chart_pixel_width = 250
             chart_container_col_width = round((len(values) / 60.0) * 6)
-            if chart_container_col_width < 4:
+            if chart_container_col_width < 4:  # noqa: PLR2004
                 chart_container_col_width = 4
-            elif chart_container_col_width >= 5:
+            elif chart_container_col_width >= 5:  # noqa: PLR2004
                 chart_container_col_width = 6
-            elif chart_container_col_width >= 4:
+            elif chart_container_col_width >= 4:  # noqa: PLR2004
                 chart_container_col_width = 5
 
         mark_bar_args = {}

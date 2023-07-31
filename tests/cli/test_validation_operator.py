@@ -1,6 +1,10 @@
+import pytest
 from click.testing import CliRunner
 
 from great_expectations.cli import cli
+
+
+pytestmark = pytest.mark.cli
 
 
 def test_validation_operator_with_new_api_raises_error():

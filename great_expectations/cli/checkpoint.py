@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 --ge-feature-maturity-info--
 
     id: checkpoint_command_line
-    title: LegacyCheckpoint - Command Line
+    title: Checkpoint - Command Line
     icon:
     short_description: Run a configured Checkpoint from a command line.
     description: Run a configured Checkpoint from a command line in a Terminal shell.

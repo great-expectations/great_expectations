@@ -2,11 +2,11 @@ from copy import deepcopy
 from typing import Dict, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -26,7 +26,7 @@ from great_expectations.validator.metric_configuration import (
     MetricConfiguration,  # noqa: TCH001
 )
 from great_expectations.validator.validator import (
-    ValidationDependencies,  # noqa: TCH001
+    ValidationDependencies,
 )
 
 
@@ -34,7 +34,7 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     """Expect the number of rows to equal the number in another table.
 
     expect_table_row_count_to_equal_other_table is a \
-    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
+    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     Args:
         other_table_name (str): \
