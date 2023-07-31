@@ -1,7 +1,6 @@
 version: '3.2'
 services:
-  mssql_db:
-    platform: linux/amd64
+  mssql-db:
     image: mcr.microsoft.com/mssql/server:2019-latest
     environment:
       ACCEPT_EULA: Y
@@ -15,7 +14,8 @@ services:
   load-db:
     image: mcr.microsoft.com/mssql/server:2019-latest
     command: sh -c 'sleep 10 && /opt/mssql-tools/bin/sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;"'
-    network_mode: service:mssql_db
+    network_mode: service:mssql-db
+
 networks:
   dbnet:
     driver: bridge
