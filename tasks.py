@@ -1032,5 +1032,8 @@ def service(ctx: Context, names: Sequence[str], markers: Sequence[str]):
                 "-d",
             ]
             ctx.run(" ".join(cmds), echo=True, pty=True)
+        # TODO: remove this sleep. This is a temporary hack to give services enough
+        #       time to come up to get ci merging again.
+        ctx.run("sleep 15")
     else:
         print("  No matching services to start")
