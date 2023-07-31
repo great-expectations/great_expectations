@@ -68,7 +68,7 @@ but the package `{library_name}` containing this library is not installed.
     assert result.exit_code == 1
 
     assert os.path.isdir(  # noqa: PTH112
-        os.path.join(basedir, FileDataContext.GX_DIR))  # noqa: PTH118
+        os.path.join(basedir, FileDataContext.GX_DIR)  # noqa: PTH118
     )
     config_path = os.path.join(  # noqa: PTH118
         basedir, "great_expectations/great_expectations.yml"
