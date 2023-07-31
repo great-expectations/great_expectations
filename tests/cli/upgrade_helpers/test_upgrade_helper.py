@@ -1,8 +1,5 @@
 import json
 import os
-from great_expectations.data_context.data_context.file_data_context import (
-    FileDataContext,
-)
 import shutil
 
 import pytest
@@ -32,7 +29,9 @@ def v20_project_directory_with_v30_configuration_and_v20_checkpoints(tmp_path_fa
     GX config_version: 3 project for testing upgrade helper
     """
     project_path = str(tmp_path_factory.mktemp("v30_project"))
-    context_root_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
+    context_root_dir = os.path.join(  # noqa: PTH118
+        project_path, FileDataContext.GX_DIR
+    )
     shutil.copytree(
         file_relative_path(
             __file__,
@@ -56,7 +55,9 @@ def v20_project_directory_with_v30_configuration_and_no_checkpoints(tmp_path_fac
     GX config_version: 3 project for testing upgrade helper
     """
     project_path = str(tmp_path_factory.mktemp("v30_project"))
-    context_root_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
+    context_root_dir = os.path.join(  # noqa: PTH118
+        project_path, FileDataContext.GX_DIR
+    )
     shutil.copytree(
         file_relative_path(
             __file__,
