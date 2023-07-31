@@ -9,6 +9,7 @@ import nbconvert
 import nbformat
 import pytest
 from freezegun import freeze_time
+import pandas as pd
 
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
@@ -317,19 +318,23 @@ def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_n
     )
 
 
-@pytest.mark.big
 def test_onboarding_data_assistant_should_fail_forward(
-    bobby_columnar_table_multi_batch_deterministic_data_context,
+    ephemeral_context_with_defaults,
     rule_state_with_domains_and_parameters,
 ):
     """When one rule fails, the rest of the rules should still be executed."""
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
+    context = ephemeral_context_with_defaults
+    datasource = context.sources.add_or_update_pandas("my_datasource")
+    asset = datasource.add_dataframe_asset("my_asset")
+    # noinspection PyTypeChecker
+    df = pd.DataFrame(
+        {
+            "non-null": [i for i in range(100)],
+            "null": [None for _ in range(100)],
+            "low-null": [None for _ in range(38)] + [i for i in range(62)],
+        }
+    )
+    batch_request = asset.build_batch_request(dataframe=df)
 
     num_rules = 8  # There are 8 rules in the onboarding data assistant.
     with mock.patch(

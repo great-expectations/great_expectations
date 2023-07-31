@@ -27,7 +27,7 @@ class RuleState:
         domains: Optional[List[Domain]] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        catch_exceptions: Optional[bool] = None,
+        catch_exceptions: bool = False,
     ) -> None:
         """
         Args:
@@ -113,7 +113,7 @@ class RuleState:
         self._exception_traceback = value
 
     @property
-    def catch_exceptions(self) -> Optional[bool]:
+    def catch_exceptions(self) -> bool:
         return self._catch_exceptions
 
     @catch_exceptions.setter
