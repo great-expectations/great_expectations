@@ -1020,6 +1020,8 @@ def service(ctx: Context, names: Sequence[str], markers: Sequence[str]):
                 "--quiet-pull",
             ]
             ctx.run(" ".join(cmds), echo=True, pty=True)
-            ctx.run("sleep 15")
+        # TODO: remove this sleep. This is a temporary hack to give services enough
+        #       time to come up to get ci merging again.
+        ctx.run("sleep 15")
     else:
         print("  No matching services to start")
