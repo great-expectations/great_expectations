@@ -28,8 +28,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     ParameterNode,
 )
-from great_expectations.rule_based_profiler.rule.rule import Rule
-from great_expectations.rule_based_profiler.rule.rule_state import RuleState
 from tests.render.util import load_notebook_from_path
 from tests.test_utils import find_strings_in_nested_obj
 
@@ -333,7 +331,9 @@ def test_onboarding_data_assistant_should_fail_forward(
     rule_state_with_domains_and_parameters,
 ):
     """When one rule fails, the rest of the rules should still be executed."""
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_deterministic_data_context
+    )
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -357,7 +357,7 @@ def test_onboarding_data_assistant_should_fail_forward(
 
         mock_run.side_effect = side_effect
 
-        data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+        data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(  # noqa: F841
             batch_request=batch_request,
             estimation="flag_outliers",
             numeric_columns_rule={
