@@ -24,7 +24,7 @@ Data Assistants excel at automating the Profiling process across multiple Batche
  be using a Batch Request that covers multiple Batches. For the purposes of this demo, the Data Source that our Batch
  Request queries will consist of a sample of the New York taxi trip data.
 
-This is the configuration that you will use for your `Data Source`:
+This is the configuration that you will use for your `Datasource`:
 
 ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py datasource_config"
 ```
@@ -35,7 +35,7 @@ And this is the configuration that you will use for your `BatchRequest`:
 ```
 
 :::caution
-The Onboarding Data Assistant will run a high volume of queries against your `Data Source`. Data Assistant performance
+The Onboarding Data Assistant will run a high volume of queries against your `Datasource`. Data Assistant performance
   can vary significantly depending on the number of Batches, count of records per Batch, and network latency. It is
   recommended that you start with a smaller `BatchRequest` if you find that Data Assistant runtimes are too long.
 :::

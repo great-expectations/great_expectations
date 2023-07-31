@@ -190,7 +190,7 @@ To configure the BigQuery Data Source, see [How to connect to a BigQuery databas
   ]}>
 <TabItem value="gcs">
 
-Add a CSV `Asset` to your `Data Source` by using the `add_csv_asset` function.
+Add a CSV `Asset` to your `Datasource` by using the `add_csv_asset` function.
 
 First, configure the `prefix` and `batching_regex`. The `prefix` is for the path in the GCS bucket where we can find our files. The `batching_regex` is a regular expression that indicates which files to treat as Batches in the Asset, and how to identify them.
 
@@ -214,7 +214,7 @@ Next we can add an `Asset` named `csv_taxi_gcs_asset` to our Data Source by usin
 </TabItem>
 <TabItem value="bigquery">
 
-Add a BigQuery `Asset` into your `Data Source` either as a table asset or query asset.
+Add a BigQuery `Asset` into your `Datasource` either as a table asset or query asset.
 
 In the first example, a table `Asset` named `my_table_asset` is built by naming the table in our BigQuery Database, which is `taxi_data` in our case. 
 
