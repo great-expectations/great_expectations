@@ -230,7 +230,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
 
     with pytest.raises(gx_exceptions.MetricResolutionError) as e:
         # noinspection PyUnusedLocal
-        validator.validate(**runtime_environment_arguments)
+        validator_validation: ExpectationSuiteValidationResult = validator.validate(  # noqa: F841
     assert e.value.message == expected_exception_message
 
     # Test calling "validator.expect_*" through "validator.validate_expectation()".

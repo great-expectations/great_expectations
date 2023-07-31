@@ -593,7 +593,7 @@ def test_expectation_configuration_has_result_format(
         },
     )
     with pytest.warns(UserWarning) as config_warning:
-        (
+        result: ExpectationValidationResult = (  # noqa: F841
             _expecation_configuration_to_validation_result_pandas(
                 expectation_configuration=expectation_configuration,
                 dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
