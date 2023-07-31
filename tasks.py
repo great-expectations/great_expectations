@@ -963,8 +963,8 @@ def ci_tests(  # noqa: PLR0913
         "-rEf",
     ]
 
-    if xdist:
-        pytest_cmds.append("-n auto")
+    # if xdist:
+    #     pytest_cmds.append("-n auto")
 
     if timeout != 0:
         pytest_cmds.append(f"--timeout={timeout}")
