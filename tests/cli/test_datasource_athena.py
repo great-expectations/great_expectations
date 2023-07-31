@@ -105,6 +105,7 @@ def test_cli_athena_datasource_new_connection_string(
     region_test = "us-east-1"
     schema_test = "test_data"
     table_name_test = "table_test"
+    _ = f"awsathena+rest://@athena.{region_test}.amazonaws.com/{schema_test}?s3_staging_dir=s3://YOUR_S3_BUCKET/path/to/"
 
     nb["cells"][5]["source"] = credentials_cell.replace("YOUR_REGION", region_test)
 
