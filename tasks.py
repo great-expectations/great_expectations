@@ -1006,7 +1006,9 @@ def service(ctx: Context, names: Sequence[str], markers: Sequence[str]):
                 f"assets/docker/{service_name}/docker-compose.yml",
                 "up",
                 "-d",
+                "--quiet-pull",
             ]
             ctx.run(" ".join(cmds), echo=True, pty=True)
+            ctx.run("sleep 30")
     else:
         print("  No matching services to start")
