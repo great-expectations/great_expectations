@@ -318,6 +318,7 @@ def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_n
     )
 
 
+@pytest.mark.unit
 def test_onboarding_data_assistant_should_fail_forward(
     ephemeral_context_with_defaults,
     rule_state_with_domains_and_parameters,
