@@ -808,6 +808,16 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         exta_pytest_args=("--docs-tests",),
     ),
     "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
+    "mssql": TestDependencies(
+        ("reqs/requirements-dev-mssql.txt",),
+        services=("mssql",),
+        exta_pytest_args=("--mssql",),
+    ),
+    "mysql": TestDependencies(
+        ("reqs/requirements-dev-mysql.txt",),
+        services=("mysql",),
+        exta_pytest_args=("--mysql",),
+    ),
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
     "postgresql": TestDependencies(
         ("reqs/requirements-dev-postgresql.txt",),
@@ -817,6 +827,11 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "spark": TestDependencies(
         ("reqs/requirements-dev-spark.txt",),
         exta_pytest_args=("--spark",),
+    ),
+    "trino": TestDependencies(
+        ("reqs/requirements-dev-trino.txt",),
+        services=("trino",),
+        exta_pytest_args=("--trino",),
     ),
 }
 
@@ -918,12 +933,15 @@ def deps(  # noqa: PLR0913
 @invoke.task(
     iterable=["service_names", "up_services", "verbose"],
 )
-def ci_tests(
+def ci_tests(  # noqa: PLR0913
     ctx: Context,
     marker: str,
     up_services: bool = False,
     verbose: bool = False,
     reports: bool = False,
+    slowest: int = 5,
+    timeout: float = 0.0,  # 0 indicates no timeout
+    xdist: bool = True,
 ):
     """
     Run tests in CI.
@@ -939,10 +957,18 @@ def ci_tests(
     """
     pytest_cmds = [
         "pytest",
+        f"--durations={slowest}",
         "-m",
         f"'{marker}'",
         "-rEf",
     ]
+
+    # if xdist:
+    #     pytest_cmds.append("-n auto")
+
+    if timeout != 0:
+        pytest_cmds.append(f"--timeout={timeout}")
+
     if reports:
         pytest_cmds.extend(["--cov=great_expectations", "--cov-report=xml"])
 
@@ -955,6 +981,9 @@ def ci_tests(
 
         for extra_pytest_arg in test_deps.exta_pytest_args:
             pytest_cmds.append(extra_pytest_arg)
+
+    if marker in ["postgresql", "mssql", "mysql", "trino"]:
+        pytest_cmds[3] = "all_backends"
 
     ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
 
@@ -982,12 +1011,17 @@ def service(ctx: Context, names: Sequence[str], markers: Sequence[str]):
         print(f"  Starting services for {', '.join(service_names)} ...")
         for service_name in service_names:
             cmds = [
-                "docker-compose",
+                "docker",
+                "compose",
                 "-f",
                 f"assets/docker/{service_name}/docker-compose.yml",
                 "up",
                 "-d",
+                "--quiet-pull",
             ]
             ctx.run(" ".join(cmds), echo=True, pty=True)
+        # TODO: remove this sleep. This is a temporary hack to give services enough
+        #       time to come up to get ci merging again.
+        ctx.run("sleep 15")
     else:
         print("  No matching services to start")
