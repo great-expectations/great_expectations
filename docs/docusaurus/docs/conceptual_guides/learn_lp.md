@@ -1,6 +1,6 @@
 ---
-sidebar_label: 'Learn'
-title: 'Learn'
+sidebar_label: 'Concepts'
+title: 'Concepts'
 id: learn_lp
 description: Longer format conceptual information about Great Expectations features and functionbality.
 ---
