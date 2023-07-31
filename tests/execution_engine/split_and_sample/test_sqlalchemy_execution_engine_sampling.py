@@ -30,12 +30,14 @@ try:
 except ImportError:
     sqlalchemy = None
 
+
 pytestmark = [
     pytest.mark.sqlalchemy_version_compatibility,
     pytest.mark.external_sqldialect,
 ]
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "underscore_prefix",
     [
@@ -113,6 +115,10 @@ def pytest_parsed_arguments(request):
     return request.config.option
 
 
+# Despite being parameterized over GXSqlDialect, this test skips if the flag corresponding to that dialect isn't
+# passed in. Most of these dialects are never run in CI.
+# TODO: remove the external_sqldialect and uncomment the all_backends mark once all_backends is supported.
+# @pytest.mark.all_backends
 @pytest.mark.parametrize(
     "dialect_name",
     [
@@ -255,6 +261,7 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
     assert query_str == expected
 
 
+@pytest.mark.sqlite
 def test_sqlite_sample_using_limit(sa):
     csv_path: str = file_relative_path(
         os.path.dirname(os.path.dirname(__file__)),  # noqa: PTH120
@@ -298,6 +305,7 @@ def test_sqlite_sample_using_limit(sa):
         assert row_date.year == 2018
 
 
+@pytest.mark.sqlite
 def test_sample_using_random(sqlite_view_engine, test_df):
     my_execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         engine=sqlite_view_engine
