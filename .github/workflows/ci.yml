@@ -83,6 +83,14 @@ jobs:
       # azure
       AZURE_ACCESS_KEY: ${{secrets.AZURE_ACCESS_KEY}}
       AZURE_CREDENTIAL: ${{secrets.AZURE_CREDENTIAL}}
+      # snowflake
+      SNOWFLAKE_ACCOUNT: ${{secrets.SNOWFLAKE_ACCOUNT}}
+      SNOWFLAKE_USER: ${{secrets.SNOWFLAKE_USER}}
+      SNOWFLAKE_PW: ${{secrets.SNOWFLAKE_PW}}
+      SNOWFLAKE_DATABASE: ${{secrets.SNOWFLAKE_DATABASE}}
+      SNOWFLAKE_SCHEMA: ${{secrets.SNOWFLAKE_SCHEMA}}
+      SNOWFLAKE_WAREHOUSE: ${{secrets.SNOWFLAKE_WAREHOUSE}}
+      SNOWFLAKE_ROLE: ${{secrets.SNOWFLAKE_ROLE}}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
