@@ -126,11 +126,7 @@ import InstantiateDataContext from '@site/docs/guides/connecting_to_your_data/cl
 
 import ConnectionStringAthena from '@site/docs/guides/connecting_to_your_data/database/components/_connection_string_athena.md'
 
-<!-- 2.4 Configure your Datasource -->
-
-import ConfigureYourDatasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_datasource_sql_runtime_configuration.md'
-
-<!-- 2.6 Test your new Datasource -->
+<!-- 2.4 Test your new Datasource -->
 
 import TestAthenaDatasource from '@site/docs/guides/connecting_to_your_data/database/components/_datasource_athena_test.md'
 
