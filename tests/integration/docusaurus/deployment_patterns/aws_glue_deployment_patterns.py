@@ -12,6 +12,11 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.util import get_context
 
+import warnings
+
+# needed because GlueContext(sc) function emits the following FutureWarning: Deprecated in 3.0.0. Use SparkSession.builder.getOrCreate() instead.
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 yaml = YAMLHandler()
 
 sc = SparkContext.getOrCreate()
