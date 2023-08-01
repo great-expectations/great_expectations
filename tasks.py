@@ -859,6 +859,12 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
 }
 
 
+def _add_all_backends_marker(marker_string: str) -> bool:
+    # We should generalize this, possibly leveraging MARKER_DEPENDENDENCY_MAP, but for now
+    # right I've hardcoded all the containerized backend services we support in testing.
+    return marker_string in ["postgresql", "mssql", "mysql", "trino"]
+
+
 def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
     """_summary_
 
@@ -1013,37 +1019,35 @@ def ci_tests(  # noqa: PLR0913
 
     Defined this as a new invoke task to avoid some of the baggage of our old test setup.
     """
-    pytest_cmds = [
-        "pytest",
-        f"--durations={slowest}",
-        "-m",
-        f"'{marker}'",
-        "-rEf",
-    ]
+    pytest_options = [f"--durations={slowest}", "-rEf"]
 
     if xdist:
-        pytest_cmds.append("-n auto")
+        pytest_options.append("-n auto")
 
     if timeout != 0:
-        pytest_cmds.append(f"--timeout={timeout}")
+        pytest_options.append(f"--timeout={timeout}")
 
     if reports:
-        pytest_cmds.extend(["--cov=great_expectations", "--cov-report=xml"])
+        pytest_options.extend(["--cov=great_expectations", "--cov-report=xml"])
 
     if verbose:
-        pytest_cmds.append("-vv")
+        pytest_options.append("-vv")
 
     for test_deps in _get_marker_dependencies(marker):
         if up_services:
             service(ctx, names=test_deps.services, markers=test_deps.services, pty=pty)
 
         for extra_pytest_arg in test_deps.extra_pytest_args:
-            pytest_cmds.append(extra_pytest_arg)
+            pytest_options.append(extra_pytest_arg)
 
-    if marker in ["postgresql", "mssql", "mysql", "trino"]:
-        pytest_cmds[3] = "all_backends"
+    marker_statement = (
+        f"'all_backends or {marker}'"
+        if _add_all_backends_marker(marker)
+        else f"'{marker}'"
+    )
 
-    ctx.run(" ".join(pytest_cmds), echo=True, pty=pty)
+    pytest_cmd = ["pytest", "-m", marker_statement] + pytest_options
+    ctx.run(" ".join(pytest_cmd), echo=True, pty=pty)
 
 
 @invoke.task(
