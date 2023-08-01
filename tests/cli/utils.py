@@ -71,7 +71,7 @@ def assert_logging_message_present(my_caplog, message):
     if messages:
         print("Found logging messages:\n")
         print("\n".join([m for m in messages]))
-    assert any([message in element for element in messages])
+    assert any(message in element for element in messages)
 
 
 def assert_no_logging_messages(my_caplog):
@@ -108,14 +108,10 @@ def assert_no_tracebacks(click_result):
         if not isinstance(value, SystemExit):
             # SystemExit is a known "good" exit type
             print("".join(traceback.format_tb(_traceback)))
-            assert False, "Found exception of type {} with message {}".format(
-                _type, value
-            )
+            assert False, f"Found exception of type {_type} with message {value}"
     if not isinstance(click_result.exception, SystemExit):
         # Ignore a SystemeExit, because some commands intentionally exit in an error state
-        assert not click_result.exception, "Found exception {}".format(
-            click_result.exception
-        )
+        assert not click_result.exception, f"Found exception {click_result.exception}"
     assert (
         "traceback" not in click_result.output.lower()
     ), f"Found a traceback in the console output: {click_result.output}"
@@ -126,7 +122,7 @@ def assert_no_tracebacks(click_result):
         assert (
             "traceback" not in click_result.stderr.lower()
         ), f"Found a traceback in the console output: {click_result.stderr}"
-    except ValueError as ve:
+    except ValueError:
         # sometimes stderr is not captured separately
         pass
 

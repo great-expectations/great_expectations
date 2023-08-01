@@ -1,9 +1,10 @@
+import pytest
+
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.data_context import DataContext
-import pytest
 
 
 @pytest.mark.big
