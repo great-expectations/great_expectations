@@ -108,7 +108,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         profiler_config: RuleBasedProfilerConfig,
         data_context: Optional[AbstractDataContext] = None,
         usage_statistics_handler: Optional[UsageStatisticsHandler] = None,
-        catch_exceptions: Optional[bool] = None,
+        catch_exceptions: bool = False,
     ) -> None:
         """
         Create a new RuleBasedProfilerBase using configured rules (as captured in the RuleBasedProfilerConfig object).
@@ -120,7 +120,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
         Args:
             profiler_config: RuleBasedProfilerConfig -- formal typed object containing configuration
             data_context: AbstractDataContext object that defines full runtime environment (data access, etc.)
-            catch_exceptions (boolean or None): \
+            catch_exceptions (boolean): \
+                Defaults to False.
                 If True, then catch exceptions and include them as part of the result object. \
                 For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
          """
