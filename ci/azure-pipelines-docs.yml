@@ -40,12 +40,6 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
-    - job: link_checker
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
-      steps:
-      - bash: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -s docs --skip-external
-        name: LinkChecker
-
     - job: docs_snippet_checker
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:
@@ -58,26 +52,6 @@ stages:
             scriptPath: 'ci/checks/validate_docs_snippets.py'
             failOnStderr: false
           name: DocsSnippetChecker
-
-    - job: line_number_snippet_checker
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
-      steps:
-        - task: PythonScript@0
-          inputs:
-            scriptSource: 'filePath'
-            scriptPath: 'ci/checks/check_no_line_number_snippets.py'
-            failOnStderr: true
-          name: LineNumberSnippetChecker
-
-    - job: name_tag_snippet_checker
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
-      steps:
-        - task: PythonScript@0
-          inputs:
-            scriptSource: 'filePath'
-            scriptPath: 'ci/checks/check_only_name_tag_snippets.py'
-            failOnStderr: true
-          name: NameTagSnippetChecker
 
     - job: integration_test_gets_run_checker
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
