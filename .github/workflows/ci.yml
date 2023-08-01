@@ -111,8 +111,11 @@ jobs:
           - cloud and not e2e
           - filesystem
           - docs
+          # Remove next line once the 'clickhouse or ...' line merges and update required test in github to point
+          # to this new test.
+          - openpyxl or pyarrow or project or sqlite
           - clickhouse or openpyxl or pyarrow or project or sqlite
-          # - spark
+          #- spark
           - mssql
           - mysql
           - trino
