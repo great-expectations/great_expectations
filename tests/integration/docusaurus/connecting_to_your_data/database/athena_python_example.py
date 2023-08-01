@@ -1,7 +1,6 @@
 import os
 
 import great_expectations as gx
-from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource.fluent.sql_datasource import SQLDatasource
 from great_expectations.exceptions import DataContextError
@@ -25,13 +24,14 @@ connection_string = f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_D
 # create datasource and add to DataContext
 context = gx.get_context()
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Connect and Build Batch Request">
 athena_source: SQLDatasource = context.sources.add_or_update_sql(
     "my_awsathena_datasource", connection_string=connection_string
 )
 athena_table = athena_source.add_table_asset("taxitable", table_name="taxitable")
 
-batch_request = athena_table.build_batch_request()
 
+batch_request = athena_table.build_batch_request()
 # </snippet>
 
 # clean db to prepare for test
