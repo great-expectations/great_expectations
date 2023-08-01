@@ -134,9 +134,8 @@ jobs:
             reqs/requirements-dev-test.txt
       - name: Install dependencies
         run: |
-          # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
-          pip install --constraint constraints-dev.txt ".[test, azure, bigquery, mssql, mysql, postgresql, redshift, snowflake, sqlalchemy1, trino]" pytest-azurepipelines "pandas<2.0.0"
-
+          pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
+          invoke deps --gx-install -m 'docs'
       - name: Run the tests
         run: |
           invoke docs-snippet-tests 'docs' --up-services --verbose
