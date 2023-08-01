@@ -10,7 +10,6 @@ from great_expectations.cli.batch_request import (
     _print_configured_asset_sql_data_connector_message,
 )
 
-
 pytestmark = pytest.mark.cli
 
 
