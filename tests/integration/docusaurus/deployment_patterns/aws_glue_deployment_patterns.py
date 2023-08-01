@@ -18,6 +18,7 @@ yaml = YAMLHandler()
 
 # needed because GlueContext(sc) function emits the following FutureWarning: Deprecated in 3.0.0. Use SparkSession.builder.getOrCreate() instead.
 with warnings.catch_warnings():
+    warnings.simplefilter(action="ignore", category=FutureWarning)
     sc = SparkContext.getOrCreate()
     glueContext = GlueContext(sc)
     spark = glueContext.spark_session
