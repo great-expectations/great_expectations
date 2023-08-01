@@ -112,7 +112,7 @@ jobs:
           - filesystem
           - docs
           - clickhouse or openpyxl or pyarrow or project or sqlite
-          #- spark
+          # - spark
           - mssql
           - mysql
           - trino
