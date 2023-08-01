@@ -7,7 +7,6 @@ from click.testing import CliRunner
 from great_expectations.cli import cli
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
-
 pytestmark = pytest.mark.cli
 
 
@@ -19,7 +18,7 @@ def test_store_list_stores(
 ):
     project_dir = empty_data_context_stats_enabled.root_directory
     runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(project_dir))
+    monkeypatch.chdir(os.path.dirname(project_dir))  # noqa: PTH120
     result = runner.invoke(
         cli,
         "store list",
