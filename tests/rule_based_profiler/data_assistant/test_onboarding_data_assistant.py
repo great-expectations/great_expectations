@@ -9,9 +9,9 @@ from unittest import mock
 import altair as alt
 import nbconvert
 import nbformat
+import pandas as pd
 import pytest
 from freezegun import freeze_time
-import pandas as pd
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.domain import Domain
@@ -361,7 +361,7 @@ def test_onboarding_data_assistant_should_fail_forward(
 
         mock_run.side_effect = side_effect
 
-        data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(  # noqa: F841
+        data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
             batch_request=batch_request,
             estimation="flag_outliers",
             numeric_columns_rule={
