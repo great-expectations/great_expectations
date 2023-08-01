@@ -995,6 +995,7 @@ def docs_snippet_tests(
 
 
 @invoke.task(
+    help={"pty": _PTY_HELP_DESC},
     iterable=["service_names", "up_services", "verbose"],
 )
 def ci_tests(  # noqa: PLR0913
@@ -1052,6 +1053,8 @@ def ci_tests(  # noqa: PLR0913
 
 
 @invoke.task(
+    aliases=("services",),
+    help={"pty": _PTY_HELP_DESC},
     iterable=["names", "markers"],
 )
 def service(
