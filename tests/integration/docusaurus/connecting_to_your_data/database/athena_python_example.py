@@ -1,7 +1,6 @@
 import os
 
 import great_expectations as gx
-from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource.fluent.sql_datasource import SQLDatasource
 from great_expectations.exceptions import DataContextError
