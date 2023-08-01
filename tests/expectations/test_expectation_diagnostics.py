@@ -1,3 +1,5 @@
+import pytest
+
 from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
     ExpectationDiagnostics,
 )
@@ -15,7 +17,6 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationTestDiagnostics,
     RendererTestDiagnostics,
 )
-import pytest
 
 # module level markers
 pytestmark = pytest.mark.unit

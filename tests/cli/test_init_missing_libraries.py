@@ -14,7 +14,6 @@ from great_expectations.util import gen_directory_tree_str, is_library_loadable
 from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
-
 pytestmark = pytest.mark.cli
 
 
@@ -68,14 +67,20 @@ but the package `{library_name}` containing this library is not installed.
 
     assert result.exit_code == 1
 
-    assert os.path.isdir(os.path.join(basedir, FileDataContext.GX_DIR))
-    config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
-    assert os.path.isfile(config_path)
+    assert os.path.isdir(  # noqa: PTH112
+        os.path.join(basedir, FileDataContext.GX_DIR)  # noqa: PTH118
+    )
+    config_path = os.path.join(  # noqa: PTH118
+        basedir, "great_expectations/great_expectations.yml"
+    )
+    assert os.path.isfile(config_path)  # noqa: PTH113
 
     config = yaml.load(open(config_path))
     assert config["datasources"] == {}
 
-    obs_tree = gen_directory_tree_str(os.path.join(basedir, FileDataContext.GX_DIR))
+    obs_tree = gen_directory_tree_str(
+        os.path.join(basedir, FileDataContext.GX_DIR)  # noqa: PTH118
+    )
     assert (
         obs_tree
         == """\
@@ -300,14 +305,20 @@ but the package `pyspark` containing this library is not installed.
 
     assert result.exit_code == 1
 
-    assert os.path.isdir(os.path.join(basedir, FileDataContext.GX_DIR))
-    config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
-    assert os.path.isfile(config_path)
+    assert os.path.isdir(  # noqa: PTH112
+        os.path.join(basedir, FileDataContext.GX_DIR)  # noqa: PTH118
+    )
+    config_path = os.path.join(  # noqa: PTH118
+        basedir, "great_expectations/great_expectations.yml"
+    )
+    assert os.path.isfile(config_path)  # noqa: PTH113
 
     config = yaml.load(open(config_path))
     assert config["datasources"] == {}
 
-    obs_tree = gen_directory_tree_str(os.path.join(basedir, FileDataContext.GX_DIR))
+    obs_tree = gen_directory_tree_str(
+        os.path.join(basedir, FileDataContext.GX_DIR)  # noqa: PTH118
+    )
     assert (
         obs_tree
         == """\

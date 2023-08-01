@@ -3,9 +3,9 @@ from typing import List, Optional
 import altair as alt
 import pandas as pd
 import pytest
-from great_expectations.core.expectation_suite import ExpectationSuite
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
