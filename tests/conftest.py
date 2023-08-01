@@ -147,6 +147,12 @@ REQUIRED_MARKERS = {
 }
 
 
+@pytest.fixture()
+def unset_gx_env_variables(monkeypatch: pytest.MonkeyPatch) -> None:
+    for var in GXCloudEnvironmentVariable:
+        monkeypatch.delenv(var, raising=False)
+
+
 @pytest.mark.order(index=2)
 @pytest.fixture(scope="module")
 def spark_warehouse_session(tmp_path_factory):
