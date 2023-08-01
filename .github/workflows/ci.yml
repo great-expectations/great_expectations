@@ -140,7 +140,7 @@ jobs:
           - cloud and not e2e
           - filesystem
           - docs
-          - athena or openpyxl or pyarrow or project or sqlite
+          - athena or clickhouse or openpyxl or pyarrow or project or sqlite
           #- spark
           - mssql
           - mysql
