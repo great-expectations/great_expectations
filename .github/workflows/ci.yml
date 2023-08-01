@@ -204,15 +204,15 @@ jobs:
     strategy:
       matrix:
         markers:
+          - athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
           - big
           - cli
           - filesystem
-          - athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
-          - spark
           - mssql
           - mysql
-          - trino
           - postgresql
+          - spark
+          - trino
         python-version: ["3.8"]
     steps:
       - name: Checkout
