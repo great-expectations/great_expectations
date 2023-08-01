@@ -32,6 +32,7 @@ athena_table = athena_source.add_table_asset("taxitable", table_name="taxitable"
 
 
 batch_request = athena_table.build_batch_request()
+# </snippet>
 
 # clean db to prepare for test
 clean_athena_db(connection_string, ATHENA_DB_NAME, "taxitable")
