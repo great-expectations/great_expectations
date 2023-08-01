@@ -27,7 +27,17 @@ def context() -> EphemeralDataContext:
                 "connection_string": "postgresql+psycopg2://postgres:postgres@localhost:5432/mercury",
             },
             id="postgres",
-        )
+        ),
+        p(
+            {
+                "name": "my_snowflake",
+                "type": "snowflake",
+                # set env vars or replace with actual values
+                "connection_string": r"snowflake://${SF_USERNAME}:${SF_PW}"
+                r"@${SF_ACCNT}/${SF_DB}/${SF_DB}?warehouse=${SF_WAREHOUSE}>&role=${SF_ROLE}",
+            },
+            id="snowflake",
+        ),
     ],
 )
 def datasources(context, request) -> Generator[SQLDatasource, None, None]:
