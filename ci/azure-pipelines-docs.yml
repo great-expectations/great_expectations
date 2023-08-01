@@ -35,36 +35,8 @@ stages:
                 tests/integration/fixtures/**
                 tests/test_sets/**
 
-  - stage: custom_checks
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-latest'
-    jobs:
-    - job: docs_snippet_checker
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
-      steps:
-        - script: |
-            yarn install
-          name: YarnInstall
-        - task: PythonScript@0
-          inputs:
-            scriptSource: 'filePath'
-            scriptPath: 'ci/checks/validate_docs_snippets.py'
-            failOnStderr: false
-          name: DocsSnippetChecker
-
-    - job: name_tag_snippet_referenced_checker
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
-      steps:
-        - task: PythonScript@0
-          inputs:
-            scriptSource: 'filePath'
-            scriptPath: 'ci/checks/check_name_tag_snippets_referenced.py'
-            failOnStderr: true
-          name: NameTagSnippetReferencedChecker
-
   - stage: test_build_docs
-    dependsOn: [ scope_check, custom_checks ]
+    dependsOn: [ scope_check]
     pool:
       vmImage: 'ubuntu-latest'
 

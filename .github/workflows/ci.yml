@@ -15,7 +15,7 @@ jobs:
       - run: echo "CI jobs won't run because this is a draft pull request."
 
   doc-checks:
-    if: github.event.pull_request.draft == false
+    #if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
