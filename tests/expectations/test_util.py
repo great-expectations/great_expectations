@@ -331,7 +331,7 @@ def test_prescriptive_renderer_with_decorator(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.external_sqldialect
+@pytest.mark.all_backends
 def test_table_column_reflection_fallback(test_backends, sa):
     include_sqlalchemy: bool = "sqlite" in test_backends
     include_postgresql: bool = "postgresql" in test_backends
@@ -443,7 +443,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
     sa is None,
     reason="sqlalchemy is not installed",
 )
-@pytest.mark.external_sqldialect
+@pytest.mark.all_backends
 def test__generate_expectation_tests():
     expectation_type = "whatever"
     data = TestData(stuff=[1, 2, 3, 4, 5])

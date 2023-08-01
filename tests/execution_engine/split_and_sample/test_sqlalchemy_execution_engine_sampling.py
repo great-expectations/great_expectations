@@ -117,8 +117,7 @@ def pytest_parsed_arguments(request):
 
 # Despite being parameterized over GXSqlDialect, this test skips if the flag corresponding to that dialect isn't
 # passed in. Most of these dialects are never run in CI.
-# TODO: remove the external_sqldialect and uncomment the all_backends mark once all_backends is supported.
-# @pytest.mark.all_backends
+@pytest.mark.all_backends
 @pytest.mark.parametrize(
     "dialect_name",
     [
