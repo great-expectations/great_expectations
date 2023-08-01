@@ -1507,9 +1507,7 @@ def test_column_partition_metric_spark(spark_session):  # noqa: PLR0915
                 ],
             },
         ),
-        schema=
-      
-      .types.StructType(
+        schema=pyspark.types.StructType(
             [
                 pyspark.types.StructField("a", pyspark.types.IntegerType(), True),
                 pyspark.types.StructField("b", pyspark.types.TimestampType(), True),
