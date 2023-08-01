@@ -266,7 +266,7 @@ context = FileDataContext.create(project_root_dir=path_to_empty_folder)
 
 <ConfigureYourDatasource />
 
-To configure a SQL Datasource, see [Connect to SQL database source data](/docs/docusaurus/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md).
+To configure a SQL Datasource, see [Connect to SQL database source data](../../guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md).
 
 <SaveDatasourceConfigurationToDataContext />
 
