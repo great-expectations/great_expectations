@@ -797,6 +797,7 @@ class TestDependencies(NamedTuple):
 
 MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "athena": TestDependencies(("reqs/requirements-dev-athena.txt",)),
+    "clickhouse": TestDependencies(("reqs/requirements-dev-clickhouse.txt",)),
     "cloud": TestDependencies(
         ("reqs/requirements-dev-cloud.txt",), exta_pytest_args=("--cloud",)
     ),
@@ -851,6 +852,13 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
         yield tokens[0]
     elif marker_string == "cloud and not e2e":
         yield "cloud"
+    elif marker_string == "clickhouse or openpyxl or pyarrow or project or sqlite":
+        yield "clickhouse"
+        yield "openpyxl"
+        yield "pyarrow"
+        yield "project"
+        yield "sqlite"
+    # Remove this elif when this marker test is removed from ci.yml
     elif marker_string == "openpyxl or pyarrow or project or sqlite":
         yield "openpyxl"
         yield "pyarrow"
