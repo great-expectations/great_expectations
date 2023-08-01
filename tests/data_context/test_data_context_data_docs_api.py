@@ -432,3 +432,33 @@ def test_view_validation_result(
     url_used = mock_open.call_args[0][0]
     assert url_used.startswith("file:///")
     assert url_used.endswith("default_pandas_datasource-%23ephemeral_pandas_asset.html")
+
+
+@pytest.mark.unit
+def test_view_validation_result_uses_run_name_template_env_var(empty_data_context):
+    os.environ["MY_ENV_VAR"] = "PLEASE_RENDER_ME"
+
+    context = empty_data_context
+
+    validator = context.sources.pandas_default.read_csv(
+        "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
+    )
+
+    validator.expect_column_values_to_not_be_null("pickup_datetime")
+    validator.save_expectation_suite()
+
+    checkpoint = context.add_or_update_checkpoint(
+        name="my_checkpoint",
+        validator=validator,
+        run_name_template="staging-$MY_ENV_VAR",
+    )
+
+    checkpoint_result = checkpoint.run()
+    with mock.patch("webbrowser.open") as mock_open:
+        context.view_validation_result(checkpoint_result)
+
+    mock_open.assert_called_once()
+
+    url_used = mock_open.call_args[0][0]
+    assert url_used.startswith("file:///")
+    assert "staging-PLEASE_RENDER_ME" in url_used
