@@ -860,7 +860,7 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
 
 
 def _add_all_backends_marker(marker_string: str) -> bool:
-    # We should generalize this, possibly leveraging MARKER_DEPENDENDENCY_MA, but for now
+    # We should generalize this, possibly leveraging MARKER_DEPENDENDENCY_MAP, but for now
     # right I've hardcoded all the containerized backend services we support in testing.
     return marker_string in ["postgresql", "mssql", "mysql", "trino"]
 
