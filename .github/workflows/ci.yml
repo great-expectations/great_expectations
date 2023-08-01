@@ -128,7 +128,7 @@ jobs:
         run: invoke ci-tests 'cloud' --up-services --verbose
 
   marker-tests:
-    if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == true # change this back
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -172,6 +172,7 @@ jobs:
           invoke deps --gx-install -m '${{ matrix.markers }}' -r test
 
       - name: Run the tests
+        if: github.event.pull_request.draft == false
         run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose
 
   py38-min-versions:
