@@ -5,7 +5,7 @@ import PythonTabCreate from './_checkpoint_create_tab_python.md'
 import YamlTabTest from './_checkpoint_test_tab_yaml.md'
 
 
-Run the following command to create the Checkpoint configuration:
+Run the following code to create the Checkpoint configuration:
 
 <Tabs
   groupId="yaml-or-python"
@@ -28,7 +28,7 @@ Run the following command to create the Checkpoint configuration:
   </TabItem>
 </Tabs>
 
-Run the following command to use `context.test_yaml_config(...)` to test the syntax:
+Run the following code to use `context.test_yaml_config(...)` to test the syntax:
 
 <Tabs
   groupId="yaml"
