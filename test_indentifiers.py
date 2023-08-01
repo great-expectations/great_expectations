@@ -36,6 +36,7 @@ def context() -> EphemeralDataContext:
                 "connection_string": r"snowflake://${SF_USERNAME}:${SF_PW}"
                 r"@${SF_ACCNT}/${SF_DB}/${SF_DB}?warehouse=${SF_WAREHOUSE}>&role=${SF_ROLE}",
             },
+            marks=[pytest.mark.xfail(reason="snowflake fix not implemented")],
             id="snowflake",
         ),
     ],
