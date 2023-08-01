@@ -126,6 +126,7 @@ locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 logger = logging.getLogger(__name__)
 
 REQUIRED_MARKERS = {
+    "all_backends",
     "aws_creds",
     "big",
     "cli",
@@ -140,7 +141,6 @@ REQUIRED_MARKERS = {
     "project",
     "pyarrow",
     "spark",
-    "sqlalchemy_version_compatibility",
     "sqlite",
     "unit",
 }

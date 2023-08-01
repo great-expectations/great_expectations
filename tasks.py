@@ -809,6 +809,16 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         exta_pytest_args=("--docs-tests",),
     ),
     "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
+    "mssql": TestDependencies(
+        ("reqs/requirements-dev-mssql.txt",),
+        services=("mssql",),
+        exta_pytest_args=("--mssql",),
+    ),
+    "mysql": TestDependencies(
+        ("reqs/requirements-dev-mysql.txt",),
+        services=("mysql",),
+        exta_pytest_args=("--mysql",),
+    ),
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
     "postgresql": TestDependencies(
         ("reqs/requirements-dev-postgresql.txt",),
@@ -818,6 +828,11 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "spark": TestDependencies(
         ("reqs/requirements-dev-spark.txt",),
         exta_pytest_args=("--spark",),
+    ),
+    "trino": TestDependencies(
+        ("reqs/requirements-dev-trino.txt",),
+        services=("trino",),
+        exta_pytest_args=("--trino",),
     ),
 }
 
@@ -950,8 +965,8 @@ def ci_tests(  # noqa: PLR0913
         "-rEf",
     ]
 
-    if xdist:
-        pytest_cmds.append("-n auto")
+    # if xdist:
+    #     pytest_cmds.append("-n auto")
 
     if timeout != 0:
         pytest_cmds.append(f"--timeout={timeout}")
@@ -968,6 +983,9 @@ def ci_tests(  # noqa: PLR0913
 
         for extra_pytest_arg in test_deps.exta_pytest_args:
             pytest_cmds.append(extra_pytest_arg)
+
+    if marker in ["postgresql", "mssql", "mysql", "trino"]:
+        pytest_cmds[3] = "all_backends"
 
     ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
 
@@ -995,11 +1013,13 @@ def service(ctx: Context, names: Sequence[str], markers: Sequence[str]):
         print(f"  Starting services for {', '.join(service_names)} ...")
         for service_name in service_names:
             cmds = [
-                "docker-compose",
+                "docker",
+                "compose",
                 "-f",
                 f"assets/docker/{service_name}/docker-compose.yml",
                 "up",
                 "-d",
+                "--quiet-pull",
             ]
             ctx.run(" ".join(cmds), echo=True, pty=True)
         # TODO: remove this sleep. This is a temporary hack to give services enough

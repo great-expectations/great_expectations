@@ -113,6 +113,9 @@ jobs:
           - docs
           - clickhouse or openpyxl or pyarrow or project or sqlite
           #- spark
+          - mssql
+          - mysql
+          - trino
           - postgresql
           # - external_sqldialect # tests being skipped likely due to flagging system
         python-version: ["3.8"]
