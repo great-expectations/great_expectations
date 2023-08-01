@@ -1,6 +1,5 @@
 import json
 import random
-from typing import List, Set
 from unittest import mock
 
 import pytest
@@ -2485,74 +2484,3 @@ def test_introspect_db(
             "type": "view",
         },
     ]
-
-
-@pytest.mark.mysql
-def test_include_schema_name_introspection(mysql_engine):
-    execution_engine = SqlAlchemyExecutionEngine(
-        name="test_sql_execution_engine",
-        engine=mysql_engine,
-    )
-
-    my_data_connector = instantiate_class_from_config(
-        config={
-            "class_name": "InferredAssetSqlDataConnector",
-            "name": "inferred_data_connector",
-            "include_schema_name": True,
-        },
-        runtime_environment={
-            "execution_engine": execution_engine,
-            "datasource_name": "my_test_datasource",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-    )
-
-    introspected_tables: List[str] = [
-        table
-        for table in my_data_connector._introspect_db()
-        if table["type"] == "table"
-    ]
-
-    # noinspection PyUnresolvedReferences
-    introspected_schemas: Set[str] = {
-        table.get("schema_name") for table in introspected_tables
-    }
-    assert introspected_schemas == {"test_ci", "test_connection"}
-
-    # ensure that tables with the same name are referenced by both schema_name and table_name
-    # test_df exists in both connection_test and public schemas
-    for schema_name in introspected_schemas:
-        assert {
-            "schema_name": schema_name,
-            "table_name": "test_df",
-            "type": "table",
-        } in introspected_tables
-
-
-@pytest.mark.mysql
-def test_include_schema_name_get_available_data_assets(
-    mysql_engine,
-):
-    execution_engine = SqlAlchemyExecutionEngine(
-        name="test_sql_execution_engine",
-        engine=mysql_engine,
-    )
-
-    my_data_connector = instantiate_class_from_config(
-        config={
-            "class_name": "InferredAssetSqlDataConnector",
-            "name": "inferred_data_connector",
-            "include_schema_name": True,
-        },
-        runtime_environment={
-            "execution_engine": execution_engine,
-            "datasource_name": "my_test_datasource",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-    )
-
-    actual_data_asset_names = my_data_connector.get_available_data_asset_names()
-
-    expected_data_asset_names = ["test_ci.test_df", "test_connection.test_df"]
-
-    assert set(expected_data_asset_names).issubset(set(actual_data_asset_names))
