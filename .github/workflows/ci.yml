@@ -80,6 +80,24 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
       AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      # aws-redshift
+      REDSHIFT_USERNAME: ${{secrets.REDSHIFT_USERNAME}}
+      REDSHIFT_PASSWORD: ${{secrets.REDSHIFT_PASSWORD}}
+      REDSHIFT_HOST: ${{secrets.REDSHIFT_HOST}}
+      REDSHIFT_PORT: ${{secrets.REDSHIFT_PORT}}
+      REDSHIFT_DATABASE: ${{secrets.REDSHIFT_DATABASE}}
+      REDSHIFT_SSLMODE: ${{secrets.REDSHIFT_SSLMODE}}
+      # azure
+      AZURE_ACCESS_KEY: ${{secrets.AZURE_ACCESS_KEY}}
+      AZURE_CREDENTIAL: ${{secrets.AZURE_CREDENTIAL}}
+      # snowflake
+      SNOWFLAKE_ACCOUNT: ${{secrets.SNOWFLAKE_ACCOUNT}}
+      SNOWFLAKE_USER: ${{secrets.SNOWFLAKE_USER}}
+      SNOWFLAKE_PW: ${{secrets.SNOWFLAKE_PW}}
+      SNOWFLAKE_DATABASE: ${{secrets.SNOWFLAKE_DATABASE}}
+      SNOWFLAKE_SCHEMA: ${{secrets.SNOWFLAKE_SCHEMA}}
+      SNOWFLAKE_WAREHOUSE: ${{secrets.SNOWFLAKE_WAREHOUSE}}
+      SNOWFLAKE_ROLE: ${{secrets.SNOWFLAKE_ROLE}}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -117,7 +135,7 @@ jobs:
       - name: Install dependencies
         run: |
           # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
-          pip install --constraint constraints-dev.txt ".[test, bigquery, sqlalchemy1, postgresql]" pytest-azurepipelines "pandas<2.0.0"
+          pip install --constraint constraints-dev.txt ".[test, azure, bigquery, mssql, mysql, postgresql, redshift, snowflake, sqlalchemy1, trino]" pytest-azurepipelines "pandas<2.0.0"
 
       - name: Run the tests
         run: |

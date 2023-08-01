@@ -801,13 +801,21 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         ("reqs/requirements-dev-cloud.txt",), extra_pytest_args=("--cloud",)
     ),
     "docs": TestDependencies(
-        requirement_files=(
-            "reqs/requirements-dev-test.txt",
-            "reqs/requirements-dev-bigquery.txt",
-            "reqs/requirements-dev-postgresql.txt",
+        # these installs are handled by the CI
+        requirement_files=("reqs/requirements-dev-test.txt",),
+        services=("postgresql", "mssql", "mysql", "trino"),
+        extra_pytest_args=(
+            "--aws",
+            "--azure",
+            "--bigquery",
+            "--mssql",
+            "--mysql",
+            "--postgresql",
+            "--redshift",
+            "--snowflake",
+            "--trino",
+            "--docs-tests",
         ),
-        services=("postgresql",),
-        extra_pytest_args=("--postgresql", "--bigquery", "--aws", "--docs-tests"),
     ),
     "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
     "mssql": TestDependencies(
