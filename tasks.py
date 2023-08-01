@@ -860,6 +860,12 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
         yield "pyarrow"
         yield "project"
         yield "sqlite"
+    # TODO: remove once PR 8458 merges
+    elif marker_string == "openpyxl or pyarrow or project or sqlite":
+        yield "openpyxl"
+        yield "pyarrow"
+        yield "project"
+        yield "sqlite"
     else:
         raise ValueError(f"Unable to tokenize marker string: {marker_string}")
 
