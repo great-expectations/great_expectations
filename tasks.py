@@ -942,7 +942,7 @@ def ci_tests(  # noqa: PLR0913
     reports: bool = False,
     slowest: int = 5,
     timeout: float = 0.0,  # 0 indicates no timeout
-    xdist: bool = True,
+    xdist: bool = False,
 ):
     """
     Run tests in CI.
@@ -964,8 +964,8 @@ def ci_tests(  # noqa: PLR0913
         "-rEf",
     ]
 
-    # if xdist:
-    #     pytest_cmds.append("-n auto")
+    if xdist:
+        pytest_cmds.append("-n auto")
 
     if timeout != 0:
         pytest_cmds.append(f"--timeout={timeout}")
