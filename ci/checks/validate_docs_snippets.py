@@ -49,7 +49,7 @@ def run_grep(target_dir: str) -> List[str]:
     return res.stdout.splitlines()
 
 
-def parse_grep(lines: list[str]) -> list[str]:
+def parse_grep(lines: List[str]) -> List[str]:
     """Parse the grep output and exclude known issues.
 
     We are ok with some snippet tags in explanatory text on how to write snippets.
