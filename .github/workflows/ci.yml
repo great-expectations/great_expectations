@@ -140,7 +140,7 @@ jobs:
           invoke deps --gx-install -m '${{ matrix.markers }}' -r test
 
       - name: Run the tests
-        run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose --no-pty
+        run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose
 
   py38-min-versions:
     if: github.event.pull_request.draft == false
