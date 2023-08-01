@@ -29,9 +29,9 @@ athena_source: SQLDatasource = context.sources.add_or_update_sql(
 )
 athena_table = athena_source.add_table_asset("taxitable", table_name="taxitable")
 
-batch_request = athena_table.build_batch_request()
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Connect and Build Batch Request">
 
-# </snippet>
+batch_request = athena_table.build_batch_request()
 
 # clean db to prepare for test
 clean_athena_db(connection_string, ATHENA_DB_NAME, "taxitable")
