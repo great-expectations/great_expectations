@@ -1,4 +1,5 @@
 import os
+import urllib
 from unittest import mock
 
 import pytest
@@ -462,3 +463,7 @@ def test_view_validation_result_uses_run_name_template_env_var(empty_data_contex
     url_used = mock_open.call_args[0][0]
     assert url_used.startswith("file:///")
     assert "staging-PLEASE_RENDER_ME" in url_used
+
+    f = urllib.request.urlopen(url_used)
+    myfile = f.read()
+    assert b"staging-PLEASE_RENDER_ME" in myfile
