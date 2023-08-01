@@ -10,6 +10,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.expectations import registry
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     ColumnPairMapMetricProvider,
@@ -34,7 +35,6 @@ from great_expectations.expectations.metrics.query_metric_provider import (
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
-from great_expectations.expectations import registry
 
 pytestmark = pytest.mark.unit
 

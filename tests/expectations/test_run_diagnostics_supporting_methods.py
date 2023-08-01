@@ -1,9 +1,7 @@
 import pytest
 
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
-    ExpectationTestCase,
     ExpectationTestDataCases,
-    TestData,
 )
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     AugmentedLibraryMetadata,
@@ -229,6 +227,6 @@ def test__get_test_results():
     for result in test_results:
         # Abe: 1/1/2022: I'm not sure this is the behavior we want long term. How does backend relate to ExecutionEngine?
         if result.backend == "pandas":
-            assert result.test_passed == True
+            assert result.test_passed is True
         elif result.backend == "sqlite":
-            assert result.test_passed == False
+            assert result.test_passed is False
