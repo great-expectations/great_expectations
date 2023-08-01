@@ -1,10 +1,11 @@
+import pytest
+
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.util import get_sqlalchemy_inspector
-import pytest
 
 
 @pytest.mark.sqlite

@@ -3,7 +3,6 @@ from click.testing import CliRunner
 
 from great_expectations.cli import cli
 
-
 pytestmark = pytest.mark.cli
 
 
