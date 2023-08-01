@@ -45,7 +45,8 @@ class RuleBasedProfilerResult(SerializableDictDot):
             List of `ExpectationConfiguration` objects.
         citation:
             `dict` of citations.
-        catch_exceptions (boolean or None): \
+        catch_exceptions (boolean): \
+            Defaults to False.
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
 
@@ -60,7 +61,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
     rule_domain_builder_execution_time: Dict[str, float]
     rule_execution_time: Dict[str, float]
     rule_exception_tracebacks: Dict[str, Optional[str]]
-    catch_exceptions: Optional[bool] = field(default=None)
+    catch_exceptions: bool = field(default=False)
     # Reference to  "UsageStatisticsHandler" object for this "RuleBasedProfilerResult" object (if configured).
     _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 

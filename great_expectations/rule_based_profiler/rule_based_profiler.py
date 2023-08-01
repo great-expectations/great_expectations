@@ -1623,7 +1623,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
         data_context: Optional[AbstractDataContext] = None,
         id: Optional[str] = None,
-        catch_exceptions: Optional[bool] = None,
+        catch_exceptions: bool = False,
     ) -> None:
         """Initialize a RuleBasedProfiler."""
 
