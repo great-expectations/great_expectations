@@ -66,6 +66,7 @@ class TestIndentifiers:
         asset = datasources.add_table_asset(**asset_config)
         print(asset)
 
+    # TODO: parametrize with different expectations types
     def test_run_checkpoint(
         self,
         context: EphemeralDataContext,
