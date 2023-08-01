@@ -808,7 +808,6 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         ),
         exta_pytest_args=("--docs-tests",),
     ),
-    "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
     "mssql": TestDependencies(
         ("reqs/requirements-dev-mssql.txt",),
         services=("mssql",),
@@ -852,13 +851,17 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
         yield tokens[0]
     elif marker_string == "cloud and not e2e":
         yield "cloud"
-    elif marker_string == "clickhouse or openpyxl or pyarrow or project or sqlite":
+    elif (
+        marker_string
+        == "athena or clickhouse or openpyxl or pyarrow or project or sqlite"
+    ):
+        yield "athena"
         yield "clickhouse"
         yield "openpyxl"
         yield "pyarrow"
         yield "project"
         yield "sqlite"
-    # Remove this elif when this marker test is removed from ci.yml
+    # TODO: remove once PR 8458 merges
     elif marker_string == "openpyxl or pyarrow or project or sqlite":
         yield "openpyxl"
         yield "pyarrow"

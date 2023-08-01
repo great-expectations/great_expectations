@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import datetime
 import json
 import os
 from collections import OrderedDict
@@ -11,7 +10,6 @@ from freezegun import freeze_time
 from numpy import Infinity
 
 import great_expectations as gx
-from great_expectations.compatibility import trino
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import PandasDatasource
@@ -22,125 +20,12 @@ from great_expectations.profile.basic_suite_builder_profiler import (
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.self_check.util import (
     expectationSuiteValidationResultSchema,
-    get_dataset,
 )
-from great_expectations.util import is_library_loadable
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
 
 FALSEY_VALUES = [None, [], False]
-
-
-@pytest.fixture
-def datetime_dataset(test_backend):
-    data = {
-        "datetime": [
-            str(datetime.datetime(2020, 2, 4, 22, 12, 5, 943152)),
-            str(datetime.datetime(2020, 2, 5, 22, 12, 5, 943152)),
-            str(datetime.datetime(2020, 2, 6, 22, 12, 5, 943152)),
-            str(datetime.datetime(2020, 2, 7, 22, 12, 5, 943152)),
-            str(datetime.datetime(2020, 2, 8, 22, 12, 5, 943152)),
-            str(datetime.datetime(2020, 2, 9, 22, 12, 5, 943152)),
-            str(datetime.datetime(2020, 2, 10, 22, 12, 5, 943152)),
-            str(datetime.datetime(2020, 2, 11, 22, 12, 5, 943152)),
-            str(datetime.datetime(2020, 2, 12, 22, 12, 5, 943152)),
-            str(datetime.datetime(2020, 2, 13, 22, 12, 5, 943152)),
-        ]
-    }
-
-    schemas = {
-        "pandas": {
-            "datetime": "datetime64",
-        },
-        "postgresql": {
-            "datetime": "TIMESTAMP",
-        },
-        "sqlite": {
-            "datetime": "TIMESTAMP",
-        },
-        "mysql": {
-            "datetime": "TIMESTAMP",
-        },
-        "mssql": {
-            "datetime": "DATETIME",
-        },
-        "spark": {
-            "datetime": "TimestampType",
-        },
-    }
-    return get_dataset(test_backend, data, schemas=schemas)
-
-
-@pytest.mark.filterwarnings(
-    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
-)
-@pytest.mark.skipif(
-    trino.trino and is_library_loadable(library_name="trino"),
-    reason="datetime doesnt exist in Trino",
-)
-@pytest.mark.xfail(
-    reason='Utility methods "get_dataset()" is part of deprecated GX-V2 functionality (it must no longer be used).'
-)
-@pytest.mark.external_sqldialect
-def test__find_next_datetime_column(datetime_dataset, numeric_high_card_dataset):
-    columns = datetime_dataset.get_table_columns()
-    column_cache = {}
-    profiled_columns = {"numeric": [], "low_card": [], "string": [], "datetime": []}
-
-    column = BasicSuiteBuilderProfiler._find_next_datetime_column(
-        datetime_dataset, columns, profiled_columns, column_cache
-    )
-    assert column == "datetime"
-    profiled_columns["datetime"].append(column)
-    assert (
-        BasicSuiteBuilderProfiler._find_next_datetime_column(
-            datetime_dataset, columns, profiled_columns, column_cache
-        )
-        is None
-    )
-
-    columns = numeric_high_card_dataset.get_table_columns()
-    column_cache = {}
-    profiled_columns = {"numeric": [], "low_card": [], "string": [], "datetime": []}
-    assert (
-        BasicSuiteBuilderProfiler._find_next_datetime_column(
-            numeric_high_card_dataset, columns, profiled_columns, column_cache
-        )
-        is None
-    )
-
-
-@pytest.mark.filterwarnings(
-    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
-)
-@pytest.mark.skipif(
-    trino.trino and is_library_loadable(library_name="trino"),
-    reason="datetime doesnt exist in Trino",
-)
-@pytest.mark.xfail(
-    reason='Utility methods "get_dataset()" is part of deprecated GX-V2 functionality (it must no longer be used).'
-)
-@pytest.mark.external_sqldialect
-def test__create_expectations_for_datetime_column(datetime_dataset):
-    column = "datetime"
-
-    expectation_suite = datetime_dataset.get_expectation_suite(suppress_warnings=True)
-    assert len(expectation_suite.expectations) == 1
-
-    BasicSuiteBuilderProfiler._create_expectations_for_datetime_column(
-        datetime_dataset, column
-    )
-    expectation_suite = datetime_dataset.get_expectation_suite(suppress_warnings=True)
-    assert {
-        expectation.expectation_type
-        for expectation in expectation_suite.expectations
-        if expectation.kwargs.get("column") == column
-    } == {
-        "expect_column_to_exist",
-        "expect_column_values_to_be_between",
-        "expect_column_values_to_not_be_null",
-    }
 
 
 @pytest.mark.unit
