@@ -25,7 +25,7 @@ connection_string = f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_D
 # create datasource and add to DataContext
 context = gx.get_context()
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Datasource dict config">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Datasource config">
 
 athena_source: SQLDatasource = context.sources.add_or_update_sql(
     "my_awsathena_datasource", connection_string=connection_string

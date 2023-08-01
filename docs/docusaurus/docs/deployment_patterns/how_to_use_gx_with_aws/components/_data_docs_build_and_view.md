@@ -8,7 +8,7 @@ For more information on Actions that Checkpoints can perform and how to add them
 
 :::
 
-Run the following command to view the new entry for the rendered Validation Result:
+Run the following code to view the new entry for the rendered Validation Result:
 
 ```python
 context.open_data_docs()
