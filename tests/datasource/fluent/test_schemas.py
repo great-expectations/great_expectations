@@ -8,6 +8,7 @@ from typing import Any, Generator, Type
 
 import pandas
 import pytest
+from packaging.version import Version
 
 from great_expectations.datasource.fluent import (
     _PANDAS_SCHEMA_VERSION,  # this is the version we run in the standard test pipeline. Update as needed
@@ -20,11 +21,11 @@ from great_expectations.datasource.fluent.sources import (
 )
 
 PANDAS_VERSION: str = pandas.__version__
-PYTHON_VERSION = float(f"{sys.version_info.major}.{sys.version_info.minor}")
+PYTHON_VERSION: Version = Version(f"{sys.version_info.major}.{sys.version_info.minor}")
 
 
-def min_supported_python() -> float:
-    return 3.8
+def min_supported_python() -> Version:
+    return Version("3.8")
 
 
 def _models_and_schema_dirs() -> (
