@@ -133,7 +133,6 @@ jobs:
     strategy:
       matrix:
         markers:
-          - all_backends
           - big
           - cli
           - filesystem
