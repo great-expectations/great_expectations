@@ -27,9 +27,6 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.compatibility import pyspark
-
-from great_expectations.compatibility import sqlalchemy
 from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
 )
