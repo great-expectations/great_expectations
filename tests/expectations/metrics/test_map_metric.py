@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -38,13 +39,12 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
-from great_expectations.compatibility import sqlalchemy
 
 
 @pytest.fixture
 def sqlite_table_for_unexpected_rows_with_index(
     test_backends,
-) -> sqlalchemy.Engine:  # noqa: F821
+) -> sqlalchemy.Engine:
     if "sqlite" in test_backends:
         try:
             from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
@@ -593,7 +593,7 @@ def test_expectation_configuration_has_result_format(
         },
     )
     with pytest.warns(UserWarning) as config_warning:
-        result: ExpectationValidationResult = (
+        result: ExpectationValidationResult = (  # noqa: F841
             _expecation_configuration_to_validation_result_pandas(
                 expectation_configuration=expectation_configuration,
                 dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,

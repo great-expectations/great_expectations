@@ -1,24 +1,23 @@
-from typing import Dict, List, Optional, ClassVar, Set, Union
+from typing import ClassVar, Dict, List, Optional, Set, Union
+from unittest import mock
 
 import pytest
-from unittest import mock
 
 from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
 )
-from great_expectations.types.attributes import Attributes
 from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    get_fully_qualified_parameter_names,
-    RAW_PARAMETER_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     PARAMETER_KEY,
+    RAW_PARAMETER_KEY,
+    ParameterContainer,
+    get_fully_qualified_parameter_names,
 )
-
+from great_expectations.types.attributes import Attributes
 
 """
 Tests in this module focus on behavior aspects of "ParameterBuilder.build_parameters()" -- this public method assesses

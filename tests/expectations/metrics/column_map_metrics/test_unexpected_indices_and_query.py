@@ -7,11 +7,10 @@ from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypeSuffixes,
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.exceptions import MetricResolutionError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
-    SqlAlchemyExecutionEngine,
     SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
 )
 from great_expectations.self_check.util import (
     build_pandas_engine,
