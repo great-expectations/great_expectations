@@ -129,7 +129,7 @@ jobs:
 
   marker-tests:
     needs: [unit-tests, static-analysis]
-    if: github.event.pull_request.draft == true # change this back
+    if: ${{ github.event_name == 'schedule' || matrix.python-version == "3.8"}}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -175,7 +175,6 @@ jobs:
       - name: Run the tests
         # if: github.event.pull_request.draft == false # this works
         # if: ${{ matrix.python-version  == "3.8" }} # ??
-        if: ${{ github.event_name == 'schedule' || matrix.python-version == '3.8'}}
         run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose
 
   py38-min-versions:
