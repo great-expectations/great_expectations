@@ -1,9 +1,3 @@
-Run the following command to create a Batch Request:
-
-```python name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Batch Request"
-
-```
-
 Run the following command to prepare an empty Expectation suite:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Create Expectation Suite"

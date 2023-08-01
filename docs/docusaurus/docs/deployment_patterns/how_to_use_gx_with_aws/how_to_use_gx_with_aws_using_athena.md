@@ -266,7 +266,7 @@ context = FileDataContext.create(project_root_dir=path_to_empty_folder)
 
 <ConfigureYourDatasource />
 
-To configure a SQL Datasource, see [How to configure a SQL Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource).
+To configure a SQL Datasource, see [Connect to SQL database source data](/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md).
 
 <SaveDatasourceConfigurationToDataContext />
 
