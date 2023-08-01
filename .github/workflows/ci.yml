@@ -135,6 +135,9 @@ jobs:
         markers:
           - big
           - cli
+          # This is a required test that has been subsumed by the cloud test above.
+          # This is a required test stage however. I'll remove this after the above test goes in.
+          - cloud and not e2e
           - filesystem
           - docs
           - openpyxl or pyarrow or project or sqlite
