@@ -790,7 +790,7 @@ def show_automerges(ctx: Context):
 class TestDependencies(NamedTuple):
     requirement_files: tuple[str, ...]
     services: tuple[str, ...] = tuple()
-    exta_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
+    extra_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
         str, ...
     ] = tuple()
 
@@ -799,40 +799,62 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "athena": TestDependencies(("reqs/requirements-dev-athena.txt",)),
     "clickhouse": TestDependencies(("reqs/requirements-dev-clickhouse.txt",)),
     "cloud": TestDependencies(
-        ("reqs/requirements-dev-cloud.txt",), exta_pytest_args=("--cloud",)
+        ("reqs/requirements-dev-cloud.txt",), extra_pytest_args=("--cloud",)
     ),
     "docs": TestDependencies(
+        # these installs are handled by the CI
         requirement_files=(
             "reqs/requirements-dev-test.txt",
-            "reqs/requirements-dev-spark.txt",
+            "reqs/requirements-dev-azure.txt",
+            "reqs/requirements-dev-bigquery.txt",
+            "reqs/requirements-dev-mssql.txt",
+            "reqs/requirements-dev-mysql.txt",
+            "reqs/requirements-dev-postgresql.txt",
+            "reqs/requirements-dev-redshift.txt",
+            "reqs/requirements-dev-snowflake.txt",
+            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
+            "reqs/requirements-dev-sqlalchemy1.txt",
+            "reqs/requirements-dev-trino.txt",
         ),
-        exta_pytest_args=("--docs-tests",),
+        services=("postgresql", "mssql", "mysql", "trino"),
+        extra_pytest_args=(
+            "--aws",
+            "--azure",
+            "--bigquery",
+            "--mssql",
+            "--mysql",
+            "--postgresql",
+            "--redshift",
+            "--snowflake",
+            "--trino",
+            "--docs-tests",
+        ),
     ),
     "mssql": TestDependencies(
         ("reqs/requirements-dev-mssql.txt",),
         services=("mssql",),
-        exta_pytest_args=("--mssql",),
+        extra_pytest_args=("--mssql",),
     ),
     "mysql": TestDependencies(
         ("reqs/requirements-dev-mysql.txt",),
         services=("mysql",),
-        exta_pytest_args=("--mysql",),
+        extra_pytest_args=("--mysql",),
     ),
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
     "postgresql": TestDependencies(
         ("reqs/requirements-dev-postgresql.txt",),
         services=("postgresql",),
-        exta_pytest_args=("--postgresql",),
+        extra_pytest_args=("--postgresql",),
     ),
     "spark": TestDependencies(
         requirement_files=("reqs/requirements-dev-spark.txt",),
         services=("spark",),
-        exta_pytest_args=("--spark",),
+        extra_pytest_args=("--spark",),
     ),
     "trino": TestDependencies(
         ("reqs/requirements-dev-trino.txt",),
         services=("trino",),
-        exta_pytest_args=("--trino",),
+        extra_pytest_args=("--trino",),
     ),
 }
 
@@ -853,16 +875,11 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
         yield "cloud"
     elif (
         marker_string
-        == "athena or clickhouse or openpyxl or pyarrow or project or sqlite"
+        == "athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds"
     ):
+        yield "aws_creds"
         yield "athena"
         yield "clickhouse"
-        yield "openpyxl"
-        yield "pyarrow"
-        yield "project"
-        yield "sqlite"
-    # TODO: remove once PR 8458 merges
-    elif marker_string == "openpyxl or pyarrow or project or sqlite":
         yield "openpyxl"
         yield "pyarrow"
         yield "project"
@@ -942,6 +959,35 @@ def deps(  # noqa: PLR0913
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
+@invoke.task(iterable=["service_names", "up_services", "verbose"])
+def docs_snippet_tests(
+    ctx: Context,
+    marker: str,
+    up_services: bool = False,
+    verbose: bool = False,
+    reports: bool = False,
+):
+    pytest_cmds = [
+        "pytest",
+        "-rEf",
+    ]
+    if reports:
+        pytest_cmds.extend(["--cov=great_expectations", "--cov-report=xml"])
+
+    if verbose:
+        pytest_cmds.append("-vv")
+
+    for test_deps in _get_marker_dependencies(marker):
+        if up_services:
+            service(ctx, names=test_deps.services, markers=test_deps.services)
+
+        for extra_pytest_arg in test_deps.extra_pytest_args:
+            pytest_cmds.append(extra_pytest_arg)
+
+    pytest_cmds.append("tests/integration/test_script_runner.py")
+    ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
+
+
 @invoke.task(
     iterable=["service_names", "up_services", "verbose"],
 )
@@ -992,7 +1038,7 @@ def ci_tests(  # noqa: PLR0913
         if up_services:
             service(ctx, names=test_deps.services, markers=test_deps.services, pty=pty)
 
-        for extra_pytest_arg in test_deps.exta_pytest_args:
+        for extra_pytest_arg in test_deps.extra_pytest_args:
             pytest_cmds.append(extra_pytest_arg)
 
     if marker in ["postgresql", "mssql", "mysql", "trino"]:
