@@ -127,14 +127,15 @@ logger = logging.getLogger(__name__)
 
 REQUIRED_MARKERS = {
     "all_backends",
+    "athena",
     "aws_creds",
     "big",
     "cli",
     "clickhouse",
     "cloud",
     "docs",
-    "external_sqldialect",
     "filesystem",
+    "google_creds",
     "mysql",
     "openpyxl",
     "postgresql",
@@ -144,6 +145,12 @@ REQUIRED_MARKERS = {
     "sqlite",
     "unit",
 }
+
+
+@pytest.fixture()
+def unset_gx_env_variables(monkeypatch: pytest.MonkeyPatch) -> None:
+    for var in GXCloudEnvironmentVariable:
+        monkeypatch.delenv(var, raising=False)
 
 
 @pytest.mark.order(index=2)
