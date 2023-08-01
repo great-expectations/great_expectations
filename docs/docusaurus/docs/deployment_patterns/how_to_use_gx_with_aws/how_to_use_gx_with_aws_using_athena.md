@@ -177,25 +177,25 @@ Use the information provided here to learn how to use Great Expectations (GX) wi
 
 ## Ensure that the AWS CLI is ready for use
 
-<VerifyAwsInstalled />
+1. <VerifyAwsInstalled />
 
-<VerifyAwsCredentials />
+2. <VerifyAwsCredentials />
 
 ## Prepare a local installation of Great Expectations
 
-<VerifyPythonVersion />
+1. <VerifyPythonVersion />
 
-<WhereToGetPython />
+    <WhereToGetPython />
 
-<CreateVirtualEnvironment />
+2. <CreateVirtualEnvironment />
 
-<GetLatestPip />
+3. <GetLatestPip />
 
-<InstallBoto3WithPip />
+4. <InstallBoto3WithPip />
 
-<InstallGxWithPip />
+5. <InstallGxWithPip />
 
-<VerifySuccessfulGxInstallation />
+6. <VerifySuccessfulGxInstallation />
 
 ## Create your Data Context
 
@@ -219,54 +219,55 @@ context = FileDataContext.create(project_root_dir=path_to_empty_folder)
 
 <IdentifyDataContextExpectationsStore />
 
-<AddS3ExpectationsStoreConfiguration />
+1. <AddS3ExpectationsStoreConfiguration />
 
-<VerifyS3ExpectationsStoreExists />
+2. <VerifyS3ExpectationsStoreExists />
 
-<OptionalCopyExistingExpectationsToS3 />
+3. <OptionalCopyExistingExpectationsToS3 />
 
-<OptionalVerifyCopiedExpectationsAreAccessible />
+4. <OptionalVerifyCopiedExpectationsAreAccessible />
 
 ## Configure your Validation Results Store on Amazon S3
 
 <IdentifyDataContextValidationResultsStore />
 
-<AddS3ValidationResultsStoreConfiguration />
+1. <AddS3ValidationResultsStoreConfiguration />
 
-<VerifyS3ValidationResultsStoreExists />
+2. <VerifyS3ValidationResultsStoreExists />
 
-<OptionalCopyExistingValidationResultsToS3 />
+3. <OptionalCopyExistingValidationResultsToS3 />
 
 ## Configure Data Docs for hosting and sharing from Amazon S3
 
-<CreateAnS3BucketForDataDocs />
+1. <CreateAnS3BucketForDataDocs />
 
-<ConfigureYourBucketPolicyToEnableAppropriateAccess />
+2. <ConfigureYourBucketPolicyToEnableAppropriateAccess />
 
-<ApplyTheDataDocsAccessPolicy />
+3. <ApplyTheDataDocsAccessPolicy />
 
-<AddANewS3SiteToTheDataDocsSitesSectionOfYourGreatExpectationsYml />
+4. <AddANewS3SiteToTheDataDocsSitesSectionOfYourGreatExpectationsYml />
 
-<TestThatYourConfigurationIsCorrectByBuildingTheSite />
+5. <TestThatYourConfigurationIsCorrectByBuildingTheSite />
 
 ### Optional settings
+
 <AdditionalDataDocsNotes />
 
 ## Connect to data
 
 <HowToRunDatasourceCode />
 
-<InstantiateDataContext />
+1. <InstantiateDataContext />
 
-<ConnectionStringAthena />
+2. <ConnectionStringAthena />
 
-<ConfigureYourDatasource />
+3. <ConfigureYourDatasource />
 
-To configure a SQL Datasource, see [Connect to SQL database source data](../../guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md).
+    To configure a SQL Datasource, see [Connect to SQL database source data](../../guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md).
 
-<SaveDatasourceConfigurationToDataContext />
+4. <SaveDatasourceConfigurationToDataContext />
 
-<TestAthenaDatasource />
+5. <TestAthenaDatasource />
 
 ## Create Expectations
 
@@ -280,10 +281,10 @@ To configure a SQL Datasource, see [Connect to SQL database source data](../../g
 
 <CheckpointCreateAndRun />
 
-<CreateCheckpoint />
+1. <CreateCheckpoint />
 
-<SaveCheckpoint />
+2. <SaveCheckpoint />
 
-<RunCheckpoint />
+3. <RunCheckpoint />
 
-<BuildAndViewDataDocs />
+4. <BuildAndViewDataDocs />
