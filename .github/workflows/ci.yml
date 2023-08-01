@@ -148,7 +148,11 @@ jobs:
           - mysql
           - trino
           - postgresql
-        python-version: ["3.8"]
+        python-version:
+          - "3.8"
+          # - "3.9"   # TODO: uncomment before merge
+          # - "3.10"  # TODO: uncomment before merge
+          - "3.11"
 
     steps:
       - name: Checkout
