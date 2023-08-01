@@ -30,7 +30,7 @@ from great_expectations.self_check.util import (
 from great_expectations.util import build_in_memory_runtime_context
 from tests.conftest import build_test_backends_list_v3_api
 
-pytestmark = pytest.mark.sqlalchemy_version_compatibility
+pytestmark = pytest.mark.all_backends
 
 try:
     sqliteDialect = sqlalchemy.sqlite.dialect

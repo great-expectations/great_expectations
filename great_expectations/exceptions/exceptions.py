@@ -57,6 +57,10 @@ class StoreBackendError(DataContextError):
     pass
 
 
+class GitIgnoreScaffoldingError(GreatExpectationsError):
+    pass
+
+
 class StoreBackendTransientError(StoreBackendError):
     """The result of a timeout or other networking issues"""
 

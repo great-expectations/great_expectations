@@ -13,6 +13,7 @@ pytest-mock>=3.8.2
 pytest-order>=0.9.5
 pytest-random-order>=1.0.4
 pytest-timeout>=2.1.0
+pytest-xdist>=3.3.1
 requirements-parser>=0.2.0
 responses>=0.23.1 # requests mocking
 snapshottest==0.6.0 # GX Cloud atomic renderer tests
