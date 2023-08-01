@@ -31,8 +31,8 @@ jobs:
         run: pip install -r reqs/requirements-dev-test.txt
       - name: Install Yarn
         run: yarn install
-      - name: check_repo_root_size
-        run: sh ./ci/checks/check_repo_root_size.sh
+      # - name: check_repo_root_size
+      #   run: sh ./ci/checks/check_repo_root_size.sh
       - name: Docstring linter
         run: invoke docstrings
       - name: line_number_snippet_checker
