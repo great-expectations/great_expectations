@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import io
-import os
+import pathlib
 from contextlib import redirect_stdout
-from typing import Any, Dict, List, Optional, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
 from unittest import mock
 
 import altair as alt
@@ -11,7 +13,6 @@ import pytest
 from freezegun import freeze_time
 import pandas as pd
 
-from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -31,12 +32,17 @@ from great_expectations.rule_based_profiler.parameter_container import (
 from tests.render.util import load_notebook_from_path
 from tests.test_utils import find_strings_in_nested_obj
 
+if TYPE_CHECKING:
+    from great_expectations.data_context import FileDataContext
+
 
 @pytest.fixture
 def bobby_onboarding_data_assistant_result_usage_stats_enabled(
-    bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_deterministic_data_context,
 ) -> OnboardingDataAssistantResult:
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_deterministic_data_context
+    )
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -54,9 +60,11 @@ def bobby_onboarding_data_assistant_result_usage_stats_enabled(
 
 @pytest.fixture(scope="module")
 def bobby_onboarding_data_assistant_result(
-    bobby_columnar_table_multi_batch_probabilistic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ) -> OnboardingDataAssistantResult:
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_probabilistic_data_context
+    )
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -74,9 +82,9 @@ def bobby_onboarding_data_assistant_result(
 
 @pytest.fixture(scope="module")
 def quentin_implicit_invocation_result_actual_time(
-    quentin_columnar_table_multi_batch_data_context: DataContext,
+    quentin_columnar_table_multi_batch_data_context,
 ) -> OnboardingDataAssistantResult:
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context: FileDataContext = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -95,9 +103,9 @@ def quentin_implicit_invocation_result_actual_time(
 @pytest.fixture(scope="module")
 @freeze_time("09/26/2019 13:42:41")
 def quentin_implicit_invocation_result_frozen_time(
-    quentin_columnar_table_multi_batch_data_context: DataContext,
+    quentin_columnar_table_multi_batch_data_context,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context: FileDataContext = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -114,7 +122,7 @@ def quentin_implicit_invocation_result_frozen_time(
 
 
 def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
-    context: DataContext,
+    context: FileDataContext,
     new_cell: str,
     implicit: bool,
 ):
@@ -137,7 +145,7 @@ def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
         expectation_suite_name=expectation_suite_name
     )
 
-    notebook_path: str = os.path.join(root_dir, f"run_onboarding_data_assistant.ipynb")
+    notebook_path = pathlib.Path(root_dir, "run_onboarding_data_assistant.ipynb")
 
     notebook_code_initialization: str = """
     from typing import Optional, Union
@@ -253,7 +261,7 @@ def test_onboarding_data_assistant_result_get_expectation_suite(
     assert mock_emit.call_count == 1
 
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    actual_events: List[mock._Call] = mock_emit.call_args_list
     assert (
         actual_events[-1][0][0]["event"]
         == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE
@@ -353,7 +361,7 @@ def test_onboarding_data_assistant_should_fail_forward(
 
         mock_run.side_effect = side_effect
 
-        data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+        data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(  # noqa: F841
             batch_request=batch_request,
             estimation="flag_outliers",
             numeric_columns_rule={
@@ -395,7 +403,9 @@ def test_onboarding_data_assistant_should_fail_forward(
 def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_deterministic_data_context
+    )
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -477,7 +487,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
 def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
     quentin_columnar_table_multi_batch_data_context,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context: FileDataContext = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -491,12 +501,10 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
 
     rule_config: dict
     assert all(
-        [
-            rule_config["variables"]["estimator"] == "exact"
-            if "estimator" in rule_config["variables"]
-            else True
-            for rule_config in data_assistant_result.profiler_config.rules.values()
-        ]
+        rule_config["variables"]["estimator"] == "exact"
+        if "estimator" in rule_config["variables"]
+        else True
+        for rule_config in data_assistant_result.profiler_config.rules.values()
     )
 
 
@@ -505,7 +513,9 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
 def test_onboarding_data_assistant_plot_descriptive_notebook_execution_fails(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_probabilistic_data_context
+    )
 
     new_cell: str = (
         "data_assistant_result.plot_metrics(this_is_not_a_real_parameter=True)"
@@ -531,7 +541,9 @@ def test_onboarding_data_assistant_plot_descriptive_notebook_execution_fails(
 def test_onboarding_data_assistant_plot_descriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_probabilistic_data_context
+    )
 
     new_cell: str = "data_assistant_result.plot_metrics()"
 
@@ -553,7 +565,9 @@ def test_onboarding_data_assistant_plot_descriptive_notebook_execution(
 def test_onboarding_data_assistant_plot_prescriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_probabilistic_data_context
+    )
 
     new_cell: str = "data_assistant_result.plot_expectations_and_metrics()"
 
@@ -575,7 +589,9 @@ def test_onboarding_data_assistant_plot_prescriptive_notebook_execution(
 def test_onboarding_data_assistant_plot_descriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_probabilistic_data_context
+    )
 
     theme = {"font": "Comic Sans MS"}
 
@@ -599,7 +615,9 @@ def test_onboarding_data_assistant_plot_descriptive_theme_notebook_execution(
 def test_onboarding_data_assistant_plot_prescriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_probabilistic_data_context
+    )
 
     theme = {"font": "Comic Sans MS"}
 
@@ -904,7 +922,9 @@ def test_onboarding_data_assistant_plot_return_tooltip(
 def test_onboarding_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_probabilistic_data_context
+    )
 
     new_cell: str = "data_assistant_result.plot_metrics(sequential=False)"
 
@@ -926,7 +946,9 @@ def test_onboarding_data_assistant_metrics_plot_descriptive_non_sequential_noteb
 def test_onboarding_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_probabilistic_data_context
+    )
 
     new_cell: str = (
         "data_assistant_result.plot_expectations_and_metrics(sequential=False)"

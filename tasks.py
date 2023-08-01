@@ -797,6 +797,7 @@ class TestDependencies(NamedTuple):
 
 MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "athena": TestDependencies(("reqs/requirements-dev-athena.txt",)),
+    "clickhouse": TestDependencies(("reqs/requirements-dev-clickhouse.txt",)),
     "cloud": TestDependencies(
         ("reqs/requirements-dev-cloud.txt",), exta_pytest_args=("--cloud",)
     ),
@@ -825,7 +826,8 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         exta_pytest_args=("--postgresql",),
     ),
     "spark": TestDependencies(
-        ("reqs/requirements-dev-spark.txt",),
+        requirement_files=("reqs/requirements-dev-spark.txt",),
+        services=("spark",),
         exta_pytest_args=("--spark",),
     ),
     "trino": TestDependencies(
@@ -850,6 +852,13 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
         yield tokens[0]
     elif marker_string == "cloud and not e2e":
         yield "cloud"
+    elif marker_string == "clickhouse or openpyxl or pyarrow or project or sqlite":
+        yield "clickhouse"
+        yield "openpyxl"
+        yield "pyarrow"
+        yield "project"
+        yield "sqlite"
+    # Remove this elif when this marker test is removed from ci.yml
     elif marker_string == "openpyxl or pyarrow or project or sqlite":
         yield "openpyxl"
         yield "pyarrow"
@@ -941,7 +950,8 @@ def ci_tests(  # noqa: PLR0913
     reports: bool = False,
     slowest: int = 5,
     timeout: float = 0.0,  # 0 indicates no timeout
-    xdist: bool = True,
+    xdist: bool = False,
+    pty: bool = True,
 ):
     """
     Run tests in CI.
@@ -963,8 +973,8 @@ def ci_tests(  # noqa: PLR0913
         "-rEf",
     ]
 
-    # if xdist:
-    #     pytest_cmds.append("-n auto")
+    if xdist:
+        pytest_cmds.append("-n auto")
 
     if timeout != 0:
         pytest_cmds.append(f"--timeout={timeout}")
@@ -977,7 +987,7 @@ def ci_tests(  # noqa: PLR0913
 
     for test_deps in _get_marker_dependencies(marker):
         if up_services:
-            service(ctx, names=test_deps.services, markers=test_deps.services)
+            service(ctx, names=test_deps.services, markers=test_deps.services, pty=pty)
 
         for extra_pytest_arg in test_deps.exta_pytest_args:
             pytest_cmds.append(extra_pytest_arg)
@@ -985,13 +995,15 @@ def ci_tests(  # noqa: PLR0913
     if marker in ["postgresql", "mssql", "mysql", "trino"]:
         pytest_cmds[3] = "all_backends"
 
-    ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
+    ctx.run(" ".join(pytest_cmds), echo=True, pty=pty)
 
 
 @invoke.task(
     iterable=["names", "markers"],
 )
-def service(ctx: Context, names: Sequence[str], markers: Sequence[str]):
+def service(
+    ctx: Context, names: Sequence[str], markers: Sequence[str], pty: bool = True
+):
     """
     Startup a service, by referencing its name directly or by looking up a pytest marker.
 
@@ -1019,7 +1031,7 @@ def service(ctx: Context, names: Sequence[str], markers: Sequence[str]):
                 "-d",
                 "--quiet-pull",
             ]
-            ctx.run(" ".join(cmds), echo=True, pty=True)
+            ctx.run(" ".join(cmds), echo=True, pty=pty)
         # TODO: remove this sleep. This is a temporary hack to give services enough
         #       time to come up to get ci merging again.
         ctx.run("sleep 15")
