@@ -7,13 +7,9 @@ from typing import Dict, Tuple, Union
 import numpy as np
 import pandas as pd
 import pytest
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    FilesystemStoreBackendDefaults,
-)
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch import Batch, RuntimeBatchRequest
+from great_expectations.core.batch import Batch
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
     MetricPartialFunctionTypeSuffixes,
@@ -39,7 +35,7 @@ from great_expectations.self_check.util import (
     build_sa_execution_engine,
     build_spark_engine,
 )
-from great_expectations.util import get_context, isclose
+from great_expectations.util import isclose
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
@@ -462,7 +458,7 @@ def test_column_quoted_name_type_sa_handles_explicit_string_identifiers(sa):
     When explicit quoted identifiers are passed in, we should use them as-is.
     Explicit identifiers are used when the column contains a space or reserved word.
     """
-    engine = build_sa_engine(
+    engine = build_sa_execution_engine(
         pd.DataFrame(
             {
                 "More Names": [
@@ -485,7 +481,7 @@ def test_column_quoted_name_type_sa_handles_explicit_string_identifiers(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     table_columns_metric: MetricConfiguration = MetricConfiguration(
