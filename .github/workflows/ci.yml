@@ -173,7 +173,9 @@ jobs:
           invoke deps --gx-install -m '${{ matrix.markers }}' -r test
 
       - name: Run the tests
-        if: github.event.pull_request.draft == false
+        # if: github.event.pull_request.draft == false # this works
+        # if: ${{ matrix.python-version  == "3.8" }} # ??
+        if: ${{ github.event_name == 'schedule' || matrix.python-version == '3.8'}}
         run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose
 
   py38-min-versions:
