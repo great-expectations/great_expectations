@@ -342,8 +342,8 @@ def multi_batch_taxi_validator_ge_cloud_mode(
     return validator_multi_batch
 
 
-# TODO: There is something wrong with this test. It is trying to mock out cloud but if I don't
-#       unset the gx_env_variables (eg if i remove this fixture) this test will fail.
+# TODO: There is something wrong with this test. It is trying to mock out cloud, but if I don't
+#       unset the gx_env_variables (eg if i remove this fixture), this test will fail.
 @mock.patch(
     "great_expectations.data_context.data_context.AbstractDataContext.save_expectation_suite"
 )
