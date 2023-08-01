@@ -98,7 +98,7 @@ jobs:
         run: pip install -c constraints-dev.txt ".[test, snowflake]"
 
       - name: Run the unit tests
-        run: invoke ci-tests -m "unit" --timeout=1.5 --slowest=8
+        run: invoke ci-tests -m "unit" --xdist --timeout=1.5 --slowest=8
 
   cloud-tests:
     if: github.event.pull_request.draft == false
@@ -143,7 +143,7 @@ jobs:
           - athena or clickhouse or openpyxl or pyarrow or project or sqlite
           # Remove once PR 8458 merges
           - openpyxl or pyarrow or project or sqlite
-          #- spark
+          - spark
           - mssql
           - mysql
           - trino
