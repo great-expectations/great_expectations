@@ -30,7 +30,6 @@ athena_source: SQLDatasource = context.sources.add_or_update_sql(
 )
 athena_table = athena_source.add_table_asset("taxitable", table_name="taxitable")
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Connect and Build Batch Request">
 
 batch_request = athena_table.build_batch_request()
 
