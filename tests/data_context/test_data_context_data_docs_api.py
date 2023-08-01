@@ -436,8 +436,10 @@ def test_view_validation_result(
 
 
 @pytest.mark.unit
-def test_view_validation_result_uses_run_name_template_env_var(empty_data_context):
-    os.environ["MY_ENV_VAR"] = "PLEASE_RENDER_ME"
+def test_view_validation_result_uses_run_name_template_env_var(
+    monkeypatch, empty_data_context
+):
+    monkeypatch.setenv("MY_ENV_VAR", "PLEASE_RENDER_ME")
 
     context = empty_data_context
 
