@@ -1,0 +1,3 @@
+services:
+  spark:
+    image: bitnami/spark:3.3.2
