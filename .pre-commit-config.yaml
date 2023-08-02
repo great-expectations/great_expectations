@@ -25,6 +25,10 @@ repos:
       - id: ruff
         files: ^(great_expectations|assets|contrib|scripts|tasks\.py|tests) # TODO: add docs/ etc.
         args: ["--fix"]
+  - repo: https://github.com/rhysd/actionlint
+    rev: main
+    hooks:
+      - id: actionlint
 # https://pre-commit.ci/
 ci:
     autofix_commit_msg: |
