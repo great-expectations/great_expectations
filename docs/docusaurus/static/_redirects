@@ -151,7 +151,7 @@
 /en/latest/reference/core_concepts/expectations/result_format.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/result_format.html
 /en/latest/reference/core_concepts/expectations/standard_arguments.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/standard_arguments.html
 /en/latest/reference/core_concepts/expectations/distributional_expectations.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/distributional_expectations.html
-/en/latest/reference/core_concepts/expectations/implemented_expectations.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/implemented_expectations.html
+/en/latest/reference/core_concepts/expectations/implemented_expectations.html https://greatexpectations.io/expectations.html
 /en/latest/reference/core_concepts/expectations/expectations.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html
 /en/latest/reference/core_concepts/checkpoints_and_actions.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html
 /en/latest/reference/core_concepts/expectation_suite_operations.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectation_suite_operations.html
@@ -383,7 +383,9 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs/guides/expectations/creating_custom_expectations/overview /docs/guides/expectations/custom_expectations_lp
 
 # Redirects for pages removed as no longer applicable
+
 /docs/guides/validation/advanced/how_to_validate_data_without_a_checkpoint /docs/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint
+/docs/reference/expectations/implemented_expectations/ https://greatexpectations.io/expectations.html
 
 # Redirects for removed index pages and new landing pages
 

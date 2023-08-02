@@ -20,7 +20,7 @@ from docs.sphinx_api_docs_source.public_api_report import (
     parse_docs_contents_for_class_names,
 )
 
-pytestmark = pytest.mark.docs
+pytestmark = pytest.mark.filesystem
 
 
 @pytest.fixture

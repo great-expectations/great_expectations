@@ -82,13 +82,13 @@ You can use environment variables or a key in `config_variables.yml` to store co
 
 In the previous example `MY_PASSWORD` is the name of the environment variable, or the key to the value in `config_variables.yml` that corresponds to your password.
 
-If you include a password as plain text in your connection string when you define your Datasource, GX automatically removes it, adds it to `config_variables.yml`, and substitutes it in the Datasource saved configuration with a variable.
+If you include a password as plain text in your connection string when you define your Data Source, GX automatically removes it, adds it to `config_variables.yml`, and substitutes it in the Data Source saved configuration with a variable.
 
 :::
 
-### Create a SQL Datasource
+### Create a SQL Data Source
 
-Run the following Python code to create a SQL Datasource:
+Run the following Python code to create a SQL Data Source:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py add_sql"
 ```
@@ -132,27 +132,27 @@ The following code is an example of a PostgreSQL connection string format:
 
 :::
 
-### Create a PostgreSQL Datasource
+### Create a PostgreSQL Data Source
 
 1. Run the following Python code to set the `name` and `connection_string` variables:
 
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py connection_string2"
     ```
 
-2. Run the following Python code to create a PostgreSQL Datasource:
+2. Run the following Python code to create a PostgreSQL Data Source:
 
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py add_postgres"
     ```
 
 ### Connect to a specific set of data with a Data Asset
 
-To connect the Datasource to a specific set of data in the database, you define a Data Asset in the Datasource. A Datasource can contain multiple Data Assets. Each Data Asset acts as the interface between GX and the specific set of data it is configured for.
+To connect the Data Source to a specific set of data in the database, you define a Data Asset in the Data Source. A Data Source can contain multiple Data Assets. Each Data Asset acts as the interface between GX and the specific set of data it is configured for.
 
 With SQL databases, you can use Table or Query Data Assets. The Table Data Asset connects GX to the data contained in a single table in the source database. The Query Data Asset connects GX to the data returned by a SQL query.
 
-:::tip Maximum allowable Data Assets for a Datasource
+:::tip Maximum allowable Data Assets for a Data Source
 
-Although there isn't a maximum number of Data Assets you can define for a Datasource, you must create a single Data Asset to allow GX to retrieve data from your Datasource.
+Although there isn't a maximum number of Data Assets you can define for a Data Source, you must create a single Data Asset to allow GX to retrieve data from your Data Source.
 
 :::
 
@@ -213,25 +213,25 @@ The following code is an example of a SQLite connection string format:
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py connection_string"
 ```
 
-### Create a SQLite Datasource
+### Create a SQLite Data Source
 
 1. Run the following Python code to set the `name` and `connection_string` variables:
 
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py datasource_name"
     ```
 
-2. Run the following Python code to create a SQLite Datasource:
+2. Run the following Python code to create a SQLite Data Source:
 
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py datasource"
     ```
 
     :::caution Using `add_sql(...)` instead of `add_sqlite(...)`
 
-    The SQL Datasource created with `add_sql` can connect to data in a SQLite database. However, `add_sqlite(...)` is the preferred method.
+    The SQL Data Source created with `add_sql` can connect to data in a SQLite database. However, `add_sqlite(...)` is the preferred method.
 
-    SQLite stores datetime values as strings.  Because of this, a general SQL Datasource sees datetime columns as string columns. A SQLite Datasource has additional handling in place for these fields, and also has additional error reporting for SQLite specific issues.
+    SQLite stores datetime values as strings.  Because of this, a general SQL Data Source sees datetime columns as string columns. A SQLite Data Source has additional handling in place for these fields, and also has additional error reporting for SQLite specific issues.
 
-    If you are working with SQLite source data, use `add_sqlite(...)` to create your Datasource.
+    If you are working with SQLite source data, use `add_sqlite(...)` to create your Data Source.
     :::
 
 ### Connect to the data in a table (Optional)
@@ -303,7 +303,7 @@ Account locators act in the same manner but are auto-generated by Snowflake base
 For more information on both methods, please visit [Snowflake's official documentation on account identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier)
 :::
 
-### Create a Snowflake Datasource
+### Create a Snowflake Data Source
 
 1. Run the following Python code to set the `name` and `connection_string` variables:
 
@@ -311,7 +311,7 @@ For more information on both methods, please visit [Snowflake's official documen
     datasource_name = "my_snowflake_datasource"
     ```
 
-2. Run the following Python code to create a Snowflake Datasource:
+2. Run the following Python code to create a Snowflake Data Source:
 
     ```python 
     datasource = context.sources.add_snowflake(
@@ -406,7 +406,7 @@ The following code is an example of a Databricks SQL connection string format:
 my_connection_string = f"databricks://token:{token}@{host}:{port}/{database}?http_path={http_path}&catalog={catalog}&schema={schema}"
 ```
 
-### Create a Databricks SQL Datasource
+### Create a Databricks SQL Data Source
 
 1. Run the following Python code to set the `name` and `connection_string` variables:
 
@@ -414,7 +414,7 @@ my_connection_string = f"databricks://token:{token}@{host}:{port}/{database}?htt
     datasource_name = "my_databricks_sql_datasource"
     ```
 
-2. Run the following Python code to create a Snowflake Datasource:
+2. Run the following Python code to create a Snowflake Data Source:
 
     ```python 
     datasource = context.sources.add_databricks_sql(
