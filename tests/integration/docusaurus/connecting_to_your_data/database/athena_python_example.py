@@ -1,12 +1,11 @@
 import os
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py imports">
 import great_expectations as gx
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.datasource.fluent.sql_datasource import SQLDatasource
-from great_expectations.exceptions import DataContextError
-from tests.test_utils import check_athena_table_count, clean_athena_db
 
-yaml = YAMLHandler()
+# </snippet>
+from great_expectations.datasource.fluent.sql_datasource import SQLDatasource
+from tests.test_utils import check_athena_table_count, clean_athena_db
 
 ATHENA_DB_NAME = os.getenv("ATHENA_DB_NAME")
 if not ATHENA_DB_NAME:
@@ -22,7 +21,9 @@ if not ATHENA_STAGING_S3:
 connection_string = f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_DB_NAME}?s3_staging_dir={ATHENA_STAGING_S3}"
 
 # create datasource and add to DataContext
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py get_context">
 context = gx.get_context()
+# </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Connect and Build Batch Request">
 athena_source: SQLDatasource = context.sources.add_or_update_sql(
@@ -41,14 +42,9 @@ clean_athena_db(connection_string, ATHENA_DB_NAME, "taxitable")
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Create Expectation Suite">
 expectation_suite_name = "my_awsathena_expectation_suite"
-try:
-    suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
-    print(
-        f'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} expectations.'
-    )
-except DataContextError:
-    suite = context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
-    print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
+suite = context.add_or_update_expectation_suite(
+    expectation_suite_name=expectation_suite_name
+)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Test Datasource with Validator">
