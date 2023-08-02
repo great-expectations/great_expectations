@@ -2,7 +2,7 @@
 
 # Build API docs then build docusaurus docs.
 # Currently used in our netlify pipeline.
-
+# this should trigger something
 source ../logging.sh
 
 CURRENT_COMMIT=$(git rev-parse HEAD)
