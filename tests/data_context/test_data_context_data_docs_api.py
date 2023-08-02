@@ -435,7 +435,7 @@ def test_view_validation_result(
     assert url_used.endswith("default_pandas_datasource-%23ephemeral_pandas_asset.html")
 
 
-@pytest.mark.unit
+@pytest.mark.big
 def test_view_validation_result_uses_run_name_template_env_var(
     monkeypatch, empty_data_context
 ):
