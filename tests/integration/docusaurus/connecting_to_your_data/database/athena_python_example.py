@@ -56,6 +56,22 @@ validator.head(n_rows=5, fetch_all=False)
 # </snippet>
 assert validator
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Add Checkpoint">
+checkpoint = context.add_or_update_checkpoint(
+    name="my_checkpoint",
+    validations=[
+        {
+            "batch_request": batch_request,
+            "expectation_suite_name": expectation_suite_name,
+        },
+    ],
+)
+# </snippet>
+
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Run Checkpoint">
+checkpoint_result = checkpoint.run()
+# </snippet>
+
 # clean db
 clean_athena_db(connection_string, ATHENA_DB_NAME, "taxitable")
 
