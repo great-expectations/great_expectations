@@ -226,7 +226,7 @@ jobs:
           # TODO: would like to adopt `actionlint` pre-commit hook
           # but false positive here and inability to do an inline ignore
           # prevents this https://github.com/rhysd/actionlint/issues/237
-          - python-version: ${{ github.event_name != 'schedule' && '3.11' || '3.10' }}
+          - python-version: ${{ github.event_name != 'schedule' && 'dummy' || '3.11' || '3.10' }}
 
     steps:
       - name: Checkout
