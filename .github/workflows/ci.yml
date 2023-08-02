@@ -231,6 +231,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          cache: "pip"
           cache-dependency-path: |
             reqs/requirements-dev-test.txt
             setup.py
@@ -304,13 +305,17 @@ jobs:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        exclude:
+          - python-version: ${{ github.event_name != 'schedule' && '3.9' }}
+          - python-version: ${{ github.event_name != 'schedule' && '3.10' }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: ${{ matrix.python-version }}
           cache: "pip"
           cache-dependency-path: requirements.txt
       - name: Install Great Expectations with core deps only
