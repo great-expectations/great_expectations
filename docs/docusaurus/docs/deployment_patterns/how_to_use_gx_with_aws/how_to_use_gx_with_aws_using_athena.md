@@ -271,7 +271,7 @@ context = FileDataContext.create(project_root_dir=path_to_empty_folder)
 
 <SaveTheExpectationSuite />
 
-## Validate Data
+## Validate data
 
 <CheckpointCreateAndRun />
 
