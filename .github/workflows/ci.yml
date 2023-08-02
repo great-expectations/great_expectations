@@ -29,8 +29,6 @@ jobs:
             reqs/requirements-dev-test.txt
       - name: Install dependencies
         run: pip install -r reqs/requirements-dev-test.txt
-      - name: Install Yarn
-        run: yarn install
       - name: check_repo_root_size
         run: sh ./ci/checks/check_repo_root_size.sh
       - name: Docstring linter
@@ -44,7 +42,9 @@ jobs:
       - name: name_tag_snippet_referenced_checker
         run: python ci/checks/check_name_tag_snippets_referenced.py
       - name: run docs_snippet_checker
-        run: python ci/checks/validate_docs_snippets.py
+        run: |
+          yarn install
+          python ci/checks/validate_docs_snippets.py
       - name: public_api_report
         run: invoke public-api
   static-analysis:
