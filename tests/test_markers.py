@@ -7,7 +7,7 @@ from typing import Final
 
 import pytest
 import tomli
-from tasks import MARKER_DEPENDENDENCY_MAP
+from tasks import MARKER_DEPENDENCY_MAP
 
 pytestmark = pytest.mark.project
 
@@ -40,7 +40,7 @@ def test_marker_mappings_are_registered(pytest_markers: list[str]):
     """
     LOGGER.debug(f"pytest_markers:\n----------\n{pf(pytest_markers)}")
 
-    for marker in MARKER_DEPENDENDENCY_MAP:
+    for marker in MARKER_DEPENDENCY_MAP:
         assert marker in pytest_markers
 
 

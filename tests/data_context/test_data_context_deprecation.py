@@ -39,7 +39,6 @@ ge_cloud_config = GXCloudConfig(
 )
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 @pytest.mark.parametrize(
     "cloud_args,expected_resolved_args",
@@ -73,7 +72,6 @@ def test_BaseDataContext_resolve_cloud_args(
     assert actual_resolved_args == expected_resolved_args
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 @pytest.mark.parametrize(
     "cloud_args,expected_resolved_args",
@@ -121,7 +119,6 @@ def test_DataContext_resolve_cloud_args(
     assert actual_resolved_args == expected_resolved_args
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 @pytest.mark.parametrize(
     "cloud_args,expected_resolved_args",
@@ -165,7 +162,6 @@ def test_CloudDataContext_resolve_cloud_args(
     assert actual_resolved_args == expected_resolved_args
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 @pytest.mark.parametrize(
     "cloud_args,expected_resolved_args",
@@ -246,7 +242,6 @@ def test_get_context_resolve_cloud_args(
     assert actual_resolved_args == expected_resolved_args
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 @pytest.mark.parametrize(
     "id, ge_cloud_id, expected",
@@ -265,7 +260,6 @@ def test_data_context__resolve_id_and_ge_cloud_id_success(
     assert resolved == expected
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_data_context__resolve_id_and_ge_cloud_id_failure():
     id = "abc123"

@@ -206,7 +206,6 @@ def check_store_backend_store_backend_id_functionality(
     assert test_utils.validate_uuid4(parsed_store_backend_id[1])
 
 
-@pytest.mark.filesystem
 @pytest.mark.big
 @mock_s3
 def test_StoreBackend_id_initialization(tmp_path_factory):
