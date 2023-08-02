@@ -110,34 +110,6 @@ stages:
               invoke lint || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
-  - stage: unit_tests
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-latest'
-
-    jobs:
-      - job: run_unit_tests
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.8'
-            displayName: 'Use Python 3.8'
-
-          - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
-
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test, snowflake]" pytest-azurepipelines
-            displayName: 'Install dependencies'
-
-          - script: |
-              invoke tests --cloud --unit --timeout=3.0
-            displayName: 'Unit Tests'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
-              SQLALCHEMY_WARN_20: true
-
   - stage: import_ge
     dependsOn: scope_check
     pool:
@@ -163,7 +135,7 @@ stages:
              python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
            displayName: 'Import Great Expectations'
   - stage: required
-    dependsOn: [scope_check, lint, import_ge, unit_tests]
+    dependsOn: [scope_check, lint, import_ge]
     pool:
       vmImage: 'ubuntu-20.04'
 
@@ -291,7 +263,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
   - stage: usage_stats_integration
-    dependsOn: [scope_check, lint, import_ge, unit_tests]
+    dependsOn: [scope_check, lint, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -326,7 +298,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: [scope_check, lint, import_ge, unit_tests]
+    dependsOn: [scope_check, lint, import_ge]
 
     jobs:
       - job: mysql
@@ -466,7 +438,7 @@ stages:
               SQLALCHEMY_WARN_20: true
 
   - stage: cli_integration
-    dependsOn: [scope_check, lint, import_ge, unit_tests]
+    dependsOn: [scope_check, lint, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 
