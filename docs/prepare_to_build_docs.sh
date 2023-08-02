@@ -5,6 +5,7 @@
 # this should trigger something
 # triggaaaaa
 # I am skeptical
+# more things
 source ../logging.sh
 
 CURRENT_COMMIT=$(git rev-parse HEAD)
