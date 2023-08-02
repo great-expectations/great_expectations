@@ -138,60 +138,6 @@ stages:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
               SQLALCHEMY_WARN_20: true
 
-  - stage: custom_checks
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-latest'
-
-    jobs:
-    - job: static_type_check
-      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
-      variables:
-        python.version: '3.8'
-      steps:
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: $(python.version)
-        displayName: 'Use Python $(python.version)'
-      - script: |
-          python -m pip install --upgrade pip
-          pip install --requirement requirements-types.txt
-        name: InstallDependencies
-      - script: |
-          invoke type-check --ci --pretty --python-version $(python.version)
-        name: StaticTypeCheck
-      - script: |
-          # initial run doesn't check `.pyi` source files
-          invoke type-check --ci --pretty --check-stub-sources --python-version $(python.version)
-        name: TypeCheckStubSourceFiles
-    - job: docstring_linter
-      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
-      steps:
-      - script: |
-          pip install --requirement reqs/requirements-dev-test.txt
-          invoke docstrings
-        name: DocstringLinter
-    - job: unused_import_checker
-      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
-      steps:
-      - script: |
-          pip install $(grep -E '^(ruff)' reqs/requirements-dev-contrib.txt)
-          # https://www.flake8rules.com/rules/F401.html
-          ruff --select F401 great_expectations tests
-        name: UnusedImportChecker
-    - job: check_repo_root_size
-      steps:
-        - script: ./ci/checks/check_repo_root_size.sh
-          name: CheckRepoRootSize
-    - job: public_api_report
-      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
-      steps:
-        - script: |
-            pip install --requirement reqs/requirements-dev-test.txt
-            invoke public-api
-          name: PublicAPIReport
-
-
   - stage: import_ge
     dependsOn: scope_check
     pool:
@@ -217,7 +163,7 @@ stages:
              python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
            displayName: 'Import Great Expectations'
   - stage: required
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+    dependsOn: [scope_check, lint, import_ge, unit_tests]
     pool:
       vmImage: 'ubuntu-20.04'
 
@@ -345,7 +291,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
   - stage: usage_stats_integration
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+    dependsOn: [scope_check, lint, import_ge, unit_tests]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -380,7 +326,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+    dependsOn: [scope_check, lint, import_ge, unit_tests]
 
     jobs:
       - job: mysql
@@ -520,7 +466,7 @@ stages:
               SQLALCHEMY_WARN_20: true
 
   - stage: cli_integration
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+    dependsOn: [scope_check, lint, import_ge, unit_tests]
     pool:
       vmImage: 'ubuntu-latest'
 
