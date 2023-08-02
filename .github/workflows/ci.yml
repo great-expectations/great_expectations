@@ -302,7 +302,7 @@ jobs:
         run: invoke tests --unit
 
   import_gx:
-    needs: [unit-tests, static-analysis]
+    needs: [static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     strategy:
