@@ -13,7 +13,7 @@ Expectation Suite, which you can then adjust to be suited for your specific need
 <Prerequisites>
 
 - A [configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
-- An understanding of how to [configure a Datasource](../../connecting_to_your_data/connect_to_data_lp.md).
+- An understanding of how to [configure a Data Source](../../connecting_to_your_data/connect_to_data_lp.md).
 - An understanding of how to [configure a Batch Request](/docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource).
 
 </Prerequisites>
@@ -21,7 +21,7 @@ Expectation Suite, which you can then adjust to be suited for your specific need
 ## Prepare your Batch Request
 
 Data Assistants excel at automating the Profiling process across multiple Batches. Therefore, for this guide you will
- be using a Batch Request that covers multiple Batches. For the purposes of this demo, the Datasource that our Batch
+ be using a Batch Request that covers multiple Batches. For the purposes of this demo, the Data Source that our Batch
  Request queries will consist of a sample of the New York taxi trip data.
 
 This is the configuration that you will use for your `Datasource`:

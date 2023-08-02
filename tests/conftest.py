@@ -126,24 +126,31 @@ locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 logger = logging.getLogger(__name__)
 
 REQUIRED_MARKERS = {
+    "all_backends",
+    "athena",
     "aws_creds",
     "big",
     "cli",
     "clickhouse",
     "cloud",
     "docs",
-    "external_sqldialect",
     "filesystem",
+    "google_creds",
     "mysql",
     "openpyxl",
     "postgresql",
     "project",
     "pyarrow",
     "spark",
-    "sqlalchemy_version_compatibility",
     "sqlite",
     "unit",
 }
+
+
+@pytest.fixture()
+def unset_gx_env_variables(monkeypatch: pytest.MonkeyPatch) -> None:
+    for var in GXCloudEnvironmentVariable:
+        monkeypatch.delenv(var, raising=False)
 
 
 @pytest.mark.order(index=2)

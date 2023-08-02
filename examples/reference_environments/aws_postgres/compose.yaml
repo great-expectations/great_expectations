@@ -1,7 +1,7 @@
 services:
   jupyter:
-    image: gx/aws_rds_example_jupyter
-    container_name: gx_aws_rds_example_jupyter
+    image: gx/aws_postgres_example_jupyter
+    container_name: aws_postgres_example_jupyter
     build:
       context: .
       dockerfile: jupyter.Dockerfile

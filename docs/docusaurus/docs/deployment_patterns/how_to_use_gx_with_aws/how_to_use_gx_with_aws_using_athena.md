@@ -114,7 +114,7 @@ import AdditionalDataDocsNotes from '@site/docs/guides/setup/configuring_data_do
 
 <!-- Part 2: Connect to data -->
 
-<!-- 2.1 Choose how to run the code for configuring a new Datasource -->
+<!-- 2.1 Choose how to run the code for configuring a new Data Source -->
 
 import HowToRunDatasourceCode from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_datasource_code_environment.md'
 
@@ -126,15 +126,15 @@ import InstantiateDataContext from '@site/docs/guides/connecting_to_your_data/cl
 
 import ConnectionStringAthena from '@site/docs/guides/connecting_to_your_data/database/components/_connection_string_athena.md'
 
-<!-- 2.4 Configure your Datasource -->
+<!-- 2.4 Configure your Data Source -->
 
 import ConfigureYourDatasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_datasource_sql_runtime_configuration.md'
 
-<!-- 2.5 Save the Datasource configuration to your DataContext -->
+<!-- 2.5 Save the Data Source configuration to your DataContext -->
 
 import SaveDatasourceConfigurationToDataContext from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_save_the_datasource_configuration_to_your_datacontext.mdx'
 
-<!-- 2.6 Test your new Datasource -->
+<!-- 2.6 Test your new Data Source -->
 
 import TestAthenaDatasource from '@site/docs/guides/connecting_to_your_data/database/components/_datasource_athena_test.md'
 
@@ -294,28 +294,28 @@ context = FileDataContext.create(project_root_dir=path_to_empty_folder)
 
 ## Part 2: Connect to data
 
-### 2.1 Choose how to run the code for creating a new Datasource
+### 2.1 Choose how to run the code for creating a new Data Source
 <HowToRunDatasourceCode />
 
 ### 2.2 Instantiate your project's DataContext
 <InstantiateDataContext />
 
-### 2.3 Configure your Datasource
+### 2.3 Configure your Data Source
 
 #### 2.3.1 Determine your connection string
 
 <ConnectionStringAthena />
 
-#### 2.3.2 Create your Datasource configuration
+#### 2.3.2 Create your Data Source configuration
 
 <ConfigureYourDatasource />
 
-To configure a SQL datasource such as the one used to connect to your Athena data, see [How to configure a SQL Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
+To configure a SQL datasource such as the one used to connect to your Athena data, see [How to configure a SQL Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
 
-### 2.4 Save the Datasource configuration to your DataContext
+### 2.4 Save the Data Source configuration to your DataContext
 <SaveDatasourceConfigurationToDataContext />
 
-### 2.5 Test your new Datasource
+### 2.5 Test your new Data Source
 <TestAthenaDatasource />
 
 ## Part 3: Create Expectations

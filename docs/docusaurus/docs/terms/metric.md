@@ -53,7 +53,7 @@ See the [How to configure a MetricsStore](../guides/setup/configuring_metadata_s
 
 ## Create
 
-Metrics are produced using logic specific to the Execution Engine associated with the Datasource that provides the data for the Batch Request/s that the Metric is calculated for.  That logic that is defined in a `MetricProvider`. When a `MetricProvider` class is first encountered, Great Expectations will register the Metric and any methods that it defines as able to produce Metrics.  The registered metric will then be able to be used with `validator.get_metric()` or `validator.get_metrics()`. 
+Metrics are produced using logic specific to the Execution Engine associated with the Data Source that provides the data for the Batch Request/s that the Metric is calculated for.  That logic that is defined in a `MetricProvider`. When a `MetricProvider` class is first encountered, Great Expectations will register the Metric and any methods that it defines as able to produce Metrics.  The registered metric will then be able to be used with `validator.get_metric()` or `validator.get_metrics()`. 
 
 ## Configure
 
