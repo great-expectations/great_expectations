@@ -6,6 +6,9 @@ on:
     # https://crontab.guru/every-3-hours
     - cron: "0 */3 * * *"
   workflow_dispatch:  # allows manual triggering with branch picker
+  push:
+    tags:
+    - '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   ci-does-not-run-on-draft-pull-requests:
@@ -299,3 +302,30 @@ jobs:
         run: pip install . -c ci/constraints-test/py310-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
         run: invoke tests --unit
+  deploy:
+    needs: [unit-tests, static-analysis]
+    if: github.ref_type == 'tag'
+    steps:
+      - name: echo my tag
+        run: echo ${{ github.event.ref }}
+    # steps:
+    #   - name: echo my tag
+    #     run: echo ${{ github.event.ref }}
+      # - name: Checkout
+      #   uses: actions/checkout@v3
+      # - name: Set up Python
+      #   uses: actions/setup-python@v4
+      #   with:
+      #     python-version: "3.8"
+      #     cache: "pip"
+      #     cache-dependency-path: |
+      #       reqs/requirements-dev-test.txt
+      # - name: Install dependencies
+      #   run: pip install . -c ci/constraints-test/py38-min-install.txt -r reqs/requirements-dev-test.txt
+      # - name: Deploy to PyPI
+      #   run: |
+      #     python -m pip install --upgrade pip
+      #     python -m pip install --upgrade setuptools wheel
+      #     python -m pip install --upgrade twine
+      #     python setup.py sdist bdist_wheel
+      #     python -m twine upload dist/*
