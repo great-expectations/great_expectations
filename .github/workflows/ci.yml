@@ -15,7 +15,7 @@ jobs:
       - run: echo "CI jobs won't run because this is a draft pull request."
 
   doc-checks:
-    #if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -47,6 +47,27 @@ jobs:
           python ci/checks/validate_docs_snippets.py
       - name: public_api_report
         run: invoke public-api
+  docs-build:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: --max_old_space_size=4096
+    steps:
+      - name: Get all docs files that have changed
+        id: changed-files
+        uses: tj-actions/changed-files@v37
+        with:
+          files_yaml: |
+            doc:
+              - docs/**
+              - tests/integration/docusaurus/**
+              - tests/integration/fixtures/**
+              - tests/test_sets/**
+      - name: test build_docs
+        if: steps.changed-files.outputs.doc_any_changed == 'true'
+        run: |
+          echo "One or more Docs file(s) have changed."
+          cd docs/docusaurus && yarn install && bash ../build_docs
   static-analysis:
     runs-on: ubuntu-latest
     steps:
