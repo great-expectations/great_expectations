@@ -117,7 +117,7 @@ import CreateDataContextWithCreateAgain from '@site/docs/deployment_patterns/how
 
 import ConnectionStringRedshift from '@site/docs/guides/connecting_to_your_data/database/components/_redshift_credentials.md'
 
-<!-- 2.2 Add Datasource to your DataContext -->
+<!-- 2.2 Add Data Source to your DataContext -->
 
 import ConfigureYourRedshiftDatasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_configure_your_redshift_datasource.mdx'
 
@@ -125,7 +125,7 @@ import ConfigureYourRedshiftDatasource from '@site/docs/deployment_patterns/how_
 
 import ConnectToDataAssets from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_add_table_and_query_assets.mdx'
 
-<!-- 2.4 Test your new Datasource -->
+<!-- 2.4 Test your new Data Source -->
 
 import TestRedshiftDatasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_test_your_new_redshift_datasource.mdx'
 
@@ -281,13 +281,13 @@ For additional options on configuring the `config_variables.yml` file or additio
 
 :::
 
-### 2.2 Add Datasource to your DataContext
+### 2.2 Add Data Source to your DataContext
 <ConfigureYourRedshiftDatasource />
 
 ### 2.3. Connect to a specific set of data with a Data Asset
 <ConnectToDataAssets />
 
-### 2.4 Test your new Datasource
+### 2.4 Test your new Data Source
 <TestRedshiftDatasource />
 
 ## Part 3: Create Expectations

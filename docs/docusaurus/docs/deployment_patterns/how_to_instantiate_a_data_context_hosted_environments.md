@@ -6,7 +6,7 @@ id: how_to_instantiate_a_data_context_hosted_environments
 sidebar_custom_props: { icon: 'img/integrations/hosted_icon.svg' }
 ---
 
-The components in the ``great_expectations.yml`` file define the Validation Results Stores, Datasource connections, and Data Docs hosts for a Data Context. These components might be inaccessible in hosted environments, such as Databricks, Amazon EMR, and Google Cloud Composer. The information provided here is intended to help you use Great Expectations in hosted environments.
+The components in the ``great_expectations.yml`` file define the Validation Results Stores, Data Source connections, and Data Docs hosts for a Data Context. These components might be inaccessible in hosted environments, such as Databricks, Amazon EMR, and Google Cloud Composer. The information provided here is intended to help you use Great Expectations in hosted environments.
 
 ## Configure your Data Context
  
@@ -19,7 +19,7 @@ To configure a Data Context for a specific environment, see one of the following
 
 ## Create Expectation Suites and add Expectations
 
-To add a Datasource and an Expectation Suite, see [How to connect to a PostgreSQL database](/docs/0.15.50/guides/connecting_to_your_data/database/postgres#5-configure-your-datasource).
+To add a Data Source and an Expectation Suite, see [How to connect to a PostgreSQL database](/docs/0.15.50/guides/connecting_to_your_data/database/postgres#5-configure-your-datasource).
 
 To add Expectations to your Suite individually, use the following code:
 
