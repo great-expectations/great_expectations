@@ -762,6 +762,7 @@ class _SQLAsset(DataAsset):
         raise NotImplementedError
 
 
+@public_api
 class QueryAsset(_SQLAsset):
     # Instance fields
     type: Literal["query"] = "query"
@@ -790,6 +791,7 @@ class QueryAsset(_SQLAsset):
         }
 
 
+@public_api
 class TableAsset(_SQLAsset):
     """A _SQLAsset Mixin
 
