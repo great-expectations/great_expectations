@@ -25,10 +25,13 @@ repos:
       - id: ruff
         files: ^(great_expectations|assets|contrib|scripts|tasks\.py|tests) # TODO: add docs/ etc.
         args: ["--fix"]
-  - repo: https://github.com/rhysd/actionlint
-    rev: main
-    hooks:
-      - id: actionlint
+  # Github Actions Linter
+  # Need to be able to inline ignore errors
+  # https://github.com/rhysd/actionlint/issues/237
+  # - repo: https://github.com/rhysd/actionlint
+  #   rev: main
+  #   hooks:
+  #     - id: actionlint
 # https://pre-commit.ci/
 ci:
     autofix_commit_msg: |
