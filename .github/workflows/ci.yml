@@ -67,6 +67,7 @@ jobs:
         if: steps.changed-files.outputs.doc_any_changed == 'true'
         run: |
           echo "One or more Docs file(s) have changed."
+          pwd
           ls -l
       #cd docs/docusaurus && yarn install && bash ../build_docs
   static-analysis:
