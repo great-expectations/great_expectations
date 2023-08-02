@@ -127,14 +127,15 @@ logger = logging.getLogger(__name__)
 
 REQUIRED_MARKERS = {
     "all_backends",
+    "athena",
     "aws_creds",
     "big",
     "cli",
     "clickhouse",
     "cloud",
     "docs",
-    "external_sqldialect",
     "filesystem",
+    "google_creds",
     "mysql",
     "openpyxl",
     "postgresql",
