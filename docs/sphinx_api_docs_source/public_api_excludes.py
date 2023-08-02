@@ -762,6 +762,11 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         filepath=pathlib.Path("great_expectations/agent/actions/list_table_names.py"),
     ),
     IncludeExcludeDefinition(
+        reason="The agent is not part of the public API",
+        name="run",
+        filepath=pathlib.Path("great_expectations/agent/actions/run_checkpoint.py"),
+    ),
+    IncludeExcludeDefinition(
         reason="The add method shares a name with a public API method",
         name="add",
         filepath=pathlib.Path(
