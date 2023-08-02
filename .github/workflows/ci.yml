@@ -244,6 +244,7 @@ jobs:
         run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose
 
   py38-min-versions:
+    needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
@@ -262,6 +263,7 @@ jobs:
         run: invoke tests --unit
 
   py39-min-versions:
+    needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
@@ -280,6 +282,7 @@ jobs:
         run: invoke tests --unit
 
   py310-min-versions:
+    needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
