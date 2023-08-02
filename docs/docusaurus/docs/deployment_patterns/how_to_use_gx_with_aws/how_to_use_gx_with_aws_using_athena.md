@@ -166,7 +166,7 @@ Use the information provided here to learn how to use Great Expectations (GX) wi
 - <PrereqPython />
 - The AWS CLI. To download and install the AWS CLI, see [Installing or updating the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 - AWS credentials. See [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
-- Permissions to install the Python packages ([`boto3`](https://github.com/boto/boto3) and `great_expectations`) with pip.
+- Permissions to install the Python packages [`boto3`](https://github.com/boto/boto3) and `great_expectations` with pip.
 - An S3 bucket and prefix to store Expectations and Validation Results.
 
 </Prerequisites>
