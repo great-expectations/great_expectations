@@ -67,7 +67,7 @@ jobs:
 
   docs-snippets:
     name: docs-snippets
-    #if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false
     #add more scope here
     runs-on: ubuntu-latest
     env:
@@ -214,7 +214,15 @@ jobs:
           - postgresql
           - spark
           - trino
-        python-version: ["3.8"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        exclude:
+          # TODO: would like to adopt `actionlint` pre-commit hook
+          # but false positive here and inability to do an inline ignore
+          # prevents this https://github.com/rhysd/actionlint/issues/237
+          - python-version: ${{ github.event_name != 'schedule' && '3.9' }}
+          - python-version: ${{ github.event_name != 'schedule' && '3.10' }}
+          - python-version: ${{ github.event_name != 'schedule' && '3.11' }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
