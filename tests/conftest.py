@@ -135,14 +135,16 @@ REQUIRED_MARKERS = {
     "cloud",
     "docs",
     "filesystem",
-    "google_creds",
+    "mssql",
     "mysql",
     "openpyxl",
+    "performance",
     "postgresql",
     "project",
     "pyarrow",
     "spark",
     "sqlite",
+    "trino",
     "unit",
 }
 
@@ -364,25 +366,67 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize("test_backends", [test_backends], scope="module")
 
 
+@dataclass(frozen=True)
+class TestMarkerCoverage:
+    path: str
+    name: str
+    markers: set[str]
+
+    def __str__(self):
+        return f"{self.path}, {self.name}, {self.markers}"
+
+
 def _verify_marker_coverage(
     session,
-) -> list[tuple[str, str, list[str]]]:
-    uncovered: list[tuple[str, str, set[str]]] = []
+) -> tuple[list[TestMarkerCoverage], list[TestMarkerCoverage]]:
+    uncovered: list[TestMarkerCoverage] = []
+    multiple_markers: list[TestMarkerCoverage] = []
     for test in session.items:
         markers = {m.name for m in test.iter_markers()}
-        if not REQUIRED_MARKERS.intersection(markers):
-            uncovered.append((str(test.path), test.name, markers))
-    return uncovered
+        required_intersection = markers.intersection(REQUIRED_MARKERS)
+        required_intersection_size = len(required_intersection)
+        # required_intersection_size is a non-zero integer so there 3 cases we care about:
+        #  0 => no marker coverage for this test
+        #  1 => the marker coverage for this test is correct
+        # >1 => too many markers are covering this test
+        if required_intersection_size == 0:
+            uncovered.append(
+                TestMarkerCoverage(path=str(test.path), name=test.name, markers=markers)
+            )
+        elif required_intersection_size > 1:
+            multiple_markers.append(
+                TestMarkerCoverage(
+                    path=str(test.path), name=test.name, markers=required_intersection
+                )
+            )
+    return uncovered, multiple_markers
 
 
 def pytest_collection_finish(session):
     if session.config.option.verify_marker_coverage_and_exit:
-        uncovered = _verify_marker_coverage(session)
-        if uncovered:
-            print(f"*** {len(uncovered)} tests have no marker coverage ***")
-            for uncovered_test_info in uncovered:
-                print(uncovered_test_info)
-            print("\n*** Every test is required to have 1 of the following markers ***")
+        uncovered, multiply_covered = _verify_marker_coverage(session)
+        if uncovered or multiply_covered:
+            print(
+                "*** Every test should be covered by exactly 1 of our required markers ***"
+            )
+            if uncovered:
+                print(f"*** {len(uncovered)} tests have no marker coverage ***")
+                for test_info in uncovered:
+                    print(test_info)
+                print()
+            else:
+                print(
+                    f"*** {len(multiply_covered)} tests have multiple marker coverage ***"
+                )
+                for test_info in multiply_covered:
+                    print(test_info)
+                print()
+
+            print("*** The required markers follow. ***")
+            print(
+                "*** Tests marked with 'performance' are not run in the PR or release pipeline. ***"
+            )
+            print("*** All other tests are. ***")
             for m in REQUIRED_MARKERS:
                 print(m)
             pytest.exit(

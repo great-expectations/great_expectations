@@ -56,7 +56,7 @@ Windows support for the open source Python version of GX is currently unavailabl
     ```python name="tutorials/quickstart/quickstart.py connect_to_data"
     ```
 
-    The example code uses the default Data Context Datasource for Pandas to access the `.csv` data in the file at the specified `path`.
+    The example code uses the default Data Context Data Source for Pandas to access the `.csv` data in the file at the specified `path`.
 
 ## Create Expectations
 

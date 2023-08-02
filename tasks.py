@@ -790,51 +790,79 @@ def show_automerges(ctx: Context):
 class TestDependencies(NamedTuple):
     requirement_files: tuple[str, ...]
     services: tuple[str, ...] = tuple()
-    exta_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
+    extra_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
         str, ...
     ] = tuple()
 
 
-MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
+MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "athena": TestDependencies(("reqs/requirements-dev-athena.txt",)),
     "clickhouse": TestDependencies(("reqs/requirements-dev-clickhouse.txt",)),
     "cloud": TestDependencies(
-        ("reqs/requirements-dev-cloud.txt",), exta_pytest_args=("--cloud",)
+        ("reqs/requirements-dev-cloud.txt",), extra_pytest_args=("--cloud",)
     ),
     "docs": TestDependencies(
+        # these installs are handled by the CI
         requirement_files=(
             "reqs/requirements-dev-test.txt",
-            "reqs/requirements-dev-spark.txt",
+            "reqs/requirements-dev-azure.txt",
+            "reqs/requirements-dev-bigquery.txt",
+            "reqs/requirements-dev-mssql.txt",
+            "reqs/requirements-dev-mysql.txt",
+            "reqs/requirements-dev-postgresql.txt",
+            "reqs/requirements-dev-redshift.txt",
+            "reqs/requirements-dev-snowflake.txt",
+            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
+            "reqs/requirements-dev-sqlalchemy1.txt",
+            "reqs/requirements-dev-trino.txt",
         ),
-        exta_pytest_args=("--docs-tests",),
+        services=("postgresql", "mssql", "mysql", "trino"),
+        extra_pytest_args=(
+            "--aws",
+            "--azure",
+            "--bigquery",
+            "--mssql",
+            "--mysql",
+            "--postgresql",
+            "--redshift",
+            "--snowflake",
+            "--trino",
+            "--docs-tests",
+        ),
     ),
     "mssql": TestDependencies(
         ("reqs/requirements-dev-mssql.txt",),
         services=("mssql",),
-        exta_pytest_args=("--mssql",),
+        extra_pytest_args=("--mssql",),
     ),
     "mysql": TestDependencies(
         ("reqs/requirements-dev-mysql.txt",),
         services=("mysql",),
-        exta_pytest_args=("--mysql",),
+        extra_pytest_args=("--mysql",),
     ),
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
     "postgresql": TestDependencies(
         ("reqs/requirements-dev-postgresql.txt",),
         services=("postgresql",),
-        exta_pytest_args=("--postgresql",),
+        extra_pytest_args=("--postgresql",),
     ),
     "spark": TestDependencies(
         requirement_files=("reqs/requirements-dev-spark.txt",),
         services=("spark",),
-        exta_pytest_args=("--spark",),
+        extra_pytest_args=("--spark",),
     ),
     "trino": TestDependencies(
         ("reqs/requirements-dev-trino.txt",),
         services=("trino",),
-        exta_pytest_args=("--trino",),
+        extra_pytest_args=("--trino",),
     ),
 }
+
+
+def _add_all_backends_marker(marker_string: str) -> bool:
+    # We should generalize this, possibly leveraging MARKER_DEPENDENCY_MAP, but for now
+    # right I've hardcoded all the containerized backend services we support in testing.
+    return marker_string in ["postgresql", "mssql", "mysql", "spark", "trino"]
 
 
 def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
@@ -849,20 +877,13 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
     tokens = marker_string.split()
     if len(tokens) == 1:
         yield tokens[0]
-    elif marker_string == "cloud and not e2e":
-        yield "cloud"
     elif (
         marker_string
-        == "athena or clickhouse or openpyxl or pyarrow or project or sqlite"
+        == "athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds"
     ):
+        yield "aws_creds"
         yield "athena"
         yield "clickhouse"
-        yield "openpyxl"
-        yield "pyarrow"
-        yield "project"
-        yield "sqlite"
-    # TODO: remove once PR 8458 merges
-    elif marker_string == "openpyxl or pyarrow or project or sqlite":
         yield "openpyxl"
         yield "pyarrow"
         yield "project"
@@ -877,7 +898,7 @@ def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependenc
     dependencies: list[TestDependencies] = []
     for marker_string in markers:
         for marker_token in _tokenize_marker_string(marker_string):
-            if marker_depedencies := MARKER_DEPENDENDENCY_MAP.get(marker_token):
+            if marker_depedencies := MARKER_DEPENDENCY_MAP.get(marker_token):
                 LOGGER.debug(f"'{marker_token}' has dependencies")
                 dependencies.append(marker_depedencies)
     return dependencies
@@ -942,7 +963,37 @@ def deps(  # noqa: PLR0913
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
+@invoke.task(iterable=["service_names", "up_services", "verbose"])
+def docs_snippet_tests(
+    ctx: Context,
+    marker: str,
+    up_services: bool = False,
+    verbose: bool = False,
+    reports: bool = False,
+):
+    pytest_cmds = [
+        "pytest",
+        "-rEf",
+    ]
+    if reports:
+        pytest_cmds.extend(["--cov=great_expectations", "--cov-report=xml"])
+
+    if verbose:
+        pytest_cmds.append("-vv")
+
+    for test_deps in _get_marker_dependencies(marker):
+        if up_services:
+            service(ctx, names=test_deps.services, markers=test_deps.services)
+
+        for extra_pytest_arg in test_deps.extra_pytest_args:
+            pytest_cmds.append(extra_pytest_arg)
+
+    pytest_cmds.append("tests/integration/test_script_runner.py")
+    ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
+
+
 @invoke.task(
+    help={"pty": _PTY_HELP_DESC},
     iterable=["service_names", "up_services", "verbose"],
 )
 def ci_tests(  # noqa: PLR0913
@@ -968,40 +1019,40 @@ def ci_tests(  # noqa: PLR0913
 
     Defined this as a new invoke task to avoid some of the baggage of our old test setup.
     """
-    pytest_cmds = [
-        "pytest",
-        f"--durations={slowest}",
-        "-m",
-        f"'{marker}'",
-        "-rEf",
-    ]
+    pytest_options = [f"--durations={slowest}", "-rEf"]
 
     if xdist:
-        pytest_cmds.append("-n auto")
+        pytest_options.append("-n auto")
 
     if timeout != 0:
-        pytest_cmds.append(f"--timeout={timeout}")
+        pytest_options.append(f"--timeout={timeout}")
 
     if reports:
-        pytest_cmds.extend(["--cov=great_expectations", "--cov-report=xml"])
+        pytest_options.extend(["--cov=great_expectations", "--cov-report=xml"])
 
     if verbose:
-        pytest_cmds.append("-vv")
+        pytest_options.append("-vv")
 
     for test_deps in _get_marker_dependencies(marker):
         if up_services:
             service(ctx, names=test_deps.services, markers=test_deps.services, pty=pty)
 
-        for extra_pytest_arg in test_deps.exta_pytest_args:
-            pytest_cmds.append(extra_pytest_arg)
+        for extra_pytest_arg in test_deps.extra_pytest_args:
+            pytest_options.append(extra_pytest_arg)
 
-    if marker in ["postgresql", "mssql", "mysql", "trino"]:
-        pytest_cmds[3] = "all_backends"
+    marker_statement = (
+        f"'all_backends or {marker}'"
+        if _add_all_backends_marker(marker)
+        else f"'{marker}'"
+    )
 
-    ctx.run(" ".join(pytest_cmds), echo=True, pty=pty)
+    pytest_cmd = ["pytest", "-m", marker_statement] + pytest_options
+    ctx.run(" ".join(pytest_cmd), echo=True, pty=pty)
 
 
 @invoke.task(
+    aliases=("services",),
+    help={"pty": _PTY_HELP_DESC},
     iterable=["names", "markers"],
 )
 def service(
@@ -1010,7 +1061,7 @@ def service(
     """
     Startup a service, by referencing its name directly or by looking up a pytest marker.
 
-    If a marker is specified, the services listed in `MARKER_DEPENDENDENCY_MAP` will be used.
+    If a marker is specified, the services listed in `MARKER_DEPENDENCY_MAP` will be used.
 
     Note:
         The main reason this is a separate task is to make it easy to start services

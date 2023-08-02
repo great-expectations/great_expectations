@@ -196,7 +196,6 @@ def test_get_datasource_cache_miss(
     assert not mock_get.called
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_DataContext_add_datasource_updates_cache_and_store(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: CloudDataContext,
@@ -229,7 +228,6 @@ def test_DataContext_add_datasource_updates_cache_and_store(
     assert name in context.datasources
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_DataContext_update_datasource_updates_existing_value_in_cache_and_store(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: CloudDataContext,
@@ -271,7 +269,6 @@ def test_DataContext_update_datasource_updates_existing_value_in_cache_and_store
     assert retrieved_datasource.data_connectors.keys() == data_connectors.keys()
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_DataContext_update_datasource_creates_new_value_in_cache_and_store(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: CloudDataContext,
@@ -303,7 +300,6 @@ def test_DataContext_update_datasource_creates_new_value_in_cache_and_store(
     assert name in context.datasources
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_DataContext_delete_datasource_updates_cache(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: CloudDataContext,
