@@ -207,7 +207,11 @@ def _get_dialect_type_module(dialect):
     return dialect
 
 
-_PERSISTED_CONNECTION_DIALECTS = (GXSqlDialect.SQLITE, GXSqlDialect.MSSQL)
+_PERSISTED_CONNECTION_DIALECTS = (
+    GXSqlDialect.SQLITE,
+    GXSqlDialect.MSSQL,
+    GXSqlDialect.BIGQUERY,
+)
 
 
 def _dialect_requires_persisted_connection(

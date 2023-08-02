@@ -19,6 +19,7 @@ from great_expectations.util import build_in_memory_runtime_context, is_library_
     not (aws.sqlalchemy_athena and is_library_loadable(library_name="pyathena")),
     reason="pyathena is not installed",
 )
+@pytest.mark.athena
 @pytest.mark.external_sqldialect
 def test_expect_column_values_to_be_in_type_list_dialect_pyathena_string(sa):
     df = pd.DataFrame({"col": ["test_val1", "test_val2"]})
@@ -68,6 +69,7 @@ def test_expect_column_values_to_be_in_type_list_dialect_pyathena_string(sa):
     not (aws.sqlalchemy_athena and is_library_loadable(library_name="pyathena")),
     reason="pyathena is not installed",
 )
+@pytest.mark.athena
 @pytest.mark.external_sqldialect
 def test_expect_column_values_to_be_in_type_list_dialect_pyathena_boolean(sa):
     df = pd.DataFrame({"col": [True, False]})

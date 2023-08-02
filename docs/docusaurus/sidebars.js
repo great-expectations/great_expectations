@@ -247,7 +247,6 @@ module.exports = {
               items: [
                 { type: 'doc', id: 'reference/expectations/conditional_expectations' },
                 { type: 'doc', id: 'reference/expectations/distributional_expectations' },
-                { type: 'doc', id: 'reference/expectations/implemented_expectations' },
                 { type: 'doc', id: 'reference/expectation_suite_operations' },
                 { type: 'doc', id: 'reference/expectations/result_format' },
                 { type: 'doc', id: 'reference/expectations/standard_arguments' }
