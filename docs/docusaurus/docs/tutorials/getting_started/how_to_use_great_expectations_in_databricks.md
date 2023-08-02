@@ -14,7 +14,7 @@ To use GX with Databricks, you'll complete the following tasks:
 
 - Load data
 - Instantiate a <TechnicalTag tag="data_context" text="Data Context" />
-- Create a <TechnicalTag tag="datasource" text="Datasource" /> and a <TechnicalTag tag="data_asset" text="Data Asset" />
+- Create a <TechnicalTag tag="datasource" text="Data Source" /> and a <TechnicalTag tag="data_asset" text="Data Asset" />
 - Create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />
 - Validate data using a <TechnicalTag tag="checkpoint" text="Checkpoint" />
 
@@ -120,7 +120,7 @@ df = spark.read.format("csv")\
   ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose base directory"
   ```
 
-2. Run the following command to create our <TechnicalTag tag="datasource" text="Datasource" />:
+2. Run the following command to create our <TechnicalTag tag="datasource" text="Data Source" />:
 
   ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add datasource"
   ```
@@ -130,7 +130,7 @@ df = spark.read.format("csv")\
   ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose batching regex"
   ```
 
-4. Run the following command to create a <TechnicalTag tag="data_asset" text="Data Asset" /> with the Datasource:
+4. Run the following command to create a <TechnicalTag tag="data_asset" text="Data Asset" /> with the Data Source:
 
   ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add data asset"
   ```
@@ -143,12 +143,12 @@ df = spark.read.format("csv")\
 </TabItem>
 <TabItem value="dataframe">
 
-1. Run the following command to create the Datasource:
+1. Run the following command to create the Data Source:
 
   ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add datasource"
   ```
 
-2. Run the following command to create a <TechnicalTag tag="data_asset" text="Data Asset" /> with the Datasource:
+2. Run the following command to create a <TechnicalTag tag="data_asset" text="Data Asset" /> with the Data Source:
 
   ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add data asset"
   ```
@@ -230,5 +230,5 @@ displayHTML(data)
 
 ## Next steps
 
-Now that you've created and saved a Data Context, Datasource, Data Asset, Expectation Suite, and Checkpoint, see [Validate data by running a Checkpoint](https://docs.greatexpectations.io/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) 
+Now that you've created and saved a Data Context, Data Source, Data Asset, Expectation Suite, and Checkpoint, see [Validate data by running a Checkpoint](https://docs.greatexpectations.io/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) 
 to create a script to run the Checkpoint without the need to recreate your Data Assets and Expectations. To move Databricks notebooks to production, see [Software Engineering Best Practices With Databricks Notebooks](https://www.databricks.com/blog/2022/06/25/software-engineering-best-practices-with-databricks-notebooks.html) from Databricks.
