@@ -20,7 +20,7 @@ No.  The interactive method used to create and edit Expectations does not edit o
 
 - Great Expectations installed in a Python environment
 - A Filesystem Data Context for your Expectations
-- Created a Datasource from which to request a Batch of data for introspection
+- Created a Data Source from which to request a Batch of data for introspection
 
 </Prerequisites> 
 

@@ -1,5 +1,5 @@
 ---
-title: Connect to in-memory Source Data using Pandas
+title: Connect to in-memory source data using Pandas
 tag: [how-to, connect to data]
 description: Connect Great Expectations to a Pandas in-memory DataFrame.
 keywords: [Great Expectations, Pandas, Filesystem]
@@ -28,9 +28,9 @@ In this guide we will demonstrate how to connect to an in-memory Pandas DataFram
 
 <ImportGxAndInstantiateADataContext />
 
-## Create a Datasource
+## Create a Data Source
 
-Run the following Python code to create a Pandas Datasource:
+Run the following Python code to create a Pandas Data Source:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py datasource"
 ```
@@ -44,13 +44,13 @@ Run the following Python code to create the Pandas DataFrame:
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py dataframe"
 ```
 
-## Add a Data Asset to the Datasource
+## Add a Data Asset to the Data Source
 
 The following information is required when you create a Pandas DataFrame Data Asset:
 
-- `name`: The Datasource name.
+- `name`: The Data Source name.
 
-- `dataframe`: The Pandas DataFrame containing the Source Data.
+- `dataframe`: The Pandas DataFrame containing the source data.
 
 The DataFrame you created previously is the value you'll enter for `dataframe` parameter.  
 
@@ -82,6 +82,6 @@ For more information on Pandas read methods, see [the Pandas Input/Output docume
 
 For more information on the concepts and reasoning employed by this guide, please reference the following informational guides:
 
-- [What does a Datasource do behind the scenes?]
+- [What does a Data Source do behind the scenes?]
 - [What are use the use cases for single vs multiple Batch Data Assets?]
 -->
