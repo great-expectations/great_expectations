@@ -89,31 +89,6 @@ stages:
                 scripts/*.py
                 scripts/*.sh
 
-  - stage: import_ge
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-20.04'
-
-    jobs:
-      - job: import_ge
-
-        steps:
-         - task: UsePythonVersion@0
-           inputs:
-             versionSpec: '3.8'
-           displayName: 'Use Python 3.8'
-
-         - bash: python -m pip install --upgrade pip
-           displayName: 'Update pip'
-
-         - script: |
-             pip install  .
-           displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
-
-         - script: |
-             python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
-           displayName: 'Import Great Expectations'
-
   - stage: usage_stats_integration
     dependsOn: [scope_check, import_ge]
     pool:
