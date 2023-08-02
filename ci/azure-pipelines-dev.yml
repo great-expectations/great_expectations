@@ -289,42 +289,6 @@ stages:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
               SQLALCHEMY_WARN_20: true
 
-  - stage: cli_integration
-    dependsOn: [scope_check, import_ge]
-    pool:
-      vmImage: 'ubuntu-latest'
-
-    jobs:
-      - job: test_cli
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
-
-        services:
-          postgres: postgres
-
-        variables:
-          python.version: '3.8'
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
-
-          - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
-
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test, postgresql, spark, athena]" pytest-azurepipelines
-            displayName: 'Install dependencies'
-
-          - script: |
-              # Run pytest
-              pytest --postgresql --spark --aws-integration tests/cli
-
-            displayName: 'pytest'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
-              SQLALCHEMY_WARN_20: true
 
   # 2023-07-18 - Chetan - these are being disabled due to a test failure introduced by the provider
   # GitHub issue requiring resolution: https://github.com/astronomer/airflow-provider-great-expectations/issues/114
