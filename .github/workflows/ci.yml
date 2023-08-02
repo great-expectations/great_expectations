@@ -223,6 +223,9 @@ jobs:
           # - "3.10"  # TODO: uncomment before merge
           - "3.11"
         exclude:
+          # TODO: would like to adopt `actionlint` pre-commit hook
+          # but false positive here and inability to do an inline ignore
+          # prevents this https://github.com/rhysd/actionlint/issues/237
           - python-version: ${{ github.event_name != 'schedule' && '3.11' }}
 
     steps:
