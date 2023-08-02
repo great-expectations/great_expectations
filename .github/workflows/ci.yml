@@ -205,18 +205,15 @@ jobs:
     strategy:
       matrix:
         markers:
+          - athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
           - big
           - cli
-          # This is a required test that has been subsumed by the cloud test above.
-          # This is a required test stage however. I'll remove this after the above test goes in.
-          - cloud and not e2e
           - filesystem
-          - athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
-          - spark
           - mssql
           - mysql
-          - trino
           - postgresql
+          - spark
+          - trino
         python-version: ["3.8", "3.9", "3.10", "3.11"]
         exclude:
           # TODO: would like to adopt `actionlint` pre-commit hook
