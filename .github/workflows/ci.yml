@@ -305,6 +305,7 @@ jobs:
   deploy:
     needs: [unit-tests, static-analysis]
     if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
     steps:
       - name: echo my tag
         run: echo ${{ github.event.ref }}
