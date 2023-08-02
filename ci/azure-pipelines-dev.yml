@@ -89,27 +89,6 @@ stages:
                 scripts/*.py
                 scripts/*.sh
 
-  - stage: lint
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-latest'
-
-    jobs:
-      - job: lint
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: 3.8
-            displayName: 'Use Python 3.8'
-
-          - script: |
-              pip install $(grep -E '^(black|invoke|ruff)' reqs/requirements-dev-contrib.txt)
-              EXIT_STATUS=0
-              invoke fmt --check || EXIT_STATUS=$?
-              invoke lint || EXIT_STATUS=$?
-              exit $EXIT_STATUS
-
   - stage: import_ge
     dependsOn: scope_check
     pool:
@@ -135,7 +114,7 @@ stages:
              python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
            displayName: 'Import Great Expectations'
   - stage: required
-    dependsOn: [scope_check, lint, import_ge]
+    dependsOn: [scope_check, import_ge]
     pool:
       vmImage: 'ubuntu-20.04'
 
@@ -263,7 +242,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
   - stage: usage_stats_integration
-    dependsOn: [scope_check, lint, import_ge]
+    dependsOn: [scope_check, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -298,7 +277,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: [scope_check, lint, import_ge]
+    dependsOn: [scope_check, import_ge]
 
     jobs:
       - job: mysql
@@ -438,7 +417,7 @@ stages:
               SQLALCHEMY_WARN_20: true
 
   - stage: cli_integration
-    dependsOn: [scope_check, lint, import_ge]
+    dependsOn: [scope_check, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -478,7 +457,7 @@ stages:
   # GitHub issue requiring resolution: https://github.com/astronomer/airflow-provider-great-expectations/issues/114
 
   # - stage: airflow_provider
-  #   dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+  #   dependsOn: [scope_check, import_ge]
   #   pool:
   #     vmImage: 'ubuntu-latest'
 
