@@ -187,7 +187,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     def _question_renderer(cls, configuration, result=None, runtime_configuration=None):
         column = configuration.kwargs.get("column")
         mostly = configuration.kwargs.get("mostly")
-        regex = cls.regex
+        regex = getattr(cls, "regex", None)
         semantic_type_name_plural = getattr(cls, "semantic_type_name_plural", None)
 
         if mostly == 1 or mostly is None:
