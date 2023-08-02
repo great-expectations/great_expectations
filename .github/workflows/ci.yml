@@ -332,7 +332,7 @@ jobs:
           cache: "pip"
           cache-dependency-path: requirements.txt
       - name: Install Great Expectations with core deps only
-        run: pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
+        run: pip install --constraint constraints-dev.txt ".[test]"
       - name: Import Great Expectations
         env:
           GE_USAGE_STATISTICS_URL: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
