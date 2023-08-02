@@ -254,7 +254,6 @@ ignore = [
     "B904", # raise-without-from-inside-except
     "B028", # no-explicit-stacklevel - https://beta.ruff.rs/docs/rules/no-explicit-stacklevel/
     "B007", # unused-loop-control-variable
-    "B009", # get-attr-with-constant
 ]
 extend-exclude = [
     "docs/*",
