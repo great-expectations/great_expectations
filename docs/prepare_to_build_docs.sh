@@ -4,6 +4,7 @@
 # Currently used in our netlify pipeline.
 # this should trigger something
 # triggaaaaa
+# I am skeptical
 source ../logging.sh
 
 CURRENT_COMMIT=$(git rev-parse HEAD)
