@@ -90,7 +90,7 @@ stages:
                 scripts/*.sh
 
   - stage: usage_stats_integration
-    dependsOn: [scope_check, import_ge]
+    dependsOn: [scope_check]
     pool:
       vmImage: 'ubuntu-latest'
 
