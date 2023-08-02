@@ -31,11 +31,30 @@ def dummy_org_id() -> str:
     return "94af8c91-6e56-4f2a-9b1f-04868321c5f5"
 
 
+@pytest.fixture
+def dummy_access_token() -> str:
+    return (
+        "5a43e329ddd64ca286bf58574d17f9e1.V1"
+        ".myBie29LH0m_5CTw0RCeAtBXWb5V519lAeIq1rF4WWN4WZrJGMe0GAMcnuuwYkveR0ptvUFoeeK2zCt6NJMiSg"
+    )
+
+
+@pytest.fixture
+def set_required_env_vars(
+    monkeypatch, dummy_org_id, dummy_base_url, dummy_access_token
+):
+    env_vars = {
+        "GX_CLOUD_ORGANIZATION_ID": dummy_org_id,
+        "GX_CLOUD_ACCESS_TOKEN": dummy_access_token,
+        "GX_CLOUD_BASE_URL": dummy_base_url,
+    }
+    for key, val in env_vars.items():
+        monkeypatch.setenv(name=key, value=val)
+
+
 @pytest.fixture(scope="function")
 def context(dummy_base_url, dummy_org_id):
     mock_context = MagicMock(autospec=CloudDataContext)
-    mock_context._cloud_config.base_url = dummy_base_url
-    mock_context._cloud_config.organization_id = dummy_org_id
     return mock_context
 
 
@@ -63,7 +82,7 @@ def test_list_table_names_event_raises_for_non_sql_datasource(context, event):
 
 @responses.activate
 def test_run_list_table_names_action_returns_action_result(
-    context, event, dummy_base_url, dummy_org_id
+    context, event, dummy_base_url, dummy_org_id, set_required_env_vars
 ):
     action = ListTableNamesAction(context=context)
     id = "096ce840-7aa8-45d1-9e64-2833948f4ae8"
