@@ -110,7 +110,7 @@ import AdditionalDataDocsNotes from '@site/docs/guides/setup/configuring_data_do
 
 <!-- Part 2: Connect to data -->
 
-<!-- 2.1 Choose how to run the code for configuring a new Datasource -->
+<!-- 2.1 Choose how to run the code for configuring a new Data Source -->
 
 import HowToRunDatasourceCode from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_datasource_code_environment.md'
 
@@ -251,21 +251,47 @@ context = FileDataContext.create(project_root_dir=path_to_empty_folder)
 
 ## Connect to data
 
+<<<<<<< HEAD
+=======
+### 2.1 Choose how to run the code for creating a new Data Source
+>>>>>>> develop
 <HowToRunDatasourceCode />
 
 1. <InstantiateDataContext />
 
+<<<<<<< HEAD
 2. <ConnectionStringAthena />
+=======
+### 2.3 Configure your Data Source
+>>>>>>> develop
 
 3. <ConfigureYourDatasource />
 
     To configure a SQL Datasource, see [Connect to SQL database source data](../../guides/connecting_to_your_data/fluent/database/connect_sql_source_data.md).
 
+<<<<<<< HEAD
 4. <SaveDatasourceConfigurationToDataContext />
+=======
+#### 2.3.2 Create your Data Source configuration
+>>>>>>> develop
 
 5. <TestAthenaDatasource />
 
+<<<<<<< HEAD
 ## Create Expectations
+=======
+To configure a SQL datasource such as the one used to connect to your Athena data, see [How to configure a SQL Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
+
+### 2.4 Save the Data Source configuration to your DataContext
+<SaveDatasourceConfigurationToDataContext />
+
+### 2.5 Test your new Data Source
+<TestAthenaDatasource />
+
+## Part 3: Create Expectations
+
+### 3.1: Prepare a Batch Request, empty Expectation Suite, and Validator
+>>>>>>> develop
 
 <PrepareABatchRequestAndValidatorForCreatingExpectations />
 

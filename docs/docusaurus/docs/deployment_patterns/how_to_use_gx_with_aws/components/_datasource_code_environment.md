@@ -1,3 +1,3 @@
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-To simplify setting up your Datasource configurations, use the Great Expectation Python API in a Jupyter Notebook. You'll receive immediate feedback on the results of your code blocks. Alternatively, you can use a Python script in the IDE of your choice.
+Previously, you were required to manually edit configuration files when you added configurations for Amazon S3 buckets.  Now, it is recommended that you use the Great Expectations Python API in a Jupyter Notebook to set up your Data Source configurations. When you use this methodology, you'll receive immediate feedback when you run your code. Alternatively you can use a Python script in the integrated development environment (IDE) of your choice.
