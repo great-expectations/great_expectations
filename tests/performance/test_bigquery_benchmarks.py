@@ -19,7 +19,7 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.core.async_executor import patch_https_connection_pool
 from tests.performance import taxi_benchmark_util
 
-pytestmark = pytest.mark.google_creds
+pytestmark = pytest.mark.performance
 
 
 @pytest.mark.parametrize(
