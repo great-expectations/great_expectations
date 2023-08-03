@@ -71,6 +71,25 @@ validator.expect_column_values_to_be_between(
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
+# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py checkpoint config">
+my_checkpoint_name = "my_databricks_checkpoint"
+
+checkpoint = Checkpoint(
+    name=my_checkpoint_name,
+    run_name_template="%Y%m%d-%H%M%S-my-run-name-template",
+    data_context=context,
+    batch_request=batch_request,
+    expectation_suite_name=expectation_suite_name,
+    action_list=[
+        {
+            "name": "store_validation_result",
+            "action": {"class_name": "StoreValidationResultAction"},
+        },
+        {"name": "update_data_docs", "action": {"class_name": "UpdateDataDocsAction"}},
+    ],
+)
+# </snippet>
+
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add checkpoint config">
 context.add_or_update_checkpoint(checkpoint=checkpoint)
 # </snippet>
