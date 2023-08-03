@@ -269,9 +269,7 @@ checkpoint = gx.checkpoint.SimpleCheckpoint(
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py run checkpoint">
 checkpoint_result = checkpoint.run()
-# </snippet>
 
 assert not checkpoint_result.success
 
