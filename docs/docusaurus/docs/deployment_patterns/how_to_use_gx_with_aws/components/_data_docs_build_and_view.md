@@ -1,6 +1,6 @@
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-As the examples use a `SimpleCheckpoint`, the Checkpoint already contains an `UpdateDataDocsAction` which renders the <TechnicalTag tag="data_docs" text="Data Docs"/> from the generated Validation Results. The Data Docs store contains a new entry for the rendered Validation Result.
+The Checkpoint contains `UpdateDataDocsAction` which renders the <TechnicalTag tag="data_docs" text="Data Docs"/> from the generated Validation Results. The Data Docs store contains a new entry for the rendered Validation Result.
 
 :::tip 
 
