@@ -346,9 +346,22 @@ jobs:
         # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
         run: pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
 
-  scheduled-run-failure:
+  notify_on_failure:
+    needs: [
+      doc-checks,
+      static-analysis,
+      docs-snippets,
+      unit-tests,
+      cloud-tests,
+      marker-tests,
+      py38-min-versions,
+      py39-min-versions,
+      py310-min-versions,
+      import_gx,
+      usage_stats_integration
+    ]
+    if: always() && !contains(needs.*.result, 'failure') && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'failure' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     steps:
       - name: Scheduled CI job failure
         id: slack
