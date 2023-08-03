@@ -38,7 +38,7 @@ Run the following Python code to create a Spark Datasource:
 
 ## Read your source data into a Spark DataFrame
 
-In the following example, a parquet file is read into a Spark DataFrame that will be used in subsequent code examples.
+In the following example, a simple Spark DataFrame is created that will be used in subsequent code examples.
 
 Run the following Python code to create the Spark DataFrame:
 
