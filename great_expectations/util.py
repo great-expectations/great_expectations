@@ -70,7 +70,11 @@ try:
     import black
 except ImportError:
     black = None  # type: ignore[assignment]
+
+
 logger = logging.getLogger(__name__)
+
+
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt

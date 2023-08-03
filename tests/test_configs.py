@@ -3,6 +3,7 @@ import pytest
 from great_expectations.data_context.util import instantiate_class_from_config
 
 
+@pytest.mark.unit
 def test_instantiate_class_from_config():
     # This config structure feels very tidy to me.
     instantiate_class_from_config(
