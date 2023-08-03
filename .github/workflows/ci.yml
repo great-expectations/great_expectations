@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: static
-        run: echo "hello static"
+        run: python -c "5/0"
 #      - name: Checkout
 #        uses: actions/checkout@v3
 #      - name: Set up Python
@@ -366,7 +366,7 @@ jobs:
       import_gx,
       usage_stats_integration
     ]
-    if: always() # && !contains(needs.*.result, 'failure') && github.event_name != 'pull_request'
+    if: always() && !cancelled() && contains(needs.*.result, 'failure') && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Scheduled CI job failure
