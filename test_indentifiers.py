@@ -1,19 +1,47 @@
 from __future__ import annotations
 
-from typing import Generator
-import pytest
+from typing import Final, Generator, Literal
 
+import pytest
 from pytest import param as p
+
+from great_expectations import get_context
+from great_expectations.data_context import EphemeralDataContext
 from great_expectations.datasource.fluent import (
-    SQLDatasource,
     PostgresDatasource,
     SnowflakeDatasource,
+    SQLDatasource,
 )
-from great_expectations import get_context
 from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
 )
-from great_expectations.data_context import EphemeralDataContext
+
+pg_table: Final[str] = "checkpoints"
+snowflake_table: Final[str] = "nyc_tlc__yellow__bronze"
+
+
+TABLE_NAME_MAPPING: Final[
+    dict[
+        type[SQLDatasource],
+        dict[
+            Literal["unquoted_lower", "quoted_lower", "unqouted_upper", "qouted_upper"],
+            str,
+        ],
+    ]
+] = {
+    PostgresDatasource: {
+        "unquoted_lower": pg_table.lower(),
+        "quoted_lower": f"'{pg_table.lower()}'",
+        "unqouted_upper": pg_table.upper(),
+        "qouted_upper": f"'{pg_table.upper()}'",
+    },
+    SnowflakeDatasource: {
+        "unquoted_lower": snowflake_table.lower(),
+        "quoted_lower": f"'{snowflake_table.lower()}'",
+        "unqouted_upper": snowflake_table.upper(),
+        "qouted_upper": f"'{snowflake_table.upper()}'",
+    },
+}
 
 
 @pytest.fixture
@@ -54,6 +82,16 @@ def datasources(
     factory_method = getattr(context.sources, f"add_{ds_type}")
     ds = factory_method(**request.param)
     yield ds
+
+
+@pytest.fixture
+def ds_w_assets(datasources: SQLDatasource) -> Generator[SQLDatasource, None, None]:
+    datasources.add_table_asset(
+        "unquoted_lower_asset",
+        table_name=TABLE_NAME_MAPPING[type(datasources)]["unquoted_lower"],
+    )
+
+    yield datasources
 
 
 @pytest.mark.parametrize(
@@ -133,24 +171,8 @@ class TestIndentifiers:
         assert result.success is True
 
 
-@pytest.fixture
-def ds_w_assets(datasources: SQLDatasource) -> Generator[SQLDatasource, None, None]:
-    table_names_mapping: dict[type[SQLDatasource], tuple[str, str]] = {
-        PostgresDatasource: ("checkpoints", "'checkpoints'"),
-        SnowflakeDatasource: ("nyc_tlc__yellow__bronze", "'nyc_tlc__yellow__bronze'"),
-    }
-
-    for n, table_name in enumerate(table_names_mapping[type(datasources)], start=1):
-        datasources.add_table_asset(
-            name=f"my_asset_{n}",
-            table_name=table_name,
-        )
-
-    yield datasources
-
-
 def test_does_it_work(context: EphemeralDataContext, ds_w_assets: SQLDatasource):
-    asset = ds_w_assets.get_asset("my_asset_1")
+    asset = ds_w_assets.get_asset("unquoted_lower_asset")
 
     suite = context.add_expectation_suite(
         expectation_suite_name=f"{ds_w_assets.name}-{asset.name}"
