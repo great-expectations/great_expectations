@@ -254,7 +254,6 @@ ignore = [
     "B904", # raise-without-from-inside-except
     "B028", # no-explicit-stacklevel - https://beta.ruff.rs/docs/rules/no-explicit-stacklevel/
     "B007", # unused-loop-control-variable
-    "B009", # get-attr-with-constant
 ]
 extend-exclude = [
     "docs/*",
@@ -516,7 +515,6 @@ markers = [
     "docs: mark a test as a docs test.",
     "e2e: mark test as an E2E test.",
     "external_sqldialect: mark test as requiring install of an external sql dialect.",
-    "google_creds: mark tests that require google creds",
     "filesystem: mark tests using the filesystem as the storage backend.",
     "slow: mark tests taking longer than 1 second.",
     "unit: mark a test as a unit test.",
@@ -524,6 +522,7 @@ markers = [
     "athena: mark a test as AWS Athena-dependent.",
     "spark: mark a test as Spark-dependent.",
     "postgresql: mark a test as postgresql-dependent.",
+    "performance:mark a test as a performance test for BigQuery. These aren't run in our PR or release pipeline",
     "mssql: mark a test as mssql-dependent.",
     "mysql: mark a test as mysql-dependent.",
     "trino: mark a test as trino-dependent.",

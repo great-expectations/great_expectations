@@ -231,6 +231,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          cache: "pip"
           cache-dependency-path: |
             reqs/requirements-dev-test.txt
             setup.py
@@ -244,6 +245,7 @@ jobs:
         run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose
 
   py38-min-versions:
+    needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
@@ -262,6 +264,7 @@ jobs:
         run: invoke tests --unit
 
   py39-min-versions:
+    needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
@@ -280,6 +283,7 @@ jobs:
         run: invoke tests --unit
 
   py310-min-versions:
+    needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
@@ -296,3 +300,48 @@ jobs:
         run: pip install . -c ci/constraints-test/py310-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
         run: invoke tests --unit
+
+  import_gx:
+    needs: [static-analysis]
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        exclude:
+          - python-version: ${{ github.event_name != 'schedule' && '3.9' }}
+          - python-version: ${{ github.event_name != 'schedule' && '3.10' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+          cache-dependency-path: requirements.txt
+      - name: Install Great Expectations with core deps only
+        run: pip install .
+      - name: Import Great Expectations
+        run: python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
+
+  usage_stats_integration:
+    needs: [unit-tests, static-analysis]
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "pip"
+          cache-dependency-path: requirements.txt
+      - name: Install Great Expectations with core deps only
+        run: pip install --constraint constraints-dev.txt ".[test]"
+      - name: Usage Stats Integration Test
+        env:
+          GE_USAGE_STATISTICS_URL: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
+        # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
+        run: pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics

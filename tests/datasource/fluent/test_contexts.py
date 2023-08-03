@@ -150,7 +150,8 @@ def test_assets_are_persisted_on_creation_and_removed_on_deletion(
     assert asset_name not in fds_after_delete[datasource_name].get("assets", {})
 
 
-@pytest.mark.cloud
+# This test is parameterized by the fixture `empty_context`. This fixture will mark the test as
+# cloud or filesystem as appropriate
 def test_context_add_or_update_datasource(
     cloud_api_fake: RequestsMock,
     empty_contexts: CloudDataContext | FileDataContext,
@@ -216,7 +217,8 @@ def test_cloud_add_or_update_datasource_kw_vs_positional(
     assert datasource1 == datasource2 == datasource3
 
 
-@pytest.mark.cloud
+# This test is parameterized by the fixture `empty_context`. This fixture will mark the test as
+# cloud or filesystem as appropriate
 def test_context_add_and_then_update_datasource(
     cloud_api_fake: RequestsMock,
     empty_contexts: CloudDataContext | FileDataContext,
@@ -243,7 +245,8 @@ def test_context_add_and_then_update_datasource(
     assert datasource2 == datasource3
 
 
-@pytest.mark.cloud
+# This test is parameterized by the fixture `empty_context`. This fixture will mark the test as
+# cloud or filesystem as appropriate
 def test_update_non_existant_datasource(
     cloud_api_fake: RequestsMock,
     empty_contexts: CloudDataContext | FileDataContext,

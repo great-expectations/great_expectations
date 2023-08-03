@@ -333,7 +333,6 @@ def mock_get_all_profilers_json(
     return mock_json
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_list_profilers(
     empty_ge_cloud_data_context_config: DataContextConfig,

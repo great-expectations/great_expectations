@@ -822,18 +822,18 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         if not datasource:
             ds_type = _SourceFactories.type_lookup[kwargs["type"]]
-            update_datasource = ds_type(**kwargs)
+            updated_datasource = ds_type(**kwargs)
         else:
-            update_datasource = datasource
+            updated_datasource = datasource
 
-        update_datasource._data_context = self
+        updated_datasource._data_context = self
 
-        update_datasource._rebuild_asset_data_connectors()
+        updated_datasource._rebuild_asset_data_connectors()
 
-        update_datasource.test_connection()
-        update_datasource._data_context._save_project_config()
+        updated_datasource.test_connection()
+        self._save_project_config(_fds_datasource=updated_datasource)
 
-        self.datasources[datasource_name] = update_datasource
+        self.datasources[datasource_name] = updated_datasource
 
     def _delete_fluent_datasource(
         self, datasource_name: str, _call_store: bool = True
@@ -2661,13 +2661,10 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
             > 1
         ):
-            ge_cloud_mode = getattr(  # attr not on AbstractDataContext
-                self, "ge_cloud_mode"
-            )
             raise ValueError(
-                "No more than one of expectation_suite_name,"
-                f"{'expectation_suite_id,' if ge_cloud_mode else ''}"
-                " expectation_suite, or create_expectation_suite_with_name can be specified"
+                "No more than one of expectation_suite_name, "
+                f"{'expectation_suite_id, ' if expectation_suite_id else ''}"
+                "expectation_suite, or create_expectation_suite_with_name can be specified"
             )
 
         if expectation_suite_id is not None:
