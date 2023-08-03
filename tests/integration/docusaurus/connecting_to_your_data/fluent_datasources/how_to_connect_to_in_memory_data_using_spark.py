@@ -50,8 +50,4 @@ assert my_batch_request.options == {}
 
 batches = data_asset.get_batch_list_from_batch_request(my_batch_request)
 assert len(batches) == 1
-assert set(batches[0].columns()) == {
-    "a",
-    "b",
-    "c"
-}
+assert set(batches[0].columns()) == {"a", "b", "c"}
