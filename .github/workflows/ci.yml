@@ -351,12 +351,11 @@ jobs:
     name: Build and publish Python distributions to PyPI
     runs-on: ubuntu-latest
     environment:
+      # TODO: update to actual name and URL
       name: testpypi
       url: https://test.pypi.org/p/great-expectations
     permissions:
-      # needed
       id-token: write
-
     steps:
     - uses: actions/checkout@master
     - name: Set up Python 3.8
@@ -377,4 +376,5 @@ jobs:
     - name: Publish distribution to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
+        # TODO: change to actual repo URL
         repository-url: https://test.pypi.org/legacy/
