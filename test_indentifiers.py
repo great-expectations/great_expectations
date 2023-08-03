@@ -231,7 +231,7 @@ if __name__ == "__main__":
         [
             __file__,
             "-vv",
-            "-rxpEf",
+            "-rxXpEf",
             # "--sw",
         ]
     )
