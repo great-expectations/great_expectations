@@ -1,7 +1,7 @@
 ---
 sidebar_label: "Connect to in-memory source data"
 title: "Connect to in-memory source data"
-id: connect_filesystem_source_data
+id: connect_in_memory_data
 description: Connect to source data stored in-memory.
 toc_min_heading_level: 2
 toc_max_heading_level: 2
