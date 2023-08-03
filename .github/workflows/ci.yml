@@ -39,32 +39,32 @@ jobs:
 #        run: python ci/checks/check_only_name_tag_snippets.py
 #      - name: public_api_report
 #        run: invoke public-api
-#  static-analysis:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v3
-#      - name: Set up Python
-#        uses: actions/setup-python@v4
-#        with:
-#          python-version: "3.8"
-#          cache: "pip"
-#          cache-dependency-path: |
-#            requirements-types.txt
-#            reqs/requirements-dev-contrib.txt
-#
-#      - name: Install dependencies
-#        run: pip install -r requirements-types.txt -r reqs/requirements-dev-contrib.txt
-#      - run: invoke lint --no-fmt
-#      - run: invoke fmt --check
-#      - name: Marker-coverage-check
-#        run: |
-#          invoke marker-coverage
-#      - name: Type-check
-#        run: |
-#          invoke type-check --ci --pretty
-#          invoke type-check --ci --pretty  --check-stub-sources
-#
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "pip"
+          cache-dependency-path: |
+            requirements-types.txt
+            reqs/requirements-dev-contrib.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements-types.txt -r reqs/requirements-dev-contrib.txt
+      - run: invoke lint --no-fmt
+      - run: invoke fmt --check
+      - name: Marker-coverage-check
+        run: |
+          invoke marker-coverage
+      - name: Type-check
+        run: |
+          invoke type-check --ci --pretty
+          invoke type-check --ci --pretty  --check-stub-sources
+
 #  docs-snippets:
 #    name: docs-snippets
 #    if: github.event.pull_request.draft == false
@@ -350,9 +350,9 @@ jobs:
 
   notify_on_failure:
     needs: [
-      doc-checks,
+      # doc-checks,
       static-analysis,
-      docs-snippets,
+      # docs-snippets,
       unit-tests,
       cloud-tests,
       marker-tests,
