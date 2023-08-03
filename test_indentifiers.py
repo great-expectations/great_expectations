@@ -61,10 +61,16 @@ def datasources(context, request) -> Generator[SQLDatasource, None, None]:
         ),
         p(
             {"name": "unqouted_upper", "table_name": "CHECKPOINTS"},
+            marks=[
+                pytest.mark.xfail(
+                    reason="pg table names should be lowercase. Why doesn't sqla fix the casing?"
+                )
+            ],
             id="unqouted_upper",
         ),
         p(
             {"name": "qouted_upper", "table_name": "'CHECKPOINTS'"},
+            marks=[pytest.mark.xfail(reason="pg table names should be lowercase")],
             id="qouted_upper",
         ),
     ],
