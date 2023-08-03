@@ -144,7 +144,7 @@ import CheckpointCreateAndRun from '@site/docs/deployment_patterns/how_to_use_gx
 
 <!-- 4.1.1 Create a Checkpoint -->
 
-import CreateCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_create_tabs.md'
+import CreateCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_create_tab_python.md'
 
 <!-- 4.1.2 Save the Checkpoint -->
 
