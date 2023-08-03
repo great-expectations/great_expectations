@@ -830,8 +830,8 @@ class TableAsset(_SQLAsset):
         return validated_table_name
 
     @pydantic.validator("table_name")
-    def _resolve_qouted_name(cls, table_name: str) -> str | quoted_name:
-        table_name_is_qouted: bool = cls._is_bracketed_by_quotes(table_name)
+    def _resolve_quoted_name(cls, table_name: str) -> str | quoted_name:
+        table_name_is_quoted: bool = cls._is_bracketed_by_quotes(table_name)
 
         from great_expectations.compatibility import sqlalchemy
 
@@ -839,15 +839,15 @@ class TableAsset(_SQLAsset):
             if isinstance(table_name, sqlalchemy.quoted_name):
                 return table_name
 
-            if table_name_is_qouted:
+            if table_name_is_quoted:
                 # https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.quoted_name.quote
                 # Remove the quotes and add them back using the sqlalchemy.quoted_name function
-                # TODO: We need to handle nested qoutes
+                # TODO: We need to handle nested quotes
                 table_name = table_name.strip("'").strip('"')
 
             return sqlalchemy.quoted_name(
                 value=table_name,
-                quote=table_name_is_qouted,
+                quote=table_name_is_quoted,
             )
 
         return table_name
