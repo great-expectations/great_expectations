@@ -523,6 +523,7 @@ markers = [
     "athena: mark a test as AWS Athena-dependent.",
     "spark: mark a test as Spark-dependent.",
     "postgresql: mark a test as postgresql-dependent.",
+    "performance: mark a test as a performance test for BigQuery.",
     "mssql: mark a test as mssql-dependent.",
     "mysql: mark a test as mysql-dependent.",
     "trino: mark a test as trino-dependent.",
