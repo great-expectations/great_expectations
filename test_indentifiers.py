@@ -143,7 +143,6 @@ class TestIndentifiers:
         )
         print(asset)
 
-    # TODO: parametrize with different expectations types
     def test_run_checkpoint(
         self,
         context: EphemeralDataContext,
