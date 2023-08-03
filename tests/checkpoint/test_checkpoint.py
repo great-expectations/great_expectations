@@ -4714,7 +4714,6 @@ def fake_cloud_context_with_slack(_fake_cloud_context_setup, monkeypatch):
     yield context, slack_counter
 
 
-@pytest.mark.filesystem
 @pytest.mark.cloud
 def test_use_validation_url_from_cloud(fake_cloud_context_basic):
     context = fake_cloud_context_basic
@@ -4728,7 +4727,6 @@ def test_use_validation_url_from_cloud(fake_cloud_context_basic):
     )
 
 
-@pytest.mark.filesystem
 @pytest.mark.cloud
 def test_use_validation_url_from_cloud_with_slack(fake_cloud_context_with_slack):
     context, slack_counter = fake_cloud_context_with_slack

@@ -795,7 +795,7 @@ class TestDependencies(NamedTuple):
     ] = tuple()
 
 
-MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
+MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "athena": TestDependencies(("reqs/requirements-dev-athena.txt",)),
     "clickhouse": TestDependencies(("reqs/requirements-dev-clickhouse.txt",)),
     "cloud": TestDependencies(
@@ -860,9 +860,9 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
 
 
 def _add_all_backends_marker(marker_string: str) -> bool:
-    # We should generalize this, possibly leveraging MARKER_DEPENDENDENCY_MAP, but for now
+    # We should generalize this, possibly leveraging MARKER_DEPENDENCY_MAP, but for now
     # right I've hardcoded all the containerized backend services we support in testing.
-    return marker_string in ["postgresql", "mssql", "mysql", "trino"]
+    return marker_string in ["postgresql", "mssql", "mysql", "spark", "trino"]
 
 
 def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
@@ -877,8 +877,6 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
     tokens = marker_string.split()
     if len(tokens) == 1:
         yield tokens[0]
-    elif marker_string == "cloud and not e2e":
-        yield "cloud"
     elif (
         marker_string
         == "athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds"
@@ -900,7 +898,7 @@ def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependenc
     dependencies: list[TestDependencies] = []
     for marker_string in markers:
         for marker_token in _tokenize_marker_string(marker_string):
-            if marker_depedencies := MARKER_DEPENDENDENCY_MAP.get(marker_token):
+            if marker_depedencies := MARKER_DEPENDENCY_MAP.get(marker_token):
                 LOGGER.debug(f"'{marker_token}' has dependencies")
                 dependencies.append(marker_depedencies)
     return dependencies
@@ -1063,7 +1061,7 @@ def service(
     """
     Startup a service, by referencing its name directly or by looking up a pytest marker.
 
-    If a marker is specified, the services listed in `MARKER_DEPENDENDENCY_MAP` will be used.
+    If a marker is specified, the services listed in `MARKER_DEPENDENCY_MAP` will be used.
 
     Note:
         The main reason this is a separate task is to make it easy to start services

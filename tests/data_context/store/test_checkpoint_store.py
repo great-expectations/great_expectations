@@ -285,7 +285,6 @@ store_backend:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_ge_cloud_response_json_to_object_dict() -> None:
     store = CheckpointStore(store_name="checkpoint_store")
@@ -380,7 +379,6 @@ def test_list_checkpoints(
     assert checkpoints == ["a.b.c", "d.e.f"]
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_list_checkpoints_cloud_mode(
     checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
@@ -409,7 +407,6 @@ def test_delete_checkpoint(
 
 
 @pytest.mark.cloud
-@pytest.mark.unit
 def test_delete_checkpoint_with_cloud_id(
     checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
 ) -> None:

@@ -13,6 +13,7 @@ from great_expectations.agent.actions.data_assistants import (
 from great_expectations.agent.actions.draft_datasource_config_action import (
     DraftDatasourceConfigAction,
 )
+from great_expectations.agent.actions.run_checkpoint import RunCheckpointAction
 from great_expectations.agent.models import (
     DraftDatasourceConfigEvent,
     Event,
@@ -63,7 +64,7 @@ class EventHandler:
             return ListTableNamesAction(context=self._context)
 
         if isinstance(event, RunCheckpointEvent):
-            raise NotImplementedError
+            return RunCheckpointAction(context=self._context)
 
         if isinstance(event, RunColumnDescriptiveMetricsEvent):
             metric_retrievers: list[MetricRetriever] = [
