@@ -18,13 +18,14 @@ from great_expectations.expectations.expectation import (
 
 pg_table: Final[str] = "checkpoints"
 snowflake_table: Final[str] = "nyc_tlc__yellow__bronze"
+trino_table: Final[str] = "customer"
 
 
 TABLE_NAME_MAPPING: Final[
     dict[
         type[SQLDatasource],
         dict[
-            Literal["unquoted_lower", "quoted_lower", "unqouted_upper", "qouted_upper"],
+            Literal["unquoted_lower", "quoted_lower", "unquoted_upper", "quoted_upper"],
             str,
         ],
     ]
@@ -32,14 +33,20 @@ TABLE_NAME_MAPPING: Final[
     PostgresDatasource: {
         "unquoted_lower": pg_table.lower(),
         "quoted_lower": f"'{pg_table.lower()}'",
-        "unqouted_upper": pg_table.upper(),
-        "qouted_upper": f"'{pg_table.upper()}'",
+        "unquoted_upper": pg_table.upper(),
+        "quoted_upper": f"'{pg_table.upper()}'",
     },
     SnowflakeDatasource: {
         "unquoted_lower": snowflake_table.lower(),
         "quoted_lower": f"'{snowflake_table.lower()}'",
-        "unqouted_upper": snowflake_table.upper(),
-        "qouted_upper": f"'{snowflake_table.upper()}'",
+        "unquoted_upper": snowflake_table.upper(),
+        "quoted_upper": f"'{snowflake_table.upper()}'",
+    },
+    SQLDatasource: {  # There is no TrinoDatasource
+        "unquoted_lower": trino_table.lower(),
+        "quoted_lower": f"'{trino_table.lower()}'",
+        "unquoted_upper": trino_table.upper(),
+        "quoted_upper": f"'{trino_table.upper()}'",
     },
 }
 
@@ -64,13 +71,21 @@ def context() -> EphemeralDataContext:
         ),
         p(
             {
+                "name": "my_trino",
+                "type": "sql",
+                "connection_string": "trino://user:@localhost:8088/tpch/sf1",
+            },
+            id="trino",
+        ),
+        p(
+            {
                 "name": "my_snowflake",
                 "type": "snowflake",
                 # set env vars or replace with actual values
                 "connection_string": r"snowflake://${SF_USERNAME}:${SF_PW}"
                 r"@${SF_ACCNT}/${SF_DB}/${SF_DB}?warehouse=${SF_WAREHOUSE}>&role=${SF_ROLE}",
             },
-            # marks=[pytest.mark.xfail(reason="snowflake fix not implemented")],
+            marks=[pytest.mark.xfail(reason="snowflake fix not implemented")],
             id="snowflake",
         ),
     ],
@@ -100,7 +115,7 @@ def ds_w_assets(datasources: SQLDatasource) -> Generator[SQLDatasource, None, No
         p("unquoted_lower"),
         p("quoted_lower"),
         p(
-            "unqouted_upper",
+            "unquoted_upper",
             marks=[
                 pytest.mark.xfail(
                     reason="pg table names should be lowercase. Why doesn't sqla fix the casing?"
@@ -108,7 +123,7 @@ def ds_w_assets(datasources: SQLDatasource) -> Generator[SQLDatasource, None, No
             ],
         ),
         p(
-            "qouted_upper",
+            "quoted_upper",
             marks=[pytest.mark.xfail(reason="pg table names should be lowercase")],
         ),
     ],
@@ -118,7 +133,7 @@ class TestIndentifiers:
         self,
         datasources: SQLDatasource,
         asset_name: Literal[
-            "unquoted_lower", "quoted_lower", "unqouted_upper", "qouted_upper"
+            "unquoted_lower", "quoted_lower", "unquoted_upper", "quoted_upper"
         ],
     ):
         print(datasources)
@@ -134,7 +149,7 @@ class TestIndentifiers:
         context: EphemeralDataContext,
         datasources: SQLDatasource,
         asset_name: Literal[
-            "unquoted_lower", "quoted_lower", "unqouted_upper", "qouted_upper"
+            "unquoted_lower", "quoted_lower", "unquoted_upper", "quoted_upper"
         ],
     ):
         asset = datasources.add_table_asset(
