@@ -467,6 +467,10 @@ Run the following Python code to read the data in individual files directly into
 
 <InfoUsingPandasToConnectToDifferentFileTypes this_example_file_extension="csv"/>
 
+### Create Data Source (Optional)
+
+
+
 ### Next steps
 
 <AfterCreateValidator />
