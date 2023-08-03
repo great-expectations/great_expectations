@@ -345,11 +345,9 @@ jobs:
           GE_USAGE_STATISTICS_URL: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
         # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
         run: pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
-
-
   build-n-publish:
     # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
-    if: github.event.push != null || github.event.schedule != null
+    #if: github.event.push != null || github.event.schedule != null
     name: Build and publish Python distributions to PyPI
     runs-on: ubuntu-latest
     environment:
