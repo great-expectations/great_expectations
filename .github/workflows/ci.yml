@@ -6,6 +6,9 @@ on:
     # https://crontab.guru/every-3-hours
     - cron: "0 */3 * * *"
   workflow_dispatch:  # allows manual triggering with branch picker
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   ci-does-not-run-on-draft-pull-requests:
