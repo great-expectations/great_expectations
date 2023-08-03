@@ -345,3 +345,39 @@ jobs:
           GE_USAGE_STATISTICS_URL: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
         # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
         run: pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+
+
+  build-n-publish:
+    # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+    if: github.event.push != null || github.event.schedule != null
+    name: Build and publish Python distributions to PyPI
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/great-expectations
+    permissions:
+      # needed
+      id-token: write
+
+    steps:
+    - uses: actions/checkout@master
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.8'
+    - name: Update pip
+      run: python -m pip install --upgrade pip
+    - name: Install Twine and Wheel, and prepare packaging
+      run: |
+        pip install twine wheel
+        git config --global user.email "team@greatexpectations.io"
+        git config --global user.name "Great Expectations"
+    - name: Build distribution
+      run: |
+        python setup.py sdist
+        python setup.py bdist_wheel
+    - name: Publish distribution to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{secrets.TEST_PYPI_API_TOKEN}}
+        repository-url: https://test.pypi.org/legacy/

@@ -9,9 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: testpypi
-      url: https://pypi.org/p/<your-pypi-project-name>
+      url: https://test.pypi.org/p/great-expectations
     permissions:
-      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+      # needed
+      id-token: write
 
     steps:
     - uses: actions/checkout@master
