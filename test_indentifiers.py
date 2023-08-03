@@ -70,7 +70,7 @@ def context() -> EphemeralDataContext:
                 "connection_string": r"snowflake://${SF_USERNAME}:${SF_PW}"
                 r"@${SF_ACCNT}/${SF_DB}/${SF_DB}?warehouse=${SF_WAREHOUSE}>&role=${SF_ROLE}",
             },
-            marks=[pytest.mark.xfail(reason="snowflake fix not implemented")],
+            # marks=[pytest.mark.xfail(reason="snowflake fix not implemented")],
             id="snowflake",
         ),
     ],
@@ -95,38 +95,37 @@ def ds_w_assets(datasources: SQLDatasource) -> Generator[SQLDatasource, None, No
 
 
 @pytest.mark.parametrize(
-    ["asset_config"],
+    ["asset_name"],
     [
+        p("unquoted_lower"),
+        p("quoted_lower"),
         p(
-            {"name": "unquoted_lower", "table_name": "checkpoints"},
-            id="unquoted_lower",
-        ),
-        p(
-            {"name": "quoted_lower", "table_name": "'checkpoints'"},
-            id="quoted_lower",
-        ),
-        p(
-            {"name": "unqouted_upper", "table_name": "CHECKPOINTS"},
+            "unqouted_upper",
             marks=[
                 pytest.mark.xfail(
                     reason="pg table names should be lowercase. Why doesn't sqla fix the casing?"
                 )
             ],
-            id="unqouted_upper",
         ),
         p(
-            {"name": "qouted_upper", "table_name": "'CHECKPOINTS'"},
+            "qouted_upper",
             marks=[pytest.mark.xfail(reason="pg table names should be lowercase")],
-            id="qouted_upper",
         ),
     ],
 )
 class TestIndentifiers:
-    def test_add_table_asset(self, datasources: SQLDatasource, asset_config: dict):
+    def test_add_table_asset(
+        self,
+        datasources: SQLDatasource,
+        asset_name: Literal[
+            "unquoted_lower", "quoted_lower", "unqouted_upper", "qouted_upper"
+        ],
+    ):
         print(datasources)
-        print(asset_config)
 
-        asset = datasources.add_table_asset(**asset_config)
+        asset = datasources.add_table_asset(
+            asset_name, table_name=TABLE_NAME_MAPPING[type(datasources)][asset_name]
+        )
         print(asset)
 
     # TODO: parametrize with different expectations types
@@ -134,9 +133,13 @@ class TestIndentifiers:
         self,
         context: EphemeralDataContext,
         datasources: SQLDatasource,
-        asset_config: dict,
+        asset_name: Literal[
+            "unquoted_lower", "quoted_lower", "unqouted_upper", "qouted_upper"
+        ],
     ):
-        asset = datasources.add_table_asset(**asset_config)
+        asset = datasources.add_table_asset(
+            asset_name, table_name=TABLE_NAME_MAPPING[type(datasources)][asset_name]
+        )
         suite = context.add_expectation_suite(
             expectation_suite_name=f"{datasources.name}-{asset.name}"
         )
@@ -150,7 +153,7 @@ class TestIndentifiers:
             )
         )
 
-        checkpoint_name = f"{datasources.name}-{asset_config['name']}"
+        checkpoint_name = f"{datasources.name}-{asset.name}"
         print(f"WTF: {asset.name}")
 
         checkpoint_config = {
