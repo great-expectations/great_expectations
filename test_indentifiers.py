@@ -1,8 +1,14 @@
+from __future__ import annotations
+
 from typing import Generator
 import pytest
 
 from pytest import param as p
-from great_expectations.datasource.fluent import SQLDatasource
+from great_expectations.datasource.fluent import (
+    SQLDatasource,
+    PostgresDatasource,
+    SnowflakeDatasource,
+)
 from great_expectations import get_context
 from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
@@ -41,7 +47,9 @@ def context() -> EphemeralDataContext:
         ),
     ],
 )
-def datasources(context, request) -> Generator[SQLDatasource, None, None]:
+def datasources(
+    context: EphemeralDataContext, request: pytest.FixtureRequest
+) -> Generator[SQLDatasource, None, None]:
     ds_type = request.param["type"]
     factory_method = getattr(context.sources, f"add_{ds_type}")
     ds = factory_method(**request.param)
@@ -125,5 +133,65 @@ class TestIndentifiers:
         assert result.success is True
 
 
+@pytest.fixture
+def ds_w_assets(datasources: SQLDatasource) -> Generator[SQLDatasource, None, None]:
+    table_names_mapping: dict[type[SQLDatasource], tuple[str, str]] = {
+        PostgresDatasource: ("checkpoints", "'checkpoints'"),
+        SnowflakeDatasource: ("nyc_tlc__yellow__bronze", "'nyc_tlc__yellow__bronze'"),
+    }
+
+    for n, table_name in enumerate(table_names_mapping[type(datasources)], start=1):
+        datasources.add_table_asset(
+            name=f"my_asset_{n}",
+            table_name=table_name,
+        )
+
+    yield datasources
+
+
+def test_does_it_work(context: EphemeralDataContext, ds_w_assets: SQLDatasource):
+    asset = ds_w_assets.get_asset("my_asset_1")
+
+    suite = context.add_expectation_suite(
+        expectation_suite_name=f"{ds_w_assets.name}-{asset.name}"
+    )
+    suite.add_expectation(
+        expectation_configuration=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_not_be_null",
+            kwargs={
+                "column": "val",
+                "mostly": 1,
+            },
+        )
+    )
+
+    checkpoint_name = f"{ds_w_assets.name}-{asset.name}"
+    print(f"WTF: {asset.name}")
+
+    checkpoint_config = {
+        "name": checkpoint_name,
+        "validations": [
+            {
+                "expectation_suite_name": suite.expectation_suite_name,
+                "expectation_suite_ge_cloud_id": suite.ge_cloud_id,
+                "batch_request": {
+                    "datasource_name": ds_w_assets.name,
+                    "data_asset_name": asset.name,
+                },
+            }
+        ],
+    }
+    checkpoint = context.add_checkpoint(**checkpoint_config)
+    result = checkpoint.run()
+    assert result.success is True
+
+
 if __name__ == "__main__":
-    pytest.main([__file__, "-vv", "-rxpEf"])
+    pytest.main(
+        [
+            __file__,
+            "-vv",
+            "-rxpEf",
+            # "--sw",
+        ]
+    )
