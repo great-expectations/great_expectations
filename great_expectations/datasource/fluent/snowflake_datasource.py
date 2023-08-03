@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, List, Literal, Optional, Type, Union
+from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Union
 
 import pydantic
 from pydantic import AnyUrl, errors
@@ -10,23 +10,14 @@ from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import (
-    QueryAsset as SqlQueryAsset,
-)
-from great_expectations.datasource.fluent.sql_datasource import (
     SQLDatasource,
     SQLDatasourceError,
-)
-from great_expectations.datasource.fluent.sql_datasource import (
-    TableAsset as SqlTableAsset,
 )
 
 if TYPE_CHECKING:
     from pydantic.networks import Parts
 
     from great_expectations.compatibility import sqlalchemy
-    from great_expectations.datasource.fluent.interfaces import (
-        DataAsset,
-    )
 
 
 class _UrlPasswordError(pydantic.UrlError):
@@ -72,14 +63,6 @@ class SnowflakeDsn(AnyUrl):
         return AnyUrl.validate_parts(parts=parts, validate_port=validate_port)
 
 
-class SnowflakeTableAsset(SqlTableAsset):
-    type: Literal["table"] = "table"
-
-    @pydantic.validator("table_name")
-    def _resolve_quoted_name(cls, table_name: str) -> str:
-        return table_name
-
-
 @public_api
 class SnowflakeDatasource(SQLDatasource):
     """Adds a Snowflake datasource to the data context.
@@ -91,9 +74,6 @@ class SnowflakeDatasource(SQLDatasource):
         assets: An optional dictionary whose keys are TableAsset or QueryAsset names and whose values
             are TableAsset or QueryAsset objects.
     """
-
-    # class var definitions
-    asset_types: ClassVar[List[Type[DataAsset]]] = [SnowflakeTableAsset, SqlQueryAsset]
 
     type: Literal["snowflake"] = "snowflake"  # type: ignore[assignment]
     connection_string: Optional[Union[ConfigStr, SnowflakeDsn]] = None  # type: ignore[assignment] # Deviation from parent class as individual args are supported for connection
@@ -119,10 +99,6 @@ class SnowflakeDatasource(SQLDatasource):
         "numpy",
         "warehouse",
     }
-
-    # These are instance var because ClassVars can't contain Type variables. See
-    # https://peps.python.org/pep-0526/#class-and-instance-variable-annotations
-    _TableAsset: Type[SqlTableAsset] = pydantic.PrivateAttr(SnowflakeTableAsset)
 
     @pydantic.root_validator
     def _check_xor_input_args(cls, values: dict) -> dict:
