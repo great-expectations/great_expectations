@@ -6,6 +6,7 @@ on:
     # https://crontab.guru/every-3-hours
     - cron: "0 */3 * * *"
   workflow_dispatch:  # allows manual triggering with branch picker
+  # pushing tags
   push:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+'
@@ -377,7 +378,7 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CI_WEBHOOK_URL }}
   build-n-publish:
-    #needs: [doc-checks, static-analysis, docs-snippets, unit-tests, cloud-tests, marker-tests, py38-min-versions, py39-min-versions, py310-min-versions, import_gx, usage_stats_integration]
+    needs: [doc-checks, static-analysis, docs-snippets, unit-tests, cloud-tests, marker-tests, py38-min-versions, py39-min-versions, py310-min-versions, import_gx, usage_stats_integration]
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     name: Build and publish Python distributions to PyPI
     runs-on: ubuntu-latest
