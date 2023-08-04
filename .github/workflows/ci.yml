@@ -302,6 +302,25 @@ jobs:
       - name: Run the tests
         run: invoke tests --unit
 
+  py311-min-versions:
+    needs: [unit-tests, static-analysis]
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            reqs/requirements-dev-test.txt
+      - name: Install dependencies
+        run: pip install . -c ci/constraints-test/py311-min-install.txt -r reqs/requirements-dev-test.txt
+      - name: Run the tests
+        run: invoke tests --unit
+
   import_gx:
     needs: [static-analysis]
     if: github.event.pull_request.draft == false
