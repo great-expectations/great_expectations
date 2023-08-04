@@ -19,14 +19,14 @@ on:
 
 jobs:
   ci-does-not-run-on-draft-pull-requests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     if: github.event.pull_request.draft == true
     steps:
       - run: echo "CI jobs won't run because this is a draft pull request."
 
   doc-checks:
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -51,7 +51,7 @@ jobs:
         run: invoke public-api
 
   static-analysis:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -80,7 +80,7 @@ jobs:
     name: docs-snippets
     if: github.event.pull_request.draft == false
     #add more scope here
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     env:
       # google
       GE_TEST_GCP_CREDENTIALS: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
@@ -154,7 +154,7 @@ jobs:
   unit-tests:
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-18.04]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     runs-on: ${{ matrix.os }}
@@ -179,7 +179,7 @@ jobs:
 
   cloud-tests:
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -212,7 +212,7 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
       AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     strategy:
       matrix:
         markers:
@@ -258,7 +258,7 @@ jobs:
   py38-min-versions:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -277,7 +277,7 @@ jobs:
   py39-min-versions:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -296,7 +296,7 @@ jobs:
   py310-min-versions:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -315,7 +315,7 @@ jobs:
   import_gx:
     needs: [static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
@@ -339,7 +339,7 @@ jobs:
   usage_stats_integration:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -373,7 +373,7 @@ jobs:
     ]
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     name: Build and publish Python distributions to PyPI
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     environment:
       name: pypi
       url: https://pypi.org/p/great-expectations
@@ -417,7 +417,7 @@ jobs:
       build-n-publish
     ]
     if: always() && !cancelled() && contains(needs.*.result, 'failure') && github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: Scheduled CI job failure
         id: slack
@@ -433,7 +433,7 @@ jobs:
 
   notify_on_release:
     needs: [build-n-publish]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: Announce Release
         id: slack
