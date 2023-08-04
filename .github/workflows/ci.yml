@@ -39,6 +39,7 @@ jobs:
         run: python ci/checks/check_only_name_tag_snippets.py
       - name: public_api_report
         run: invoke public-api
+
   static-analysis:
     runs-on: ubuntu-latest
     steps:
@@ -219,9 +220,9 @@ jobs:
           # TODO: would like to adopt `actionlint` pre-commit hook
           # but false positive here and inability to do an inline ignore
           # prevents this https://github.com/rhysd/actionlint/issues/237
-          - python-version: ${{ github.event_name != 'schedule' && '3.9' }}
-          - python-version: ${{ github.event_name != 'schedule' && '3.10' }}
-          - python-version: ${{ github.event_name != 'schedule' && '3.11' }}
+          - python-version: ${{ github.event_name == 'pull_request' && '3.9' }}
+          - python-version: ${{ github.event_name == 'pull_request' && '3.10' }}
+          - python-version: ${{ github.event_name == 'pull_request' && '3.11' }}
 
     steps:
       - name: Checkout
@@ -309,8 +310,8 @@ jobs:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
         exclude:
-          - python-version: ${{ github.event_name != 'schedule' && '3.9' }}
-          - python-version: ${{ github.event_name != 'schedule' && '3.10' }}
+          - python-version: ${{ github.event_name == 'pull_request' && '3.9' }}
+          - python-version: ${{ github.event_name == 'pull_request' && '3.10' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -345,3 +346,31 @@ jobs:
           GE_USAGE_STATISTICS_URL: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
         # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
         run: pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+
+  notify_on_failure:
+    needs: [
+      doc-checks,
+      static-analysis,
+      docs-snippets,
+      unit-tests,
+      cloud-tests,
+      marker-tests,
+      py38-min-versions,
+      py39-min-versions,
+      py310-min-versions,
+      import_gx,
+      usage_stats_integration
+    ]
+    if: always() && !cancelled() && contains(needs.*.result, 'failure') && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scheduled CI job failure
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CI_WEBHOOK_URL }}
