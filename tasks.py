@@ -388,6 +388,7 @@ def tests(  # noqa: PLR0913
     package: str | None = None,
     full_cov: bool = False,
     verbose: bool = False,
+    xdist: bool = False,
 ):
     """
     Run tests. Runs unit tests by default.
@@ -432,6 +433,8 @@ def tests(  # noqa: PLR0913
         cmds += ["--cov-report", "html"]
     if package:
         cmds += [f"tests/{package.replace('.', '/')}"]  # allow `foo.bar`` format
+    if xdist:
+        cmds += ["-n", "auto"]
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 

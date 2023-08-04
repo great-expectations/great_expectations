@@ -261,7 +261,7 @@ jobs:
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py38-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
-        run: invoke tests --unit
+        run: invoke tests --unit --xdist
 
   py39-min-versions:
     needs: [unit-tests, static-analysis]
@@ -279,7 +279,7 @@ jobs:
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py39-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
-        run: invoke tests --unit
+        run: invoke tests --unit --xdist
 
   py310-min-versions:
     needs: [unit-tests, static-analysis]
@@ -297,7 +297,7 @@ jobs:
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py310-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
-        run: invoke tests --unit
+        run: invoke tests --unit --xdist
 
   py311-min-versions:
     needs: [unit-tests, static-analysis]
@@ -315,7 +315,7 @@ jobs:
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py311-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
-        run: invoke tests --unit
+        run: invoke tests --unit --xdist
 
   import_gx:
     needs: [static-analysis]
