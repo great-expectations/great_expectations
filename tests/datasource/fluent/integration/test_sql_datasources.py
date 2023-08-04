@@ -132,7 +132,9 @@ class TestTableIdentifiers:
                 }
             ],
         }
-        checkpoint = context.add_checkpoint(**checkpoint_config)  # type: ignore[overload]
+        checkpoint = context.add_checkpoint(  # type: ignore[call-overload]
+            **checkpoint_config,
+        )
         result = checkpoint.run()
 
         print(f"result:\n{pf(result)}")
