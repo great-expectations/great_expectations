@@ -153,8 +153,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 # This is not a metric or renderer.
                 continue
 
-            if hasattr(attr_obj, "metric_engine"):
-                engine = getattr(attr_obj, "metric_engine")
+            if engine := getattr(attr_obj, "metric_engine", None):
                 if not issubclass(engine, ExecutionEngine):
                     raise ValueError(
                         "metric functions must be defined with an Execution Engine"
