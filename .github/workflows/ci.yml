@@ -329,9 +329,7 @@ jobs:
       unit-tests,
       cloud-tests,
       marker-tests,
-      py38-min-versions,
-      py39-min-versions,
-      py310-min-versions,
+      min-versions,
       import_gx,
       usage_stats_integration
     ]
