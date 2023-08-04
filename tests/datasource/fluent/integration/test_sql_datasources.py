@@ -7,6 +7,7 @@ import pytest
 from pytest import param
 
 from great_expectations import get_context
+from great_expectations.compatibility.sqlalchemy import inspect
 from great_expectations.data_context import EphemeralDataContext
 from great_expectations.datasource.fluent import (
     PostgresDatasource,
@@ -78,12 +79,18 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
 class TestTableIdentifiers:
     @pytest.mark.trino
     def test_trino(self, trino_ds: SQLDatasource, asset_name: str):
+        table_names: list[str] = inspect(trino_ds.get_engine()).get_table_names()  # type: ignore[attr-defined]
+        print(f"trino tables:\n{pf(table_names)}))")
+
         trino_ds.add_table_asset(
             asset_name, table_name=TABLE_NAME_MAPPING["trino"][asset_name]
         )
 
     @pytest.mark.postgresql
     def test_postgres(self, postgres_ds: PostgresDatasource, asset_name: str):
+        table_names: list[str] = inspect(postgres_ds.get_engine()).get_table_names()  # type: ignore[attr-defined]
+        print(f"postgres tables:\n{pf(table_names)}))")
+
         postgres_ds.add_table_asset(
             asset_name, table_name=TABLE_NAME_MAPPING["postgres"][asset_name]
         )
