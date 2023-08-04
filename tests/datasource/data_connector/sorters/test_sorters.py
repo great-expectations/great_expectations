@@ -12,6 +12,9 @@ from great_expectations.datasource.data_connector.sorter import (
     Sorter,
 )
 
+# module level markers
+pytestmark = pytest.mark.unit
+
 
 def test_sorter_instantiation_base():
     # base
@@ -25,7 +28,6 @@ def test_sorter_instantiation_base():
         my_sorter = Sorter(name="base", orderby="fake")
 
 
-@pytest.mark.unit
 def test_sorter_instantiation_lexicographic():
     # Lexicographic
     my_lex = LexicographicSorter(name="lex", orderby="desc")
@@ -34,7 +36,6 @@ def test_sorter_instantiation_lexicographic():
     assert my_lex.reverse is True
 
 
-@pytest.mark.unit
 def test_sorter_instantiation_datetime():
     sorter_params: dict = {
         "datetime_format": "%Y%m%d",
@@ -47,7 +48,6 @@ def test_sorter_instantiation_datetime():
     assert my_dt._datetime_format == "%Y%m%d"
 
 
-@pytest.mark.unit
 def test_sorter_instantiation_numeric():
     # NumericSorter
     my_num = NumericSorter(name="num", orderby="asc")
@@ -56,7 +56,6 @@ def test_sorter_instantiation_numeric():
     assert my_num.reverse is False
 
 
-@pytest.mark.unit
 def test_sorter_instantiation_dictionary():
     # DictionarySorter
     my_dict = DictionarySorter(

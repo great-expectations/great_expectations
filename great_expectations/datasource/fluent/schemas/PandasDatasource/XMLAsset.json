@@ -55,7 +55,10 @@
         },
         "namespaces": {
             "title": "Namespaces",
-            "type": "object"
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            }
         },
         "elems_only": {
             "title": "Elems Only",
@@ -74,20 +77,29 @@
                 "type": "string"
             }
         },
+        "dtype": {
+            "title": "Dtype",
+            "type": "object"
+        },
         "encoding": {
             "title": "Encoding",
             "default": "utf-8",
-            "type": "string"
-        },
-        "parser": {
-            "title": "Parser",
-            "default": "lxml",
             "type": "string"
         },
         "stylesheet": {
             "title": "Stylesheet",
             "format": "file-path",
             "type": "string"
+        },
+        "iterparse": {
+            "title": "Iterparse",
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
         },
         "compression": {
             "title": "Compression",

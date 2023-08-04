@@ -1,5 +1,5 @@
 ---
-title: How to create a Custom Batch Expectation
+title: Create a Custom Batch Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
@@ -13,13 +13,9 @@ This guide will walk you through the process of creating your own custom `BatchE
 
 <Prerequisites>
 
-- Completion of the [overview for creating Custom Expectations](./overview.md).
-
 </Prerequisites>
 
-## Steps
-
-### 1. Choose a name for your Expectation
+## Choose a name for your Expectation
 
 First, decide on a name for your own Expectation. By convention, `BatchExpectations` always start with `expect_table_`. 
 For more on Expectation naming conventions, see the [Expectations section](../../../contributing/style_guides/code_style.md#expectations) of the Code Style Guide.
@@ -29,7 +25,7 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 - `ExpectBatchColumnsToBeUnique`
 - `expect_batch_columns_to_be_unique`
 
-### 2. Copy and rename the template file
+## Copy and rename the template file
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
@@ -61,7 +57,7 @@ cp batch_expectation_template.py /SOME_DIRECTORY/expect_batch_columns_to_be_uniq
   </div>
 </details>
 
-### 3. Generate a diagnostic checklist for your Expectation
+## Generate a diagnostic checklist for your Expectation
 
 Once you've copied and renamed the template file, you can execute it as follows.
 
@@ -75,7 +71,7 @@ This guide will walk you through the first five steps, the minimum for a functio
 ```
 Completeness checklist for ExpectColumnAggregateToMatchSomeCriteria:
   ✔ Has a valid library_metadata object
-    Has a docstring, including a one-line short description
+    Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
     Passes all linting checks
@@ -84,7 +80,7 @@ Completeness checklist for ExpectColumnAggregateToMatchSomeCriteria:
 
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it. This guide covers the first five steps on the checklist.
 
-### 4. Change the Expectation class name and add a docstring
+## Change the Expectation class name and add a docstring
 
 By convention, your <TechnicalTag tag="metric" text="Metric"/> class is defined first in a Custom Expectation. For now, we're going to skip to the Expectation class and begin laying the groundwork for the functionality of your Custom Expectation.
 
@@ -106,7 +102,7 @@ with something like:
 ```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py docstring"
 ```
 
-You'll also need to change the class name at the bottom of the file, by replacing this line:
+Make sure your one-line docstring begins with "Expect " and ends with a period. You'll also need to change the class name at the bottom of the file, by replacing this line:
 ```python name="tests/integration/docusaurus/expectations/examples/batch_expectation_template.py diagnostics"
 ```
 
@@ -114,7 +110,7 @@ with this one:
 ```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py diagnostics"
 ```
 
-Later, you can go back and write a more thorough docstring.
+Later, you can go back and write a more thorough docstring. See [Expectation Docstring Formatting](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/3-expectation-docstring-formatting.md).
 
 At this point you can re-run your diagnostic checklist. You should see something like this:
 ```
@@ -122,7 +118,7 @@ $ python expect_batch_columns_to_be_unique.py
 
 Completeness checklist for ExpectBatchColumnsToBeUnique:
   ✔ Has a valid library_metadata object
-  ✔ Has a docstring, including a one-line short description
+  ✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
     Passes all linting checks
@@ -131,7 +127,7 @@ Completeness checklist for ExpectBatchColumnsToBeUnique:
 
 Congratulations! You're one step closer to implementing a Custom Expectation.
 
-### 5. Add example cases
+## Add example cases
 
 Next, we're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve a dual purpose:
 
@@ -152,11 +148,9 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"strict": True}` in the example above is equivalent to `expect_batch_columns_to_be_unique(strict=True)`
 	* `out` is based on the Validation Result returned when executing the Expectation.
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
-
-<details>
-<summary><code>test_backends</code>?</summary>
-<code>test_backends</code> is an optional key you can pass to offer more granular control over which backends and SQL dialects your tests are run against.
-</details>
+* `only_for` (optional): the list of backends that the Expectation should use for testing
+* `suppress_test_for` (optional): the list of backends that the Expectation should not use for testing
+* `only_for` and `suppres_test_for` can be specified at the top-level (next to `data` and `tests`) or within specific tests (next to `title`, and so on)
 
 If you run your Expectation file again, you won't see any new checkmarks, as the logic for your Custom Expectation hasn't been implemented yet. 
 However, you should see that the tests you've written are now being caught and reported in your checklist:
@@ -166,7 +160,7 @@ $ python expect_batch_columns_to_be_unique.py
 
 Completeness checklist for ExpectBatchColumnsToBeUnique:
   ✔ Has a valid library_metadata object
-  ✔ Has a docstring, including a one-line short description
+  ✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
 ...
 	Has core logic that passes tests for all applicable Execution Engines and SQL dialects
 		  Only 0 / 2 tests for pandas are passing
@@ -179,7 +173,7 @@ For more information on tests and example cases, <br/>
 see our guide on [creating example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
 :::
 
-### 6. Implement your Metric and connect it to your Expectation
+## Implement your Metric and connect it to your Expectation
 
 This is the stage where you implement the actual business logic for your Expectation. 
 To do so, you'll need to implement a function within a <TechnicalTag tag="metric" text="Metric"/> class, and link it to your Expectation.
@@ -254,7 +248,7 @@ with
 ```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py BatchColumnsUnique class_def"
 ```
 
-### 7. Validate
+## Validate
 
 In this step, we simply need to validate that the results of our Metrics meet our Expectation.
 
@@ -278,14 +272,14 @@ $ python expect_batch_columns_to_be_unique.py
 
 Completeness checklist for ExpectBatchColumnsToBeUnique:
   ✔ Has a valid library_metadata object
-  ✔ Has a docstring, including a one-line short description
+  ✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
   ✔ Has at least one positive and negative example case, and all test cases pass
   ✔ Has core logic and passes tests on at least one Execution Engine
     Passes all linting checks
 ...
 ```
 
-### 8. Linting
+## Linting
 
 Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, and `ruff`.
 
@@ -307,7 +301,7 @@ $ python expect_batch_columns_to_be_unique.py
 
 Completeness checklist for ExpectBatchColumnsToBeUnique:
   ✔ Has a valid library_metadata object
-  ✔ Has a docstring, including a one-line short description
+  ✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
   ✔ Has at least one positive and negative example case, and all test cases pass
   ✔ Has core logic and passes tests on at least one Execution Engine
   ✔ Passes all linting checks
@@ -320,7 +314,8 @@ Congratulations!<br/>&#127881; You've just built your first Custom Expectation! 
 </b></p>
 </div>
 
-### 9. Contribution (Optional)
+## 9. Contribute (Optional)
+
 This guide will leave you with a Custom Expectation sufficient for [contribution](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) to Great Expectations at an Experimental level.
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:

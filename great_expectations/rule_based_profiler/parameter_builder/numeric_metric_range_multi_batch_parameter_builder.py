@@ -122,7 +122,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         "single_batch_mode",
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         metric_name: Optional[str] = None,
@@ -245,7 +245,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
                 "lower_bound": None,
                 "upper_bound": None,
             }
-        else:
+        else:  # noqa: PLR5501
             if not isinstance(truncate_values, str):
                 truncate_values_keys: set = set(truncate_values.keys())
                 if (
@@ -525,7 +525,7 @@ detected.
 
         return ExactNumericRangeEstimator()
 
-    def _estimate_metric_value_range(
+    def _estimate_metric_value_range(  # noqa: PLR0912, PLR0913, PLR0915
         self,
         metric_values: np.ndarray,
         numeric_range_estimator: NumericRangeEstimator,
@@ -648,7 +648,7 @@ detected.
                 max_value = min(np.float64(max_value), np.float64(upper_bound))
 
             # Obtain index of metric element (by discarding "N"-element samples dimension).
-            metric_value_idx = metric_value_idx[1:]
+            metric_value_idx = metric_value_idx[1:]  # noqa: PLW2901
 
             # Compute indices for metric value range min and max estimates.
             metric_value_range_min_idx = metric_value_idx + (
@@ -665,7 +665,7 @@ detected.
             if datetime_detected:
                 metric_value_range[metric_value_range_min_idx] = min_value
                 metric_value_range[metric_value_range_max_idx] = max_value
-            else:
+            else:  # noqa: PLR5501
                 if round_decimals is None:
                     metric_value_range[metric_value_range_min_idx] = np.float64(
                         min_value

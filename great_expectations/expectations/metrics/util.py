@@ -2,15 +2,14 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, Dict, List, Optional, Tuple, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple, overload
 
 import numpy as np
-import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility import aws, sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -37,11 +36,6 @@ except ImportError:
     snowflake = None
 
 
-try:
-    import sqlalchemy_redshift
-except ImportError:
-    sqlalchemy_redshift = None
-
 logger = logging.getLogger(__name__)
 
 try:
@@ -52,14 +46,17 @@ except ImportError:
     sqlalchemy_dremio = None
 
 try:
-    import trino
+    import clickhouse_sqlalchemy
 except ImportError:
-    trino = None
+    clickhouse_sqlalchemy = None
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 
-from great_expectations.compatibility import sqlalchemy_bigquery as sqla_bigquery
-from great_expectations.compatibility.sqlalchemy_bigquery import bigquery_types_tuple
+from great_expectations.compatibility import bigquery as sqla_bigquery
+from great_expectations.compatibility.bigquery import bigquery_types_tuple
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 try:
     import teradatasqlalchemy.dialect
@@ -69,7 +66,7 @@ except ImportError:
     teradatatypes = None
 
 
-def get_dialect_regex_expression(  # noqa: C901 - 36
+def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     column, regex, dialect, positive=True
 ):
     try:
@@ -86,24 +83,21 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
     except AttributeError:
         pass
 
-    try:
-        # redshift
-        # noinspection PyUnresolvedReferences
-        if hasattr(dialect, "RedshiftDialect") or issubclass(
-            dialect.dialect, sqlalchemy_redshift.dialect.RedshiftDialect
-        ):
-            if positive:
-                return sqlalchemy.BinaryExpression(
-                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("~")
-                )
-            else:
-                return sqlalchemy.BinaryExpression(
-                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("!~")
-                )
-    except (
-        AttributeError,
-        TypeError,
-    ):  # TypeError can occur if the driver was not installed and so is None
+    # redshift
+    # noinspection PyUnresolvedReferences
+    if hasattr(dialect, "RedshiftDialect") or (
+        aws.redshiftdialect
+        and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)
+    ):
+        if positive:
+            return sqlalchemy.BinaryExpression(
+                column, sqlalchemy.literal(regex), sqlalchemy.custom_op("~")
+            )
+        else:
+            return sqlalchemy.BinaryExpression(
+                column, sqlalchemy.literal(regex), sqlalchemy.custom_op("!~")
+            )
+    else:
         pass
 
     try:
@@ -128,15 +122,16 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
             dialect.dialect,
             snowflake.sqlalchemy.snowdialect.SnowflakeDialect,
         ):
-            # if positive:
-            #     return BinaryExpression(column, literal(regex), custom_op("RLIKE"))
-            # else:
-            #     return BinaryExpression(column, literal(regex), custom_op("NOT RLIKE"))
-
-            # While the snowflake docs mention having regex-related functions, they don't
-            # seem to work with the Python driver
-            # https://docs.snowflake.com/en/sql-reference/functions/regexp.html
-            return None
+            if positive:
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("REGEXP")
+                )
+            else:
+                return sqlalchemy.BinaryExpression(
+                    column,
+                    sqlalchemy.literal(regex),
+                    sqlalchemy.custom_op("NOT REGEXP"),
+                )
     except (
         AttributeError,
         TypeError,
@@ -165,8 +160,8 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
     try:
         # Trino
         # noinspection PyUnresolvedReferences
-        if hasattr(dialect, "TrinoDialect") or isinstance(
-            dialect, trino.sqlalchemy.dialect.TrinoDialect
+        if hasattr(dialect, "TrinoDialect") or (
+            trino.trinodialect and isinstance(dialect, trino.trinodialect.TrinoDialect)
         ):
             if positive:
                 return sa.func.regexp_like(column, sqlalchemy.literal(regex))
@@ -178,6 +173,21 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
     ):  # TypeError can occur if the driver was not installed and so is None
         pass
 
+    try:
+        # Clickhouse
+        # noinspection PyUnresolvedReferences
+        if hasattr(dialect, "ClickHouseDialect") or isinstance(
+            dialect, clickhouse_sqlalchemy.drivers.base.ClickHouseDialect
+        ):
+            if positive:
+                return sa.func.regexp_like(column, sqlalchemy.literal(regex))
+            else:
+                return sa.not_(sa.func.regexp_like(column, sqlalchemy.literal(regex)))
+    except (
+        AttributeError,
+        TypeError,
+    ):  # TypeError can occur if the driver was not installed and so is None
+        pass
     try:
         # Dremio
         if hasattr(dialect, "DremioDialect"):
@@ -241,13 +251,14 @@ def _get_dialect_type_module(dialect=None):
             "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
         )
         return sa
-    try:
-        # Redshift does not (yet) export types to top level; only recognize base SA types
-        # noinspection PyUnresolvedReferences
-        if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
-            return dialect.sa
-    except (TypeError, AttributeError):
-        pass
+
+    # Redshift does not (yet) export types to top level; only recognize base SA types
+    # noinspection PyUnresolvedReferences
+    if aws.redshiftdialect and isinstance(
+        dialect,
+        aws.redshiftdialect.RedshiftDialect,
+    ):
+        return dialect.sa
 
     # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
     try:
@@ -280,12 +291,9 @@ def _get_dialect_type_module(dialect=None):
 
 def attempt_allowing_relative_error(dialect):
     # noinspection PyUnresolvedReferences
-    detected_redshift: bool = (
-        sqlalchemy_redshift is not None
-        and check_sql_engine_dialect(
-            actual_sql_engine_dialect=dialect,
-            candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect,
-        )
+    detected_redshift: bool = aws.redshiftdialect and check_sql_engine_dialect(
+        actual_sql_engine_dialect=dialect,
+        candidate_sql_engine_dialect=aws.redshiftdialect.RedshiftDialect,
     )
     # noinspection PyTypeChecker
     detected_psycopg2: bool = (
@@ -366,7 +374,7 @@ def get_sqlalchemy_column_metadata(
         return None
 
 
-def column_reflection_fallback(
+def column_reflection_fallback(  # noqa: PLR0915
     selectable: sqlalchemy.Select,
     dialect: sqlalchemy.Dialect,
     sqlalchemy_engine: sqlalchemy.Engine,
@@ -562,6 +570,11 @@ def column_reflection_fallback(
                 )
                 .alias("column_info")
             )
+
+            # in sqlalchemy > 2.0.0 this is a Subquery, which we need to convert into a Selectable
+            if not col_info_query.supports_execution:
+                col_info_query = sa.select(col_info_query)
+
             col_info_tuples_list = connection.execute(col_info_query).fetchall()
             # type_module = _get_dialect_type_module(dialect=dialect)
             col_info_dict_list = [
@@ -575,7 +588,7 @@ def column_reflection_fallback(
             # if a custom query was passed
             if sqlalchemy.TextClause and isinstance(selectable, sqlalchemy.TextClause):
                 query: sqlalchemy.TextClause = selectable
-            else:
+            else:  # noqa: PLR5501
                 # noinspection PyUnresolvedReferences
                 if dialect.name.lower() == GXSqlDialect.REDSHIFT:
                     # Redshift needs temp tables to be declared as text
@@ -594,10 +607,58 @@ def column_reflection_fallback(
         return col_info_dict_list
 
 
+def get_dbms_compatible_metric_domain_kwargs(
+    metric_domain_kwargs: dict,
+    batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
+) -> dict:
+    """
+    This method checks "metric_domain_kwargs" and updates values of "Domain" keys based on actual "Batch" columns.  If
+    column name in "Batch" column list is quoted, then corresponding column name in "metric_domain_kwargs" is also quoted.
+
+    Args:
+        metric_domain_kwargs: Original "metric_domain_kwargs" dictionary of attribute key-value pairs.
+        batch_columns_list: Actual "Batch" column list (e.g., output of "table.columns" metric).
+
+    Returns:
+        metric_domain_kwargs: Updated "metric_domain_kwargs" dictionary with quoted column names, where appropriate.
+    """
+    column_names: List[str | sqlalchemy.quoted_name]
+    if "column" in metric_domain_kwargs:
+        column_name: str | sqlalchemy.quoted_name = get_dbms_compatible_column_names(
+            column_names=metric_domain_kwargs["column"],
+            batch_columns_list=batch_columns_list,
+        )
+        metric_domain_kwargs["column"] = column_name
+    elif "column_A" in metric_domain_kwargs and "column_B" in metric_domain_kwargs:
+        column_A_name: str | sqlalchemy.quoted_name = metric_domain_kwargs["column_A"]
+        column_B_name: str | sqlalchemy.quoted_name = metric_domain_kwargs["column_B"]
+        column_names = [
+            column_A_name,
+            column_B_name,
+        ]
+        column_names = get_dbms_compatible_column_names(
+            column_names=column_names,
+            batch_columns_list=batch_columns_list,
+        )
+        (
+            metric_domain_kwargs["column_A"],
+            metric_domain_kwargs["column_B"],
+        ) = column_names
+    elif "column_list" in metric_domain_kwargs:
+        column_names = metric_domain_kwargs["column_list"]
+        column_names = get_dbms_compatible_column_names(
+            column_names=column_names,
+            batch_columns_list=batch_columns_list,
+        )
+        metric_domain_kwargs["column_list"] = column_names
+
+    return metric_domain_kwargs
+
+
 @overload
 def get_dbms_compatible_column_names(
     column_names: str,
-    batch_columns_list: List[str | sqlalchemy.quoted_name],
+    batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
     error_message_template: str = ...,
 ) -> str | sqlalchemy.quoted_name:
     ...
@@ -606,7 +667,7 @@ def get_dbms_compatible_column_names(
 @overload
 def get_dbms_compatible_column_names(
     column_names: List[str],
-    batch_columns_list: List[str | sqlalchemy.quoted_name],
+    batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
     error_message_template: str = ...,
 ) -> List[str | sqlalchemy.quoted_name]:
     ...
@@ -614,7 +675,7 @@ def get_dbms_compatible_column_names(
 
 def get_dbms_compatible_column_names(
     column_names: List[str] | str,
-    batch_columns_list: List[str | sqlalchemy.quoted_name],
+    batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
 ) -> List[str | sqlalchemy.quoted_name] | str | sqlalchemy.quoted_name:
     """
@@ -670,7 +731,7 @@ def verify_column_names_exist(
 
 def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
     column_names: List[str] | str,
-    batch_columns_list: List[str | sqlalchemy.quoted_name],
+    batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
     verify_only: bool = False,
 ) -> List[Tuple[str, str | sqlalchemy.quoted_name]] | None:
@@ -719,7 +780,7 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
             raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=error_message_template.format(column_name=column_name)
             )
-        else:
+        else:  # noqa: PLR5501
             if not verify_only:
                 normalized_batch_columns_mappings.append(normalized_column_name_mapping)
 
@@ -733,7 +794,7 @@ def parse_value_set(value_set):
     return parsed_value_set
 
 
-def get_dialect_like_pattern_expression(  # noqa: C901 - 28
+def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
     column, dialect, like_pattern, positive=True
 ):
     dialect_supported: bool = False
@@ -766,22 +827,30 @@ def get_dialect_like_pattern_expression(  # noqa: C901 - 28
     except (AttributeError, TypeError):
         pass
 
-    try:
-        # noinspection PyUnresolvedReferences
-        if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
-            dialect_supported = True
-    except (AttributeError, TypeError):
+    # noinspection PyUnresolvedReferences
+    if aws.redshiftdialect and isinstance(dialect, aws.redshiftdialect.RedshiftDialect):
+        dialect_supported = True
+    else:
         pass
 
     try:
         # noinspection PyUnresolvedReferences
-        if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect) or hasattr(
-            dialect, "TrinoDialect"
+        if hasattr(dialect, "TrinoDialect") or (
+            trino.trinodialect and isinstance(dialect, trino.trinodialect.TrinoDialect)
         ):
             dialect_supported = True
     except (AttributeError, TypeError):
         pass
 
+    try:
+        # noinspection PyUnresolvedReferences
+        if hasattr(dialect, "ClickhouseDialect") or (
+            trino.trinodrivers
+            and isinstance(dialect, trino.trinodrivers.base.ClickhouseDialect)
+        ):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
     try:
         if hasattr(dialect, "SnowflakeDialect"):
             dialect_supported = True
@@ -812,7 +881,9 @@ def get_dialect_like_pattern_expression(  # noqa: C901 - 28
     return None
 
 
-def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
+def validate_distribution_parameters(  # noqa: C901, PLR0912, PLR0915
+    distribution, params
+):
     """Ensures that necessary parameters for a distribution are present and that all parameters are sensical.
 
        If parameters necessary to construct a distribution are missing or invalid, this function raises ValueError\
@@ -882,32 +953,32 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
         elif distribution == "chi2" and params.get("df", -1) <= 0:
             raise ValueError(f"Invalid parameters: {chi2_msg}:")
 
-    elif isinstance(params, tuple) or isinstance(params, list):
+    elif isinstance(params, tuple) or isinstance(params, list):  # noqa: PLR1701
         scale = None
 
         # `params` is a tuple or a list
         if distribution == "beta":
-            if len(params) < 2:
+            if len(params) < 2:  # noqa: PLR2004
                 raise ValueError(f"Missing required parameters: {beta_msg}")
             if params[0] <= 0 or params[1] <= 0:
                 raise ValueError(f"Invalid parameters: {beta_msg}")
-            if len(params) == 4:
+            if len(params) == 4:  # noqa: PLR2004
                 scale = params[3]
-            elif len(params) > 4:
+            elif len(params) > 4:  # noqa: PLR2004
                 raise ValueError(f"Too many parameters provided: {beta_msg}")
 
         elif distribution == "norm":
-            if len(params) > 2:
+            if len(params) > 2:  # noqa: PLR2004
                 raise ValueError(f"Too many parameters provided: {norm_msg}")
-            if len(params) == 2:
+            if len(params) == 2:  # noqa: PLR2004
                 scale = params[1]
 
         elif distribution == "gamma":
             if len(params) < 1:
                 raise ValueError(f"Missing required parameters: {gamma_msg}")
-            if len(params) == 3:
+            if len(params) == 3:  # noqa: PLR2004
                 scale = params[2]
-            if len(params) > 3:
+            if len(params) > 3:  # noqa: PLR2004
                 raise ValueError(f"Too many parameters provided: {gamma_msg}")
             elif params[0] <= 0:
                 raise ValueError(f"Invalid parameters: {gamma_msg}")
@@ -921,25 +992,25 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
         #        raise ValueError("Invalid parameters: %s" %poisson_msg)
 
         elif distribution == "uniform":
-            if len(params) == 2:
+            if len(params) == 2:  # noqa: PLR2004
                 scale = params[1]
-            if len(params) > 2:
+            if len(params) > 2:  # noqa: PLR2004
                 raise ValueError(f"Too many arguments provided: {uniform_msg}")
 
         elif distribution == "chi2":
             if len(params) < 1:
                 raise ValueError(f"Missing required parameters: {chi2_msg}")
-            elif len(params) == 3:
+            elif len(params) == 3:  # noqa: PLR2004
                 scale = params[2]
-            elif len(params) > 3:
+            elif len(params) > 3:  # noqa: PLR2004
                 raise ValueError(f"Too many arguments provided: {chi2_msg}")
             if params[0] <= 0:
                 raise ValueError(f"Invalid parameters: {chi2_msg}")
 
         elif distribution == "expon":
-            if len(params) == 2:
+            if len(params) == 2:  # noqa: PLR2004
                 scale = params[1]
-            if len(params) > 2:
+            if len(params) > 2:  # noqa: PLR2004
                 raise ValueError(f"Too many arguments provided: {expon_msg}")
 
         if scale is not None and scale <= 0:
@@ -949,8 +1020,6 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
         raise ValueError(
             "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"
         )
-
-    return
 
 
 def _scipy_distribution_positional_args_from_dict(distribution, params):
@@ -1005,7 +1074,7 @@ def is_valid_continuous_partition_object(partition_object):
         return False
 
     if "tail_weights" in partition_object:
-        if len(partition_object["tail_weights"]) != 2:
+        if len(partition_object["tail_weights"]) != 2:  # noqa: PLR2004
             return False
         comb_weights = partition_object["tail_weights"] + partition_object["weights"]
     else:
@@ -1245,7 +1314,7 @@ def compute_unexpected_pandas_indices(
                     index, domain_column_name
                 ]
                 for column_name in unexpected_index_column_names:
-                    column_name = get_dbms_compatible_column_names(
+                    column_name = get_dbms_compatible_column_names(  # noqa: PLW2901
                         column_names=column_name,
                         batch_columns_list=metrics["table.columns"],
                         error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',

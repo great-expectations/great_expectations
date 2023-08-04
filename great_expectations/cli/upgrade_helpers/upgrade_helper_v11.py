@@ -19,7 +19,7 @@ from great_expectations.data_context.store import (
     ValidationsStore,
 )
 from great_expectations.data_context.store.store_backend import (
-    StoreBackend,  # noqa: TCH001
+    StoreBackend,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
@@ -283,7 +283,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                     exception_message=exception_message,
                 )
 
-    def _update_upgrade_log(
+    def _update_upgrade_log(  # noqa: PLR0913
         self,
         store_backend: Type[StoreBackend],
         source_key: Optional[tuple] = None,
@@ -327,7 +327,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 self.upgrade_log["upgraded_validations_stores"][store_name][
                     "validations_updated"
                 ].append(log_dict)
-        else:
+        else:  # noqa: PLR5501
             if exception_message:
                 self.upgrade_log["upgraded_docs_site_validations_stores"][site_name][
                     "exceptions"
@@ -366,8 +366,8 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 store_backend.full_base_directory,
                 store_backend._convert_key_to_filepath(source_key),
             )
-            path_mod_timestamp = os.path.getmtime(source_path)
-            path_mod_iso_str = datetime.datetime.fromtimestamp(
+            path_mod_timestamp = os.path.getmtime(source_path)  # noqa: PTH204
+            path_mod_iso_str = datetime.datetime.fromtimestamp(  # noqa: DTZ006
                 path_mod_timestamp
             ).strftime("%Y%m%dT%H%M%S.%fZ")
             self.validation_run_times[run_name] = path_mod_iso_str
@@ -375,9 +375,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
     def _get_tuple_s3_store_backend_run_time(
         self, source_key: tuple, store_backend: Type[StoreBackend]
     ) -> None:
-        import boto3
+        from great_expectations.compatibility import aws
 
-        s3 = boto3.resource("s3")
+        s3 = aws.boto3.resource("s3")
         run_name = source_key[-2]
 
         try:
@@ -658,7 +658,7 @@ A log detailing the upgrade can be found here:
     - {upgrade_log_path}\
 </green>\
 """
-        else:
+        else:  # noqa: PLR5501
             if exceptions:
                 exception_occurred = True
                 upgrade_report += f"""

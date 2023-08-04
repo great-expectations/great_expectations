@@ -253,7 +253,7 @@ class GxConfig(FluentBaseModel):
         return config
 
     @overload
-    def yaml(
+    def yaml(  # noqa: PLR0913
         self,
         stream_or_path: Union[StringIO, None] = None,
         *,
@@ -270,7 +270,7 @@ class GxConfig(FluentBaseModel):
         ...
 
     @overload
-    def yaml(
+    def yaml(  # noqa: PLR0913
         self,
         stream_or_path: pathlib.Path,
         *,
@@ -286,13 +286,13 @@ class GxConfig(FluentBaseModel):
     ) -> pathlib.Path:
         ...
 
-    def yaml(
+    def yaml(  # noqa: PLR0913
         self,
         stream_or_path: Union[StringIO, pathlib.Path, None] = None,
         *,
         include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
         exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
-        by_alias: bool = False,
+        by_alias: bool = True,
         exclude_unset: bool = True,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
@@ -340,7 +340,7 @@ class GxConfig(FluentBaseModel):
             datasource_config: dict
             for datasource_config in fluent_datasources:
                 datasource_name = datasource_config[_DATASOURCE_NAME_KEY]
-                datasource_config = _exclude_fields_from_serialization(
+                datasource_config = _exclude_fields_from_serialization(  # noqa: PLW2901
                     source_dict=datasource_config,
                     exclusions=self._EXCLUDE_FROM_DATASOURCE_SERIALIZATION,
                 )

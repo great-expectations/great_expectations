@@ -1,5 +1,4 @@
 import os
-from collections import OrderedDict
 from unittest import mock
 
 import nbformat
@@ -9,7 +8,9 @@ from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations.cli import cli
 from great_expectations.util import get_context
-from tests.cli.utils import assert_no_logging_messages_or_tracebacks, escape_ansi
+from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+
+pytestmark = pytest.mark.cli
 
 
 @mock.patch(
@@ -30,11 +31,11 @@ def test_cli_datasource_new_connection_string(
     assert context.list_datasources() == []
 
     runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     result = runner.invoke(
         cli,
         "datasource new",
-        input="y\n2\n8\n",
+        input="y\n2\n9\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -43,10 +44,12 @@ def test_cli_datasource_new_connection_string(
 
     assert result.exit_code == 0
 
-    uncommitted_dir = os.path.join(root_dir, context.GX_UNCOMMITTED_DIR)
-    expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
+    uncommitted_dir = os.path.join(root_dir, context.GX_UNCOMMITTED_DIR)  # noqa: PTH118
+    expected_notebook = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "datasource_new.ipynb"
+    )
 
-    assert os.path.isfile(expected_notebook)
+    assert os.path.isfile(expected_notebook)  # noqa: PTH113
     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
 
     expected_call_args_list = [

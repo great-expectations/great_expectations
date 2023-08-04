@@ -67,6 +67,7 @@ def in_memory_data_context_config_usage_stats_enabled():
 
 
 @pytest.mark.slow  # 1.34s
+@pytest.mark.big
 def test_common_usage_stats_are_sent_no_mocking(
     caplog, in_memory_data_context_config_usage_stats_enabled, monkeypatch
 ):

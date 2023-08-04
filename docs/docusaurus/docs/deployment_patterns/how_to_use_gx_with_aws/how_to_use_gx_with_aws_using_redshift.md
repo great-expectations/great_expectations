@@ -1,7 +1,9 @@
 ---
-title: How to use Great Expectations with Amazon Web Services using Redshift
+title: Use Great Expectations with Amazon Web Services using Redshift
+sidebar_label: "AWS S3 and Redshift"
 ---
 import Prerequisites from '@site/docs/components/_prerequisites.jsx'
+import PrereqPython from '@site/docs/components/prerequisites/_python_version.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import Congratulations from './components/_congratulations_aws_redshift.md'
@@ -115,7 +117,7 @@ import CreateDataContextWithCreateAgain from '@site/docs/deployment_patterns/how
 
 import ConnectionStringRedshift from '@site/docs/guides/connecting_to_your_data/database/components/_redshift_credentials.md'
 
-<!-- 2.2 Add Datasource to your DataContext -->
+<!-- 2.2 Add Data Source to your DataContext -->
 
 import ConfigureYourRedshiftDatasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_configure_your_redshift_datasource.mdx'
 
@@ -123,7 +125,7 @@ import ConfigureYourRedshiftDatasource from '@site/docs/deployment_patterns/how_
 
 import ConnectToDataAssets from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_add_table_and_query_assets.mdx'
 
-<!-- 2.4 Test your new Datasource -->
+<!-- 2.4 Test your new Data Source -->
 
 import TestRedshiftDatasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_test_your_new_redshift_datasource.mdx'
 
@@ -166,7 +168,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 <Prerequisites>
 
-- Python 3. To download and install Python, see [Python downloads](https://www.python.org/downloads/).
+- <PrereqPython />
 - The AWS CLI. To download and install the AWS CLI, see [Installing or updating the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 - AWS credentials. See [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
 - Permissions to install the Python packages ([`boto3`](https://github.com/boto/boto3) and `great_expectations`) with pip.
@@ -279,13 +281,13 @@ For additional options on configuring the `config_variables.yml` file or additio
 
 :::
 
-### 2.2 Add Datasource to your DataContext
+### 2.2 Add Data Source to your DataContext
 <ConfigureYourRedshiftDatasource />
 
 ### 2.3. Connect to a specific set of data with a Data Asset
 <ConnectToDataAssets />
 
-### 2.4 Test your new Datasource
+### 2.4 Test your new Data Source
 <TestRedshiftDatasource />
 
 ## Part 3: Create Expectations

@@ -65,7 +65,7 @@ class MulticolumnValuesSumValuesToBeBetweenMaxAndMin(MulticolumnMapMetricProvide
 
 # This class defines the Expectation itself
 class ExpectMulticolumnSumValuesToBeBetween(MulticolumnMapExpectation):
-    """Expect a sum of values over the columns to be between max and min values
+    """Expect a sum of values over the columns to be between max and min values.
 
     min_value <= SUM(col_a, cob_b, cob_c, ...) <= max_value
 
@@ -87,6 +87,7 @@ class ExpectMulticolumnSumValuesToBeBetween(MulticolumnMapExpectation):
                 "col_b": [0, 3, 6, 33, 9],
                 "col_c": [1, 5, 6, 27, 3],
             },
+            "only_for": ["pandas", "spark"],
             "tests": [
                 {
                     "title": "multi_column_sum_to_equal_range_2-set_positive_test",
@@ -139,16 +140,6 @@ class ExpectMulticolumnSumValuesToBeBetween(MulticolumnMapExpectation):
                     "out": {
                         "success": False,
                     },
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "spark",
-                    "dialects": None,
-                },
-                {
-                    "backend": "pandas",
-                    "dialects": None,
                 },
             ],
         }

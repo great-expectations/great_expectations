@@ -8,7 +8,7 @@ from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
     ConfiguredAssetSqlDataConnector,
 )
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import deep_filter_properties_iterable
 
@@ -46,7 +46,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -171,7 +171,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             introspected_assets[data_asset_name] = data_asset_config
             self.add_data_asset(name=table_name, config=data_asset_config)
 
-    def _introspect_db(  # noqa: C901 - 16
+    def _introspect_db(  # noqa: C901, PLR0912, PLR0913
         self,
         schema_name: Union[str, None] = None,
         ignore_information_schemas_and_system_tables: bool = True,
@@ -252,8 +252,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         try:
             if engine.dialect.name.lower() == GXSqlDialect.REDSHIFT:
                 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
-                result = engine.execute(
-                    "select schemaname, tablename from svv_external_tables"
+                result = self.execution_engine.execute_query(
+                    sa.text("select schemaname, tablename from svv_external_tables")
                 ).fetchall()
                 for row in result:
                     tables.append(

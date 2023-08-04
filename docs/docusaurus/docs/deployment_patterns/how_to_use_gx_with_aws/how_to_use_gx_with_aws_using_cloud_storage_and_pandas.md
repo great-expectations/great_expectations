@@ -1,7 +1,11 @@
 ---
-title: How to use Great Expectations with Amazon Web Services using S3 and Pandas
+title: Use Great Expectations with Amazon Web Services using S3 and Pandas
+description: AWS S3
+sidebar_label: "AWS S3 and Pandas"
+sidebar_custom_props: { icon: 'img/integrations/s3_icon.png' }
 ---
 import Prerequisites from '@site/docs/components/_prerequisites.jsx'
+import PrereqPython from '@site/docs/components/prerequisites/_python_version.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import Congratulations from './components/_congratulations_aws_s3_pandas.md'
@@ -102,15 +106,15 @@ import AdditionalDataDocsNotes from '@site/docs/guides/setup/configuring_data_do
 
 import CreateDataContextWithCreateAgain from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_initialize_data_context_with_create.mdx'
 
-<!-- 2.2 Add Datasource to your DataContext -->
+<!-- 2.2 Add Data Source to your DataContext -->
 
 import ConfigureYourDatasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_configure_your_datasource.mdx'
 
-<!-- 2.3 Add CSV Asset to your Datasource -->
+<!-- 2.3 Add CSV Asset to your Data Source -->
 
 import AddCSVAssetToS3Datasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_add_csv_asset_to_pandas_s3_datasource.mdx'
 
-<!-- 2.4 Test your new Datasource -->
+<!-- 2.4 Test your new Data Source -->
 
 import TestS3Datasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_test_your_new_datasource.mdx'
 
@@ -153,7 +157,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 <Prerequisites>
 
-- Python 3. To download and install Python, see [Python downloads](https://www.python.org/downloads/).
+- <PrereqPython />
 - The AWS CLI. To download and install the AWS CLI, see [Installing or updating the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 - AWS credentials. See [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
 - Permissions to install the Python packages ([`boto3`](https://github.com/boto/boto3) and `great_expectations`) with pip.
@@ -247,13 +251,13 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 If you have already instantiated your `DataContext` in a previous step, this step can be skipped.
 
-### 2.2 Add Datasource to your DataContext
+### 2.2 Add Data Source to your DataContext
 <ConfigureYourDatasource />
 
-### 2.2 Add CSV Asset to your Datasource 
+### 2.2 Add CSV Asset to your Data Source 
 <AddCSVAssetToS3Datasource />
 
-### 2.3 Test your new Datasource 
+### 2.3 Test your new Data Source 
 <TestS3Datasource />
 
 ## Part 3: Create Expectations

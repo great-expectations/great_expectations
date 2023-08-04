@@ -68,12 +68,6 @@ class DataAsset:
         batch_parameters = kwargs.pop("batch_parameters", {})
         batch_markers = kwargs.pop("batch_markers", {})
 
-        if "autoinspect_func" in kwargs:
-            # deprecated-v0.10.10
-            warnings.warn(
-                "Autoinspect_func is deprecated as of v0.10.10 and will be removed in v0.16; use a profiler instead (migration is easy!).",
-                category=DeprecationWarning,
-            )
         super().__init__(*args, **kwargs)
         self._config = {"interactive_evaluation": interactive_evaluation}
         self._data_context = data_context
@@ -99,26 +93,6 @@ class DataAsset:
             expectation for expectation in keys if expectation.startswith("expect_")
         ]
 
-    def autoinspect(self, profiler):
-        """Deprecated: use profile instead.
-
-        Use the provided profiler to evaluate this data_asset and assign the resulting expectation suite as its own.
-
-        Args:
-            profiler: The profiler to use
-
-        Returns:
-            tuple(expectation_suite, validation_results)
-        """
-        # deprecated-v0.10.10
-        warnings.warn(
-            "The term autoinspect is deprecated as of v0.10.10 and will be removed in v0.16. Please use 'profile'\
-        instead.",
-            DeprecationWarning,
-        )
-        expectation_suite, validation_results = profiler.profile(self)
-        return expectation_suite, validation_results
-
     def profile(self, profiler, profiler_configuration=None):
         """Use the provided profiler to evaluate this data_asset and assign the resulting expectation suite as its own.
 
@@ -141,8 +115,8 @@ class DataAsset:
             self
         )
 
-    @classmethod  # noqa: C901 - complexity 24
-    def expectation(cls, method_arg_names):  # noqa: C901
+    @classmethod  # - complexity 24
+    def expectation(cls, method_arg_names):  # noqa: C901, PLR0915
         """Manages configuration and running of expectation objects.
 
         Expectation builds and saves a new expectation configuration to the DataAsset object. It is the core decorator \
@@ -174,9 +148,9 @@ class DataAsset:
                     modification. For more detail, see :ref:`meta`.
         """
 
-        def outer_wrapper(func):  # noqa: C901 - 22
+        def outer_wrapper(func):  # noqa: C901, PLR0915
             @wraps(func)
-            def wrapper(self, *args, **kwargs):  # noqa: C901 - 21
+            def wrapper(self, *args, **kwargs):  # noqa: C901, PLR0912, PLR0915
                 # Get the name of the method
                 method_name = func.__name__
 
@@ -214,7 +188,7 @@ class DataAsset:
 
                 if "result_format" in argspec:
                     all_args["result_format"] = result_format
-                else:
+                else:  # noqa: PLR5501
                     if "result_format" in all_args:
                         del all_args["result_format"]
 
@@ -468,7 +442,7 @@ class DataAsset:
 
         self.default_expectation_args[argument] = value
 
-    def get_expectation_suite(  # noqa: C901 - complexity 17
+    def get_expectation_suite(  # noqa: C901, PLR0912, PLR0913
         self,
         discard_failed_expectations=True,
         discard_result_format_kwargs=True,
@@ -570,7 +544,7 @@ class DataAsset:
             logger.info(message + settings_message)
         return expectation_suite
 
-    def save_expectation_suite(
+    def save_expectation_suite(  # noqa: PLR0913
         self,
         filepath=None,
         discard_failed_expectations=True,
@@ -630,7 +604,7 @@ class DataAsset:
                 "Unable to save config: filepath or data_context must be available."
             )
 
-    def validate(  # noqa: C901 - complexity 36
+    def validate(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         expectation_suite=None,
         run_id=None,
@@ -828,7 +802,7 @@ class DataAsset:
             for expectation in expectations_to_evaluate:
                 try:
                     # copy the config so we can modify it below if needed
-                    expectation = copy.deepcopy(expectation)
+                    expectation = copy.deepcopy(expectation)  # noqa: PLW2901
 
                     expectation_method = getattr(self, expectation.expectation_type)
 
@@ -967,7 +941,7 @@ class DataAsset:
             {parameter_name: parameter_value}
         )
 
-    def add_citation(
+    def add_citation(  # noqa: PLR0913
         self,
         comment,
         batch_kwargs=None,
@@ -1005,7 +979,7 @@ class DataAsset:
     #
     ###
 
-    def _format_map_output(  # noqa: C901 - complexity 21
+    def _format_map_output(  # noqa: PLR0912, PLR0913
         self,
         result_format,
         success,

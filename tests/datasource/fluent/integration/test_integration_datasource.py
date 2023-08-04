@@ -1,16 +1,18 @@
 from __future__ import annotations
 
 import pathlib
+from typing import TYPE_CHECKING
 
 import pandas as pd
 import pydantic
 import pytest
-from responses import RequestsMock
 
+import great_expectations as gx
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.data_context import (
     AbstractDataContext,
     CloudDataContext,
+    FileDataContext,
 )
 from great_expectations.datasource.fluent import (
     BatchRequest,
@@ -31,8 +33,11 @@ from tests.datasource.fluent.integration.integration_test_utils import (
     run_multibatch_data_assistant_and_checkpoint,
 )
 
+if TYPE_CHECKING:
+    from responses import RequestsMock
 
-@pytest.mark.integration
+
+# This is marked by the various backend used in testing in the datasource_test_data fixture.
 @pytest.mark.parametrize("include_rendered_content", [False, True])
 def test_run_checkpoint_and_data_doc(
     datasource_test_data: tuple[
@@ -46,7 +51,7 @@ def test_run_checkpoint_and_data_doc(
     )
 
 
-@pytest.mark.integration
+# This is marked by the various backend used in testing in the datasource_test_data fixture.
 @pytest.mark.slow  # sql: 7s  # pandas: 4s
 def test_run_data_assistant_and_checkpoint(
     datasource_test_data: tuple[
@@ -56,7 +61,7 @@ def test_run_data_assistant_and_checkpoint(
     run_data_assistant_and_checkpoint(datasource_test_data=datasource_test_data)
 
 
-@pytest.mark.integration
+# This is marked by the various backend used in testing in the multibatch_datasource_test_data fixture.
 @pytest.mark.slow  # sql: 33s  # pandas: 9s
 def test_run_multibatch_data_assistant_and_checkpoint(multibatch_datasource_test_data):
     """Test using data assistants to create expectation suite using multiple batches and to run checkpoint"""
@@ -65,7 +70,7 @@ def test_run_multibatch_data_assistant_and_checkpoint(multibatch_datasource_test
     )
 
 
-@pytest.mark.integration
+# This is marked by the various backend used in testing in the datasource_test_data fixture.
 @pytest.mark.parametrize(
     ["n_rows", "fetch_all", "success"],
     [
@@ -105,7 +110,7 @@ def test_batch_head(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_sql_query_data_asset(empty_data_context):
     context = empty_data_context
     datasource = sqlite_datasource(context, "yellow_tripdata.db")
@@ -129,7 +134,7 @@ def test_sql_query_data_asset(empty_data_context):
     assert result.success
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 @pytest.mark.parametrize(
     ["base_directory", "batching_regex", "raises_test_connection_error"],
     [
@@ -199,7 +204,7 @@ def test_filesystem_data_asset_batching_regex(
         )
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 @pytest.mark.parametrize(
     [
         "database",
@@ -369,7 +374,7 @@ def test_splitter(
     assert specified_batches[-1].metadata == last_specified_batch_metadata
 
 
-@pytest.mark.integration
+# This is marked by the various backend used in testing in the datasource_test_data fixture.
 def test_simple_checkpoint_run(
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest
@@ -387,7 +392,7 @@ def test_simple_checkpoint_run(
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
+    assert result["checkpoint_config"]["class_name"] == "SimpleCheckpoint"
 
     checkpoint = SimpleCheckpoint(
         "my_checkpoint",
@@ -401,11 +406,11 @@ def test_simple_checkpoint_run(
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
+    assert result["checkpoint_config"]["class_name"] == "SimpleCheckpoint"
 
 
-@pytest.mark.integration
-def test_checkpoint_run_with_nonstring_path_option(empty_data_context):
+@pytest.mark.filesystem
+def test_simple_checkpoint_run_with_nonstring_path_option(empty_data_context):
     context = empty_data_context
     path = pathlib.Path(
         __file__,
@@ -431,7 +436,7 @@ def test_checkpoint_run_with_nonstring_path_option(empty_data_context):
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
+    assert result["checkpoint_config"]["class_name"] == "SimpleCheckpoint"
 
 
 @pytest.mark.parametrize(
@@ -449,7 +454,7 @@ def test_checkpoint_run_with_nonstring_path_option(empty_data_context):
         ),
     ],
 )
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_asset_specified_metadata(
     empty_data_context, add_asset_method, add_asset_kwarg
 ):
@@ -470,7 +475,7 @@ def test_asset_specified_metadata(
     assert batches[0].metadata == {**asset_specified_metadata, "year": 2019, "month": 2}
 
 
-@pytest.mark.integration
+# This is marked by the various backend used in testing in the datasource_test_data fixture.
 def test_batch_request_error_messages(
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest
@@ -510,40 +515,87 @@ def test_batch_request_error_messages(
         batch_request.batch_slice = True  # type: ignore[assignment]
 
 
-@pytest.mark.integration
+@pytest.mark.cloud
 def test_pandas_data_adding_dataframe_in_cloud_context(
     cloud_api_fake: RequestsMock,
     empty_cloud_context_fluent: CloudDataContext,
 ):
-    context = empty_cloud_context_fluent
-
     df = pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
+
+    context = empty_cloud_context_fluent
 
     dataframe_asset = context.sources.add_or_update_pandas(
         name="fluent_pandas_datasource"
-    ).add_dataframe_asset(name="my_df_asset", dataframe=df)
-    dataframe_asset.build_batch_request()
+    ).add_dataframe_asset(name="my_df_asset")
+    _ = dataframe_asset.build_batch_request(dataframe=df)
+    assert dataframe_asset.dataframe.equals(df)
 
-    assert "No error was raised above"
+
+@pytest.mark.filesystem
+def test_pandas_data_adding_dataframe_in_file_reloaded_context(
+    empty_file_context: FileDataContext,
+):
+    df = pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
+
+    context = empty_file_context
+
+    datasource = context.sources.add_or_update_pandas(name="fluent_pandas_datasource")
+    dataframe_asset = datasource.add_dataframe_asset(name="my_df_asset")
+    _ = dataframe_asset.build_batch_request(dataframe=df)
+    assert dataframe_asset.dataframe.equals(df)
+
+    context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
+    dataframe_asset = context.get_datasource(  # type: ignore[union-attr]
+        datasource_name="fluent_pandas_datasource"
+    ).get_asset(asset_name="my_df_asset")
+    _ = dataframe_asset.build_batch_request(dataframe=df)
+    assert dataframe_asset.dataframe.equals(df)
 
 
-@pytest.mark.integration
+@pytest.mark.spark
 def test_spark_data_adding_dataframe_in_cloud_context(
     spark_session,
+    spark_df_from_pandas_df,
     cloud_api_fake: RequestsMock,
     empty_cloud_context_fluent: CloudDataContext,
 ):
-    from pyspark.sql import SparkSession  # isort:skip
+    df = pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
+    spark_df = spark_df_from_pandas_df(spark_session, df)
 
     context = empty_cloud_context_fluent
 
-    SparkSession.builder.appName("local").master("local[1]").getOrCreate()
+    dataframe_asset = context.sources.add_or_update_spark(
+        name="fluent_pandas_datasource"
+    ).add_dataframe_asset(name="my_df_asset")
+    _ = dataframe_asset.build_batch_request(dataframe=spark_df)
+    assert dataframe_asset.dataframe.toPandas().equals(df)
+
+
+@pytest.mark.spark
+def test_spark_data_adding_dataframe_in_file_reloaded_context(
+    spark_session,
+    spark_df_from_pandas_df,
+    empty_file_context: FileDataContext,
+):
     df = pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
-    spark_df = spark_session.createDataFrame(df)
+    spark_df = spark_df_from_pandas_df(spark_session, df)
+
+    context = empty_file_context
 
     dataframe_asset = context.sources.add_or_update_spark(
         name="fluent_pandas_datasource"
-    ).add_dataframe_asset(name="my_df_asset", dataframe=spark_df)
-    dataframe_asset.build_batch_request()
+    ).add_dataframe_asset(name="my_df_asset")
+    _ = dataframe_asset.build_batch_request(dataframe=spark_df)
+    assert dataframe_asset.dataframe.toPandas().equals(df)
 
-    assert "No error was raised above"
+    datasource = context.sources.add_or_update_spark(name="fluent_pandas_datasource")
+    dataframe_asset = datasource.add_dataframe_asset(name="my_df_asset")
+    _ = dataframe_asset.build_batch_request(dataframe=spark_df)
+    assert dataframe_asset.dataframe.toPandas().equals(df)
+
+    context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
+    dataframe_asset = context.get_datasource(  # type: ignore[union-attr]
+        datasource_name="fluent_pandas_datasource"
+    ).get_asset(asset_name="my_df_asset")
+    _ = dataframe_asset.build_batch_request(dataframe=spark_df)
+    assert dataframe_asset.dataframe.toPandas().equals(df)

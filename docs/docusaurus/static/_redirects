@@ -1,4 +1,5 @@
 # Redirect from what the browser serves
+
 /v2 https://legacy.docs.greatexpectations.io/en/latest/
 /latest https://docs.greatexpectations.io/docs/
 /v3 https://docs.greatexpectations.io/docs/
@@ -150,7 +151,7 @@
 /en/latest/reference/core_concepts/expectations/result_format.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/result_format.html
 /en/latest/reference/core_concepts/expectations/standard_arguments.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/standard_arguments.html
 /en/latest/reference/core_concepts/expectations/distributional_expectations.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/distributional_expectations.html
-/en/latest/reference/core_concepts/expectations/implemented_expectations.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/implemented_expectations.html
+/en/latest/reference/core_concepts/expectations/implemented_expectations.html https://greatexpectations.io/expectations.html
 /en/latest/reference/core_concepts/expectations/expectations.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html
 /en/latest/reference/core_concepts/checkpoints_and_actions.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html
 /en/latest/reference/core_concepts/expectation_suite_operations.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectation_suite_operations.html
@@ -174,12 +175,15 @@
 /docs/contributing/contributing_style https://docs.greatexpectations.io/docs/contributing/style_guides/docs_style
 
 # Redirects for consolidated pages
+
 /docs/why_use_ge https://docs.greatexpectations.io/docs
 /docs/community https://docs.greatexpectations.io/docs
 /docs/guides/setup/installation/spark_emr https://docs.greatexpectations.io/docs/guides/setup/installation/hosted_environment
 
 # Redirects for integrations And How-Tos
+
 /docs/deployment_patterns/reference_architecture_overview /docs/deployment_patterns/integrations_and_howtos_overview
+
 # Redirects for Universal Map getting started tutorial
 /docs/tutorials/getting_started/intro /docs/tutorials/getting_started/tutorial_overview
 /docs/tutorials/getting_started/initialize_a_data_context /docs/tutorials/getting_started/tutorial_setup
@@ -202,10 +206,10 @@
 /docs/reference/data_discovery/ https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant/
 /docs/reference/evaluation_parameters/ https://docs.greatexpectations.io/docs/terms/evaluation_parameter
 /docs/guides/validation/advanced/how_to_implement_custom_notifications https://docs.greatexpectations.io/docs/guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions
-/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_metrics https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
-/docs/guides/expectations/advanced/how_to_create_renderers_for_custom_expectations https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
-/docs/guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
-/docs/guides/expectations/features_custom_expectations/how_to_add_statement_renderers_for_an_expectation https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
+/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_metrics https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp
+/docs/guides/expectations/advanced/how_to_create_renderers_for_custom_expectations https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp
+/docs/guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp
+/docs/guides/expectations/features_custom_expectations/how_to_add_statement_renderers_for_an_expectation https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp
 /docs/reference/expectations/expectations https://docs.greatexpectations.io/docs/terms/expectation/
 /docs/reference/expectations/expectation_suite_operations https://docs.greatexpectations.io/docs/reference/expectation_suite_operations/
 /docs/reference/checkpoints_and_actions https://docs.greatexpectations.io/docs/terms/checkpoint
@@ -223,6 +227,7 @@
 /docs/guides/expectations/advanced/how_to_compare_two_tables_with_the_user_configurable_profiler /docs/guides/expectations/advanced/how_to_compare_two_tables_with_the_onboarding_data_assistant
 
 # Redirects for deprecated API docs
+
 /docs/api_docs/classes/great_expectations-data_context-data_context-data_context-DataContext /docs/reference/api/abstract_data_context
 /docs/api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config /docs/reference/api/abstract_data_context
 /docs/api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-create /docs/reference/api/great_expectations.util
@@ -232,9 +237,11 @@
 /docs/api_docs/methods/great_expectations-data_context-data_context-data_context-datacontext-create /docs/reference/api/great_expectations.util
 
 # Redirects for renamed reference docs
+
 /docs/reference/anonymous_usage_statistics /docs/reference/usage_statistics
 
 # Redirect from Getting Started Tutorial to Quickstart
+
 /docs/docusaurus/docs/tutorials/getting_started/ /docs/tutorials/quickstart
 /docs/tutorials/getting_started/tutorial_connect_to_data /docs/tutorials/quickstart
 /docs/tutorials/getting_started/tutorial_create_expectations /docs/tutorials/quickstart
@@ -243,14 +250,16 @@
 /docs/tutorials/getting_started/tutorial_setup /docs/tutorials/quickstart
 /docs/tutorials/getting_started/tutorial_validate_data /docs/tutorials/quickstart
 
-# removing CLI-based guide
+# Removing CLI-based guide
+
 /docs/guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit /docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data
 
 # Redirect for defunct JSON profiler
 /docs/guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file /docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant
 
-# removing yml-driven datacontext in favor of ephemeral
-/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context
+# Removing yml-driven datacontext in favor of ephemeral
+
+/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context
 
 # Redirects for Contributing docs
 
@@ -266,10 +275,12 @@
 docs/guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md
 /docs/contributing/contributing_package https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_PACKAGES.md
 
-# removing How to Validate data with an in-memory Checkpoint
+# Removing How to Validate data with an in-memory Checkpoint
+
 /docs/guides/validation/advanced/how_to_validate_data_with_an_in_memory_checkpoint.md /docs/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.md
 
 # Getting rid of the test_yaml_config doc, which was focused on datasources
+
 /docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config /docs/docusaurus/docs/guides/connecting_to_your_data/connect_to_data_overview.md
 
 
@@ -315,10 +326,73 @@ docs/guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_
 /docs/guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store /docs/0.15.50/guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store
 /docs/guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_tables_in_sql /docs/0.15.50/guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_tables_in_sql
 
-
 ## Redirects for deleted CLI guides back to the last version of the docs to include them
+
 /docs/contributing/style_guides/cli_and_notebooks_style /docs/0.15.50/contributing/style_guides/cli_and_notebooks_style
 /docs/guides/miscellaneous/how_to_use_the_great_expectations_cli /docs/0.15.50/guides/miscellaneous/how_to_use_the_great_expectations_cli
 /docs/guides/miscellaneous/how_to_use_the_project_check_config_command /docs/0.15.50/guides/miscellaneous/how_to_use_the_project_check_config_command
 /docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli 
 /docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python
+
+## Redircet UserConfigurableProfiler doc to v 0.15.50 docs
+
+/docs/guides/expectations/how_to_create_and_edit_expectations_with_a_profiler /docs/0.15.50/guides/expectations/how_to_create_and_edit_expectations_with_a_profiler
+
+## Redirects for content reorg
+
+/docs/guides/setup/installation/local /docs/guides/setup/installation/install_gx
+/docs/guides/setup/installation/hosted_environment /docs/guides/setup/installation/install_gx
+/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3 /docs/guides/setup/optional_dependencies/cloud/connect_gx_source_data_system
+/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs /docs/guides/setup/optional_dependencies/cloud/connect_gx_source_data_system
+/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs /docs/guides/setup/optional_dependencies/cloud/connect_gx_source_data_system
+/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases /docs/guides/setup/optional_dependencies/cloud/connect_gx_source_data_system
+/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context
+/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context
+/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context
+/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context
+docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3 /docs/guides/setup/configuring_metadata_stores/configure_expectation_stores
+/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage /docs/guides/setup/configuring_metadata_stores/configure_expectation_stores
+/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs /docs/guides/setup/configuring_metadata_stores/configure_expectation_stores
+docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem /docs/guides/setup/configuring_metadata_stores/configure_expectation_stores
+/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql /docs/guides/setup/configuring_metadata_stores/configure_expectation_stores
+docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3 /docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql /docs/guides/setup/configuring_metadata_stores/configure_result_stores
+/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage /docs/guides/setup/configuring_metadata_stores/configure_result_stores
+/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs /docs/guides/setup/configuring_metadata_stores/configure_result_stores
+/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem /docs/guides/setup/configuring_metadata_stores/configure_result_stores
+/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_to_postgresql /docs/guides/setup/configuring_metadata_stores/configure_result_stores
+/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem /docs/guides/setup/configuring_data_docs/host_and_share_data_docs
+docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage /docs/guides/setup/configuring_data_docs/host_and_share_data_docs
+/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs /docs/guides/setup/configuring_data_docs/host_and_share_data_docs
+/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3 /docs/guides/setup/configuring_data_docs/host_and_share_data_docs
+/docs/guides/connecting_to_your_data/fluent/filesystem/how_to_quickly_connect_to_a_single_file_with_pandas /docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data
+/docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas /docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data
+/docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark /docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data
+/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_pandas /docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data
+/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_spark /docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data
+/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_pandas /docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data
+/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_spark /docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data
+/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_pandas /docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data
+/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_spark /docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data
+/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data /docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data
+/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data /docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data
+/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data /docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data
+/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table /docs/guides/connecting_to_your_data/fluent/database/sql_data_assets
+/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query /docs/guides/connecting_to_your_data/fluent/database/sql_data_assets
+/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset /docs/guides/connecting_to_your_data/fluent/database/sql_data_assets
+/docs/deployment_patterns/how_to_use_great_expectations_in_databricks /docs/tutorials/getting_started/how_to_use_great_expectations_in_databricks
+/docs/guides/expectations/creating_custom_expectations/overview /docs/guides/expectations/custom_expectations_lp
+
+# Redirects for pages removed as no longer applicable
+
+/docs/guides/validation/advanced/how_to_validate_data_without_a_checkpoint /docs/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint
+/docs/reference/expectations/implemented_expectations/ https://greatexpectations.io/expectations.html
+
+# Redirects for removed index pages and new landing pages
+
+/docs/guides/setup/index /docs/guides/setup/setup_overview_lp
+/docs/guides/connecting_to_your_data/index /docs/guides/connecting_to_your_data/connect_to_data_lp
+/docs/guides/expectations/index /docs/guides/expectations/expectations_lp
+/docs/guides/validation/index /docs/guides/validation/validate_data_lp
+/docs/deployment_patterns/index /docs/category/integrations
+/docs/guides/validation/validate_data_overview /docs/guides/validation/validate_data_lp
+/docs/guides/connecting_to_your_data/connect_to_data_overview /docs/guides/connecting_to_your_data/connect_to_data_lp

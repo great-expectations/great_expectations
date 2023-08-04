@@ -18,3 +18,7 @@ _DATA_ASSET_NAME_KEY: Final[str] = "name"
 _DATA_CONNECTOR_NAME: Final[str] = "fluent"
 
 MATCH_ALL_PATTERN: Final[re.Pattern] = re.compile(".*")
+
+DEFAULT_PANDAS_DATASOURCE_NAME: Final[str] = "default_pandas_datasource"
+
+DEFAULT_PANDAS_DATA_ASSET_NAME: Final[str] = "#ephemeral_pandas_asset"

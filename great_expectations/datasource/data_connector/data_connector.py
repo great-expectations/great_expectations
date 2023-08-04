@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import logging
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Tuple
-
-import pandas as pd
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
@@ -14,9 +12,13 @@ from great_expectations.core.batch import (
     BatchRequestBase,  # noqa: TCH001
 )
 from great_expectations.core.id_dict import BatchSpec
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
+
+if TYPE_CHECKING:
+    import pandas as pd
+
+    from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +53,7 @@ class DataConnector:
         id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,

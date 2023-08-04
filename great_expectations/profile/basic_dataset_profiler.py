@@ -89,20 +89,20 @@ class BasicDatasetProfilerBase(DatasetProfiler):
 
         if num_unique is None or num_unique == 0 or pct_unique is None:
             cardinality = ProfilerCardinality.NONE
-        elif pct_unique == 1.0:
+        elif pct_unique == 1.0:  # noqa: PLR2004
             cardinality = ProfilerCardinality.UNIQUE
-        elif pct_unique > 0.1:
+        elif pct_unique > 0.1:  # noqa: PLR2004
             cardinality = ProfilerCardinality.VERY_MANY
-        elif pct_unique > 0.02:
+        elif pct_unique > 0.02:  # noqa: PLR2004
             cardinality = ProfilerCardinality.MANY
-        else:
+        else:  # noqa: PLR5501
             if num_unique == 1:
                 cardinality = ProfilerCardinality.ONE
-            elif num_unique == 2:
+            elif num_unique == 2:  # noqa: PLR2004
                 cardinality = ProfilerCardinality.TWO
-            elif num_unique < 60:
+            elif num_unique < 60:  # noqa: PLR2004
                 cardinality = ProfilerCardinality.VERY_FEW
-            elif num_unique < 1000:
+            elif num_unique < 1000:  # noqa: PLR2004
                 cardinality = ProfilerCardinality.FEW
             else:
                 cardinality = ProfilerCardinality.MANY
@@ -122,8 +122,8 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
     such as min, max, mean and median, for numeric columns, and distribution of values, when appropriate.
     """
 
-    @classmethod  # noqa: C901
-    def _profile(cls, dataset, configuration=None):  # noqa: C901 - 18
+    @classmethod
+    def _profile(cls, dataset, configuration=None):  # noqa: C901, PLR0912, PLR0915
         df = dataset
 
         df.set_default_expectation_argument("catch_exceptions", True)
@@ -305,7 +305,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                         column, value_set=None, result_format="SUMMARY"
                     )
 
-            else:
+            else:  # noqa: PLR5501
                 if cardinality == ProfilerCardinality.UNIQUE:
                     df.expect_column_values_to_be_unique(column)
 

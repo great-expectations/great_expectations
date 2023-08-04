@@ -6,10 +6,6 @@ hoverText: A collection of verifiable assertions about data.
 
 import TechnicalTag from '../term_tags/_tag.mdx';
 
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
-
 An Expectation Suite is a collection of verifiable assertions about data.
 
 Expectation Suites combine multiple <TechnicalTag relative="../" tag="expectation" text="Expectations" /> into an overall description of data. For example, you can group all the Expectations about a given table in a given database into an Expectation Suite and name it `my_database.my_table`. Expectation Suite names are customizable, and the only constraint is that it must be unique to a given project.
@@ -26,7 +22,6 @@ Expectation Suites are largely managed automatically in the workflows for creati
 
 For more information on these processes, please see:
 - [Our overview on the process of Creating Expectations](../guides/expectations/create_expectations_overview.md)
-- [Our guide on how to create and edit Expectations with a Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md)
 - [Our guide on how to create and edit Expectations with instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
 
 Expectation Suites are *used* during the Validation of data.  In this step, you will need to provide one or more Expectation Suites to a Checkpoint.  This can either be done by configuring the Checkpoint to use a preset list of one or more Expectation Suites, or by configuring the Checkpoint to accept a list of one or more Expectation Suites at runtime.

@@ -141,7 +141,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         return column_cardinality
 
     @classmethod
-    def _create_expectations_for_low_card_column(
+    def _create_expectations_for_low_card_column(  # noqa: PLR0913
         cls,
         dataset,
         column,
@@ -213,7 +213,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 )
 
     @classmethod
-    def _create_expectations_for_numeric_column(
+    def _create_expectations_for_numeric_column(  # noqa: PLR0912
         cls, dataset, column, excluded_expectations=None, included_expectations=None
     ) -> None:
         cls._create_non_nullity_expectations(
@@ -458,7 +458,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         return None
 
     @classmethod
-    def _create_expectations_for_datetime_column(
+    def _create_expectations_for_datetime_column(  # noqa: PLR0912
         cls, dataset, column, excluded_expectations=None, included_expectations=None
     ) -> None:
         cls._create_non_nullity_expectations(
@@ -539,8 +539,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     column, min_value, max_value, parse_strings_as_datetimes=True
                 )
 
-    @classmethod  # noqa: C901
-    def _profile(cls, dataset, configuration=None):  # noqa: C901 - 28
+    @classmethod
+    def _profile(cls, dataset, configuration=None):  # noqa: C901, PLR0912, PLR0915
         logger.debug(f"Running profiler with configuration: {configuration}")
         if configuration == "demo":
             return cls._demo_profile(dataset)

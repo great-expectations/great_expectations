@@ -1,5 +1,5 @@
 ---
-title: How to convert an Ephemeral Data Context to a Filesystem Data Context
+title: Convert an Ephemeral Data Context to a Filesystem Data Context
 tag: [how-to, setup]
 keywords: [Great Expectations, Ephemeral Data Context, Filesystem Data Context]
 ---
@@ -43,7 +43,7 @@ The `get_context()` method will return an Ephemeral Data Context if your system 
 - [How to quickly instantiate a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
 
 You can also instantiate an Ephemeral Data Context (for those occasions when your system is set up to work with GX Cloud or you do have a previously initialized Filesystem Data Context).  For more information, see:
-- [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context)
+- [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
 
 </details>
 
@@ -62,15 +62,13 @@ You can easily check to see if you are working with an Ephemeral Data Context wi
 
 </details>
 
-## Steps
-
-### 1. Verify that your current working directory does not already contain a GX Filesystem Data Context
+## Verify that your current working directory does not already contain a GX Filesystem Data Context
 
 The method for converting an Ephemeral Data Context to a Filesystem Data Context initializes the new Filesystem Data Context in the current working directory of the Python process that is being executed.  If a Filesystem Data Context already exists at that location, the process will fail.
 
 You can determine if your current working directory already has a Filesystem Data Context by looking for a `great_expectations.yml` file.  The presence of that file indicates that a Filesystem Data Context has already been initialized in the corresponding directory.
 
-### 2. Convert the Ephemeral Data Context into a Filesystem Data Context
+## Convert the Ephemeral Data Context into a Filesystem Data Context
 
 Converting an Ephemeral Data Context into a Filesystem Data Context can be done with one line of code:
 
@@ -90,10 +88,10 @@ For these reasons, it is strongly advised that once you have converted your Ephe
 
 ## Next steps
 
-### Customizing configurations in a Data Context
+### Customize Data Context configurations 
 
 <SetupConfigurations />
 
-### Connecting GX to source data systems
+### Connect GX to source data systems
 
 <ConnectingToDataFluently />

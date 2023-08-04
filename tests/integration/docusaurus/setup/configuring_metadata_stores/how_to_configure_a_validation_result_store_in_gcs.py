@@ -3,6 +3,9 @@ import os
 import subprocess
 
 import great_expectations as gx
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.core.yaml_handler import YAMLHandler
 
 yaml = YAMLHandler()
@@ -59,7 +62,7 @@ context.run_checkpoint(checkpoint_name=checkpoint_name)
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(
-    context.root_directory, "great_expectations.yml"
+    context.root_directory, FileDataContext.GX_YML
 )
 with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.load(f)
@@ -145,7 +148,7 @@ great_expectations_yaml["stores"]["validations_GCS_store"]["store_backend"].pop(
     "suppress_store_backend_id"
 )
 with open(great_expectations_yaml_file_path, "w") as f:
-    yaml.dump(great_expectations_yaml, f, default_flow_style=False)
+    yaml.dump(great_expectations_yaml, f)
 
 """
 # <snippet name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py copy_validation_command">

@@ -16,6 +16,9 @@ from great_expectations.render.exceptions import InlineRendererError
 from great_expectations.render.renderer.inline_renderer import InlineRenderer
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 
+# module level markers
+pytestmark = pytest.mark.unit
+
 
 def clean_serialized_rendered_atomic_content_graphs(
     serialized_rendered_atomic_content: List[dict],
@@ -29,7 +32,6 @@ def clean_serialized_rendered_atomic_content_graphs(
     return serialized_rendered_atomic_content
 
 
-@pytest.mark.unit
 def test_inline_renderer_instantiation_error_message(
     basic_expectation_suite: ExpectationSuite,
 ):
@@ -42,7 +44,6 @@ def test_inline_renderer_instantiation_error_message(
     )
 
 
-@pytest.mark.unit
 @pytest.mark.parametrize(
     "expectation_configuration,fake_result,expected_serialized_expectation_validation_result_rendered_atomic_content",
     [
@@ -411,7 +412,6 @@ def test_inline_renderer_expectation_validation_result_serialization(
     )
 
 
-@pytest.mark.unit
 @pytest.mark.parametrize(
     "expectation_configuration,expected_serialized_expectation_configuration_rendered_atomic_content",
     [
@@ -638,7 +638,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
                     },
                 }
             ],
-            id="meta_notes list",
+            id="meta_notes content list",
         ),
         pytest.param(
             ExpectationConfiguration(
@@ -649,6 +649,33 @@ def test_inline_renderer_expectation_validation_result_serialization(
                         "format": MetaNotesFormat.STRING,
                         "content": "This is the most important Expectation!!",
                     }
+                },
+            ),
+            [
+                {
+                    "value_type": "StringValueType",
+                    "name": AtomicPrescriptiveRendererType.SUMMARY,
+                    "value": {
+                        "template": "Must have exactly $value rows.",
+                        "schema": {"type": "com.superconductive.rendered.string"},
+                        "params": {
+                            "value": {"schema": {"type": "number"}, "value": 3},
+                        },
+                        "meta_notes": {
+                            "content": ["This is the most important Expectation!!"],
+                            "format": MetaNotesFormat.STRING,
+                        },
+                    },
+                }
+            ],
+            id="meta_notes content string",
+        ),
+        pytest.param(
+            ExpectationConfiguration(
+                expectation_type="expect_table_row_count_to_equal",
+                kwargs={"value": 3},
+                meta={
+                    "notes": "This is the most important Expectation!!",
                 },
             ),
             [

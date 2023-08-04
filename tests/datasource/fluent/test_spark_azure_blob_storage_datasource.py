@@ -29,7 +29,7 @@ from great_expectations.datasource.fluent.spark_file_path_datasource import (
 logger = logging.getLogger(__file__)
 
 
-if not (azure.storage and azure.BlobServiceClient and azure.ContainerClient):
+if not (azure.storage and azure.BlobServiceClient and azure.ContainerClient):  # type: ignore[truthy-function] # False if NotImported
     pytest.skip(
         'Could not import "azure.storage.blob" from Microsoft Azure cloud',
         allow_module_level=True,
@@ -122,7 +122,7 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     return regex, test_connection_error_message
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_construct_spark_abs_datasource_with_account_url_and_credential():
     spark_abs_datasource = SparkAzureBlobStorageDatasource(
         name="spark_abs_datasource",
@@ -137,7 +137,7 @@ def test_construct_spark_abs_datasource_with_account_url_and_credential():
     assert spark_abs_datasource.name == "spark_abs_datasource"
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_construct_spark_abs_datasource_with_conn_str_and_credential():
     spark_abs_datasource = SparkAzureBlobStorageDatasource(
         name="spark_abs_datasource",
@@ -152,7 +152,7 @@ def test_construct_spark_abs_datasource_with_conn_str_and_credential():
     assert spark_abs_datasource.name == "spark_abs_datasource"
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_construct_spark_abs_datasource_with_valid_account_url_assigns_account_name():
     spark_abs_datasource = SparkAzureBlobStorageDatasource(
         name="spark_abs_datasource",
@@ -167,7 +167,7 @@ def test_construct_spark_abs_datasource_with_valid_account_url_assigns_account_n
     assert spark_abs_datasource.name == "spark_abs_datasource"
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_construct_spark_abs_datasource_with_valid_conn_str_assigns_account_name():
     spark_abs_datasource = SparkAzureBlobStorageDatasource(
         name="spark_abs_datasource",
@@ -182,7 +182,7 @@ def test_construct_spark_abs_datasource_with_valid_conn_str_assigns_account_name
     assert spark_abs_datasource.name == "spark_abs_datasource"
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_construct_spark_abs_datasource_with_multiple_auth_methods_raises_error():
     # Raises error in DataContext's schema validation due to having both `account_url` and `conn_str`
     with pytest.raises(SparkAzureBlobStorageDatasourceError):
@@ -199,7 +199,7 @@ def test_construct_spark_abs_datasource_with_multiple_auth_methods_raises_error(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -227,7 +227,7 @@ def test_add_csv_asset_to_datasource(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -248,7 +248,7 @@ def test_construct_csv_asset_directly(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -275,7 +275,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -302,7 +302,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -329,7 +329,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -353,7 +353,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
         )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.xfail(
     reason="Accessing objects on azure.storage.blob using Spark is not working, due to local credentials issues (this test is conducted using Jupyter notebook manually)."
 )
@@ -413,7 +413,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert len(batches) == 2
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_test_connection_failures(
     spark_abs_datasource: SparkAzureBlobStorageDatasource,
     bad_regex_config: tuple[re.Pattern, str],
@@ -431,7 +431,7 @@ def test_test_connection_failures(
         datasource_name=spark_abs_datasource.name,
         data_asset_name=csv_asset.name,
         batching_regex=re.compile(regex),
-        azure_client=spark_abs_datasource._azure_client,
+        azure_client=spark_abs_datasource._azure_client,  # type: ignore[arg-type] # _azure_client could be None
         account_name=csv_asset.datasource._account_name,
         container="my_container",
         file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
@@ -442,3 +442,36 @@ def test_test_connection_failures(
         spark_abs_datasource.test_connection()
 
     assert str(e.value) == str(test_connection_error_message)
+
+
+# noinspection PyUnusedLocal
+@pytest.mark.unit
+@mock.patch(
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+)
+@mock.patch("azure.storage.blob.BlobServiceClient")
+def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
+    mock_azure_client,
+    mock_list_keys,
+    object_keys: List[str],
+    spark_abs_datasource: SparkAzureBlobStorageDatasource,
+):
+    """
+    Tests that the abs_recursive_file_discovery-flag is passed on
+    to the list_keys-function as the recursive-parameter
+
+    This makes the list_keys-function search and return files also
+    from sub-directories on Azure, not just the files in the folder
+    specified with the abs_name_starts_with-parameter
+    """
+    mock_list_keys.return_value = object_keys
+    asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
+    spark_abs_datasource.add_csv_asset(
+        name="csv_asset",
+        batching_regex=r".*",
+        abs_container="my_container",
+        batch_metadata=asset_specified_metadata,
+        abs_recursive_file_discovery=True,
+    )
+    assert "recursive" in mock_list_keys.call_args.kwargs.keys()
+    assert mock_list_keys.call_args.kwargs["recursive"] is True

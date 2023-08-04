@@ -22,6 +22,11 @@ except ImportError:
     sqlalchemy = None
 
 
+# module level markers
+# these tests use sqlite, which is a filesystem-based db
+pytestmark = pytest.mark.filesystem
+
+
 def test_get_batch(data_context_with_simple_sql_datasource_for_testing_get_batch):
     context = data_context_with_simple_sql_datasource_for_testing_get_batch
 

@@ -11,7 +11,10 @@ class MockSaInspector:
     def get_schema_names(self) -> List[str]:  # type: ignore[empty-body]
         ...
 
-    def has_table(self, table_name: str, schema: str) -> bool:  # type: ignore[empty-body]
+    def get_table_names(self, schema: str | None):  # type: ignore[empty-body]
+        ...
+
+    def has_table(self, table_name: str, schema: str | None) -> bool:  # type: ignore[empty-body]
         ...
 
 
@@ -30,7 +33,6 @@ class _MockConnection:
 
     def execute(self, statement):
         self.statement = statement
-        return
 
 
 class MockSaEngine:

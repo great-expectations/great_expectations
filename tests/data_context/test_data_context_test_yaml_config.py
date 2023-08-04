@@ -78,6 +78,7 @@ SELECT EXISTS (
     return engine
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -110,6 +111,7 @@ EGREGIOUS FORMATTING ERROR
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -160,6 +162,7 @@ store_backend:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -299,6 +302,7 @@ def test_checkpoint_store_with_filesystem_store_backend(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @pytest.mark.filterwarnings(
     "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
 )
@@ -341,6 +345,7 @@ store_backend:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -451,6 +456,7 @@ data_connectors:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -568,6 +574,7 @@ data_connectors:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -676,6 +683,7 @@ introspection:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -796,6 +804,7 @@ def test_golden_path_sql_datasource_configuration(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -988,6 +997,7 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1203,6 +1213,7 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1293,6 +1304,7 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1424,6 +1436,7 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1462,6 +1475,7 @@ def test_rule_based_profiler_integration(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 def test_test_yaml_config_supported_types_have_self_check():
     # Each major category of test_yaml_config supported types has its own origin module_name
     supported_types = [
@@ -1502,7 +1516,7 @@ def test_test_yaml_config_supported_types_have_self_check():
             ), f"Class '{class_}' is missing the required `self_check()` method"
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_test_yaml_config_on_datasource_sanitizes_instantiated_objs_config(
     empty_data_context_stats_enabled,
     monkeypatch,
@@ -1547,7 +1561,7 @@ data_connectors:
     )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_test_yaml_config_on_datasources_persists_object_id(
     empty_data_context_stats_enabled,
 ):

@@ -53,7 +53,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         "reduce_scalar_metric",
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         map_metric_name: str,

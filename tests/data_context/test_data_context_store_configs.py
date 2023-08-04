@@ -4,6 +4,9 @@ import pytest
 
 import great_expectations as gx
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
 yaml = YAMLHandler()
 
@@ -16,7 +19,7 @@ def totally_empty_data_context(tmp_path_factory):
     # TODO: Where appropriate, switch DataContext tests to the new method.
     project_root_dir = str(tmp_path_factory.mktemp("totally_empty_data_context"))
     os.mkdir(  # noqa: PTH102
-        os.path.join(project_root_dir, "great_expectations")  # noqa: PTH118
+        os.path.join(project_root_dir, FileDataContext.GX_DIR)  # noqa: PTH118
     )
 
     config = {
@@ -48,13 +51,14 @@ def totally_empty_data_context(tmp_path_factory):
 
     context = gx.get_context(
         context_root_dir=os.path.join(  # noqa: PTH118
-            project_root_dir, "great_expectations"
+            project_root_dir, FileDataContext.GX_DIR
         )
     )
     # print(json.dumps(context._project_config, indent=2))
     return context
 
 
+@pytest.mark.filesystem
 def test_create(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("path_001"))
     context = gx.data_context.FileDataContext.create(project_path)
@@ -62,6 +66,7 @@ def test_create(tmp_path_factory):
     assert isinstance(context, gx.data_context.FileDataContext)
 
 
+@pytest.mark.filesystem
 def test_add_store(totally_empty_data_context):
     assert len(totally_empty_data_context.stores.keys()) == 1
 
@@ -76,6 +81,7 @@ def test_add_store(totally_empty_data_context):
     assert len(totally_empty_data_context.stores.keys()) == 2
 
 
+@pytest.mark.filesystem
 def test_default_config_yml_stores(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("totally_empty_data_context"))
     context = gx.data_context.FileDataContext.create(project_path)

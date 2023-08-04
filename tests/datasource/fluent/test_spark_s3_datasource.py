@@ -78,6 +78,7 @@ def spark_s3_datasource(s3_mock, s3_bucket: str) -> SparkS3Datasource:
         "will_20200810_1001.csv",
         "james_20200810_1003.csv",
         "alex_20200819_1300.csv",
+        "subfolder/for_recursive_search.csv",
     ]
 
     for key in keys:
@@ -114,12 +115,12 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     return regex, test_connection_error_message
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_construct_spark_s3_datasource(spark_s3_datasource: SparkS3Datasource):
     assert spark_s3_datasource.name == "spark_s3_datasource"
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_add_csv_asset_to_datasource(spark_s3_datasource: SparkS3Datasource):
     asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_s3_datasource.add_csv_asset(
@@ -137,7 +138,7 @@ def test_add_csv_asset_to_datasource(spark_s3_datasource: SparkS3Datasource):
     assert asset.batch_metadata == asset_specified_metadata
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_construct_csv_asset_directly():
     # noinspection PyTypeChecker
     asset = CSVAsset(
@@ -151,7 +152,7 @@ def test_construct_csv_asset_directly():
     assert m1 is not None
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_csv_asset_with_batching_regex_unnamed_parameters(
     spark_s3_datasource: SparkS3Datasource,
 ):
@@ -170,7 +171,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_csv_asset_with_batching_regex_named_parameters(
     spark_s3_datasource: SparkS3Datasource,
 ):
@@ -189,7 +190,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_csv_asset_with_some_batching_regex_named_parameters(
     spark_s3_datasource: SparkS3Datasource,
 ):
@@ -208,7 +209,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_csv_asset_with_non_string_batching_regex_named_parameters(
     spark_s3_datasource: SparkS3Datasource,
 ):
@@ -225,7 +226,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
         )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.xfail(
     reason="Accessing objects on moto.mock_s3 using Spark is not working (this test is conducted using Jupyter notebook manually)."
 )
@@ -272,7 +273,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert len(batches) == 2
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_test_connection_failures(
     s3_mock,
     spark_s3_datasource: SparkS3Datasource,
@@ -301,3 +302,28 @@ def test_test_connection_failures(
         spark_s3_datasource.test_connection()
 
     assert str(e.value) == str(test_connection_error_message)
+
+
+@pytest.mark.big
+def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
+    spark_s3_datasource: SparkS3Datasource,
+):
+    """
+    Tests that files from the subfolder(s) is returned
+    when the s3_recursive_file_discovery-flag is set to True
+
+    This makes the list_keys-function search and return files also
+    from sub-directories on S3, not just the files in the folder
+    specified with the s3_name_starts_with-parameter
+    """
+    asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
+    asset = spark_s3_datasource.add_csv_asset(
+        name="csv_asset_recursive",
+        batching_regex=r".*",
+        header=True,
+        infer_schema=True,
+        batch_metadata=asset_specified_metadata,
+        s3_recursive_file_discovery=True,
+    )
+    recursion_match = asset.batching_regex.match(".*/.*.csv")
+    assert recursion_match is not None

@@ -1,9 +1,8 @@
 import copy
 import logging
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
 import numpy as np
-import pandas as pd
 
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import (
@@ -25,6 +24,9 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 
+if TYPE_CHECKING:
+    import pandas as pd
+
 logger = logging.getLogger(__name__)
 
 
@@ -33,7 +35,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
     value_keys = ("bins",)
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: PLR0913
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
@@ -53,7 +55,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         return list(hist)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -132,7 +134,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
 
             # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
             return convert_to_json_serializable(
-                list(execution_engine.engine.execute(query).fetchone())
+                list(execution_engine.execute_query(query).fetchone())
             )
 
         idx = 0
@@ -223,11 +225,11 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
 
         # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
         return convert_to_json_serializable(
-            list(execution_engine.engine.execute(query).fetchone())
+            list(execution_engine.execute_query(query).fetchone())
         )
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,
@@ -246,7 +248,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             copy.deepcopy(bins)
         )  # take a copy since we are inserting and popping
 
-        if bins[0] == -np.inf or bins[0] == -float("inf"):
+        if bins[0] == -np.inf or bins[0] == -float("inf"):  # noqa: PLR1714
             added_min = False
             bins[0] = -float("inf")
         else:

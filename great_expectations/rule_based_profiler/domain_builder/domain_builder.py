@@ -46,7 +46,7 @@ class DomainBuilder(ABC, Builder):
         """
         super().__init__(data_context=data_context)
 
-    def get_domains(
+    def get_domains(  # noqa: PLR0913
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,

@@ -32,7 +32,6 @@ import numpy as np
 import pandas as pd
 import pydantic
 from IPython import get_ipython
-from typing_extensions import TypeAlias
 
 from great_expectations import exceptions as gx_exceptions
 from great_expectations.compatibility import pyspark, sqlalchemy
@@ -51,6 +50,8 @@ from great_expectations.types.base import SerializableDotDict
 from great_expectations.util import convert_decimal_to_float
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     from great_expectations.alias_types import JSONValues
 
 logger = logging.getLogger(__name__)
@@ -192,7 +193,7 @@ ToDict: TypeAlias = Union[
 ]
 
 JSONConvertable: TypeAlias = Union[
-    ToDict, ToList, ToStr, ToInt, ToFloat, ToBool, ToBool, None
+    ToDict, ToList, ToStr, ToInt, ToFloat, ToBool, ToBool, None  # noqa: PYI016
 ]
 
 
@@ -245,8 +246,8 @@ def convert_to_json_serializable(
     ...
 
 
-@public_api  # noqa: C901 - complexity 32
-def convert_to_json_serializable(  # noqa: C901 - complexity 32
+@public_api  # - complexity 32
+def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     data: JSONConvertable,
 ) -> JSONValues:
     """Converts an object to one that is JSON-serializable.
@@ -410,21 +411,22 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         # Connection is a module, which is non-serializable. Return module name instead.
         return "sqlalchemy.engine.base.Connection"
 
+    # Unable to serialize (unrecognized data type).
     raise TypeError(
         f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
     )
 
 
-def ensure_json_serializable(data):  # noqa: C901 - complexity 21
+def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
     """
     Helper function to convert an object to one that is json serializable
     Args:
         data: an object to attempt to convert a corresponding json-serializable object
-    Returns:
-        (dict) A converted test_object
     Warning:
         test_obj may also be converted in place.
     """
+    if isinstance(data, pydantic.BaseModel):
+        return
 
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
         return
@@ -449,7 +451,7 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
         # test_obj[key] = test_obj[key].tolist()
         # If we have an array or index, convert it first to a list--causing coercion to float--and then round
         # to the number of digits for which the string representation will equal the float representation
-        _ = [ensure_json_serializable(x) for x in data.tolist()]
+        _ = [ensure_json_serializable(x) for x in data.tolist()]  # type: ignore[func-returns-value]
         return
 
     if isinstance(data, (datetime.datetime, datetime.date)):
@@ -500,7 +502,7 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
         ]
         return
 
-    if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function]
+    if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
         return ensure_json_serializable(
@@ -537,8 +539,8 @@ def substitute_all_strftime_format_strings(
     elements using either the provided datetime_obj or the current datetime
     """
 
-    datetime_obj = datetime_obj or datetime.datetime.now()
-    if isinstance(data, dict) or isinstance(data, OrderedDict):
+    datetime_obj = datetime_obj or datetime.datetime.now()  # noqa: DTZ005
+    if isinstance(data, dict) or isinstance(data, OrderedDict):  # noqa: PLR1701
         return {
             k: substitute_all_strftime_format_strings(v, datetime_obj=datetime_obj)
             for k, v in data.items()
@@ -573,7 +575,9 @@ def parse_string_to_datetime(
             """
         )
 
-    return datetime.datetime.strptime(datetime_string, datetime_format_string)
+    return datetime.datetime.strptime(  # noqa: DTZ007
+        datetime_string, datetime_format_string
+    )
 
 
 def datetime_to_int(dt: datetime.date) -> int:
@@ -932,7 +936,7 @@ def get_sql_dialect_floating_point_infinity_value(
             return -np.inf
         else:
             return np.inf
-    else:
+    else:  # noqa: PLR5501
         if negative:
             return res["NegativeInfinity"]
         else:

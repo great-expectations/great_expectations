@@ -31,10 +31,16 @@ from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations.cli import cli
 
+pytestmark = pytest.mark.cli
+
 
 def _run_notebook(context: FileDataContext) -> None:
-    uncommitted_dir = os.path.join(context.root_directory, context.GX_UNCOMMITTED_DIR)
-    expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
+    uncommitted_dir = os.path.join(  # noqa: PTH118
+        context.root_directory, context.GX_UNCOMMITTED_DIR
+    )
+    expected_notebook = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "datasource_new.ipynb"
+    )
     with open(expected_notebook) as f:
         nb = nbformat.read(f, as_version=4)
     ep = ExecutePreprocessor(timeout=60, kernel_name="python3")
@@ -99,7 +105,7 @@ def test_cli_datasource_new_run_from_ge_dir_absolute_data_path(
     mock_subprocess, monkeypatch, empty_data_context, filesystem_csv_2
 ):
     context = empty_data_context
-    files_directory = os.path.basename(filesystem_csv_2)
+    files_directory = os.path.basename(filesystem_csv_2)  # noqa: PTH119
     monkeypatch.chdir(context.root_directory)
     invocation = "datasource new"
     invocation_input = f"Y\n1\n1\n{filesystem_csv_2}\n"
@@ -114,7 +120,7 @@ def test_cli_datasource_new_run_from_ge_dir_relative_data_path(
     mock_subprocess, monkeypatch, empty_data_context, filesystem_csv_2
 ):
     context = empty_data_context
-    files_directory = os.path.basename(filesystem_csv_2)
+    files_directory = os.path.basename(filesystem_csv_2)  # noqa: PTH119
     monkeypatch.chdir(context.root_directory)
     invocation = "datasource new"
     invocation_input = f"Y\n1\n1\n../../{files_directory}\n"
@@ -129,8 +135,8 @@ def test_cli_datasource_new_run_from_adjacent_dir_absolute_data_path(
     mock_subprocess, monkeypatch, empty_data_context, filesystem_csv_2
 ):
     context = empty_data_context
-    adjacent_dir = os.path.dirname(context.root_directory)
-    files_directory = os.path.basename(filesystem_csv_2)
+    adjacent_dir = os.path.dirname(context.root_directory)  # noqa: PTH120
+    files_directory = os.path.basename(filesystem_csv_2)  # noqa: PTH119
     monkeypatch.chdir(adjacent_dir)
     invocation = "datasource new"
     invocation_input = f"Y\n1\n1\n{filesystem_csv_2}\n"
@@ -145,8 +151,8 @@ def test_cli_datasource_new_run_from_adjacent_dir_relative_data_path(
     mock_subprocess, monkeypatch, empty_data_context, filesystem_csv_2
 ):
     context = empty_data_context
-    adjacent_dir = os.path.dirname(context.root_directory)
-    files_directory = os.path.basename(filesystem_csv_2)
+    adjacent_dir = os.path.dirname(context.root_directory)  # noqa: PTH120
+    files_directory = os.path.basename(filesystem_csv_2)  # noqa: PTH119
     monkeypatch.chdir(adjacent_dir)
     invocation = "datasource new"
     invocation_input = f"Y\n1\n1\n../{files_directory}\n"
@@ -161,7 +167,7 @@ def test_cli_datasource_new_run_from_misc_dir_using_config_flag_absolute_data_pa
     mock_subprocess, monkeypatch, empty_data_context, filesystem_csv_2, misc_directory
 ):
     context = empty_data_context
-    files_directory = os.path.basename(filesystem_csv_2)
+    files_directory = os.path.basename(filesystem_csv_2)  # noqa: PTH119
     monkeypatch.chdir(misc_directory)
     invocation = f"--config {context.root_directory} datasource new"
     invocation_input = f"Y\n1\n1\n{filesystem_csv_2}\n"
@@ -176,7 +182,7 @@ def test_cli_datasource_new_run_from_misc_dir_using_config_flag_relative_data_pa
     mock_subprocess, monkeypatch, empty_data_context, filesystem_csv_2, misc_directory
 ):
     context = empty_data_context
-    files_directory = os.path.basename(filesystem_csv_2)
+    files_directory = os.path.basename(filesystem_csv_2)  # noqa: PTH119
     monkeypatch.chdir(misc_directory)
     invocation = f"--config {context.root_directory} datasource new"
     invocation_input = f"Y\n1\n1\n../{files_directory}\n"

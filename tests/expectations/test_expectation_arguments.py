@@ -7,6 +7,7 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
+from great_expectations.compatibility import pyspark
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
@@ -18,7 +19,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.validator.validator import Validator
-from great_expectations.compatibility import pyspark
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +40,7 @@ def test_spark_df(test_pandas_df, spark_session):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.spark
 def test_catch_exceptions_no_exceptions(
     mock_emit, in_memory_runtime_context, test_spark_df
 ):
@@ -154,6 +155,7 @@ def test_catch_exceptions_no_exceptions(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.spark
 def test_catch_exceptions_exception_occurred_catch_exceptions_false(
     mock_emit, in_memory_runtime_context, test_spark_df
 ):
@@ -227,8 +229,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
     # Test calling "validator.validate()" explicitly.
 
     with pytest.raises(gx_exceptions.MetricResolutionError) as e:
-        # noinspection PyUnusedLocal
-        validator_validation: ExpectationSuiteValidationResult = validator.validate(
+        validator_validation = validator.validate(  # noqa: F841
             **runtime_environment_arguments
         )
     assert e.value.message == expected_exception_message
@@ -245,7 +246,6 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
     )
 
     with pytest.raises(gx_exceptions.MetricResolutionError) as e:
-        # noinspection PyUnusedLocal
         result: ExpectationValidationResult = (
             validator.expect_column_values_to_not_be_null(**expectation_parameters)
         )
@@ -271,6 +271,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.spark
 def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     mock_emit, in_memory_runtime_context, test_spark_df
 ):
@@ -420,7 +421,8 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_result_format_configured_no_set_default_override(
+@pytest.mark.spark
+def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
     mock_emit, in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
@@ -642,6 +644,7 @@ def test_result_format_configured_no_set_default_override(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.spark
 def test_result_format_configured_with_set_default_override(
     mock_emit, in_memory_runtime_context, test_spark_df
 ):
@@ -811,6 +814,7 @@ def test_result_format_configured_with_set_default_override(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.filesystem
 def test_in_memory_runtime_context_configured_with_usage_stats_handler(
     mock_emit, in_memory_runtime_context, test_pandas_df
 ):
@@ -820,6 +824,7 @@ def test_in_memory_runtime_context_configured_with_usage_stats_handler(
     handler = UsageStatisticsHandler(
         data_context=context,
         data_context_id=context._data_context_id,
+        oss_id=None,
         usage_statistics_url="http://fakeendpoint.com",
     )
     context._usage_statistics_handler = handler

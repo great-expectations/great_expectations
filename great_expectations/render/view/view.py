@@ -132,7 +132,7 @@ class DefaultJinjaView:
         return url
 
     @contextfilter
-    def render_content_block(
+    def render_content_block(  # noqa: PLR0911, PLR0913, PLR0912
         self,
         jinja_context,
         content_block,
@@ -171,7 +171,7 @@ class DefaultJinjaView:
                         idx,
                         content_block_id=new_content_block_id,
                     )
-                else:
+                else:  # noqa: PLR5501
                     if render_to_markdown:
                         rendered_block += str(content_block_el)
                     else:
@@ -314,7 +314,7 @@ class DefaultJinjaView:
         except OSError:
             return markdown
 
-    def render_string_template(self, template):
+    def render_string_template(self, template):  # noqa: PLR0912
         # NOTE: Using this line for debugging. This should probably be logged...?
         # print(template)
 
@@ -560,7 +560,7 @@ class DefaultMarkdownPageView(DefaultJinjaView):
         )
 
     @contextfilter
-    def render_content_block(
+    def render_content_block(  # noqa: PLR0913
         self,
         jinja_context,
         content_block,

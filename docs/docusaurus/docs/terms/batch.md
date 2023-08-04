@@ -7,11 +7,11 @@ import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Batch is a selection of records from a <TechnicalTag relative="../" tag="data_asset" text="Data Asset" />.
 
-A Batch provides a consistent interface for describing specific data from any <TechnicalTag relative="../" tag="datasource" text="Datasource" />, to support building <TechnicalTag relative="../" tag="metric" text="Metrics" />, <TechnicalTag relative="../" tag="validation" text="Validation" />, and <TechnicalTag relative="../" tag="profiling" text="Profiling" />.
+A Batch provides a consistent interface for describing specific data from any <TechnicalTag relative="../" tag="datasource" text="Data Source" />, to support building <TechnicalTag relative="../" tag="metric" text="Metrics" />, <TechnicalTag relative="../" tag="validation" text="Validation" />, and <TechnicalTag relative="../" tag="profiling" text="Profiling" />.
 
 Batches are designed to be "MECE" -- mutually exclusive and collectively exhaustive partitions of Data Assets. However, in many cases the same *underlying data* could be present in multiple batches, for example if an analyst runs an analysis against an entire table of data each day, with only a fraction of new records being added.
 
-Consequently, the best way to understand what "makes a Batch a Batch" is the act of attending to it. Once you have defined how a Datasource's data should be sliced (even if that is to define a single slice containing all of the data in the Data Asset), you have determined what makes those particular Batches "a Batch."  The Batch is the fundamental unit that Great Expectations will validate and about which it will collect metrics.
+Consequently, the best way to understand what "makes a Batch a Batch" is the act of attending to it. Once you have defined how a Data Source's data should be sliced (even if that is to define a single slice containing all of the data in the Data Asset), you have determined what makes those particular Batches "a Batch."  The Batch is the fundamental unit that Great Expectations will validate and about which it will collect metrics.
 
 ## Relationship to other objects
 
@@ -27,15 +27,13 @@ Batches are also used by <TechnicalTag relative="../" tag="validator" text="Vali
 
 When creating Expectations interactively, a <TechnicalTag relative="../" tag="validator" text="Validator" /> needs access to a specific Batch of data against which to check Expectations. The [how to guide on interactively creating expectations](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md) covers using a Batch in this use case.
 
-To specify which Batches of data should be used when using Great Expectations to generate statistics and candidate Expectations for your data. see [How to create and edit Expectations with the User Configurable Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md).
-
 During Validation, a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> checks a Batch of data against Expectations from an <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" />. You must specify a Batch Request for the Checkpoint to run.
 
 ## Consistency
 
 A Batch is always part of a Data Asset. A Data Asset can be configured to slice its data into batches in many ways. For example, it can be based on an arbitrary field, including datetimes, from the data.
 
-A Batch is always built using a Batch Request. See [Batch Request](./batch_request.md) or a specific [connecting to data guide](../guides/connecting_to_your_data/index.md).
+A Batch is always built using a Batch Request. See [Batch Request](./batch_request.md) or [Connect to source data](../guides/connecting_to_your_data/connect_to_data_lp.md).
 
 Once a Data Asset identifies the specific data that will be included in a Batch based on the Batch Request, it creates a reference to the data and adds metadata to including the parameters used in the Batch Request.
 

@@ -116,7 +116,7 @@ def quentin_implicit_invocation_result_frozen_time(
     return cast(GrowthNumericDataAssistantResult, data_assistant_result)
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 6.90s
 def test_growth_numeric_data_assistant_result_serialization(
     bobby_growth_numeric_data_assistant_result: GrowthNumericDataAssistantResult,
@@ -135,7 +135,7 @@ def test_growth_numeric_data_assistant_result_serialization(
     assert len(bobby_growth_numeric_data_assistant_result.profiler_config.rules) == 4
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -162,7 +162,7 @@ def test_growth_numeric_data_assistant_result_get_expectation_suite(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_growth_numeric_data_assistant_metrics_count(
     bobby_growth_numeric_data_assistant_result: GrowthNumericDataAssistantResult,
 ) -> None:
@@ -194,7 +194,7 @@ def test_growth_numeric_data_assistant_metrics_count(
     assert num_metrics == 121
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_growth_numeric_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_growth_numeric_data_assistant_result: GrowthNumericDataAssistantResult,
 ):
@@ -220,7 +220,7 @@ def test_growth_numeric_data_assistant_result_batch_id_to_batch_identifier_displ
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 39.26s
 def test_growth_numeric_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -266,7 +266,7 @@ def test_growth_numeric_data_assistant_get_metrics_and_expectations_using_implic
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 38.26s
 def test_growth_numeric_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
     quentin_columnar_table_multi_batch_data_context,
@@ -292,7 +292,7 @@ def test_growth_numeric_data_assistant_get_metrics_and_expectations_using_implic
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 19s
 def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> None:
     """
@@ -397,7 +397,7 @@ def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> 
     assert results.success is False
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 149 seconds
 def test_spark_happy_path_growth_numeric_data_assistant(
     empty_data_context, spark_df_taxi_data_schema
@@ -419,7 +419,7 @@ def test_spark_happy_path_growth_numeric_data_assistant(
         __file__,
         os.path.join(  # noqa: PTH118
             "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-        ),  # noqa: PTH118
+        ),
     )
 
     datasource_config: dict = {
@@ -499,7 +499,7 @@ def test_spark_happy_path_growth_numeric_data_assistant(
     assert results.success is False
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 104 seconds
 def test_sql_happy_path_growth_numeric_data_assistant(
     empty_data_context, test_backends, sa

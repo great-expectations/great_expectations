@@ -82,7 +82,7 @@ class _FilePathDataAsset(DataAsset):
         "batch_metadata",
         "batching_regex",  # file_path argument
         "kwargs",  # kwargs need to be unpacked and passed separately
-        "batch_metadata",
+        "batch_metadata",  # noqa: PLW0130
         "connect_options",
     }
 
@@ -182,6 +182,11 @@ class _FilePathDataAsset(DataAsset):
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
+
+        Note:
+            Option "batch_slice" is supported for all "DataAsset" extensions of this class identically.  This mechanism
+            applies to every "Datasource" type and any "ExecutionEngine" that is capable of loading data from files on
+            local and/or cloud/networked filesystems (currently, Pandas and Spark backends work with files).
         """
         if options:
             for option, value in options.items():

@@ -1,4 +1,5 @@
-import nbformat
+from typing import TYPE_CHECKING
+
 import pytest
 
 from great_expectations import DataContext
@@ -6,6 +7,11 @@ from great_expectations.datasource.types import DatasourceTypes
 from great_expectations.render.renderer.datasource_new_notebook_renderer import (
     DatasourceNewNotebookRenderer,
 )
+
+if TYPE_CHECKING:
+    import nbformat
+
+pytestmark = pytest.mark.filesystem
 
 
 @pytest.fixture

@@ -28,9 +28,7 @@ from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
 )
-from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # noqa: TCH001 # needed for pydantic
-)
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
@@ -50,9 +48,11 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
 )
 
 if TYPE_CHECKING:
+    from sqlalchemy.sql import quoted_name  # noqa: TID251 # type-checking only
     from typing_extensions import Self
 
     from great_expectations.compatibility import sqlalchemy
+    from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
@@ -397,6 +397,15 @@ Splitter = Union[
 
 
 class _SQLAsset(DataAsset):
+    """A _SQLAsset Mixin
+
+    This is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality
+    that can be used by different SQL datasource subclasses.
+
+    For example see TableAsset defined in this module and SqliteTableAsset defined in
+    sqlite_datasource.py
+    """
+
     # Instance fields
     type: str = pydantic.Field("_sql_asset")
     splitter: Optional[Splitter] = None
@@ -425,6 +434,10 @@ class _SQLAsset(DataAsset):
     def _add_splitter(self: Self, splitter: Splitter) -> Self:
         self.splitter = splitter
         self.test_splitter_connection()
+        # persist the config changes
+        context: AbstractDataContext | None
+        if context := self._datasource._data_context:
+            context._save_project_config(self._datasource)
         return self
 
     @public_api
@@ -759,6 +772,7 @@ class _SQLAsset(DataAsset):
         raise NotImplementedError
 
 
+@public_api
 class QueryAsset(_SQLAsset):
     # Instance fields
     type: Literal["query"] = "query"
@@ -787,19 +801,15 @@ class QueryAsset(_SQLAsset):
         }
 
 
+@public_api
 class TableAsset(_SQLAsset):
-    """A _SQLAsset Mixin
-
-    This is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality
-    that can be used by different SQL datasource subclasses.
-
-    For example see TableAsset defined in this module and SqliteTableAsset defined in
-    sqlite_datasource.py
-    """
-
     # Instance fields
     type: Literal["table"] = "table"
-    table_name: str
+    # TODO: quoted_name or str
+    table_name: str = pydantic.Field(
+        "",
+        description="Name of the SQL table. Will default to the value of `name` if not provided.",
+    )
     schema_name: Optional[str] = None
 
     @property
@@ -809,6 +819,38 @@ class TableAsset(_SQLAsset):
             if self.schema_name
             else self.table_name
         )
+
+    @pydantic.validator("table_name", pre=True, always=True)
+    def _default_table_name(cls, table_name: str, values: dict, **kwargs) -> str:
+        if not (validated_table_name := table_name or values.get("name")):
+            raise ValueError(
+                "table_name cannot be empty and should default to name if not provided"
+            )
+
+        return validated_table_name
+
+    @pydantic.validator("table_name")
+    def _resolve_quoted_name(cls, table_name: str) -> str | quoted_name:
+        table_name_is_quoted: bool = cls._is_bracketed_by_quotes(table_name)
+
+        from great_expectations.compatibility import sqlalchemy
+
+        if sqlalchemy.quoted_name:
+            if isinstance(table_name, sqlalchemy.quoted_name):
+                return table_name
+
+            if table_name_is_quoted:
+                # https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.quoted_name.quote
+                # Remove the quotes and add them back using the sqlalchemy.quoted_name function
+                # TODO: We need to handle nested quotes
+                table_name = table_name.strip("'").strip('"')
+
+            return sqlalchemy.quoted_name(
+                value=table_name,
+                quote=table_name_is_quoted,
+            )
+
+        return table_name
 
     def test_connection(self) -> None:
         """Test the connection for the TableAsset.
@@ -826,11 +868,10 @@ class TableAsset(_SQLAsset):
                 f'"{self.schema_name}" does not exist.'
             )
 
-        table_exists = sa.inspect(engine).has_table(
+        if not inspector.has_table(
             table_name=self.table_name,
             schema=self.schema_name,
-        )
-        if not table_exists:
+        ):
             raise TestConnectionError(
                 f'Attempt to connect to table: "{self.qualified_name}" failed because the table '
                 f'"{self.table_name}" does not exist.'
@@ -867,6 +908,21 @@ class TableAsset(_SQLAsset):
             "schema_name": self.schema_name,
             "batch_identifiers": {},
         }
+
+    @staticmethod
+    def _is_bracketed_by_quotes(target: str) -> bool:
+        """Returns True if the target string is bracketed by quotes.
+
+        Arguments:
+            target: A string to check if it is bracketed by quotes.
+
+        Returns:
+            True if the target string is bracketed by quotes.
+        """
+        for quote in ["'", '"']:
+            if target.startswith(quote) and target.endswith(quote):
+                return True
+        return False
 
 
 @public_api
@@ -918,13 +974,7 @@ class SQLDatasource(Datasource):
     def get_engine(self) -> sqlalchemy.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
-                model_dict = self.dict(
-                    exclude=self._EXCLUDED_EXEC_ENG_ARGS,
-                    config_provider=self._config_provider,
-                )
-                connection_string = model_dict.pop("connection_string")
-                kwargs = model_dict.pop("kwargs", {})
-                self._engine = sa.create_engine(connection_string, **kwargs)
+                self._engine = self._create_engine()
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
                 # one possible case is a missing plugin (e.g. psycopg2)
@@ -935,6 +985,15 @@ class SQLDatasource(Datasource):
                 ) from e
             self._cached_connection_string = self.connection_string
         return self._engine
+
+    def _create_engine(self) -> sqlalchemy.Engine:
+        model_dict = self.dict(
+            exclude=self._get_exec_engine_excludes(),
+            config_provider=self._config_provider,
+        )
+        connection_string = model_dict.pop("connection_string")
+        kwargs = model_dict.pop("kwargs", {})
+        return sa.create_engine(connection_string, **kwargs)
 
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the SQLDatasource.
@@ -959,10 +1018,10 @@ class SQLDatasource(Datasource):
                 asset.test_connection()
 
     @public_api
-    def add_table_asset(
+    def add_table_asset(  # noqa: PLR0913
         self,
         name: str,
-        table_name: str,
+        table_name: str = "",
         schema_name: Optional[str] = None,
         order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,

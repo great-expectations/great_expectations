@@ -1,4 +1,4 @@
-from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
@@ -46,8 +46,9 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
         # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
         # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created with
         # the column we will be performing the expectation on, and the query is performed against it.
-        dialect = kwargs.get("_dialect", None)
-        sql_engine = kwargs.get("_sqlalchemy_engine", None)
+        dialect = kwargs.get("_dialect")
+        sql_engine = kwargs.get("_sqlalchemy_engine")
+        execution_engine = kwargs.get("_execution_engine")
         try:
             dialect_name = dialect.dialect.name
         except AttributeError:
@@ -62,14 +63,7 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
                 source_table=_table,
                 column_name=column.name,
             )
-            if sqlalchemy.Engine and isinstance(sql_engine, sqlalchemy.Engine):
-                with sql_engine.connect() as connection:
-                    with connection.begin():
-                        connection.execute(sa.text(temp_table_stmt))
-            else:
-                # sql_engine is a connection
-                with sql_engine.begin():
-                    sql_engine.execute(sa.text(temp_table_stmt))
+            execution_engine.execute_query_in_transaction(sa.text(temp_table_stmt))
             dup_query = (
                 sa.select(column)
                 .select_from(sa.text(temp_table_name))

@@ -11,7 +11,7 @@ from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # noqa: TCH001 # needed at runtime
+    ConfigStr,
     _check_config_substitutions_needed,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 _MISSING: Final = object()
 
 if TYPE_CHECKING:
+    from great_expectations.compatibility.azure import BlobServiceClient
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         _SPARK_FILE_PATH_ASSET_TYPES_UNION,
     )
@@ -53,9 +54,8 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
     azure_options: Dict[str, Union[ConfigStr, Any]] = {}
 
     _account_name: str = pydantic.PrivateAttr(default="")
-    _azure_client: Union[azure.BlobServiceClient, None] = pydantic.PrivateAttr(
-        default=None
-    )
+    # on 3.11 the annotation must be type-checking import otherwise it will fail at import time
+    _azure_client: Union[BlobServiceClient, None] = pydantic.PrivateAttr(default=None)
 
     def _get_azure_client(self) -> azure.BlobServiceClient:
         azure_client: Union[azure.BlobServiceClient, None] = self._azure_client
@@ -80,7 +80,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
                 )
 
             # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
-            if azure.BlobServiceClient:
+            if azure.BlobServiceClient:  # type: ignore[truthy-function] # False if NotImported
                 try:
                     if conn_str is not None:
                         self._account_name = re.search(  # type: ignore[union-attr] # re.search could return None
@@ -111,6 +111,11 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
 
             self._azure_client = azure_client
 
+        if not azure_client:
+            raise SparkAzureBlobStorageDatasourceError(
+                "Failed to return `azure_client`"
+            )
+
         return azure_client
 
     def test_connection(self, test_assets: bool = True) -> None:
@@ -134,12 +139,13 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             for asset in self.assets:
                 asset.test_connection()
 
-    def _build_data_connector(
+    def _build_data_connector(  # noqa: PLR0913
         self,
         data_asset: _SPARK_FILE_PATH_ASSET_TYPES_UNION,
         abs_container: str = _MISSING,  # type: ignore[assignment] # _MISSING is used as sentinel value
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
+        abs_recursive_file_discovery: bool = False,
         **kwargs,
     ) -> None:
         """Builds and attaches the `AzureBlobStorageDataConnector` to the asset."""
@@ -161,6 +167,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             container=abs_container,
             name_starts_with=abs_name_starts_with,
             delimiter=abs_delimiter,
+            recursive_file_discovery=abs_recursive_file_discovery,
             file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format,
         )
 
@@ -173,5 +180,6 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
                 container=abs_container,
                 name_starts_with=abs_name_starts_with,
                 delimiter=abs_delimiter,
+                recursive_file_discovery=abs_recursive_file_discovery,
             )
         )

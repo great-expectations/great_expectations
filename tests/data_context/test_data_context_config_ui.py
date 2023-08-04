@@ -124,6 +124,7 @@ def default_spark_datasource_config():
     }
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -172,6 +173,7 @@ def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
     )
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_S3StoreBackendDefaults(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -278,6 +280,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
     )
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -406,6 +409,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
     )
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaults(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -473,6 +477,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
     )
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaults_no_root_directory(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -522,6 +527,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
     )
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_GCSStoreBackendDefaults(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -641,6 +647,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
     )
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -779,6 +786,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
     )
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -920,6 +928,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
     )
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameters(
     construct_data_context_config, default_pandas_datasource_config
 ):
@@ -1100,6 +1109,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
     )
 
 
+@pytest.mark.unit
 def test_override_general_defaults(
     construct_data_context_config,
     default_pandas_datasource_config,
@@ -1368,6 +1378,7 @@ def test_override_general_defaults(
     )
 
 
+@pytest.mark.big
 @pytest.mark.slow  # 1.81s
 def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_variable_sub(
     monkeypatch, construct_data_context_config, default_pandas_datasource_config
@@ -1489,6 +1500,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
     )
 
 
+@pytest.mark.unit
 def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
     construct_data_context_config,
 ):

@@ -142,7 +142,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
                     if icon and os.path.exists(icon):  # noqa: PTH110
                         package_name: str = os.path.basename(  # noqa: PTH119
                             os.getcwd()  # noqa: PTH109
-                        )  # noqa: PTH119, PTH109
+                        )
                         url: str = os.path.join(  # noqa: PTH118
                             "https://raw.githubusercontent.com/great-expectations/great_expectations/develop/contrib",
                             package_name,
@@ -173,7 +173,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
                 if picture_path and os.path.exists(picture_path):  # noqa: PTH110
                     package_name: str = os.path.basename(  # noqa: PTH119
                         os.getcwd()  # noqa: PTH109
-                    )  # noqa: PTH119, PTH109
+                    )
                     url: str = os.path.join(  # noqa: PTH118
                         "https://raw.githubusercontent.com/great-expectations/great_expectations/develop/contrib",
                         package_name,

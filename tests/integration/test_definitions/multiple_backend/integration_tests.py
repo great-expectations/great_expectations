@@ -28,18 +28,18 @@ deployment_patterns = [
 ]
 
 cross_table_comparisons = [
-    # Uncomment after mysql warnings are resolved and mysql stage of docs-integration is uncommented
-    # IntegrationTestFixture(
-    #     name="cross_table_comparisons",
-    #     user_flow_script="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     util_script="tests/test_utils.py",
-    #     backend_dependencies=[
-    #         BackendDependencies.MYSQL,
-    #         BackendDependencies.POSTGRESQL,
-    #     ],
-    # ),
+    IntegrationTestFixture(
+        # Run locally via `pytest -v --mysql --postgresql --docs-tests -k "test_docs[cross_table_comparisons]" tests/integration/test_script_runner.py`
+        name="cross_table_comparisons",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        util_script="tests/test_utils.py",
+        backend_dependencies=[
+            BackendDependencies.MYSQL,
+            BackendDependencies.POSTGRESQL,
+        ],
+    ),
 ]
 
 creating_custom_expectations = [

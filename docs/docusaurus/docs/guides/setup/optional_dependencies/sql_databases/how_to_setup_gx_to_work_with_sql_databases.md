@@ -1,5 +1,5 @@
 ---
-title: How to set up GX to work with SQL databases
+title: Connect to a SQL database
 tag: [how-to, setup]
 keywords: [Great Expectations, SQL]
 
@@ -9,9 +9,6 @@ keywords: [Great Expectations, SQL]
 
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
 import Prerequisites from '/docs/components/_prerequisites.jsx'
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 <!-- ## Prerequisites -->
 
@@ -69,14 +66,6 @@ The above pip instruction will install GX with basic SQL support through SqlAlch
 - Redshift: `pip install 'great_expectations[redshift]'`
 - Snowflake: `pip install 'great_expectations[snowflake]'`
 - Trino: `pip install 'great_expectations[trino]'`
-
-:::
-
-:::caution SqlAlchemy version
-
-Great Expectations does not currently support SqlAlchemy 2.0.
-
-If you install SqlAlchemy independently of the above pip commands, be certain to install the most recent SqlAlchemy version prior to 2.0.
 
 :::
 

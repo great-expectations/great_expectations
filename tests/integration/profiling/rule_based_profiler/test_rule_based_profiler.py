@@ -1,9 +1,11 @@
-import os
+from __future__ import annotations
+
+import pathlib
+from typing import TYPE_CHECKING
 from unittest import mock
 
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -12,9 +14,13 @@ from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
+
 yaml = YAMLHandler()
 
 
+@pytest.mark.filesystem
 def test_batches_are_accessible(
     multibatch_generic_csv_generator,
     multibatch_generic_csv_generator_context,
@@ -26,9 +32,10 @@ def test_batches_are_accessible(
     This test most likely duplicates tests elsewhere, but it is more of a test of the configurable fixture.
     """
 
-    context: DataContext = multibatch_generic_csv_generator_context
+    context: AbstractDataContext = multibatch_generic_csv_generator_context
     data_relative_path = "../data"
-    data_path = os.path.join(context.root_directory, data_relative_path)
+    assert context.root_directory
+    data_path = pathlib.Path(context.root_directory, data_relative_path)
     datasource_name = "generic_csv_generator"
     data_connector_name = "daily_data_connector"
     asset_name = "daily_data_asset"
@@ -132,13 +139,14 @@ def test_batches_are_accessible(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @pytest.mark.slow  # 2.04s
+@pytest.mark.filesystem
 def test_profile_includes_citations(
     mock_emit,
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
     # Load data context
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     # Load profiler configs & loop (run tests for each one)
     yaml_config: str = alice_columnar_table_single_batch["profiler_config"]
@@ -174,7 +182,7 @@ def test_profile_includes_citations(
     )
 
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    actual_events: list[mock._Call] = mock_emit.call_args_list
     assert actual_events[-1][0][0]["event"] == UsageStatsEvents.RULE_BASED_PROFILER_RUN
 
 
@@ -182,13 +190,14 @@ def test_profile_includes_citations(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @pytest.mark.slow  # 2.16s
+@pytest.mark.filesystem
 def test_profile_get_expectation_suite(
     mock_emit,
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
     # Load data context
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     # Load profiler configs & loop (run tests for each one)
     yaml_config: str = alice_columnar_table_single_batch["profiler_config"]
@@ -226,7 +235,7 @@ def test_profile_get_expectation_suite(
     assert mock_emit.call_count == 44
 
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    actual_events: list[mock._Call] = mock_emit.call_args_list
     assert (
         actual_events[-1][0][0]["event"]
         == UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE

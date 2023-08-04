@@ -1,5 +1,5 @@
 ---
-title: How to create and edit Expectations based on domain knowledge, without inspecting data directly
+title: Create and edit Expectations based on domain knowledge, without inspecting data directly
 tag: [how-to, getting started]
 description: Create ExpectationConfigurations based on domain knowledge.
 keywords: [Expectations, Domain Knowledge]
@@ -35,7 +35,7 @@ No.  The interactive method used to create and edit Expectations does not edit o
 
 - Great Expectations installed in a Python environment
 - A Filesystem Data Context for your Expectations
-- Created a Datasource from which to request a Batch of data for introspection
+- Created a Data Source from which to request a Batch of data for introspection
 
 </Prerequisites>
 
@@ -66,7 +66,7 @@ See one of the following guides:
 <details>
 <summary>
 
-### If you haven't created a Datasource
+### If you haven't created a Data Source
 
 </summary>
 

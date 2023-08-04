@@ -24,7 +24,7 @@ class ColumnTypes(TableMetricProvider):
     default_kwarg_values = {"include_nested": True}
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: PLR0913
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
@@ -41,7 +41,7 @@ class ColumnTypes(TableMetricProvider):
         ]
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -71,7 +71,7 @@ class ColumnTypes(TableMetricProvider):
         return _get_sqlalchemy_column_metadata(execution_engine.engine, batch_data)
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,
@@ -114,14 +114,18 @@ def _get_spark_column_metadata(field, parent_name="", include_nested=True):
 
     if pyspark.types and isinstance(field, pyspark.types.StructType):
         for child in field.fields:
-            cols += _get_spark_column_metadata(child, parent_name=parent_name)
+            cols += _get_spark_column_metadata(
+                child, parent_name=parent_name, include_nested=include_nested
+            )
     elif pyspark.types and isinstance(field, pyspark.types.StructField):
-        if "." in field.name:
+        if include_nested and "." in field.name:
             name = f"{parent_name}`{field.name}`"
         else:
             name = parent_name + field.name
+
         field_metadata = {"name": name, "type": field.dataType}
         cols.append(field_metadata)
+
         if (
             include_nested
             and pyspark.types

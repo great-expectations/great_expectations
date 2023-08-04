@@ -31,7 +31,7 @@ from great_expectations.datasource import BaseDatasource
 from great_expectations.util import get_context
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
+    from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.types.checkpoint_result import (
         CheckpointResult,
     )
@@ -81,7 +81,7 @@ When you run this notebook, Great Expectations will store these expectations in 
     confirm_proceed_or_exit()
 
 
-def get_or_create_expectation_suite(
+def get_or_create_expectation_suite(  # noqa: PLR0913
     expectation_suite_name: Optional[str],
     data_context: FileDataContext,
     data_asset_name: Optional[str] = None,
@@ -335,12 +335,10 @@ def load_checkpoint(  # type: ignore[return] # sys.exit if no checkpoint
     context: FileDataContext,
     checkpoint_name: str,
     usage_event: str,
-) -> Union[Checkpoint, LegacyCheckpoint]:
+) -> Checkpoint:
     """Load a Checkpoint or raise helpful errors."""
     try:
-        checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
-            name=checkpoint_name
-        )
+        checkpoint: Checkpoint = context.get_checkpoint(name=checkpoint_name)
         return checkpoint
     except (
         gx_exceptions.CheckpointNotFoundError,
@@ -404,7 +402,7 @@ def select_datasource(
     return data_source
 
 
-def load_data_context_with_error_handling(
+def load_data_context_with_error_handling(  # noqa: PLR0912
     directory: Optional[str], from_cli_upgrade_command: bool = False
 ) -> Optional[FileDataContext]:
     """Return a DataContext with good error handling and exit codes."""
@@ -596,7 +594,7 @@ To learn more about the upgrade process, visit \
     sys.exit(0)
 
 
-def upgrade_project_one_or_multiple_versions_increment(
+def upgrade_project_one_or_multiple_versions_increment(  # noqa: PLR0912
     directory: str,
     context: FileDataContext,
     ge_config_version: float,
@@ -834,7 +832,7 @@ def upgrade_project_up_to_one_version_increment(
     sys.exit(0)
 
 
-def confirm_proceed_or_exit(
+def confirm_proceed_or_exit(  # noqa: PLR0913
     confirm_prompt: str = "Would you like to proceed?",
     continuation_message: str = "Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
     exit_on_no: bool = True,

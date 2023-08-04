@@ -1,31 +1,44 @@
 from __future__ import annotations
 
+import logging
 import pathlib
+import re
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
 
+import pandas as pd
 import pytest
 import requests
 
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
-from tests.datasource.fluent.conftest import (
+from great_expectations.datasource.fluent.constants import (
+    DEFAULT_PANDAS_DATA_ASSET_NAME,
+)
+from tests.datasource.fluent._fake_cloud_api import (
+    DEFAULT_HEADERS,
     FAKE_ORG_ID,
     GX_CLOUD_MOCK_BASE_URL,
+    UUID_REGEX,
+    CallbackResult,
+    CloudResponseSchema,
+)
+from tests.datasource.fluent.conftest import (
+    CloudDetails,
 )
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
+    from requests import PreparedRequest
     from responses import RequestsMock
 
-
-# apply markers to entire test module
-# NOTE: removing this integration marker to force running in PR pipeline
-# pytestmark = [pytest.mark.integration]
+    from tests.datasource.fluent._fake_cloud_api import FakeDBTypedDict
 
 
 yaml = YAMLHandler()
+
+LOGGER = logging.getLogger(__name__)
 
 
 @pytest.fixture
@@ -59,6 +72,7 @@ def test_add_fluent_datasource_are_persisted(
     )
 
 
+@pytest.mark.filesystem
 def test_add_fluent_datasource_are_persisted_without_duplicates(
     empty_file_context: FileDataContext,
     db_file: pathlib.Path,
@@ -79,6 +93,32 @@ def test_add_fluent_datasource_are_persisted_without_duplicates(
     assert datasource_name not in yaml_dict["datasources"]
 
 
+@pytest.mark.cloud
+def test_splitters_are_persisted_on_creation(
+    empty_cloud_context_fluent: CloudDataContext,
+    cloud_api_fake_db: FakeDBTypedDict,
+    db_file: pathlib.Path,
+):
+    context = empty_cloud_context_fluent
+
+    datasource_name = "save_ds_splitters_test"
+    datasource = context.sources.add_sqlite(
+        name=datasource_name, connection_string=f"sqlite:///{db_file}"
+    )
+    my_asset = datasource.add_table_asset("table_partitioned_by_date_column__A")
+    my_asset.test_connection()
+    my_asset.add_splitter_year("date")
+
+    datasource_config = cloud_api_fake_db["datasources"][str(datasource.id)]["data"][
+        "attributes"
+    ]["datasource_config"]
+    print(f"'{datasource_name}' config -> \n\n{pf(datasource_config)}")
+
+    # splitters should be present
+    assert datasource_config["assets"][0]["splitter"]
+
+
+@pytest.mark.filesystem
 def test_assets_are_persisted_on_creation_and_removed_on_deletion(
     empty_file_context: FileDataContext,
     db_file: pathlib.Path,
@@ -110,7 +150,8 @@ def test_assets_are_persisted_on_creation_and_removed_on_deletion(
     assert asset_name not in fds_after_delete[datasource_name].get("assets", {})
 
 
-@pytest.mark.cloud
+# This test is parameterized by the fixture `empty_context`. This fixture will mark the test as
+# cloud or filesystem as appropriate
 def test_context_add_or_update_datasource(
     cloud_api_fake: RequestsMock,
     empty_contexts: CloudDataContext | FileDataContext,
@@ -176,7 +217,8 @@ def test_cloud_add_or_update_datasource_kw_vs_positional(
     assert datasource1 == datasource2 == datasource3
 
 
-@pytest.mark.cloud
+# This test is parameterized by the fixture `empty_context`. This fixture will mark the test as
+# cloud or filesystem as appropriate
 def test_context_add_and_then_update_datasource(
     cloud_api_fake: RequestsMock,
     empty_contexts: CloudDataContext | FileDataContext,
@@ -203,7 +245,8 @@ def test_context_add_and_then_update_datasource(
     assert datasource2 == datasource3
 
 
-@pytest.mark.cloud
+# This test is parameterized by the fixture `empty_context`. This fixture will mark the test as
+# cloud or filesystem as appropriate
 def test_update_non_existant_datasource(
     cloud_api_fake: RequestsMock,
     empty_contexts: CloudDataContext | FileDataContext,
@@ -236,7 +279,7 @@ def test_cloud_context_delete_datasource(
     print(f"Before Delete -> {response1}\n{pf(response1.json())}\n")
     assert response1.status_code == 200
 
-    context.sources.delete_pandas_filesystem(datasource.name)
+    context.sources.delete(datasource.name)
     assert datasource.name not in context.fluent_datasources
 
     cloud_api_fake.assert_call_count(
@@ -255,6 +298,61 @@ def test_cloud_context_delete_datasource(
     assert response2.status_code == 404
 
 
+@pytest.fixture
+def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDetails):
+    def verify_asset_name_cb(request: PreparedRequest) -> CallbackResult:
+        if request.body:
+            payload = CloudResponseSchema.from_datasource_json(request.body)
+            LOGGER.info(f"PUT payload: ->\n{pf(payload.dict())}")
+            assets = payload.data.attributes["datasource_config"]["assets"]  # type: ignore[index]
+            assert assets, "No assets found"
+            for asset in assets:
+                if asset["name"] == DEFAULT_PANDAS_DATA_ASSET_NAME:  # type: ignore[index]
+                    raise ValueError(
+                        f"Asset name should not be default - '{DEFAULT_PANDAS_DATA_ASSET_NAME}'"
+                    )
+            return CallbackResult(
+                200,
+                headers=DEFAULT_HEADERS,
+                body=payload.json(),
+            )
+        return CallbackResult(500, DEFAULT_HEADERS, "No body found")
+
+    cloud_url = re.compile(
+        f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources/{UUID_REGEX}"
+    )
+
+    cloud_api_fake.remove("PUT", url=cloud_url)
+    cloud_api_fake.add_callback("PUT", url=cloud_url, callback=verify_asset_name_cb)
+
+    return cloud_api_fake
+
+
+class TestPandasDefaultWithCloud:
+    @pytest.mark.cloud
+    def test_payload_sent_to_cloud(
+        self,
+        cloud_details: CloudDetails,
+        empty_cloud_context_fluent: CloudDataContext,
+        verify_asset_names_mock: RequestsMock,
+    ):
+        context = empty_cloud_context_fluent
+        df = pd.DataFrame.from_dict(
+            {"col_1": [3, 2, 1, 0], "col_2": ["a", "b", "c", "d"]}
+        )
+
+        context.sources.pandas_default.read_dataframe(df)
+
+        pandas_default_id = context.sources.pandas_default.id
+        assert pandas_default_id
+
+        assert verify_asset_names_mock.assert_call_count(
+            f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources/{pandas_default_id}",
+            1,
+        )
+
+
+# Test markers come from seeded_contexts fixture
 def test_data_connectors_are_built_on_config_load(
     seeded_contexts: CloudDataContext | FileDataContext,
 ):

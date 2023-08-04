@@ -448,7 +448,6 @@ stages:
 
           - script: |
               pip install \
-                "google-cloud-bigquery-storage" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, bigquery]" \
                 --constraint constraints-dev.txt
@@ -732,6 +731,10 @@ stages:
           - bash: cat gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show gallery tracebacks'
+
+          - bash: cat docstrings.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show docstring conversions'
 
           - bash: cut -d " " -f 3,4 gallery-exp-types.txt | uniq -c | sort -nr; echo; cut -d " " -f 3,4,6 gallery-exp-types.txt | sort
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/

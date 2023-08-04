@@ -88,7 +88,7 @@ def test_substitute_value_from_aws_secrets_manager(
 ):
     with raises:
         with mock.patch(
-            "great_expectations.core.config_substitutor.boto3.session.Session",
+            "great_expectations.core.config_substitutor.aws.boto3.session.Session",
             return_value=MockedBoto3Session(secret_response),
         ):
             # As we're testing the secret store and not the actual substitution logic,
@@ -162,7 +162,7 @@ def test_substitute_value_from_aws_ssm(
 ):
     with raises:
         with mock.patch(
-            "great_expectations.core.config_substitutor.boto3.session.Session",
+            "great_expectations.core.config_substitutor.aws.boto3.session.Session",
             return_value=MockedBoto3Session(secret_response),
         ):
             assert (
@@ -192,6 +192,7 @@ class MockedSecretManagerServiceClient:
         return response
 
 
+# This test requires this import but monkeypatches external calls made to google.
 @pytest.mark.skipif(
     not google.secretmanager,
     reason="Could not import 'secretmanager' from google.cloud in data_context.util",
@@ -295,6 +296,7 @@ class MockedSecretClient:
     ],
 )
 @pytest.mark.unit
+# This test requires this import but monkeypatches external calls made to azure.
 @pytest.mark.skipif(
     not (azure.storage and azure.SecretClient),
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',

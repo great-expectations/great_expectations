@@ -3,7 +3,7 @@ from typing import Optional
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypeSuffixes,
 )
@@ -151,7 +151,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         ]
 
         # noinspection PyProtectedMember
-        row_wise_cond = compound_columns_count_query.c._num_rows < 2
+        row_wise_cond = compound_columns_count_query.c._num_rows < 2  # noqa: PLR2004
 
         return row_wise_cond
 

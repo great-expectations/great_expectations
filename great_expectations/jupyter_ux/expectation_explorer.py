@@ -117,7 +117,6 @@ class ExpectationExplorer:
             "expect_column_pair_values_A_to_be_greater_than_B": [
                 "or_equal",
                 "ignore_row_if",
-                "allow_cross_type_comparisons",
             ],
             "expect_column_pair_values_to_be_in_set": [
                 "value_pairs_set",
@@ -418,7 +417,7 @@ class ExpectationExplorer:
             disabled=disabled,
         )
 
-    def generate_text_area_widget(
+    def generate_text_area_widget(  # noqa: PLR0913
         self,
         value,
         description="",
@@ -436,7 +435,7 @@ class ExpectationExplorer:
             continuous_update=continuous_update,
         )
 
-    def generate_text_widget(
+    def generate_text_widget(  # noqa: PLR0913
         self,
         value,
         description="",
@@ -566,7 +565,7 @@ class ExpectationExplorer:
     def generate_zero_or_positive_integer_widget(
         self,
         value,
-        max=int(9e300),  # noqa: B008 # function-call-in-default-argument
+        max=int(9e300),
         description="",
         continuous_update=False,
     ):
@@ -1182,7 +1181,7 @@ class ExpectationExplorer:
 
         return {"kwarg_widget": min_max_type_widget}
 
-    def generate_min_value_widget_dict(  # noqa: C901 - 20
+    def generate_min_value_widget_dict(  # noqa: C901, PLR0912, PLR0915
         self, expectation_state, min_value=None, column=None, **expectation_kwargs
     ):
         data_asset_name = expectation_state["data_asset_name"]
@@ -1337,7 +1336,7 @@ class ExpectationExplorer:
 
         return min_value_widget_dict
 
-    def generate_max_value_widget_dict(  # noqa: C901 - 19
+    def generate_max_value_widget_dict(  # noqa: C901, PLR0912, PLR0915
         self, expectation_state, max_value=None, column=None, **expectation_kwargs
     ):
         data_asset_name = expectation_state["data_asset_name"]
@@ -1646,7 +1645,7 @@ class ExpectationExplorer:
             value=f"<span><strong>Expectation Type: </strong>{expectation_type}</span>"
         )
 
-    def generate_basic_expectation_info_box(
+    def generate_basic_expectation_info_box(  # noqa: PLR0913
         self,
         data_asset_name,
         expectation_type,
@@ -1912,7 +1911,7 @@ class ExpectationExplorer:
         column_count = len(column_names)
         expectation_count = len(expectation_suite["expectations"])
 
-        summary_widget_content = """\
+        summary_widget_content = f"""\
             <div>
                 <h1>Expectation Suite Editor</h1>
                 <hr>
@@ -1925,12 +1924,7 @@ class ExpectationExplorer:
                 <hr>
                 <h2>Columns:</h2>
             </div>\
-        """.format(
-            data_asset_name=data_asset_name,
-            ge_version=ge_version,
-            column_count=column_count,
-            expectation_count=expectation_count,
-        )
+        """
         summary_widget = widgets.HTML(
             value=summary_widget_content,
             layout=widgets.Layout(

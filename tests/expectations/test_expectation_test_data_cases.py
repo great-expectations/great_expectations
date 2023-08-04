@@ -1,7 +1,12 @@
+import pytest
+
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationLegacyTestCaseAdapter,
     TestData,
 )
+
+# module level markers
+pytestmark = pytest.mark.unit
 
 
 # @pytest.mark.skip(reason="Not yet supported")

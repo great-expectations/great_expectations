@@ -1,11 +1,8 @@
 from __future__ import annotations
 
 import functools
-import json
 import logging
 import pathlib
-import urllib.parse
-import uuid
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -15,16 +12,12 @@ from typing import (
     Final,
     Generator,
     List,
-    Literal,
-    NamedTuple,
     Optional,
     Type,
     Union,
 )
 
-import pydantic
 import pytest
-import responses
 from pytest import MonkeyPatch
 
 import great_expectations as gx
@@ -34,10 +27,6 @@ from great_expectations.core.batch_spec import (
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.data_context import FileDataContext
-from great_expectations.data_context.store.gx_cloud_store_backend import (
-    ErrorDetail,
-    ErrorPayload,
-)
 from great_expectations.datasource.fluent import (
     PandasAzureBlobStorageDatasource,
     PandasGoogleCloudStorageDatasource,
@@ -51,11 +40,21 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from tests.datasource.fluent._fake_cloud_api import (
+    _CLOUD_API_FAKE_DB,
+    DUMMY_JWT_TOKEN,
+    FAKE_ORG_ID,
+    GX_CLOUD_MOCK_BASE_URL,
+    CloudDetails,
+    FakeDBTypedDict,
+    create_fake_db_seed_data,
+    gx_cloud_api_fake_ctx,
+)
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 
 if TYPE_CHECKING:
+    import responses
     from pytest import FixtureRequest
-    from requests import PreparedRequest
 
     from great_expectations.data_context import CloudDataContext
 
@@ -63,19 +62,6 @@ if TYPE_CHECKING:
 FLUENT_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
 PG_CONFIG_YAML_FILE: Final = FLUENT_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
 
-
-GX_CLOUD_MOCK_BASE_URL: Final[str] = "https://app.greatexpectations.fake.io"
-
-DUMMY_JWT_TOKEN: Final[
-    str
-] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-# Can replace hardcoded ids with dynamic ones if using a regex url with responses.add_callback()
-# https://github.com/getsentry/responses/tree/master#dynamic-responses
-FAKE_ORG_ID: Final[str] = str(uuid.UUID("12345678123456781234567812345678"))
-FAKE_DATA_CONTEXT_ID: Final[str] = str(uuid.uuid4())
-FAKE_DATASOURCE_ID: Final[str] = str(uuid.uuid4())
-
-MISSING: Final = object()
 
 logger = logging.getLogger(__name__)
 
@@ -191,263 +177,36 @@ def seed_ds_env_vars(
     return tuple((k, v) for k, v in config_sub_dict.items())
 
 
-_CLOUD_API_FAKE_DB: dict = {}
-_DEFAULT_HEADERS: Final[dict[str, str]] = {"content-type": "application/json"}
-
-
-class _DatasourceSchema(pydantic.BaseModel):
-    id: Optional[str] = None
-    type: Literal["datasource"]
-    attributes: Dict[str, Union[Dict, str]]
-
-    @property
-    def name(self) -> str:
-        return self.attributes["datasource_config"]["name"]  # type: ignore[index]
-
-
-class _CloudResponseSchema(pydantic.BaseModel):
-    data: _DatasourceSchema
-
-    @classmethod
-    def from_datasource_json(cls, ds_payload: str | bytes) -> _CloudResponseSchema:
-        payload_dict = json.loads(ds_payload)
-        data = {
-            "id": payload_dict.get("id"),
-            "type": "datasource",
-            "attributes": payload_dict["data"]["attributes"],
-        }
-
-        return cls(data=data)  # type: ignore[arg-type] # pydantic type coercion
-
-
-class _CallbackResult(NamedTuple):
-    status: int
-    headers: dict[str, str]
-    body: str
-
-
-ErrorPayloadSchema = pydantic.create_model_from_typeddict(ErrorPayload)
-ErrorPayloadSchema.update_forward_refs(ErrorDetail=ErrorDetail)
-
-
-def _get_fake_db_callback(
-    request: PreparedRequest,
-) -> _CallbackResult:
-    url = request.url
-    assert url
-    logger.info(f"{request.method} {url}")
-
-    parsed_url = urllib.parse.urlparse(url)
-
-    _ = parsed_url.query
-    # TODO: do something with this
-    url = urllib.parse.urljoin(url, parsed_url.path)
-
-    item = _CLOUD_API_FAKE_DB.get(url, MISSING)
-    logger.info(f"body -->\n{pf(item, depth=2)}")
-    if item is MISSING:
-        errors = ErrorPayloadSchema(
-            errors=[
-                {"code": "mock 404", "detail": f"NotFound at {url}", "source": None}
-            ]
-        )
-        result = _CallbackResult(404, headers={}, body=errors.json())
-    else:
-        result = _CallbackResult(200, headers=_DEFAULT_HEADERS, body=json.dumps(item))
-    return result
-
-
-def _delete_fake_db_datasources_callback(
-    request: PreparedRequest,
-) -> _CallbackResult:
-    url = request.url
-    logger.info(f"{request.method} {url}")
-
-    item = _CLOUD_API_FAKE_DB.pop(url, MISSING)
-    if item is MISSING:
-        errors = ErrorPayloadSchema(
-            errors=[{"code": "mock 404", "detail": None, "source": None}]
-        )
-        result = _CallbackResult(404, headers=_DEFAULT_HEADERS, body=errors.json())
-    else:
-        result = _CallbackResult(204, headers=_DEFAULT_HEADERS, body="")
-    return result
-
-
-def _post_fake_db_datasources_callback(
-    request: PreparedRequest,
-) -> _CallbackResult:
-    url = request.url
-    logger.info(f"{request.method} {url}")
-
-    ds_names: set[str] = _CLOUD_API_FAKE_DB["DATASOURCE_NAMES"]
-    datasource_path = f"{url}/{FAKE_DATASOURCE_ID}"
-
-    if not request.body:
-        return _CallbackResult(
-            400,
-            headers=_DEFAULT_HEADERS,
-            body=ErrorPayloadSchema(
-                errors=[{"code": "400", "detail": "Missing Body", "source": None}]
-            ).json(),
-        )
-
-    try:
-        payload = _CloudResponseSchema.from_datasource_json(request.body)
-
-        datasource_name: str = payload.data.name
-        if datasource_name not in ds_names:
-            datasource_id = payload.data.id
-            if not datasource_id:
-                datasource_id = FAKE_DATASOURCE_ID
-                payload.data.id = datasource_id
-
-            _CLOUD_API_FAKE_DB[datasource_path] = payload.dict()
-            _CLOUD_API_FAKE_DB["DATASOURCE_NAMES"].add(payload.data.name)
-
-            result = _CallbackResult(201, headers=_DEFAULT_HEADERS, body=payload.json())
-        else:
-            errors = ErrorPayloadSchema(
-                errors=[
-                    {
-                        "code": "mock 400/409",
-                        "detail": f"Datasource with name '{datasource_name}' already exists.",
-                        "source": None,
-                    }
-                ]
-            )
-            result = _CallbackResult(409, headers=_DEFAULT_HEADERS, body=errors.json())
-
-        return result
-    except pydantic.ValidationError as err:
-        logger.exception(err)
-        return _CallbackResult(
-            400,
-            headers=_DEFAULT_HEADERS,
-            body=ErrorPayloadSchema(
-                errors=[
-                    {"code": "mock 400", "detail": str(err.errors()), "source": None}
-                ]
-            ).json(),
-        )
-
-
-def _put_db_datasources_callback(
-    request: PreparedRequest,
-) -> _CallbackResult:
-    url = request.url
-    logger.info(f"{request.method} {url}")
-
-    item = _CLOUD_API_FAKE_DB.get(url, MISSING)
-    if not request.body:
-        errors = ErrorPayload(
-            errors=[{"code": "mock 400", "detail": "missing body", "source": None}]
-        )
-        result = _CallbackResult(400, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
-    elif item is not MISSING:
-        payload = json.loads(request.body)
-        _CLOUD_API_FAKE_DB[url] = payload
-        result = _CallbackResult(
-            200, headers=_DEFAULT_HEADERS, body=json.dumps(payload)
-        )
-    else:
-        errors = ErrorPayload(
-            errors=[{"code": "mock 404", "detail": None, "source": None}]
-        )
-        result = _CallbackResult(404, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
-
-    logger.info(f"Response {result.status}")
-    return result
-
-
-def _get_db_datasources_callback(
-    request: PreparedRequest,
-) -> _CallbackResult:
-    url = request.url
-    logger.info(f"{request.method} {url}")
-
-    item = _CLOUD_API_FAKE_DB.get(url, MISSING)
-    if not request.body:
-        errors = ErrorPayload(
-            errors=[{"code": "mock 400", "detail": "missing body", "source": None}]
-        )
-        result = _CallbackResult(400, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
-    elif item is not MISSING:
-        payload = json.loads(request.body)
-        _CLOUD_API_FAKE_DB[url] = payload
-        result = _CallbackResult(
-            200, headers=_DEFAULT_HEADERS, body=json.dumps(payload)
-        )
-    else:
-        errors = ErrorPayload(
-            errors=[{"code": "mock 404", "detail": None, "source": None}]
-        )
-        result = _CallbackResult(404, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
-
-    logger.info(f"Response {result.status}")
-    return result
-
-
-@pytest.fixture
-def cloud_api_fake():
-    org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
-    dc_config_url = f"{org_url_base}/data-context-configuration"
-    datasources_url = f"{org_url_base}/datasources"
-
-    assert not _CLOUD_API_FAKE_DB, "_CLOUD_API_FAKE_DB should be empty"
-    _CLOUD_API_FAKE_DB.update(
-        {
-            dc_config_url: {
-                "anonymous_usage_statistics": {
-                    "data_context_id": FAKE_DATA_CONTEXT_ID,
-                    "enabled": False,
-                },
-                "datasources": {},
-            },
-            "DATASOURCE_NAMES": set(),
-        }
+@pytest.fixture(scope="session")
+def cloud_details() -> CloudDetails:
+    return CloudDetails(
+        base_url=GX_CLOUD_MOCK_BASE_URL,
+        org_id=FAKE_ORG_ID,
+        access_token=DUMMY_JWT_TOKEN,
     )
 
-    logger.info("Mocking the GX Cloud API")
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_mocker:
-        resp_mocker.add_callback(responses.GET, dc_config_url, _get_fake_db_callback)
-        resp_mocker.add_callback(
-            responses.GET,
-            f"{datasources_url}/{FAKE_DATASOURCE_ID}",
-            _get_fake_db_callback,
-        )
-        resp_mocker.add_callback(
-            responses.DELETE,
-            f"{datasources_url}/{FAKE_DATASOURCE_ID}",
-            _delete_fake_db_datasources_callback,
-        )
-        resp_mocker.add_callback(
-            responses.PUT,
-            f"{datasources_url}/{FAKE_DATASOURCE_ID}",
-            _put_db_datasources_callback,
-        )
-        resp_mocker.add_callback(
-            responses.POST, datasources_url, _post_fake_db_datasources_callback
-        )
-        resp_mocker.add_callback(
-            responses.GET,
-            f"{datasources_url}",
-            _get_db_datasources_callback,
-        )
-
-        yield resp_mocker
-
-    logger.info(f"Ending state ->\n{pf(_CLOUD_API_FAKE_DB, depth=1)}")
-    _CLOUD_API_FAKE_DB.clear()
+@pytest.fixture
+def cloud_api_fake(cloud_details: CloudDetails):
+    with gx_cloud_api_fake_ctx(cloud_details=cloud_details) as requests_mock:
+        yield requests_mock
 
 
 @pytest.fixture
-def empty_cloud_context_fluent(cloud_api_fake) -> CloudDataContext:
+def cloud_api_fake_db(cloud_api_fake) -> FakeDBTypedDict:
+    from tests.datasource.fluent._fake_cloud_api import _CLOUD_API_FAKE_DB
+
+    return _CLOUD_API_FAKE_DB
+
+
+@pytest.fixture
+def empty_cloud_context_fluent(
+    cloud_api_fake, cloud_details: CloudDetails
+) -> CloudDataContext:
     context = gx.get_context(
-        cloud_access_token=DUMMY_JWT_TOKEN,
-        cloud_organization_id=FAKE_ORG_ID,
-        cloud_base_url=GX_CLOUD_MOCK_BASE_URL,
+        cloud_access_token=cloud_details.access_token,
+        cloud_organization_id=cloud_details.org_id,
+        cloud_base_url=cloud_details.base_url,
         cloud_mode=True,
     )
     return context
@@ -476,7 +235,11 @@ def empty_file_context(file_dc_config_dir_init) -> FileDataContext:
 
 
 @pytest.fixture(
-    params=["empty_cloud_context_fluent", "empty_file_context"], ids=["cloud", "file"]
+    params=[
+        pytest.param("empty_cloud_context_fluent", marks=pytest.mark.cloud),
+        pytest.param("empty_file_context", marks=pytest.mark.filesystem),
+    ],
+    ids=["cloud", "file"],
 )
 def empty_contexts(
     request: FixtureRequest,
@@ -618,34 +381,14 @@ def seed_cloud(
     `get_context()` calls.
     """
     org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
-    dc_config_url = f"{org_url_base}/data-context-configuration"
 
-    by_id = {}
-    fds_config = {}
-    datasource_names: set[str] = set()
-    for datasource in fluent_only_config._json_dict()["fluent_datasources"]:
-        name: str = datasource["name"]
-        datasource["id"] = str(uuid.uuid4())
-        fds_config[name] = datasource
-        by_id[datasource["id"]] = datasource
-        datasource_names.add(name)
+    fake_db_data = create_fake_db_seed_data(fds_config=fluent_only_config)
+    _CLOUD_API_FAKE_DB.update(fake_db_data)  # type: ignore[typeddict-item]
 
-    _CLOUD_API_FAKE_DB["DATASOURCE_NAMES"] = datasource_names
+    seeded_datasources = _CLOUD_API_FAKE_DB["data-context-configuration"]["datasources"]
+    logger.info(f"Seeded Datasources ->\n{pf(seeded_datasources, depth=2)}")
+    assert seeded_datasources
 
-    logger.info(f"Seeded Datasources ->\n{pf(fds_config, depth=2)}")
-    assert fds_config
-
-    cloud_api_fake.upsert(
-        responses.GET,
-        dc_config_url,
-        json={
-            "anonymous_usage_statistics": {
-                "data_context_id": FAKE_DATA_CONTEXT_ID,
-                "enabled": False,
-            },
-            "datasources": fds_config,
-        },
-    )
     yield cloud_api_fake
 
     assert len(cloud_api_fake.calls) >= 1, f"{org_url_base} was never called"
@@ -659,7 +402,12 @@ def seeded_cloud_context(
     return empty_cloud_context_fluent
 
 
-@pytest.fixture(params=["seeded_file_context", "seeded_cloud_context"])
+@pytest.fixture(
+    params=[
+        pytest.param("seeded_file_context", marks=pytest.mark.filesystem),
+        pytest.param("seeded_cloud_context", marks=pytest.mark.cloud),
+    ]
+)
 def seeded_contexts(
     request: FixtureRequest,
 ):

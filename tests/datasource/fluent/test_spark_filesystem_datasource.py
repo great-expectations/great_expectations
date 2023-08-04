@@ -5,7 +5,7 @@ import logging
 import pathlib
 import re
 from dataclasses import dataclass
-from typing import List, cast
+from typing import TYPE_CHECKING, List, cast
 
 import pydantic
 import pytest
@@ -41,6 +41,10 @@ from great_expectations.datasource.fluent.spark_filesystem_datasource import (
     SparkFilesystemDatasource,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.datasource.fluent.interfaces import BatchSlice
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -65,17 +69,6 @@ def spark_filesystem_datasource(
     )
     spark_filesystem_datasource._data_context = empty_data_context
     return spark_filesystem_datasource
-
-
-@pytest.fixture
-def csv_path() -> pathlib.Path:
-    relative_path = pathlib.Path(
-        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-    )
-    abs_csv_path = (
-        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    )
-    return abs_csv_path
 
 
 @pytest.mark.unit
@@ -152,7 +145,7 @@ add_csv_asset = [
         "add_csv_asset",
         {
             **add_csv_asset_all_params,
-            **additional_params,  # type: ignore[arg-type]
+            **additional_params,
         },
         id="csv_all_params_pyspark_3_4_0",
     ),
@@ -274,7 +267,7 @@ add_json_asset = [
         "add_json_asset",
         {
             **add_json_asset_all_params,
-            **additional_params,  # type: ignore[arg-type]
+            **additional_params,
         },
         id="json_all_params_pyspark_3_4_0",
     ),
@@ -450,7 +443,7 @@ add_directory_csv_asset = [
             **{
                 "data_directory": "some_directory",
             },
-            **additional_params,  # type: ignore[arg-type]
+            **additional_params,
         },
         id="directory_csv_all_params_pyspark_3_4_0",
     ),
@@ -561,7 +554,7 @@ add_directory_json_asset = [
             **{
                 "data_directory": "some_directory",
             },
-            **additional_params,  # type: ignore[arg-type]
+            **additional_params,
         },
         id="directory_json_all_params_pyspark_3_4_0",
     ),
@@ -805,7 +798,7 @@ def test_get_batch_list_from_directory_one_batch(
     assert len(batches) == 1
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 @pytest.mark.parametrize(
     "path",
     [
@@ -992,6 +985,42 @@ def test_spark_sorter(
             metadata = batches[batch_index].metadata
             assert metadata[key1] == range1
             assert metadata[key2] == range2
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "batch_slice, expected_batch_count",
+    [
+        ("[-3:]", 3),
+        ("[5:9]", 4),
+        ("[:10:2]", 5),
+        (slice(-3, None), 3),
+        (slice(5, 9), 4),
+        (slice(0, 10, 2), 5),
+        ("-5", 1),
+        ("-1", 1),
+        (11, 1),
+        (0, 1),
+        ([3], 1),
+        (None, 12),
+        ("", 12),
+    ],
+)
+def test_spark_slice_batch_count(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+    batch_slice: BatchSlice,
+    expected_batch_count: int,
+) -> None:
+    asset = spark_filesystem_datasource.add_csv_asset(
+        name="csv_asset",
+        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+    )
+    batch_request = asset.build_batch_request(
+        options={"year": "2019"},
+        batch_slice=batch_slice,
+    )
+    batches = asset.get_batch_list_from_batch_request(batch_request=batch_request)
+    assert len(batches) == expected_batch_count
 
 
 def bad_batching_regex_config(

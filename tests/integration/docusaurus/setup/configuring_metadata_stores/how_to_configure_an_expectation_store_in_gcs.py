@@ -2,6 +2,9 @@ import os
 import subprocess
 
 import great_expectations as gx
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.core.yaml_handler import YAMLHandler
 
 yaml = YAMLHandler()
@@ -18,7 +21,7 @@ if not gcp_project:
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(
-    context.root_directory, "great_expectations.yml"
+    context.root_directory, FileDataContext.GX_YML
 )
 with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.load(f)
@@ -100,7 +103,7 @@ great_expectations_yaml["stores"]["expectations_GCS_store"]["store_backend"].pop
     "suppress_store_backend_id"
 )
 with open(great_expectations_yaml_file_path, "w") as f:
-    yaml.dump(great_expectations_yaml, f, default_flow_style=False)
+    yaml.dump(great_expectations_yaml, f)
 
 expectation_suite_name = "my_expectation_suite"
 context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
@@ -214,10 +217,8 @@ result = subprocess.run(
 stdout = result.stdout.decode("utf-8")
 
 list_expectation_suites_output = """
-# <snippet name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py list_expectation_suites_output">
 1 Expectation Suite found:
  - my_expectation_suite
-# </snippet>
 """
 
 assert "1 Expectation Suite found:" in list_expectation_suites_output

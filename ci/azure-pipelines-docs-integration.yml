@@ -13,7 +13,7 @@ trigger:
 resources:
   containers:
   - container: postgres
-    image: postgres:11
+    image: postgres:15.1
     ports:
     - 5432:5432
     env:
@@ -65,9 +65,6 @@ stages:
                 tests/integration/test_script_runner.py
                 tests/test_sets/**
 
-          - bash: ./ci/checks/check_for_docs_deps_changes.sh
-            name: CheckDocsDependenciesChanges
-
   - stage: docusaurus_tests
     dependsOn: scope_check
     pool:
@@ -86,11 +83,11 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
-            pytest -v --docs-tests -m integration tests/integration/test_script_runner.py
+            pytest -v --docs-tests tests/integration/test_script_runner.py
           displayName: 'pytest'
 
     - job: test_docs_spark
@@ -111,25 +108,21 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, spark]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
-            pytest -v --docs-tests -m integration --spark tests/integration/test_script_runner.py
+            pytest -v --docs-tests --spark tests/integration/test_script_runner.py
           displayName: 'pytest'
 
     - job: test_docs_mysql
       timeoutInMinutes: 30
-      condition: false
-#
-#     pymysql.err.Warning: (1051, "Unknown table 'test_ci.taxi_data'"), etc
-#
-#     condition: or(
-#         eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
-#         eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true),
-#         eq(variables.isDevelop, true),
-#         eq(variables.isManual, true)
-#       )
+      condition: or(
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true),
+          eq(variables.isDevelop, true),
+          eq(variables.isManual, true)
+        )
       variables:
         python.version: '3.8'
       services:
@@ -142,7 +135,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, mysql]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -159,7 +152,7 @@ stages:
           displayName: 'Configure mysql'
 
         - script: |
-            pytest -v --docs-tests -m integration --mysql tests/integration/test_script_runner.py
+            pytest -v --docs-tests --mysql tests/integration/test_script_runner.py
           displayName: 'pytest'
 
     - job: test_docs_postgresql
@@ -182,17 +175,16 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, postgresql]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
-            pytest -v --docs-tests -m integration --postgresql tests/integration/test_script_runner.py
+            pytest -v --docs-tests --postgresql tests/integration/test_script_runner.py
           displayName: 'pytest'
-
 
     - job: test_docs_bigquery
       timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
 
@@ -203,9 +195,9 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage
+            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
+            pip install --constraint constraints-dev.txt ".[test, bigquery]" pytest-azurepipelines "pandas<2.0.0"
           displayName: 'Install dependencies'
-
         - task: DownloadSecureFile@1
           name: gcp_authkey
           displayName: 'Download GCS Credentials'
@@ -228,7 +220,7 @@ stages:
           displayName: 'Install and setup Google Cloud SDK'
 
         - script: |
-            pytest -v --docs-tests -m integration --bigquery tests/integration/test_script_runner.py
+            pytest -v --docs-tests --bigquery tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # GCP credentials
@@ -251,7 +243,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, mssql]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -259,12 +251,13 @@ stages:
           displayName: 'Create MSSQL database test_ci'
 
         - script: |
-            pytest -v --docs-tests -m integration --mssql tests/integration/test_script_runner.py
+            # Note expect_column_values_to_only_contain_vowels is skipped because metrics are not implemented for MSSQL.
+            pytest -v --docs-tests --mssql -k "not test_docs[expect_column_values_to_only_contain_vowels]" tests/integration/test_script_runner.py
           displayName: 'pytest'
 
     - job: test_docs_snowflake
       timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
 
@@ -275,11 +268,11 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, snowflake]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
-            pytest -v --docs-tests -m integration --snowflake tests/integration/test_script_runner.py
+            pytest -v --docs-tests --snowflake tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # snowflake credentials
@@ -293,7 +286,7 @@ stages:
 
     - job: test_docs_redshift
       timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
 
@@ -304,11 +297,11 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_redshift] when pandas>=2.0
+            pip install --constraint constraints-dev.txt ".[test, redshift]" pytest-azurepipelines "pandas<2.0.0"
           displayName: 'Install dependencies'
-
         - script: |
-            pytest -v --docs-tests -m integration --redshift tests/integration/test_script_runner.py
+            pytest -v --docs-tests --redshift tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # redshift credentials
@@ -325,7 +318,7 @@ stages:
 
     - job: test_docs_aws
       timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
 
@@ -336,11 +329,11 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
+            pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
           displayName: 'Install dependencies'
 
         - script: |
-            pytest -v --docs-tests -m integration --aws tests/integration/test_script_runner.py
+            pytest -v --docs-tests --aws tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
@@ -349,7 +342,7 @@ stages:
 
     - job: test_docs_aws_spark
       timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
         spark.version: '3.3.2'
@@ -375,10 +368,10 @@ stages:
 
           displayName: download the AWS JARs and move to pyspark's JAR directory.
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
+            pip install --constraint constraints-dev.txt ".[test, spark]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
           displayName: 'Install dependencies'
         - script: |
-            pytest -v --docs-tests -m integration --aws --spark tests/integration/test_script_runner.py
+            pytest -v --docs-tests --aws --spark tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
@@ -387,7 +380,7 @@ stages:
 
     - job: test_docs_azure
       timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
 
@@ -398,11 +391,11 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, azure]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
-            pytest -v --docs-tests -m integration --azure tests/integration/test_script_runner.py
+            pytest -v --docs-tests --azure tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
@@ -423,11 +416,10 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, trino]" pytest-azurepipelines
           displayName: 'Install dependencies'
-
         - script: |
-            pytest -v --docs-tests -m integration --trino tests/integration/test_script_runner.py
+            pytest -v --docs-tests --trino tests/integration/test_script_runner.py
           displayName: 'pytest'
 
     - job: test_docs_athena
@@ -443,11 +435,11 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, athena]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
-            pytest -v --docs-tests -m integration --athena tests/integration/test_script_runner.py
+            pytest -v --docs-tests --athena tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             ATHENA_DB_NAME: $(ATHENA_DB_NAME)
@@ -461,16 +453,12 @@ stages:
 
     - job: test_docs_multiple_database
       timeoutInMinutes: 30
-      condition: false
-#
-#     pymysql.err.Warning: (1051, "Unknown table 'test_ci.taxi_data'"), etc
-#
-#     condition: or(
-#         eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
-#         eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true),
-#         eq(variables.isDevelop, true),
-#         eq(variables.isManual, true)
-#       )
+      condition: or(
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true),
+          eq(variables.isDevelop, true),
+          eq(variables.isManual, true)
+        )
       variables:
         python.version: '3.8'
       services:
@@ -484,9 +472,22 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, mysql, postgresql]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
-            pytest -v --docs-tests -m integration --mysql --postgresql tests/integration/test_script_runner.py
+            printf 'Waiting for MySQL database to accept connections'
+            until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+              printf '.'
+              sleep 1;
+            done;
+          displayName: Wait for database to initialise
+
+        - script: |
+            echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
+            mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
+          displayName: 'Configure mysql'
+
+        - script: |
+            pytest -v --docs-tests --mysql --postgresql tests/integration/test_script_runner.py
           displayName: 'pytest'

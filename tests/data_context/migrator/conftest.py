@@ -221,9 +221,20 @@ def serialized_configuration_bundle() -> dict:
         "checkpoints": [
             {
                 "class_name": "Checkpoint",
-                "config_version": None,
+                "config_version": 1.0,
                 "module_name": "great_expectations.checkpoint",
                 "name": "my_checkpoint",
+                "action_list": [],
+                "batch_request": {},
+                "evaluation_parameters": {},
+                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_name": None,
+                "ge_cloud_id": None,
+                "profilers": [],
+                "run_name_template": None,
+                "runtime_configuration": {},
+                "template_name": None,
+                "validations": [],
             }
         ],
         "data_context_variables": {
