@@ -430,3 +430,13 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CI_WEBHOOK_URL }}
+
+  notify_on_release:
+    needs: [build-n-publish]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Announce Release
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_WEBHOOK_URL }}
