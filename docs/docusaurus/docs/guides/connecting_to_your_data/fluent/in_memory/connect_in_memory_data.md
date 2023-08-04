@@ -105,16 +105,16 @@ Connect to in-memory source data using Spark.
 
 <ImportGxAndInstantiateADataContext />
 
-## Create a Datasource
+## Create a Data Source
 
-Run the following Python code to create a Spark Datasource:
+Run the following Python code to create a Spark Data Source:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_spark.py datasource"
 ```
 
 ## Read your source data into a Spark DataFrame
 
-In the following example, a simple Spark DataFrame is created that will be used in subsequent code examples.
+In the following example, you'll create a simple Spark DataFrame that is used in the following code examples.
 
 Run the following Python code to create the Spark DataFrame:
 
@@ -152,7 +152,7 @@ The DataFrame you created previously is the value you'll enter for `dataframe` p
 
 ## Related documentation
 
-For more information on Spark read methods, see [the Spark Input/Output documentation](https://Spark.pydata.org/docs/reference/io.html).
+For more information on Spark read methods, see the [Spark Input/Output documentation](https://spark.apache.org/docs/latest/api/python/reference/pyspark.pandas/io.html).
 
 </TabItem>
 </Tabs>
