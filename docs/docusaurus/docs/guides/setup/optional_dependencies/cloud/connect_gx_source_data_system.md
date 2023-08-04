@@ -1,6 +1,6 @@
 ---
-sidebar_label: "Connect to a Source Data System"
-title: "Connect to a Source Data System"
+sidebar_label: "Connect to a source data system"
+title: "Connect to a source data system"
 id: connect_gx_source_data_system
 description: Install and configure Great Expectations to access data stored on Amazon S3, Google Cloud Storage, Microsoft Azure Blob Storage, and SQL databases.
 toc_min_heading_level: 2
@@ -31,7 +31,7 @@ import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
 
-This is where you'll find information about creating your Great Expectations (GX) Python environment, installing GX locally, and how to configure the dependencies necessary to access Source Data stored on Amazon S3, Google Cloud Storage (GCS), Microsoft Azure Blob Storage, or SQL databases. GX uses the term Source Data when referring to data in its original format, and the term Source Data System when referring to the storage location for Source Data.
+This is where you'll find information about creating your Great Expectations (GX) Python environment, installing GX locally, and how to configure the dependencies necessary to access source data stored on Amazon S3, Google Cloud Storage (GCS), Microsoft Azure Blob Storage, or SQL databases. GX uses the term source data when referring to data in its original format, and the term source data system when referring to the storage location for source data.
 
 <Tabs
   groupId="install-gx-cloud-storage"
@@ -216,14 +216,6 @@ The above pip instruction will install GX with basic SQL support through SqlAlch
 - Redshift: `pip install 'great_expectations[redshift]'`
 - Snowflake: `pip install 'great_expectations[snowflake]'`
 - Trino: `pip install 'great_expectations[trino]'`
-
-:::
-
-:::caution SqlAlchemy version
-
-Great Expectations does not currently support SqlAlchemy 2.0.
-
-If you install SqlAlchemy independently of the above pip commands, be certain to install the most recent SqlAlchemy version prior to 2.0.
 
 :::
 

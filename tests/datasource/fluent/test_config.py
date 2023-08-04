@@ -221,6 +221,7 @@ class TestExcludeUnsetAssetFields:
     users never set.
     """
 
+    @pytest.mark.unit
     def test_from_datasource(self, asset_dict: dict):
         asset_dict_config = copy.deepcopy(asset_dict)
 
@@ -257,6 +258,7 @@ class TestExcludeUnsetAssetFields:
             )[0]
         )
 
+    @pytest.mark.unit
     def test_from_gx_config(self, asset_dict: dict):
         """
         Ensure that unset fields are excluded even when being parsed by the top-level `GxConfig` class.
@@ -305,6 +307,7 @@ class TestExcludeUnsetAssetFields:
         assert asset_dict == my_asset_config_dict
 
 
+@pytest.mark.big
 def test_id_only_serialized_if_present(ds_dict_config: dict):
     print(f"\tInput:\n\n{pf(ds_dict_config, depth=3)}")
     all_ids: list[str] = []
@@ -373,6 +376,7 @@ def test_id_only_serialized_if_present(ds_dict_config: dict):
             assert id_ in serialized_str
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     ["load_method", "input_"],
     [
@@ -554,7 +558,13 @@ def from_yaml_gx_config() -> GxConfig:
     return gx_config
 
 
-@pytest.fixture(params=[from_dict_gx_config, from_json_gx_config, from_yaml_gx_config])
+@pytest.fixture(
+    params=[
+        pytest.param(from_dict_gx_config, marks=pytest.mark.unit),
+        pytest.param(from_json_gx_config, marks=pytest.mark.unit),
+        pytest.param(from_yaml_gx_config, marks=pytest.mark.filesystem),
+    ]
+)
 def from_all_config(request: FixtureRequest) -> GxConfig:
     """
     This fixture parametrizes all our config fixtures.
@@ -565,6 +575,7 @@ def from_all_config(request: FixtureRequest) -> GxConfig:
     return request.getfixturevalue(fixture_name)
 
 
+@pytest.mark.unit
 def test_dict_config_round_trip(
     inject_engine_lookup_double, from_dict_gx_config: GxConfig
 ):
@@ -578,6 +589,7 @@ def test_dict_config_round_trip(
     assert from_dict_gx_config == re_loaded
 
 
+@pytest.mark.unit
 def test_json_config_round_trip(
     inject_engine_lookup_double, from_json_gx_config: GxConfig
 ):
@@ -591,6 +603,7 @@ def test_json_config_round_trip(
     assert from_json_gx_config.dict() == re_loaded.dict()
 
 
+@pytest.mark.filesystem
 def test_yaml_config_round_trip(
     inject_engine_lookup_double, from_yaml_gx_config: GxConfig
 ):
@@ -605,6 +618,7 @@ def test_yaml_config_round_trip(
     assert dumped == re_loaded.yaml()
 
 
+@pytest.mark.filesystem
 def test_yaml_file_config_round_trip(
     inject_engine_lookup_double, tmp_path: pathlib.Path, from_yaml_gx_config: GxConfig
 ):
@@ -624,6 +638,7 @@ def test_yaml_file_config_round_trip(
     assert sorted(from_yaml_gx_config.dict()) == sorted(re_loaded.dict())
 
 
+@pytest.mark.filesystem
 def test_assets_key_presence(
     inject_engine_lookup_double, from_yaml_gx_config: GxConfig
 ):
@@ -646,6 +661,7 @@ def test_assets_key_presence(
     assert _ASSETS_KEY not in dumped_as_dict[_FLUENT_DATASOURCES_KEY][ds_wo_assets.name]
 
 
+# Marked via from_all_config fixture
 def test_splitters_deserialization(
     inject_engine_lookup_double, from_all_config: GxConfig
 ):
@@ -660,6 +676,7 @@ def test_splitters_deserialization(
 
 
 @pytest.mark.xfail(reason="Key Ordering needs to be implemented")
+@pytest.mark.filesystem
 def test_yaml_config_round_trip_ordering(
     inject_engine_lookup_double, from_yaml_gx_config: GxConfig
 ):
@@ -669,6 +686,7 @@ def test_yaml_config_round_trip_ordering(
 
 
 @pytest.mark.xfail(reason="Custom Sorter serialization logic needs to be implemented")
+@pytest.mark.big
 def test_custom_sorter_serialization(
     inject_engine_lookup_double, from_json_gx_config: GxConfig
 ):
@@ -686,6 +704,7 @@ def test_custom_sorter_serialization(
         assert sorter_str in dumped, f"`{sorter_str}` not found in dumped json"
 
 
+@pytest.mark.big
 def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
     # the default data asset should be dropped, but one named asset should remain
     datasource_without_default_pandas_data_asset_config_dict = copy.deepcopy(
@@ -782,8 +801,9 @@ def file_dc_config_file_with_substitutions(
     return config_file
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_config_substitution_retains_original_value_on_save(
+    unset_gx_env_variables,
     seed_ds_env_vars: tuple,
     file_dc_config_file_with_substitutions: pathlib.Path,
     sqlite_database_path: pathlib.Path,
@@ -824,8 +844,9 @@ def test_config_substitution_retains_original_value_on_save(
     assert round_tripped == original
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
+    unset_gx_env_variables,
     seed_ds_env_vars: tuple,
     file_dc_config_file_with_substitutions: pathlib.Path,
     cloud_storage_get_client_doubles,
@@ -874,6 +895,7 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     assert round_tripped_datasources["my_sqlite_ds_w_subs"]["assets"]["new_asset"]
 
 
+@pytest.mark.unit
 def test_table_asset_omit_table_name():
     name = "my_table"
     asset = TableAsset(name=name)

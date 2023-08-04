@@ -3,7 +3,7 @@ import pytest
 from great_expectations.compatibility.not_imported import NotImported
 
 # module level markers
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 
 
 @pytest.fixture

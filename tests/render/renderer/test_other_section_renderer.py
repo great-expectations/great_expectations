@@ -19,6 +19,7 @@ def datetime_column_evrs():
         )
 
 
+@pytest.mark.filesystem
 def test_ProfilingResultsOverviewSectionRenderer_render_variable_types(
     datetime_column_evrs,
 ):

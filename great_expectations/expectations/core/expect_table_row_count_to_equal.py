@@ -24,7 +24,7 @@ class ExpectTableRowCountToEqual(BatchExpectation):
     """Expect the number of rows to equal a value.
 
     expect_table_row_count_to_equal is a \
-    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
+    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     Args:
         value (int): \

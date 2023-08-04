@@ -43,7 +43,7 @@ class ColumnValuesHaveElevation(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToHaveElevation(ColumnMapExpectation):
-    """This expectation will check a point to see if it is elevated"""
+    """Expect the column values to be points that have elevation."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [

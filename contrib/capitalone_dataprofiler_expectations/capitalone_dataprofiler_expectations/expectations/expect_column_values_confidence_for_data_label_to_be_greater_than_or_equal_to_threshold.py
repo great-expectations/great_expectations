@@ -71,7 +71,8 @@ class ColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualToThreshold(
 class ExpectColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualToThreshold(
     ColumnMapExpectation
 ):
-    """
+    """Expect the column values to have a DataProfiler confidence threshold greater than or equal to the specified threshold for the data label.
+
     This function builds upon the custom column map expectations of Great Expectations. This function asks the question a yes/no question of each row in the user-specified column; namely, does the confidence threshold provided by the DataProfiler model exceed the user-specified threshold.
 
     Args:

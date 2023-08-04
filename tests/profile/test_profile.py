@@ -11,11 +11,13 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.profile.columns_exist import ColumnsExistProfiler
 
 
+@pytest.mark.unit
 def test_base_class_not_instantiable_due_to_abstract_methods():
     with pytest.raises(TypeError):
         Profiler()
 
 
+@pytest.mark.unit
 def test_DataSetProfiler_methods():
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
 
@@ -26,6 +28,7 @@ def test_DataSetProfiler_methods():
         DatasetProfiler.profile(toy_dataset)
 
 
+@pytest.mark.unit
 def test_ColumnsExistProfiler():
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
 
@@ -41,6 +44,7 @@ def test_ColumnsExistProfiler():
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.unit
 def test_BasicDatasetProfiler(mock_emit):
     toy_dataset = PandasDataset(
         {"x": [1, 2, 3]},
@@ -93,6 +97,7 @@ def test_BasicDatasetProfiler(mock_emit):
     assert mock_emit.call_args_list == []
 
 
+@pytest.mark.unit
 def test_BasicDatasetProfiler_null_column():
     """
     The profiler should determine that null columns are of null cardinality and of null type and
@@ -138,6 +143,7 @@ def test_BasicDatasetProfiler_null_column():
     )
 
 
+@pytest.mark.filesystem
 def test_BasicDatasetProfiler_with_context(filesystem_csv_data_context):
     context = filesystem_csv_data_context
 
@@ -179,6 +185,7 @@ def test_BasicDatasetProfiler_with_context(filesystem_csv_data_context):
     }
 
 
+@pytest.mark.filesystem
 def test_context_profiler(filesystem_csv_data_context):
     """
     This just validates that it's possible to profile using the datasource hook,
@@ -204,6 +211,7 @@ def test_context_profiler(filesystem_csv_data_context):
     assert len(profiled_expectations.expectations) == 8
 
 
+@pytest.mark.filesystem
 def test_context_profiler_with_data_asset_name(filesystem_csv_data_context):
     """
     If a valid data asset name is passed to the profiling method
@@ -225,6 +233,7 @@ def test_context_profiler_with_data_asset_name(filesystem_csv_data_context):
     )
 
 
+@pytest.mark.filesystem
 def test_context_profiler_with_nonexisting_data_asset_name(filesystem_csv_data_context):
     """
     If a non-existing data asset name is passed to the profiling method
@@ -251,6 +260,7 @@ def test_context_profiler_with_nonexisting_data_asset_name(filesystem_csv_data_c
     }
 
 
+@pytest.mark.filesystem
 def test_context_profiler_with_non_existing_generator(filesystem_csv_data_context):
     """
         If a non-existing generator name is passed to the profiling method
@@ -269,6 +279,7 @@ def test_context_profiler_with_non_existing_generator(filesystem_csv_data_contex
         )
 
 
+@pytest.mark.filesystem
 def test_context_profiler_without_generator_name_arg_on_datasource_with_multiple_generators(
     filesystem_csv_data_context, filesystem_csv_2
 ):
@@ -296,6 +307,7 @@ def test_context_profiler_without_generator_name_arg_on_datasource_with_multiple
     assert profiling_result == {"success": False, "error": {"code": 5}}
 
 
+@pytest.mark.filesystem
 def test_context_profiler_without_generator_name_arg_on_datasource_with_no_generators(
     filesystem_csv_data_context,
 ):

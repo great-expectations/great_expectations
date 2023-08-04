@@ -25,6 +25,9 @@ if not google.storage:
         allow_module_level=True,
     )
 
+# module level markers
+pytestmark = pytest.mark.big
+
 
 @pytest.fixture
 def expected_config_dict():

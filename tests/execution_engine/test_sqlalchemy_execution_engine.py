@@ -52,9 +52,14 @@ try:
 except ImportError:
     sqlalchemy = None
 
-pytestmark = pytest.mark.sqlalchemy_version_compatibility
+
+pytestmark = [
+    pytest.mark.sqlalchemy_version_compatibility,
+    pytest.mark.external_sqldialect,
+]
 
 
+@pytest.mark.sqlite
 def test_instantiation_via_connection_string(sa, test_db_connection_string):
     my_execution_engine = SqlAlchemyExecutionEngine(
         connection_string=test_db_connection_string
@@ -73,6 +78,7 @@ def test_instantiation_via_connection_string(sa, test_db_connection_string):
     )
 
 
+@pytest.mark.sqlite
 def test_instantiation_via_url(sa):
     db_file = file_relative_path(
         __file__,
@@ -94,6 +100,7 @@ def test_instantiation_via_url(sa):
     )
 
 
+@pytest.mark.sqlite
 def test_instantiation_via_url_with_kwargs(sa):
     db_file = file_relative_path(
         __file__,
@@ -117,6 +124,7 @@ def test_instantiation_via_url_with_kwargs(sa):
     )
 
 
+@pytest.mark.sqlite
 def test_instantiation_via_url_with_invalid_kwargs(sa):
     db_file = file_relative_path(
         __file__,
@@ -131,7 +139,7 @@ def test_instantiation_via_url_with_invalid_kwargs(sa):
         )
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_instantiation_via_url_and_retrieve_data_with_other_dialect(sa):
     """Ensure that we can still retrieve data when the dialect is not recognized."""
 
@@ -169,6 +177,7 @@ def test_instantiation_via_url_and_retrieve_data_with_other_dialect(sa):
     assert len(validator.head(fetch_all=True)) == num_rows_in_sample
 
 
+@pytest.mark.postgresql
 def test_instantiation_via_credentials(sa, test_backends, test_df):
     if "postgresql" not in test_backends:
         pytest.skip("test_database_store_backend_get_url_for_key requires postgresql")
@@ -204,12 +213,14 @@ def test_instantiation_via_credentials(sa, test_backends, test_df):
     # ))
 
 
+@pytest.mark.sqlite
 def test_instantiation_error_states(sa, test_db_connection_string):
     with pytest.raises(gx_exceptions.InvalidConfigError):
         SqlAlchemyExecutionEngine()
 
 
 # Testing batching of aggregate metrics
+@pytest.mark.sqlite
 def test_sa_batch_aggregate_metrics(caplog, sa):
     import datetime
 
@@ -338,6 +349,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     assert found_message
 
 
+@pytest.mark.sqlite
 def test_get_domain_records_with_column_domain(sa):
     df = pd.DataFrame(
         {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
@@ -369,6 +381,7 @@ def test_get_domain_records_with_column_domain(sa):
     ), "Data does not match after getting full access compute domain"
 
 
+@pytest.mark.sqlite
 def test_get_domain_records_with_column_domain_and_filter_conditions(sa):
     df = pd.DataFrame(
         {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
@@ -406,6 +419,7 @@ def test_get_domain_records_with_column_domain_and_filter_conditions(sa):
     ), "Data does not match after getting full access compute domain"
 
 
+@pytest.mark.sqlite
 def test_get_domain_records_with_different_column_domain_and_filter_conditions(sa):
     df = pd.DataFrame(
         {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
@@ -443,6 +457,7 @@ def test_get_domain_records_with_different_column_domain_and_filter_conditions(s
     ), "Data does not match after getting full access compute domain"
 
 
+@pytest.mark.sqlite
 def test_get_domain_records_with_column_domain_and_filter_conditions_raises_error_on_multiple_conditions(
     sa,
 ):
@@ -470,6 +485,7 @@ def test_get_domain_records_with_column_domain_and_filter_conditions_raises_erro
         )
 
 
+@pytest.mark.sqlite
 def test_get_domain_records_with_column_pair_domain(sa):
     df = pd.DataFrame(
         {
@@ -573,6 +589,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
     ), "Data does not match after getting full access compute domain"
 
 
+@pytest.mark.sqlite
 def test_get_domain_records_with_multicolumn_domain(sa):
     df = pd.DataFrame(
         {
@@ -687,6 +704,7 @@ def test_get_domain_records_with_multicolumn_domain(sa):
 
 
 # Ensuring functionality of compute_domain when no domain kwargs are given
+@pytest.mark.sqlite
 def test_get_compute_domain_with_no_domain_kwargs(sa):
     execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
@@ -715,6 +733,7 @@ def test_get_compute_domain_with_no_domain_kwargs(sa):
 
 
 # Testing for only untested use case - column_pair
+@pytest.mark.sqlite
 def test_get_compute_domain_with_column_pair(sa):
     execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
@@ -750,6 +769,7 @@ def test_get_compute_domain_with_column_pair(sa):
 
 
 # Testing for only untested use case - multicolumn
+@pytest.mark.sqlite
 def test_get_compute_domain_with_multicolumn(sa):
     execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None], "c": [1, 2, 3, None]}),
@@ -782,6 +802,7 @@ def test_get_compute_domain_with_multicolumn(sa):
 
 
 # Testing whether compute domain is properly calculated, but this time obtaining a column
+@pytest.mark.sqlite
 def test_get_compute_domain_with_column_domain(sa):
     execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
@@ -811,6 +832,7 @@ def test_get_compute_domain_with_column_domain(sa):
 
 
 # What happens when we filter such that no value meets the condition?
+@pytest.mark.sqlite
 def test_get_compute_domain_with_unmeetable_row_condition(sa):
     execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
@@ -849,6 +871,7 @@ def test_get_compute_domain_with_unmeetable_row_condition(sa):
 
 
 # Testing to ensure that great expectation experimental parser also works in terms of defining a compute domain
+@pytest.mark.sqlite
 def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
     execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
@@ -888,6 +911,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
     assert accessor_kwargs == {"column": "b"}, "Accessor kwargs have been modified"
 
 
+@pytest.mark.sqlite
 def test_get_compute_domain_with_nonexistent_condition_parser(sa):
     execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
@@ -905,6 +929,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser(sa):
 
 
 # Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
+@pytest.mark.sqlite
 def test_resolve_metric_bundle_with_nonexistent_metric(sa):
     execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
@@ -945,6 +970,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric(sa):
         print(e)
 
 
+@pytest.mark.sqlite
 def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa):
     """
     Insures that even when "compute_domain_kwargs" has multiple keys, it will be JSON-serialized for "IDDict.to_id()".
@@ -1017,6 +1043,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
         assert False, str(e)
 
 
+@pytest.mark.sqlite
 def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
     my_execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         engine=sqlite_view_engine
@@ -1036,6 +1063,7 @@ def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
     assert batch_markers.get("ge_load_time") is not None
 
 
+@pytest.mark.sqlite
 def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     def validate_tmp_tables(execution_engine):
         temp_tables = [
@@ -1117,7 +1145,7 @@ class TestExecuteQuery:
             pd_dataframe, sa
         )
 
-        select_all = "SELECT * FROM test;"
+        select_all = f"SELECT * FROM {sa.text('test')};"
         result = execution_engine.execute_query(sa.text(select_all)).fetchall()
 
         expected = [(1, 4), (2, 4)]
@@ -1128,7 +1156,7 @@ class TestExecuteQuery:
             pd_dataframe, sa
         )
 
-        select_all = "SELECT * FROM test;"
+        select_all = f"SELECT * FROM {sa.text('test')};"
         result = execution_engine.execute_query_in_transaction(
             sa.text(select_all)
         ).fetchall()
@@ -1235,21 +1263,18 @@ class TestDialectRequiresPersistedConnection:
             connection_string=connection_string
         )
 
-    @pytest.mark.unit
     def test__dialect_requires_persisted_connection_sqlite(self):
         connection_string = "sqlite://"
         assert _dialect_requires_persisted_connection(
             connection_string=connection_string
         )
 
-    @pytest.mark.unit
     def test__dialect_requires_persisted_connection_postgres(self):
         connection_string = "postgresql://postgres@db_hostname/test_ci"
         assert not _dialect_requires_persisted_connection(
             connection_string=connection_string
         )
 
-    @pytest.mark.unit
     def test__dialect_requires_persisted_connection_empty_url_raises_exception(
         self, sa
     ):
@@ -1259,7 +1284,6 @@ class TestDialectRequiresPersistedConnection:
                 url=url,
             )
 
-    @pytest.mark.unit
     def test__dialect_requires_persisted_connection_error_on_multiple_params(self):
         connection_string = "postgresql://postgres@db_hostname/test_ci"
         url = "postgresql://postgres@db_hostname/test_ci?client_encoding=utf8&application_name=test_ci"
@@ -1272,7 +1296,6 @@ class TestDialectRequiresPersistedConnection:
                 url=url,
             )
 
-    @pytest.mark.unit
     def test__dialect_requires_persisted_connection_error_on_multiple_params_empty_url(
         self,
     ):

@@ -20,7 +20,7 @@ No.  The interactive method used to create and edit Expectations does not edit o
 
 - Great Expectations installed in a Python environment
 - A Filesystem Data Context for your Expectations
-- Created a Datasource from which to request a Batch of data for introspection
+- Created a Data Source from which to request a Batch of data for introspection
 
 </Prerequisites> 
 
@@ -99,7 +99,7 @@ It runs the `expect_column_values_to_be_between` Expectation on the `passenger_c
 
 Here is the same configuration, but this time as a `ExpectationConfiguration` object.  
 
-```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite import_expectation_suite"
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite import_expectation_configuration"
 ```
 ```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite example_configuration_1"
 ```
@@ -144,6 +144,7 @@ Finally, when you are done editing the `ExpectationSuite`, you can save it to yo
 
 ```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite save_suite"
 ```
+Do not forget to overwrite the `validator` (or create a new one) from the updated context with `context.get_validator()`, otherwise your expectation suite changes will not be reflected on the validator.
 
 ## Related Documentation
 

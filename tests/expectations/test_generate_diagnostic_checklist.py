@@ -1,11 +1,14 @@
 import pytest
 
+from great_expectations.core.expectation_diagnostics.supporting_types import Maturity
 from tests.expectations.fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
     ExpectColumnValuesToEqualThree__SecondIteration,
     ExpectColumnValuesToEqualThree__ThirdIteration,
 )
-from great_expectations.core.expectation_diagnostics.supporting_types import Maturity
+
+# module level markers
+pytestmark = pytest.mark.unit
 
 
 @pytest.mark.skip(
@@ -19,7 +22,7 @@ def test_print_diagnostic_checklist__first_iteration():
         == """\
 Completeness checklist for ExpectColumnValuesToEqualThree:
    library_metadata object exists
-   Has a docstring, including a one-line short description
+   Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
    Has at least one positive and negative example case, and all test cases pass
    Has core logic and passes tests on at least one Execution Engine
 """
@@ -37,7 +40,7 @@ def test_print_diagnostic_checklist__second_iteration():
         == f"""\
 Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration ({Maturity.EXPERIMENTAL}):
  ✔ Has a valid library_metadata object
- ✔ Has a docstring, including a one-line short description
+ ✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
     ✔ "Expect values in this column to equal the number three."
  ✔ Has at least one positive and negative example case, and all test cases pass
  ✔ Has core logic and passes tests on at least one Execution Engine
@@ -64,7 +67,7 @@ def test_print_diagnostic_checklist__third_iteration():
         == f"""\
 Completeness checklist for ExpectColumnValuesToEqualThree__ThirdIteration ({Maturity.EXPERIMENTAL}):
  ✔ Has a valid library_metadata object
-   Has a docstring, including a one-line short description
+   Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
  ✔ Has at least one positive and negative example case, and all test cases pass
  ✔ Has core logic and passes tests on at least one Execution Engine
     ✔ All 3 tests for pandas are passing

@@ -11,7 +11,7 @@ from great_expectations.agent.message_service.subscriber import (
 )
 from tests.agent.message_service.amqp_errors import get_amqp_errors
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.cloud
 
 
 def test_subscriber_consume_calls_run():

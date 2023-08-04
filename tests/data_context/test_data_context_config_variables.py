@@ -35,7 +35,7 @@ def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
         "../test_fixtures/great_expectations_basic_with_variables.yml",
     )
     shutil.copy(
-        ge_config_path, os.path.join(root_dir, "great_expectations.yml")  # noqa: PTH118
+        ge_config_path, os.path.join(root_dir, FileDataContext.GX_YML)  # noqa: PTH118
     )
     config_variables_path = file_relative_path(
         __file__,
@@ -47,6 +47,7 @@ def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
     return get_context(context_root_dir=root_dir)
 
 
+@pytest.mark.filesystem
 def test_config_variables_on_context_without_config_variables_filepath_configured(
     data_context_without_config_variables_filepath_configured,
 ):
@@ -65,12 +66,13 @@ def test_config_variables_on_context_without_config_variables_filepath_configure
     )
 
 
+@pytest.mark.filesystem
 def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     # this test uses a great_expectations.yml with almost all values replaced
     # with substitution variables
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
 
     create_data_context_files(
@@ -104,6 +106,7 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     assert context_config_commented_map == expected_config_commented_map
 
 
+@pytest.mark.filesystem
 def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypatch):
     monkeypatch.setenv("FOO", "BAR")
     monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", r"ive_been_\$replaced")
@@ -114,7 +117,7 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
     runtime_environment = {"replace_me": value_from_runtime_override}
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     create_data_context_files(
         context_path,
@@ -147,6 +150,7 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
         del os.environ["replace_me"]
 
 
+@pytest.mark.unit
 def test_substitute_config_variable():
     config_substitutor = _ConfigurationSubstitutor()
     config_variables_dict = {
@@ -189,8 +193,7 @@ def test_substitute_config_variable():
 
     # Null cases
     assert (
-        config_substitutor.substitute_config_variable("", config_variables_dict)
-        == ""  # noqa: PLC1901
+        config_substitutor.substitute_config_variable("", config_variables_dict) == ""
     )
     assert (
         config_substitutor.substitute_config_variable(None, config_variables_dict)
@@ -246,6 +249,7 @@ def test_substitute_config_variable():
     )
 
 
+@pytest.mark.filesystem
 def test_substitute_env_var_in_config_variable_file(
     monkeypatch, empty_data_context_with_config_variables
 ):
@@ -275,6 +279,7 @@ def test_substitute_env_var_in_config_variable_file(
     )
 
 
+@pytest.mark.unit
 def test_escape_all_config_variables(empty_data_context_with_config_variables):
     """
     Make sure that all types of input to escape_all_config_variables are escaped properly: str, dict, OrderedDict, list
@@ -389,6 +394,7 @@ def test_escape_all_config_variables(empty_data_context_with_config_variables):
     )
 
 
+@pytest.mark.unit
 def test_escape_all_config_variables_skip_substitution_vars(
     empty_data_context_with_config_variables,
 ):
@@ -634,6 +640,7 @@ def test_escape_all_config_variables_skip_substitution_vars(
     )
 
 
+@pytest.mark.filesystem
 def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypatch):
     """
     What does this test and why?

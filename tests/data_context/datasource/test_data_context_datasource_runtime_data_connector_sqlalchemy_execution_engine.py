@@ -14,6 +14,10 @@ yaml = YAMLHandler()
 # Tests with data passed in as query
 ####################################
 
+# module level markers
+# these tests use sqlite, which is a filesystem-based db
+pytestmark = pytest.mark.filesystem
+
 
 def test_get_batch_successful_specification_sqlalchemy_engine(
     data_context_with_datasource_sqlalchemy_engine, sa

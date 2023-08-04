@@ -23,6 +23,7 @@ from tests.test_utils import get_sqlite_temp_table_names_from_engine
 pytestmark = pytest.mark.sqlalchemy_version_compatibility
 
 
+@pytest.mark.sqlite
 def test_instantiation_with_table_name(sqlite_view_engine):
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         engine=sqlite_view_engine
@@ -43,6 +44,7 @@ def test_instantiation_with_table_name(sqlite_view_engine):
     assert batch_data.use_quoted_name is False
 
 
+@pytest.mark.sqlite
 def test_instantiation_with_query(sqlite_view_engine, test_df):
     add_dataframe_to_db(df=test_df, name="test_table_0", con=sqlite_view_engine)
 
@@ -78,6 +80,7 @@ def test_instantiation_with_query(sqlite_view_engine, test_df):
 #     assert validator.head(n_rows=20, fetch_all=True).shape == (100, 2)
 
 
+@pytest.mark.sqlite
 def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
     print(get_sqlite_temp_table_names_from_engine(sqlite_view_engine))
     assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
@@ -144,7 +147,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
     assert len(res) == 2
 
 
-@pytest.mark.unit
+@pytest.mark.sqlite
 def test_instantiation_with_unknown_dialect(sqlite_view_engine):
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         engine=sqlite_view_engine
@@ -158,7 +161,7 @@ def test_instantiation_with_unknown_dialect(sqlite_view_engine):
     assert batch_data.dialect == GXSqlDialect.OTHER
 
 
-@pytest.mark.unit
+@pytest.mark.sqlite
 def test_instantiation_with_temp_table_schema():
     # not supported
     engine = MockSaEngine(dialect=Dialect(dialect="sqlite"))
@@ -196,6 +199,7 @@ def test_instantiation_with_temp_table_schema():
         assert "test_schema" in query_to_create_temp_table
 
 
+@pytest.mark.sqlite
 def test_instantiation_with_selectable_only_and_no_temp_table(sqlite_view_engine, sa):
     """
     What does this test and why?

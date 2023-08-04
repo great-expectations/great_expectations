@@ -145,7 +145,7 @@ add_csv_asset = [
         "add_csv_asset",
         {
             **add_csv_asset_all_params,
-            **additional_params,  # type: ignore[arg-type]
+            **additional_params,
         },
         id="csv_all_params_pyspark_3_4_0",
     ),
@@ -267,7 +267,7 @@ add_json_asset = [
         "add_json_asset",
         {
             **add_json_asset_all_params,
-            **additional_params,  # type: ignore[arg-type]
+            **additional_params,
         },
         id="json_all_params_pyspark_3_4_0",
     ),
@@ -443,7 +443,7 @@ add_directory_csv_asset = [
             **{
                 "data_directory": "some_directory",
             },
-            **additional_params,  # type: ignore[arg-type]
+            **additional_params,
         },
         id="directory_csv_all_params_pyspark_3_4_0",
     ),
@@ -554,7 +554,7 @@ add_directory_json_asset = [
             **{
                 "data_directory": "some_directory",
             },
-            **additional_params,  # type: ignore[arg-type]
+            **additional_params,
         },
         id="directory_json_all_params_pyspark_3_4_0",
     ),
@@ -798,7 +798,7 @@ def test_get_batch_list_from_directory_one_batch(
     assert len(batches) == 1
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 @pytest.mark.parametrize(
     "path",
     [

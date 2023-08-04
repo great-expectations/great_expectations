@@ -6,11 +6,11 @@ id: how_to_instantiate_a_data_context_hosted_environments
 sidebar_custom_props: { icon: 'img/integrations/hosted_icon.svg' }
 ---
 
-The components in the ``great_expectations.yml`` file define the Validation Results Stores, Datasource connections, and Data Docs hosts for a Data Context. These components might be inaccessible in hosted environments, such as Databricks, Amazon EMR, and Google Cloud Composer. The information provided here is intended to help you use Great Expectations in hosted environments.
+The components in the ``great_expectations.yml`` file define the Validation Results Stores, Data Source connections, and Data Docs hosts for a Data Context. These components might be inaccessible in hosted environments, such as Databricks, Amazon EMR, and Google Cloud Composer. The information provided here is intended to help you use Great Expectations in hosted environments.
 
 ## Configure your Data Context
  
-To use code to create a Data Context, see [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
+To use code to create a Data Context, see [Instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 
 To configure a Data Context for a specific environment, see one of the following resources:
 
@@ -19,7 +19,7 @@ To configure a Data Context for a specific environment, see one of the following
 
 ## Create Expectation Suites and add Expectations
 
-To add a Datasource and an Expectation Suite, see [How to connect to a PostgreSQL database](/docs/0.15.50/guides/connecting_to_your_data/database/postgres#5-configure-your-datasource).
+To add a Data Source and an Expectation Suite, see [How to connect to a PostgreSQL database](/docs/0.15.50/guides/connecting_to_your_data/database/postgres#5-configure-your-datasource).
 
 To add Expectations to your Suite individually, use the following code:
 
@@ -38,7 +38,7 @@ To configure your Expectation store to load a Suite at a later time, see one of 
 
 ## Run validation
 
-To use an Expectation Suite you've created to validate data, see [How to validate data without a Checkpoint](../guides/validation/advanced/how_to_validate_data_without_a_checkpoint.md).
+To create and run a Checkpoint in code, see [How to create a new Checkpoint](../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).  In a hosted environment you will not be able to store the Checkpoint for repeated use across Python sessions, but you can recreate it each time your scripts run.
 
 ## Use Data Docs
 

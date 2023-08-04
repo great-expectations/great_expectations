@@ -19,6 +19,8 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.core.async_executor import patch_https_connection_pool
 from tests.performance import taxi_benchmark_util
 
+pytestmark = pytest.mark.performance
+
 
 @pytest.mark.parametrize(
     "backend_api",
@@ -29,6 +31,7 @@ from tests.performance import taxi_benchmark_util
 )
 @pytest.mark.parametrize("write_data_docs", [False, True])
 @pytest.mark.parametrize("number_of_tables", [1, 2, 4, 8, 16, 100])
+@pytest.mark.external_sqldialect
 def test_taxi_trips_benchmark(
     benchmark: BenchmarkFixture,
     tmpdir: py.path.local,

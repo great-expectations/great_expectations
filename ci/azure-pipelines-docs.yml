@@ -5,6 +5,11 @@
 # The pipeline is run under the following conditions:
 #   - On any PR
 
+trigger:
+  branches:
+    include:
+    - develop
+
 variables:
   isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
   isManual: $[eq(variables['Build.Reason'], 'Manual')]
@@ -17,6 +22,8 @@ stages:
     jobs:
       - job: changes
         steps:
+          - checkout: self
+            fetchDepth: "0"
           - task: ChangedFiles@1
             name: CheckDocsChanges
             inputs:
@@ -27,9 +34,6 @@ stages:
                 tests/integration/docusaurus/**
                 tests/integration/fixtures/**
                 tests/test_sets/**
-
-          - bash: ./ci/checks/check_for_docs_deps_changes.sh
-            name: CheckDocsDependenciesChanges
 
   - stage: custom_checks
     dependsOn: scope_check
@@ -102,6 +106,7 @@ stages:
 
     jobs:
       - job: test_build_docs
+        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
         steps:
           - task: UsePythonVersion@0
             inputs:
