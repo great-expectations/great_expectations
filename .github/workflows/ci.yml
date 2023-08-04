@@ -261,7 +261,7 @@ jobs:
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py38-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
-        run: invoke tests --unit --xdist
+        run: invoke tests --unit
 
   py39-min-versions:
     needs: [unit-tests, static-analysis]
@@ -279,7 +279,7 @@ jobs:
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py39-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
-        run: invoke tests --unit --xdist
+        run: invoke tests --unit
 
   py310-min-versions:
     needs: [unit-tests, static-analysis]
@@ -297,7 +297,7 @@ jobs:
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py310-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
-        run: invoke tests --unit --xdist
+        run: invoke tests --unit
 
   py311-min-versions:
     needs: [unit-tests, static-analysis]
