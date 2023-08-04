@@ -434,7 +434,6 @@ class TaxiSplittingTestCasesDateTime(TaxiSplittingTestCasesBase):
                 splitter_method_name="split_on_column_value",
                 splitter_kwargs={
                     "column_name": self.taxi_test_data.test_column_name,
-                    "date": "2018-01-01",
                 },
                 num_expected_batch_definitions=8,
                 num_expected_rows_in_first_batch_definition=9,
