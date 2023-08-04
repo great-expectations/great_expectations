@@ -3,6 +3,7 @@ Purpose: To ensure that no stray snippet opening/closing tags are present in our
 
 In short, this script creates a temporary Docusaurus build and utilizes grep to parse for stray tags.
 """
+from __future__ import annotations
 
 import shutil
 import subprocess
@@ -49,7 +50,7 @@ def run_grep(target_dir: str) -> List[str]:
     return res.stdout.splitlines()
 
 
-def parse_grep(lines: List[str]) -> List[str]:
+def parse_grep(lines: list[str]) -> list[str]:
     """Parse the grep output and exclude known issues.
 
     We are ok with some snippet tags in explanatory text on how to write snippets.
