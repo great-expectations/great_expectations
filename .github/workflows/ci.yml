@@ -274,7 +274,7 @@ jobs:
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py3${{ matrix.py-minor }}-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
-        run: invoke tests --unit
+        run: invoke ci-tests -m unit
 
   import_gx:
     needs: [static-analysis]
