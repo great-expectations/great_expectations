@@ -373,6 +373,7 @@ jobs:
       py38-min-versions,
       py39-min-versions,
       py310-min-versions,
+      py311-min-versions,
       import_gx,
       usage_stats_integration
     ]
