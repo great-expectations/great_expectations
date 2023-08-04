@@ -46,6 +46,9 @@ core:
   - '@sujensen'        # Susan Jensen
   - '@tyler-hoffman'   # Tyler Hoffman
   - '@wookasz'         # Łukasz Lempart
+  - '@nicgrayson'      # Nic Grayson
+  - '@Erin-GX'         # Erin Kapp
+
 
 bot:
   - '@dependabot'
