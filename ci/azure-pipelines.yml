@@ -545,42 +545,43 @@ stages:
             env:
               NODE_OPTIONS: --max_old_space_size=4096
 
-  - stage: deploy
-    condition: and(succeeded(), eq(variables.isRelease, true))
-    pool:
-      vmImage: 'ubuntu-latest'
-    dependsOn: [import_ge, lint, db_integration, docker_tests]
-    jobs:
-      - job: deploy
-        variables:
-          python.version: '3.8'
+  # 2023-08-03 - Will - Release is now being handled by the github actions pipeline
+  # - stage: deploy
+  #   condition: and(succeeded(), eq(variables.isRelease, true))
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
+  #   dependsOn: [import_ge, lint, db_integration, docker_tests]
+  #   jobs:
+  #     - job: deploy
+  #       variables:
+  #         python.version: '3.8'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+  #         - bash: python -m pip install --upgrade pip
+  #           displayName: 'Update pip'
 
-          - script: |
-              pip install twine wheel
-              git config --global user.email "team@greatexpectations.io"
-              git config --global user.name "Great Expectations"
-            displayName: 'Prepare packaging'
+  #         - script: |
+  #             pip install twine wheel
+  #             git config --global user.email "team@greatexpectations.io"
+  #             git config --global user.name "Great Expectations"
+  #           displayName: 'Prepare packaging'
 
-          # Build the python distribution from source
-          - script: |
-              python setup.py sdist
-              python setup.py bdist_wheel
-            displayName: 'Build distribution'
+  #         # Build the python distribution from source
+  #         - script: |
+  #             python setup.py sdist
+  #             python setup.py bdist_wheel
+  #           displayName: 'Build distribution'
 
-          - task: TwineAuthenticate@1
-            inputs:
-              pythonUploadServiceConnection: pypi
+  #         - task: TwineAuthenticate@1
+  #           inputs:
+  #             pythonUploadServiceConnection: pypi
 
-          # Use command line script to 'twine upload', use -r to pass the repository name and --config-file to pass the environment variable set by the authenticate task.
-          - script: |
-              python -m twine upload -r great-expectations --config-file $(PYPIRC_PATH) dist/*
-            displayName: 'Upload'
+  #         # Use command line script to 'twine upload', use -r to pass the repository name and --config-file to pass the environment variable set by the authenticate task.
+  #         - script: |
+  #             python -m twine upload -r great-expectations --config-file $(PYPIRC_PATH) dist/*
+  #           displayName: 'Upload'
