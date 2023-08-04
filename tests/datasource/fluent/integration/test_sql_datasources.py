@@ -17,7 +17,7 @@ from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
 )
 
-PG_TABLE: Final[str] = "pg_aggregate"
+PG_TABLE: Final[str] = "ge_expectations_store"
 TRINO_TABLE: Final[str] = "customer"
 
 TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
