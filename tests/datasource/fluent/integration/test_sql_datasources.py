@@ -12,7 +12,7 @@ from great_expectations.datasource.fluent import (
     SQLDatasource,
 )
 
-PG_TABLE: Final[str] = "checkpoints"
+PG_TABLE: Final[str] = "pg_aggregate"
 TRINO_TABLE: Final[str] = "customer"
 
 TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
@@ -51,7 +51,7 @@ def trino_ds(context: EphemeralDataContext) -> SQLDatasource:
 def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
     ds = context.sources.add_postgres(
         "postgres",
-        connection_string="postgresql+psycopg2://postgres:postgres@localhost:5432/mercury",
+        connection_string="postgresql+psycopg2://postgres:postgres@localhost:5432/test_ci",
     )
     return ds
 
