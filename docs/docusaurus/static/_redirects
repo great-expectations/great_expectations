@@ -172,7 +172,7 @@
 
 
 # Redirects for old style guides
-/docs/contributing/contributing_style https://docs.greatexpectations.io/docs/contributing/style_guides/docs_style
+/docs/contributing/contributing_style /docs/contributing/contributing/
 
 # Redirects for consolidated pages
 
