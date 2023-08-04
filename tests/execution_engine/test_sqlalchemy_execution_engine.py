@@ -94,6 +94,43 @@ def test_instantiation_via_url(sa):
     )
 
 
+def test_instantiation_via_url_with_kwargs(sa):
+    db_file = file_relative_path(
+        __file__,
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
+    )
+    my_execution_engine = SqlAlchemyExecutionEngine(
+        url="sqlite:///" + db_file, kwargs={"connect_args": {"timeout": 10}}
+    )
+    assert my_execution_engine.connection_string is None
+    assert my_execution_engine.credentials is None
+    assert my_execution_engine.url[-36:] == "test_cases_for_sql_data_connector.db"
+
+    my_execution_engine.get_batch_data_and_markers(
+        batch_spec=SqlAlchemyDatasourceBatchSpec(
+            table_name="table_partitioned_by_date_column__A",
+            sampling_method="_sample_using_limit",
+            sampling_kwargs={"n": 5},
+        )
+    )
+
+
+def test_instantiation_via_url_with_invalid_kwargs(sa):
+    db_file = file_relative_path(
+        __file__,
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
+    )
+    with pytest.raises(TypeError):
+        _ = SqlAlchemyExecutionEngine(
+            url="sqlite:///" + db_file,
+            kwargs={"connect_args": {"invalid_keyword_argument": ""}},
+        )
+
+
 @pytest.mark.integration
 def test_instantiation_via_url_and_retrieve_data_with_other_dialect(sa):
     """Ensure that we can still retrieve data when the dialect is not recognized."""
