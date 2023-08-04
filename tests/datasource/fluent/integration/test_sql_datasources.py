@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pprint import pformat as pf
 from typing import Final
 
 import pytest
@@ -10,6 +11,9 @@ from great_expectations.data_context import EphemeralDataContext
 from great_expectations.datasource.fluent import (
     PostgresDatasource,
     SQLDatasource,
+)
+from great_expectations.expectations.expectation import (
+    ExpectationConfiguration,
 )
 
 PG_TABLE: Final[str] = "pg_aggregate"
@@ -57,7 +61,7 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
 
 
 @pytest.mark.parametrize(
-    ["asset_name"],
+    "asset_name",
     [
         param("unquoted_lower"),
         param("quoted_lower"),
@@ -83,6 +87,53 @@ class TestTableIdentifiers:
         postgres_ds.add_table_asset(
             asset_name, table_name=TABLE_NAME_MAPPING["postgres"][asset_name]
         )
+
+    @pytest.mark.parametrize(
+        "datasource_type",
+        ["trino", "postgres"],
+    )
+    def test_checkpoint_run(
+        self,
+        request: pytest.FixtureRequest,
+        context: EphemeralDataContext,
+        asset_name: str,
+        datasource_type: str,
+    ):
+        datasource: SQLDatasource = request.getfixturevalue(f"{datasource_type}_ds")
+        asset = datasource.add_table_asset(
+            asset_name, table_name=TABLE_NAME_MAPPING[datasource_type][asset_name]
+        )
+
+        suite = context.add_expectation_suite(
+            expectation_suite_name=f"{datasource.name}-{asset.name}"
+        )
+        suite.add_expectation(
+            expectation_configuration=ExpectationConfiguration(
+                expectation_type="expect_column_values_to_not_be_null",
+                kwargs={
+                    "column": "val",
+                    "mostly": 1,
+                },
+            )
+        )
+
+        checkpoint_config = {
+            "name": f"{datasource.name}-{asset.name}",
+            "validations": [
+                {
+                    "expectation_suite_name": suite.expectation_suite_name,
+                    "batch_request": {
+                        "datasource_name": datasource.name,
+                        "data_asset_name": asset.name,
+                    },
+                }
+            ],
+        }
+        checkpoint = context.add_checkpoint(**checkpoint_config)
+        result = checkpoint.run()
+
+        print(f"result:\n{pf(result)}")
+        assert result.success is True
 
 
 if __name__ == "__main__":
