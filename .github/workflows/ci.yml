@@ -1,13 +1,10 @@
 name: ci
 
 # This pipeline is intended to facilicate the full coverage of tests for OSS GX.
-# It will run inthe following cases:
-# A minimal set will run with
-# 1. On every pull request
-# A full set will run with
-# 1. Manual triggering
-# 2. Every 3 hours
-# 3. When we push a tag with a pattern x.y.z (for example 0.0.1) which is the pattern we use for releases.
+# A "reasonable" set of tests will run on every pull request, and a full set will run with:
+#   1. Manual triggering
+#   2. Every 3 hours
+#   3. When we push a tag with a pattern x.y.z (for example 0.0.1) which is the pattern we use for releases.
 
 on:
 
@@ -405,9 +402,8 @@ jobs:
     name: Build and publish Python distributions to PyPI
     runs-on: ubuntu-latest
     environment:
-      # TODO: update to actual name and URL
-      name: testpypi
-      url: https://test.pypi.org/p/great-expectations
+      name: pypi
+      url: https://pypi.org/p/great-expectations
     permissions:
       id-token: write
     steps:
@@ -430,6 +426,4 @@ jobs:
     - name: Publish distribution to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
-        # TODO: change to actual repo URL
-        skip-existing: true # prevent against pushing duplicates
-        repository-url: https://test.pypi.org/legacy/
+        skip-existing: true # prevent against pushing duplicate versions
