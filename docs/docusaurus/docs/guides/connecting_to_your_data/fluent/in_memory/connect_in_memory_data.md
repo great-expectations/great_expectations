@@ -24,9 +24,11 @@ Use the information provided here to connect to an in-memory pandas or Spark Dat
   ]}>
 <TabItem value="pandas">
 
+## pandas
+
 pandas can read many types of data into its DataFrame class, but the following examples use data originating in a parquet file.
 
-## Prerequisites
+### Prerequisites
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {true} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
@@ -34,18 +36,18 @@ pandas can read many types of data into its DataFrame class, but the following e
 
 </Prerequisites> 
 
-## Import the Great Expectations module and instantiate a Data Context
+### Import the Great Expectations module and instantiate a Data Context
 
 <ImportGxAndInstantiateADataContext />
 
-## Create a Data Source
+### Create a Data Source
 
 Run the following Python code to create a Pandas Data Source:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py datasource"
 ```
 
-## Read your source data into a Pandas DataFrame
+### Read your source data into a Pandas DataFrame
 
 In the following example, a parquet file is read into a Pandas DataFrame that will be used in subsequent code examples.
 
@@ -54,7 +56,7 @@ Run the following Python code to create the Pandas DataFrame:
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py dataframe"
 ```
 
-## Add a Data Asset to the Data Source
+### Add a Data Asset to the Data Source
 
 The following information is required when you create a Pandas DataFrame Data Asset:
 
@@ -79,20 +81,22 @@ The DataFrame you created previously is the value you'll enter for `dataframe` p
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py build_batch_request_with_dataframe"
     ```
 
-## Next steps
+### Next steps
 
 <AfterCreateInMemoryDataAsset />
 
-## Related documentation
+### Related documentation
 
 For more information on Pandas read methods, see [the Pandas Input/Output documentation](https://pandas.pydata.org/docs/reference/io.html).
 
 </TabItem>
 <TabItem value="spark">
 
+## Spark
+
 Connect to in-memory source data using Spark. 
 
-## Prerequisites
+### Prerequisites
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {true} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
@@ -101,18 +105,18 @@ Connect to in-memory source data using Spark.
 
 </Prerequisites> 
 
-## Import the Great Expectations module and instantiate a Data Context
+### Import the Great Expectations module and instantiate a Data Context
 
 <ImportGxAndInstantiateADataContext />
 
-## Create a Data Source
+### Create a Data Source
 
 Run the following Python code to create a Spark Data Source:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_spark.py datasource"
 ```
 
-## Read your source data into a Spark DataFrame
+### Read your source data into a Spark DataFrame
 
 In the following example, you'll create a simple Spark DataFrame that is used in the following code examples.
 
@@ -121,7 +125,7 @@ Run the following Python code to create the Spark DataFrame:
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_spark.py dataframe"
 ```
 
-## Add a Data Asset to the Datasource
+### Add a Data Asset to the Datasource
 
 The following information is required when you create a Spark DataFrame Data Asset:
 
@@ -150,7 +154,7 @@ The DataFrame you created previously is the value you'll enter for `dataframe` p
 
 <AfterCreateInMemoryDataAsset />
 
-## Related documentation
+### Related documentation
 
 For more information on Spark read methods, see the [Spark Input/Output documentation](https://spark.apache.org/docs/latest/api/python/reference/pyspark.pandas/io.html).
 
