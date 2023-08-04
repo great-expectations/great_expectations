@@ -18,11 +18,9 @@ Execution Engines are components of <TechnicalTag relative="../" tag="datasource
 
 ## Use cases
 
-<<<<<<< HEAD
 You define the Execution Engine that you want to use to process data to compute Metrics in the Data Source configuration.  After you define the Execution Engine, you don't need to interact with it because the Data Source it is configured for uses it automatically.
-=======
+
 If a <TechnicalTag relative="../" tag="profiler" text="Profiler" /> is used to create Expectations, or if you use the [interactive workflow for creating Expectations](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), an Execution Engine will be involved as part of the Data Source used to provide data from a source data system for introspection.
->>>>>>> develop
 
 When a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> Validates data, it uses a Data Source (and therefore an Execution Engine) to execute one or more Batch Requests and acquire the data that the Validation is run on.
 
