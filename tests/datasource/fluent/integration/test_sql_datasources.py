@@ -79,7 +79,7 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
 class TestTableIdentifiers:
     @pytest.mark.trino
     def test_trino(self, trino_ds: SQLDatasource, asset_name: str):
-        table_names: list[str] = inspect(trino_ds.get_engine()).get_table_names()  # type: ignore[attr-defined]
+        table_names: list[str] = inspect(trino_ds.get_engine()).get_table_names()
         print(f"trino tables:\n{pf(table_names)}))")
 
         trino_ds.add_table_asset(
@@ -88,7 +88,7 @@ class TestTableIdentifiers:
 
     @pytest.mark.postgresql
     def test_postgres(self, postgres_ds: PostgresDatasource, asset_name: str):
-        table_names: list[str] = inspect(postgres_ds.get_engine()).get_table_names()  # type: ignore[attr-defined]
+        table_names: list[str] = inspect(postgres_ds.get_engine()).get_table_names()
         print(f"postgres tables:\n{pf(table_names)}))")
 
         postgres_ds.add_table_asset(
