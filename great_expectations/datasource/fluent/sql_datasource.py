@@ -397,6 +397,15 @@ Splitter = Union[
 
 
 class _SQLAsset(DataAsset):
+    """A _SQLAsset Mixin
+
+    This is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality
+    that can be used by different SQL datasource subclasses.
+
+    For example see TableAsset defined in this module and SqliteTableAsset defined in
+    sqlite_datasource.py
+    """
+
     # Instance fields
     type: str = pydantic.Field("_sql_asset")
     splitter: Optional[Splitter] = None
@@ -763,6 +772,7 @@ class _SQLAsset(DataAsset):
         raise NotImplementedError
 
 
+@public_api
 class QueryAsset(_SQLAsset):
     # Instance fields
     type: Literal["query"] = "query"
@@ -791,16 +801,8 @@ class QueryAsset(_SQLAsset):
         }
 
 
+@public_api
 class TableAsset(_SQLAsset):
-    """A _SQLAsset Mixin
-
-    This is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality
-    that can be used by different SQL datasource subclasses.
-
-    For example see TableAsset defined in this module and SqliteTableAsset defined in
-    sqlite_datasource.py
-    """
-
     # Instance fields
     type: Literal["table"] = "table"
     # TODO: quoted_name or str
