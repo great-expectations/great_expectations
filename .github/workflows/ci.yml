@@ -1,11 +1,21 @@
 name: ci
 
+# This pipeline is intended to facilicate the full coverage of tests for OSS GX.
+# A "reasonable" set of tests will run on every pull request, and a full set will run with:
+#   1. Manual triggering
+#   2. Every 3 hours
+#   3. When we push a tag with a pattern x.y.z (for example 0.0.1) which is the pattern we use for releases.
+
 on:
+
   pull_request:
   schedule:
     # https://crontab.guru/every-3-hours
     - cron: "0 */3 * * *"
   workflow_dispatch:  # allows manual triggering with branch picker
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   ci-does-not-run-on-draft-pull-requests:
@@ -47,6 +57,7 @@ jobs:
           python ci/checks/validate_docs_snippets.py
       - name: public_api_report
         run: invoke public-api
+
   static-analysis:
     runs-on: ubuntu-latest
     steps:
@@ -227,9 +238,9 @@ jobs:
           # TODO: would like to adopt `actionlint` pre-commit hook
           # but false positive here and inability to do an inline ignore
           # prevents this https://github.com/rhysd/actionlint/issues/237
-          - python-version: ${{ github.event_name != 'schedule' && '3.9' }}
-          - python-version: ${{ github.event_name != 'schedule' && '3.10' }}
-          - python-version: ${{ github.event_name != 'schedule' && '3.11' }}
+          - python-version: ${{ github.event_name == 'pull_request' && '3.9' }}
+          - python-version: ${{ github.event_name == 'pull_request' && '3.10' }}
+          - python-version: ${{ github.event_name == 'pull_request' && '3.11' }}
 
     steps:
       - name: Checkout
@@ -317,8 +328,8 @@ jobs:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
         exclude:
-          - python-version: ${{ github.event_name != 'schedule' && '3.9' }}
-          - python-version: ${{ github.event_name != 'schedule' && '3.10' }}
+          - python-version: ${{ github.event_name == 'pull_request' && '3.9' }}
+          - python-version: ${{ github.event_name == 'pull_request' && '3.10' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -353,3 +364,74 @@ jobs:
           GE_USAGE_STATISTICS_URL: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
         # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
         run: pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+
+  notify_on_failure:
+    needs: [
+      doc-checks,
+      static-analysis,
+      docs-snippets,
+      unit-tests,
+      cloud-tests,
+      marker-tests,
+      py38-min-versions,
+      py39-min-versions,
+      py310-min-versions,
+      import_gx,
+      usage_stats_integration
+    ]
+    if: always() && !cancelled() && contains(needs.*.result, 'failure') && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scheduled CI job failure
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CI_WEBHOOK_URL }}
+  build-n-publish:
+    needs: [
+      doc-checks,
+      static-analysis,
+      docs-snippets,
+      unit-tests,
+      cloud-tests,
+      marker-tests,
+      py38-min-versions,
+      py39-min-versions,
+      py310-min-versions,
+      import_gx,
+      usage_stats_integration
+      ]
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    name: Build and publish Python distributions to PyPI
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/great-expectations
+    permissions:
+      id-token: write
+    steps:
+    - uses: actions/checkout@master
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.8'
+    - name: Update pip
+      run: python -m pip install --upgrade pip
+    - name: Install Twine and Wheel, and prepare packaging
+      run: |
+        pip install twine wheel
+        git config --global user.email "team@greatexpectations.io"
+        git config --global user.name "Great Expectations"
+    - name: Build distribution
+      run: |
+        python setup.py sdist
+        python setup.py bdist_wheel
+    - name: Publish distribution to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        skip-existing: true # prevent against pushing duplicate versions
