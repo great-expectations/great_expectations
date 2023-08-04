@@ -90,7 +90,10 @@ class TestTableIdentifiers:
 
     @pytest.mark.parametrize(
         "datasource_type",
-        ["trino", "postgres"],
+        [
+            param("trino", marks=[pytest.mark.trino]),
+            param("postgres", marks=[pytest.mark.postgresql]),
+        ],
     )
     def test_checkpoint_run(
         self,
