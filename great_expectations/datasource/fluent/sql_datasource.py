@@ -48,6 +48,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
 )
 
 if TYPE_CHECKING:
+    from sqlalchemy.sql import quoted_name  # noqa: TID251 # type-checking only
     from typing_extensions import Self
 
     from great_expectations.compatibility import sqlalchemy
@@ -804,6 +805,7 @@ class QueryAsset(_SQLAsset):
 class TableAsset(_SQLAsset):
     # Instance fields
     type: Literal["table"] = "table"
+    # TODO: quoted_name or str
     table_name: str = pydantic.Field(
         "",
         description="Name of the SQL table. Will default to the value of `name` if not provided.",
@@ -825,12 +827,30 @@ class TableAsset(_SQLAsset):
                 "table_name cannot be empty and should default to name if not provided"
             )
 
+        return validated_table_name
+
+    @pydantic.validator("table_name")
+    def _resolve_quoted_name(cls, table_name: str) -> str | quoted_name:
+        table_name_is_quoted: bool = cls._is_bracketed_by_quotes(table_name)
+
         from great_expectations.compatibility import sqlalchemy
 
         if sqlalchemy.quoted_name:
-            return sqlalchemy.quoted_name(value=validated_table_name, quote=True)
+            if isinstance(table_name, sqlalchemy.quoted_name):
+                return table_name
 
-        return validated_table_name
+            if table_name_is_quoted:
+                # https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.quoted_name.quote
+                # Remove the quotes and add them back using the sqlalchemy.quoted_name function
+                # TODO: We need to handle nested quotes
+                table_name = table_name.strip("'").strip('"')
+
+            return sqlalchemy.quoted_name(
+                value=table_name,
+                quote=table_name_is_quoted,
+            )
+
+        return table_name
 
     def test_connection(self) -> None:
         """Test the connection for the TableAsset.
@@ -888,6 +908,21 @@ class TableAsset(_SQLAsset):
             "schema_name": self.schema_name,
             "batch_identifiers": {},
         }
+
+    @staticmethod
+    def _is_bracketed_by_quotes(target: str) -> bool:
+        """Returns True if the target string is bracketed by quotes.
+
+        Arguments:
+            target: A string to check if it is bracketed by quotes.
+
+        Returns:
+            True if the target string is bracketed by quotes.
+        """
+        for quote in ["'", '"']:
+            if target.startswith(quote) and target.endswith(quote):
+                return True
+        return False
 
 
 @public_api
