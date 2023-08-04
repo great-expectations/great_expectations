@@ -32,8 +32,9 @@ from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
 
-from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility import aws, snowflake, sqlalchemy, trino
 from great_expectations.compatibility.not_imported import is_version_greater_or_equal
+from great_expectations.compatibility.sqlalchemy import Subquery
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -106,11 +107,6 @@ except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
 
 try:
-    import sqlalchemy_redshift.dialect
-except ImportError:
-    sqlalchemy_redshift = None
-
-try:
     import sqlalchemy_dremio.pyodbc
 
     if sa:
@@ -120,23 +116,19 @@ try:
 except ImportError:
     sqlalchemy_dremio = None
 
-try:
-    import snowflake.sqlalchemy.snowdialect
-
+if snowflake.snowflakedialect:
     if sa:
         # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
         sa.dialects.registry.register(
             GXSqlDialect.SNOWFLAKE, "snowflake.sqlalchemy", "dialect"
         )
-except (ImportError, KeyError, AttributeError):
-    snowflake = None
 
-from great_expectations.compatibility.sqlalchemy_bigquery import (
+from great_expectations.compatibility.bigquery import (
     _BIGQUERY_MODULE_NAME,
     bigquery_types_tuple,
 )
-from great_expectations.compatibility.sqlalchemy_bigquery import (
+from great_expectations.compatibility.bigquery import (
     sqlalchemy_bigquery as sqla_bigquery,
 )
 
@@ -152,18 +144,11 @@ except ImportError:
     teradatasqlalchemy = None
     teradatatypes = None
 
-try:
-    import trino.sqlalchemy.datatype as trinotypes
-    import trino.sqlalchemy.dialect
-except ImportError:
-    trino = None
-    trinotypes = None
-
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine as SaEngine  # noqa: TID251
 
 
-def _get_dialect_type_module(dialect):  # noqa: PLR0912
+def _get_dialect_type_module(dialect):
     """Given a dialect, returns the dialect type, which is defines the engine/system that is used to communicates
     with the database/database implementation. Currently checks for RedShift/BigQuery dialects
     """
@@ -172,12 +157,12 @@ def _get_dialect_type_module(dialect):  # noqa: PLR0912
             "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
         )
         return sa
-    try:
-        # Redshift does not (yet) export types to top level; only recognize base SA types
-        if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
-            # noinspection PyUnresolvedReferences
-            return dialect.sa
-    except (TypeError, AttributeError):
+
+    # Redshift does not (yet) export types to top level; only recognize base SA types
+    if aws.redshiftdialect and isinstance(dialect, aws.redshiftdialect.RedshiftDialect):
+        # noinspection PyUnresolvedReferences
+        return dialect.sa
+    else:
         pass
 
     # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
@@ -211,18 +196,22 @@ def _get_dialect_type_module(dialect):  # noqa: PLR0912
         if (
             isinstance(
                 dialect,
-                trino.sqlalchemy.dialect.TrinoDialect,
+                trino.trinodialect.TrinoDialect,
             )
-            and trinotypes is not None
+            and trino.trinotypes is not None
         ):
-            return trinotypes
+            return trino.trinotypes
     except (TypeError, AttributeError):
         pass
 
     return dialect
 
 
-_PERSISTED_CONNECTION_DIALECTS = (GXSqlDialect.SQLITE, GXSqlDialect.MSSQL)
+_PERSISTED_CONNECTION_DIALECTS = (
+    GXSqlDialect.SQLITE,
+    GXSqlDialect.MSSQL,
+    GXSqlDialect.BIGQUERY,
+)
 
 
 def _dialect_requires_persisted_connection(
@@ -667,8 +656,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 raise GreatExpectationsError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
-        else:
-            if batch_id in self.batch_manager.batch_data_cache:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if batch_id in self.batch_manager.batch_data_cache:
                 data_object = cast(
                     SqlAlchemyBatchData, self.batch_manager.batch_data_cache[batch_id]
                 )
@@ -738,7 +727,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
             # SQLAlchemy 2.0 deprecated select_from() from a non-Table asset without a subquery.
             # Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated.
-            if not isinstance(selectable, sa.Table):
+            if not isinstance(selectable, (sa.Table, Subquery)):
                 selectable = selectable.subquery()
 
             selectable = (
@@ -805,8 +794,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         )
                     )
                 )
-            else:
-                if ignore_row_if != "neither":  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -856,8 +845,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         )
                     )
                 )
-            else:
-                if ignore_row_if != "never":  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if ignore_row_if != "never":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -1262,8 +1251,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 **batch_spec["splitter_kwargs"],
             )
 
-        else:
-            if self.dialect_name == GXSqlDialect.SQLITE:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if self.dialect_name == GXSqlDialect.SQLITE:
                 split_clause = sa.text("1 = 1")
             else:
                 split_clause = sa.true()
@@ -1346,11 +1335,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             }
         )
+        temp_table_schema_name: Optional[str] = batch_spec.get("temp_table_schema_name")
 
         source_schema_name: str = batch_spec.get("schema_name", None)
         source_table_name: str = batch_spec.get("table_name", None)
-
-        temp_table_schema_name: Optional[str] = batch_spec.get("temp_table_schema_name")
 
         if batch_spec.get("bigquery_temp_table"):
             # deprecated-v0.15.3
@@ -1374,8 +1362,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 query=query,
                 temp_table_schema_name=temp_table_schema_name,
                 create_temp_table=create_temp_table,
-                source_table_name=source_table_name,
-                source_schema_name=source_schema_name,
             )
         elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
             selectable: Union[

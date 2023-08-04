@@ -246,8 +246,8 @@ def param_method(param_name: str) -> Callable:
                     return_obj = param_func(
                         renderer_configuration=renderer_configuration
                     )
-                else:
-                    if return_type is RendererConfiguration:  # noqa: PLR5501
+                else:  # noqa: PLR5501
+                    if return_type is RendererConfiguration:
                         return_obj = renderer_configuration
                     else:
                         return_obj = None
@@ -872,7 +872,7 @@ class Expectation(metaclass=MetaExpectation):
                 for unexpected_value in partial_unexpected_list:
                     if unexpected_value:
                         string_unexpected_value = str(unexpected_value)
-                    elif unexpected_value == "":  # noqa: PLC1901
+                    elif unexpected_value == "":
                         string_unexpected_value = "EMPTY"
                     else:
                         string_unexpected_value = "null"
@@ -2605,8 +2605,7 @@ class QueryExpectation(BatchExpectation, ABC):
             parsed_query: Set[str] = {
                 x
                 for x in re.split(", |\\(|\n|\\)| |/", query)
-                if x.upper() != ""  # noqa: PLC1901
-                and x.upper() not in valid_sql_tokens_and_types
+                if x.upper() and x.upper() not in valid_sql_tokens_and_types
             }
             assert "{active_batch}" in parsed_query, (
                 "Your query appears to not be parameterized for a data asset. "

@@ -1,10 +1,17 @@
+from __future__ import annotations
+
 import logging
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.util import deep_filter_properties_iterable
+
+if TYPE_CHECKING:
+    from great_expectations.core.usage_statistics.anonymizers.anonymizer import (
+        Anonymizer,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +19,7 @@ logger = logging.getLogger(__name__)
 class ProfilerAnonymizer(BaseAnonymizer):
     def __init__(
         self,
-        aggregate_anonymizer: "Anonymizer",  # noqa: F821
+        aggregate_anonymizer: Anonymizer,
         salt: Optional[str] = None,
     ) -> None:
         super().__init__(salt=salt)
@@ -54,7 +61,7 @@ class ProfilerAnonymizer(BaseAnonymizer):
         ), "ProfilerAnonymizer can only handle objects of type RuleBasedProfilerConfig"
         profiler_config: RuleBasedProfilerConfig = obj
 
-        name: str = profiler_config.name
+        name: str | None = profiler_config.name
         anonymized_name: Optional[str] = self._anonymize_string(name)
 
         config_version: float = profiler_config.config_version

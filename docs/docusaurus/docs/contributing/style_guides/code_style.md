@@ -17,6 +17,7 @@ This style guide will be enforced for all incoming PRs. However, certain legacy 
 * **Experimental classes should log an experimental warning when initialized:** “Warning: great_expectations.some_module.SomeClass is experimental. Methods, APIs, and core behavior may change in the future.”
 
 * **Docstrings are highly recommended.** We use the Sphinx’s [Napoleon extension](http://www.sphinx-doc.org/en/master/ext/napoleon.html) to build documentation from Google-style docstrings.
+    * Docstrings on Expectation classes have [additional requirements](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/3-expectation-docstring-formatting.md) since their content is converted and included in the [Expectation Gallery](https://greatexpectations.io/expectations).
 
 ### Tasks
 
@@ -25,7 +26,7 @@ Common developer tasks such as linting, formatting, type-checking are defined in
 To see the available task run `invoke --list` from the project root.
 
 ```console
-$ invoke --list                                                                                                                                                                                                                                                                                                                                               in zsh at 14:47:20
+$ invoke --list
 Available tasks:
 
   fmt             Run code formatter.
@@ -39,7 +40,7 @@ Available tasks:
 For detailed usage guide, `invoke <TASK-NAME> --help`
 
 ```console
-$ invoke fmt --help                                                                                                                                                                                                                                                                                                                                           in zsh at 14:58:01
+$ invoke fmt --help
 Usage: inv[oke] [--core-opts] fmt [--options] [other tasks here ...]
 
 Docstring:

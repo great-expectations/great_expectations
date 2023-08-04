@@ -12,7 +12,7 @@ date: 20220118
 
 - `great_expectation.yml` file containing a `Datasource` with a `InferredAssetDataConnector` connecting to example data. For Pandas and Spark it is the `.csv` and for sqlite it is the `.db` file.
 - `ExpectationSuite` named `visitors_exp` that contains a single Expectation. It is configured to detect non-pageview related entries in the `event_type` column of our data.
-- `Checkpoint` configuration named `my_checkpoint` will run the `visitor_exp` Suite against the data configured in the `Datasource`.
+- `Checkpoint` configuration named `my_checkpoint` will run the `visitor_exp` Expectation Suite against the data configured in the `Datasource`.
 - Jupyter Notebook containing `Checkpoint` configuration with `result_format` configured in the following ways:
     1. Checkpoint run without primary key configuration.
     2. Checkpoint run with a **single** column defined in `unexpected_index_column_names`.

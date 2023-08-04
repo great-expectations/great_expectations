@@ -742,7 +742,14 @@ def load_data_into_test_bigquery_database_with_bigquery_client(
     job: bigquery.LoadJob = client.load_table_from_dataframe(
         dataframe, table_id
     )  # Make an API request.
-    job.result()  # Wait for the job to complete
+    load_job = job.result()  # Wait for the job to complete
+    if load_job.errors or load_job.error_result:
+        raise gx_exceptions.DatabaseConnectionError(
+            "Unable to load data into BigQuery. Load job errors: "
+            + str(load_job.errors)
+            + " Load job error result: "
+            + str(load_job.error_result)
+        )
 
 
 def load_dataframe_into_test_athena_database_as_table(
@@ -820,7 +827,9 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
 
     for table_name in tables_to_drop:
         print(f"Dropping table {table_name}")
-        execution_engine.execute_query(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
+        execution_engine.execute_query_in_transaction(
+            sa.text(f"DROP TABLE IF EXISTS {table_name}")
+        )
         tables_dropped.append(table_name)
 
     tables_skipped: List[str] = list(set(tables_to_drop) - set(tables_dropped))

@@ -1,5 +1,5 @@
 ---
-title: How to create Expectations interactively in Python
+title: Create Expectations interactively with Python
 tag: [how-to, getting started]
 description: Create Expectations with a Python interpreter or a script and then use interactive feedback to validate them with batch data.
 keywords: [Expectations, Interactive Mode, Interactive]
@@ -23,7 +23,7 @@ No.  The interactive method used to create and edit Expectations does not edit o
 
 - Great Expectations installed in a Python environment
 - A Filesystem Data Context for your Expectations
-- Created a Datasource from which to request a Batch of data for introspection
+- Created a Data Source from which to request a Batch of data for introspection
 
 </Prerequisites> 
 
@@ -54,7 +54,7 @@ See one of the following guides:
 <details>
 <summary>
 
-### If you haven't created a Datasource
+### If you haven't created a Data Source
 
 </summary>
 

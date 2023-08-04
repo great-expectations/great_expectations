@@ -5,11 +5,11 @@ from typing import Callable, Iterator
 
 import pandas as pd
 
-from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.not_imported import (
     is_version_greater_or_equal,
     is_version_less_than,
 )
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.warnings import (
     warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0,
 )
@@ -32,9 +32,7 @@ def execute_pandas_reader_fn(
         dataframe or list of dataframes
     """
     if is_version_less_than(pd.__version__, "2.0.0"):
-        if sqlalchemy.sqlalchemy and is_version_greater_or_equal(
-            sqlalchemy.sqlalchemy.__version__, "2.0.0"
-        ):
+        if sa and is_version_greater_or_equal(sa.__version__, "2.0.0"):
             warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
         with warnings.catch_warnings():
             # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
@@ -71,9 +69,7 @@ def pandas_read_sql(sql, con, **kwargs) -> pd.DataFrame | Iterator[pd.DataFrame]
         dataframe
     """
     if is_version_less_than(pd.__version__, "2.0.0"):
-        if sqlalchemy.sqlalchemy and is_version_greater_or_equal(
-            sqlalchemy.sqlalchemy.__version__, "2.0.0"
-        ):
+        if sa and is_version_greater_or_equal(sa.__version__, "2.0.0"):
             warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
         with warnings.catch_warnings():
             # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
@@ -82,11 +78,15 @@ def pandas_read_sql(sql, con, **kwargs) -> pd.DataFrame | Iterator[pd.DataFrame]
             warnings.filterwarnings(action="ignore", category=DeprecationWarning)
             return_value = pd.read_sql(sql=sql, con=con, **kwargs)
     else:
+        if not sql.supports_execution:
+            sql = sa.select(sa.text("*")).select_from(sql)
         return_value = pd.read_sql(sql=sql, con=con, **kwargs)
     return return_value
 
 
-def pandas_read_sql_query(sql, con, execution_engine, **kwargs) -> pd.DataFrame:
+def pandas_read_sql_query(
+    sql, con, execution_engine, chunksize=None, **kwargs
+) -> pd.DataFrame:
     """Suppress deprecation warnings while executing the pandas read_sql_query function.
 
     Note this only passes params straight to pandas read_sql_query method, please
@@ -101,24 +101,29 @@ def pandas_read_sql_query(sql, con, execution_engine, **kwargs) -> pd.DataFrame:
     Args:
         sql: str or SQLAlchemy Selectable (select or text object)
         con: SQLAlchemy connectable, str, or sqlite3 connection
+        chunksize: If specified, return an iterator where `chunksize` is the number of rows to include in each chunk.
         **kwargs: Other keyword arguments, not enumerated here since they differ
             between pandas versions.
-
     Returns:
         dataframe
     """
     if (
-        sqlalchemy.sqlalchemy
-        and is_version_greater_or_equal(sqlalchemy.sqlalchemy.__version__, "2.0.0")
+        sa
+        and is_version_greater_or_equal(sa.__version__, "2.0.0")
         and is_version_less_than(pd.__version__, "2.0.0")
     ):
         warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
+
         with warnings.catch_warnings():
             # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
             # but using the base class here since sqlalchemy is an optional dependency and this
             # warning type only exists in sqlalchemy < 2.0.
             warnings.filterwarnings(action="ignore", category=DeprecationWarning)
-            return_value = pd.read_sql_query(sql=sql, con=con, **kwargs)
+            return_value = pd.read_sql_query(
+                sql=sql, con=con, chunksize=chunksize, **kwargs
+            )
     else:
-        return_value = pd.read_sql_query(sql=sql, con=con, **kwargs)
+        return_value = pd.read_sql_query(
+            sql=sql, con=con, chunksize=chunksize, **kwargs
+        )
     return return_value

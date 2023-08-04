@@ -79,9 +79,9 @@ class ColumnMedian(ColumnAggregateMetricProvider):
                 )
                 / 2.0
             )  # Average center values
-        else:
+        else:  # noqa: PLR5501
             # An odd number of column values, we can just take the center value
-            if len(column_values) == 1:  # noqa: PLR5501
+            if len(column_values) == 1:
                 column_median = column_values[0][0]  # The only value
             else:
                 column_median = column_values[1][0]  # True center value
@@ -115,7 +115,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         # in the degenerate case when n_values = 0
 
         """Spark Median Implementation"""
-        table_row_count = metrics.get("table.row_count")
+        table_row_count = metrics["table.row_count"]
         result = df.approxQuantile(
             column, [0.5, 0.5 + (1 / (2 + (2 * table_row_count)))], 0
         )

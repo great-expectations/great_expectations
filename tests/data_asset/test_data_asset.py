@@ -1,5 +1,8 @@
 import os
 import shutil
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
 import pandas as pd
 import pytest
@@ -19,7 +22,7 @@ def data_context_simple_expectation_suite_with_custom_pandas_dataset(tmp_path_fa
     created with DataContext.create()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)
     asset_config_path = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "../test_fixtures")
     os.makedirs(
@@ -30,7 +33,7 @@ def data_context_simple_expectation_suite_with_custom_pandas_dataset(tmp_path_fa
         os.path.join(
             fixture_dir, "great_expectations_basic_with_custom_pandas_dataset.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, FileDataContext.GX_YML)),
     )
     shutil.copy(
         os.path.join(
@@ -51,6 +54,7 @@ def data_context_simple_expectation_suite_with_custom_pandas_dataset(tmp_path_fa
     return gx.get_context(context_root_dir=context_path)
 
 
+@pytest.mark.filesystem
 def test_data_asset_expectation_suite(empty_data_context_stats_enabled):
     context: DataContext = empty_data_context_stats_enabled
     asset = DataAsset()
@@ -67,6 +71,7 @@ def test_data_asset_expectation_suite(empty_data_context_stats_enabled):
     assert asset.get_expectation_suite() == default_suite
 
 
+@pytest.mark.filesystem
 def test_custom_expectation_default_arg_values_set(
     data_context_simple_expectation_suite_with_custom_pandas_dataset,
 ):

@@ -11,11 +11,14 @@ To show task help page `invoke <NAME> --help`
 from __future__ import annotations
 
 import json
+import logging
 import os
 import pathlib
 import shutil
 import sys
-from typing import TYPE_CHECKING, Final, Union
+from collections.abc import Generator, Mapping, Sequence
+from pprint import pformat as pf
+from typing import TYPE_CHECKING, Final, NamedTuple, Union
 
 import invoke
 
@@ -26,7 +29,11 @@ if TYPE_CHECKING:
     from invoke.context import Context
 
 
-GX_ROOT_DIR: Final = pathlib.Path(__file__).parent / "great_expectations"
+LOGGER = logging.getLogger(__name__)
+
+GX_ROOT_DIR: Final = pathlib.Path(__file__).parent
+GX_PACKAGE_DIR: Final = GX_ROOT_DIR / "great_expectations"
+REQS_DIR: Final = GX_ROOT_DIR / "reqs"
 
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
@@ -112,20 +119,23 @@ def fmt(  # noqa: PLR0913
 @invoke.task(
     help={
         "path": _PATH_HELP_DESC,
+        "fmt": "Disable formatting. Runs by default.",
         "fix": "Attempt to automatically fix lint violations.",
         "watch": "Run in watch mode by re-running whenever files change.",
         "pty": _PTY_HELP_DESC,
     }
 )
-def lint(
+def lint(  # noqa: PLR0913
     ctx: Context,
     path: str = ".",
+    fmt_: bool = True,
     fix: bool = False,
     watch: bool = False,
     pty: bool = True,
 ):
     """Run formatter (black) and linter (ruff)"""
-    fmt(ctx, path, check=not fix, pty=pty)
+    if fmt_:
+        fmt(ctx, path, check=not fix, pty=pty)
 
     # Run code linter (ruff)
     cmds = ["ruff", path]
@@ -201,6 +211,14 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
         )
 
 
+@invoke.task()
+def marker_coverage(
+    ctx: Context,
+):
+    pytest_cmds = ["pytest", "--verify-marker-coverage-and-exit"]
+    ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
+
+
 @invoke.task(
     aliases=["types"],
     iterable=["packages"],
@@ -270,11 +288,11 @@ def type_check(  # noqa: PLR0913, PLR0912
 
     if check_stub_sources:
         # see --help docs for explanation of this flag
-        for stub_file in GX_ROOT_DIR.glob("**/*.pyi"):
+        for stub_file in GX_PACKAGE_DIR.glob("**/*.pyi"):
             source_file = stub_file.with_name(  # TODO:py3.9 .with_stem()
                 f"{stub_file.name[:-1]}"
             )
-            relative_path = source_file.relative_to(GX_ROOT_DIR.parent)
+            relative_path = source_file.relative_to(GX_ROOT_DIR)
             ge_pkgs.append(str(relative_path))
 
     cmds = [
@@ -342,14 +360,13 @@ def mv_usage_stats_json(ctx: Context):
     print(f"'{outfile}' copied to dbfs.")
 
 
-UNIT_TEST_DEFAULT_TIMEOUT: float = 2.0
+UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
 
 
 @invoke.task(
     aliases=["test"],
     help={
         "unit": "Runs tests marked with the 'unit' marker. Default behavior.",
-        "integration": "Runs integration tests and exclude unit-tests. By default only unit tests are run.",
         "ignore-markers": "Don't exclude any test by not passing any markers to pytest.",
         "slowest": "Report on the slowest n number of tests",
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
@@ -362,7 +379,6 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 2.0
 def tests(  # noqa: PLR0913
     ctx: Context,
     unit: bool = True,
-    integration: bool = False,
     ignore_markers: bool = False,
     ci: bool = False,
     html: bool = False,
@@ -371,16 +387,16 @@ def tests(  # noqa: PLR0913
     timeout: float = UNIT_TEST_DEFAULT_TIMEOUT,
     package: str | None = None,
     full_cov: bool = False,
+    verbose: bool = False,
 ):
     """
     Run tests. Runs unit tests by default.
 
     Use `invoke tests -p=<TARGET_PACKAGE>` to run tests on a particular package and measure coverage (or lack thereof).
+
+    See also, the newer `invoke ci-tests --help`.
     """
     markers = []
-    if integration:
-        markers += ["integration"]
-        unit = False
     markers += ["unit" if unit else "not unit"]
 
     marker_text = " and ".join(markers)
@@ -394,8 +410,10 @@ def tests(  # noqa: PLR0913
         f"--durations={slowest}",
         cov_param,
         "--cov-report term",
-        "-vv",
+        "-rEf",  # show extra test summary info for errors & failed tests
     ]
+    if verbose:
+        cmds.append("-vv")
     if not ignore_markers:
         cmds += ["-m", f"'{marker_text}'"]
     if unit and not ignore_markers:
@@ -523,7 +541,7 @@ def type_schema(
     )
 
     schema_dir_root: Final[pathlib.Path] = (
-        GX_ROOT_DIR / "datasource" / "fluent" / "schemas"
+        GX_PACKAGE_DIR / "datasource" / "fluent" / "schemas"
     )
     if clean:
         file_count = len(list(schema_dir_root.glob("**/*.json")))
@@ -656,8 +674,8 @@ def docs(
         ctx.run(" ".join(rm_rf_cmds), echo=True)
     elif lint:
         ctx.run(" ".join(["yarn lint"]), echo=True)
-    else:
-        if start:  # noqa: PLR5501
+    else:  # noqa: PLR5501
+        if start:
             ctx.run(" ".join(["yarn start"]), echo=True)
         else:
             print("Making sure docusaurus dependencies are installed.")
@@ -733,3 +751,343 @@ def link_checker(ctx: Context, skip_external: bool = True):
         skip_external=skip_external,
     )
     raise invoke.Exit(message, code)
+
+
+@invoke.task(
+    aliases=("automerge",),
+)
+def show_automerges(ctx: Context):
+    """Show github pull requests currently in automerge state."""
+    import requests
+
+    url = "https://api.github.com/repos/great-expectations/great_expectations/pulls"
+    response = requests.get(
+        url,
+        params={
+            "state": "open",
+            "sort": "updated",
+            "direction": "desc",
+            "per_page": 50,
+        },
+    )
+    LOGGER.debug(f"{response.request.method} {response.request.url} - {response}")
+
+    if response.status_code != requests.codes.ok:
+        print(f"Error: {response.reason}\n{pf(response.json(), depth=2)}")
+        response.raise_for_status()
+
+    pr_details = response.json()
+    LOGGER.debug(pf(pr_details, depth=2))
+
+    if automerge_prs := tuple(x for x in pr_details if x["auto_merge"]):
+        print(f"\tAutomerge PRs: {len(automerge_prs)}")
+        for i, pr in enumerate(automerge_prs, start=1):
+            print(f"{i}. @{pr['user']['login']} {pr['title']} {pr['html_url']}")
+    else:
+        print("\tNo PRs set to automerge")
+
+
+class TestDependencies(NamedTuple):
+    requirement_files: tuple[str, ...]
+    services: tuple[str, ...] = tuple()
+    extra_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
+        str, ...
+    ] = tuple()
+
+
+MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
+    "athena": TestDependencies(("reqs/requirements-dev-athena.txt",)),
+    "clickhouse": TestDependencies(("reqs/requirements-dev-clickhouse.txt",)),
+    "cloud": TestDependencies(
+        ("reqs/requirements-dev-cloud.txt",), extra_pytest_args=("--cloud",)
+    ),
+    "docs": TestDependencies(
+        # these installs are handled by the CI
+        requirement_files=(
+            "reqs/requirements-dev-test.txt",
+            "reqs/requirements-dev-azure.txt",
+            "reqs/requirements-dev-bigquery.txt",
+            "reqs/requirements-dev-mssql.txt",
+            "reqs/requirements-dev-mysql.txt",
+            "reqs/requirements-dev-postgresql.txt",
+            "reqs/requirements-dev-redshift.txt",
+            "reqs/requirements-dev-snowflake.txt",
+            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
+            "reqs/requirements-dev-sqlalchemy1.txt",
+            "reqs/requirements-dev-trino.txt",
+        ),
+        services=("postgresql", "mssql", "mysql", "trino"),
+        extra_pytest_args=(
+            "--aws",
+            "--azure",
+            "--bigquery",
+            "--mssql",
+            "--mysql",
+            "--postgresql",
+            "--redshift",
+            "--snowflake",
+            "--trino",
+            "--docs-tests",
+        ),
+    ),
+    "mssql": TestDependencies(
+        ("reqs/requirements-dev-mssql.txt",),
+        services=("mssql",),
+        extra_pytest_args=("--mssql",),
+    ),
+    "mysql": TestDependencies(
+        ("reqs/requirements-dev-mysql.txt",),
+        services=("mysql",),
+        extra_pytest_args=("--mysql",),
+    ),
+    "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
+    "postgresql": TestDependencies(
+        ("reqs/requirements-dev-postgresql.txt",),
+        services=("postgresql",),
+        extra_pytest_args=("--postgresql",),
+    ),
+    "spark": TestDependencies(
+        requirement_files=("reqs/requirements-dev-spark.txt",),
+        services=("spark",),
+        extra_pytest_args=("--spark",),
+    ),
+    "trino": TestDependencies(
+        ("reqs/requirements-dev-trino.txt",),
+        services=("trino",),
+        extra_pytest_args=("--trino",),
+    ),
+}
+
+
+def _add_all_backends_marker(marker_string: str) -> bool:
+    # We should generalize this, possibly leveraging MARKER_DEPENDENCY_MAP, but for now
+    # right I've hardcoded all the containerized backend services we support in testing.
+    return marker_string in ["postgresql", "mssql", "mysql", "spark", "trino"]
+
+
+def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
+    """_summary_
+
+    Args:
+        marker_string (str): _description_
+
+    Yields:
+        Generator[str, None, None]: _description_
+    """
+    tokens = marker_string.split()
+    if len(tokens) == 1:
+        yield tokens[0]
+    elif (
+        marker_string
+        == "athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds"
+    ):
+        yield "aws_creds"
+        yield "athena"
+        yield "clickhouse"
+        yield "openpyxl"
+        yield "pyarrow"
+        yield "project"
+        yield "sqlite"
+    else:
+        raise ValueError(f"Unable to tokenize marker string: {marker_string}")
+
+
+def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependencies]:
+    if isinstance(markers, str):
+        markers = [markers]
+    dependencies: list[TestDependencies] = []
+    for marker_string in markers:
+        for marker_token in _tokenize_marker_string(marker_string):
+            if marker_depedencies := MARKER_DEPENDENCY_MAP.get(marker_token):
+                LOGGER.debug(f"'{marker_token}' has dependencies")
+                dependencies.append(marker_depedencies)
+    return dependencies
+
+
+@invoke.task(
+    iterable=["markers", "requirements_dev"],
+    help={
+        "markers": "Optional marker to install dependencies for. Can be specified multiple times.",
+        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud etc. Can be specified multiple times.",
+        "constraints": "Optional flag to install dependencies with constraints, default True",
+    },
+)
+def deps(  # noqa: PLR0913
+    ctx: Context,
+    markers: list[str],
+    requirements_dev: list[str],
+    constraints: bool = True,
+    gx_install: bool = False,
+    editable_install: bool = False,
+):
+    """
+    Install dependencies for development and testing.
+
+    Specific requirement files needed for a specific test maker can be registered in `MARKER_REQ_MAPPING`,
+    `invoke deps` will always check for and use these when installing dependencies.
+
+    If no `markers` or `requirements-dev` are specified, the dev-contrib and
+    core requirements are installed.
+
+    Example usage:
+    Installing the needed dependencies for running the `external_sqldialect` tests and
+    the 'requirements-dev-cloud.txt' dependencies.
+
+    $ invoke deps -m external_sqldialect -r cloud
+    """
+    cmds = ["pip", "install"]
+    if editable_install:
+        cmds.append("-e .")
+    elif gx_install:
+        cmds.append(".")
+
+    req_files: list[str] = ["requirements.txt"]
+
+    for test_deps in _get_marker_dependencies(markers):
+        req_files.extend(test_deps.requirement_files)
+
+    for name in requirements_dev:
+        req_path: pathlib.Path = REQS_DIR / f"requirements-dev-{name}.txt"
+        assert req_path.exists(), f"Requirement file {req_path} does not exist"
+        req_files.append(str(req_path))
+
+    if not markers and not requirements_dev:
+        req_files.append("reqs/requirements-dev-contrib.txt")
+
+    for req_file in req_files:
+        cmds.append(f"-r {req_file}")
+
+    if constraints:
+        cmds.append("-c constraints-dev.txt")
+
+    ctx.run(" ".join(cmds), echo=True, pty=True)
+
+
+@invoke.task(iterable=["service_names", "up_services", "verbose"])
+def docs_snippet_tests(
+    ctx: Context,
+    marker: str,
+    up_services: bool = False,
+    verbose: bool = False,
+    reports: bool = False,
+):
+    pytest_cmds = [
+        "pytest",
+        "-rEf",
+    ]
+    if reports:
+        pytest_cmds.extend(["--cov=great_expectations", "--cov-report=xml"])
+
+    if verbose:
+        pytest_cmds.append("-vv")
+
+    for test_deps in _get_marker_dependencies(marker):
+        if up_services:
+            service(ctx, names=test_deps.services, markers=test_deps.services)
+
+        for extra_pytest_arg in test_deps.extra_pytest_args:
+            pytest_cmds.append(extra_pytest_arg)
+
+    pytest_cmds.append("tests/integration/test_script_runner.py")
+    ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
+
+
+@invoke.task(
+    help={"pty": _PTY_HELP_DESC},
+    iterable=["service_names", "up_services", "verbose"],
+)
+def ci_tests(  # noqa: PLR0913
+    ctx: Context,
+    marker: str,
+    up_services: bool = False,
+    verbose: bool = False,
+    reports: bool = False,
+    slowest: int = 5,
+    timeout: float = 0.0,  # 0 indicates no timeout
+    xdist: bool = False,
+    pty: bool = True,
+):
+    """
+    Run tests in CI.
+
+    This method looks up the pytest marker provided and runs the tests for that marker,
+    as well as looking up any required services, testing dependencies and extra CLI flags
+    that are need and starting them if `up_services` is True.
+
+    `up_services` is False by default to avoid starting services which may already be up
+    when running tests locally.
+
+    Defined this as a new invoke task to avoid some of the baggage of our old test setup.
+    """
+    pytest_options = [f"--durations={slowest}", "-rEf"]
+
+    if xdist:
+        pytest_options.append("-n auto")
+
+    if timeout != 0:
+        pytest_options.append(f"--timeout={timeout}")
+
+    if reports:
+        pytest_options.extend(["--cov=great_expectations", "--cov-report=xml"])
+
+    if verbose:
+        pytest_options.append("-vv")
+
+    for test_deps in _get_marker_dependencies(marker):
+        if up_services:
+            service(ctx, names=test_deps.services, markers=test_deps.services, pty=pty)
+
+        for extra_pytest_arg in test_deps.extra_pytest_args:
+            pytest_options.append(extra_pytest_arg)
+
+    marker_statement = (
+        f"'all_backends or {marker}'"
+        if _add_all_backends_marker(marker)
+        else f"'{marker}'"
+    )
+
+    pytest_cmd = ["pytest", "-m", marker_statement] + pytest_options
+    ctx.run(" ".join(pytest_cmd), echo=True, pty=pty)
+
+
+@invoke.task(
+    aliases=("services",),
+    help={"pty": _PTY_HELP_DESC},
+    iterable=["names", "markers"],
+)
+def service(
+    ctx: Context, names: Sequence[str], markers: Sequence[str], pty: bool = True
+):
+    """
+    Startup a service, by referencing its name directly or by looking up a pytest marker.
+
+    If a marker is specified, the services listed in `MARKER_DEPENDENCY_MAP` will be used.
+
+    Note:
+        The main reason this is a separate task is to make it easy to start services
+        when running tests locally.
+    """
+    service_names = set(names)
+
+    if markers:
+        for test_deps in _get_marker_dependencies(markers):
+            service_names.update(test_deps.services)
+
+    if service_names:
+        print(f"  Starting services for {', '.join(service_names)} ...")
+        for service_name in service_names:
+            cmds = [
+                "docker",
+                "compose",
+                "-f",
+                f"assets/docker/{service_name}/docker-compose.yml",
+                "up",
+                "-d",
+                "--quiet-pull",
+            ]
+            ctx.run(" ".join(cmds), echo=True, pty=pty)
+        # TODO: remove this sleep. This is a temporary hack to give services enough
+        #       time to come up to get ci merging again.
+        ctx.run("sleep 15")
+    else:
+        print("  No matching services to start")

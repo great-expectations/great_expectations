@@ -14,11 +14,11 @@ import Introduction from '/docs/components/connect_to_data/filesystem/_intro_con
 <!-- ### 1. Import GX and instantiate a Data Context -->
 import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
 
-<!-- ### 2. Create a Datasource -->
+<!-- ### 2. Create a Data Source -->
 import InfoFilesystemDatasourceRelativeBasePaths from '/docs/components/connect_to_data/filesystem/_info_filesystem_datasource_relative_base_paths.md'
 import TipFilesystemDatasourceNestedSourceDataFolders from '/docs/components/connect_to_data/filesystem/_tip_filesystem_datasource_nested_source_data_folders.md'
 
-<!-- ### 3. Add a Data Asset to the Datasource -->
+<!-- ### 3. Add a Data Asset to the Data Source -->
 import TipFilesystemDataAssetWhatIfBatchingRegexMatchesMultipleFiles from '/docs/components/connect_to_data/filesystem/_tip_filesystem_data_asset_if_batching_regex_matches_multiple_files.md'
 import TipUsingPandasToConnectToDifferentFileTypes from '/docs/components/connect_to_data/filesystem/_info_using_pandas_to_connect_to_different_file_types.mdx'
 
@@ -44,11 +44,11 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 
 <ImportGxAndInstantiateADataContext />
 
-### 2. Create a Datasource
+### 2. Create a Data Source
 
-A Filesystem Datasource can be created with two pieces of information:
-- `name`: The name by which the Datasource will be referenced in the future
-- `base_directory`: The path to the folder containing the files the Datasource will be used to connect to
+A Filesystem Data Source can be created with two pieces of information:
+- `name`: The name by which the Data Source will be referenced in the future
+- `base_directory`: The path to the folder containing the files the Data Source will be used to connect to
 
 In our example, we will define these in advance by storing them in the Python variables `datasource_name` and `path_to_folder_containing_csv_files`:
 
@@ -57,17 +57,17 @@ In our example, we will define these in advance by storing them in the Python va
 
 <InfoFilesystemDatasourceRelativeBasePaths />
 
-Once we have determined our `name` and `base_directory`, we pass them in as parameters when we create our Datasource:
+Once we have determined our `name` and `base_directory`, we pass them in as parameters when we create our Data Source:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py create_datasource"
 ```
 
 <TipFilesystemDatasourceNestedSourceDataFolders />
 
-### 3. Add a Data Asset to the Datasource
+### 3. Add a Data Asset to the Data Source
 
 A Data Asset requires two pieces of information to be defined:
-- `name`: The name by which you will reference the Data Asset (for when you have defined multiple Data Assets in the same Datasource)
+- `name`: The name by which you will reference the Data Asset (for when you have defined multiple Data Assets in the same Data Source)
 - `batching_regex`: A regular expression that matches the files to be included in the Data Asset
 
 <TipFilesystemDataAssetWhatIfBatchingRegexMatchesMultipleFiles />
@@ -111,6 +111,6 @@ For more information on Pandas `read_*` methods, please reference [the official 
 
 For more information on the concepts and reasoning employed by this guide, please reference the following informational guides:
 
-- What does a Datasource do behind the scenes?]
+- What does a Data Source do behind the scenes?]
 - What are use the use cases for single vs multiple Batch Data Assets?
 -->

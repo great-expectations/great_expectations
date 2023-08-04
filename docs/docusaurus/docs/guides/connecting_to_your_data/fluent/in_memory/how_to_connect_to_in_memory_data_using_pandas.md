@@ -1,7 +1,7 @@
 ---
-title: How to connect to in-memory data using Pandas
+title: Connect to in-memory source data using Pandas
 tag: [how-to, connect to data]
-description: A technical guide on connecting Great Expectations to a Pandas in-memory DataFrame.
+description: Connect Great Expectations to a Pandas in-memory DataFrame.
 keywords: [Great Expectations, Pandas, Filesystem]
 ---
 
@@ -24,73 +24,64 @@ In this guide we will demonstrate how to connect to an in-memory Pandas DataFram
 
 </Prerequisites> 
 
-## Steps
-
-### 1. Import the Great Expectations module and instantiate a Data Context
+## Import the Great Expectations module and instantiate a Data Context
 
 <ImportGxAndInstantiateADataContext />
 
-### 2. Create a Datasource
+## Create a Data Source
 
-To access our in-memory data, we will create a Pandas Datasource:
+Run the following Python code to create a Pandas Data Source:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py datasource"
 ```
 
-### 3. Read your source data into a Pandas DataFrame
+## Read your source data into a Pandas DataFrame
 
-For this example, we will read a parquet file into a Pandas DataFrame, which we will then use in the rest of this guide.
+In the following example, a parquet file is read into a Pandas DataFrame that will be used in subsequent code examples.
 
-The code to create the Pandas DataFrame we are using in this guide is defined with:
+Run the following Python code to create the Pandas DataFrame:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py dataframe"
 ```
 
-### 4. Add a Data Asset to the Datasource
+## Add a Data Asset to the Data Source
 
-A Pandas DataFrame Data Asset can be defined with two elements:
-- `name`: The name by which the Datasource will be referenced in the future
-- `dataframe`: A Pandas DataFrame containing the data
+The following information is required when you create a Pandas DataFrame Data Asset:
 
-We will use the `dataframe` from the previous step as the corresponding parameter's value.  For the `name` parameter, we will define a name in advance by storing it in a Python variable:
+- `name`: The Data Source name.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py name"
-```
+- `dataframe`: The Pandas DataFrame containing the source data.
 
-Now that we have the `name` and `dataframe` for our Data Asset, we can create the Data Asset with the code:
+The DataFrame you created previously is the value you'll enter for `dataframe` parameter.  
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py data_asset"
-```
+1. Run the following Python code to define the `name` parameter and store it as a Python variable:
 
-For `dataframe` Data Assets, the `dataframe` is always specified as the argument of exactly one API method:
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py name"
+    ```
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py build_batch_request_with_dataframe"
-```
+2. Run the following Python code to create the Data Asset:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py data_asset"
+    ```
+
+    For `dataframe` Data Assets, the `dataframe` is always specified as the argument of one API method. For example:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py build_batch_request_with_dataframe"
+    ```
 
 ## Next steps
 
-Now that you have connected to your data, you may want to look into:
-
 <AfterCreateInMemoryDataAsset />
 
-## Additional information
+## Related documentation
 
-<!-- TODO: Add this once we have a script.
-### Code examples
-
-To see the full source code used for the examples in this guide, please reference the following scripts in our GitHub repository:
-- [script_name.py](https://path/to/the/script/on/github.com)
--->
-
-### External APIs
-
-For more information on Pandas read methods, please reference [the official Pandas Input/Output documentation](https://pandas.pydata.org/docs/reference/io.html).
+For more information on Pandas read methods, see [the Pandas Input/Output documentation](https://pandas.pydata.org/docs/reference/io.html).
 
 <!-- TODO: Enable this and update links after the conceptual guides are revised
 ### Related reading
 
 For more information on the concepts and reasoning employed by this guide, please reference the following informational guides:
 
-- [What does a Datasource do behind the scenes?]
+- [What does a Data Source do behind the scenes?]
 - [What are use the use cases for single vs multiple Batch Data Assets?]
 -->

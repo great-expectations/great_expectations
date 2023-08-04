@@ -11,8 +11,9 @@ import Prerequisites from '/docs/components/_prerequisites.jsx'
 <!-- ### 1. Import GX and instantiate a Data Context -->
 import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
 
-<!-- ### 3. Add GCS data to the Datasource as a Data Asset -->
+<!-- ### 3. Add GCS data to the Data Source as a Data Asset -->
 import BatchingRegexExplaination from '/docs/components/connect_to_data/cloud/_batching_regex_explaination.mdx'
+import GCSFluentAddDataAssetConfigKeys from '/docs/components/connect_to_data/cloud/_gcs_fluent_data_asset_config_keys.mdx'
 
 <!-- Next steps -->
 import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
@@ -34,22 +35,26 @@ In this guide we will demonstrate how to use Spark to connect to data stored on 
 
 <ImportGxAndInstantiateADataContext />
 
-### 2. Create a Datasource
+### 2. Create a Data Source
 
 We can define a GCS datasource by providing three pieces of information:
-- `name`: In our example, we will name our Datasource `"my_gcs_datasource"`
+- `name`: In our example, we will name our Data Source `"my_gcs_datasource"`
 - `bucket_or_name`: In this example, we will provide a GCS bucket
 - `gcs_options`: We can provide various additional options here, but in this example we will leave this empty and use the default values.
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_spark.py define_add_spark_gcs_args"
 ```
 
-Once we have those three elements, we can define our Datasource like so:
+Once we have those three elements, we can define our Data Source like so:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_spark.py create_datasource"
 ```
 
-### 3. Add GCS data to the Datasource as a Data Asset
+### 3. Add GCS data to the Data Source as a Data Asset
+
+<GCSFluentAddDataAssetConfigKeys />
+
+We will define these values and create our DataAsset with the code:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_spark.py add_asset"
 ```
@@ -81,7 +86,7 @@ To see the full source code used for the examples in this guide, please referenc
  
  - `get_context(...)`
  - `DataContext.datasources.add_spark_gcs(...)`
- - `Datasource.add_csv_asset(...)` -->
+ - `Data Source.add_csv_asset(...)` -->
 
 ### External APIs
 

@@ -78,6 +78,7 @@ from great_expectations.data_context.types.base import (
     CURRENT_GX_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
+    CheckpointValidationConfig,
     ConcurrencyConfig,
     DataContextConfig,
     DataContextConfigDefaults,
@@ -161,7 +162,10 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store.expectations_store import (
         ExpectationsStore,
     )
-    from great_expectations.data_context.store.store import StoreConfigTypedDict
+    from great_expectations.data_context.store.store import (
+        DataDocsSiteConfigTypedDict,
+        StoreConfigTypedDict,
+    )
     from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
@@ -547,6 +551,19 @@ class AbstractDataContext(ConfigPeer, ABC):
     def expectations_store_name(self) -> Optional[str]:
         return self.variables.expectations_store_name
 
+    @expectations_store_name.setter
+    @public_api
+    @new_method_or_class(version="0.17.2")
+    def expectations_store_name(self, value: str) -> None:
+        """Set the name of the expectations store.
+
+        Args:
+            value: New value for the expectations store name.
+        """
+
+        self.variables.expectations_store_name = value
+        self._save_project_config()
+
     @property
     def expectations_store(self) -> ExpectationsStore:
         return self.stores[self.expectations_store_name]
@@ -562,6 +579,18 @@ class AbstractDataContext(ConfigPeer, ABC):
     @property
     def validations_store_name(self) -> Optional[str]:
         return self.variables.validations_store_name
+
+    @validations_store_name.setter
+    @public_api
+    @new_method_or_class(version="0.17.2")
+    def validations_store_name(self, value: str) -> None:
+        """Set the name of the validations store.
+
+        Args:
+            value: New value for the validations store name.
+        """
+        self.variables.validations_store_name = value
+        self._save_project_config()
 
     @property
     def validations_store(self) -> ValidationsStore:
@@ -606,6 +635,18 @@ class AbstractDataContext(ConfigPeer, ABC):
                 )
 
             raise gx_exceptions.InvalidTopLevelConfigKeyError(error_message)
+
+    @checkpoint_store_name.setter
+    @public_api
+    @new_method_or_class(version="0.17.2")
+    def checkpoint_store_name(self, value: str) -> None:
+        """Set the name of the checkpoint store.
+
+        Args:
+            value: New value for the checkpoint store name.
+        """
+        self.variables.checkpoint_store_name = value
+        self._save_project_config()
 
     @property
     def checkpoint_store(self) -> CheckpointStore:
@@ -673,6 +714,18 @@ class AbstractDataContext(ConfigPeer, ABC):
                 )
 
             raise gx_exceptions.InvalidTopLevelConfigKeyError(error_message)
+
+    @profiler_store_name.setter
+    @public_api
+    @new_method_or_class(version="0.17.2")
+    def profiler_store_name(self, value: str) -> None:
+        """Set the name of the profiler store.
+
+        Args:
+            value: New value for the profiler store name.
+        """
+        self.variables.profiler_store_name = value
+        self._save_project_config()
 
     @property
     def profiler_store(self) -> ProfilerStore:
@@ -769,18 +822,18 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         if not datasource:
             ds_type = _SourceFactories.type_lookup[kwargs["type"]]
-            update_datasource = ds_type(**kwargs)
+            updated_datasource = ds_type(**kwargs)
         else:
-            update_datasource = datasource
+            updated_datasource = datasource
 
-        update_datasource._data_context = self
+        updated_datasource._data_context = self
 
-        update_datasource._rebuild_asset_data_connectors()
+        updated_datasource._rebuild_asset_data_connectors()
 
-        update_datasource.test_connection()
-        update_datasource._data_context._save_project_config()
+        updated_datasource.test_connection()
+        self._save_project_config(_fds_datasource=updated_datasource)
 
-        self.datasources[datasource_name] = update_datasource
+        self.datasources[datasource_name] = updated_datasource
 
     def _delete_fluent_datasource(
         self, datasource_name: str, _call_store: bool = True
@@ -896,7 +949,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             Datasource instance added.
         """
-        self._validate_add_datasource_args(name=name, datasource=datasource)
         return self._add_datasource(
             name=name,
             initialize=initialize,
@@ -911,9 +963,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None,
     ) -> None:
         if not ((datasource is None) ^ (name is None)):
-            raise ValueError(
-                "Must either pass in an existing datasource or individual constructor arguments (but not both)"
-            )
+            error_message = "Must either pass in an existing 'datasource' or individual constructor arguments"
+            if datasource and name:
+                error_message += " (but not both)"
+            raise TypeError(error_message)
 
     def _add_datasource(
         self,
@@ -923,6 +976,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
+        self._validate_add_datasource_args(name=name, datasource=datasource)
         if isinstance(datasource, FluentDatasource):
             self._add_fluent_datasource(
                 datasource=datasource,
@@ -1609,6 +1663,85 @@ class AbstractDataContext(ConfigPeer, ABC):
         return store
 
     @public_api
+    @new_method_or_class(version="0.17.2")
+    def add_data_docs_site(
+        self, site_name: str, site_config: DataDocsSiteConfigTypedDict
+    ) -> None:
+        """Add a new Data Docs Site to the DataContext.
+
+        Example site config dicts can be found in our "Host and share Data Docs" guides.
+
+        Args:
+            site_name: New site name to add.
+            site_config: Config dict for the new site.
+        """
+        if self.config.data_docs_sites is not None:
+            if site_name in self.config.data_docs_sites:
+                raise gx_exceptions.InvalidKeyError(
+                    f"Data Docs Site `{site_name}` already exists in the Data Context."
+                )
+
+            sites = self.config.data_docs_sites
+            sites[site_name] = site_config
+            self.variables.data_docs_sites = sites
+            self._save_project_config()
+
+    @public_api
+    @new_method_or_class(version="0.17.2")
+    def list_data_docs_sites(
+        self,
+    ) -> dict[str, DataDocsSiteConfigTypedDict]:
+        """List all Data Docs Sites with configurations."""
+
+        if self.config.data_docs_sites is None:
+            return {}
+        else:
+            return self.config.data_docs_sites
+
+    @public_api
+    @new_method_or_class(version="0.17.2")
+    def update_data_docs_site(
+        self, site_name: str, site_config: DataDocsSiteConfigTypedDict
+    ) -> None:
+        """Update an existing Data Docs Site.
+
+        Example site config dicts can be found in our "Host and share Data Docs" guides.
+
+        Args:
+            site_name: Site name to update.
+            site_config: Config dict that replaces the existing.
+        """
+        if self.config.data_docs_sites is not None:
+            if site_name not in self.config.data_docs_sites:
+                raise gx_exceptions.InvalidKeyError(
+                    f"Data Docs Site `{site_name}` does not already exist in the Data Context."
+                )
+
+            sites = self.config.data_docs_sites
+            sites[site_name] = site_config
+            self.variables.data_docs_sites = sites
+            self._save_project_config()
+
+    @public_api
+    @new_method_or_class(version="0.17.2")
+    def delete_data_docs_site(self, site_name: str):
+        """Delete an existing Data Docs Site.
+
+        Args:
+            site_name: Site name to delete.
+        """
+        if self.config.data_docs_sites is not None:
+            if site_name not in self.config.data_docs_sites:
+                raise gx_exceptions.InvalidKeyError(
+                    f"Data Docs Site `{site_name}` does not already exist in the Data Context."
+                )
+
+            sites = self.config.data_docs_sites
+            sites.pop(site_name)
+            self.variables.data_docs_sites = sites
+            self._save_project_config()
+
+    @public_api
     @new_method_or_class(version="0.15.48")
     def delete_store(self, store_name: str) -> None:
         """Delete an existing Store from the DataContext.
@@ -1717,7 +1850,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
-        validations: list[dict] | None = ...,
+        validations: list[CheckpointValidationConfig] | list[dict] | None = ...,
         profilers: list[dict] | None = ...,
         # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = ...,
@@ -1806,7 +1939,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
-        validations: list[dict] | None = None,
+        validations: list[CheckpointValidationConfig] | list[dict] | None = None,
         profilers: list[dict] | None = None,
         # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = None,
@@ -2018,7 +2151,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
-        validations: list[dict] | None = None,
+        validations: list[CheckpointValidationConfig] | list[dict] | None = None,
         profilers: list[dict] | None = None,
         # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = None,
@@ -2109,7 +2242,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
-        validations: list[dict] | None = None,
+        validations: list[CheckpointValidationConfig] | list[dict] | None = None,
         profilers: list[dict] | None = None,
         site_names: str | list[str] | None = None,
         slack_webhook: str | None = None,
@@ -2123,9 +2256,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
         if not ((checkpoint is None) ^ (name is None)):
-            raise ValueError(
-                "Must either pass in an existing checkpoint or individual constructor arguments (but not both)"
-            )
+            error_message = "Must either pass in an existing 'checkpoint' or individual constructor arguments"
+            if checkpoint and name:
+                error_message += " (but not both)"
+            raise TypeError(error_message)
 
         action_list = action_list or self._determine_default_action_list()
 
@@ -2341,7 +2475,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
-        validations: list[dict] | None = None,
+        validations: list[CheckpointValidationConfig] | list[dict] | None = None,
         profilers: list[dict] | None = None,
         run_id: str | int | float | None = None,
         run_name: str | None = None,
@@ -2527,13 +2661,10 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
             > 1
         ):
-            ge_cloud_mode = getattr(  # attr not on AbstractDataContext
-                self, "ge_cloud_mode"
-            )
             raise ValueError(
-                "No more than one of expectation_suite_name,"
-                f"{'expectation_suite_id,' if ge_cloud_mode else ''}"
-                " expectation_suite, or create_expectation_suite_with_name can be specified"
+                "No more than one of expectation_suite_name, "
+                f"{'expectation_suite_id, ' if expectation_suite_id else ''}"
+                "expectation_suite, or create_expectation_suite_with_name can be specified"
             )
 
         if expectation_suite_id is not None:
@@ -5129,7 +5260,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         ).get("data_asset_name")
 
         for expectation_suite_dependency, metrics_list in requested_metrics.items():
-            if (expectation_suite_dependency != "*") and (
+            if (expectation_suite_dependency != "*") and (  # noqa: PLR1714
                 expectation_suite_dependency != expectation_suite_name
             ):
                 continue
@@ -5793,10 +5924,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ValueError: Invalid arguments.
         """
         if expectation_suite_name is not None and expectation_suite is not None:
-            raise ValueError(
+            raise TypeError(
                 "Only one of expectation_suite_name or expectation_suite may be specified."
             )
         if expectation_suite_name is None and expectation_suite is None:
-            raise ValueError(
+            raise TypeError(
                 "One of expectation_suite_name or expectation_suite must be specified."
             )

@@ -204,11 +204,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             """One needs to implement "batch_request_options" on a DataAsset subclass."""
         )
 
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> List[Batch]:
-        raise NotImplementedError
-
     def build_batch_request(
         self,
         options: Optional[BatchRequestOptions] = None,
@@ -230,6 +225,11 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         raise NotImplementedError(
             """One must implement "build_batch_request" on a DataAsset subclass."""
         )
+
+    def get_batch_list_from_batch_request(
+        self, batch_request: BatchRequest
+    ) -> List[Batch]:
+        raise NotImplementedError
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.

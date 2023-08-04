@@ -13,7 +13,7 @@ title: <!-- Add the topic title here -->
 <!-- List the existing knowledge a user should have before they start the tutorial. Link to relevant information if it's available. What follows is an example provided for your reference. If existing knowledge isn't required, remove this section.-->
 
 - [An understanding of Great Expectations functionality](../guides/setup/setup_overview.md)
-- [How to create Data Connection](../guides/connecting_to_your_data/connect_to_data_overview.md)
+- [How to connect to source data](../guides/connecting_to_your_data/connect_to_data_lp.md)
 - [How to create an Expectation Suite](../guides/expectations/create_expectations_overview.md)
 
 ## First task 
@@ -85,7 +85,7 @@ title: <!-- Add the topic title here -->
 - [How to set up GX to work with data on GCS](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)
 - [How to set up GX to work with SQL databases](../guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases.md) 
 - [How to instantiate a Data Context on an EMR Spark Cluster](../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-- [How to use Great Expectations in Databricks](../deployment_patterns/how_to_use_great_expectations_in_databricks.md)
+- [How to use Great Expectations in Databricks](../tutorials/getting_started/how_to_use_great_expectations_in_databricks.md)
 
 ## Next steps
 

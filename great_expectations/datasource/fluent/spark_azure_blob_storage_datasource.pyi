@@ -1,9 +1,8 @@
-from __future__ import annotations
-
 import re
 from logging import Logger
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, Optional, Type
+from typing import Any, ClassVar, Literal, Optional, Type
 
+from great_expectations.compatibility import azure
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
@@ -11,19 +10,16 @@ from great_expectations.datasource.fluent.config_str import (
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
 )
+from great_expectations.datasource.fluent.interfaces import (
+    BatchMetadata,
+    SortersDefinition,
+)
 from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.compatibility import azure
-    from great_expectations.datasource.fluent.interfaces import (
-        BatchMetadata,
-        SortersDefinition,
-    )
-    from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        CSVAsset,
-    )
+from great_expectations.datasource.fluent.spark_file_path_datasource import (
+    CSVAsset,
+)
 
 logger: Logger
 
@@ -49,6 +45,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
         abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
+        abs_recursive_file_discovery: bool = False,
         header: bool = ...,
         infer_schema: bool = ...,
         order_by: Optional[SortersDefinition] = ...,

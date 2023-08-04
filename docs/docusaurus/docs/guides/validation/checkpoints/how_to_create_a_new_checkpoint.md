@@ -1,5 +1,5 @@
 ---
-title: How to create a new Checkpoint
+title: Create a new Checkpoint
 ---
 
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
@@ -11,45 +11,36 @@ import AdditionalResources from './components_how_to_create_a_new_checkpoint/_ad
 
 <StepsForCheckpoints />
 
-## Steps
+## Create a Checkpoint
 
-### 1. Create a Checkpoint
-
-In this guide, we will use the SimpleCheckpoint class, which takes care of some defaults.
-
-To modify this code sample for your use case, replace the `batch_request` and `expectation_suite_name` with your own.
+To modify the following code for your use case, replace `batch_request` and `expectation_suite_name` with your own paremeters.
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create checkpoint batch_request"
 ```
 
-Note: There are other configuration options for more advanced deployments, please refer to [How to configure a new Checkpoint using test_yaml_config](../../../guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md) for more details.
+There are other configuration options for more advanced deployments. See [How to configure a new Checkpoint using test_yaml_config](../../../guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md).
 
 
-### 2. (Optional) Run your Checkpoint
+## Run your Checkpoint (Optional)
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py run checkpoint batch_request"
 ```
 
 The returned `checkpoint_result` contains information about the checkpoint run.
 
-### 3. (Optional) Build Data Docs
+## Build Data Docs (Optional)
 
-You can build <TechnicalTag tag="data_docs" text="Data Docs" /> with the latest checkpoint run result included by running:
+Run the following Python code to build <TechnicalTag tag="data_docs" text="Data Docs" /> with the latest checkpoint run results:
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py build data docs"
 ```
 
-### 4. (Optional) Store your Checkpoint
+## Retrieve your Checkpoint (Optional)
 
-If you want to store your Checkpoint for later use:
-
-```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py add checkpoint"
-```
-
-And retrieve via the name we set earlier:
+Run the following Python code to retrieve the Checkpoint:
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py get checkpoint"
 ```
 
-## Additional Resources
+## Related documentation
 <AdditionalResources />

@@ -1,5 +1,7 @@
 from unittest.mock import patch
 
+import pytest
+
 from great_expectations.cli.datasource import (
     SnowflakeAuthMethod,
     _prompt_for_snowflake_auth_method,
@@ -36,6 +38,9 @@ from great_expectations.cli.datasource import (
 #     # We don't have a snowflake account to use for testing, therefore we do not
 #     # want to run the notebook, as it will hang as it tries to connect.
 #     assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+pytestmark = pytest.mark.cli
 
 
 @patch("click.prompt")

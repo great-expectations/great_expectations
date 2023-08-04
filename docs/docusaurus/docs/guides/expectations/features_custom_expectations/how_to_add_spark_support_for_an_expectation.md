@@ -1,5 +1,5 @@
 ---
-title: How to add Spark support for Custom Expectations
+title: Add Spark support for Custom Expectations
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
@@ -12,7 +12,7 @@ This guide will help you implement native Spark support for your <TechnicalTag t
 
 <Prerequisites>
 
- - [A Custom Expectation](../creating_custom_expectations/overview.md)
+ - [A Custom Expectation](../custom_expectations_lp.md)
     
 </Prerequisites>
 
@@ -23,9 +23,7 @@ If you decide to contribute your <TechnicalTag tag="expectation" text="Expectati
 We will add Spark support for the Custom Expectations implemented in our guides on [how to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md) 
 and [how to create Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
 
-## Steps
-
-### 1. Specify your backends
+## Specify your backends
 
 To avoid surprises and help clearly define your Custom Expectation, it can be helpful to determine beforehand what backends you plan to support, and test them along the way.
 
@@ -40,7 +38,7 @@ The optional `only_for` and `suppress_test_for` keys may be specified at the top
 Allowed backends include: "bigquery", "mssql", "mysql", "pandas", "postgresql", "redshift", "snowflake", "spark", "sqlite", "trino"
 :::
 
-### 2. Implement the Spark logic for your Custom Expectation
+## Implement the Spark logic for your Custom Expectation
 
 Great Expectations provides a variety of ways to implement an Expectation in Spark. Two of the most common include: 
 
@@ -145,7 +143,7 @@ Because in Spark we are implementing the window function directly, we have to re
 </TabItem>
 </Tabs>
 
-### 3. Verifying your implementation
+## Verify your implementation
 
 If you now run your file, `print_diagnostic_checklist()` will attempt to execute your example cases using this new backend.
 
@@ -155,7 +153,7 @@ If your implementation is correctly defined, and the rest of the core logic in y
 ✔ Has at least one positive and negative example case, and all test cases pass
 ```
 
-If you've already implemented the Pandas backend covered in our How-To guides for creating [Custom Expectations](../creating_custom_expectations/overview.md) 
+If you've already implemented the Pandas backend covered in our How-To guides for creating [Custom Expectations](../custom_expectations_lp.md) 
 and the SQLAlchemy backend covered in our guide on [how to add SQLAlchemy support for Custom Expectations](./how_to_add_sqlalchemy_support_for_an_expectation.md), 
 you should see the following in your Diagnostic Checklist:
 
@@ -169,7 +167,7 @@ Congratulations!<br/>&#127881; You've successfully implemented Spark support for
 </b></p>
 </div>
 
-### 4. Contribution (Optional)
+## Contribution (Optional)
 
 This guide will leave you with core functionality sufficient for [contribution](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) to Great Expectations at an Experimental level.
 

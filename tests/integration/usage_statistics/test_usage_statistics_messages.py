@@ -26,7 +26,6 @@ from tests.integration.usage_statistics.usage_stats_event_examples import (
     data_context_init_with_dependencies,
 )
 
-
 # Dummy values purely used for tests - analytics with these values should be ignored
 TEST_DATA_CONTEXT_ID = "00000000-0000-0000-0000-000000000002"
 TEST_DATA_CONTEXT_INSTANCE_ID = "10000000-0000-0000-0000-000000000002"
@@ -55,6 +54,7 @@ def generate_messages_with_defaults(
     return output_list
 
 
+@pytest.mark.unit
 def test_generate_messages_with_defaults():
     defaults = {
         "success": True,
@@ -2888,7 +2888,7 @@ for message_type, messages in valid_usage_statistics_messages.items():
         message_test_ids += [f"{message_type}_{idx}"]
 
 
-@pytest.mark.aws_integration
+@pytest.mark.aws_creds
 @pytest.mark.parametrize("message", test_messages, ids=message_test_ids)
 def test_usage_statistics_message(
     message: dict, requests_session_with_retries: requests.Session

@@ -1,26 +1,21 @@
-from __future__ import annotations
-
 import re
 from logging import Logger
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, Optional, Type
+from typing import Any, ClassVar, Literal, Optional, Type
 
 from great_expectations.compatibility import google
-from great_expectations.datasource.fluent import _SparkFilePathDatasource
+from great_expectations.datasource.fluent import BatchMetadata, _SparkFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.datasource.fluent import BatchMetadata
-    from great_expectations.datasource.fluent.interfaces import (
-        SortersDefinition,
-    )
-    from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        CSVAsset,
-    )
+from great_expectations.datasource.fluent.interfaces import (
+    SortersDefinition,
+)
+from great_expectations.datasource.fluent.spark_file_path_datasource import (
+    CSVAsset,
+)
 
 logger: Logger
 
@@ -45,6 +40,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         gcs_prefix: str = "",
         gcs_delimiter: str = "/",
         gcs_max_results: int = 1000,
+        gcs_recursive_file_discovery: bool = False,
         header: bool = ...,
         infer_schema: bool = ...,
         order_by: Optional[SortersDefinition] = ...,

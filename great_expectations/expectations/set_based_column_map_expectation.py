@@ -118,7 +118,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         set_camel_name: str,
         set_: str,
     ) -> str:
-        """Register an ephemeral metric using a constructed name with the logic provided by RegexColumnMapMetricProvider.
+        """Register an ephemeral metric using a constructed name with the logic provided by SetColumnMapMetricProvider.
 
         Args:
             set_camel_name: A name describing a set of values, in camel case.
@@ -180,7 +180,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     def _question_renderer(cls, configuration, result=None, runtime_configuration=None):
         column = configuration.kwargs.get("column")
         mostly = configuration.kwargs.get("mostly")
-        set_ = getattr(cls, "set_")
+        set_ = cls.set_
         set_semantic_name = getattr(cls, "set_semantic_name", None)
 
         if mostly == 1 or mostly is None:
@@ -188,8 +188,8 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                 return f'Are all values in column "{column}" in {set_semantic_name}: {str(set_)}?'
             else:
                 return f'Are all values in column "{column}" in the set {str(set_)}?'
-        else:
-            if set_semantic_name is not None:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if set_semantic_name is not None:
                 return f'Are at least {mostly * 100}% of values in column "{column}" in {set_semantic_name}: {str(set_)}?'
             else:
                 return f'Are at least {mostly * 100}% of values in column "{column}" in the set {str(set_)}?'
@@ -201,7 +201,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     ):
         column = result.expectation_config.kwargs.get("column")
         mostly = result.expectation_config.kwargs.get("mostly")
-        set_ = getattr(cls, "set_")
+        set_ = cls.set_
         set_semantic_name = getattr(cls, "set_semantic_name", None)
 
         if result.success:
@@ -212,13 +212,13 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                     return (
                         f'All values in column "{column}" are in the set {str(set_)}.'
                     )
-            else:
-                if set_semantic_name is not None:  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if set_semantic_name is not None:
                     return f'At least {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {str(set_)}.'
                 else:
                     return f'At least {mostly * 100}% of values in column "{column}" are in the set {str(set)}.'
-        else:
-            if set_semantic_name is not None:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if set_semantic_name is not None:
                 return f' Less than {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {str(set_)}.'
             else:
                 return f'Less than {mostly * 100}% of values in column "{column}" are in the set {str(set_)}.'

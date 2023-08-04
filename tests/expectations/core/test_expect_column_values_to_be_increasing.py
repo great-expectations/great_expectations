@@ -5,6 +5,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context import DataContext
 
 
+@pytest.mark.big
 def test_expect_column_values_to_be_increasing_warn_parse_strings_as_datetimes(
     data_context_with_datasource_pandas_engine,
 ):

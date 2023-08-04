@@ -1,4 +1,5 @@
 import os
+import urllib
 from unittest import mock
 
 import pytest
@@ -11,6 +12,7 @@ from great_expectations.exceptions import DataContextError
 from great_expectations.util import get_context
 
 
+@pytest.mark.unit
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_open_docs_with_no_site(mock_webbrowser, context_with_no_sites):
     context = context_with_no_sites
@@ -19,6 +21,7 @@ def test_open_docs_with_no_site(mock_webbrowser, context_with_no_sites):
     assert mock_webbrowser.call_count == 0
 
 
+@pytest.mark.unit
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_open_docs_with_non_existent_site_raises_error(
     mock_webbrowser, empty_data_context
@@ -29,6 +32,7 @@ def test_open_docs_with_non_existent_site_raises_error(
     assert mock_webbrowser.call_count == 0
 
 
+@pytest.mark.filesystem
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_open_docs_with_single_local_site(mock_webbrowser, empty_data_context):
     context = empty_data_context
@@ -110,6 +114,7 @@ def context_with_multiple_built_sites(empty_data_context):
     return context
 
 
+@pytest.mark.unit
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_open_docs_with_two_local_sites(
     mock_webbrowser, context_with_multiple_built_sites
@@ -129,6 +134,7 @@ def test_open_docs_with_two_local_sites(
     )
 
 
+@pytest.mark.unit
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_open_docs_with_two_local_sites_specify_open_one(
     mock_webbrowser, context_with_multiple_built_sites
@@ -151,14 +157,17 @@ def context_with_no_sites(empty_data_context):
     return context
 
 
+@pytest.mark.unit
 def test_get_docs_sites_urls_with_no_sites(context_with_no_sites):
     assert context_with_no_sites.get_docs_sites_urls() == []
 
 
+@pytest.mark.unit
 def test_get_docs_sites_urls_with_no_sites_specify_one(context_with_no_sites):
     assert context_with_no_sites.get_docs_sites_urls(site_name="foo") == []
 
 
+@pytest.mark.unit
 def test_get_docs_sites_urls_with_non_existent_site_raises_error(
     context_with_multiple_built_sites,
 ):
@@ -167,6 +176,7 @@ def test_get_docs_sites_urls_with_non_existent_site_raises_error(
         context.get_docs_sites_urls(site_name="not_a_real_site")
 
 
+@pytest.mark.filesystem
 def test_get_docs_sites_urls_with_two_local_sites_specify_one(
     context_with_multiple_built_sites,
 ):
@@ -184,6 +194,7 @@ def test_get_docs_sites_urls_with_two_local_sites_specify_one(
     )
 
 
+@pytest.mark.unit
 def test_clean_data_docs_on_context_with_no_sites_raises_error(
     context_with_no_sites,
 ):
@@ -192,6 +203,7 @@ def test_clean_data_docs_on_context_with_no_sites_raises_error(
         context.clean_data_docs()
 
 
+@pytest.mark.filesystem
 def test_clean_data_docs_on_context_with_multiple_sites_with_no_site_name_cleans_all_sites_and_returns_true(
     context_with_multiple_built_sites,
 ):
@@ -209,6 +221,7 @@ def test_clean_data_docs_on_context_with_multiple_sites_with_no_site_name_cleans
         )
 
 
+@pytest.mark.filesystem
 def test_clean_data_docs_on_context_with_multiple_sites_with_existing_site_name_cleans_selected_site_and_returns_true(
     context_with_multiple_built_sites,
 ):
@@ -225,6 +238,7 @@ def test_clean_data_docs_on_context_with_multiple_sites_with_existing_site_name_
     )
 
 
+@pytest.mark.filesystem
 def test_clean_data_docs_on_context_with_multiple_sites_with_non_existent_site_name_raises_error(
     context_with_multiple_built_sites,
 ):
@@ -233,6 +247,7 @@ def test_clean_data_docs_on_context_with_multiple_sites_with_non_existent_site_n
         assert context.clean_data_docs(site_name="not_a_real_site")
 
 
+@pytest.mark.filesystem
 def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasources_and_a_site_configured(
     tmp_path_factory,
 ):
@@ -255,6 +270,7 @@ def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasource
     )
 
 
+@pytest.mark.filesystem
 def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_site(
     tmp_path_factory,
 ):
@@ -288,6 +304,7 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
     assert obs == [{"site_name": "my_rad_site", "site_url": f"file://{expected_path}"}]
 
 
+@pytest.mark.filesystem
 def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_local_site(
     tmp_path_factory,
 ):
@@ -336,6 +353,7 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
     ]
 
 
+@pytest.mark.filesystem
 def test_build_data_docs_skipping_index_does_not_build_index(
     tmp_path_factory,
 ):
@@ -371,16 +389,19 @@ def test_build_data_docs_skipping_index_does_not_build_index(
     assert not os.path.isfile(index_path)  # noqa: PTH113
 
 
+@pytest.mark.unit
 def test_get_site_names_with_no_sites(tmpdir, basic_data_context_config):
     context = get_context(basic_data_context_config, context_root_dir=tmpdir)
     assert context.get_site_names() == []
 
 
+@pytest.mark.unit
 def test_get_site_names_with_site(titanic_data_context_stats_enabled_config_version_3):
     context = titanic_data_context_stats_enabled_config_version_3
     assert context.get_site_names() == ["local_site"]
 
 
+@pytest.mark.filesystem
 def test_get_site_names_with_three_sites(tmpdir, basic_data_context_config):
     basic_data_context_config.data_docs_sites = {}
     for i in range(3):
@@ -396,7 +417,7 @@ def test_get_site_names_with_three_sites(tmpdir, basic_data_context_config):
     assert context.get_site_names() == ["site-0", "site-1", "site-2"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_view_validation_result(
     checkpoint_result: CheckpointResult,
 ):
@@ -412,3 +433,39 @@ def test_view_validation_result(
     url_used = mock_open.call_args[0][0]
     assert url_used.startswith("file:///")
     assert url_used.endswith("default_pandas_datasource-%23ephemeral_pandas_asset.html")
+
+
+@pytest.mark.big
+def test_view_validation_result_uses_run_name_template_env_var(
+    monkeypatch, empty_data_context
+):
+    monkeypatch.setenv("MY_ENV_VAR", "PLEASE_RENDER_ME")
+
+    context = empty_data_context
+
+    validator = context.sources.pandas_default.read_csv(
+        "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
+    )
+
+    validator.expect_column_values_to_not_be_null("pickup_datetime")
+    validator.save_expectation_suite()
+
+    checkpoint = context.add_or_update_checkpoint(
+        name="my_checkpoint",
+        validator=validator,
+        run_name_template="staging-$MY_ENV_VAR",
+    )
+
+    checkpoint_result = checkpoint.run()
+    with mock.patch("webbrowser.open") as mock_open:
+        context.view_validation_result(checkpoint_result)
+
+    mock_open.assert_called_once()
+
+    url_used = mock_open.call_args[0][0]
+    assert url_used.startswith("file:///")
+    assert "staging-PLEASE_RENDER_ME" in url_used
+
+    f = urllib.request.urlopen(url_used)
+    myfile = f.read()
+    assert b"staging-PLEASE_RENDER_ME" in myfile

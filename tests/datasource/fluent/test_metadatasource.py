@@ -335,6 +335,7 @@ class TestMisconfiguredMetaDatasource:
             MissingTestConnectionDatasource(name="name").test_connection()
 
 
+@pytest.mark.big
 def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     # 1. Define Datasource & Assets
 
@@ -617,8 +618,17 @@ def test_add_or_update_datasource_using_update(
 @pytest.mark.unit
 def test_delete_datasource(context_with_fluent_datasource):
     context, config_file_path, data_dir = context_with_fluent_datasource
-    context.sources.delete_pandas_filesystem(name=DEFAULT_CRUD_DATASOURCE_NAME)
+    context.sources.delete(name=DEFAULT_CRUD_DATASOURCE_NAME)
     assert_fluent_datasource_content(config_file_path, {})
+
+
+@pytest.mark.unit
+def test_legacy_delete_datasource_raises_deprecation_warning(
+    context_with_fluent_datasource,
+):
+    context, _, _ = context_with_fluent_datasource
+    with pytest.deprecated_call():
+        context.sources.delete_pandas_filesystem(name=DEFAULT_CRUD_DATASOURCE_NAME)
 
 
 if __name__ == "__main__":

@@ -76,7 +76,7 @@ class MetaDataAssistant(ABCMeta):
 
     def __new__(cls, clsname, bases, attrs):
         """
-        Instantiate class as part of descentants calling "__init__()" and register its type in "DataAssistant" registry.
+        Instantiate class as part of descendants calling "__init__()" and register its type in "DataAssistant" registry.
         """
         newclass = super().__new__(cls, clsname, bases, attrs)
 
@@ -85,12 +85,14 @@ class MetaDataAssistant(ABCMeta):
             # Only particular "DataAssistant" implementations must be registered.
             newclass.data_assistant_type = camel_to_snake(name=clsname)
 
-            from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
-                DataAssistantDispatcher,
-            )
+            alias: Optional[str] = getattr(newclass, "__alias__", None)
+            if alias and not alias.startswith("_"):
+                from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
+                    DataAssistantDispatcher,
+                )
 
-            # noinspection PyTypeChecker
-            DataAssistantDispatcher._register_data_assistant(data_assistant=newclass)
+                # noinspection PyTypeChecker
+                DataAssistantDispatcher._register(name=alias, data_assistant=newclass)
 
         return newclass
 
@@ -468,6 +470,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         CommonlyUsedParameterBuilders()
     )
 
+    # When DataAssistant subclasses are instantiated, they are registered in the DataAssistantDispatcher
+    # if __alias__ is defined and does not start with underscore _. This is handled by MetaDataAssistant.
     __alias__: Optional[str] = None
 
     def __init__(
@@ -477,7 +481,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
     ) -> None:
         """
         DataAssistant subclasses guide "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,
-        corresponding to indended exploration and validation goals.  Then executing "RuleBasedProfiler.run()" yields
+        corresponding to intended exploration and validation goals.  Then executing "RuleBasedProfiler.run()" yields
         "RuleBasedProfilerResult" object, containing "fully_qualified_parameter_names_by_domain",
         "parameter_values_for_fully_qualified_parameter_names_by_domain", "expectation_configurations", and "citation",
         immediately available for composing "ExpectationSuite" and validating underlying data "Batch" objects.
@@ -503,6 +507,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             config_version=1.0,
             variables=variables,
             data_context=self._data_context,
+            catch_exceptions=True,
         )
 
         self._metrics_parameter_builders_by_domain = {}
@@ -771,6 +776,9 @@ configuration included.
         rule_based_profiler_result.rule_domain_builder_execution_time
     )
     result.rule_execution_time = rule_based_profiler_result.rule_execution_time
+    result.rule_exception_tracebacks = (
+        rule_based_profiler_result.rule_exception_tracebacks
+    )
     result.metrics_by_domain = data_assistant.get_metrics_by_domain()
     result.expectation_configurations = (
         rule_based_profiler_result.expectation_configurations
@@ -885,7 +893,7 @@ def build_map_metric_rule(  # noqa: PLR0913
         ),
     ]
     column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations = MeanUnexpectedMapMetricMultiBatchParameterBuilder(
-        name=f"{map_metric_name}.unexpected_value",
+        name=f"{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         map_metric_name=map_metric_name,
         total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
         null_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
@@ -917,7 +925,6 @@ def build_map_metric_rule(  # noqa: PLR0913
     variables: dict = {
         "success_ratio": 7.5e-1,
     }
-
     expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
         expect_column_values_to_be_attribute_expectation_configuration_builder,
     ]

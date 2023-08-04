@@ -1,14 +1,8 @@
 ---
-title: "Validate Data: Overview"
+title: "Data Validation workflow"
 ---
-# [![Create Expectations Icon](../../images/universal_map/Checkmark-active.png)](./validate_data_overview.md) Validate Data: Overview
 
-import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-
-<!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->
-
-<UniversalMap setup='inactive' connect='inactive' create='inactive' validate='active'/>
 
 Great Expectations recommends using Checkpoints to validate data.  Checkpoints validate data, save <TechnicalTag tag="validation_result" text="Validation Results" />, run any <TechnicalTag tag="action" text="Actions" /> you have specified, and finally, create <TechnicalTag tag="data_docs" text="Data Docs" /> with their results.  A Checkpoint can be reused to <TechnicalTag tag="validation" text="Validate" /> data in the future, and you can create and configure additional Checkpoints for different business requirements.
 
@@ -38,7 +32,7 @@ For more information on adding Batch Requests and Expectation Suites to a Checkp
 
 ### Checkpoints and Actions
 
-Actions are optional and are executed after a Checkpoint validates data. Some of the more common Actions include updating Data Docs, sending emails, posting Slack notifications, or sending custom notifications. You can create custom Actions to complete business specific actions after a Checkpoint Validates. For more information about Actions, see [Validation Actions](./index.md#validation-actions).
+Actions are optional and are executed after a Checkpoint validates data. Some of the more common Actions include updating Data Docs, sending emails, posting Slack notifications, or sending custom notifications. You can create custom Actions to complete business specific actions after a Checkpoint Validates. For more information about Actions, see [Configure Actions](./validation_actions/actions_lp.md).
 
 ## Run your Checkpoint
 

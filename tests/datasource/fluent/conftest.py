@@ -46,6 +46,7 @@ from tests.datasource.fluent._fake_cloud_api import (
     FAKE_ORG_ID,
     GX_CLOUD_MOCK_BASE_URL,
     CloudDetails,
+    FakeDBTypedDict,
     create_fake_db_seed_data,
     gx_cloud_api_fake_ctx,
 )
@@ -192,6 +193,13 @@ def cloud_api_fake(cloud_details: CloudDetails):
 
 
 @pytest.fixture
+def cloud_api_fake_db(cloud_api_fake) -> FakeDBTypedDict:
+    from tests.datasource.fluent._fake_cloud_api import _CLOUD_API_FAKE_DB
+
+    return _CLOUD_API_FAKE_DB
+
+
+@pytest.fixture
 def empty_cloud_context_fluent(
     cloud_api_fake, cloud_details: CloudDetails
 ) -> CloudDataContext:
@@ -227,7 +235,11 @@ def empty_file_context(file_dc_config_dir_init) -> FileDataContext:
 
 
 @pytest.fixture(
-    params=["empty_cloud_context_fluent", "empty_file_context"], ids=["cloud", "file"]
+    params=[
+        pytest.param("empty_cloud_context_fluent", marks=pytest.mark.cloud),
+        pytest.param("empty_file_context", marks=pytest.mark.filesystem),
+    ],
+    ids=["cloud", "file"],
 )
 def empty_contexts(
     request: FixtureRequest,
@@ -390,7 +402,12 @@ def seeded_cloud_context(
     return empty_cloud_context_fluent
 
 
-@pytest.fixture(params=["seeded_file_context", "seeded_cloud_context"])
+@pytest.fixture(
+    params=[
+        pytest.param("seeded_file_context", marks=pytest.mark.filesystem),
+        pytest.param("seeded_cloud_context", marks=pytest.mark.cloud),
+    ]
+)
 def seeded_contexts(
     request: FixtureRequest,
 ):
