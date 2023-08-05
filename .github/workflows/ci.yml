@@ -79,7 +79,6 @@ jobs:
   docs-snippets:
     name: docs-snippets
     if: github.event.pull_request.draft == false
-    #add more scope here
     runs-on: ubuntu-22.04
     env:
       # google
@@ -152,10 +151,12 @@ jobs:
           invoke docs-snippet-tests 'docs' --up-services --verbose
 
   unit-tests:
-    runs-on: ubuntu-22.04
     strategy:
       matrix:
+        os: [ubuntu-22.04]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
