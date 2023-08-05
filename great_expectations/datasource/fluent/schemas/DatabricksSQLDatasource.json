@@ -1,6 +1,6 @@
 {
     "title": "DatabricksSQLDatasource",
-    "description": "--Public API--Adds a DatabricksSQLDatasource to the data context.\n\nArgs:\n    name: The name of this DatabricksSQL datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the postgres database.\n        For example: \"databricks+connector://token:<token>@<host>:<port>/<database>?http_path=<http_path>\"\n    assets: An optional dictionary whose keys are TableAsset or QueryAsset names and whose values\n        are TableAsset or QueryAsset objects.",
+    "description": "--Public API--Adds a DatabricksSQLDatasource to the data context.\n\nArgs:\n    name: The name of this DatabricksSQL datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the postgres database.\n        For example: \"databricks://token:<token>@<host>:<port>/<database>?http_path=<http_path>&catalog=<catalog>&schema=<schema>\"\"\n    assets: An optional dictionary whose keys are TableAsset or QueryAsset names and whose values\n        are TableAsset or QueryAsset objects.",
     "type": "object",
     "properties": {
         "type": {
@@ -305,7 +305,7 @@
         },
         "TableAsset": {
             "title": "TableAsset",
-            "description": "A _SQLAsset Mixin\n\nThis is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality\nthat can be used by different SQL datasource subclasses.\n\nFor example see TableAsset defined in this module and SqliteTableAsset defined in\nsqlite_datasource.py",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "name": {
@@ -384,7 +384,7 @@
         },
         "QueryAsset": {
             "title": "QueryAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "name": {

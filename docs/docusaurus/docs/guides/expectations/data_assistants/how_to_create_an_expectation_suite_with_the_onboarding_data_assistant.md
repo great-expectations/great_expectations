@@ -2,7 +2,7 @@
 title: Create an Expectation Suite with the Onboarding Data Assistant
 ---
 
-import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx'
+import Prerequisites from '/docs/components/_prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide demonstrates how to use the Onboarding Data Assistant to Profile your data and automate the generation of an
@@ -13,7 +13,7 @@ Expectation Suite, which you can then adjust to be suited for your specific need
 <Prerequisites>
 
 - A [configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
-- An understanding of how to [configure a Datasource](../../connecting_to_your_data/connect_to_data_lp.md).
+- An understanding of how to [configure a Data Source](../../connecting_to_your_data/connect_to_data_lp.md).
 - An understanding of how to [configure a Batch Request](/docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource).
 
 </Prerequisites>
@@ -21,7 +21,7 @@ Expectation Suite, which you can then adjust to be suited for your specific need
 ## Prepare your Batch Request
 
 Data Assistants excel at automating the Profiling process across multiple Batches. Therefore, for this guide you will
- be using a Batch Request that covers multiple Batches. For the purposes of this demo, the Datasource that our Batch
+ be using a Batch Request that covers multiple Batches. For the purposes of this demo, the Data Source that our Batch
  Request queries will consist of a sample of the New York taxi trip data.
 
 This is the configuration that you will use for your `Datasource`:
@@ -93,19 +93,16 @@ And once the Expectation Suite has been retrieved from the Data Assistant result
 ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py save_expectation_suite"
 ```
 
-## Test your Expectation Suite with a `SimpleCheckpoint`
+## Test your Expectation Suite with a `heckpoint`
 
-To verify that your Expectation Suite is working, you can use a `SimpleCheckpoint`. First, you will configure one to
+To verify that your Expectation Suite is working, you can use a Checkpoint. First, you will configure one to
  operate with the Expectation Suite and Batch Request that you have already defined:
 
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py checkpoint_config"
-```
-
-Once you have our `SimpleCheckpoint`'s configuration defined, you can instantiate a `SimpleCheckpoint` and run it. You
- can check the `"success"` key of the `SimpleCheckpoint`'s results to verify that your Expectation Suite worked.
 
 ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py checkpoint"
 ```
+
+You can check the `"success"` key of the Checkpoint's results to verify that your Expectation Suite worked.
 
 ## Plot and inspect the Data Assistant's calculated Metrics and produced Expectations
 

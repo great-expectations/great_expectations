@@ -3,7 +3,7 @@ import os
 import shutil
 import subprocess
 import unittest
-from typing import List, Optional, Union
+from typing import List
 from unittest import mock
 
 import nbformat
@@ -26,13 +26,11 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
     GETTING_STARTED_DATASOURCE_NAME,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource import (
-    Datasource,
-    LegacyDatasource,
-    SimpleSqlalchemyDatasource,
-)
 from great_expectations.util import get_context
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
@@ -55,14 +53,14 @@ def titanic_data_context_with_sql_datasource(
 
     db_file_path: str = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "titanic_sql_test_cases.db"),
+        os.path.join("..", "test_sets", "titanic_sql_test_cases.db"),  # noqa: PTH118
     )
     sqlite_engine: sa.engine.base.Engine = sa.create_engine(f"sqlite:///{db_file_path}")
     # noinspection PyUnusedLocal
     conn: sa.engine.base.Connection = sqlite_engine.connect()
     try:
         csv_path: str = file_relative_path(
-            __file__, os.path.join("..", "test_sets", "Titanic.csv")
+            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
         )
         df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
         add_dataframe_to_db(df=df, name="titanic", con=conn)
@@ -81,9 +79,7 @@ introspection:
 
     try:
         # noinspection PyUnusedLocal
-        my_sql_datasource: Optional[
-            Union[SimpleSqlalchemyDatasource, LegacyDatasource]
-        ] = context.add_datasource(
+        context.add_datasource(
             "test_sqlite_db_datasource", **yaml.load(datasource_config)
         )
     except AttributeError:
@@ -104,36 +100,48 @@ def titanic_data_context_with_spark_datasource(
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path: str = os.path.join(context_path, "..", "data", "titanic")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
+    context_path: str = os.path.join(  # noqa: PTH118
+        project_path, FileDataContext.GX_DIR
+    )
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    data_path: str = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH103, PTH118
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "..",
                 "test_fixtures",
                 "great_expectations_v013_no_datasource_stats_enabled.yml",
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
-        file_relative_path(__file__, os.path.join("..", "test_sets", "Titanic.csv")),
-        str(
-            os.path.join(
-                context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
-            )
+        file_relative_path(
+            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        os.path.join(  # noqa: PTH118
+            context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
         ),
     )
     shutil.copy(
-        file_relative_path(__file__, os.path.join("..", "test_sets", "Titanic.csv")),
-        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1911.csv")),
+        file_relative_path(
+            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        os.path.join(  # noqa: PTH118
+            context_path, "..", "data", "titanic", "Titanic_1911.csv"
+        ),
     )
     shutil.copy(
-        file_relative_path(__file__, os.path.join("..", "test_sets", "Titanic.csv")),
-        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
+        file_relative_path(
+            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        os.path.join(  # noqa: PTH118
+            context_path, "..", "data", "titanic", "Titanic_1912.csv"
+        ),
     )
 
     context = get_context(context_root_dir=context_path)
@@ -186,7 +194,7 @@ def titanic_data_context_with_spark_datasource(
         """
 
     # noinspection PyUnusedLocal
-    datasource: Datasource = context.test_yaml_config(
+    context.test_yaml_config(
         name=GETTING_STARTED_DATASOURCE_NAME,
         yaml_config=datasource_config,
         pretty_print=False,
@@ -197,7 +205,7 @@ def titanic_data_context_with_spark_datasource(
     csv_path: str
 
     # To fail an expectation, make number of rows less than 1313 (the original number of rows in the "Titanic" dataset).
-    csv_path = os.path.join(
+    csv_path = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_1911.csv"
     )
     df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
@@ -205,7 +213,7 @@ def titanic_data_context_with_spark_datasource(
     # noinspection PyTypeChecker
     df.to_csv(path_or_buf=csv_path)
 
-    csv_path: str = os.path.join(
+    csv_path: str = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
     # mangle the csv
@@ -225,7 +233,7 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
 ):
     context = empty_data_context_stats_enabled
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -283,7 +291,7 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
 ):
     context = empty_context_with_checkpoint_v1_stats_enabled
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -352,7 +360,7 @@ def test_checkpoint_delete_with_single_checkpoint_assume_yes_flag(
     empty_context_with_checkpoint_v1_stats_enabled,
 ):
     context = empty_context_with_checkpoint_v1_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     runner: CliRunner = CliRunner(mix_stderr=False)
     checkpoint_name: str = "my_v1_checkpoint"
     # noinspection PyTypeChecker
@@ -427,7 +435,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
 ):
     context = empty_context_with_checkpoint_v1_stats_enabled
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -495,7 +503,7 @@ def test_checkpoint_list_with_no_checkpoints(
 ):
     context = empty_data_context_stats_enabled
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -551,7 +559,7 @@ def test_checkpoint_list_with_single_checkpoint(
 ):
     context = empty_context_with_checkpoint_v1_stats_enabled
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -610,7 +618,7 @@ def test_checkpoint_list_with_eight_checkpoints(
 ):
     context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -634,7 +642,7 @@ def test_checkpoint_list_with_eight_checkpoints(
         "my_simple_checkpoint_with_slack",
         "my_simple_template_checkpoint",
     ]
-    assert all([checkpoint_name in stdout for checkpoint_name in checkpoint_names_list])
+    assert all(checkpoint_name in stdout for checkpoint_name in checkpoint_names_list)
 
     assert mock_emit.call_count == 3
 
@@ -684,7 +692,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
     """
     context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -753,7 +761,7 @@ def test_checkpoint_new_no_fluent_datasource_messages(
     """
     context = data_context_with_block_datasource
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -789,7 +797,7 @@ def test_checkpoint_new_raises_error_on_fluent_datasources_only(
     """
     context = data_context_with_fluent_datasource
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -824,7 +832,7 @@ def test_checkpoint_new_raises_warning_on_mixed_datasource_styles(
     """
     context = data_context_with_fluent_datasource_and_block_datasource
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -864,7 +872,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     context = deterministic_asset_data_connector_context
 
     root_dir: str = context.root_directory
-    monkeypatch.chdir(os.path.dirname(root_dir))
+    monkeypatch.chdir(os.path.dirname(root_dir))  # noqa: PTH120
 
     assert context.list_checkpoints() == []
     context.save_expectation_suite(titanic_expectation_suite)
@@ -916,25 +924,25 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     assert mock_subprocess.call_count == 1
     assert mock_webbroser.call_count == 0
 
-    expected_notebook_path: str = os.path.join(
+    expected_notebook_path: str = os.path.join(  # noqa: PTH118
         root_dir, "uncommitted", "edit_checkpoint_passengers.ipynb"
     )
-    assert os.path.isfile(expected_notebook_path)
+    assert os.path.isfile(expected_notebook_path)  # noqa: PTH113
 
     with open(expected_notebook_path) as f:
         nb: NotebookNode = nbformat.read(f, as_version=4)
 
-    uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(root_dir, "uncommitted")  # noqa: PTH118
     # Run notebook
     # TODO: <ANTHONY>We should mock the datadocs call or skip running that cell within the notebook (rather than commenting it out in the notebook)</ANTHONY>
     ep: ExecutePreprocessor = ExecutePreprocessor(timeout=600, kernel_name="python3")
     ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     # Ensure the checkpoint file was created
-    expected_checkpoint_path: str = os.path.join(
+    expected_checkpoint_path: str = os.path.join(  # noqa: PTH118
         root_dir, "checkpoints", "passengers.yml"
     )
-    assert os.path.isfile(expected_checkpoint_path)
+    assert os.path.isfile(expected_checkpoint_path)  # noqa: PTH113
 
     # Ensure the Checkpoint configuration in the file is as expected
     with open(expected_checkpoint_path) as f:
@@ -987,7 +995,7 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
 ):
     context = empty_context_with_checkpoint_v1_stats_enabled
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -1053,7 +1061,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
 
     context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -1187,7 +1195,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     context.save_expectation_suite(expectation_suite=suite)
     assert context.list_expectation_suite_names() == ["bar"]
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "bad_batch.yml",
@@ -1232,7 +1240,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
         config=config, checkpoint_file_path=checkpoint_file_path
     )
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
@@ -1391,7 +1399,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     assert context.list_expectation_suite_names() == []
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "no_suite.yml",
@@ -1433,7 +1441,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
@@ -1506,7 +1514,7 @@ def test_checkpoint_run_on_non_existent_validations(
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     assert context.list_expectation_suite_names() == []
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "no_validations.yml",
@@ -1541,7 +1549,7 @@ def test_checkpoint_run_on_non_existent_validations(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
@@ -1619,7 +1627,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -1662,7 +1670,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
@@ -1673,14 +1681,12 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
 
     stdout: str = result.stdout
     assert all(
-        [
-            msg in stdout
-            for msg in [
-                "Validation succeeded!",
-                "Titanic.warning",
-                "Passed",
-                "100.0 %",
-            ]
+        msg in stdout
+        for msg in [
+            "Validation succeeded!",
+            "Titanic.warning",
+            "Passed",
+            "100.0 %",
         ]
     )
 
@@ -1837,7 +1843,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -1878,7 +1884,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
@@ -1889,14 +1895,12 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
 
     stdout: str = result.stdout
     assert all(
-        [
-            msg in stdout
-            for msg in [
-                "Validation succeeded!",
-                "Titanic.warning",
-                "Passed",
-                "100.0 %",
-            ]
+        msg in stdout
+        for msg in [
+            "Validation succeeded!",
+            "Titanic.warning",
+            "Passed",
+            "100.0 %",
         ]
     )
 
@@ -2047,7 +2051,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -2091,7 +2095,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
@@ -2102,14 +2106,12 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
 
     stdout: str = result.stdout
     assert all(
-        [
-            msg in stdout
-            for msg in [
-                "Validation succeeded!",
-                "Titanic.warning",
-                "Passed",
-                "100.0 %",
-            ]
+        msg in stdout
+        for msg in [
+            "Validation succeeded!",
+            "Titanic.warning",
+            "Passed",
+            "100.0 %",
         ]
     )
 
@@ -2266,10 +2268,10 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     # To fail an expectation, make number of rows less than 1313 (the original number of rows in the "Titanic" dataset).
-    csv_path: str = os.path.join(
+    csv_path: str = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
     df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
@@ -2277,7 +2279,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
     # noinspection PyTypeChecker
     df.to_csv(path_or_buf=csv_path)
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -2484,7 +2486,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -2525,7 +2527,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
@@ -2683,7 +2685,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -2729,7 +2731,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
@@ -2900,16 +2902,16 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
-    csv_path: str = os.path.join(
+    csv_path: str = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
     # mangle the csv
     with open(csv_path, "w") as f:
         f.write("foo,bar\n1,2\n")
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -3111,9 +3113,9 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -3306,14 +3308,14 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    csv_path: str = os.path.join(
+    csv_path: str = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
     # mangle the csv
     with open(csv_path, "w") as f:
         f.write("foo,bar\n1,2\n")
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -3360,7 +3362,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
@@ -3512,7 +3514,7 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
     context = empty_context_with_checkpoint_v1_stats_enabled
     assert context.list_checkpoints() == ["my_v1_checkpoint"]
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -3567,15 +3569,15 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
 
     assert context.list_checkpoints() == ["my_v1_checkpoint"]
 
-    script_path: str = os.path.join(
+    script_path: str = os.path.join(  # noqa: PTH118
         context.root_directory, context.GX_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
     )
     with open(script_path, "w") as f:
         f.write("script here")
-    assert os.path.isfile(script_path)
+    assert os.path.isfile(script_path)  # noqa: PTH113
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
@@ -3630,7 +3632,7 @@ def test_checkpoint_script_happy_path_generates_script_pandas(
 ):
     context = empty_context_with_checkpoint_v1_stats_enabled
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -3675,10 +3677,10 @@ def test_checkpoint_script_happy_path_generates_script_pandas(
             }
         ),
     ]
-    expected_script: str = os.path.join(
+    expected_script: str = os.path.join(  # noqa: PTH118
         context.root_directory, context.GX_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
     )
-    assert os.path.isfile(expected_script)
+    assert os.path.isfile(expected_script)  # noqa: PTH113
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -3714,9 +3716,9 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     context.save_expectation_suite(expectation_suite=suite)
     assert context.list_expectation_suite_names() == ["users.delivery"]
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -3772,14 +3774,14 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
         click_result=result,
     )
 
-    script_path: str = os.path.abspath(
-        os.path.join(
+    script_path: str = os.path.abspath(  # noqa: PTH100
+        os.path.join(  # noqa: PTH118
             context.root_directory,
             context.GX_UNCOMMITTED_DIR,
             "run_my_fancy_checkpoint.py",
         )
     )
-    assert os.path.isfile(script_path)
+    assert os.path.isfile(script_path)  # noqa: PTH113
 
     # In travis on osx, python may not execute from the build dir
     cmdstring: str = f"python {script_path}"
@@ -3790,7 +3792,13 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     print("about to run: " + cmdstring)
     print(os.curdir)
     print(os.listdir(os.curdir))
-    print(os.listdir(os.path.abspath(os.path.join(context.root_directory, ".."))))
+    print(
+        os.listdir(
+            os.path.abspath(  # noqa: PTH100
+                os.path.join(context.root_directory, "..")  # noqa: PTH118
+            )
+        )
+    )
 
     status: int
     output: str
@@ -3830,10 +3838,10 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     # To fail an expectation, make number of rows less than 1313 (the original number of rows in the "Titanic" dataset).
-    csv_path: str = os.path.join(
+    csv_path: str = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
     df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
@@ -3841,7 +3849,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     # noinspection PyTypeChecker
     df.to_csv(path_or_buf=csv_path)
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -3897,14 +3905,14 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
         click_result=result,
     )
 
-    script_path: str = os.path.abspath(
-        os.path.join(
+    script_path: str = os.path.abspath(  # noqa: PTH100
+        os.path.join(  # noqa: PTH118
             context.root_directory,
             context.GX_UNCOMMITTED_DIR,
             "run_my_fancy_checkpoint.py",
         )
     )
-    assert os.path.isfile(script_path)
+    assert os.path.isfile(script_path)  # noqa: PTH113
 
     # In travis on osx, python may not execute from the build dir
     cmdstring: str = f"python {script_path}"
@@ -3915,7 +3923,13 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     print("about to run: " + cmdstring)
     print(os.curdir)
     print(os.listdir(os.curdir))
-    print(os.listdir(os.path.abspath(os.path.join(context.root_directory, ".."))))
+    print(
+        os.listdir(
+            os.path.abspath(  # noqa: PTH100
+                os.path.join(context.root_directory, "..")  # noqa: PTH118
+            )
+        )
+    )
 
     status: int
     output: str
@@ -3954,16 +3968,16 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
-    csv_path: str = os.path.join(
+    csv_path: str = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
     # mangle the csv
     with open(csv_path, "w") as f:
         f.write("foo,bar\n1,2\n")
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -4020,14 +4034,14 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
         click_result=result,
     )
 
-    script_path: str = os.path.abspath(
-        os.path.join(
+    script_path: str = os.path.abspath(  # noqa: PTH100
+        os.path.join(  # noqa: PTH118
             context.root_directory,
             context.GX_UNCOMMITTED_DIR,
             "run_my_fancy_checkpoint.py",
         )
     )
-    assert os.path.isfile(script_path)
+    assert os.path.isfile(script_path)  # noqa: PTH113
 
     # In travis on osx, python may not execute from the build dir
     cmdstring: str = f"python {script_path}"
@@ -4038,7 +4052,13 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     print("about to run: " + cmdstring)
     print(os.curdir)
     print(os.listdir(os.curdir))
-    print(os.listdir(os.path.abspath(os.path.join(context.root_directory, ".."))))
+    print(
+        os.listdir(
+            os.path.abspath(  # noqa: PTH100
+                os.path.join(context.root_directory, "..")  # noqa: PTH118
+            )
+        )
+    )
 
     status: int
     output: str

@@ -19,7 +19,6 @@ from great_expectations.exceptions.exceptions import InvalidConfigError
 from great_expectations.rule_based_profiler import (
     BaseRuleBasedProfiler,
     RuleBasedProfiler,
-    RuleBasedProfilerResult,
 )
 from great_expectations.rule_based_profiler.config import (
     DomainBuilderConfig,
@@ -993,15 +992,12 @@ def test_run_profiler_with_dynamic_args(
     variables = {"foo": "bar"}
     rules = {"baz": "qux"}
 
-    # noinspection PyUnusedLocal
-    rule_based_profiler_result: RuleBasedProfilerResult = (
-        RuleBasedProfiler.run_profiler(
-            data_context=mock_data_context,
-            profiler_store=populated_profiler_store,
-            name=profiler_name,
-            variables=variables,
-            rules=rules,
-        )
+    rule_based_profiler_result = RuleBasedProfiler.run_profiler(  # noqa: F841
+        data_context=mock_data_context,
+        profiler_store=populated_profiler_store,
+        name=profiler_name,
+        variables=variables,
+        rules=rules,
     )
 
     assert mock_profiler_run.called
@@ -1187,7 +1183,6 @@ def test_add_profiler(
     mock_data_context.profiler_store.add.asset_called_once()
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_add_profiler_ge_cloud_mode(
     ge_cloud_profiler_id: str,
@@ -1354,7 +1349,6 @@ def test_list_profilers(mock_profiler_store: mock.MagicMock):
     assert store.list_keys.called
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.store.ProfilerStore")
 def test_list_profilers_in_cloud_mode(mock_profiler_store: mock.MagicMock):

@@ -1,11 +1,21 @@
 name: ci
 
+# This pipeline is intended to facilicate the full coverage of tests for OSS GX.
+# A "reasonable" set of tests will run on every pull request, and a full set will run with:
+#   1. Manual triggering
+#   2. Every 3 hours
+#   3. When we push a tag with a pattern x.y.z (for example 0.0.1) which is the pattern we use for releases.
+
 on:
+
   pull_request:
   schedule:
     # https://crontab.guru/every-3-hours
     - cron: "0 */3 * * *"
   workflow_dispatch:  # allows manual triggering with branch picker
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   ci-does-not-run-on-draft-pull-requests:
@@ -14,13 +24,37 @@ jobs:
     steps:
       - run: echo "CI jobs won't run because this is a draft pull request."
 
-  static-analysis:
+  doc-checks:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "pip"
+          cache-dependency-path: |
+            reqs/requirements-dev-test.txt
+      - name: Install dependencies
+        run: pip install -r reqs/requirements-dev-test.txt
+      - name: check_repo_root_size
+        run: sh ./ci/checks/check_repo_root_size.sh
+      - name: Docstring linter
+        run: invoke docstrings
+      - name: line_number_snippet_checker
+        run: python ci/checks/check_no_line_number_snippets.py
+      - name: name_tag_snippet_checker
+        run: python ci/checks/check_only_name_tag_snippets.py
+      - name: public_api_report
+        run: invoke public-api
 
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -32,7 +66,6 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements-types.txt -r reqs/requirements-dev-contrib.txt
-
       - run: invoke lint --no-fmt
       - run: invoke fmt --check
       - name: Marker-coverage-check
@@ -42,6 +75,81 @@ jobs:
         run: |
           invoke type-check --ci --pretty
           invoke type-check --ci --pretty  --check-stub-sources
+
+  docs-snippets:
+    name: docs-snippets
+    if: github.event.pull_request.draft == false
+    #add more scope here
+    runs-on: ubuntu-latest
+    env:
+      # google
+      GE_TEST_GCP_CREDENTIALS: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
+      GE_TEST_GCP_PROJECT: ${{secrets.GE_TEST_GCP_PROJECT}}
+      GE_TEST_BIGQUERY_DATASET: ${{secrets.GE_TEST_BIGQUERY_DATASET}}
+      GOOGLE_APPLICATION_CREDENTIALS: 'gcp-credentials.json'
+      # aws
+      AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+      AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
+      AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      # aws-redshift
+      REDSHIFT_USERNAME: ${{secrets.REDSHIFT_USERNAME}}
+      REDSHIFT_PASSWORD: ${{secrets.REDSHIFT_PASSWORD}}
+      REDSHIFT_HOST: ${{secrets.REDSHIFT_HOST}}
+      REDSHIFT_PORT: ${{secrets.REDSHIFT_PORT}}
+      REDSHIFT_DATABASE: ${{secrets.REDSHIFT_DATABASE}}
+      REDSHIFT_SSLMODE: ${{secrets.REDSHIFT_SSLMODE}}
+      # azure
+      AZURE_ACCESS_KEY: ${{secrets.AZURE_ACCESS_KEY}}
+      AZURE_CREDENTIAL: ${{secrets.AZURE_CREDENTIAL}}
+      # snowflake
+      SNOWFLAKE_ACCOUNT: ${{secrets.SNOWFLAKE_ACCOUNT}}
+      SNOWFLAKE_USER: ${{secrets.SNOWFLAKE_USER}}
+      SNOWFLAKE_PW: ${{secrets.SNOWFLAKE_PW}}
+      SNOWFLAKE_DATABASE: ${{secrets.SNOWFLAKE_DATABASE}}
+      SNOWFLAKE_SCHEMA: ${{secrets.SNOWFLAKE_SCHEMA}}
+      SNOWFLAKE_WAREHOUSE: ${{secrets.SNOWFLAKE_WAREHOUSE}}
+      SNOWFLAKE_ROLE: ${{secrets.SNOWFLAKE_ROLE}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Authenticate with GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
+
+      - name: Create JSON file for following step
+        run: |
+          echo "$GE_TEST_GCP_CREDENTIALS" > gcp-credentials.json
+
+      - name: Install and setup Google Cloud SDK
+        run: |
+          # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
+          curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
+          ./google-cloud-sdk/install.sh --usage-reporting=False --path-update=True --quiet --install-python=False
+          # creating new named configuration
+          ./google-cloud-sdk/bin/gcloud config configurations create ge-oss-ci-cd-configurations
+          # setting account config using project and service account info
+          ./google-cloud-sdk/bin/gcloud config set account account-for-azure-tests --project=$GE_TEST_GCP_PROJECT --access-token-file=$GOOGLE_APPLICATION_CREDENTIALS
+          # Pass the configured Cloud SDK authentication to gsutil.
+          ./google-cloud-sdk/bin/gcloud config set pass_credentials_to_gsutil True
+          # Authorize access to Google Cloud with a service account
+          ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+
+      - name: Set up Python bigquery
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "pip"
+          cache-dependency-path: |
+            reqs/requirements-dev-test.txt
+      - name: Install dependencies
+        run: |
+          pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
+          invoke deps --gx-install -m 'docs'
+      - name: Run the tests
+        run: |
+          invoke docs-snippet-tests 'docs' --up-services --verbose
 
   unit-tests:
     strategy:
@@ -67,35 +175,64 @@ jobs:
         run: pip install -c constraints-dev.txt ".[test, snowflake]"
 
       - name: Run the unit tests
-        run: invoke tests --cloud --unit --timeout=1.5 --slowest=8
+        run: invoke ci-tests -m "unit" --xdist --timeout=1.5 --slowest=8
+
+  cloud-tests:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache-dependency-path: |
+            reqs/requirements-dev-test.txt
+            setup.py
+
+      - name: Install dependencies
+        run: |
+          pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
+          invoke deps --gx-install -m 'cloud' -r test
+
+      - name: Run the tests
+        env:
+          GX_CLOUD_BASE_URL: ${{secrets.GX_CLOUD_BASE_URL}}
+          GX_CLOUD_ORGANIZATION_ID: ${{secrets.GX_CLOUD_ORGANIZATION_ID}}
+          GX_CLOUD_ACCESS_TOKEN: ${{secrets.GX_CLOUD_ACCESS_TOKEN}}
+        run: invoke ci-tests 'cloud' --up-services --verbose
 
   marker-tests:
+    needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    services:
-      postgres:
-        # Docker hub image
-        image: postgres:13.3
-        env:
-          POSTGRES_USER: postgresql
-          POSTGRES_DB: test_ci # required by postgres image
-          POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5432
+    env:
+      # aws
+      AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+      AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
+      AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         markers:
+          - athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
           - big
           - cli
-          # `not e2e` because 1 test & 1 fixture need access token
-          - cloud and not e2e
           - filesystem
-          - docs
-          - openpyxl or pyarrow or project or sqlite
-          #- spark
+          - mssql
+          - mysql
           - postgresql
-          # - external_sqldialect # tests being skipped likely due to flagging system
-        python-version: ["3.8"]
-
-    runs-on: ubuntu-latest
+          - spark
+          - trino
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        exclude:
+          # TODO: would like to adopt `actionlint` pre-commit hook
+          # but false positive here and inability to do an inline ignore
+          # prevents this https://github.com/rhysd/actionlint/issues/237
+          - python-version: ${{ github.event_name == 'pull_request' && '3.9' }}
+          - python-version: ${{ github.event_name == 'pull_request' && '3.10' }}
+          - python-version: ${{ github.event_name == 'pull_request' && '3.11' }}
 
     steps:
       - name: Checkout
@@ -105,6 +242,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          cache: "pip"
           cache-dependency-path: |
             reqs/requirements-dev-test.txt
             setup.py
@@ -116,3 +254,189 @@ jobs:
 
       - name: Run the tests
         run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose
+
+  py38-min-versions:
+    needs: [unit-tests, static-analysis]
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "pip"
+          cache-dependency-path: |
+            reqs/requirements-dev-test.txt
+      - name: Install dependencies
+        run: pip install . -c ci/constraints-test/py38-min-install.txt -r reqs/requirements-dev-test.txt
+      - name: Run the tests
+        run: invoke tests --unit
+
+  py39-min-versions:
+    needs: [unit-tests, static-analysis]
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+          cache: "pip"
+          cache-dependency-path: |
+            reqs/requirements-dev-test.txt
+      - name: Install dependencies
+        run: pip install . -c ci/constraints-test/py39-min-install.txt -r reqs/requirements-dev-test.txt
+      - name: Run the tests
+        run: invoke tests --unit
+
+  py310-min-versions:
+    needs: [unit-tests, static-analysis]
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          cache: "pip"
+          cache-dependency-path: |
+            reqs/requirements-dev-test.txt
+      - name: Install dependencies
+        run: pip install . -c ci/constraints-test/py310-min-install.txt -r reqs/requirements-dev-test.txt
+      - name: Run the tests
+        run: invoke tests --unit
+
+  import_gx:
+    needs: [static-analysis]
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        exclude:
+          - python-version: ${{ github.event_name == 'pull_request' && '3.9' }}
+          - python-version: ${{ github.event_name == 'pull_request' && '3.10' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+          cache-dependency-path: requirements.txt
+      - name: Install Great Expectations with core deps only
+        run: pip install .
+      - name: Import Great Expectations
+        run: python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
+
+  usage_stats_integration:
+    needs: [unit-tests, static-analysis]
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "pip"
+          cache-dependency-path: requirements.txt
+      - name: Install Great Expectations with core deps only
+        run: pip install --constraint constraints-dev.txt ".[test]"
+      - name: Usage Stats Integration Test
+        env:
+          GE_USAGE_STATISTICS_URL: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
+        # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
+        run: pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+
+  build-n-publish:
+    needs: [
+      doc-checks,
+      static-analysis,
+      docs-snippets,
+      unit-tests,
+      cloud-tests,
+      marker-tests,
+      py38-min-versions,
+      py39-min-versions,
+      py310-min-versions,
+      import_gx,
+      usage_stats_integration
+    ]
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    name: Build and publish Python distributions to PyPI
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/great-expectations
+    permissions:
+      id-token: write
+    steps:
+    - uses: actions/checkout@master
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.8'
+    - name: Update pip
+      run: python -m pip install --upgrade pip
+    - name: Install Twine and Wheel, and prepare packaging
+      run: |
+        pip install twine wheel
+        git config --global user.email "team@greatexpectations.io"
+        git config --global user.name "Great Expectations"
+    - name: Build distribution
+      run: |
+        python setup.py sdist
+        python setup.py bdist_wheel
+    - name: Publish distribution to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        skip-existing: true # prevent against pushing duplicate versions
+
+  notify_on_failure:
+    needs: [
+      doc-checks,
+      static-analysis,
+      docs-snippets,
+      unit-tests,
+      cloud-tests,
+      marker-tests,
+      py38-min-versions,
+      py39-min-versions,
+      py310-min-versions,
+      import_gx,
+      usage_stats_integration,
+      build-n-publish
+    ]
+    if: always() && !cancelled() && contains(needs.*.result, 'failure') && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scheduled CI job failure
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "event_name": "${{ github.event_name }}",
+              "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CI_WEBHOOK_URL }}
+
+  notify_on_release:
+    needs: [build-n-publish]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Announce Release
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_WEBHOOK_URL }}

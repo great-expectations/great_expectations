@@ -1,6 +1,6 @@
 version: '3.2'
 services:
-  travis_db:
+  postgres_db:
     image: postgres:15.1
     command:
       - postgres

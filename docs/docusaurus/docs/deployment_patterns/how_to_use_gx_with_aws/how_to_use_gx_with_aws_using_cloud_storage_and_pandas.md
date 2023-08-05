@@ -106,15 +106,15 @@ import AdditionalDataDocsNotes from '@site/docs/guides/setup/configuring_data_do
 
 import CreateDataContextWithCreateAgain from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_initialize_data_context_with_create.mdx'
 
-<!-- 2.2 Add Datasource to your DataContext -->
+<!-- 2.2 Add Data Source to your DataContext -->
 
 import ConfigureYourDatasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_configure_your_datasource.mdx'
 
-<!-- 2.3 Add CSV Asset to your Datasource -->
+<!-- 2.3 Add CSV Asset to your Data Source -->
 
 import AddCSVAssetToS3Datasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_add_csv_asset_to_pandas_s3_datasource.mdx'
 
-<!-- 2.4 Test your new Datasource -->
+<!-- 2.4 Test your new Data Source -->
 
 import TestS3Datasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_test_your_new_datasource.mdx'
 
@@ -251,13 +251,13 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 If you have already instantiated your `DataContext` in a previous step, this step can be skipped.
 
-### 2.2 Add Datasource to your DataContext
+### 2.2 Add Data Source to your DataContext
 <ConfigureYourDatasource />
 
-### 2.2 Add CSV Asset to your Datasource 
+### 2.2 Add CSV Asset to your Data Source 
 <AddCSVAssetToS3Datasource />
 
-### 2.3 Test your new Datasource 
+### 2.3 Test your new Data Source 
 <TestS3Datasource />
 
 ## Part 3: Create Expectations

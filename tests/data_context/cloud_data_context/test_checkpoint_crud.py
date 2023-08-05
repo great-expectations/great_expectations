@@ -230,7 +230,6 @@ def test_cloud_backed_data_context_get_checkpoint_by_name(
 
 
 @pytest.mark.cloud
-@pytest.mark.unit
 def test_get_checkpoint_no_identifier_raises_error(
     empty_cloud_data_context: CloudDataContext,
 ) -> None:
@@ -967,7 +966,6 @@ def mock_get_all_checkpoints_json(
     return mock_json
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_list_checkpoints(
     empty_ge_cloud_data_context_config: DataContextConfig,

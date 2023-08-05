@@ -52,7 +52,9 @@ def yellow_trip_pandas_data_context(
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path: str = os.path.join(  # noqa: PTH118
+        project_path, FileDataContext.GX_DIR
+    )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -66,11 +68,11 @@ def yellow_trip_pandas_data_context(
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
-                "great_expectations",
-                "great_expectations.yml",
+                FileDataContext.GX_DIR,
+                FileDataContext.GX_YML,
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(
@@ -340,6 +342,8 @@ def multi_batch_taxi_validator_ge_cloud_mode(
     return validator_multi_batch
 
 
+# TODO: There is something wrong with this test. It is trying to mock out cloud, but if I don't
+#       unset the gx_env_variables (eg if i remove this fixture), this test will fail.
 @mock.patch(
     "great_expectations.data_context.data_context.AbstractDataContext.save_expectation_suite"
 )
@@ -358,6 +362,7 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     mock_emit,
     mock_context_get_suite,
     mock_context_save_suite,
+    unset_gx_env_variables,
     multi_batch_taxi_validator_ge_cloud_mode,
     empty_data_context_stats_enabled,
 ):

@@ -4,7 +4,7 @@ from typing import Dict, Optional, Union
 import numpy as np
 import pandas as pd
 import pytest
-import scipy.stats as stats
+from scipy import stats
 
 from great_expectations.core import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes

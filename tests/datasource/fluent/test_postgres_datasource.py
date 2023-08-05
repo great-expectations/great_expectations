@@ -24,6 +24,9 @@ from pydantic import ValidationError
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
@@ -47,7 +50,7 @@ from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine, MockSaInspector
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-    from great_expectations.data_context import AbstractDataContext, FileDataContext
+    from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
@@ -1088,7 +1091,7 @@ def test_adding_splitter_persists_results(
     mock_test_connection,
 ):
     gx_yaml = pathlib.Path(
-        empty_data_context.root_directory, "great_expectations.yml"
+        empty_data_context.root_directory, FileDataContext.GX_YML
     ).resolve(strict=True)
 
     empty_data_context.sources.add_postgres(
