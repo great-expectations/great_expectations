@@ -21,7 +21,9 @@ def regex_for_deprecation_comments() -> Pattern:
 
 @pytest.fixture
 def files_with_deprecation_warnings() -> List[str]:
-    files: List[str] = glob.glob("great_expectations/**/*.py", recursive=True)
+    files: List[str] = glob.glob(  # noqa: PTH207
+        "great_expectations/**/*.py", recursive=True
+    )
     files_to_exclude = [
         "great_expectations/compatibility/google.py",
         "great_expectations/compatibility/pyspark.py",
