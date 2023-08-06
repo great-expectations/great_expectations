@@ -389,8 +389,8 @@ class HtmlSiteStore:
         Copies static assets, using a special "static_assets" backend store that accepts variable-length tuples as
         keys, with no filepath_template.
         """
-        file_exclusions = [".DS_Store"]
-        dir_exclusions = []
+        file_exclusions: list[str] = [".DS_Store"]
+        dir_exclusions: list[str] = []
 
         if not static_assets_source_dir:
             static_assets_source_dir = pathlib.Path(
