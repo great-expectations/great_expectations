@@ -538,5 +538,4 @@ testpaths = "tests"
 # https://pytest-mock.readthedocs.io/en/latest/configuration.html#use-standalone-mock-package
 mock_use_standalone_module = false
 # https://docs.pytest.org/en/7.1.x/how-to/logging.html#how-to-manage-logging
-# WARNING some cli v012 tests may fail if this is "info" or lower
 log_level = "info"
