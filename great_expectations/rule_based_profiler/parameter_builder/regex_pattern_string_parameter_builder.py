@@ -124,7 +124,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
     ) -> Union[str, Union[List[str], Set[str]]]:
         return self._candidate_regexes
 
-    def _build_parameters(
+    def _build_parameters(  # noqa: PLR0912
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
