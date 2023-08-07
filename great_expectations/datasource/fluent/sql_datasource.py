@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from datetime import date, datetime
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -574,6 +575,11 @@ class _SQLAsset(DataAsset):
         candidate: Dict, requested_options: BatchRequestOptions
     ) -> bool:
         for k, v in requested_options.items():
+            if type(candidate[k]) == datetime:
+                candidate[k] = str(candidate[k])
+            elif type(candidate[k]) == date:
+                candidate[k] = str(candidate[k])
+
             if v is not None and candidate[k] != v:
                 return False
         return True
