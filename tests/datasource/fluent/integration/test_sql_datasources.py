@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from pprint import pformat as pf
-from typing import Final
+from typing import Final, Generator, Literal, Protocol
 
 import pytest
 from pytest import param
 
 from great_expectations import get_context
-from great_expectations.compatibility.sqlalchemy import inspect
+from great_expectations.compatibility.sqlalchemy import TextClause, engine, inspect
 from great_expectations.data_context import EphemeralDataContext
 from great_expectations.datasource.fluent import (
     PostgresDatasource,
@@ -17,7 +17,7 @@ from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
 )
 
-PG_TABLE: Final[str] = "ge_expectations_store"
+PG_TABLE: Final[str] = "test_table"
 TRINO_TABLE: Final[str] = "customer"
 
 TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
@@ -43,6 +43,44 @@ def context() -> EphemeralDataContext:
     return ctx
 
 
+class TableFactory(Protocol):
+    def __call__(
+        self,
+        engine: engine.Engine,
+        table_name: str,
+        schema: str = "public",
+        drop_if_exists: bool = False,
+    ) -> None:
+        ...
+
+
+@pytest.fixture(scope="class")
+def table_factory_cls_scope() -> Generator[TableFactory, None, None]:
+    """Given a an SQLALchemy engine, table_name and schema, create the table."""
+    created_tables: list[dict[Literal["table_name", "schema"], str]] = []
+
+    def _table_factory(
+        engine: engine.Engine,
+        table_name: str,
+        schema: str = "public",
+        drop_if_exists: bool = False,
+    ) -> None:
+        with engine.connect() as conn:
+            if drop_if_exists:
+                conn.execute(f"DROP TABLE IF EXISTS {schema}.{table_name}")
+                conn.execute(f"DROP SCHEMA IF EXISTS {schema} CASCADE")
+            conn.execute(f"CREATE SCHEMA {schema}")
+            conn.execute(
+                TextClause(
+                    f"CREATE TABLE {schema}.{table_name} (id INTEGER, name VARCHAR(255))"
+                )
+            )
+        created_tables.append(dict(table_name=table_name, schema=schema))
+
+    yield _table_factory
+    print(f"created_tables may not have been cleaned up\n{pf(created_tables)}")
+
+
 @pytest.fixture
 def trino_ds(context: EphemeralDataContext) -> SQLDatasource:
     ds = context.sources.add_sql(
@@ -53,11 +91,17 @@ def trino_ds(context: EphemeralDataContext) -> SQLDatasource:
 
 
 @pytest.fixture
-def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
+def postgres_ds(
+    context: EphemeralDataContext,
+    table_factory_cls_scope: TableFactory,
+) -> PostgresDatasource:
     ds = context.sources.add_postgres(
         "postgres",
         connection_string="postgresql+psycopg2://postgres:postgres@localhost:5432/test_ci",
     )
+
+    table_factory_cls_scope(ds.get_engine(), PG_TABLE)
+
     return ds
 
 
