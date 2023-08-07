@@ -51,10 +51,6 @@ jobs:
         run: python ci/checks/check_integration_test_gets_run.py
       - name: name_tag_snippet_referenced_checker
         run: python ci/checks/check_name_tag_snippets_referenced.py
-      - name: run docs_snippet_checker
-        run: |
-          yarn install
-          python ci/checks/validate_docs_snippets.py
       - name: public_api_report
         run: invoke public-api
 
@@ -120,7 +116,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
+      - name: Run docs_snippet_checker
+        run: |
+          yarn install
+          python ci/checks/validate_docs_snippets.py
       - name: Authenticate with GCP
         uses: google-github-actions/auth@v1
         with:
@@ -158,7 +157,6 @@ jobs:
       - name: Run the tests
         run: |
           invoke docs-snippet-tests 'docs' --up-services --verbose
-
   unit-tests:
     strategy:
       matrix:
