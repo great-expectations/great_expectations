@@ -66,7 +66,7 @@ jobs:
       - name: public_api_report
         run: invoke public-api
       - name: link_checker
-        if: steps.changed-files.outputs.docs == 'true'
+        #if: steps.changed-files.outputs.docs == 'true'
         run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -s docs --skip-external
 
   static-analysis:
