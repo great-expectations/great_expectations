@@ -338,9 +338,12 @@ def get_sqlalchemy_column_metadata(
                 table_selectable, sqlalchemy.TextClause
             ):
                 if hasattr(table_selectable, "selected_columns"):
+                    # New in version 1.4.
                     columns = table_selectable.selected_columns.columns
                 else:
-                    columns = table_selectable.columns().columns
+                    # Implicit subquery for columns().column was deprecated in SQLAlchemy 1.4
+                    # We must explicitly create a subquery
+                    columns = table_selectable.columns().subquery().columns
             else:
                 columns = inspector.get_columns(
                     table_selectable,
