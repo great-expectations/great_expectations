@@ -145,7 +145,6 @@ jobs:
         run: |
           yarn install
           python ci/checks/validate_docs_snippets.py
-
       - name: Authenticate with GCP
         uses: google-github-actions/auth@v1
         with:
