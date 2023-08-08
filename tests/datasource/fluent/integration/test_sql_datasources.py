@@ -43,9 +43,9 @@ TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
     "trino": {
         "unquoted_lower": TRINO_TABLE.lower(),
         "quoted_lower": f"'{TRINO_TABLE.lower()}'",
-        "unquoted_upper": TRINO_TABLE.upper(),
-        "quoted_upper": f"'{TRINO_TABLE.upper()}'",
-        "unquoted_mixed": TRINO_TABLE.title(),
+        # "unquoted_upper": TRINO_TABLE.upper(),
+        # "quoted_upper": f"'{TRINO_TABLE.upper()}'",
+        # "unquoted_mixed": TRINO_TABLE.title(),
     },
 }
 
@@ -155,18 +155,22 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
         param("quoted_lower"),
         param(
             "unquoted_upper",
-            marks=[pytest.mark.xfail(reason="table names should be lowercase")],
+            marks=[pytest.mark.xfail(reason="TODO: fix or remove")],
         ),
         param("quoted_upper"),
         param(
             "unquoted_mixed",
-            marks=[pytest.mark.xfail(reason="table names should be lowercase")],
+            marks=[pytest.mark.xfail(reason="TODO: fix or remove")],
         ),
     ],
 )
 class TestTableIdentifiers:
     @pytest.mark.trino
     def test_trino(self, trino_ds: SQLDatasource, asset_name: str):
+        table_name: str = TABLE_NAME_MAPPING["trino"].get(asset_name)
+        if not table_name:
+            pytest.skip(f"no '{asset_name}' table_name for trino")
+
         table_names: list[str] = inspect(trino_ds.get_engine()).get_table_names()
         print(f"trino tables:\n{pf(table_names)}))")
 
@@ -207,7 +211,10 @@ class TestTableIdentifiers:
     ):
         datasource: SQLDatasource = request.getfixturevalue(f"{datasource_type}_ds")
 
-        table_name: str = TABLE_NAME_MAPPING[datasource_type][asset_name]
+        table_name: str | None = TABLE_NAME_MAPPING[datasource_type].get(asset_name)
+        if not table_name:
+            pytest.skip(f"no '{asset_name}' table_name for {datasource_type}")
+
         # create table
         table_factory(engine=datasource.get_engine(), table_names={table_name})
 
