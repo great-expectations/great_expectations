@@ -91,6 +91,11 @@
             "default": true,
             "type": "boolean"
         },
+        "persist": {
+            "title": "Persist",
+            "default": true,
+            "type": "boolean"
+        },
         "base_directory": {
             "title": "Base Directory",
             "type": "string",
