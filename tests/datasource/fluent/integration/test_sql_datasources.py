@@ -75,7 +75,7 @@ def table_factory(
     capture_engine_logs: pytest.LogCaptureFixture,
 ) -> Generator[TableFactory, None, None]:
     """
-    Given a an SQLALchemy engine, table_name and schema,
+    Given a SQLALchemy engine, table_name and schema,
     create the table if it does not exist and drop it after the test.
     """
     all_created_tables: dict[
@@ -109,7 +109,7 @@ def table_factory(
     yield _table_factory
 
     # teardown
-    print(f"dropping up tables\n{pf(all_created_tables)}")
+    print(f"dropping tables\n{pf(all_created_tables)}")
     for dialect, tables in all_created_tables.items():
         engine = engines[dialect]
         with engine.connect() as conn:
