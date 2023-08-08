@@ -35,9 +35,9 @@ DO_NOT_CREATE_TABLES: set[str] = {"trino"}
 TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
     "postgres": {
         "unquoted_lower": PG_TABLE.lower(),
-        "quoted_lower": f"'{PG_TABLE.lower()}'",
+        "quoted_lower": f'"{PG_TABLE.lower()}"',
         "unquoted_upper": PG_TABLE.upper(),
-        "quoted_upper": f"'{PG_TABLE.upper()}'",
+        "quoted_upper": f'"{PG_TABLE.upper()}"',
         "unquoted_mixed": PG_TABLE.title(),
     },
     "trino": {
@@ -157,10 +157,7 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
             "unquoted_upper",
             marks=[pytest.mark.xfail(reason="table names should be lowercase")],
         ),
-        param(
-            "quoted_upper",
-            marks=[pytest.mark.xfail(reason="table names should be lowercase")],
-        ),
+        param("quoted_upper"),
         param(
             "unquoted_mixed",
             marks=[pytest.mark.xfail(reason="table names should be lowercase")],
