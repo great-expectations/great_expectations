@@ -44,9 +44,9 @@ def test_dataframe_asset(
     assert errors_dict["loc"][0] == "dataframe"
 
     datasource_name = "my_spark_datasource"
-    datasource = empty_data_context.sources.add_spark(name=datasource_name,
-                                                      persist=False,
-                                                      spark_config={})
+    datasource = empty_data_context.sources.add_spark(
+        name=datasource_name, persist=False, spark_config={}
+    )
 
     pandas_df = test_df_pandas
     spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
@@ -74,8 +74,8 @@ def test_dataframe_asset(
 
     datasource_config = empty_data_context.get_datasource(datasource_name)
     assert datasource_config.spark_config == {}
-    assert datasource_config.force_reuse_spark_context == True
-    assert datasource_config.persist == False
+    assert datasource_config.force_reuse_spark_context is True
+    assert datasource_config.persist is False
 
 
 @pytest.mark.spark
