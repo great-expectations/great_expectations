@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from pprint import pformat as pf
 from typing import Final, Generator, Literal, Protocol
 
@@ -17,15 +18,18 @@ from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
 )
 
-PG_TABLE: Final[str] = "test_table"
+LOGGER: Final = logging.getLogger(__name__)
+
+DEFAULT_TEST_TABLE_NAME: Final[str] = "test_table"
+# trino container ships with default test tables
 TRINO_TABLE: Final[str] = "customer"
 
 TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
     "postgres": {
-        "unquoted_lower": PG_TABLE.lower(),
-        "quoted_lower": f"'{PG_TABLE.lower()}'",
-        "unquoted_upper": PG_TABLE.upper(),
-        "quoted_upper": f"'{PG_TABLE.upper()}'",
+        "unquoted_lower": DEFAULT_TEST_TABLE_NAME.lower(),
+        "quoted_lower": f"'{DEFAULT_TEST_TABLE_NAME.lower()}'",
+        "unquoted_upper": DEFAULT_TEST_TABLE_NAME.upper(),
+        "quoted_upper": f"'{DEFAULT_TEST_TABLE_NAME.upper()}'",
     },
     "trino": {
         "unquoted_lower": TRINO_TABLE.lower(),
@@ -48,8 +52,7 @@ class TableFactory(Protocol):
         self,
         engine: engine.Engine,
         table_name: str,
-        schema: str = "public",
-        drop_if_exists: bool = False,
+        schema: str | None = None,
     ) -> None:
         ...
 
@@ -57,22 +60,23 @@ class TableFactory(Protocol):
 @pytest.fixture(scope="class")
 def table_factory_cls_scope() -> Generator[TableFactory, None, None]:
     """Given a an SQLALchemy engine, table_name and schema, create the table."""
-    created_tables: list[dict[Literal["table_name", "schema"], str]] = []
+    created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
 
     def _table_factory(
         engine: engine.Engine,
-        table_name: str,
-        schema: str = "public",
-        drop_if_exists: bool = False,
+        table_name: str = DEFAULT_TEST_TABLE_NAME,
+        schema: str | None = None,
     ) -> None:
+        qualified_table_name = f"{schema}.{table_name}" if schema else table_name
+        LOGGER.info(
+            f"Creating `{engine.dialect.name}` table for `{qualified_table_name}` if it does not exist"
+        )
         with engine.connect() as conn:
-            if drop_if_exists:
-                conn.execute(f"DROP TABLE IF EXISTS {schema}.{table_name}")
-                conn.execute(f"DROP SCHEMA IF EXISTS {schema} CASCADE")
-            conn.execute(f"CREATE SCHEMA {schema}")
+            if schema:
+                conn.execute(f"CREATE SCHEMA {schema}")
             conn.execute(
                 TextClause(
-                    f"CREATE TABLE {schema}.{table_name} (id INTEGER, name VARCHAR(255))"
+                    f"CREATE TABLE IF NOT EXISTS {qualified_table_name} (id INTEGER, name VARCHAR(255))"
                 )
             )
         created_tables.append(dict(table_name=table_name, schema=schema))
@@ -82,11 +86,15 @@ def table_factory_cls_scope() -> Generator[TableFactory, None, None]:
 
 
 @pytest.fixture
-def trino_ds(context: EphemeralDataContext) -> SQLDatasource:
+def trino_ds(
+    context: EphemeralDataContext,
+    table_factory_cls_scope: TableFactory,
+) -> SQLDatasource:
     ds = context.sources.add_sql(
         "trino",
         connection_string="trino://user:@localhost:8088/tpch/sf1",
     )
+    # trino container ships with default test tables so there is no need to create them
     return ds
 
 
@@ -100,8 +108,7 @@ def postgres_ds(
         connection_string="postgresql+psycopg2://postgres:postgres@localhost:5432/test_ci",
     )
 
-    table_factory_cls_scope(ds.get_engine(), PG_TABLE)
-
+    table_factory_cls_scope(engine=ds.get_engine(), table_name=DEFAULT_TEST_TABLE_NAME)
     return ds
 
 
