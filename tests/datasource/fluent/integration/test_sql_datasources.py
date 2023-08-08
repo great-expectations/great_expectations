@@ -99,6 +99,7 @@ def table_factory() -> Generator[TableFactory, None, None]:
 
     yield _table_factory
 
+    # teardown
     print(f"dropping up tables\n{pf(all_created_tables)}")
     for dialect, tables in all_created_tables.items():
         engine = engines[dialect]
