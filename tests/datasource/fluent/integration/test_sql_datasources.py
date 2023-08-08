@@ -28,6 +28,8 @@ PG_TABLE: Final[str] = "test_table"
 # trino container ships with default test tables
 TRINO_TABLE: Final[str] = "customer"
 
+DO_NOT_CREATE_TABLES: set[str] = {"trino"}
+
 TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
     "postgres": {
         "unquoted_lower": PG_TABLE.lower(),
@@ -88,6 +90,11 @@ def table_factory(
         table_names: set[str],
         schema: str | None = None,
     ) -> None:
+        if engine.dialect.name in DO_NOT_CREATE_TABLES:
+            LOGGER.info(
+                f"Skipping table creation for {table_names} for {engine.dialect.name}"
+            )
+            return
         LOGGER.info(
             f"Creating `{engine.dialect.name}` table for {table_names} if it does not exist"
         )
@@ -131,23 +138,11 @@ def trino_ds(context: EphemeralDataContext) -> SQLDatasource:
 
 
 @pytest.fixture
-def postgres_ds(
-    context: EphemeralDataContext, table_factory: TableFactory
-) -> PostgresDatasource:
+def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
     ds = context.sources.add_postgres(
         "postgres",
         connection_string="postgresql+psycopg2://postgres:postgres@localhost:5432/test_ci",
     )
-
-    table_factory(
-        engine=ds.get_engine(),
-        table_names={
-            v
-            for (k, v) in TABLE_NAME_MAPPING["postgres"].items()
-            if k.startswith("unquoted")
-        },
-    )
-    # assert False
     return ds
 
 
@@ -181,13 +176,20 @@ class TestTableIdentifiers:
         )
 
     @pytest.mark.postgresql
-    def test_postgres(self, postgres_ds: PostgresDatasource, asset_name: str):
+    def test_postgres(
+        self,
+        postgres_ds: PostgresDatasource,
+        asset_name: str,
+        table_factory: TableFactory,
+    ):
+        table_name: str = TABLE_NAME_MAPPING["postgres"][asset_name]
+        # create table
+        table_factory(engine=postgres_ds.get_engine(), table_names={table_name})
+
         table_names: list[str] = inspect(postgres_ds.get_engine()).get_table_names()
         print(f"postgres tables:\n{pf(table_names)}))")
 
-        postgres_ds.add_table_asset(
-            asset_name, table_name=TABLE_NAME_MAPPING["postgres"][asset_name]
-        )
+        postgres_ds.add_table_asset(asset_name, table_name=table_name)
 
     @pytest.mark.parametrize(
         "datasource_type",
@@ -200,10 +202,16 @@ class TestTableIdentifiers:
         self,
         request: pytest.FixtureRequest,
         context: EphemeralDataContext,
+        table_factory: TableFactory,
         asset_name: str,
         datasource_type: str,
     ):
         datasource: SQLDatasource = request.getfixturevalue(f"{datasource_type}_ds")
+
+        table_name: str = TABLE_NAME_MAPPING[datasource_type][asset_name]
+        # create table
+        table_factory(engine=datasource.get_engine(), table_names={table_name})
+
         asset = datasource.add_table_asset(
             asset_name, table_name=TABLE_NAME_MAPPING[datasource_type][asset_name]
         )
