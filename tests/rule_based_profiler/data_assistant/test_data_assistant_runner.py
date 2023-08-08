@@ -105,3 +105,36 @@ def test_onboarding_data_assistant_runner_top_level_kwargs_explicit_none(
     }
 
     assert "user_id" not in categorical_columns_used
+
+
+@pytest.mark.big
+def test_onboarding_data_assistant_runner_using_validator(
+    data_context_with_datasource_pandas_engine,
+):
+    context: DataContext = data_context_with_datasource_pandas_engine
+
+    df = pd.DataFrame(
+        {
+            "user_id": [1, 2, 3, 4, 5, 6],
+            "total_spend": [131.24, 42.21, 516.55, 0.00, 12351.92, 0.52],
+        }
+    )
+
+    validator = context.sources.pandas_default.read_dataframe(
+        dataframe=df, asset_name="users_df"
+    )
+
+    # Ensure that user_id is still excluded from categorical_columns_rule when we pass an explicit None to
+    # exclude_column_name_suffixes, because CategoricalColumnBuilder defaults will continue to be respected.
+    data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+        validator=validator,
+        exclude_column_name_suffixes=None,
+    )
+    categorical_columns_used = {
+        domain["domain_kwargs"]["column"]
+        for domain in data_assistant_result.metrics_by_domain.keys()
+        if domain["domain_type"] == MetricDomainTypes.COLUMN
+        and domain["rule_name"] == "categorical_columns_rule"
+    }
+
+    assert "user_id" not in categorical_columns_used

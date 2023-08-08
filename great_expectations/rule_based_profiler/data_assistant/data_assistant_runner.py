@@ -108,6 +108,7 @@ class DataAssistantRunner:
 
         def run(
             batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+            validator: Optional[Validator] = None,
             estimation: Optional[Union[str, NumericRangeEstimatorType]] = None,
             **kwargs,
         ) -> DataAssistantResult:
@@ -126,11 +127,10 @@ class DataAssistantRunner:
             Returns:
                 DataAssistantResult: The result object for the DataAssistant
             """
-            if batch_request is None:
+            if batch_request is None and validator is None:
                 data_assistant_name: str = self._data_assistant_cls.data_assistant_type
                 raise gx_exceptions.DataAssistantExecutionError(
-                    message=f"""Utilizing "{data_assistant_name}.run()" requires valid "batch_request" to be specified \
-(empty or missing "batch_request" detected)."""
+                    message=f'Utilizing "{data_assistant_name}.run()" requires either a valid "batch_request" or "validator" to be specified'
                 )
 
             if estimation is None:
@@ -142,7 +142,8 @@ class DataAssistantRunner:
                 estimation = NumericRangeEstimatorType(estimation)
 
             data_assistant: DataAssistant = self._build_data_assistant(
-                batch_request=batch_request
+                batch_request=batch_request,
+                validator=validator,
             )
             directives: dict = deep_filter_properties_iterable(
                 properties=kwargs,
@@ -185,7 +186,7 @@ class DataAssistantRunner:
             ] = build_domain_type_directives(**domain_type_directives_kwargs)
             """
             Run "data_assistant" with thus constructed "variables"-level and "Domain"-level custom user-specified
-            overwrite arguments/directives and return comput3ed "data_assistant_result" to caller.
+            overwrite arguments/directives and return computed "data_assistant_result" to caller.
             """
             data_assistant_result: DataAssistantResult = data_assistant.run(
                 variables_directives_list=variables_directives_list,
@@ -200,13 +201,20 @@ class DataAssistantRunner:
             Parameter(
                 name="batch_request",
                 kind=Parameter.POSITIONAL_OR_KEYWORD,
-                annotation=Union[BatchRequestBase, dict],
+                annotation=Optional[Union[BatchRequestBase, dict]],
+                default=None,
             ),
             Parameter(
                 name="estimation",
                 kind=Parameter.POSITIONAL_OR_KEYWORD,
                 default="exact",
                 annotation=Optional[Union[str, NumericRangeEstimatorType]],
+            ),
+            Parameter(
+                name="validator",
+                kind=Parameter.POSITIONAL_OR_KEYWORD,
+                annotation=Optional[Validator],
+                default=None,
             ),
         ]
 
@@ -234,6 +242,7 @@ class DataAssistantRunner:
     def _build_data_assistant(
         self,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        validator: Optional[Validator] = None,
     ) -> DataAssistant:
         """
         This method builds specified "DataAssistant" object and returns its effective "BaseRuleBasedProfiler" object.
@@ -251,7 +260,7 @@ class DataAssistantRunner:
         if batch_request is None:
             data_assistant = self._data_assistant_cls(
                 name=data_assistant_name,
-                validator=None,
+                validator=validator,
             )
         else:
             validator: Validator = get_validator_with_expectation_suite(
