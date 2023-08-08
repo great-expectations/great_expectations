@@ -234,6 +234,7 @@ class TestTableIdentifiers:
                 },
             )
         )
+        suite = context.add_or_update_expectation_suite(expectation_suite=suite)
 
         checkpoint_config = {
             "name": f"{datasource.name}-{asset.name}",
