@@ -61,8 +61,8 @@ class TableFactory(Protocol):
         ...
 
 
-@pytest.fixture(scope="class")
-def table_factory_cls_scope() -> Generator[TableFactory, None, None]:
+@pytest.fixture(scope="function")
+def table_factory() -> Generator[TableFactory, None, None]:
     """Given a an SQLALchemy engine, table_name and schema, create the table."""
     all_created_tables: dict[
         str, list[dict[Literal["table_name", "schema"], str | None]]
@@ -97,7 +97,7 @@ def table_factory_cls_scope() -> Generator[TableFactory, None, None]:
 @pytest.fixture
 def trino_ds(
     context: EphemeralDataContext,
-    table_factory_cls_scope: TableFactory,
+    table_factory: TableFactory,
 ) -> SQLDatasource:
     ds = context.sources.add_sql(
         "trino",
@@ -110,14 +110,14 @@ def trino_ds(
 @pytest.fixture
 def postgres_ds(
     context: EphemeralDataContext,
-    table_factory_cls_scope: TableFactory,
+    table_factory: TableFactory,
 ) -> PostgresDatasource:
     ds = context.sources.add_postgres(
         "postgres",
         connection_string="postgresql+psycopg2://postgres:postgres@localhost:5432/test_ci",
     )
 
-    table_factory_cls_scope(
+    table_factory(
         engine=ds.get_engine(),
         table_names={
             v
