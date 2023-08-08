@@ -468,8 +468,8 @@ class ExpectationSuite(SerializableDictDot):
         match_type: str = "domain",
         ge_cloud_id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
-        """
-        Find Expectations matching the given ExpectationConfiguration on the given match_type.
+        """Find Expectations matching the given ExpectationConfiguration on the given match_type.
+
         If a ge_cloud_id is provided, match_type is ignored and only Expectations with matching
         ge_cloud_id are returned.
 

@@ -205,12 +205,13 @@ class CheckpointResult(SerializableDictDot):
                 value will cause this method to silently fail, and return None.
 
         Returns:
-            A list of ExpectationSuiteValidationResult, when group_by=None
-            A dict of ValidationResultIdentifier keys and ExpectationValidationResults
-                values, when group_by="validation_result_identifier"
-            A dict of str keys and ExpectationValidationResults values, when
-                group_by="expectation_suite_name" or group_by="data_asset_name"
-            None, when group_by is something other than the options described above
+            The following are the possible return values for this method:
+                A list of ExpectationSuiteValidationResult, when group_by=None
+                A dict of ValidationResultIdentifier keys and ExpectationValidationResults
+                    values, when group_by="validation_result_identifier"
+                A dict of str keys and ExpectationValidationResults values, when
+                    group_by="expectation_suite_name" or group_by="data_asset_name"
+                None, when group_by is something other than the options described above
         """
         if group_by is None:
             if self._validation_results is None:

@@ -51,20 +51,20 @@ class UserConfigurableProfiler:
     Build a suite without a config as follows:
 
     ```python
-    profiler = UserConfigurableProfiler(dataset)
-    suite = profiler.build_suite()
+        profiler = UserConfigurableProfiler(dataset)
+        suite = profiler.build_suite()
     ```
 
     Use a Profiler to build a suite with a semantic types dict, as follows:
 
     ```python
-    semantic_types_dict = {
+        semantic_types_dict = {
                 "numeric": ["c_acctbal"],
                 "string": ["c_address","c_custkey"],
                 "value_set": ["c_nationkey","c_mktsegment", 'c_custkey', 'c_name', 'c_address', 'c_phone']
             }
-    profiler = UserConfigurableProfiler(dataset, semantic_types_dict=semantic_types_dict)
-    suite = profiler.build_suite()
+        profiler = UserConfigurableProfiler(dataset, semantic_types_dict=semantic_types_dict)
+        suite = profiler.build_suite()
     ```
 
     Args:
