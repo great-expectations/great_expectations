@@ -42,8 +42,7 @@ if TYPE_CHECKING:
 class UserConfigurableProfiler:
     """Build an Expectation Suite from a dataset.
 
-    The Expectations built are
-    strict - they can be used to determine whether two tables are the same.
+    The Expectations built are strict - they can be used to determine whether two tables are the same.
 
     Instantiate with or without a number of configuration arguments.
     Once instantiated, if these arguments change, a new Profiler will be needed.
@@ -69,14 +68,13 @@ class UserConfigurableProfiler:
 
     Args:
         profile_dataset: A Great Expectations Dataset or Validator object.
-        excluded_expectations: A  list of Expectations to omit from the suite.
+        excluded_expectations: A list of Expectations to omit from the suite.
         ignored_columns: A list of columns for which you would like to NOT create Expectations.
-        not_null_only: By default, each column is evaluated for nullity. If the
-            column values contain fewer than 50% null values, then the Profiler will add
-            `expect_column_values_to_not_be_null`; if greater than 50% it will add
-            `expect_column_values_to_be_null`. If `not_null_only` is set to `True`, the Profiler will add a
-            `not_null` Expectation irrespective of the percent nullity (and therefore will not add
-            `expect_column_values_to_be_null`).
+        not_null_only: By default, each column is evaluated for nullity. If the column values contain fewer
+            than 50% null values, then the Profiler will add `expect_column_values_to_not_be_null`;
+            if greater than 50% it will add `expect_column_values_to_be_null`. If `not_null_only` is set to
+            `True`, the Profiler will add a `not_null` Expectation irrespective of the percent nullity
+            (and therefore will not add `expect_column_values_to_be_null`).
         primary_or_compound_key: A list containing one or more columns which are a dataset's primary or
             compound key. This will create an `expect_column_values_to_be_unique` or
             `expect_compound_columns_to_be_unique` Expectation. This will occur even if one or more of the
@@ -98,10 +96,8 @@ class UserConfigurableProfiler:
             column. If set to `"few"`, it will add a `value_set` Expectation for columns whose cardinality is
             one of `"one"`, `"two"`, `"very_few"`, or `"few"`. For the purposes of
             comparing whether two tables are identical, it might make the most sense to set this to `"unique"`.
-
     Raises:
         ValueError: If an invalid `primary_or_compound_key` is provided.
-
     """
 
     def __init__(  # noqa: PLR0913, PLR0912, PLR0915
