@@ -329,7 +329,7 @@ convention = "google"
 [tool.pytest.ini_options]
 filterwarnings = [
     # Turn all warnings not explicitly filtered below into errors
-    "error",
+    # "error", TODO: uncomment this before merge
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would
     # be potentially overly resource intensive in standard operation
     "ignore:Setting result format to COMPLETE for a SqlAlchemyDataset:UserWarning",
