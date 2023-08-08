@@ -30,11 +30,11 @@ TRINO_TABLE: Final[str] = "customer"
 
 TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
     "postgres": {
-        "unquoted_lower": f"ul_{PG_TABLE.lower()}",
-        "quoted_lower": f"'ql_{PG_TABLE.lower()}'",
-        "unquoted_upper": f"UU_{PG_TABLE.upper()}",
-        "quoted_upper": f"'QU_{PG_TABLE.upper()}'",
-        "unquoted_mixed": f"um_{PG_TABLE.title()}",
+        "unquoted_lower": PG_TABLE.lower(),
+        "quoted_lower": f"'{PG_TABLE.lower()}'",
+        "unquoted_upper": PG_TABLE.upper(),
+        "quoted_upper": f"'{PG_TABLE.upper()}'",
+        "unquoted_mixed": PG_TABLE.title(),
     },
     "trino": {
         "unquoted_lower": TRINO_TABLE.lower(),
