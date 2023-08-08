@@ -8,7 +8,11 @@ import pytest
 from pytest import param
 
 from great_expectations import get_context
-from great_expectations.compatibility.sqlalchemy import TextClause, engine, inspect
+from great_expectations.compatibility.sqlalchemy import (
+    TextClause,
+    engine,
+    inspect,
+)
 from great_expectations.data_context import EphemeralDataContext
 from great_expectations.datasource.fluent import (
     PostgresDatasource,
@@ -18,7 +22,7 @@ from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
 )
 
-LOGGER: Final = logging.getLogger(__name__)
+LOGGER: Final = logging.getLogger("tests")
 
 PG_TABLE: Final[str] = "test_table"
 # trino container ships with default test tables
@@ -51,7 +55,7 @@ class TableFactory(Protocol):
     def __call__(
         self,
         engine: engine.Engine,
-        table_name: str,
+        table_names: set[str],
         schema: str | None = None,
     ) -> None:
         ...
@@ -60,29 +64,34 @@ class TableFactory(Protocol):
 @pytest.fixture(scope="class")
 def table_factory_cls_scope() -> Generator[TableFactory, None, None]:
     """Given a an SQLALchemy engine, table_name and schema, create the table."""
-    created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
+    all_created_tables: dict[
+        str, list[dict[Literal["table_name", "schema"], str | None]]
+    ] = {}
 
     def _table_factory(
         engine: engine.Engine,
-        table_name: str,
+        table_names: set[str],
         schema: str | None = None,
     ) -> None:
-        qualified_table_name = f"{schema}.{table_name}" if schema else table_name
         LOGGER.info(
-            f"Creating `{engine.dialect.name}` table for `{qualified_table_name}` if it does not exist"
+            f"Creating `{engine.dialect.name}` table for {table_names} if it does not exist"
         )
+        created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
         with engine.connect() as conn:
             if schema:
                 conn.execute(f"CREATE SCHEMA {schema}")
-            conn.execute(
-                TextClause(
+            for name in table_names:
+                qualified_table_name = f"{schema}.{name}" if schema else name
+                stmt = TextClause(
                     f"CREATE TABLE IF NOT EXISTS {qualified_table_name} (id INTEGER, name VARCHAR(255))"
                 )
-            )
-        created_tables.append(dict(table_name=table_name, schema=schema))
+                LOGGER.info(stmt)
+                conn.execute(stmt)
+                created_tables.append(dict(table_name=name, schema=schema))
+        all_created_tables[engine.dialect.name] = created_tables
 
     yield _table_factory
-    print(f"created_tables may not have been cleaned up\n{pf(created_tables)}")
+    print(f"created_tables may not have been cleaned up\n{pf(all_created_tables)}")
 
 
 @pytest.fixture
@@ -108,7 +117,15 @@ def postgres_ds(
         connection_string="postgresql+psycopg2://postgres:postgres@localhost:5432/test_ci",
     )
 
-    table_factory_cls_scope(engine=ds.get_engine(), table_name=PG_TABLE)
+    table_factory_cls_scope(
+        engine=ds.get_engine(),
+        table_names={
+            v
+            for (k, v) in TABLE_NAME_MAPPING["postgres"].items()
+            if k.startswith("unquoted")
+        },
+    )
+    # assert False
     return ds
 
 
