@@ -64,7 +64,7 @@ def table_factory_cls_scope() -> Generator[TableFactory, None, None]:
 
     def _table_factory(
         engine: engine.Engine,
-        table_name: str = DEFAULT_TEST_TABLE_NAME,
+        table_name: str,
         schema: str | None = None,
     ) -> None:
         qualified_table_name = f"{schema}.{table_name}" if schema else table_name
