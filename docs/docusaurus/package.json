@@ -16,6 +16,7 @@
     "snippet-check": "node scripts/remark-named-snippets/snippet.js"
   },
   "dependencies": {
+    "@algolia/client-search": ">= 4.9.1 < 6",
     "@cmfcmf/docusaurus-search-local": "^0.11.0",
     "@docusaurus-terminology/parser": "^1.3.0",
     "@docusaurus-terminology/term": "^1.0.0",
@@ -25,18 +26,21 @@
     "@docusaurus/preset-classic": "^2.0.0-beta.21",
     "@docusaurus/theme-search-algolia": "^2.0.0-beta.21",
     "@mdx-js/react": "^1.6.21",
-    "@svgr/webpack": "^5.5.0",
     "clsx": "^1.1.1",
     "docusaurus-gtm-plugin": "^0.0.2",
     "docusaurus-plugin-sass": "^0.2.2",
     "plugin-image-zoom": "ataft/plugin-image-zoom",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4",
+    "react-loadable": "*",
+    "react-router-dom": "^5.1.2",
     "react-select": "^4.3.0",
     "remark-code-import": "^0.3.0",
     "sass": "^1.56.1",
     "search-insights": "^2.2.3",
-    "standard": "^17.1.0"
+    "standard": "^17.1.0",
+    "typescript": ">= 2.7",
+    "webpack": "^4.36.0 || ^5.0.0"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "2.0.0-beta.21"
