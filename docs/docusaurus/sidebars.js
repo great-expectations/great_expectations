@@ -43,7 +43,7 @@ module.exports = {
       link: { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_lp' },
       items: [
         'guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data',
-        'guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas',
+        'guides/connecting_to_your_data/fluent/in_memory/connect_in_memory_data',
         'guides/connecting_to_your_data/fluent/database/connect_sql_source_data',
         {
           type: 'category',
