@@ -38,7 +38,9 @@ def test_spark_config_datasource(spark_session_v012):
         "spark.executor.memory": "768m",
         # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
     }
-    source: SparkDFDatasource = SparkDFDatasource(spark_config=spark_config)
+    source: SparkDFDatasource = SparkDFDatasource(
+        spark_config=spark_config, force_reuse_spark_context=False
+    )
     spark_session: pyspark.SparkSession = source.spark
     # noinspection PyProtectedMember
     sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
@@ -60,7 +62,9 @@ def test_spark_config_execution_engine(spark_session):
         "spark.executor.memory": "512m",
         # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
     }
-    execution_engine = SparkDFExecutionEngine(spark_config=new_spark_config)
+    execution_engine = SparkDFExecutionEngine(
+        spark_config=new_spark_config, test_spark_config_execution_engine=False
+    )
     new_spark_session: pyspark.SparkSession = execution_engine.spark
 
     # noinspection PyProtectedMember
