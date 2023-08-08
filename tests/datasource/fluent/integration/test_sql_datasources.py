@@ -28,6 +28,8 @@ PG_TABLE: Final[str] = "test_table"
 # trino container ships with default test tables
 TRINO_TABLE: Final[str] = "customer"
 
+# NOTE: can we create tables in trino?
+# some of the trino tests probably don't make sense if we can't create tables
 DO_NOT_CREATE_TABLES: set[str] = {"trino"}
 
 TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
