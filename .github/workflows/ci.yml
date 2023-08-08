@@ -182,6 +182,7 @@ jobs:
       - name: Run the tests
         run: |
           invoke docs-snippet-tests 'docs' --up-services --verbose
+
   unit-tests:
     strategy:
       matrix:

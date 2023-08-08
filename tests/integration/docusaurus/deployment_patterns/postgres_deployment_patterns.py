@@ -21,7 +21,6 @@ load_data_into_test_database(
     connection_string=PG_CONNECTION_STRING,
 )
 
-
 # <snippet name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add_datasource">
 pg_datasource = context.sources.add_sql(
     name="pg_datasource", connection_string=PG_CONNECTION_STRING
