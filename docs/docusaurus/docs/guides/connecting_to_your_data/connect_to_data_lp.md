@@ -12,7 +12,7 @@ import LinkCard from '/docs/components/LinkCard';
 
 <LinkCardGrid>
   <LinkCard topIcon label="Connect to filesystem source data" description="Connect to filesystem source data" href="/docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data" icon="/img/connect_icon.svg" />
-  <LinkCard topIcon label="Connect to in-memory source data using Pandas" description="Connect to in-memory source data using Pandas" href="/docs/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas" icon="/img/connect_icon.svg" />
+  <LinkCard topIcon label="Connect to in-memory source data" description="Connect to an in-memory pandas or Spark DataFrame" href="/docs/guides/connecting_to_your_data/fluent/in_memory/connect_in_memory_data" icon="/img/connect_icon.svg" />
   <LinkCard topIcon label="Connect to SQL database source data" description="Connect to source data stored on SQL databases" href="/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data" icon="/img/connect_icon.svg" />
   <LinkCard topIcon label="Manage Data Assets" description="Request data from a Data Source and organize Batches in file-based and SQL Data Assets" href="/docs/guides/connecting_to_your_data/manage_data_assets_lp" icon="/img/manage_icon.svg" />
 </LinkCardGrid>
