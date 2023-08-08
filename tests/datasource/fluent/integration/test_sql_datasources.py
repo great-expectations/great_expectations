@@ -20,16 +20,16 @@ from great_expectations.expectations.expectation import (
 
 LOGGER: Final = logging.getLogger(__name__)
 
-DEFAULT_TEST_TABLE_NAME: Final[str] = "test_table"
+PG_TABLE: Final[str] = "test_table"
 # trino container ships with default test tables
 TRINO_TABLE: Final[str] = "customer"
 
 TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
     "postgres": {
-        "unquoted_lower": DEFAULT_TEST_TABLE_NAME.lower(),
-        "quoted_lower": f"'{DEFAULT_TEST_TABLE_NAME.lower()}'",
-        "unquoted_upper": DEFAULT_TEST_TABLE_NAME.upper(),
-        "quoted_upper": f"'{DEFAULT_TEST_TABLE_NAME.upper()}'",
+        "unquoted_lower": PG_TABLE.lower(),
+        "quoted_lower": f"'{PG_TABLE.lower()}'",
+        "unquoted_upper": PG_TABLE.upper(),
+        "quoted_upper": f"'{PG_TABLE.upper()}'",
     },
     "trino": {
         "unquoted_lower": TRINO_TABLE.lower(),
@@ -108,7 +108,7 @@ def postgres_ds(
         connection_string="postgresql+psycopg2://postgres:postgres@localhost:5432/test_ci",
     )
 
-    table_factory_cls_scope(engine=ds.get_engine(), table_name=DEFAULT_TEST_TABLE_NAME)
+    table_factory_cls_scope(engine=ds.get_engine(), table_name=PG_TABLE)
     return ds
 
 
