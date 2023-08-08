@@ -1,6 +1,6 @@
 from __future__ import annotations
-import datetime
 
+import datetime
 import pathlib
 from typing import TYPE_CHECKING
 from unittest import mock
@@ -397,7 +397,7 @@ def test_splitter_build_batch_request_allows_selecting_by_date_and_datetime_as_s
 
     asset = datasource.add_query_asset(
         "query_asset",
-        f"SELECT date(pickup_datetime) as pickup_date, passenger_count FROM yellow_tripdata_sample_2019_02",
+        "SELECT date(pickup_datetime) as pickup_date, passenger_count FROM yellow_tripdata_sample_2019_02",
     )
     asset.add_splitter_column_value(column_name="pickup_date")
     asset.add_sorters(["pickup_date"])
