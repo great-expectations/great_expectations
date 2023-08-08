@@ -19,7 +19,7 @@ class DictionarySorter(Sorter):
         name: str,
         orderby: str = "asc",
         order_keys_by: str = "asc",
-        key_reference_list: list[Any] = None,
+        key_reference_list: list[Any] | None = None,
     ) -> None:
         """Defines sorting behavior for batch definitions based on batch identifiers in nested dictionary form.
 
@@ -82,4 +82,6 @@ class DictionarySorter(Sorter):
 
     @property
     def key_reference_list(self) -> list[Any]:
-        return self._key_reference_list  # type: ignore[return-value]
+        if self._key_reference_list is None:
+            return []
+        return self._key_reference_list

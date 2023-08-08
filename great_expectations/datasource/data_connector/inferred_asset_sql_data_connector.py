@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
@@ -8,9 +8,13 @@ from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
     ConfiguredAssetSqlDataConnector,
 )
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import deep_filter_properties_iterable
+
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import (
+        SqlAlchemyExecutionEngine,
+    )
 
 
 @public_api
@@ -50,7 +54,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         self,
         name: str,
         datasource_name: str,
-        execution_engine: Optional[ExecutionEngine] = None,
+        execution_engine: SqlAlchemyExecutionEngine,
         data_asset_name_prefix: str = "",
         data_asset_name_suffix: str = "",
         include_schema_name: bool = False,
