@@ -305,7 +305,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         create_temp_table: bool = True,
         concurrency: Optional[ConcurrencyConfig] = None,
         # kwargs will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
-        kwargs: Optional[dict] = None,
+        **kwargs,
     ) -> None:
         super().__init__(name=name, batch_data_dict=batch_data_dict)
         self._name = name
@@ -315,8 +315,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._url = url
         self._create_temp_table = create_temp_table
         os.environ["SF_PARTNER"] = "great_expectations_oss"
-        if kwargs is None:
-            kwargs = {}
 
         # sqlite/mssql temp tables only persist within a connection, so we need to keep the connection alive by
         # keeping a reference to it.

@@ -995,6 +995,25 @@ class SQLDatasource(Datasource):
         kwargs = model_dict.pop("kwargs", {})
         return sa.create_engine(connection_string, **kwargs)
 
+    def get_execution_engine(self) -> SqlAlchemyExecutionEngine:
+        # Overrides get_execution_engine in Datasource
+        # because we need to pass the kwargs as keyvalue args to the execution engine
+        # when then passes them to the engine.
+        current_execution_engine_kwargs = self.dict(
+            exclude=self._get_exec_engine_excludes(),
+            config_provider=self._config_provider,
+        )
+        if (
+            current_execution_engine_kwargs != self._cached_execution_engine_kwargs
+            or not self._execution_engine
+        ):
+            self._cached_execution_engine_kwargs = current_execution_engine_kwargs
+            engine_kwargs = current_execution_engine_kwargs.pop("kwargs", {})
+            self._execution_engine = self._execution_engine_type()(
+                **current_execution_engine_kwargs, **engine_kwargs
+            )
+        return self._execution_engine
+
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the SQLDatasource.
 
