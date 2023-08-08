@@ -167,7 +167,7 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
 class TestTableIdentifiers:
     @pytest.mark.trino
     def test_trino(self, trino_ds: SQLDatasource, asset_name: str):
-        table_name: str = TABLE_NAME_MAPPING["trino"].get(asset_name)
+        table_name = TABLE_NAME_MAPPING["trino"].get(asset_name)
         if not table_name:
             pytest.skip(f"no '{asset_name}' table_name for trino")
 
