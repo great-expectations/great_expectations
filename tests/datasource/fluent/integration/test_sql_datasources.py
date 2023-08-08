@@ -65,10 +65,14 @@ class TableFactory(Protocol):
 
 @pytest.fixture(scope="function")
 def table_factory() -> Generator[TableFactory, None, None]:
-    """Given a an SQLALchemy engine, table_name and schema, create the table."""
+    """
+    Given a an SQLALchemy engine, table_name and schema,
+    create the table if it does not exist and drop it after the test.
+    """
     all_created_tables: dict[
         str, list[dict[Literal["table_name", "schema"], str | None]]
     ] = {}
+    engines: dict[str, engine.Engine] = {}
 
     def _table_factory(
         engine: engine.Engine,
@@ -91,9 +95,21 @@ def table_factory() -> Generator[TableFactory, None, None]:
                 conn.execute(stmt)
                 created_tables.append(dict(table_name=name, schema=schema))
         all_created_tables[engine.dialect.name] = created_tables
+        engines[engine.dialect.name] = engine
 
     yield _table_factory
-    print(f"created_tables may not have been cleaned up\n{pf(all_created_tables)}")
+
+    print(f"dropping up tables\n{pf(all_created_tables)}")
+    for dialect, tables in all_created_tables.items():
+        engine = engines[dialect]
+        with engine.connect() as conn:
+            for table in tables:
+                name = table["table_name"]
+                schema = table["schema"]
+                qualified_table_name = f"{schema}.{name}" if schema else name
+                stmt = TextClause(f"DROP TABLE IF EXISTS {qualified_table_name}")
+                LOGGER.info(stmt)
+                conn.execute(stmt)
 
 
 @pytest.fixture
