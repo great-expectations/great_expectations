@@ -3,6 +3,10 @@ import great_expectations as gx
 
 from great_expectations.checkpoint import Checkpoint
 
+from great_expectations.datasource.types import SqlAlchemyDatasourceQueryBatchRequest
+
+batch_request = SqlAlchemyDatasourceQueryBatchRequest()
+
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py set up context">
