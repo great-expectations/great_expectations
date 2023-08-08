@@ -1,5 +1,6 @@
 # <snippet name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py imports">
 import great_expectations as gx
+import great_expectations.datasource.types as types
 
 from great_expectations.checkpoint import Checkpoint
 
@@ -20,6 +21,8 @@ load_data_into_test_database(
     csv_path="./data/yellow_tripdata_sample_2019-01.csv",
     connection_string=PG_CONNECTION_STRING,
 )
+
+types = types
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add_datasource">
 pg_datasource = context.sources.add_sql(

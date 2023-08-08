@@ -75,7 +75,7 @@ jobs:
         run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -s docs --skip-external
       - name: docs_build
         env:
-          NODE_OPTIONS: --max_old_space_size=20480
+          NODE_OPTIONS: --max_old_space_size=4096
         if: steps.changed-files.outputs.docs == 'true'
         run: cd docs/docusaurus && yarn install && bash ../build_docs
 
