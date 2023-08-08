@@ -30,16 +30,18 @@ TRINO_TABLE: Final[str] = "customer"
 
 TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
     "postgres": {
-        "unquoted_lower": PG_TABLE.lower(),
-        "quoted_lower": f"'{PG_TABLE.lower()}'",
-        "unquoted_upper": PG_TABLE.upper(),
-        "quoted_upper": f"'{PG_TABLE.upper()}'",
+        "unquoted_lower": f"ul_{PG_TABLE.lower()}",
+        "quoted_lower": f"'ql_{PG_TABLE.lower()}'",
+        "unquoted_upper": f"UU_{PG_TABLE.upper()}",
+        "quoted_upper": f"'QU_{PG_TABLE.upper()}'",
+        "unquoted_mixed": f"um_{PG_TABLE.title()}",
     },
     "trino": {
         "unquoted_lower": TRINO_TABLE.lower(),
         "quoted_lower": f"'{TRINO_TABLE.lower()}'",
         "unquoted_upper": TRINO_TABLE.upper(),
         "quoted_upper": f"'{TRINO_TABLE.upper()}'",
+        "unquoted_mixed": TRINO_TABLE.title(),
     },
 }
 
@@ -140,6 +142,10 @@ def postgres_ds(
         ),
         param(
             "quoted_upper",
+            marks=[pytest.mark.xfail(reason="table names should be lowercase")],
+        ),
+        param(
+            "unquoted_mixed",
             marks=[pytest.mark.xfail(reason="table names should be lowercase")],
         ),
     ],
