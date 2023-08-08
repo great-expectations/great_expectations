@@ -64,7 +64,16 @@ class TableFactory(Protocol):
 
 
 @pytest.fixture(scope="function")
-def table_factory() -> Generator[TableFactory, None, None]:
+def capture_engine_logs(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFixture:
+    """Capture SQLAlchemy engine logs and display them if the test fails."""
+    caplog.set_level(logging.INFO, logger="sqlalchemy.engine")
+    return caplog
+
+
+@pytest.fixture(scope="function")
+def table_factory(
+    capture_engine_logs: pytest.LogCaptureFixture,
+) -> Generator[TableFactory, None, None]:
     """
     Given a an SQLALchemy engine, table_name and schema,
     create the table if it does not exist and drop it after the test.
@@ -88,11 +97,11 @@ def table_factory() -> Generator[TableFactory, None, None]:
                 conn.execute(f"CREATE SCHEMA {schema}")
             for name in table_names:
                 qualified_table_name = f"{schema}.{name}" if schema else name
-                stmt = TextClause(
-                    f"CREATE TABLE IF NOT EXISTS {qualified_table_name} (id INTEGER, name VARCHAR(255))"
+                conn.execute(
+                    TextClause(
+                        f"CREATE TABLE IF NOT EXISTS {qualified_table_name} (id INTEGER, name VARCHAR(255))"
+                    )
                 )
-                LOGGER.info(stmt)
-                conn.execute(stmt)
                 created_tables.append(dict(table_name=name, schema=schema))
         all_created_tables[engine.dialect.name] = created_tables
         engines[engine.dialect.name] = engine
@@ -108,16 +117,11 @@ def table_factory() -> Generator[TableFactory, None, None]:
                 name = table["table_name"]
                 schema = table["schema"]
                 qualified_table_name = f"{schema}.{name}" if schema else name
-                stmt = TextClause(f"DROP TABLE IF EXISTS {qualified_table_name}")
-                LOGGER.info(stmt)
-                conn.execute(stmt)
+                conn.execute(TextClause(f"DROP TABLE IF EXISTS {qualified_table_name}"))
 
 
 @pytest.fixture
-def trino_ds(
-    context: EphemeralDataContext,
-    table_factory: TableFactory,
-) -> SQLDatasource:
+def trino_ds(context: EphemeralDataContext) -> SQLDatasource:
     ds = context.sources.add_sql(
         "trino",
         connection_string="trino://user:@localhost:8088/tpch/sf1",
@@ -128,8 +132,7 @@ def trino_ds(
 
 @pytest.fixture
 def postgres_ds(
-    context: EphemeralDataContext,
-    table_factory: TableFactory,
+    context: EphemeralDataContext, table_factory: TableFactory
 ) -> PostgresDatasource:
     ds = context.sources.add_postgres(
         "postgres",
