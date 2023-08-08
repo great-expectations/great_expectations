@@ -85,7 +85,7 @@ class UserConfigurableProfiler:
             (see `profiler.base.ProfilerSemanticTypes`) and the values are lists of columns for which you
             would like to create semantic-type-specific Expectations e.g.:
             ```python
-            "semantic_types": { "value_set": ["state","country"], "numeric":["age", "amount_due"]}
+                "semantic_types": { "value_set": ["state","country"], "numeric":["age", "amount_due"]}
             ```
         table_expectations_only: If `True`, this will only create the two table level
             Expectations available to this Profiler (`expect_table_columns_to_match_ordered_list` and
@@ -101,6 +101,7 @@ class UserConfigurableProfiler:
 
     Raises:
         ValueError: If an invalid `primary_or_compound_key` is provided.
+
     """
 
     def __init__(  # noqa: PLR0913, PLR0912, PLR0915

@@ -478,8 +478,8 @@ class ExpectationSuite(SerializableDictDot):
                 find the index of any matching Expectation Configurations on the suite.
             match_type: This determines what kwargs to use when matching. Options are 'domain' to match based
                 on the data evaluated by that expectation, 'success' to match based on all configuration parameters
-                 that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
-                 based on all configuration parameters
+                that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
+                based on all configuration parameters
             ge_cloud_id: Great Expectations Cloud id
 
         Returns: A list of matching ExpectationConfigurations
