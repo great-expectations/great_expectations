@@ -51,7 +51,7 @@ data_asset = datasource.add_dataframe_asset(name=name)
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_spark.py build_batch_request_with_dataframe">
-my_batch_request = data_asset.build_batch_request(dataframe=dataframe)
+my_batch_request = data_asset.build_batch_request(dataframe=df)
 # </snippet>
 
 assert my_batch_request.datasource_name == "my_spark_datasource"
