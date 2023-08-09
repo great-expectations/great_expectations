@@ -14,6 +14,7 @@ from great_expectations.datasource.fluent.spark_datasource import (
     SparkConfig,
 )
 from great_expectations.util import is_candidate_subset_of_target
+from tests.conftest import yaml
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -75,10 +76,12 @@ def test_dataframe_asset(
         for asset in datasource.assets
     )
 
-    datasource_config = empty_data_context.get_datasource(datasource_name)
-    assert datasource_config.spark_config == {}
-    assert datasource_config.force_reuse_spark_context is True
-    assert datasource_config.persist is False
+    datasource_config = yaml.load(empty_data_context.fluent_config.yaml())[
+        "fluent_datasources"
+    ][datasource_name]
+    assert datasource_config["spark_config"] == {}
+    assert datasource_config["force_reuse_spark_context"] is True
+    assert datasource_config["persist"] is False
 
 
 @pytest.mark.spark
