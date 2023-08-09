@@ -26,7 +26,7 @@ extend_skip_glob = ['venv/*', 'docs/*']
 
 [tool.mypy]
 python_version = "3.8"
-plugins = ["pydantic.mypy"]
+# plugins = ["pydantic.mypy"]
 files = [
     "great_expectations",
     "tests/datasource/fluent",
