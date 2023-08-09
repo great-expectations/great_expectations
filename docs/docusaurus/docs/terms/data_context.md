@@ -1,60 +1,56 @@
 ---
 title: Data Context
 id: data_context
-hoverText: The primary entry point for a Great Expectations deployment, with configurations and methods for all supporting components.
+hoverText: The primary entry point for a GX deployment, with configurations and methods for all supporting components.
 ---
 
 import TechnicalTag from '../term_tags/_tag.mdx';
 
-A Data Context is the primary entry point for a Great Expectations deployment, with configurations and methods for all supporting components.
+A Data Context is the primary entry point for a Great Expectations (GX) deployment, and it provides the configurations and methods for all supporting GX components.
 
-As the primary entry point for all of Great Expectations' APIs, the Data Context provides convenience methods for accessing common objects based on untyped input or common defaults.  It also provides the ability to easily handle configuration of its own top-level components, and the configs and data necessary to back up your Data Context itself can be stored in a variety of ways.  It doesn’t matter how you instantiate your `DataContext`, or store its configs: once you have the `DataContext` in memory, it will always behave in the same way.
+As the primary entry point for the GX API, the Data Context provides a convenient method for accessing common objects based on untyped input or common defaults. A Data Context also allows you to configure top-level components, and you can use different storage methodologies to back up your Data Context configuration. After you instantiate your `DataContext` and store its configurations, it always behaves the same way.
 
 ## Relationships to other objects
 
-Your Data Context will provide you with methods to configure your Stores, plugins, and Data Docs.  It will also provide the methods needed to create, configure, and access your <TechnicalTag relative="../" tag="datasource" text="Datasources" />, <TechnicalTag relative="../" tag="expectation" text="Expectations" />, <TechnicalTag relative="../" tag="profiler" text="Profilers" />, and <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" />.  In addition to all of that, it will internally manage your <TechnicalTag relative="../" tag="metric" text="Metrics" />, <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, and the contents of your <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> for you!
+Your Data Context provides you with the methods to configure your Stores, plugins, and Data Docs.  It also provides the methods needed to create, configure, and access your <TechnicalTag relative="../" tag="datasource" text="Data Sources" />, <TechnicalTag relative="../" tag="expectation" text="Expectations" />, <TechnicalTag relative="../" tag="profiler" text="Profilers" />, and <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" />.  In addition, a Data Context helps you manage your <TechnicalTag relative="../" tag="metric" text="Metrics" />, <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, and the contents of your <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> .
 
 ## Use Cases
 
-![What your Data Context does for you throughout using Great Expectations](../guides/images/overview_illustrations/data_context_does_for_you.png)
+![What your Data Context does for you throughout using GX](../guides/images/overview_illustrations/data_context_does_for_you.png)
 
-During Setup you will initialize a Data Context.  For instructions on how to do this, see [Setup Overview: Initialize a Data Context](../guides/setup/setup_overview.md#3-initialize-a-data-context) documentation. For more information on configuring a newly initialized Data Context, see [Configure your Great Expectations environment](../guides/setup/setup_overview_lp.md).
+When you configure your GX environment, you'll instantiate a Data Context. See [Instantiate a Data Context](../guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 
-You can also use the Data Context to manage optional configurations for your Stores, Plugins, and Data Docs.  To configure Stores, see [Configure your Great Expectations environment](../guides/setup/setup_overview_lp.md). To host and share Data Docs, see [Host and share Data Docs](../guides/setup/configuring_data_docs/host_and_share_data_docs.md).
+You can also use the Data Context to manage optional configurations for your Stores, Plugins, and Data Docs.  To configure Stores, see [Configure your GX environment](../guides/setup/setup_overview_lp.md). To host and share Data Docs, see [Host and share Data Docs](../guides/setup/configuring_data_docs/host_and_share_data_docs.md).
 
-When connecting to Data, your Data Context will be used to create and configure Datasources.  For more information on how to create and configure Datasources, see [overview documentation for the Connect to Data step](../guides/connecting_to_your_data/connect_to_data_lp.md), or [Connect to source data](../guides/connecting_to_your_data/connect_to_data_lp.md).
+When you connect to data, you use your Data Context to create and configure Data Sources.  For more information on how to create and configure Data Sources, see [Connect to source data](../guides/connecting_to_your_data/connect_to_data_lp.md).
 
-When creating Expectations, your Data Context will be used to create <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" /> and Expectations, as well as save them to an <TechnicalTag relative="../" tag="expectation_store" text="Expectations Store" />.  The Data Context also provides your starting point for creating Custom Profilers, and will manage the Metrics and Validation Results involved in running a Profiler automatically.  Finally, the Data Context will manage the content of your Data Docs (displaying such things as the Validation Results and Expectations generated by a Profiler) for you.  For more information on creating Expectations, see [overview documentation for the Create Expectations step](../guides/expectations/create_expectations_overview.md), as well as our [how-to guides for creating Expectations](../guides/expectations/expectations_lp.md). 
+When creating Expectations, you'll use your Data Context to create <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" /> and Expectations, and then save them to an <TechnicalTag relative="../" tag="expectation_store" text="Expectations Store" />. The Data Context also provides a starting point for creating Custom Profilers, and manages the Metrics and Validation Results needed to run a Profiler automatically. The Data Context manages the content of your Data Docs (displaying such things as the Validation Results and Expectations generated by a Profiler).  For more information about creating Expectations, see [Create Expectations](../guides/expectations/expectations_lp.md). 
 
-When Validating data, the Data Context provides your entry point for creating, configuring, saving, and accessing Checkpoints.  For more information on using your Data Context to create a Checkpoint, see [overview documentation for the Validate Data step](../guides/validation/validate_data_overview.md).
-
-Additionally, it continues to manage all the same behind the scenes activity involved in using Metrics, saving Validation Results, and creating the contents of your Data Docs for you. 
+When Validating data, the Data Context provides your entry point for creating, configuring, saving, and accessing Checkpoints.  For more information on using your Data Context to create a Checkpoint, see [Validate Data](../guides/validation/validate_data_lp.md). 
 
 ## Access to APIs
 
-The Data Context provides a primary entry point to all of Great Expectations' APIs.  Your Data Context will provide convenience methods for accessing common objects.  While internal workflows of Great Expectations are strongly typed, the convenience methods available from the Data Context are exceptions, allowing access based on untyped input or common defaults.
+The Data Context provides a primary entry point to the GX API.  Your Data Context provides a convenient method for accessing common objects.  While internal workflows of GX are strongly typed, the convenience methods available from the Data Context are exceptions, allowing access based on untyped input or common defaults.
 
 ### Configuration management
 
-A Data Context includes basic create, read, update, and delete (CRUD) operations for the core components of a Great Expectations deployment. This includes Datasources, Expectation Suites, and Checkpoints. In addition, a Data Context allows you to access and integrate Data Docs, Stores, Plugins, and so on.
+A Data Context includes basic create, read, update, and delete (CRUD) operations for the core components of a GX deployment. This includes Datasources, Expectation Suites, and Checkpoints. In addition, a Data Context allows you to access and integrate Data Docs, Stores, Plugins, and so on.
 
 ### Component management and config storage
 
-The Data Context doesn't just give you convenient ways to access and configure components.  It also provides the ability to *create* top-level components such as Datasources, Checkpoints, and Expectation Suites and manage where the information about those components is stored.  
+The Data Context helps you create components such as Data Sources, Checkpoints, and Expectation Suites and manage where the information about those components is stored.  
 
-For production deployments you will want to define these components according to your source data systems and production environment.  This may include storing information about those components in something other than your local environment. To view implementation examples for specific environments and source data systems, see [Integrations](https://docs.greatexpectations.io/docs/category/integrations).
+For production deployments, you will want to define these components according to your source data systems and production environment. This may include storing information about those components in something other than your local environment. To view implementation examples for specific environments and source data systems, see [Integrations](https://docs.greatexpectations.io/docs/category/integrations).
 
-If the exact deployment pattern you want to follow isn't documented in a Reference Architecture, you can see details for configuring specific components that component's related how-to guides.
+## GX Cloud compatability
 
-## Great Expectations Cloud compatability
-
-Because your Data Context contains the entirety of your Great Expectations project, Great Expectations Cloud can reference it to permit seamless upgrading from open source Great Expectations to Great Expectations Cloud.
+Because your Data Context contains the entirety of your GX project, GX Cloud can reference it to permit seamless upgrading from open source GX to GX Cloud.
 
 ## Instantiating a DataContext
 
-As a Great Expectations user, once you have created a Data Context, you will almost always start future work either by using <TechnicalTag relative="../" tag="cli" text="CLI" /> commands from your Data Context's root folder, or by instantiating a `DataContext` in Python:
+After you've created a Data Context, you'll likely start future work by instantiating a `DataContext` in Python. For example:
 
-```python title="Import Great Expectations" name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py import gx"
+```python title="Import GX" name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py import gx"
 ```
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py get_context"
@@ -62,13 +58,11 @@ As a Great Expectations user, once you have created a Data Context, you will alm
 
 Alternatively, you can use the `context_root_dir` parameter if you want to specify a specific directory
 
-If you’re using Great Expectations Cloud, you’d set up cloud environment variables before calling `get_context`.
-
-That’s it! You now have access to all the goodness of a DataContext.
+If you’re using GX Cloud, you set up the cloud environment variables before calling `get_context`.
 
 ## Untyped inputs
 
-The code standards for Great Expectations strive for strongly typed inputs.  However, the Data Context's convenience functions are a noted exception to this standard.  For example, to get a Batch with typed input, you could follow these steps:
+The code standards for GX strive for strongly typed inputs.  However, the Data Context's convenience functions are a noted exception to this standard.  For example, to get a Batch with typed input, you run the following code:
 
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py import BatchRequest"
@@ -77,7 +71,7 @@ The code standards for Great Expectations strive for strongly typed inputs.  How
 ```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py context.get_batch with batch request"
 ```
 
-However, we can take some of the friction out of that process by allowing untyped inputs:
+If you prefer untyped inputs, you run code similar to the following examples:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py context.get_batch with parameters data_asset_name"
 ```
@@ -85,14 +79,14 @@ However, we can take some of the friction out of that process by allowing untype
 ```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py context.get_batch with parameters"
 ```
 
-In this example, the `get_batch()` method takes on the responsibility for inferring your intended types, and passing it through to the correct internal methods.
+In the example code, the `get_batch()` method is responsible for inferring your intended types, and passing it through to the correct internal methods.
 
-This distinction around untyped inputs reflects an important architecture decision within the Great Expectations codebase: “Internal workflows are strongly typed, but we make exceptions for a handful of convenience methods on the `DataContext`.”
+This distinction between untyped and typed inputs reflects an important architectural decision within the GX codebase. Internal workflows are strongly typed, but  exceptions are allowed for a handful of convenience methods on the `DataContext`.
 
-Stronger type-checking allows the building of cleaner code, with stronger guarantees and a better understanding of error states. It also allows us to take advantage of tools like static type checkers, cyclometric complexity analysis, etc.
+Stronger type-checking allows the building of cleaner code, with stronger guarantees and a better understanding of error states. It also allows GX to take advantage of tools such as static type checkers, cyclometric complexity analysis, and so on.
 
-However, requiring typed inputs creates a steep learning curve for new users. For example, the first method above can be intimidating if you haven’t done a deep dive on exactly what a `BatchRequest` is. It also requires you to know that a Batch Request is imported from `great_expectations.core.batch`.
+Requiring typed inputs can make getting started with GX challenging. For example, the first method shown in the previous code examples can be intimidating if you don't know what a `BatchRequest` is. It also requires you to know that a Batch Request is imported from `great_expectations.core.batch`. Allowing untyped inputs makes it possible to get started with GX much more quickly. However, there is always a risk is that untyped inputs will lead to confusion. To reduce or eliminate the risk, GX uses these guidleines:
 
-Allowing untyped inputs makes it possible to get started much more quickly in Great Expectations. However, the risk is that untyped inputs will lead to confusion. To head off that risk, we follow the following principles:
-1. Type inference is conservative. If inferring types would require guessing, the method will instead throw an error.
-2. We raise informative errors, to help users zero in on alternative input that does not require guessing to infer.
+- Type inference is conservative. If inferring types require guessing, the method returns an error.
+
+- Informative errors are provided to help you determine an alternative input that does not require guessing to infer.

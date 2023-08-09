@@ -1,4 +1,5 @@
 boto3>=1.17.106
+flaky>=3.7.0 # for docs-integration tests that access cloud-resources that access cloud-resources
 flask>=1.0.0 # for s3 test only (with moto)
 freezegun>=0.3.15
 ipykernel<=6.17.1 # Newest version (6.19.0 released on 12/7/2022) causes "WARNING  traitlets:client.py:1181 No handler found for comm target 'comm'" by "https://github.com/jupyter/nbclient/blob/main/nbclient/client.py" (version 0.7.2) to be emitted.
