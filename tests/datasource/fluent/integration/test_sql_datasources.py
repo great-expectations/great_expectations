@@ -5,6 +5,7 @@ from pprint import pformat as pf
 from typing import Final, Generator, Literal, Protocol
 
 import pytest
+from packaging.version import Version
 from pytest import param
 
 from great_expectations import get_context
@@ -12,6 +13,9 @@ from great_expectations.compatibility.sqlalchemy import (
     TextClause,
     engine,
     inspect,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    __version__ as sqlalchemy_version,
 )
 from great_expectations.data_context import EphemeralDataContext
 from great_expectations.datasource.fluent import (
@@ -23,6 +27,7 @@ from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
 )
 
+SQLA_VERSION: Final = Version(sqlalchemy_version or "0.0.0")
 LOGGER: Final = logging.getLogger("tests")
 
 PG_TABLE: Final[str] = "test_table"
@@ -108,7 +113,7 @@ def table_factory(
             )
             return
         LOGGER.info(
-            f"Creating `{engine.dialect.name}` table for {table_names} if it does not exist"
+            f"SQLA:{SQLA_VERSION} - Creating `{engine.dialect.name}` table for {table_names} if it does not exist"
         )
         created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
         with engine.connect() as conn:
@@ -121,7 +126,8 @@ def table_factory(
                         f"CREATE TABLE IF NOT EXISTS {qualified_table_name} (id INTEGER, name VARCHAR(255))"
                     )
                 )
-                conn.commit()
+                if SQLA_VERSION >= Version("2.0"):
+                    conn.commit()
                 created_tables.append(dict(table_name=name, schema=schema))
         all_created_tables[engine.dialect.name] = created_tables
         engines[engine.dialect.name] = engine
@@ -138,7 +144,8 @@ def table_factory(
                 schema = table["schema"]
                 qualified_table_name = f"{schema}.{name}" if schema else name
                 conn.execute(TextClause(f"DROP TABLE IF EXISTS {qualified_table_name}"))
-            conn.commit()
+            if SQLA_VERSION >= Version("2.0"):
+                conn.commit()
 
 
 @pytest.fixture

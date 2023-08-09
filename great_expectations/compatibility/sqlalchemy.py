@@ -248,3 +248,5 @@ try:
     from sqlalchemy import Table
 except (ImportError, AttributeError):
     Table = SQLALCHEMY_NOT_IMPORTED
+
+__version__: str | None = getattr(sqlalchemy, "__version__", None)
