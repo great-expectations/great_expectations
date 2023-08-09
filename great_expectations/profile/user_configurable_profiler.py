@@ -10,7 +10,6 @@ from tqdm.auto import tqdm
 from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import (
     deprecated_method_or_class,
-    public_api,
 )
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -226,7 +225,6 @@ class UserConfigurableProfiler:
             "BOOLEAN": self._build_expectations_value_set,
         }
 
-    @public_api
     def build_suite(self) -> ExpectationSuite:
         """Build an Expectation Suite based on the `semantic_types_dict` if one is provided.
 
