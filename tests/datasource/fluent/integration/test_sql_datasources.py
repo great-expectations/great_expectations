@@ -130,6 +130,7 @@ def table_factory(
                 schema = table["schema"]
                 qualified_table_name = f"{schema}.{name}" if schema else name
                 conn.execute(TextClause(f"DROP TABLE IF EXISTS {qualified_table_name}"))
+            conn.commit()
 
 
 @pytest.fixture
