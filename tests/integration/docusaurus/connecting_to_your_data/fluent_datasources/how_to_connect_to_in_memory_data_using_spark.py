@@ -26,10 +26,13 @@ datasource = context.sources.add_spark("my_spark_datasource")
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_spark.py dataframe">
 df = ps.DataFrame(
-    {'a': [1, 2, 3, 4, 5, 6],
-     'b': [100, 200, 300, 400, 500, 600],
-     'c': ["one", "two", "three", "four", "five", "six"]},
-    index=[10, 20, 30, 40, 50, 60])
+    {
+        "a": [1, 2, 3, 4, 5, 6],
+        "b": [100, 200, 300, 400, 500, 600],
+        "c": ["one", "two", "three", "four", "five", "six"],
+    },
+    index=[10, 20, 30, 40, 50, 60],
+)
 # </snippet>
 
 # Python
