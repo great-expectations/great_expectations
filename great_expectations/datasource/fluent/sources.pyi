@@ -350,6 +350,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkFilesystemDatasource: ...
@@ -361,6 +362,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkFilesystemDatasource: ...
@@ -372,6 +374,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkFilesystemDatasource: ...
@@ -387,6 +390,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkDBFSDatasource: ...
@@ -398,6 +402,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkDBFSDatasource: ...
@@ -409,6 +414,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkDBFSDatasource: ...
@@ -424,6 +430,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         bucket: str = ...,
         boto3_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkS3Datasource: ...
@@ -435,6 +442,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         bucket: str = ...,
         boto3_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkS3Datasource: ...
@@ -446,6 +454,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         bucket: str = ...,
         boto3_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkS3Datasource: ...
@@ -461,6 +470,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         bucket_or_name: str = ...,
         gcs_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkGoogleCloudStorageDatasource: ...
@@ -472,6 +482,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         bucket_or_name: str = ...,
         gcs_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkGoogleCloudStorageDatasource: ...
@@ -483,6 +494,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         bucket_or_name: str = ...,
         gcs_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkGoogleCloudStorageDatasource: ...
@@ -498,6 +510,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         azure_options: dict[str, Any] = ...,
     ) -> SparkAzureBlobStorageDatasource: ...
     def update_spark_abs(  # noqa: PLR0913
@@ -508,6 +521,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         azure_options: dict[str, Any] = ...,
     ) -> SparkAzureBlobStorageDatasource: ...
     def add_or_update_spark_abs(  # noqa: PLR0913
@@ -518,6 +532,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         azure_options: dict[str, Any] = ...,
     ) -> SparkAzureBlobStorageDatasource: ...
     def delete_spark_abs(
