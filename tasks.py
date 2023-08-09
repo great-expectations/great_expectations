@@ -830,6 +830,10 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
             "--docs-tests",
         ),
     ),
+    "databricks": TestDependencies(
+        ("reqs/requirements-dev-databricks.txt",),
+        services=("databricks",),
+    ),
     "mssql": TestDependencies(
         ("reqs/requirements-dev-mssql.txt",),
         services=("mssql",),
