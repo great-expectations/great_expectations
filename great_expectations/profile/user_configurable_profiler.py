@@ -8,7 +8,10 @@ from dateutil.parser import parse
 from tqdm.auto import tqdm
 
 from great_expectations.core import ExpectationSuite
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core._docs_decorators import (
+    deprecated_method_or_class,
+    public_api,
+)
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
@@ -38,7 +41,10 @@ if TYPE_CHECKING:
     from great_expectations.data_context.data_context import AbstractDataContext
 
 
-@public_api
+@deprecated_method_or_class(
+    version="0.17.9",
+    message="UserConfigurableProfiler is deprecated and will be removed in a future release. Please use DataAssistants instead.",
+)
 class UserConfigurableProfiler:
     """Build an Expectation Suite from a dataset.
 
