@@ -106,7 +106,8 @@ stages:
           inputs:
             versionSpec: '$(python.version)'
           displayName: 'Use Python $(python.version)'
-
+          env:
+            PYARROW_IGNORE_TIMEZONE: 1
         - script: |
             pip install --constraint constraints-dev.txt ".[test, spark]" pytest-azurepipelines
           displayName: 'Install dependencies'
@@ -377,6 +378,7 @@ stages:
             AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
             AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
             AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+            PYARROW_IGNORE_TIMEZONE: 1
 
     - job: test_docs_azure
       timeoutInMinutes: 30
