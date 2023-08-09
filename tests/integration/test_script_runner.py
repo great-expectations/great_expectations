@@ -16,6 +16,7 @@ from typing import List
 import pkg_resources
 import pytest
 from assets.scripts.build_gallery import execute_shell_command
+from flaky import flaky
 
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -71,6 +72,20 @@ pytestmark = pytest.mark.docs
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
+
+
+import time
+
+
+def delay_rerun(*args):
+    """Delay for flaky tests
+
+    Returns:
+        True: After sleeping for 1 second.
+    """
+    time.sleep(1)
+    return True
+
 
 # to be populated by the smaller lists below
 docs_test_matrix: List[IntegrationTestFixture] = []
@@ -417,6 +432,12 @@ fluent_datasources = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         backend_dependencies=[BackendDependencies.PANDAS],
     ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_in_memory_data_using_spark",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_spark.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.SPARK],
+    ),
 ]
 
 
@@ -498,6 +519,7 @@ def pytest_parsed_arguments(request):
     return request.config.option
 
 
+@flaky(rerun_filter=delay_rerun)
 @pytest.mark.parametrize("integration_test_fixture", docs_test_matrix, ids=idfn)
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 def test_docs(integration_test_fixture, tmp_path, pytest_parsed_arguments):

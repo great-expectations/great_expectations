@@ -172,7 +172,7 @@
 
 
 # Redirects for old style guides
-/docs/contributing/contributing_style https://docs.greatexpectations.io/docs/contributing/style_guides/docs_style
+/docs/contributing/contributing_style /docs/contributing/contributing/
 
 # Redirects for consolidated pages
 
@@ -381,6 +381,7 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset /docs/guides/connecting_to_your_data/fluent/database/sql_data_assets
 /docs/deployment_patterns/how_to_use_great_expectations_in_databricks /docs/tutorials/getting_started/how_to_use_great_expectations_in_databricks
 /docs/guides/expectations/creating_custom_expectations/overview /docs/guides/expectations/custom_expectations_lp
+/docs/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas /docs/guides/connecting_to_your_data/fluent/in_memory/connect_in_memory_data
 
 # Redirects for pages removed as no longer applicable
 
