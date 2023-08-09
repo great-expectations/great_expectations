@@ -75,10 +75,10 @@ def test_dataframe_asset(
         for asset in datasource.assets
     )
 
-    datasource_config = empty_data_context.get_datasource(datasource_name).dict()
-    assert datasource_config["spark_config"] == {}
-    assert datasource_config["force_reuse_spark_context"] is True
-    assert datasource_config["persist"] is False
+    datasource_config = empty_data_context.get_datasource(datasource_name)
+    assert datasource_config.spark_config == {}
+    assert datasource_config.force_reuse_spark_context is True
+    assert datasource_config.persist is False
 
 
 @pytest.mark.spark

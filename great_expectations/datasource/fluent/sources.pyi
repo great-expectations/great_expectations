@@ -320,6 +320,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
     ) -> SparkDatasource: ...
     def update_spark(
         self,
@@ -327,6 +328,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
     ) -> SparkDatasource: ...
     def add_or_update_spark(
         self,
@@ -334,6 +336,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
     ) -> SparkDatasource: ...
     def delete_spark(
         self,
