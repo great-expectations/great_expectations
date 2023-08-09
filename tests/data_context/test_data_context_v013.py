@@ -110,6 +110,7 @@ def data_context_with_runtime_sql_datasource_for_testing_get_batch(
     return context
 
 
+@pytest.mark.filesystem
 def test_ConfigOnlyDataContext_v013__initialization(
     tmp_path_factory, basic_data_context_v013_config
 ):
@@ -165,6 +166,7 @@ def test__normalize_absolute_or_relative_path(
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
 
 
+@pytest.mark.filesystem
 def test_load_config_variables_file(
     basic_data_context_v013_config, tmp_path_factory, monkeypatch
 ):
@@ -207,6 +209,7 @@ def test_load_config_variables_file(
         monkeypatch.delenv("TEST_CONFIG_FILE_ENV")
 
 
+@pytest.mark.filesystem
 def test_get_config(empty_data_context):
     context = empty_data_context
 
@@ -239,12 +242,14 @@ def test_get_config(empty_data_context):
     }
 
 
+@pytest.mark.filesystem
 def test_config_variables(empty_data_context):
     context = empty_data_context
     assert type(context.config_variables) == dict
     assert set(context.config_variables.keys()) == {"instance_id"}
 
 
+@pytest.mark.filesystem
 @pytest.mark.filterwarnings(
     "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
 )
@@ -348,6 +353,7 @@ data_connectors:
     assert df_data.drop("belongs_in_split", axis=1).shape == (4, 10)
 
 
+@pytest.mark.filesystem
 @pytest.mark.filterwarnings(
     "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
 )
@@ -422,6 +428,7 @@ data_connectors:
     assert df_data.shape == (120, 10)
 
 
+@pytest.mark.filesystem
 def test__get_data_context_version(empty_data_context, titanic_data_context):
     context = empty_data_context
 
@@ -466,6 +473,7 @@ data_connectors:
     )
 
 
+@pytest.mark.filesystem
 @pytest.mark.slow  # 1.06s
 def test_in_memory_data_context_configuration(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -515,6 +523,7 @@ def test_in_memory_data_context_configuration(
     assert my_validator.expect_table_column_count_to_equal(7)["success"]
 
 
+@pytest.mark.sqlite
 @pytest.mark.filterwarnings(
     "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
 )
@@ -579,6 +588,7 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
     assert len(get_sqlite_temp_table_names(batch.data.execution_engine)) == 1
 
 
+@pytest.mark.sqlite
 def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_connector(
     sa,
     data_context_with_runtime_sql_datasource_for_testing_get_batch,
@@ -611,6 +621,7 @@ def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_conne
     assert len(validator.batches) == 1
 
 
+@pytest.mark.filesystem
 @pytest.mark.filterwarnings(
     "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
 )
@@ -686,6 +697,7 @@ def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
     assert batch.batch_markers.get("ge_load_time") is not None
 
 
+@pytest.mark.filesystem
 def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connector(
     sa,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,

@@ -2,7 +2,7 @@
 sidebar_label: "Host and share Data Docs"
 title: "Host and share Data Docs"
 id: host_and_share_data_docs
-description: Host and share Data Docs stored on a filesystem or a Source Data System.
+description: Host and share Data Docs stored on a filesystem or a source data system.
 toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
@@ -19,7 +19,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-Data Docs translate Expectations, Validation Results, and other metadata into human-readable documentation. Automatically compiling your data documentation from your data tests in the form of Data Docs keeps your documentation current. Use the information provided here to host and share Data Docs stored on a filesystem or a Source Data System.
+Data Docs translate Expectations, Validation Results, and other metadata into human-readable documentation. Automatically compiling your data documentation from your data tests in the form of Data Docs keeps your documentation current. Use the information provided here to host and share Data Docs stored on a filesystem or a source data system.
 
 <Tabs
   groupId="host-and-share-data-docs"

@@ -125,6 +125,35 @@ locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
 logger = logging.getLogger(__name__)
 
+REQUIRED_MARKERS = {
+    "all_backends",
+    "athena",
+    "aws_creds",
+    "big",
+    "cli",
+    "clickhouse",
+    "cloud",
+    "docs",
+    "filesystem",
+    "mssql",
+    "mysql",
+    "openpyxl",
+    "performance",
+    "postgresql",
+    "project",
+    "pyarrow",
+    "spark",
+    "sqlite",
+    "trino",
+    "unit",
+}
+
+
+@pytest.fixture()
+def unset_gx_env_variables(monkeypatch: pytest.MonkeyPatch) -> None:
+    for var in GXCloudEnvironmentVariable:
+        monkeypatch.delenv(var, raising=False)
+
 
 @pytest.mark.order(index=2)
 @pytest.fixture(scope="module")
@@ -165,6 +194,13 @@ def pytest_configure(config):
 
 
 def pytest_addoption(parser):
+    parser.addoption(
+        "--verify-marker-coverage-and-exit",
+        action="store_true",
+        help="If set, checks that all tests have one of the markers necessary "
+        "for it to be run.",
+    )
+
     # note: --no-spark will be deprecated in favor of --spark
     parser.addoption(
         "--no-spark",
@@ -248,10 +284,10 @@ def pytest_addoption(parser):
         help="If set, run integration tests for docs",
     )
     parser.addoption(
-        "--azure", action="store_true", help="If set, execute tests again Azure"
+        "--azure", action="store_true", help="If set, execute tests against Azure"
     )
     parser.addoption(
-        "--cloud", action="store_true", help="If set, execute tests again GX Cloud"
+        "--cloud", action="store_true", help="If set, execute tests against GX Cloud"
     )
     parser.addoption(
         "--performance-tests",
@@ -328,6 +364,79 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize("test_backend", test_backends, scope="module")
     if "test_backends" in metafunc.fixturenames:
         metafunc.parametrize("test_backends", [test_backends], scope="module")
+
+
+@dataclass(frozen=True)
+class TestMarkerCoverage:
+    path: str
+    name: str
+    markers: set[str]
+
+    def __str__(self):
+        return f"{self.path}, {self.name}, {self.markers}"
+
+
+def _verify_marker_coverage(
+    session,
+) -> tuple[list[TestMarkerCoverage], list[TestMarkerCoverage]]:
+    uncovered: list[TestMarkerCoverage] = []
+    multiple_markers: list[TestMarkerCoverage] = []
+    for test in session.items:
+        markers = {m.name for m in test.iter_markers()}
+        required_intersection = markers.intersection(REQUIRED_MARKERS)
+        required_intersection_size = len(required_intersection)
+        # required_intersection_size is a non-zero integer so there 3 cases we care about:
+        #  0 => no marker coverage for this test
+        #  1 => the marker coverage for this test is correct
+        # >1 => too many markers are covering this test
+        if required_intersection_size == 0:
+            uncovered.append(
+                TestMarkerCoverage(path=str(test.path), name=test.name, markers=markers)
+            )
+        elif required_intersection_size > 1:
+            multiple_markers.append(
+                TestMarkerCoverage(
+                    path=str(test.path), name=test.name, markers=required_intersection
+                )
+            )
+    return uncovered, multiple_markers
+
+
+def pytest_collection_finish(session):
+    if session.config.option.verify_marker_coverage_and_exit:
+        uncovered, multiply_covered = _verify_marker_coverage(session)
+        if uncovered or multiply_covered:
+            print(
+                "*** Every test should be covered by exactly 1 of our required markers ***"
+            )
+            if uncovered:
+                print(f"*** {len(uncovered)} tests have no marker coverage ***")
+                for test_info in uncovered:
+                    print(test_info)
+                print()
+            else:
+                print(
+                    f"*** {len(multiply_covered)} tests have multiple marker coverage ***"
+                )
+                for test_info in multiply_covered:
+                    print(test_info)
+                print()
+
+            print("*** The required markers follow. ***")
+            print(
+                "*** Tests marked with 'performance' are not run in the PR or release pipeline. ***"
+            )
+            print("*** All other tests are. ***")
+            for m in REQUIRED_MARKERS:
+                print(m)
+            pytest.exit(
+                reason="Marker coverage verification failed",
+                returncode=pytest.ExitCode.TESTS_FAILED,
+            )
+        pytest.exit(
+            reason="Marker coverage verification succeeded",
+            returncode=pytest.ExitCode.OK,
+        )
 
 
 def pytest_collection_modifyitems(config, items):
@@ -841,7 +950,7 @@ def empty_data_context(
     project_path.mkdir()
     project_path = str(project_path)
     context = gx.data_context.FileDataContext.create(project_path)
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
     assert context.list_datasources() == []
@@ -875,7 +984,7 @@ def data_context_with_connection_to_metrics_db(
     project_path.mkdir()
     project_path = str(project_path)
     context = gx.data_context.FileDataContext.create(project_path)
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
     assert context.list_datasources() == []
@@ -918,7 +1027,9 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
-    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path: str = os.path.join(  # noqa: PTH118
+        project_path, FileDataContext.GX_DIR
+    )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -951,7 +1062,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
                 )
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(
@@ -1455,7 +1566,7 @@ def deterministic_asset_data_connector_context(
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -1471,7 +1582,7 @@ def deterministic_asset_data_connector_context(
                 )
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(__file__, "./test_sets/Titanic.csv"),
@@ -1537,7 +1648,9 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
-    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path: str = os.path.join(  # noqa: PTH118
+        project_path, FileDataContext.GX_DIR
+    )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -1553,7 +1666,7 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
                 )
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
@@ -2136,7 +2249,7 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
     context = gx.data_context.FileDataContext.create(project_path)
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
     return context
@@ -2145,7 +2258,7 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 @pytest.fixture
 def titanic_data_context(tmp_path_factory) -> FileDataContext:
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -2159,7 +2272,7 @@ def titanic_data_context(tmp_path_factory) -> FileDataContext:
     )
     shutil.copy(
         titanic_yml_path,
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
     shutil.copy(
@@ -2172,7 +2285,7 @@ def titanic_data_context(tmp_path_factory) -> FileDataContext:
 @pytest.fixture
 def titanic_data_context_no_data_docs_no_checkpoint_store(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -2186,7 +2299,7 @@ def titanic_data_context_no_data_docs_no_checkpoint_store(tmp_path_factory):
     )
     shutil.copy(
         titanic_yml_path,
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
     shutil.copy(
@@ -2199,7 +2312,7 @@ def titanic_data_context_no_data_docs_no_checkpoint_store(tmp_path_factory):
 @pytest.fixture
 def titanic_data_context_no_data_docs(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -2213,7 +2326,7 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
     )
     shutil.copy(
         titanic_yml_path,
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
     shutil.copy(
@@ -2228,7 +2341,7 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -2242,7 +2355,7 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     )
     shutil.copy(
         titanic_yml_path,
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
     shutil.copy(
@@ -2257,7 +2370,7 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -2271,7 +2384,7 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
     )
     shutil.copy(
         titanic_yml_path,
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
     shutil.copy(
@@ -2286,7 +2399,7 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -2300,7 +2413,7 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
     )
     shutil.copy(
         titanic_yml_path,
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
     shutil.copy(
@@ -2458,12 +2571,14 @@ def site_builder_data_context_with_html_store_titanic_random(
         ),
         str(
             os.path.join(  # noqa: PTH118
-                project_dir, "great_expectations", "great_expectations.yml"
+                project_dir, FileDataContext.GX_DIR, FileDataContext.GX_YML
             )
         ),
     )
     context = get_context(
-        context_root_dir=os.path.join(project_dir, "great_expectations")  # noqa: PTH118
+        context_root_dir=os.path.join(  # noqa: PTH118
+            project_dir, FileDataContext.GX_DIR
+        )
     )
 
     context.add_datasource(
@@ -2539,12 +2654,14 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
         ),
         str(
             os.path.join(  # noqa: PTH118
-                project_dir, "great_expectations", "great_expectations.yml"
+                project_dir, FileDataContext.GX_DIR, FileDataContext.GX_YML
             )
         ),
     )
     context = get_context(
-        context_root_dir=os.path.join(project_dir, "great_expectations")  # noqa: PTH118
+        context_root_dir=os.path.join(  # noqa: PTH118
+            project_dir, FileDataContext.GX_DIR
+        )
     )
 
     context.add_datasource(
@@ -2590,7 +2707,9 @@ def v20_project_directory(tmp_path_factory):
     GX config_version: 2 project for testing upgrade helper
     """
     project_path = str(tmp_path_factory.mktemp("v20_project"))
-    context_root_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_root_dir = os.path.join(  # noqa: PTH118
+        project_path, FileDataContext.GX_DIR
+    )
     shutil.copytree(
         file_relative_path(
             __file__, "./test_fixtures/upgrade_helper/great_expectations_v20_project/"
@@ -2601,7 +2720,7 @@ def v20_project_directory(tmp_path_factory):
         file_relative_path(
             __file__, "./test_fixtures/upgrade_helper/great_expectations_v2.yml"
         ),
-        os.path.join(context_root_dir, "great_expectations.yml"),  # noqa: PTH118
+        os.path.join(context_root_dir, FileDataContext.GX_YML),  # noqa: PTH118
     )
     return context_root_dir
 
@@ -2613,7 +2732,7 @@ def data_context_parameterized_expectation_suite_no_checkpoint_store(tmp_path_fa
     created with DataContext.create()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
     os.makedirs(  # noqa: PTH103
@@ -2622,7 +2741,7 @@ def data_context_parameterized_expectation_suite_no_checkpoint_store(tmp_path_fa
     )
     shutil.copy(
         os.path.join(fixture_dir, "great_expectations_basic.yml"),  # noqa: PTH118
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         os.path.join(  # noqa: PTH118
@@ -2660,7 +2779,7 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
     created with DataContext.create()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
     os.makedirs(  # noqa: PTH103
@@ -2669,7 +2788,7 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
     )
     shutil.copy(
         os.path.join(fixture_dir, "great_expectations_v013_basic.yml"),  # noqa: PTH118
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         os.path.join(  # noqa: PTH118
@@ -2707,7 +2826,7 @@ def data_context_simple_expectation_suite(tmp_path_factory):
     created with DataContext.create()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
     os.makedirs(  # noqa: PTH103
@@ -2716,7 +2835,7 @@ def data_context_simple_expectation_suite(tmp_path_factory):
     )
     shutil.copy(
         os.path.join(fixture_dir, "great_expectations_basic.yml"),  # noqa: PTH118
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         os.path.join(  # noqa: PTH118
@@ -3600,10 +3719,11 @@ def cloud_data_context_with_datasource_pandas_engine(
         "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
         side_effect=set_side_effect,
     ):
-        context.add_datasource(
-            "my_datasource",
-            **config,
-        )
+        with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
+            context.add_datasource(
+                "my_datasource",
+                **config,
+            )
     return context
 
 
@@ -7327,7 +7447,9 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path: str = os.path.join(  # noqa: PTH118
+        project_path, FileDataContext.GX_DIR
+    )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -7340,11 +7462,11 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
-                "great_expectations",
-                "great_expectations.yml",
+                FileDataContext.GX_DIR,
+                FileDataContext.GX_YML,
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(
@@ -7406,7 +7528,9 @@ def bobby_columnar_table_multi_batch_probabilistic_data_context(
     tmp_path_factory,
 ) -> FileDataContext:
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path: str = os.path.join(  # noqa: PTH118
+        project_path, FileDataContext.GX_DIR
+    )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -7419,11 +7543,11 @@ def bobby_columnar_table_multi_batch_probabilistic_data_context(
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
-                "great_expectations",
-                "great_expectations.yml",
+                FileDataContext.GX_DIR,
+                FileDataContext.GX_YML,
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(
@@ -7575,7 +7699,9 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path: str = os.path.join(  # noqa: PTH118
+        project_path, FileDataContext.GX_DIR
+    )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -7588,11 +7714,11 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
-                "great_expectations",
-                "great_expectations.yml",
+                FileDataContext.GX_DIR,
+                FileDataContext.GX_YML,
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     base_directory: str = file_relative_path(
         __file__,
@@ -7761,7 +7887,9 @@ def quentin_columnar_table_multi_batch_data_context(
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path: str = os.path.join(  # noqa: PTH118
+        project_path, FileDataContext.GX_DIR
+    )
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -7774,11 +7902,11 @@ def quentin_columnar_table_multi_batch_data_context(
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
-                "great_expectations",
-                "great_expectations.yml",
+                FileDataContext.GX_DIR,
+                FileDataContext.GX_YML,
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     base_directory: str = file_relative_path(
         __file__,

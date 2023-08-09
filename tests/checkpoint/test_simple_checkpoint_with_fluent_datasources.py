@@ -61,7 +61,7 @@ def two_validations(
     ]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_defaults_run_and_basic_run_params_without_persisting_checkpoint(
     simple_checkpoint_defaults, one_validation
 ):
@@ -76,6 +76,7 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_without_persisting_
     assert result.success
 
 
+@pytest.mark.filesystem
 @pytest.mark.slow  # 1.09s
 def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_persisting_checkpoint(
     simple_checkpoint_defaults,
@@ -129,7 +130,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_per
     )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 @pytest.mark.slow  # 1.23s
 def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates,
@@ -226,6 +227,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
     )
 
 
+@pytest.mark.filesystem
 @pytest.mark.slow  # 1.12s
 def test_simple_checkpoint_defaults_run_with_top_level_batch_request_and_suite(
     simple_checkpoint_defaults,
@@ -242,7 +244,7 @@ def test_simple_checkpoint_defaults_run_with_top_level_batch_request_and_suite(
     assert len(result.run_results) == 1
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 @pytest.mark.slow  # 1.61s
 def test_simple_checkpoint_defaults_run_multiple_validations_without_persistence(
     context_with_data_source_and_empty_suite,
@@ -264,7 +266,7 @@ def test_simple_checkpoint_defaults_run_multiple_validations_without_persistence
     assert result.success
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 @pytest.mark.slow  # 1.62s
 def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_checkpoint_loaded_from_store(
     context_with_data_source_and_empty_suite,
@@ -293,7 +295,7 @@ def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_chec
     assert result.success
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_dataframe_batch_request_in_validations_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -324,7 +326,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_dataframe_batch_request_data_in_validations_sparkdf(
     titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -355,7 +357,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_batch_request_sql_asset_object_in_validations_sqlalchemy(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -388,7 +390,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_multiple_batch_request_sql_asset_objects_in_validations_sqlalchemy(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -429,7 +431,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_dataframe_batch_request_in_top_level_batch_request_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -460,7 +462,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_dataframe_batch_request_in_top_level_batch_request_sparkdf(
     titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -491,7 +493,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sql_asset_object_in_top_level_batch_request_sqlalchemy(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -524,7 +526,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_dataframe_batch_request_in_checkpoint_run_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -555,7 +557,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_dataframe_batch_request_in_checkpoint_run_sparkdf(
     titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -586,7 +588,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sql_asset_object_in_checkpoint_run_sqlalchemy(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -618,7 +620,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_dataframe_validations_in_checkpoint_run_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -649,7 +651,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_dataframe_validations_in_checkpoint_run_sparkdf(
     titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -680,7 +682,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_request_sql_asset_object_in_checkpoint_run_sqlalchemy(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -712,7 +714,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_dataframe_batch_request_in_context_run_checkpoint_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -747,7 +749,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_dataframe_batch_request_in_context_run_checkpoint_sparkdf(
     titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -782,7 +784,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sql_asset_object_in_context_run_checkpoint_sqlalchemy(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -818,7 +820,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_dataframe_validations_in_context_run_checkpoint_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -853,7 +855,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_dataframe_validations_in_context_run_checkpoint_sparkdf(
     titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -888,7 +890,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_sql_asset_object_in_context_run_checkpoint_sqlalchemy(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -924,7 +926,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_instantiates_and_produces_a_printable_validation_result_with_dataframe_batch_request_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates,
     common_action_list,
@@ -954,7 +956,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_printable_validation_resu
     assert type(repr(result)) == str
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 @pytest.mark.slow  # 1.73s
 def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result_dataframe_batch_request_in_checkpoint_yml_and_checkpoint_run_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
@@ -1018,7 +1020,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 @pytest.mark.slow  # 2.32s
 def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_checkpoint_run_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
@@ -1096,7 +1098,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 @pytest.mark.slow  # 1.87s
 def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_context_run_checkpoint_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
@@ -1161,7 +1163,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 @pytest.mark.slow  # 2.44s
 def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_context_run_checkpoint_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
@@ -1241,7 +1243,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 @pytest.mark.slow  # 1.16s
 def test_simple_checkpoint_result_validations_include_rendered_content_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,

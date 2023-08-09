@@ -117,7 +117,6 @@ class ExpectationExplorer:
             "expect_column_pair_values_A_to_be_greater_than_B": [
                 "or_equal",
                 "ignore_row_if",
-                "allow_cross_type_comparisons",
             ],
             "expect_column_pair_values_to_be_in_set": [
                 "value_pairs_set",
@@ -1912,7 +1911,7 @@ class ExpectationExplorer:
         column_count = len(column_names)
         expectation_count = len(expectation_suite["expectations"])
 
-        summary_widget_content = """\
+        summary_widget_content = f"""\
             <div>
                 <h1>Expectation Suite Editor</h1>
                 <hr>
@@ -1925,12 +1924,7 @@ class ExpectationExplorer:
                 <hr>
                 <h2>Columns:</h2>
             </div>\
-        """.format(
-            data_asset_name=data_asset_name,
-            ge_version=ge_version,
-            column_count=column_count,
-            expectation_count=expectation_count,
-        )
+        """
         summary_widget = widgets.HTML(
             value=summary_widget_content,
             layout=widgets.Layout(

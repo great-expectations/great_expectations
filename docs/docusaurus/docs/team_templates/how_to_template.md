@@ -20,7 +20,7 @@ To complete this how-to, you'll complete the following tasks:
 <!-- List the items that need to be present or completed by the user before they start the tasks. Link to relevant information if it's available. What follows is an example provided for your reference. If there aren't any prerequisites, remove this section. -->
 
 - [A Great Expectations instance](../guides/setup/setup_overview.md)
-- [A Data Connection](../guides/connecting_to_your_data/connect_to_data_overview.md)
+- [A Data Connection](../guides/connecting_to_your_data/connect_to_data_lp.md)
 - [An Expectation Suite](../guides/expectations/create_expectations_overview.md)
 
 
@@ -94,4 +94,4 @@ To complete this how-to, you'll complete the following tasks:
 - [How to set up GX to work with data on GCS](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)
 - [How to set up GX to work with SQL databases](../guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases.md) 
 - [How to instantiate a Data Context on an EMR Spark Cluster](../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-- [How to use Great Expectations in Databricks](../deployment_patterns/how_to_use_great_expectations_in_databricks.md)
+- [How to use Great Expectations in Databricks](../tutorials/getting_started/how_to_use_great_expectations_in_databricks.md)

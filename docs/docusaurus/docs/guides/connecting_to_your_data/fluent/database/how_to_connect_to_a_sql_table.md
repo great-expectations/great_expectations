@@ -24,7 +24,7 @@ If you would like to connect to the results of a SQL query instead of the conten
 
 - An installation of GX set up to work with SQL
 - Source data stored in a SQL database
-- A SQL-based Datasource
+- A SQL-based Data Source
 
 </Prerequisites> 
 
@@ -44,7 +44,7 @@ Please reference the appropriate one of these guides:
 <details>
 <summary>
 
-### If you still need to connect a Datasource to a SQL database...
+### If you still need to connect a Data Source to a SQL database...
 
 </summary>
 
@@ -56,7 +56,7 @@ Please reference the appropriate one of these guides:
 
 :::caution Datasources defined with the block-config method
 
-If you're using a Datasource that was created with the advanced block-config method, see [How to configure a SQL Datasource with the block-config method](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource).
+If you're using a Data Source that was created with the advanced block-config method, see [How to configure a SQL Data Source with the block-config method](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource).
 
 :::
 
@@ -66,16 +66,16 @@ If you're using a Datasource that was created with the advanced block-config met
 
 <ImportGxAndInstantiateADataContext />
 
-### 2. Retrieve a SQL Datasource
+### 2. Retrieve a SQL Data Source
 
-For this guide, we will use a previously defined Datasource named `"my_datasource"` which connects to a SQL database.
+For this guide, we will use a previously defined Data Source named `"my_datasource"` which connects to a SQL database.
 
-To retrieve this Datasource, we will supply the `get_datasource(...)` method of our Data Context with the name of the Datasource we wish to retrieve:
+To retrieve this Data Source, we will supply the `get_datasource(...)` method of our Data Context with the name of the Data Source we wish to retrieve:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py datasource
 ```
 
-### 3. Add a table to the Datasource as a Data Asset
+### 3. Add a table to the Data Source as a Data Asset
 
 We will indicate a table to connect to by defining a Data Asset.  This is as simple as providing the `add_table_asset(...)` method a `name` by which we will reference the Data Asset in the future and a `table_name` to specify the table we wish the Data Asset to connect to.
 

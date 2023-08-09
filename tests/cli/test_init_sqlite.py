@@ -22,17 +22,20 @@ except ImportError:
     from unittest import mock
 
 
+pytestmark = pytest.mark.cli
+
+
 @pytest.fixture
 def titanic_sqlite_db_file(sa, tmp_path_factory):
     temp_dir = str(tmp_path_factory.mktemp("foo_path"))
     fixture_db_path = file_relative_path(__file__, "../test_sets/titanic.db")
 
-    db_path = os.path.join(temp_dir, "titanic.db")
+    db_path = os.path.join(temp_dir, "titanic.db")  # noqa: PTH118
     shutil.copy(fixture_db_path, db_path)
 
     engine = sa.create_engine(f"sqlite:///{db_path}", pool_recycle=3600)
     with engine.connect() as connection:
-        assert connection.execute(sa.text(f"select count(*) from titanic")).fetchall()[
+        assert connection.execute(sa.text("select count(*) from titanic")).fetchall()[
             0
         ] == (1313,)
     return db_path
@@ -49,9 +52,9 @@ def test_cli_init_on_new_project(
     mock_webbrowser, caplog, monkeypatch, tmp_path_factory, titanic_sqlite_db_file, sa
 ):
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
-    ge_dir = os.path.join(project_dir, "great_expectations")
+    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
 
-    database_path = os.path.join(project_dir, "titanic.db")
+    database_path = os.path.join(project_dir, "titanic.db")  # noqa: PTH118
     shutil.copy(titanic_sqlite_db_file, database_path)
     engine = sa.create_engine(f"sqlite:///{database_path}", pool_recycle=3600)
 
@@ -107,9 +110,11 @@ def test_cli_init_on_new_project(
     suite = context.get_expectation_suite(first_suite.expectation_suite_name)
     assert len(suite.expectations) == 14
 
-    assert os.path.isdir(ge_dir)
-    config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
-    assert os.path.isfile(config_path)
+    assert os.path.isdir(ge_dir)  # noqa: PTH112
+    config_path = os.path.join(  # noqa: PTH118
+        project_dir, "great_expectations/great_expectations.yml"
+    )
+    assert os.path.isfile(config_path)  # noqa: PTH113
 
     config = yaml.load(open(config_path))
     data_source_class = config["datasources"]["titanic"]["data_asset_type"][
@@ -209,9 +214,9 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     mock_webbrowser, caplog, monkeypatch, tmp_path_factory, titanic_sqlite_db_file, sa
 ):
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
-    ge_dir = os.path.join(project_dir, "great_expectations")
+    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
 
-    database_path = os.path.join(project_dir, "titanic.db")
+    database_path = os.path.join(project_dir, "titanic.db")  # noqa: PTH118
     shutil.copy(titanic_sqlite_db_file, database_path)
     engine = sa.create_engine(f"sqlite:///{database_path}", pool_recycle=3600)
     engine_url_with_added_whitespace = "    " + str(engine.url) + "  "
@@ -278,9 +283,11 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     suite = context.get_expectation_suite(first_suite.expectation_suite_name)
     assert len(suite.expectations) == 14
 
-    assert os.path.isdir(ge_dir)
-    config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
-    assert os.path.isfile(config_path)
+    assert os.path.isdir(ge_dir)  # noqa: PTH112
+    config_path = os.path.join(  # noqa: PTH118
+        project_dir, "great_expectations/great_expectations.yml"
+    )
+    assert os.path.isfile(config_path)  # noqa: PTH113
 
     config = yaml.load(open(config_path))
     data_source_class = config["datasources"]["titanic"]["data_asset_type"][
@@ -315,10 +322,12 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     sa,
 ):
     project_dir = initialized_sqlite_project
-    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
+    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
 
     _remove_all_datasources(ge_dir)
-    os.remove(os.path.join(ge_dir, "expectations", "warning.json"))
+    os.remove(  # noqa: PTH107
+        os.path.join(ge_dir, "expectations", "warning.json")  # noqa: PTH118
+    )
     context = get_context(context_root_dir=ge_dir)
     assert not context.list_expectation_suites()
 
@@ -372,7 +381,9 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     assert "Great Expectations connected to your database" in stdout
     assert "This looks like an existing project that" not in stdout
 
-    config = _load_config_file(os.path.join(ge_dir, FileDataContext.GX_YML))
+    config = _load_config_file(
+        os.path.join(ge_dir, FileDataContext.GX_YML)  # noqa: PTH118
+    )
     assert "sqlite" in config["datasources"].keys()
 
     context = get_context(context_root_dir=ge_dir)
@@ -395,7 +406,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
 
 
 def _remove_all_datasources(ge_dir):
-    config_path = os.path.join(ge_dir, FileDataContext.GX_YML)
+    config_path = os.path.join(ge_dir, FileDataContext.GX_YML)  # noqa: PTH118
 
     config = _load_config_file(config_path)
     config["datasources"] = {}
@@ -408,7 +419,9 @@ def _remove_all_datasources(ge_dir):
 
 
 def _load_config_file(config_path):
-    assert os.path.isfile(config_path), "Config file is missing. Check path"
+    assert os.path.isfile(  # noqa: PTH113
+        config_path
+    ), "Config file is missing. Check path"
 
     with open(config_path) as f:
         read = f.read()
@@ -457,7 +470,9 @@ def initialized_sqlite_project(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
     context = get_context(
-        context_root_dir=os.path.join(project_dir, FileDataContext.GX_DIR)
+        context_root_dir=os.path.join(  # noqa: PTH118
+            project_dir, FileDataContext.GX_DIR
+        )
     )
     assert isinstance(context, FileDataContext)
     assert len(context.list_datasources()) == 1
@@ -546,9 +561,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
     assert (
-        "{}/great_expectations/uncommitted/data_docs/local_site/index.html".format(
-            project_dir
-        )
+        f"{project_dir}/great_expectations/uncommitted/data_docs/local_site/index.html"
         in mock_webbrowser.call_args[0][0]
     )
 
@@ -572,13 +585,13 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     mock_webbrowser, caplog, monkeypatch, initialized_sqlite_project, sa
 ):
     project_dir = initialized_sqlite_project
-    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
-    uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
+    uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
 
     # mangle the setup to remove all traces of any suite
-    expectations_dir = os.path.join(ge_dir, "expectations")
-    data_docs_dir = os.path.join(uncommitted_dir, "data_docs")
-    validations_dir = os.path.join(uncommitted_dir, "validations")
+    expectations_dir = os.path.join(ge_dir, "expectations")  # noqa: PTH118
+    data_docs_dir = os.path.join(uncommitted_dir, "data_docs")  # noqa: PTH118
+    validations_dir = os.path.join(uncommitted_dir, "validations")  # noqa: PTH118
 
     _delete_and_recreate_dir(expectations_dir)
     _delete_and_recreate_dir(data_docs_dir)
@@ -613,11 +626,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
         result = runner.invoke(
             cli,
             ["init"],
-            input="\n1\n{schema}\n{table}\nsink_me\n\n\n\n".format(
-                os.path.join(project_dir, "data/Titanic.csv"),
-                schema=default_schema,
-                table=default_table,
-            ),
+            input=f"\n1\n{default_schema}\n{default_table}\nsink_me\n\n\n\n",
             catch_exceptions=False,
         )
     stdout = result.stdout

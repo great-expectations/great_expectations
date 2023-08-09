@@ -1,9 +1,11 @@
 # Utility methods for dealing with DataAsset objects
+from __future__ import annotations
 
 import datetime
 import decimal
 import sys
 from functools import wraps
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -18,8 +20,8 @@ def parse_result_format(result_format):
     there is no need to specify a custom partial_unexpected_count."""
     if isinstance(result_format, str):
         result_format = {"result_format": result_format, "partial_unexpected_count": 20}
-    else:
-        if "partial_unexpected_count" not in result_format:  # noqa: PLR5501
+    else:  # noqa: PLR5501
+        if "partial_unexpected_count" not in result_format:
             result_format["partial_unexpected_count"] = 20
 
     return result_format
@@ -79,9 +81,11 @@ class DocInherit:
         return f
 
 
-def recursively_convert_to_json_serializable(test_obj):  # noqa: C901, PLR0911, PLR0912
+def recursively_convert_to_json_serializable(
+    test_obj: dict,
+) -> dict:
     """
-    Helper function to convert a dict object to one that is serializable
+    Helper function to convert an object to one that is serializable
 
     Args:
         test_obj: an object to attempt to convert a corresponding json-serializable object
@@ -93,6 +97,12 @@ def recursively_convert_to_json_serializable(test_obj):  # noqa: C901, PLR0911, 
         test_obj may also be converted in place.
 
     """
+    return _recursively_convert_to_json_serializable(test_obj)
+
+
+def _recursively_convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
+    test_obj,
+) -> Any:
     # If it's one of our types, we pass
     if isinstance(test_obj, (SerializableDictDot, SerializableDotDict)):
         return test_obj

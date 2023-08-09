@@ -2,15 +2,25 @@ module.exports = {
   docs: [
     'intro',
     {
-      type: 'doc', id: 'tutorials/quickstart/quickstart', label: 'Quickstart'
+      type: 'category',
+      label: 'Get started with GX',
+      link: { type: 'doc', id: 'guides/setup/get_started_lp' },
+      items: [
+        'tutorials/quickstart/quickstart',
+        {
+          type: 'doc', id: 'conceptual_guides/gx_overview', label: 'GX Overview'
+        },
+        'tutorials/getting_started/how_to_use_great_expectations_in_databricks',
+        'tutorials/getting_started/how_to_use_great_expectations_with_sql',
+      ]
     },
     {
       type: 'category',
-      label: 'Set up your GX environment',
+      label: 'Configure your GX environment',
       link: { type: 'doc', id: 'guides/setup/setup_overview_lp' },
       items: [
+        'guides/setup/setup_overview',
         'guides/setup/installation/install_gx',
-        'guides/setup/optional_dependencies/cloud/connect_gx_source_data_system',
         {
           type: 'category',
           label: 'Configure Data Contexts',
@@ -29,11 +39,11 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Connect to data',
+      label: 'Connect to source data',
       link: { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_lp' },
       items: [
         'guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data',
-        'guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas',
+        'guides/connecting_to_your_data/fluent/in_memory/connect_in_memory_data',
         'guides/connecting_to_your_data/fluent/database/connect_sql_source_data',
         {
           type: 'category',
@@ -60,8 +70,6 @@ module.exports = {
           items: [
             'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
             'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
-            'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant',
-            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers',
             'guides/expectations/how_to_edit_an_existing_expectationsuite',
             'guides/expectations/how_to_use_auto_initializing_expectations',
             'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
@@ -71,10 +79,19 @@ module.exports = {
         },
         {
           type: 'category',
+          label: 'Profilers and Data Assistants',
+          link: { type: 'doc', id: 'guides/expectations/profilers_data_assistants_lp' },
+          items: [
+            'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant',
+            'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant',
+            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers',
+          ]
+        },
+        {
+          type: 'category',
           label: 'Create Custom Expectations',
           link: { type: 'doc', id: 'guides/expectations/custom_expectations_lp' },
           items: [
-            'guides/expectations/creating_custom_expectations/overview',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations',
@@ -87,7 +104,6 @@ module.exports = {
             'guides/expectations/creating_custom_expectations/how_to_add_support_for_the_auto_initializing_framework_to_a_custom_expectation',
           ]
         },
-        'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
         {
           type: 'category',
           label: 'Add Features to Custom Expectations',
@@ -97,9 +113,11 @@ module.exports = {
             'guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation',
             'guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
             'guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
-            'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation'
+            'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation',
+            'guides/expectations/creating_custom_expectations/add_custom_parameters',
           ]
-        }
+        },
+        'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
       ]
     },
     {
@@ -108,9 +126,6 @@ module.exports = {
       link: { type: 'doc', id: 'guides/validation/validate_data_lp' },
       items: [
         'guides/validation/validate_data_overview',
-        'guides/validation/how_to_validate_data_by_running_a_checkpoint',
-        'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
-        'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
         {
           type: 'category',
           label: 'Manage Checkpoints',
@@ -119,7 +134,9 @@ module.exports = {
             'guides/validation/checkpoints/how_to_create_a_new_checkpoint',
             'guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config',
             'guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
-            'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint'
+            'guides/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint',
+            'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint',
+            'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
           ]
         },
         {
@@ -131,29 +148,32 @@ module.exports = {
             'guides/validation/validation_actions/how_to_collect_openlineage_metadata_using_a_validation_action',
             'guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action',
             'guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action',
-            'guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action'
+            'guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action',
+            'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
           ]
         },
       ]
     },
     {
       type: 'category',
-      label: 'Integrate',
+      label: 'Integrations',
       link: {
         type: 'generated-index',
-        title: 'Integrate',
+        title: 'Integrations',
         description: 'Integrate Great Expectations (GX) with commonly used data engineering tools.',
       },
       items: [
         {
           type: 'category',
-          label: 'Integrate with AWS',
+          label: 'Amazon Web Services (AWS)',
           link: {
             type: 'doc',
             id: 'deployment_patterns/aws_lp',
           },
           items: [
             'deployment_patterns/how_to_use_great_expectations_in_aws_glue',
+            'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
+            'deployment_patterns/how_to_use_great_expectations_in_emr_serverless',
             'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_cloud_storage_and_pandas',
             'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_s3_and_spark',
             'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_athena',
@@ -161,9 +181,7 @@ module.exports = {
           ],
         },
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
-        'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_use_great_expectations_with_airflow',
-        'deployment_patterns/how_to_use_great_expectations_in_databricks',
         'integrations/integration_datahub',
         'deployment_patterns/how_to_use_great_expectations_in_deepnote',
         'deployment_patterns/how_to_use_great_expectations_in_flyte',
@@ -171,8 +189,16 @@ module.exports = {
         'deployment_patterns/how_to_use_great_expectations_with_meltano',
         'deployment_patterns/how_to_use_great_expectations_with_prefect',
         'deployment_patterns/how_to_use_great_expectations_with_ydata_synthetic',
-        'deployment_patterns/how_to_use_great_expectations_in_emr_serverless',
         'integrations/integration_zenml',
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Concepts',
+      link: { type: 'doc', id: 'conceptual_guides/learn_lp' }, 
+      items: [
+        'conceptual_guides/expectation_classes',
+        'conceptual_guides/metricproviders',
       ]
     },
     {
@@ -180,10 +206,9 @@ module.exports = {
       label: 'Reference',
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
-    'contributing/contributing_maturity',
-    'reference/customize_your_deployment',
-    'reference/usage_statistics',
-    'conceptual_guides/expectation_classes',
+        'contributing/contributing_maturity',
+        'reference/customize_your_deployment',
+        'reference/usage_statistics',
         {
           type: 'category',
           label: 'API documentation',
@@ -197,7 +222,7 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Glossary of Terms',
+          label: 'Glossary',
           link: { type: 'doc', id: 'glossary' },
           items: [
             'terms/action',
@@ -221,7 +246,6 @@ module.exports = {
               items: [
                 { type: 'doc', id: 'reference/expectations/conditional_expectations' },
                 { type: 'doc', id: 'reference/expectations/distributional_expectations' },
-                { type: 'doc', id: 'reference/expectations/implemented_expectations' },
                 { type: 'doc', id: 'reference/expectation_suite_operations' },
                 { type: 'doc', id: 'reference/expectations/result_format' },
                 { type: 'doc', id: 'reference/expectations/standard_arguments' }

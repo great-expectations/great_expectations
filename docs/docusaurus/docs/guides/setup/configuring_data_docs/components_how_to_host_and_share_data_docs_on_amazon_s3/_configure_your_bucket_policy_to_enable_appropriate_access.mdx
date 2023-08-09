@@ -1,9 +1,9 @@
 
-The example policy below **enforces IP-based access** - modify the bucket name and IP addresses for your situation. After you have customized the example policy to suit your situation, save it to a file called ``ip-policy.json`` in your local directory.
+The example policy below **enforces IP-based access**. Modify the bucket name and IP addresses for your environment. After you have customized the example policy to suit your situation, name the file ``ip-policy.json`` and save it in your local directory.
 
 :::caution
 
-Your policy should provide access only to appropriate users. Data Docs sites can include critical information about raw data and should generally **not** be publicly accessible.
+Your policy should limit access to authorized users. Data Docs sites can include sensitive information and should **not** be publicly accessible.
 
 :::
 
@@ -40,4 +40,4 @@ Because Data Docs include multiple generated pages, it is important to include t
 
 :::info REMINDER
 
-Amazon Web Service's S3 buckets are a third party utility.  For more (and the most up to date) information on configuring AWS S3 bucket policies, please refer to [Amazon's guide on using bucket policies.](https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-policies.html)
+Amazon Web Service's S3 buckets are a third party utility.  For more information about configuring AWS S3 bucket policies, see [Using bucket policies](https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-policies.html).

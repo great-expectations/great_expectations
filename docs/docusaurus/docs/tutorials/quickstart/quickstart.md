@@ -1,14 +1,13 @@
 ---
-title: Great Expectations Quickstart
+sidebar_label: 'Quickstart'
+title: Quickstart
 tag: [tutorial, getting started]
 ---
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 import SetupAndInstallGx from '/docs/components/setup/link_lists/_setup_and_install_gx.md'
 import DataContextInitializeInstantiateSave from '/docs/components/setup/link_lists/_data_context_initialize_instatiate_save.md'
 
-# Great Expectations Quickstart
-
-Use this quickstart to install GX, connect to sample data, build your first Expectation, validate your data, and review the validation results. This is a great place to start if you're new to GX and aren't sure if it's the right solution for you or your organization.
+Use this quickstart to install GX, connect to sample data, build your first Expectation, validate data, and review the validation results. This is a great place to start if you're new to GX and aren't sure if it's the right solution for you or your organization. If you're using Databricks or SQL to store data, see [Get Started with GX and Databricks](../getting_started/how_to_use_great_expectations_in_databricks.md) or [Get Started with GX and SQL](../getting_started/how_to_use_great_expectations_with_sql.md).
 
 :::note Great Expectations Cloud
 
@@ -57,7 +56,7 @@ Windows support for the open source Python version of GX is currently unavailabl
     ```python name="tutorials/quickstart/quickstart.py connect_to_data"
     ```
 
-    The example code uses the default Data Context Datasource for Pandas to access the `.csv` data in the file at the specified `path`.
+    The example code uses the default Data Context Data Source for Pandas to access the `.csv` data in the file at the specified `path`.
 
 ## Create Expectations
 
@@ -96,11 +95,11 @@ If you're ready to continue your Great Expectations journey, the following topic
     - [How to set up GX to work with data on GCS](../../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)
     - [How to set up GX to work with SQL databases](../../guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases.md)
     - [How to instantiate a Data Context on an EMR Spark Cluster](../../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-    - [How to use Great Expectations in Databricks](../../deployment_patterns/how_to_use_great_expectations_in_databricks.md)
+    - [How to use Great Expectations in Databricks](../getting_started/how_to_use_great_expectations_in_databricks.md)
 
-- Initialize, instantiate, and save a Data Contex:
-    - [How to quickly instantiate a Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context.md)
+- Initialize, instantiate, and save a Data Context:
+    - [How to quickly instantiate a Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md)
     - [How to initialize a filesystem Data Context in Python](../../guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python.md)
     - [How to instantiate a specific Filesystem Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context.md)
-    - [How to explicitly instantiate an Ephemeral Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context.md)
+    - [How to explicitly instantiate an Ephemeral Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md)
     - [How to convert an Ephemeral Data Context to a Filesystem Data Context](../../guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context.md)

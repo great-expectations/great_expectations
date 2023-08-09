@@ -3,25 +3,6 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 
 mssql_integration_tests = []
 
-connecting_to_your_data = [
-    IntegrationTestFixture(
-        name="mssql_yaml_example",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/mssql_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.MSSQL],
-    ),
-    IntegrationTestFixture(
-        name="mssql_python_example",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/mssql_python_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.MSSQL],
-    ),
-]
-
 split_data = [
     IntegrationTestFixture(
         name="split_data_on_whole_table_mssql",
@@ -156,6 +137,5 @@ sample_data = [
     ),
 ]
 
-mssql_integration_tests += connecting_to_your_data
 mssql_integration_tests += split_data
 mssql_integration_tests += sample_data

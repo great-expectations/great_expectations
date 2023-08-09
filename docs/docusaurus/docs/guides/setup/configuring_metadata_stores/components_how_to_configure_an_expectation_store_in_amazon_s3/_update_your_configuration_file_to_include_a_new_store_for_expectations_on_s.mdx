@@ -4,7 +4,7 @@ To manually add an <TechnicalTag tag="expectation_store" text="Expectations Stor
 
 ```python name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py new_expectations_store"
 ```
-As shown in the previous example, you need to change the default ``store_backend`` settings to make the Store work with S3.  The ``class_name`` is set to ``TupleS3StoreBackend``, ``bucket`` is the address of your S3 bucket, and ``prefix`` is the folder in your S3 bucket where Expectations are located.
+Change the default ``store_backend`` settings to make the Store work with S3.  The ``class_name`` is set to ``TupleS3StoreBackend``, ``bucket`` is the address of your S3 bucket, and ``prefix`` is the folder in your S3 bucket where Expectations are located.
 
 The following example shows the additional options that are available to customize `TupleS3StoreBackend`:
 
@@ -55,5 +55,5 @@ store_backend:
 ```
 
 :::caution
-If you are also storing [Validations in S3](../../configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3.md) or [DataDocs in S3](../../configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3.md),  make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
+If you're storing [Validations in S3](../../configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3.md) or [DataDocs in S3](../../configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3.md), make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
 :::

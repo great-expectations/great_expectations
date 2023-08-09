@@ -1,5 +1,7 @@
-import os
-from typing import Any, Callable, Dict, List, Optional, Tuple, cast
+from __future__ import annotations
+
+import pathlib
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, cast
 from unittest import mock
 
 import altair as alt
@@ -8,7 +10,6 @@ import nbformat
 import pytest
 from freezegun import freeze_time
 
-from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.domain import (
@@ -41,8 +42,14 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
-from tests.render.test_util import load_notebook_from_path
+from tests.render.util import load_notebook_from_path
 from tests.test_utils import find_strings_in_nested_obj
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import FileDataContext
+
+# module level markers
+pytestmark = pytest.mark.big
 
 
 @pytest.fixture
@@ -1381,9 +1388,11 @@ def quentin_expected_expectation_suite(
 
 @pytest.fixture(scope="module")
 def bobby_volume_data_assistant_result(
-    bobby_columnar_table_multi_batch_probabilistic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ) -> VolumeDataAssistantResult:
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_probabilistic_data_context
+    )
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -1401,9 +1410,11 @@ def bobby_volume_data_assistant_result(
 
 @pytest.fixture
 def bobby_volume_data_assistant_result_usage_stats_enabled(
-    bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_deterministic_data_context,
 ) -> VolumeDataAssistantResult:
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_deterministic_data_context
+    )
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -1424,7 +1435,7 @@ def quentin_explicit_instantiation_result_actual_time(
     quentin_columnar_table_multi_batch_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ) -> Tuple[Validator, VolumeDataAssistantResult]:
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context: FileDataContext = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -1461,7 +1472,7 @@ def quentin_explicit_instantiation_result_frozen_time(
     quentin_columnar_table_multi_batch_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ) -> Tuple[Validator, VolumeDataAssistantResult]:
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context: FileDataContext = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -1497,7 +1508,7 @@ def quentin_implicit_invocation_result_actual_time(
     quentin_columnar_table_multi_batch_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context: FileDataContext = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -1519,7 +1530,7 @@ def quentin_implicit_invocation_result_frozen_time(
     quentin_columnar_table_multi_batch_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context: FileDataContext = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -1561,7 +1572,7 @@ def _assert_quentin_expected_metrics_by_domain_serialized(
 
 
 def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
-    context: DataContext,
+    context: FileDataContext,
     new_cell: str,
     implicit: bool,
 ):
@@ -1584,7 +1595,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         expectation_suite_name=expectation_suite_name
     )
 
-    notebook_path: str = os.path.join(root_dir, f"run_volume_data_assistant.ipynb")
+    notebook_path = pathlib.Path(root_dir, "run_volume_data_assistant.ipynb")
 
     notebook_code_initialization: str = """
     from typing import Optional, Union
@@ -1661,7 +1672,6 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     ep.preprocess(nb, {"metadata": {"path": root_dir}})
 
 
-@pytest.mark.integration
 def test_volume_data_assistant_result_serialization(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -1682,7 +1692,6 @@ def test_volume_data_assistant_result_serialization(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-@pytest.mark.integration
 @pytest.mark.slow  # 1.06s
 def test_volume_data_assistant_result_get_expectation_suite(
     mock_emit,
@@ -1701,14 +1710,13 @@ def test_volume_data_assistant_result_get_expectation_suite(
     assert mock_emit.call_count == 1
 
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    actual_events: List[mock._Call] = mock_emit.call_args_list
     assert (
         actual_events[-1][0][0]["event"]
         == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE
     )
 
 
-@pytest.mark.integration
 def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ):
@@ -1734,7 +1742,6 @@ def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_
     )
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 3.72s
 def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_instantiation(
     quentin_explicit_instantiation_result_frozen_time,
@@ -1806,7 +1813,6 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_insta
 
 
 @freeze_time("09/26/2019 13:42:41")
-@pytest.mark.integration
 @pytest.mark.slow  # 3.53s
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation(
     quentin_implicit_invocation_result_frozen_time,
@@ -1891,7 +1897,6 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
 
 @freeze_time("09/26/2019 13:42:41")
-@pytest.mark.integration
 @pytest.mark.slow  # 3.03s
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_domain_type_directives(
     quentin_columnar_table_multi_batch_data_context,
@@ -1900,7 +1905,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     quentin_expected_expectation_suite,
     quentin_expected_rule_based_profiler_configuration,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context: FileDataContext = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -2042,12 +2047,11 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
 
 @freeze_time("09/26/2019 13:42:41")
-@pytest.mark.integration
 @pytest.mark.slow  # 3.30s
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
     quentin_columnar_table_multi_batch_data_context,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context: FileDataContext = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -2061,21 +2065,18 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
     rule_config: dict
     assert all(
-        [
-            rule_config["variables"]["estimator"] == "exact"
-            if "estimator" in rule_config["variables"]
-            else True
-            for rule_config in data_assistant_result.profiler_config.rules.values()
-        ]
+        rule_config["variables"]["estimator"] == "exact"
+        if "estimator" in rule_config["variables"]
+        else True
+        for rule_config in data_assistant_result.profiler_config.rules.values()
     )
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 3.31s
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
     quentin_columnar_table_multi_batch_data_context,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context: FileDataContext = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -2098,7 +2099,6 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     )
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 4.97s
 def test_volume_data_assistant_execution_time_within_proper_bounds_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
@@ -2111,7 +2111,6 @@ def test_volume_data_assistant_execution_time_within_proper_bounds_using_explici
     assert data_assistant_result.profiler_execution_time > 0.0
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 3.37s
 def test_volume_data_assistant_execution_time_within_proper_bounds_using_implicit_invocation(
     quentin_implicit_invocation_result_actual_time,
@@ -2124,7 +2123,6 @@ def test_volume_data_assistant_execution_time_within_proper_bounds_using_implici
     assert data_assistant_result.profiler_execution_time > 0.0
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 3.46s
 def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_by_domain_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
@@ -2150,12 +2148,13 @@ def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_
     )
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 13.77s
 def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_probabilistic_data_context
+    )
 
     new_cell: str = (
         "data_assistant_result.plot_metrics(this_is_not_a_real_parameter=True)"
@@ -2176,12 +2175,13 @@ def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
         )
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 11.07s
 def test_volume_data_assistant_plot_descriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_probabilistic_data_context
+    )
 
     new_cell: str = "data_assistant_result.plot_metrics()"
 
@@ -2198,12 +2198,13 @@ def test_volume_data_assistant_plot_descriptive_notebook_execution(
     )
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 11.91s
 def test_volume_data_assistant_plot_prescriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_probabilistic_data_context
+    )
 
     new_cell: str = "data_assistant_result.plot_expectations_and_metrics()"
 
@@ -2220,12 +2221,13 @@ def test_volume_data_assistant_plot_prescriptive_notebook_execution(
     )
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 11.57s
 def test_volume_data_assistant_plot_descriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_probabilistic_data_context
+    )
 
     theme = {"font": "Comic Sans MS"}
 
@@ -2244,12 +2246,13 @@ def test_volume_data_assistant_plot_descriptive_theme_notebook_execution(
     )
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 12.09s
 def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_probabilistic_data_context
+    )
 
     theme = {"font": "Comic Sans MS"}
 
@@ -2270,7 +2273,6 @@ def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
     )
 
 
-@pytest.mark.integration
 def test_volume_data_assistant_plot_returns_proper_dict_repr_of_table_domain_chart(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2280,7 +2282,6 @@ def test_volume_data_assistant_plot_returns_proper_dict_repr_of_table_domain_cha
     assert find_strings_in_nested_obj(table_domain_chart, ["Table Row Count per Batch"])
 
 
-@pytest.mark.integration
 def test_volume_data_assistant_plot_returns_proper_dict_repr_of_column_domain_chart(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2304,7 +2305,6 @@ def test_volume_data_assistant_plot_returns_proper_dict_repr_of_column_domain_ch
     assert find_strings_in_nested_obj(column_domain_charts, columns)
 
 
-@pytest.mark.integration
 def test_volume_data_assistant_plot_include_column_names_filters_output(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2320,7 +2320,6 @@ def test_volume_data_assistant_plot_include_column_names_filters_output(
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
 
-@pytest.mark.integration
 def test_volume_data_assistant_plot_exclude_column_names_filters_output(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2334,7 +2333,6 @@ def test_volume_data_assistant_plot_exclude_column_names_filters_output(
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
 
-@pytest.mark.integration
 def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_error(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2346,7 +2344,6 @@ def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_erro
     assert "either use `include_column_names` or `exclude_column_names`" in str(e.value)
 
 
-@pytest.mark.integration
 def test_volume_data_assistant_plot_custom_theme_overrides(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2405,7 +2402,6 @@ def test_volume_data_assistant_plot_custom_theme_overrides(
     )
 
 
-@pytest.mark.integration
 def test_volume_data_assistant_plot_return_tooltip(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2488,12 +2484,13 @@ def test_volume_data_assistant_plot_return_tooltip(
         assert tooltip in actual_tooltip
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 11.63s
 def test_volume_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_probabilistic_data_context
+    )
 
     new_cell: str = "data_assistant_result.plot_metrics(sequential=False)"
 
@@ -2510,12 +2507,13 @@ def test_volume_data_assistant_metrics_plot_descriptive_non_sequential_notebook_
     )
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 12.09s
 def test_volume_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_probabilistic_data_context
+    )
 
     new_cell: str = (
         "data_assistant_result.plot_expectations_and_metrics(sequential=False)"

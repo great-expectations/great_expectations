@@ -55,6 +55,9 @@ from great_expectations.expectations.registry import (
     list_registered_expectation_implementations,
 )
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.domain_builder import (
+    ColumnDomainBuilder,
+)
 from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
     DEFAULT_RECONCILATION_DIRECTIVES,
     ReconciliationDirectives,
@@ -66,7 +69,11 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
 from great_expectations.types import ClassConfig
 from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.exception_info import ExceptionInfo
-from great_expectations.validator.metrics_calculator import MetricsCalculator
+from great_expectations.validator.metrics_calculator import (
+    MetricsCalculator,
+    _MetricKey,
+    _MetricsDict,
+)
 from great_expectations.validator.validation_graph import (
     ExpectationValidationGraph,
     MetricEdge,
@@ -79,8 +86,9 @@ logging.captureWarnings(True)
 
 if TYPE_CHECKING:
     from great_expectations.core.batch import (
+        AnyBatch,
         Batch,
-        BatchData,
+        BatchDataUnion,
         BatchDefinition,
         BatchMarkers,
     )
@@ -100,7 +108,6 @@ if TYPE_CHECKING:
         ParameterContainer,
     )
     from great_expectations.rule_based_profiler.rule import Rule
-    from great_expectations.validator.computed_metric import MetricValue
     from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -185,12 +192,10 @@ class Validator:
         self,
         execution_engine: ExecutionEngine,
         interactive_evaluation: bool = True,
-        expectation_suite: Optional[ExpectationSuite] = None,
+        expectation_suite: ExpectationSuite | None = None,
         expectation_suite_name: Optional[str] = None,
         data_context: Optional[AbstractDataContext] = None,
-        batches: Optional[
-            Union[List[Batch], Sequence[Union[Batch, FluentBatch]]]
-        ] = None,
+        batches: List[Batch] | Sequence[Batch | FluentBatch] = tuple(),
         include_rendered_content: Optional[bool] = None,
         **kwargs,
     ) -> None:
@@ -214,7 +219,7 @@ class Validator:
             expectation_suite_name=expectation_suite_name,
         )
         self._default_expectation_args: Dict[str, Union[bool, str]] = copy.deepcopy(
-            Validator.DEFAULT_RUNTIME_CONFIGURATION
+            Validator.DEFAULT_RUNTIME_CONFIGURATION  # type: ignore[arg-type]
         )
 
         # This special state variable tracks whether a validation run is going on, which will disable
@@ -259,17 +264,17 @@ class Validator:
         return self._execution_engine.batch_manager.loaded_batch_ids
 
     @property
-    def active_batch_data(self) -> Optional[BatchData]:
+    def active_batch_data(self) -> Optional[BatchDataUnion]:
         """Getter for BatchData object from the currently-active Batch object (convenience property)."""
         return self._execution_engine.batch_manager.active_batch_data
 
     @property
-    def batch_cache(self) -> Dict[str, Batch]:
+    def batch_cache(self) -> Dict[str, AnyBatch]:
         """Getter for dictionary of Batch objects (convenience property)"""
         return self._execution_engine.batch_manager.batch_cache
 
     @property
-    def batches(self) -> Dict[str, Union[Batch, FluentBatch]]:
+    def batches(self) -> Dict[str, AnyBatch]:
         """Getter for dictionary of Batch objects (alias convenience property, to be deprecated)"""
         return self.batch_cache
 
@@ -279,7 +284,7 @@ class Validator:
         return self._execution_engine.batch_manager.active_batch_id
 
     @property
-    def active_batch(self) -> Optional[Batch]:
+    def active_batch(self) -> Optional[AnyBatch]:
         """Getter for active Batch (convenience property)"""
         return self._execution_engine.batch_manager.active_batch
 
@@ -319,7 +324,7 @@ class Validator:
         """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
         self._expectation_suite.expectation_suite_name = expectation_suite_name
 
-    def load_batch_list(self, batch_list: List[Batch]) -> None:
+    def load_batch_list(self, batch_list: Sequence[Batch | FluentBatch]) -> None:
         self._execution_engine.batch_manager.load_batch_list(batch_list=batch_list)
 
     @public_api
@@ -358,7 +363,7 @@ class Validator:
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
-    ) -> Dict[Tuple[str, str, str], MetricValue]:
+    ) -> _MetricsDict:
         """
         Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
 
@@ -444,13 +449,15 @@ class Validator:
             # If progress_bars are not present, assume we want them enabled
             if progress_bars is not None:
                 if "globally" in progress_bars:
-                    enable = progress_bars["globally"]
+                    enable = bool(progress_bars["globally"])
                 if "metric_calculations" in progress_bars:
-                    enable = progress_bars["metric_calculations"]
+                    enable = bool(progress_bars["metric_calculations"])
 
         return enable
 
     def __getattr__(self, name):
+        if self.active_batch is None:
+            raise TypeError("active_batch cannot be None")
         name = name.lower()
         if name.startswith("expect_") and get_expectation_impl(name):
             return self.validate_expectation(name)
@@ -478,15 +485,15 @@ class Validator:
         """
         expectation_impl = get_expectation_impl(name)
 
-        def inst_expectation(*args, **kwargs):  # noqa: PLR0912
+        def inst_expectation(*args: dict, **kwargs):  # noqa: PLR0912
             # this is used so that exceptions are caught appropriately when they occur in expectation config
 
             # TODO: JPC - THIS LOGIC DOES NOT RESPECT DEFAULTS SET BY USERS IN THE VALIDATOR VS IN THE EXPECTATION
             # DEVREL has action to develop a new plan in coordination with MarioPod
 
-            expectation_kwargs: dict = recursively_convert_to_json_serializable(kwargs)
+            expectation_kwargs = recursively_convert_to_json_serializable(kwargs)
 
-            meta: dict = expectation_kwargs.pop("meta", None)
+            meta: Optional[dict] = expectation_kwargs.pop("meta", None)
 
             basic_default_expectation_args: dict = {
                 k: v
@@ -500,14 +507,16 @@ class Validator:
                 {k: v for k, v in kwargs.items() if k in Validator.RUNTIME_KEYS}
             )
 
-            allowed_config_keys: Tuple[str] = expectation_impl.get_allowed_config_keys()
+            allowed_config_keys: Tuple[
+                str, ...
+            ] = expectation_impl.get_allowed_config_keys()
 
-            args_keys: Tuple[str] = expectation_impl.args_keys or tuple()
+            args_keys: Tuple[str, ...] = expectation_impl.args_keys or tuple()
 
             arg_name: str
 
             idx: int
-            arg: Any
+            arg: dict
             for idx, arg in enumerate(args):
                 try:
                     arg_name = args_keys[idx]
@@ -604,17 +613,21 @@ class Validator:
         self,
         expectation_type: str,
         expectation_kwargs: dict,
-        meta: dict,
-        expectation_impl: Expectation,
+        meta: Optional[dict],
+        expectation_impl: type[Expectation],
         runtime_configuration: Optional[dict] = None,
     ) -> ExpectationConfiguration:
         auto: bool = expectation_kwargs.get("auto", False)
         profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
             "profiler_config"
         )
-        default_profiler_config: Optional[
-            RuleBasedProfilerConfig
-        ] = expectation_impl.default_kwarg_values.get("profiler_config")
+        default_profiler_config = expectation_impl.default_kwarg_values.get(
+            "profiler_config"
+        )
+        if default_profiler_config and not isinstance(
+            default_profiler_config, RuleBasedProfilerConfig
+        ):
+            raise TypeError("profiler_config must be None or RuleBasedProfilerConfig")
 
         if auto and profiler_config is None and default_profiler_config is None:
             raise ValueError(
@@ -645,23 +658,23 @@ class Validator:
             configuration = expectation_configurations[0]
 
             # Reconcile explicitly provided "ExpectationConfiguration" success_kwargs as overrides to generated values.
-            success_keys: Tuple[str] = (
+            success_keys: Tuple[str, ...] = (
                 expectation_impl.success_keys
                 if hasattr(expectation_impl, "success_keys")
                 else tuple()
             )
-            arg_keys: Tuple[str] = (
+            arg_keys: Tuple[str, ...] = (
                 expectation_impl.arg_keys
                 if hasattr(expectation_impl, "arg_keys")
                 else tuple()
             )
-            runtime_keys: Tuple[str] = (
+            runtime_keys: Tuple[str, ...] = (
                 expectation_impl.runtime_keys
                 if hasattr(expectation_impl, "runtime_keys")
                 else None
             ) or tuple()
             # noinspection PyTypeChecker
-            override_keys: Tuple[str] = success_keys + arg_keys + runtime_keys
+            override_keys: Tuple[str, ...] = success_keys + arg_keys + runtime_keys
 
             key: str
             value: Any
@@ -703,7 +716,7 @@ class Validator:
         """
         expectation_impl = get_expectation_impl(expectation_type)
 
-        def inst_rule_based_profiler(
+        def inst_rule_based_profiler(  # noqa: PLR0912
             *args, **kwargs
         ) -> Optional[BaseRuleBasedProfiler]:
             if args is None:
@@ -714,9 +727,11 @@ class Validator:
 
             expectation_kwargs: dict = recursively_convert_to_json_serializable(kwargs)
 
-            allowed_config_keys: Tuple[str] = expectation_impl.get_allowed_config_keys()
+            allowed_config_keys: Tuple[
+                str, ...
+            ] = expectation_impl.get_allowed_config_keys()
 
-            args_keys: Tuple[str] = expectation_impl.args_keys or tuple()
+            args_keys: Tuple[str, ...] = expectation_impl.args_keys or tuple()
 
             arg_name: str
 
@@ -736,7 +751,7 @@ class Validator:
                         f"Invalid positional argument: {arg}"
                     )
 
-            success_keys: Tuple[str] = (
+            success_keys: Tuple[str, ...] = (
                 expectation_impl.success_keys
                 if hasattr(expectation_impl, "success_keys")
                 else tuple()
@@ -746,9 +761,15 @@ class Validator:
             profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
                 "profiler_config"
             )
-            default_profiler_config: Optional[
-                RuleBasedProfilerConfig
-            ] = expectation_impl.default_kwarg_values.get("profiler_config")
+            default_profiler_config = expectation_impl.default_kwarg_values.get(
+                "profiler_config"
+            )
+            if default_profiler_config and not isinstance(
+                default_profiler_config, RuleBasedProfilerConfig
+            ):
+                raise TypeError(
+                    "profiler_config must be None or RuleBasedProfilerConfig"
+                )
 
             if auto and profiler_config is None and default_profiler_config is None:
                 raise ValueError(
@@ -770,13 +791,17 @@ class Validator:
                 If default Rule-Based Profiler configuration exists, use it as base with custom Rule-Based Profiler
                 configuration as override; otherwise, use custom Rule-Based Profiler configuration with no override.
                 """
-                profiler_config = default_profiler_config or profiler_config
+                profiler_config_to_use = default_profiler_config or profiler_config
+                if not isinstance(profiler_config_to_use, RuleBasedProfilerConfig):
+                    raise TypeError(
+                        "profiler_config must be None or RuleBasedProfilerConfig"
+                    )
 
                 profiler = self._build_rule_based_profiler_from_config_and_runtime_args(
                     expectation_type=expectation_type,
                     expectation_kwargs=expectation_kwargs,
                     success_keys=success_keys,
-                    profiler_config=profiler_config,
+                    profiler_config=profiler_config_to_use,
                     override_profiler_config=override_profiler_config,
                 )
             else:
@@ -790,7 +815,7 @@ class Validator:
         self,
         expectation_type: str,
         expectation_kwargs: dict,
-        success_keys: Tuple[str],
+        success_keys: Tuple[str, ...],
         profiler_config: RuleBasedProfilerConfig,
         override_profiler_config: Optional[RuleBasedProfilerConfig] = None,
     ) -> BaseRuleBasedProfiler:
@@ -811,16 +836,19 @@ class Validator:
 
         domain_type: MetricDomainTypes
 
-        if override_profiler_config is None:
-            override_profiler_config = {}
+        override_profiler_config_dict: dict = {}
 
         if isinstance(override_profiler_config, RuleBasedProfilerConfig):
-            override_profiler_config = override_profiler_config.to_json_dict()
+            override_profiler_config_dict = override_profiler_config.to_json_dict()
+        elif override_profiler_config is not None:
+            # NOTE: we shouldn't get here per the override_profiler_config type, but it is needed per tests
+            # See test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_yes
+            override_profiler_config_dict = override_profiler_config
 
-        override_profiler_config.pop("name", None)
-        override_profiler_config.pop("config_version", None)
+        override_profiler_config_dict.pop("name", None)
+        override_profiler_config_dict.pop("config_version", None)
 
-        override_variables: Dict[str, Any] = override_profiler_config.get(
+        override_variables: Dict[str, Any] = override_profiler_config_dict.get(
             "variables", {}
         )
         effective_variables: Optional[
@@ -831,7 +859,7 @@ class Validator:
         )
         profiler.variables = effective_variables
 
-        override_rules: Dict[str, Dict[str, Any]] = override_profiler_config.get(
+        override_rules: Dict[str, Dict[str, Any]] = override_profiler_config_dict.get(
             "rules", {}
         )
 
@@ -865,11 +893,12 @@ class Validator:
         profiler: BaseRuleBasedProfiler,
         expectation_type: str,
         expectation_kwargs: dict,
-        success_keys: Tuple[str],
+        success_keys: Tuple[str, ...],
     ) -> None:
         rule: Rule = profiler.rules[0]
         assert (
-            rule.expectation_configuration_builders[0].expectation_type
+            rule.expectation_configuration_builders
+            and rule.expectation_configuration_builders[0].expectation_type
             == expectation_type
         ), "ExpectationConfigurationBuilder in profiler used to build an ExpectationConfiguration must have the same expectation_type as the expectation being invoked."
 
@@ -883,6 +912,8 @@ class Validator:
             and key not in BaseRuleBasedProfiler.EXPECTATION_SUCCESS_KEYS
         }
 
+        if not rule.domain_builder:
+            raise TypeError("Rule must include domain_builder.")
         domain_type: MetricDomainTypes = rule.domain_builder.domain_type
         if domain_type not in MetricDomainTypes:
             raise ValueError(
@@ -891,6 +922,8 @@ class Validator:
 
         # TODO: <Alex>Handle future domain_type cases as they are defined.</Alex>
         if domain_type == MetricDomainTypes.COLUMN:
+            assert isinstance(rule.domain_builder, ColumnDomainBuilder)
+
             column_name = expectation_kwargs.get("column")
             rule.domain_builder.include_column_names = (
                 [column_name] if column_name else None
@@ -1011,7 +1044,7 @@ class Validator:
             )
         )
 
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        resolved_metrics: _MetricsDict
 
         try:
             (
@@ -1055,7 +1088,7 @@ class Validator:
                 evrs.append(result)
             except Exception as err:
                 if catch_exceptions:
-                    exception_traceback: str = traceback.format_exc()
+                    exception_traceback = traceback.format_exc()
                     evrs = self._catch_exceptions_in_failing_expectation_validations(
                         exception_traceback=exception_traceback,
                         exception=err,
@@ -1164,14 +1197,14 @@ class Validator:
         processed_configurations: List[ExpectationConfiguration],
         show_progress_bars: bool,
     ) -> Tuple[
-        Dict[Tuple[str, str, str], MetricValue],
+        _MetricsDict,
         List[ExpectationValidationResult],
         List[ExpectationConfiguration],
     ]:
         # Resolve overall suite-level graph and process any MetricResolutionError type exceptions that might occur.
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        resolved_metrics: _MetricsDict
         aborted_metrics_info: Dict[
-            Tuple[str, str, str],
+            _MetricKey,
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ]
         (
@@ -1376,7 +1409,7 @@ class Validator:
         expectation_suite = copy.deepcopy(self.expectation_suite)
         expectations = expectation_suite.expectations
 
-        discards = defaultdict(int)
+        discards: defaultdict[str, int] = defaultdict(int)
 
         if discard_failed_expectations:
             new_expectations = []
@@ -1582,15 +1615,13 @@ class Validator:
                     raise GreatExpectationsError(
                         f"Unable to load expectation suite: IO error while reading {expectation_suite}"
                     )
-            elif not isinstance(expectation_suite, ExpectationSuite):
+
+            if not isinstance(expectation_suite, ExpectationSuite):
                 logger.error(
                     "Unable to validate using the provided value for expectation suite; does it need to be "
                     "loaded from a dictionary?"
                 )
-                if getattr(data_context, "_usage_statistics_handler", None):
-                    # noinspection PyProtectedMember
-                    handler = data_context._usage_statistics_handler
-                    # noinspection PyProtectedMember
+                if handler := getattr(data_context, "_usage_statistics_handler", None):
                     handler.send_usage_message(
                         event="data_asset.validate",
                         event_payload=handler.anonymizer.anonymize(obj=self),
@@ -1628,7 +1659,7 @@ class Validator:
             # TODO: Deprecate "great_expectations.__version__"
 
             # Group expectations by column
-            columns = {}
+            columns: dict[Any, list[ExpectationConfiguration]] = {}
 
             for expectation in expectation_suite.expectations:
                 expectation.process_evaluation_parameters(
@@ -1698,10 +1729,7 @@ class Validator:
 
             self._data_context = validation_data_context
         except Exception:
-            if getattr(data_context, "_usage_statistics_handler", None):
-                # noinspection PyProtectedMember
-                handler = data_context._usage_statistics_handler
-                # noinspection PyProtectedMember
+            if handler := getattr(data_context, "_usage_statistics_handler", None):
                 handler.send_usage_message(
                     event="data_asset.validate",
                     event_payload=handler.anonymizer.anonymize(obj=self),
@@ -1711,10 +1739,7 @@ class Validator:
         finally:
             self._active_validation = False
 
-        if getattr(data_context, "_usage_statistics_handler", None):
-            # noinspection PyProtectedMember
-            handler = data_context._usage_statistics_handler
-            # noinspection PyProtectedMember
+        if handler := getattr(data_context, "_usage_statistics_handler", None):
             handler.send_usage_message(
                 event="data_asset.validate",
                 event_payload=handler.anonymizer.anonymize(obj=self),
@@ -1765,7 +1790,7 @@ class Validator:
         if batch_markers is None:
             batch_markers = self.active_batch_markers
         if batch_definition is None:
-            batch_definition = self.active_batch_definition
+            batch_definition = self.active_batch_definition  # type: ignore [assignment]
         self._expectation_suite.add_citation(
             comment,
             batch_spec=batch_spec,
@@ -1805,7 +1830,7 @@ class Validator:
     @staticmethod
     def _parse_validation_graph(
         validation_graph: ValidationGraph,
-        metrics: Dict[Tuple[str, str, str], MetricValue],
+        metrics: _MetricsDict,
     ) -> Tuple[Set[MetricConfiguration], Set[MetricConfiguration]]:
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""
@@ -1820,8 +1845,8 @@ class Validator:
                     if edge.left.id not in maybe_ready_ids:
                         maybe_ready_ids.add(edge.left.id)
                         maybe_ready.add(edge.left)
-                else:
-                    if edge.left.id not in unmet_dependency_ids:  # noqa: PLR5501
+                else:  # noqa: PLR5501
+                    if edge.left.id not in unmet_dependency_ids:
                         unmet_dependency_ids.add(edge.left.id)
                         unmet_dependency.add(edge.left)
 
@@ -1872,7 +1897,7 @@ class Validator:
                 )
             else:
                 expectation_suite = copy.deepcopy(expectation_suite)
-            self._expectation_suite = expectation_suite
+            self._expectation_suite: ExpectationSuite = expectation_suite
 
             if expectation_suite_name is not None:
                 if (
@@ -1895,9 +1920,7 @@ class Validator:
                 data_context=self._data_context,
             )
 
-        self._expectation_suite.execution_engine_type = type(
-            self._execution_engine
-        ).__name__
+        self._expectation_suite.execution_engine_type = type(self._execution_engine)
 
     def _get_runtime_configuration(
         self,
@@ -1917,8 +1940,8 @@ class Validator:
                 runtime_configuration.pop("result_format")
             else:
                 runtime_configuration.update({"result_format": result_format})
-        else:
-            if result_format is not None:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if result_format is not None:
                 runtime_configuration.update({"result_format": result_format})
 
         return runtime_configuration
@@ -1933,7 +1956,9 @@ class Validator:
         """
         # calc stats
         evaluated_expectations = len(validation_results)
-        successful_expectations = sum(exp.success for exp in validation_results)
+        successful_expectations = len(
+            [exp for exp in validation_results if exp.success]
+        )
         unsuccessful_expectations = evaluated_expectations - successful_expectations
         success = successful_expectations == evaluated_expectations
         try:
@@ -2010,7 +2035,7 @@ class BridgeValidator:
         if self.expectation_engine is None:
             from great_expectations.compatibility import pyspark
 
-            if pyspark.DataFrame and isinstance(batch.data, pyspark.DataFrame):
+            if pyspark.DataFrame and isinstance(batch.data, pyspark.DataFrame):  # type: ignore [truthy-function]
                 self.expectation_engine = SparkDFDataset
 
         if self.expectation_engine is None:
@@ -2025,7 +2050,9 @@ class BridgeValidator:
         Bridges between Execution Engines in providing access to the batch data. Validates that Dataset classes
         contain proper type of data (i.e. a Pandas Dataset does not contain SqlAlchemy data)
         """
-        if issubclass(self.expectation_engine, PandasDataset):
+        if self.expectation_engine and issubclass(
+            self.expectation_engine, PandasDataset
+        ):
             if not isinstance(self.batch["data"], pd.DataFrame):
                 raise ValueError(
                     "PandasDataset expectation_engine requires a Pandas Dataframe for its batch"
@@ -2046,7 +2073,7 @@ class BridgeValidator:
             from great_expectations.compatibility import pyspark
 
             if not (
-                pyspark.DataFrame and isinstance(self.batch.data, pyspark.DataFrame)
+                pyspark.DataFrame and isinstance(self.batch.data, pyspark.DataFrame)  # type: ignore [truthy-function]
             ):
                 raise ValueError(
                     "SparkDFDataset expectation_engine requires a spark DataFrame for its batch"

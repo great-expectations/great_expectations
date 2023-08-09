@@ -21,6 +21,9 @@ except ImportError:
     from unittest import mock
 
 
+pytestmark = pytest.mark.cli
+
+
 @pytest.mark.xfail(
     reason="This command is not yet implemented for the modern API",
     run=True,
@@ -38,9 +41,9 @@ def test_cli_init_on_new_project(
         "GE_USAGE_STATS", raising=False
     )  # Undo the project-wide test default
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
-    os.makedirs(os.path.join(project_dir, "data"))
-    data_folder_path = os.path.join(project_dir, "data")
-    data_path = os.path.join(project_dir, "data", "Titanic.csv")
+    os.makedirs(os.path.join(project_dir, "data"))  # noqa: PTH103, PTH118
+    data_folder_path = os.path.join(project_dir, "data")  # noqa: PTH118
+    data_path = os.path.join(project_dir, "data", "Titanic.csv")  # noqa: PTH118
     fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
     shutil.copy(fixture_path, data_path)
 
@@ -75,12 +78,16 @@ def test_cli_init_on_new_project(
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
-    assert "Done generating example Expectation Suite" in stdout
+    assert "Done generating example Expectation Suite\x1B" in stdout
     assert "Great Expectations is now set up" in stdout
 
-    assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
-    config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
-    assert os.path.isfile(config_path)
+    assert os.path.isdir(  # noqa: PTH112
+        os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
+    )
+    config_path = os.path.join(  # noqa: PTH118
+        project_dir, "great_expectations/great_expectations.yml"
+    )
+    assert os.path.isfile(config_path)  # noqa: PTH113
 
     config = yaml.load(open(config_path))
     data_source_class = config["datasources"]["data__dir"]["data_asset_type"][
@@ -88,7 +95,9 @@ def test_cli_init_on_new_project(
     ]
     assert data_source_class == "PandasDataset"
 
-    obs_tree = gen_directory_tree_str(os.path.join(project_dir, "great_expectations"))
+    obs_tree = gen_directory_tree_str(
+        os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
+    )
 
     # Instead of monkey patching guids, just regex out the guids
     guid_safe_obs_tree = re.sub(
@@ -183,21 +192,27 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     initialized_project,
 ):
     project_dir = initialized_project
-    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
+    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
 
     # mangle the project to remove all traces of a suite and validations
     _remove_all_datasources(ge_dir)
-    os.remove(os.path.join(ge_dir, "expectations", "Titanic", "warning.json"))
-    uncommitted_dir = os.path.join(ge_dir, "uncommitted")
-    validations_dir = os.path.join(ge_dir, uncommitted_dir, "validations")
+    os.remove(  # noqa: PTH107
+        os.path.join(ge_dir, "expectations", "Titanic", "warning.json")  # noqa: PTH118
+    )
+    uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
+    validations_dir = os.path.join(  # noqa: PTH118
+        ge_dir, uncommitted_dir, "validations"
+    )
     shutil.rmtree(validations_dir)
-    os.mkdir(validations_dir)
-    shutil.rmtree(os.path.join(uncommitted_dir, "data_docs", "local_site"))
+    os.mkdir(validations_dir)  # noqa: PTH102
+    shutil.rmtree(
+        os.path.join(uncommitted_dir, "data_docs", "local_site")  # noqa: PTH118
+    )
     context = get_context(context_root_dir=ge_dir)
     assert not context.list_expectation_suites()
 
-    data_folder_path = os.path.join(project_dir, "data")
-    csv_path = os.path.join(project_dir, "data", "Titanic.csv")
+    data_folder_path = os.path.join(project_dir, "data")  # noqa: PTH118
+    csv_path = os.path.join(project_dir, "data", "Titanic.csv")  # noqa: PTH118
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(project_dir)
     with pytest.warns(
@@ -206,9 +221,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
         result = runner.invoke(
             cli,
             ["init"],
-            input="\n1\n1\n{}\n\n\n\n2\n{}\nmy_suite\n\n\n\n\n".format(
-                data_folder_path, csv_path
-            ),
+            input=f"\n1\n1\n{data_folder_path}\n\n\n\n2\n{csv_path}\nmy_suite\n\n\n\n\n",
             catch_exceptions=False,
         )
     assert mock_webbrowser.call_count == 1
@@ -236,7 +249,9 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     )
     assert "Great Expectations is now set up." in stdout
 
-    config = _load_config_file(os.path.join(ge_dir, FileDataContext.GX_YML))
+    config = _load_config_file(
+        os.path.join(ge_dir, FileDataContext.GX_YML)  # noqa: PTH118
+    )
     assert "data__dir" in config["datasources"].keys()
 
     context = get_context(context_root_dir=ge_dir)
@@ -250,7 +265,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
 
 
 def _remove_all_datasources(ge_dir):
-    config_path = os.path.join(ge_dir, FileDataContext.GX_YML)
+    config_path = os.path.join(ge_dir, FileDataContext.GX_YML)  # noqa: PTH118
 
     config = _load_config_file(config_path)
     config["datasources"] = {}
@@ -263,7 +278,9 @@ def _remove_all_datasources(ge_dir):
 
 
 def _load_config_file(config_path):
-    assert os.path.isfile(config_path), "Config file is missing. Check path"
+    assert os.path.isfile(  # noqa: PTH113
+        config_path
+    ), "Config file is missing. Check path"
 
     with open(config_path) as f:
         read = f.read()
@@ -278,9 +295,9 @@ def _load_config_file(config_path):
 def initialized_project(mock_webbrowser, monkeypatch, tmp_path_factory):
     """This is an initialized project through the CLI."""
     project_dir = str(tmp_path_factory.mktemp("my_rad_project"))
-    os.makedirs(os.path.join(project_dir, "data"))
-    data_folder_path = os.path.join(project_dir, "data")
-    data_path = os.path.join(project_dir, "data/Titanic.csv")
+    os.makedirs(os.path.join(project_dir, "data"))  # noqa: PTH103, PTH118
+    data_folder_path = os.path.join(project_dir, "data")  # noqa: PTH118
+    data_path = os.path.join(project_dir, "data/Titanic.csv")  # noqa: PTH118
     fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
     shutil.copy(fixture_path, data_path)
     runner = CliRunner(mix_stderr=False)
@@ -300,7 +317,9 @@ def initialized_project(mock_webbrowser, monkeypatch, tmp_path_factory):
     )
 
     context = get_context(
-        context_root_dir=os.path.join(project_dir, FileDataContext.GX_DIR)
+        context_root_dir=os.path.join(  # noqa: PTH118
+            project_dir, FileDataContext.GX_DIR
+        )
     )
     assert isinstance(context, FileDataContext)
     assert len(context.list_datasources()) == 1
@@ -317,7 +336,7 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     mock_webbrowser, caplog, monkeypatch, initialized_project, filesystem_csv_2
 ):
     project_dir = initialized_project
-    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
+    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
 
     context = get_context(context_root_dir=ge_dir)
     context.add_datasource(
@@ -450,16 +469,16 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     initialized_project,
 ):
     project_dir = initialized_project
-    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
-    uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
+    uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
 
-    data_folder_path = os.path.join(project_dir, "data")
-    data_path = os.path.join(project_dir, "data", "Titanic.csv")
+    os.path.join(project_dir, "data")  # noqa: PTH118
+    data_path = os.path.join(project_dir, "data", "Titanic.csv")  # noqa: PTH118
 
     # mangle the setup to remove all traces of any suite
-    expectations_dir = os.path.join(ge_dir, "expectations")
-    data_docs_dir = os.path.join(uncommitted_dir, "data_docs")
-    validations_dir = os.path.join(uncommitted_dir, "validations")
+    expectations_dir = os.path.join(ge_dir, "expectations")  # noqa: PTH118
+    data_docs_dir = os.path.join(uncommitted_dir, "data_docs")  # noqa: PTH118
+    validations_dir = os.path.join(uncommitted_dir, "validations")  # noqa: PTH118
 
     _delete_and_recreate_dir(expectations_dir)
     _delete_and_recreate_dir(data_docs_dir)
@@ -506,9 +525,11 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
     caplog, monkeypatch, tmp_path_factory
 ):
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
-    os.makedirs(os.path.join(project_dir, "data"))
-    data_folder_path = os.path.join(project_dir, "data")
-    data_path = os.path.join(project_dir, "data", "broken_excel_file.xls")
+    os.makedirs(os.path.join(project_dir, "data"))  # noqa: PTH103, PTH118
+    data_folder_path = os.path.join(project_dir, "data")  # noqa: PTH118
+    data_path = os.path.join(  # noqa: PTH118
+        project_dir, "data", "broken_excel_file.xls"
+    )
     fixture_path = file_relative_path(__file__, "../test_sets/broken_excel_file.xls")
     shutil.copy(fixture_path, data_path)
 
@@ -545,9 +566,13 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
         in stdout
     )
 
-    assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
-    config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
-    assert os.path.isfile(config_path)
+    assert os.path.isdir(  # noqa: PTH112
+        os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
+    )
+    config_path = os.path.join(  # noqa: PTH118
+        project_dir, "great_expectations/great_expectations.yml"
+    )
+    assert os.path.isfile(config_path)  # noqa: PTH113
 
     config = yaml.load(open(config_path))
     data_source_class = config["datasources"]["data__dir"]["data_asset_type"][
@@ -569,11 +594,13 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     mock_webbrowser, caplog, monkeypatch, tmp_path_factory
 ):
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
-    os.makedirs(os.path.join(project_dir, "data"))
-    data_folder_path = os.path.join(project_dir, "data")
-    data_path = os.path.join(project_dir, "data", "broken_excel_file.xls")
+    os.makedirs(os.path.join(project_dir, "data"))  # noqa: PTH103, PTH118
+    data_folder_path = os.path.join(project_dir, "data")  # noqa: PTH118
+    data_path = os.path.join(  # noqa: PTH118
+        project_dir, "data", "broken_excel_file.xls"
+    )
     fixture_path = file_relative_path(__file__, "../test_sets/broken_excel_file.xls")
-    data_path_2 = os.path.join(project_dir, "data", "Titanic.csv")
+    data_path_2 = os.path.join(project_dir, "data", "Titanic.csv")  # noqa: PTH118
     fixture_path_2 = file_relative_path(__file__, "../test_sets/Titanic.csv")
     shutil.copy(fixture_path, data_path)
     shutil.copy(fixture_path_2, data_path_2)
@@ -623,9 +650,13 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     assert "Data Docs" in stdout
     assert "Great Expectations is now set up" in stdout
 
-    assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
-    config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
-    assert os.path.isfile(config_path)
+    assert os.path.isdir(  # noqa: PTH112
+        os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
+    )
+    config_path = os.path.join(  # noqa: PTH118
+        project_dir, "great_expectations/great_expectations.yml"
+    )
+    assert os.path.isfile(config_path)  # noqa: PTH113
 
     config = yaml.load(open(config_path))
     data_source_class = config["datasources"]["data__dir"]["data_asset_type"][
@@ -633,7 +664,9 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     ]
     assert data_source_class == "PandasDataset"
 
-    obs_tree = gen_directory_tree_str(os.path.join(project_dir, "great_expectations"))
+    obs_tree = gen_directory_tree_str(
+        os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
+    )
 
     # Instead of monkey patching guids, just regex out the guids
     guid_safe_obs_tree = re.sub(
@@ -710,6 +743,6 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
 
 def _delete_and_recreate_dir(directory):
     shutil.rmtree(directory)
-    assert not os.path.isdir(directory)
-    os.mkdir(directory)
-    assert os.path.isdir(directory)
+    assert not os.path.isdir(directory)  # noqa: PTH112
+    os.mkdir(directory)  # noqa: PTH102
+    assert os.path.isdir(directory)  # noqa: PTH112

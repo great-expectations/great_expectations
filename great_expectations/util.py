@@ -1055,7 +1055,7 @@ def validate(  # noqa: PLR0913, PLR0912
 
 
 # https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
-def gen_directory_tree_str(startpath):
+def gen_directory_tree_str(startpath: PathStr):
     """Print the structure of directory as a tree:
 
     Ex:
@@ -1074,7 +1074,7 @@ def gen_directory_tree_str(startpath):
     tuples.sort()
 
     for root, dirs, files in tuples:
-        level = root.replace(startpath, "").count(os.sep)
+        level = root.replace(str(startpath), "").count(os.sep)
         indent = " " * 4 * level
         output_str += f"{indent}{os.path.basename(root)}/\n"  # noqa: PTH119
         subindent = " " * 4 * (level + 1)
@@ -1374,7 +1374,7 @@ def deep_filter_properties_iterable(  # noqa: PLR0913
         # Upon unwinding the call stack, do a sanity check to ensure cleaned properties.
         keys_to_delete: List[str] = list(
             filter(
-                lambda k: k not in keep_fields  # type: ignore[arg-type]
+                lambda k: k not in keep_fields
                 and _is_to_be_removed_from_deep_filter_properties_iterable(
                     value=properties[k],
                     clean_nulls=clean_nulls,
@@ -1713,6 +1713,28 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
         [np.ndarray], np.ndarray
     ] = np.vectorize(pyfunc=convert_decimal_to_float)
     return convert_decimal_to_float_vectorized(data)
+
+
+def convert_pandas_series_decimal_to_float_dtype(
+    data: pd.Series, inplace: bool = False
+) -> pd.Series | None:
+    """
+    Convert all elements of "pd.Series" argument from "decimal.Decimal" type to "float" type objects "pd.Series" result.
+    """
+    series_data: np.ndarray = data.to_numpy()
+    series_data_has_decimal: bool = does_ndarray_contain_decimal_dtype(data=series_data)
+    if series_data_has_decimal:
+        series_data = convert_ndarray_decimal_to_float_dtype(data=series_data)
+        if inplace:
+            data.update(pd.Series(series_data))
+            return None
+
+        return pd.Series(series_data)
+
+    if inplace:
+        return None
+
+    return data
 
 
 @overload

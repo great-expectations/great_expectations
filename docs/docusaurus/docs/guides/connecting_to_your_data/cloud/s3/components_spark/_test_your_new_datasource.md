@@ -2,7 +2,7 @@ import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading data from it into a <TechnicalTag tag="validator" text="Validator" /> using a <TechnicalTag tag="batch_request" text="Batch Request" />.
+Verify your new <TechnicalTag tag="datasource" text="Data Source" /> by loading data from it into a <TechnicalTag tag="validator" text="Validator" /> using a <TechnicalTag tag="batch_request" text="Batch Request" />.
 
 <Tabs
   defaultValue='runtime_batch_request'
