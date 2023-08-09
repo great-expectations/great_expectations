@@ -14,9 +14,6 @@ import pyspark.pandas as ps
 # Required by pyarrow>=2.0.0 within Spark to suppress UserWarning
 os.environ["PYARROW_IGNORE_TIMEZONE"] = "1"
 
-# Required by pyarrow>=2.0.0 within Spark to suppress UserWarning
-os.environ["PYARROW_IGNORE_TIMEZONE"] = "1"
-
 context = gx.get_context()
 
 spark = gx.core.util.get_or_create_spark_application()
@@ -37,6 +34,7 @@ df = ps.DataFrame(
     },
     index=[10, 20, 30, 40, 50, 60],
 )
+dataframe = spark.createDataFrame(data=df)
 # </snippet>
 
 # Python
