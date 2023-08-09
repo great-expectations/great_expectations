@@ -228,7 +228,7 @@ class TestTableIdentifiers:
             expectation_configuration=ExpectationConfiguration(
                 expectation_type="expect_column_values_to_not_be_null",
                 kwargs={
-                    "column": "val",
+                    "column": "name",
                     "mostly": 1,
                 },
             )
