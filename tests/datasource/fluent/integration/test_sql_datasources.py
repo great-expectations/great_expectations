@@ -111,6 +111,7 @@ def table_factory(
                         f"CREATE TABLE IF NOT EXISTS {qualified_table_name} (id INTEGER, name VARCHAR(255))"
                     )
                 )
+                conn.commit()
                 created_tables.append(dict(table_name=name, schema=schema))
         all_created_tables[engine.dialect.name] = created_tables
         engines[engine.dialect.name] = engine
