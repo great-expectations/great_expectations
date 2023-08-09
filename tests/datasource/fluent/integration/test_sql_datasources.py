@@ -32,6 +32,8 @@ TRINO_TABLE: Final[str] = "customer"
 # some of the trino tests probably don't make sense if we can't create tables
 DO_NOT_CREATE_TABLES: set[str] = {"trino"}
 
+# TODO: simplify this and possible get rid of this mapping once we have settled on
+# all the naming conventions we want to support for different SQL dialects
 TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
     "postgres": {
         "unquoted_lower": PG_TABLE.lower(),
