@@ -103,7 +103,7 @@ def table_factory(
         created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
         with engine.connect() as conn:
             if schema:
-                conn.execute(f"CREATE SCHEMA {schema}")
+                conn.execute(TextClause(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
             for name in table_names:
                 qualified_table_name = f"{schema}.{name}" if schema else name
                 conn.execute(
@@ -186,7 +186,9 @@ class TestTableIdentifiers:
     ):
         table_name: str = TABLE_NAME_MAPPING["postgres"][asset_name]
         # create table
-        table_factory(engine=postgres_ds.get_engine(), table_names={table_name})
+        table_factory(
+            engine=postgres_ds.get_engine(), table_names={table_name}, schema="public"
+        )
 
         table_names: list[str] = inspect(postgres_ds.get_engine()).get_table_names()
         print(f"postgres tables:\n{pf(table_names)}))")
