@@ -39,11 +39,11 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Connect to Source Data',
+      label: 'Connect to source data',
       link: { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_lp' },
       items: [
         'guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data',
-        'guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas',
+        'guides/connecting_to_your_data/fluent/in_memory/connect_in_memory_data',
         'guides/connecting_to_your_data/fluent/database/connect_sql_source_data',
         {
           type: 'category',
@@ -194,6 +194,15 @@ module.exports = {
     },
     {
       type: 'category',
+      label: 'Concepts',
+      link: { type: 'doc', id: 'conceptual_guides/learn_lp' }, 
+      items: [
+        'conceptual_guides/expectation_classes',
+        'conceptual_guides/metricproviders',
+      ]
+    },
+    {
+      type: 'category',
       label: 'Reference',
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
@@ -237,7 +246,6 @@ module.exports = {
               items: [
                 { type: 'doc', id: 'reference/expectations/conditional_expectations' },
                 { type: 'doc', id: 'reference/expectations/distributional_expectations' },
-                { type: 'doc', id: 'reference/expectations/implemented_expectations' },
                 { type: 'doc', id: 'reference/expectation_suite_operations' },
                 { type: 'doc', id: 'reference/expectations/result_format' },
                 { type: 'doc', id: 'reference/expectations/standard_arguments' }
@@ -271,14 +279,5 @@ module.exports = {
     { type: 'doc', id: 'changelog' },
     { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
     'contributing/contributing',
-    {
-      type: 'category',
-      label: 'Learn',
-      link: { type: 'doc', id: 'conceptual_guides/learn_lp' },
-      items: [
-        'conceptual_guides/expectation_classes',
-        'conceptual_guides/metricproviders',
-      ]
-    },
   ]
 }

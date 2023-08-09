@@ -10,7 +10,6 @@ from great_expectations.data_context.data_context import (
 )
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 @pytest.mark.parametrize(
     "id, ge_cloud_id, expected",
@@ -29,7 +28,6 @@ def test_data_context__resolve_id_and_ge_cloud_id_success(
     assert resolved == expected
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_data_context__resolve_id_and_ge_cloud_id_failure():
     id = "abc123"

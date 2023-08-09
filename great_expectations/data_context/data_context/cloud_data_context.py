@@ -594,6 +594,9 @@ class CloudDataContext(SerializableDataContext):
 
         Returns:
             An existing ExpectationSuite
+
+        Raises:
+            DataContextError: There is no expectation suite with the name provided
         """
         if ge_cloud_id is None and expectation_suite_name is None:
             raise ValueError(
@@ -611,7 +614,7 @@ class CloudDataContext(SerializableDataContext):
                 dict, self.expectations_store.get(key)
             )
         except StoreBackendError:
-            raise ValueError(
+            raise DataContextError(
                 f"Unable to load Expectation Suite {key.resource_name or key.id}"
             )
 

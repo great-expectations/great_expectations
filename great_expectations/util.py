@@ -1054,7 +1054,7 @@ def validate(  # noqa: PLR0913, PLR0912
 
 
 # https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
-def gen_directory_tree_str(startpath):
+def gen_directory_tree_str(startpath: PathStr):
     """Print the structure of directory as a tree:
 
     Ex:
@@ -1073,7 +1073,7 @@ def gen_directory_tree_str(startpath):
     tuples.sort()
 
     for root, dirs, files in tuples:
-        level = root.replace(startpath, "").count(os.sep)
+        level = root.replace(str(startpath), "").count(os.sep)
         indent = " " * 4 * level
         output_str += f"{indent}{os.path.basename(root)}/\n"  # noqa: PTH119
         subindent = " " * 4 * (level + 1)

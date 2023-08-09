@@ -284,8 +284,13 @@ class SerializableDataContext(AbstractDataContext):
     def _scaffold_directories(cls, base_dir: PathStr) -> None:
         """Safely create GE directories for a new project."""
         os.makedirs(base_dir, exist_ok=True)  # noqa: PTH103
-        with open(os.path.join(base_dir, ".gitignore"), "w") as f:  # noqa: PTH118
-            f.write("uncommitted/")
+
+        try:
+            cls._scaffold_gitignore(base_dir)
+        except Exception as e:
+            raise gx_exceptions.GitIgnoreScaffoldingError(
+                f"Could not create .gitignore in {base_dir} because of an error: {e}"
+            )
 
         for directory in cls.BASE_DIRECTORIES:
             if directory == "plugins":
@@ -326,6 +331,19 @@ class SerializableDataContext(AbstractDataContext):
                 uncommitted_dir, new_directory
             )
             os.makedirs(new_directory_path, exist_ok=True)  # noqa: PTH103
+
+    @classmethod
+    def _scaffold_gitignore(cls, base_dir: PathStr) -> None:
+        """Make sure .gitignore exists and contains uncommitted/"""
+        gitignore = pathlib.Path(base_dir) / ".gitignore"
+
+        if gitignore.is_file():
+            lines = gitignore.read_text().splitlines()
+            if "uncommited/" in lines:
+                return
+
+        with open(gitignore, "a") as f:
+            f.write("\nuncommitted/")
 
     @classmethod
     def _scaffold_custom_data_docs(cls, plugins_dir: PathStr) -> None:

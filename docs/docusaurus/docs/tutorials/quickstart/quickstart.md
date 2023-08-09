@@ -56,7 +56,7 @@ Windows support for the open source Python version of GX is currently unavailabl
     ```python name="tutorials/quickstart/quickstart.py connect_to_data"
     ```
 
-    The example code uses the default Data Context Datasource for Pandas to access the `.csv` data in the file at the specified `path`.
+    The example code uses the default Data Context Data Source for Pandas to access the `.csv` data in the file at the specified `path`.
 
 ## Create Expectations
 
@@ -97,7 +97,7 @@ If you're ready to continue your Great Expectations journey, the following topic
     - [How to instantiate a Data Context on an EMR Spark Cluster](../../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
     - [How to use Great Expectations in Databricks](../getting_started/how_to_use_great_expectations_in_databricks.md)
 
-- Initialize, instantiate, and save a Data Contex:
+- Initialize, instantiate, and save a Data Context:
     - [How to quickly instantiate a Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md)
     - [How to initialize a filesystem Data Context in Python](../../guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python.md)
     - [How to instantiate a specific Filesystem Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context.md)

@@ -481,7 +481,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
     ) -> None:
         """
         DataAssistant subclasses guide "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,
-        corresponding to indended exploration and validation goals.  Then executing "RuleBasedProfiler.run()" yields
+        corresponding to intended exploration and validation goals.  Then executing "RuleBasedProfiler.run()" yields
         "RuleBasedProfilerResult" object, containing "fully_qualified_parameter_names_by_domain",
         "parameter_values_for_fully_qualified_parameter_names_by_domain", "expectation_configurations", and "citation",
         immediately available for composing "ExpectationSuite" and validating underlying data "Batch" objects.
@@ -507,6 +507,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             config_version=1.0,
             variables=variables,
             data_context=self._data_context,
+            catch_exceptions=True,
         )
 
         self._metrics_parameter_builders_by_domain = {}
@@ -775,6 +776,9 @@ configuration included.
         rule_based_profiler_result.rule_domain_builder_execution_time
     )
     result.rule_execution_time = rule_based_profiler_result.rule_execution_time
+    result.rule_exception_tracebacks = (
+        rule_based_profiler_result.rule_exception_tracebacks
+    )
     result.metrics_by_domain = data_assistant.get_metrics_by_domain()
     result.expectation_configurations = (
         rule_based_profiler_result.expectation_configurations
