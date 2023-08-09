@@ -238,7 +238,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/microsoft-azure-blob-storage-logo.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage/">
+				<a href="https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/host_and_share_data_docs/">
 					Microsoft Azure Blob Storage
 				</a>
 			</td>

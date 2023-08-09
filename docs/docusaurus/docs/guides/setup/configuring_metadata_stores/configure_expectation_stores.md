@@ -71,7 +71,7 @@ Use the information provided here to configure a new storage location for Expect
 - [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
 - [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 - [An Azure Storage account](https://docs.microsoft.com/en-us/azure/storage/).
-- An Azure Blob container. If you need to [host and share Data Docs on Azure Blob Storage](../configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md), then you can set this up first and then use the ``$web`` existing container to store your Expectations.
+- An Azure Blob container. If you need to [host and share Data Docs on Azure Blob Storage](../configuring_data_docs/host_and_share_data_docs.md), then you can set this up first and then use the ``$web`` existing container to store your Expectations.
 - A prefix (folder) where to store Expectations. You don't need to create the folder, the prefix is just part of the Azure Blob name.
 
 </Prerequisites>
@@ -120,10 +120,10 @@ stores:
 ```
 
 :::note
-If the container for [hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md) is named ``$web``, use ``container: \$web`` to allow access to the ``$web``container.
+If the container for [hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/host_and_share_data_docs.md) is named ``$web``, use ``container: \$web`` to allow access to the ``$web``container.
 :::
 
-Additional authentication and configuration options are available. See [Hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md).
+Additional authentication and configuration options are available. See [Hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/host_and_share_data_docs.md).
 
 ### Copy existing Expectation JSON files to the Azure blob (Optional)
 

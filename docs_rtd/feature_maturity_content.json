@@ -672,7 +672,7 @@
             "icon": "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/html_site_store_azure_blob_storage.png",
             "short_description": "DataDocs on Azure Blob Storage",
             "description": "For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on Azure Blob Storage",
-            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.html",
+            "how_to_guide_url": "https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/host_and_share_data_docs.html",
             "maturity": "N/A",
             "maturity_details": {
               "api_stability": "Mostly Stable (profiling)",
