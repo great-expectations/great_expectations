@@ -14,7 +14,6 @@ from great_expectations.datasource.fluent.spark_datasource import (
     SparkConfig,
 )
 from great_expectations.util import is_candidate_subset_of_target
-from tests.conftest import yaml
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -44,13 +43,7 @@ def test_dataframe_asset(
     errors_dict = exc_info.value.errors()[0]
     assert errors_dict["loc"][0] == "dataframe"
 
-    datasource_name = "my_spark_datasource"
-    datasource = empty_data_context.sources.add_spark(
-        name=datasource_name,
-        persist=False,
-        force_reuse_spark_context=True,
-        spark_config={},
-    )
+    datasource = empty_data_context.sources.add_spark(name="my_spark_datasource")
 
     pandas_df = test_df_pandas
     spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
@@ -75,13 +68,6 @@ def test_dataframe_asset(
         asset.dataframe is not None and asset.dataframe.toPandas().equals(pandas_df)
         for asset in datasource.assets
     )
-
-    datasource_config = yaml.load(empty_data_context.fluent_config.yaml())[
-        "fluent_datasources"
-    ][datasource_name]
-    assert datasource_config["spark_config"] == {}
-    assert datasource_config["force_reuse_spark_context"] is True
-    assert datasource_config["persist"] is False
 
 
 @pytest.mark.spark
@@ -126,8 +112,10 @@ def test_spark_data_asset_batch_metadata(
 
 
 @pytest.mark.spark
+@pytest.mark.parametrize("persist", [True, False])
 def test_spark_config_passed_to_execution_engine(
     empty_data_context: AbstractDataContext,
+    persist,
     spark_session,
 ):
     spark_config: SparkConfig | None = {
@@ -142,6 +130,7 @@ def test_spark_config_passed_to_execution_engine(
         name="my_spark_datasource",
         spark_config=spark_config,
         force_reuse_spark_context=False,
+        persist=persist,
     )
     spark_config = json.loads(json.dumps(spark_config), parse_int=str, parse_float=str)
     assert is_candidate_subset_of_target(
