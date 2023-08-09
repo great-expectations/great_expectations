@@ -15,6 +15,7 @@ from great_expectations.compatibility.sqlalchemy import (
 )
 from great_expectations.data_context import EphemeralDataContext
 from great_expectations.datasource.fluent import (
+    DatabricksSQLDatasource,
     PostgresDatasource,
     SQLDatasource,
 )
@@ -48,6 +49,13 @@ TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
         # "unquoted_upper": TRINO_TABLE.upper(),
         # "quoted_upper": f"'{TRINO_TABLE.upper()}'",
         # "unquoted_mixed": TRINO_TABLE.title(),
+    },
+    "databricks_sql": {
+        "unquoted_lower": PG_TABLE.lower(),
+        "quoted_lower": f"`{PG_TABLE.lower()}`",
+        # "unquoted_upper": PG_TABLE.upper(),
+        # "quoted_upper": f'"{PG_TABLE.upper()}"',
+        # "unquoted_mixed": PG_TABLE.title(),
     },
 }
 
@@ -151,6 +159,15 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
     return ds
 
 
+@pytest.fixture
+def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
+    ds = context.sources.add_databricks_sql(
+        "databricks_sql",
+        connection_string="databricks://token:${token}@{host}:{port}/{database}?http_path={http_path}&catalog={catalog}&schema={schema}",
+    )
+    return ds
+
+
 @pytest.mark.parametrize(
     "asset_name",
     [
@@ -177,9 +194,7 @@ class TestTableIdentifiers:
         table_names: list[str] = inspect(trino_ds.get_engine()).get_table_names()
         print(f"trino tables:\n{pf(table_names)}))")
 
-        trino_ds.add_table_asset(
-            asset_name, table_name=TABLE_NAME_MAPPING["trino"][asset_name]
-        )
+        trino_ds.add_table_asset(asset_name, table_name=table_name)
 
     @pytest.mark.postgresql
     def test_postgres(
@@ -198,6 +213,24 @@ class TestTableIdentifiers:
         print(f"postgres tables:\n{pf(table_names)}))")
 
         postgres_ds.add_table_asset(asset_name, table_name=table_name)
+
+    @pytest.mark.databricks
+    def test_databricks_sql(
+        self,
+        databricks_sql_ds: DatabricksSQLDatasource,
+        asset_name: str,
+        # table_factory: TableFactory,
+    ):
+        table_name = TABLE_NAME_MAPPING["databricks"].get(asset_name)
+        if not table_name:
+            pytest.skip(f"no '{asset_name}' table_name for trino")
+
+        table_names: list[str] = inspect(
+            databricks_sql_ds.get_engine()
+        ).get_table_names()
+        print(f"databricks tables:\n{pf(table_names)}))")
+
+        databricks_sql_ds.add_table_asset(asset_name, table_name=table_name)
 
     @pytest.mark.parametrize(
         "datasource_type",
