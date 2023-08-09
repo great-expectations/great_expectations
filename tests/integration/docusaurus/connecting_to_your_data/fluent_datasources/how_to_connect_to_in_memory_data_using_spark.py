@@ -8,7 +8,11 @@ pytest -v --docs-tests -k "how_to_connect_to_in_memory_data_using_pandas" tests/
 import pathlib
 import great_expectations as gx
 import os
+import os
 import pyspark.pandas as ps
+
+# Required by pyarrow>=2.0.0 within Spark to suppress UserWarning
+os.environ["PYARROW_IGNORE_TIMEZONE"] = "1"
 
 # Required by pyarrow>=2.0.0 within Spark to suppress UserWarning
 os.environ["PYARROW_IGNORE_TIMEZONE"] = "1"
