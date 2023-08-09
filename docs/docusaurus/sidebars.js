@@ -34,6 +34,7 @@ module.exports = {
         'guides/setup/configuring_metadata_stores/configure_expectation_stores',
         'guides/setup/configuring_metadata_stores/configure_result_stores',
         'guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore',
+        'guides/setup/configuring_metadata_stores/how_to_configure_a_checkpoint_store',
         'guides/setup/configuring_data_docs/host_and_share_data_docs',
       ]
     },

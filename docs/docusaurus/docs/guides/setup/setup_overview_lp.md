@@ -19,6 +19,7 @@ import LinkCard from '/docs/components/LinkCard';
   <LinkCard topIcon label="Configure Expectation Stores" description="Configure a store for your Expectations" href="/docs/guides/setup/configuring_metadata_stores/configure_expectation_stores" icon="/img/configure_icon.svg" />
   <LinkCard topIcon label="Configure Validation Result Stores" description="Configure a store for your Validation Results" href="/docs/guides/setup/configuring_metadata_stores/configure_result_stores" icon="/img/configure_icon.svg" />
   <LinkCard topIcon label="Configure a MetricStore" description="Configure a store for Metrics computed during Validation" href="/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore" icon="/img/configure_icon.svg" />
+  <LinkCard topIcon label="Configure a Checkpoint Store" description="Configure a Checkpoint Store to store Checkpoint data" href="/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_checkpoint_store" icon="/img/configure_icon.svg" />
 </LinkCardGrid>
 
 #### Host and share
