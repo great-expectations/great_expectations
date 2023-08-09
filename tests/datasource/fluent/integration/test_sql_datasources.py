@@ -135,7 +135,6 @@ def trino_ds(context: EphemeralDataContext) -> SQLDatasource:
         "trino",
         connection_string="trino://user:@localhost:8088/tpch/sf1",
     )
-    # trino container ships with default test tables so there is no need to create them
     return ds
 
 
@@ -155,12 +154,12 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
         param("quoted_lower"),
         param(
             "unquoted_upper",
-            marks=[pytest.mark.xfail(reason="TODO: fix or remove")],
+            marks=[pytest.mark.xfail(reason="TODO: fix this")],
         ),
         param("quoted_upper"),
         param(
             "unquoted_mixed",
-            marks=[pytest.mark.xfail(reason="TODO: fix or remove")],
+            marks=[pytest.mark.xfail(reason="TODO: fix this")],
         ),
     ],
 )
