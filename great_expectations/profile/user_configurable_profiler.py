@@ -50,20 +50,20 @@ class UserConfigurableProfiler:
     Build a suite without a config as follows:
 
     ```python
-        profiler = UserConfigurableProfiler(dataset)
-        suite = profiler.build_suite()
+    profiler = UserConfigurableProfiler(dataset)
+    suite = profiler.build_suite()
     ```
 
     Use a Profiler to build a suite with a semantic types dict, as follows:
 
     ```python
-        semantic_types_dict = {
-                "numeric": ["c_acctbal"],
-                "string": ["c_address","c_custkey"],
-                "value_set": ["c_nationkey","c_mktsegment", 'c_custkey', 'c_name', 'c_address', 'c_phone']
-            }
-        profiler = UserConfigurableProfiler(dataset, semantic_types_dict=semantic_types_dict)
-        suite = profiler.build_suite()
+    semantic_types_dict = {
+            "numeric": ["c_acctbal"],
+            "string": ["c_address","c_custkey"],
+            "value_set": ["c_nationkey","c_mktsegment", 'c_custkey', 'c_name', 'c_address', 'c_phone']
+        }
+    profiler = UserConfigurableProfiler(dataset, semantic_types_dict=semantic_types_dict)
+    suite = profiler.build_suite()
     ```
 
     Args:
@@ -72,9 +72,9 @@ class UserConfigurableProfiler:
         ignored_columns: A list of columns for which you would like to NOT create Expectations.
         not_null_only: By default, each column is evaluated for nullity. If the column values contain fewer
             than 50% null values, then the Profiler will add `expect_column_values_to_not_be_null`;
-            if greater than 50% it will add `expect_column_values_to_be_null`. If `not_null_only` is set to
-            `True`, the Profiler will add a `not_null` Expectation irrespective of the percent nullity
-            (and therefore will not add `expect_column_values_to_be_null`).
+            if greater than 50% it will add `expect_column_values_to_be_null`. If `not_null_only` is set to `True`,
+            the Profiler will add a `not_null` Expectation irrespective of the percent nullity (and therefore will not add
+            `expect_column_values_to_be_null`).
         primary_or_compound_key: A list containing one or more columns which are a dataset's primary or
             compound key. This will create an `expect_column_values_to_be_unique` or
             `expect_compound_columns_to_be_unique` Expectation. This will occur even if one or more of the
@@ -82,6 +82,7 @@ class UserConfigurableProfiler:
         semantic_types_dict: A dict where the keys are available semantic types
             (see `profiler.base.ProfilerSemanticTypes`) and the values are lists of columns for which you
             would like to create semantic-type-specific Expectations e.g.:
+
             ```python
                 "semantic_types": { "value_set": ["state","country"], "numeric":["age", "amount_due"]}
             ```
