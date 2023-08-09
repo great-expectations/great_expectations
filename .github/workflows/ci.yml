@@ -219,6 +219,7 @@ jobs:
           - athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
           - big
           - cli
+          - databricks
           - filesystem
           - mssql
           - mysql
