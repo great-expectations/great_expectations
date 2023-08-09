@@ -158,11 +158,7 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
         param("quoted_lower"),
         param(
             "unquoted_upper",
-            marks=[
-                pytest.mark.xfail(
-                    reason="TODO: fix this - passes locally but not on CI"
-                )
-            ],
+            marks=[pytest.mark.xfail(reason="TODO: fix this")],
         ),
         param("quoted_upper"),
         param(
