@@ -75,6 +75,6 @@ assert my_batch_request.datasource_name == "my_spark_datasource"
 assert my_batch_request.data_asset_name == "my_df_asset"
 assert my_batch_request.options == {}
 
-# batches = data_asset.get_batch_list_from_batch_request(my_batch_request)
-# assert len(batches) == 1
-# assert set(batches[0].columns()) == {"a", "b", "c"}
+batches = data_asset.get_batch_list_from_batch_request(my_batch_request)
+assert len(batches) == 1
+assert set(batches[0].columns()) == {"a", "b", "c"}
