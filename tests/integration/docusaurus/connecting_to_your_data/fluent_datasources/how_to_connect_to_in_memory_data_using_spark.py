@@ -37,12 +37,12 @@ df = ps.DataFrame(
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_spark.py name">
-name = "example_dataframe"
+name = "my_df_asset"
 # </snippet>
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_spark.py data_asset">
-data_asset = datasource.add_dataframe_asset(name="my_df_asset")
+data_asset = datasource.add_dataframe_asset(name=name)
 # </snippet>
 
 # Python
