@@ -185,7 +185,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
     )
 
     # Polish and ratchet this number down as low as possible
-    assert len(sorted_packages_with_pins_or_upper_bounds) == 80
+    assert len(sorted_packages_with_pins_or_upper_bounds) == 77
     assert sorted_packages_with_pins_or_upper_bounds == [
         ("requirements-dev-api-docs-test.txt", "docstring-parser", (("==", "0.15"),)),
         ("requirements-dev-athena.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
@@ -228,7 +228,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev-test.txt", "pika", (("==", "1.3.1"),)),
         ("requirements-dev-test.txt", "ruff", (("==", "0.0.282"),)),
         ("requirements-dev-test.txt", "snapshottest", (("==", "0.6.0"),)),
-        ("requirements-dev.txt", "Click", (("<=", "8.1.3"), (">=", "7.1.2"))),
         ("requirements-dev.txt", "PyMySQL", (("<", "0.10"), (">=", "0.9.3"))),
         ("requirements-dev.txt", "adr-tools-python", (("==", "1.0.3"),)),
         ("requirements-dev.txt", "altair", (("<", "5.0.0"), (">=", "4.2.1"))),
@@ -250,7 +249,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev.txt", "sqlalchemy-dremio", (("==", "1.2.1"),)),
         ("requirements-dev.txt", "teradatasqlalchemy", (("==", "17.0.0.5"),)),
         ("requirements-dev.txt", "xlrd", (("<", "2.0.0"), (">=", "1.1.0"))),
-        ("requirements-types.txt", "Click", (("<=", "8.1.3"), (">=", "7.1.2"))),
         ("requirements-types.txt", "PyMySQL", (("<", "0.10"), (">=", "0.9.3"))),
         ("requirements-types.txt", "adr-tools-python", (("==", "1.0.3"),)),
         ("requirements-types.txt", "altair", (("<", "5.0.0"), (">=", "4.2.1"))),
@@ -269,7 +267,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-types.txt", "sqlalchemy", (("<", "2.0.0"),)),
         ("requirements-types.txt", "sqlalchemy-dremio", (("==", "1.2.1"),)),
         ("requirements-types.txt", "teradatasqlalchemy", (("==", "17.0.0.5"),)),
-        ("requirements.txt", "Click", (("<=", "8.1.3"), (">=", "7.1.2"))),
         ("requirements.txt", "altair", (("<", "5.0.0"), (">=", "4.2.1"))),
         ("requirements.txt", "makefun", (("<", "2"), (">=", "1.7.0"))),
         ("requirements.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),
