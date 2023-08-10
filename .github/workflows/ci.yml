@@ -155,6 +155,7 @@ jobs:
       # Spark tests are run as part of a separate task as we have not migrated all of Spark tests just yet (ie. Spark+Athena, Spark+S3 etc)
       - name: Run the Spark tests
         run: |
+          invoke deps --gx-install -m 'docs-spark'
           invoke docs-snippet-tests 'docs-spark' --up-services --verbose
 
   unit-tests:
