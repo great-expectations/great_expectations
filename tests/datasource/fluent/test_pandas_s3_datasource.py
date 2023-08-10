@@ -131,9 +131,11 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     test_connection_error_message = f"""No file in bucket "{csv_asset.datasource.bucket}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset.name}"."""
     return regex, test_connection_error_message
 
+
 @pytest.mark.aws_creds
 def test_construct_pandas_s3_datasource(pandas_s3_datasource: PandasS3Datasource):
     assert pandas_s3_datasource.name == "pandas_s3_datasource"
+
 
 @pytest.mark.aws_creds
 def test_add_csv_asset_to_datasource(pandas_s3_datasource: PandasS3Datasource):
