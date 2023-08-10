@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any
 
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -41,15 +41,15 @@ class InlineStoreBackend(StoreBackend):
     Please note that is it only to be used with file-backed DataContexts (DataContext and FileDataContext).
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         data_context: FileDataContext,
         resource_type: DataContextVariableSchema,
-        runtime_environment: Optional[dict] = None,
+        runtime_environment: dict | None = None,
         fixed_length_key: bool = False,
         suppress_store_backend_id: bool = False,
         manually_initialize_store_backend_id: str = "",
-        store_name: Optional[str] = None,
+        store_name: str | None = None,
     ) -> None:
         super().__init__(
             fixed_length_key=fixed_length_key,
@@ -78,7 +78,7 @@ class InlineStoreBackend(StoreBackend):
     def config(self) -> dict:
         return self._config
 
-    def _get(self, key: Tuple[str, ...]) -> Any:
+    def _get(self, key: tuple[str, ...]) -> Any:
         resource_name = InlineStoreBackend._determine_resource_name(key)
         project_config: DataContextConfig = self._data_context.config
         resource_type = self._resource_type
@@ -93,13 +93,17 @@ class InlineStoreBackend(StoreBackend):
 
         return variable_config
 
-    def _set(self, key: Tuple[str, ...], value: Any, **kwargs: dict) -> None:
+    def _set(self, key: tuple[str, ...], value: Any, **kwargs: dict) -> None:
         resource_name = InlineStoreBackend._determine_resource_name(key)
         project_config: DataContextConfig = self._data_context.config
         resource_type = self._resource_type
 
         if resource_type is DataContextVariableSchema.ALL_VARIABLES:
             config_commented_map_from_yaml = yaml.load(value)
+            # NOTE: fluent datasources may be present under both the `fluent_datasources` & `datasources` key
+            # if fluent datasource is part of `datasources` it will attempt to validate using a marshmallow Datasource schema and fail
+            for name in config_commented_map_from_yaml.get("fluent_datasources", {}):  # type: ignore[union-attr]
+                config_commented_map_from_yaml.get("datasources", {}).pop(name, None)  # type: ignore[union-attr,arg-type,call-arg]
             value = DataContextConfig.from_commented_map(
                 commented_map=config_commented_map_from_yaml
             )
@@ -112,13 +116,13 @@ class InlineStoreBackend(StoreBackend):
         self._save_changes()
 
     def _move(
-        self, source_key: Tuple[str, ...], dest_key: Tuple[str, ...], **kwargs: dict
+        self, source_key: tuple[str, ...], dest_key: tuple[str, ...], **kwargs: dict
     ) -> None:
         raise StoreBackendError(
             "InlineStoreBackend does not support moving of keys; the DataContext's config variables schema is immutable"
         )
 
-    def list_keys(self, prefix: Tuple[str, ...] = ()) -> List[str]:
+    def list_keys(self, prefix: tuple[str, ...] = ()) -> list[tuple]:
         """
         See `StoreBackend.list_keys` for more information.
 
@@ -129,25 +133,27 @@ class InlineStoreBackend(StoreBackend):
         Returns:
             A list of string keys from the user's project config.
         """
-        config_section: Optional[str] = None
+        config_section: str | None = None
+        if self._resource_type is not DataContextVariableSchema.ALL_VARIABLES:
+            config_section = self._resource_type
         if prefix:
             config_section = prefix[0]
 
-        keys: List[str]
+        keys: list[tuple]
         config_dict: dict = self._data_context.config.to_dict()
         if config_section is None:
-            keys = list(key for key in config_dict.keys())
+            keys = list((key,) for key in config_dict.keys())
         else:
             config_values: dict = config_dict[config_section]
             if not isinstance(config_values, dict):
                 raise StoreBackendError(
                     "Cannot list keys in a non-iterable section of a project config"
                 )
-            keys = list(key for key in config_values.keys())
+            keys = list((key,) for key in config_values.keys())
 
         return keys
 
-    def remove_key(self, key: Tuple[str, ...]) -> None:
+    def remove_key(self, key: tuple[str, ...]) -> None:
         """
         See `StoreBackend.remove_key` for more information.
         """
@@ -173,15 +179,15 @@ class InlineStoreBackend(StoreBackend):
 
     def build_key(
         self,
-        id: Optional[str] = None,
-        name: Optional[str] = None,
+        id: str | None = None,
+        name: str | None = None,
     ) -> DataContextVariableKey:
         """Get the store backend specific implementation of the key. id included for super class compatibility."""
         return DataContextVariableKey(
             resource_name=name,
         )
 
-    def _has_key(self, key: Tuple[str, ...]) -> bool:
+    def _has_key(self, key: tuple[str, ...]) -> bool:
         resource_name = InlineStoreBackend._determine_resource_name(key)
         resource_type = self._resource_type
 
@@ -193,7 +199,7 @@ class InlineStoreBackend(StoreBackend):
 
     def _save_changes(self) -> None:
         context = self._data_context
-        config_filepath = pathlib.Path(context.root_directory) / context.GX_YML  # type: ignore[arg-type]
+        config_filepath = pathlib.Path(context.root_directory) / context.GX_YML
 
         try:
             with open(config_filepath, "w") as outfile:
@@ -204,6 +210,6 @@ class InlineStoreBackend(StoreBackend):
             logger.warning(f"Could not save project config to disk: {e}")
 
     @staticmethod
-    def _determine_resource_name(key: Tuple[str, ...]) -> Optional[str]:
-        resource_name: Optional[str] = key[0] or None
+    def _determine_resource_name(key: tuple[str, ...]) -> str | None:
+        resource_name = key[0] or None
         return resource_name

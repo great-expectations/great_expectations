@@ -3,7 +3,6 @@ from typing import Any, List, Set
 from unittest import mock
 
 import pytest
-from ruamel.yaml import YAML
 
 # noinspection PyProtectedMember
 from great_expectations.cli.suite import _suite_edit_workflow
@@ -15,6 +14,7 @@ from great_expectations.core import (
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.render.renderer.v3.suite_profile_notebook_renderer import (
     SuiteProfileNotebookRenderer,
 )
@@ -24,10 +24,12 @@ from great_expectations.rule_based_profiler.config.base import (
 )
 from great_expectations.util import get_context
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
-from tests.render.test_util import find_code_in_notebook, run_notebook
+from tests.render.util import find_code_in_notebook, run_notebook
 
-yaml = YAML()
+yaml = YAMLHandler()
 
+# module level markers
+pytestmark = pytest.mark.filesystem
 
 SNIPPETS_USER_CONFIGURABLE_PROFILER: List[str] = [
     # Imports
@@ -245,10 +247,10 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
     """
     context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     root_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(root_dir, "uncommitted")  # noqa: PTH118
     expectation_suite_name: str = "warning"
 
-    context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
     batch_request: dict = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",
@@ -357,8 +359,10 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
         suppress_usage_message=True,
         assume_yes=True,
     )
-    edit_notebook_path: str = os.path.join(uncommitted_dir, "edit_warning.ipynb")
-    assert os.path.isfile(edit_notebook_path)
+    edit_notebook_path: str = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "edit_warning.ipynb"
+    )
+    assert os.path.isfile(edit_notebook_path)  # noqa: PTH113
 
     run_notebook(
         notebook_path=edit_notebook_path,
@@ -459,10 +463,10 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
     """
     context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     root_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(root_dir, "uncommitted")  # noqa: PTH118
     expectation_suite_name: str = "warning"
 
-    context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
     batch_request: dict = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",
@@ -597,8 +601,10 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
         suppress_usage_message=True,
         assume_yes=True,
     )
-    edit_notebook_path: str = os.path.join(uncommitted_dir, "edit_warning.ipynb")
-    assert os.path.isfile(edit_notebook_path)
+    edit_notebook_path: str = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "edit_warning.ipynb"
+    )
+    assert os.path.isfile(edit_notebook_path)  # noqa: PTH113
 
     run_notebook(
         notebook_path=edit_notebook_path,

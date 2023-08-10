@@ -1,0 +1,83 @@
+import NoteOptionalDataConnectorKeys from './_note_optional_data_connector_keys.mdx'
+
+In a Configured Asset Data Connector for SQL data, each entry in the `assets` dictionary will correspond to an explicitly defined Data Asset.  The key provided will be used as the name of the Data Asset, while the value will be a dictionary that specifies how that Data Asset is defined.
+
+These key/value pairs are technically all optional.  If none of them are defined, the Data Asset will correspond to the table that matches the key corresponding to the empty Data Asset dictionary.
+
+#### Optional Data Asset configuration keys for Data Asset names and schemas:
+
+You may provide the following key/value pairs in your Data Asset configuration to alter how your Data Asset behaves regarding its associated table:
+
+- **`table_name`:** A string that, if defined, is used as the name for the Data Asset.  If this is not defined, the default name will be that of the key corresponding to the Data Asset's dictionary in your configuration.
+- **`schema_name`:** An optional string that defines the `schema` for the Data Asset.
+- **`include_schema_name`:** A boolean value that determines whether the `schema_name` should be included as a prefix to the Data Asset's name.
+
+For example, imagine that you have a copy of the 2020 NYC taxi data in a table called `yellow_tripdata_sample_2020`, along with a public schema.  You could access this data by defining an entry in the `assets` dictionary like:
+
+```python name="configured sql data asset single batch"
+```
+
+
+#### Optional Data Asset configuration keys for splitting Data Assets into Batches
+
+Next is the matter of how (or even if) your Data Connector splits Data Assets into Batches.  By default, each Data Asset will provide a single Batch consisting of the entire table that it corresponds to.  You can change this behaviour by specifying the following key/value pairs:
+
+<NoteOptionalDataConnectorKeys splitting={true} />
+
+The configuration we provided above does not include a `splitter_method`, and therefore will return the entire table as a single Batch.
+
+Alternatively, you could define a Data Asset that is split into Batches based on the year and month by defining the `splitter_method` to be `split_on_year_and_month` and providing a Datetime column. (In the case of the NYC taxi data, this would be the `pickup_datetime` column.)  Creating a Data Asset like this would result in the following key/value pair in your `assets` dictionary:
+
+```python name="configured sql data asset multi batch"
+```
+
+If you included both of these Data Assets, your complete configuration would look like:
+
+```python name="full configuration for sql configured Data Source"
+```
+
+:::note Reminder
+
+If you are uncertain whether you should be splitting your Data Assets into Batches, please refer to our guide on [how to choose between working with a single or multiple Batches of data](../../how_to_choose_between_working_with_a_single_or_multiple_batches_of_data.md).
+
+:::
+
+The `splitter_method` and `splitter_kwargs` key/value pairs can be defined at either the Data Connector or the Data Asset level.  If they are defined at the Data Connector level, they will apply to all Data Assets that do not have an alternative definition in their configuration.  If they are defined at the Data Asset level, the Data Asset definition will take precedence over the Data Connector definition.
+
+You can think of the Data Connector level definition of `splitter_method` and `splitter_kwargs` as a way to define default values of these keys for your Data Assets.  The Data Asset level definitions, then, would be Data Asset specific definitions that overwrite those defaults.
+
+:::tip
+
+For more information on the available splitting methods, please see the [Splitting methods subsection under Additional notes](#splitting-methods) at the end of this guide.
+
+:::
+
+#### Optional Data Asset configuration keys for sampling data from returned Batches
+
+Finally, you may wish to only sample a portion of the data that would be returned in your Data Asset's Batches.  To do this, you will need to define the optional keys `sampling_method` and `sampling_kwargs`.  As with `splitter_method` and `splitter_kwargs`, defining these key/value pairs in your Data Connector's dictionary will result in those values being applied to all Data Assets that are made available by the Data Connector.
+
+The key/value pairs that are used for sampling data from a Data Asset are:
+
+<NoteOptionalDataConnectorKeys sampling={true} />
+
+As with `splitter_method` and `splitter_kwargs`, `sampling_method` and `sampling_kwargs` can be defined at either the Data Connector or the Data Asset level.  When defined at the Data Connector level, the definition acts as a default that applies to all Data Assets that do not have their own specific definition for the two keys.  If defined at the Data Asset level, the values will take precedence over any that are defined in the Data Connector dictionary.
+
+:::tip
+
+Although this guide will not use sampling in its examples, there is a list of the available sampling methods in [the Sampling methods subsection of the Additional notes section](#sampling-methods) at the end of this guide.
+
+:::
+
+#### Optional Data Asset configuration key for defining introspection behaviour
+
+Finally, there is an optional key that can be defined to alter the default behaviour of introspection methods such as those used by auto-initializing Expectations and Data Assistants.  This key is:
+
+<NoteOptionalDataConnectorKeys introspection={true} />
+
+Similar to the splitting and sampling key/value pairs, this key can be defined at either the Data Connector or the Data Asset level.  A definition at the Data Connector level will be applied to all Data Assets, while a definition at the Data Asset level will take precidence over the Data Connector's values.
+
+:::tip
+
+You will find a list of the valid keys for the `introspection_directives` dictionary and their corresponding values in the [Introspection directives subsection of the Additional notes](#introspection-directives) at the end of this guide.
+
+:::

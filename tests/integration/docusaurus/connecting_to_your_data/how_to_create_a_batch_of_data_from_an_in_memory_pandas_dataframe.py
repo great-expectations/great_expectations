@@ -1,13 +1,14 @@
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py imports">
 import pandas as pd
-from ruamel import yaml
 
 import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.validator.validator import Validator
 
+yaml: YAMLHandler = YAMLHandler()
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py get_context">
@@ -16,7 +17,7 @@ context: DataContext = gx.get_context()
 
 # create and load Expectation Suite
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py create_expectation_suite">
-context.create_expectation_suite(
+context.add_expectation_suite(
     expectation_suite_name="insert_your_expectation_suite_name_here"
 )
 # </snippet>
@@ -118,6 +119,6 @@ my_validator: Validator = context.get_validator(
     # expectation_suite_name=suite_name
 )
 # </snippet>
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py validator_head">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py validator head">
 my_validator.head()
 # </snippet>

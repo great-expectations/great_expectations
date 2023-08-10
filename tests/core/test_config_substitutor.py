@@ -3,9 +3,9 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.compatibility import azure, google
 from great_expectations.core.config_substitutor import (
     _ConfigurationSubstitutor,
-    secretmanager,
 )
 
 
@@ -25,6 +25,9 @@ class MockedBoto3Client:
 
     def get_secret_value(self, *args, **kwargs):
         return self.secret_response
+
+    def get_parameter(self, *args, **kwargs):
+        return self.get_secret_value(*args, **kwargs)
 
 
 class MockedBoto3Session:
@@ -85,11 +88,83 @@ def test_substitute_value_from_aws_secrets_manager(
 ):
     with raises:
         with mock.patch(
-            "great_expectations.core.config_substitutor.boto3.session.Session",
+            "great_expectations.core.config_substitutor.aws.boto3.session.Session",
             return_value=MockedBoto3Session(secret_response),
         ):
             # As we're testing the secret store and not the actual substitution logic,
             # we deem the use of an empty config_variables_dict appropriate.
+            assert (
+                config_substitutor.substitute_config_variable(
+                    template_str=input_value, config_variables_dict={}
+                )
+                == expected
+            )
+
+
+@pytest.mark.parametrize(
+    "input_value,secret_response,raises,expected",
+    [
+        (
+            "secret|arn:aws:ssm:region-name-1:123456789012:parameter/my-parameter",
+            {
+                "Parameter": {
+                    "Type": "String",
+                    "Value": "value",
+                }
+            },
+            does_not_raise(),
+            "value",
+        ),
+        (
+            "secret|arn:aws:ssm:region-name-1:123456789012:parameter/my-parameter",
+            {
+                "Parameter": {
+                    "Type": "SecureString",
+                    "Value": "value",
+                }
+            },
+            does_not_raise(),
+            "value",
+        ),
+        (
+            "secret|arn:aws:ssm:region-name-1:123456789012:parameter/my-parameter|key",
+            {
+                "Parameter": {
+                    "Type": "SecureString",
+                    "Value": '{"key": "value"}',
+                }
+            },
+            does_not_raise(),
+            "value",
+        ),
+        (
+            "secret|arn:aws:ssm:region-name-1:123456789012:parameter/secure/my-parameter",
+            {
+                "Parameter": {
+                    "Type": "SecureString",
+                    "Value": "value",
+                }
+            },
+            does_not_raise(),
+            "value",
+        ),
+        (
+            "secret|arn:aws:ssm:region-name-1:123456789012:parameter/secure/my-param%&eter",
+            None,
+            pytest.raises(ValueError),
+            None,
+        ),
+    ],
+)
+@pytest.mark.unit
+def test_substitute_value_from_aws_ssm(
+    config_substitutor, input_value, secret_response, raises, expected
+):
+    with raises:
+        with mock.patch(
+            "great_expectations.core.config_substitutor.aws.boto3.session.Session",
+            return_value=MockedBoto3Session(secret_response),
+        ):
             assert (
                 config_substitutor.substitute_config_variable(
                     template_str=input_value, config_variables_dict={}
@@ -117,8 +192,9 @@ class MockedSecretManagerServiceClient:
         return response
 
 
+# This test requires this import but monkeypatches external calls made to google.
 @pytest.mark.skipif(
-    secretmanager is None,
+    not google.secretmanager,
     reason="Could not import 'secretmanager' from google.cloud in data_context.util",
 )
 @pytest.mark.parametrize(
@@ -156,7 +232,7 @@ def test_substitute_value_from_gcp_secret_manager(
 ):
     with raises:
         with mock.patch(
-            "great_expectations.core.config_substitutor.secretmanager.SecretManagerServiceClient",
+            "great_expectations.core.config_substitutor.google.secretmanager.SecretManagerServiceClient",
             return_value=MockedSecretManagerServiceClient(secret_response),
         ):
             # As we're testing the secret store and not the actual substitution logic,
@@ -186,7 +262,8 @@ class MockedSecretClient:
 
 
 @mock.patch(
-    "great_expectations.core.config_substitutor.DefaultAzureCredential", new=object
+    "great_expectations.core.config_substitutor.azure.DefaultAzureCredential",
+    new=object,
 )
 @pytest.mark.parametrize(
     "input_value,secret_response,raises,expected",
@@ -219,12 +296,17 @@ class MockedSecretClient:
     ],
 )
 @pytest.mark.unit
+# This test requires this import but monkeypatches external calls made to azure.
+@pytest.mark.skipif(
+    not (azure.storage and azure.SecretClient),
+    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
+)
 def test_substitute_value_from_azure_keyvault(
     config_substitutor, input_value, secret_response, raises, expected
 ):
     with raises:
         with mock.patch(
-            "great_expectations.core.config_substitutor.SecretClient",
+            "great_expectations.core.config_substitutor.azure.SecretClient",
             return_value=MockedSecretClient(secret_response),
         ):
             # As we're testing the secret store and not the actual substitution logic,

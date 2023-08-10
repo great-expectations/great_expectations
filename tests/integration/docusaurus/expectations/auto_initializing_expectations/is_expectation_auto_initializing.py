@@ -12,13 +12,13 @@ the snippets that are specified for use in documentation are maintained.  These 
 --documentation--
     https://docs.greatexpectations.io/docs/
 """
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py is_expectation_self_initializing False">
 from great_expectations.expectations.expectation import Expectation
 
 Expectation.is_expectation_self_initializing(name="expect_column_to_exist")
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py is_expectation_self_initializing True">
 Expectation.is_expectation_self_initializing(name="expect_column_mean_to_be_between")
 # </snippet>
 

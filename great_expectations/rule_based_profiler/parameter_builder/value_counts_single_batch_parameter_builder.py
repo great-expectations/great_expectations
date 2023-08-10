@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set
 
 import numpy as np
 
-from great_expectations.core.domain import Domain
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,

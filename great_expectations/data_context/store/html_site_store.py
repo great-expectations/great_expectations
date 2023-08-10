@@ -308,16 +308,16 @@ class HtmlSiteStore:
             if only_if_exists:
                 return (
                     store_backend.get_public_url_for_key(key)
-                    if store_backend.has_key(key)  # noqa: W601
+                    if store_backend.has_key(key)
                     else None
                 )
             else:
                 return store_backend.get_public_url_for_key(key)
-        else:
+        else:  # noqa: PLR5501
             if only_if_exists:
                 return (
                     store_backend.get_url_for_key(key)
-                    if store_backend.has_key(key)  # noqa: W601
+                    if store_backend.has_key(key)
                     else None
                 )
             else:
@@ -388,7 +388,8 @@ class HtmlSiteStore:
 
         if not static_assets_source_dir:
             static_assets_source_dir = file_relative_path(
-                __file__, os.path.join("..", "..", "render", "view", "static")
+                __file__,
+                os.path.join("..", "..", "render", "view", "static"),  # noqa: PTH118
             )
 
         # If `static_assets_source_absdir` contains the string ".zip", then we try to extract (unzip)
@@ -402,18 +403,24 @@ class HtmlSiteStore:
 
         for item in os.listdir(static_assets_source_dir):
             # Directory
-            if os.path.isdir(os.path.join(static_assets_source_dir, item)):
+            if os.path.isdir(  # noqa: PTH112
+                os.path.join(static_assets_source_dir, item)  # noqa: PTH118
+            ):
                 if item in dir_exclusions:
                     continue
                 # Recurse
-                new_source_dir = os.path.join(static_assets_source_dir, item)
+                new_source_dir = os.path.join(  # noqa: PTH118
+                    static_assets_source_dir, item
+                )
                 self.copy_static_assets(new_source_dir)
             # File
             else:
                 # Copy file over using static assets store backend
                 if item in file_exclusions:
                     continue
-                source_name = os.path.join(static_assets_source_dir, item)
+                source_name = os.path.join(  # noqa: PTH118
+                    static_assets_source_dir, item
+                )
                 with open(source_name, "rb") as f:
                     # Only use path elements starting from static/ for key
                     store_key = tuple(os.path.normpath(source_name).split(os.sep))
@@ -454,7 +461,7 @@ class HtmlSiteStore:
         Otherwise, this function returns False
         """
 
-        static_assets_source_absdir = os.path.abspath(assets_full_path)
+        static_assets_source_absdir = os.path.abspath(assets_full_path)  # noqa: PTH100
 
         zip_re = re.match(
             f"(.+[.]zip){re.escape(os.sep)}(.+)",

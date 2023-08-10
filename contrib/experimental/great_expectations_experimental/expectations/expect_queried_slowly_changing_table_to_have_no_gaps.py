@@ -104,7 +104,6 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
         {
             "data": [
                 {
-                    "dataset_name": "test",
                     "data": {
                         "msid": [
                             "aaa",

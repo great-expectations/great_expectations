@@ -1,8 +1,13 @@
+import pytest
+
 from great_expectations.expectations.row_conditions import (
     _parse_great_expectations_condition,
     parse_condition_to_spark,
     parse_condition_to_sqlalchemy,
 )
+
+# module level markers
+pytestmark = pytest.mark.unit
 
 
 def test_notnull_parser():
@@ -20,6 +25,34 @@ def test_condition_parser():
     assert res["column"] == "foo"
     assert res["op"] == ">"
     assert res["fnumber"] == "5"
+
+
+def test_condition_parser_with_underscore_in_column_name():
+    res = _parse_great_expectations_condition('col("pk_2") == "Two"')
+    assert res["column"] == "pk_2"
+    assert res["op"] == "=="
+    assert res["condition_value"] == "Two"
+
+
+def test_condition_parser_with_dash_in_column_name():
+    res = _parse_great_expectations_condition('col("pk-2") == "Two"')
+    assert res["column"] == "pk-2"
+    assert res["op"] == "=="
+    assert res["condition_value"] == "Two"
+
+
+def test_condition_parser_with_space_in_condition_value():
+    res = _parse_great_expectations_condition('col("pk_2") == "Two Two"')
+    assert res["column"] == "pk_2"
+    assert res["op"] == "=="
+    assert res["condition_value"] == "Two Two"
+
+
+def test_condition_parser_with_tab_in_condition_value():
+    res = _parse_great_expectations_condition('col("pk_2") == "Two  Two"')
+    assert res["column"] == "pk_2"
+    assert res["op"] == "=="
+    assert res["condition_value"] == "Two  Two"
 
 
 def test_parse_condition_to_spark(spark_session):
@@ -44,3 +77,12 @@ def test_parse_condition_to_sqlalchemy(sa):
 
     res = parse_condition_to_sqlalchemy('col("foo") == "a-b"')
     assert str(res) == "foo = :foo_1"
+
+    res = parse_condition_to_sqlalchemy('col("foo") != "a-b"')
+    assert str(res) == "foo != :foo_1"
+
+    res = parse_condition_to_sqlalchemy('col("foo") <= 1.34')
+    assert str(res) == "foo <= :foo_1"
+
+    res = parse_condition_to_sqlalchemy('col("foo") <= date("2023-03-13")')
+    assert str(res) == "foo <= :foo_1"

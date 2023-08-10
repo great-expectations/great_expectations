@@ -1,6 +1,10 @@
 import pandas as pd
 import pytest
 
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -40,10 +44,10 @@ from great_expectations.validator.validator import Validator
 @pytest.fixture
 def sqlite_table_for_unexpected_rows_with_index(
     test_backends,
-) -> "sqlalchemy.engine.Engine":  # noqa: F821
+) -> sqlalchemy.Engine:
     if "sqlite" in test_backends:
         try:
-            import sqlalchemy as sa
+            from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 
             sqlite_path = file_relative_path(
                 __file__, "../../test_sets/metrics_test.db"
@@ -66,7 +70,8 @@ def sqlite_table_for_unexpected_rows_with_index(
             # use try-except block to ensure we don't keep modifying the database
             # adapted from https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_sql.html
             try:
-                df.to_sql(
+                add_dataframe_to_db(
+                    df=df,
                     name="animal_names",
                     con=sqlite_engine,
                     index=False,
@@ -107,7 +112,7 @@ def expected_evr_without_unexpected_rows():
             "partial_unexpected_list": ["giraffe", "lion", "zebra"],
             "unexpected_count": 3,
             "unexpected_index_list": [3, 4, 5],
-            "unexpected_index_query": [3, 4, 5],
+            "unexpected_index_query": "df.filter(items=[3, 4, 5], axis=0)",
             "unexpected_list": ["giraffe", "lion", "zebra"],
             "unexpected_percent": 50.0,
             "unexpected_percent_nonmissing": 50.0,
@@ -235,6 +240,7 @@ def _expecation_configuration_to_validation_result_sql(
     return result
 
 
+@pytest.mark.sqlite
 def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
     mp = ColumnMax()
     metric = MetricConfiguration(
@@ -271,6 +277,7 @@ def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
     )
 
 
+@pytest.mark.spark
 def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_engine):
     mp = ColumnValuesNonNull()
     metric = MetricConfiguration(
@@ -311,6 +318,7 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
     )
 
 
+@pytest.mark.unit
 def test_get_map_metric_dependencies():
     mp = ColumnMapMetricProvider()
     metric = MetricConfiguration(
@@ -369,16 +377,28 @@ def test_get_map_metric_dependencies():
     )
 
 
+@pytest.mark.unit
 def test_is_sqlalchemy_metric_selectable():
-    assert MapMetricProvider.is_sqlalchemy_metric_selectable(
-        map_metric_provider=CompoundColumnsUnique
+    with pytest.warns(DeprecationWarning) as record:
+        assert MapMetricProvider.is_sqlalchemy_metric_selectable(
+            map_metric_provider=CompoundColumnsUnique
+        )
+
+    assert "MapMetricProvider.is_sqlalchemy_metric_selectable is deprecated." in str(
+        record.list[0].message
     )
 
-    assert not MapMetricProvider.is_sqlalchemy_metric_selectable(
-        map_metric_provider=ColumnValuesNonNull
+    with pytest.warns(DeprecationWarning) as record:
+        assert not MapMetricProvider.is_sqlalchemy_metric_selectable(
+            map_metric_provider=ColumnValuesNonNull
+        )
+
+    assert "MapMetricProvider.is_sqlalchemy_metric_selectable is deprecated." in str(
+        record.list[0].message
     )
 
 
+@pytest.mark.unit
 def test_pandas_unexpected_rows_basic_result_format(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
@@ -419,6 +439,7 @@ def test_pandas_unexpected_rows_basic_result_format(
     }
 
 
+@pytest.mark.unit
 def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly_false(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
@@ -460,6 +481,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly
     }
 
 
+@pytest.mark.unit
 def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_unexpected_rows(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
@@ -506,6 +528,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_
     }
 
 
+@pytest.mark.unit
 def test_pandas_unexpected_rows_complete_result_format(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
@@ -541,7 +564,7 @@ def test_pandas_unexpected_rows_complete_result_format(
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
         "unexpected_index_list": [3, 4, 5],
-        "unexpected_index_query": [3, 4, 5],
+        "unexpected_index_query": "df.filter(items=[3, 4, 5], axis=0)",
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -554,6 +577,7 @@ def test_pandas_unexpected_rows_complete_result_format(
     }
 
 
+@pytest.mark.unit
 def test_expectation_configuration_has_result_format(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
@@ -569,7 +593,7 @@ def test_expectation_configuration_has_result_format(
         },
     )
     with pytest.warns(UserWarning) as config_warning:
-        result: ExpectationValidationResult = (
+        result: ExpectationValidationResult = (  # noqa: F841
             _expecation_configuration_to_validation_result_pandas(
                 expectation_configuration=expectation_configuration,
                 dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
@@ -583,6 +607,7 @@ def test_expectation_configuration_has_result_format(
     )
 
 
+@pytest.mark.unit
 def test_pandas_default_complete_result_format(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
@@ -617,7 +642,7 @@ def test_pandas_default_complete_result_format(
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
         "unexpected_index_list": [3, 4, 5],
-        "unexpected_index_query": [3, 4, 5],
+        "unexpected_index_query": "df.filter(items=[3, 4, 5], axis=0)",
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -625,6 +650,7 @@ def test_pandas_default_complete_result_format(
     }
 
 
+@pytest.mark.unit
 def test_pandas_unexpected_rows_complete_result_format_with_id_pk(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
@@ -671,7 +697,7 @@ def test_pandas_unexpected_rows_complete_result_format_with_id_pk(
             {"animals": "lion", "pk_1": 4},
             {"animals": "zebra", "pk_1": 5},
         ],
-        "unexpected_index_query": [3, 4, 5],
+        "unexpected_index_query": "df.filter(items=[3, 4, 5], axis=0)",
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -679,6 +705,7 @@ def test_pandas_unexpected_rows_complete_result_format_with_id_pk(
     }
 
 
+@pytest.mark.unit
 def test_pandas_default_to_not_include_unexpected_rows(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
@@ -704,6 +731,7 @@ def test_pandas_default_to_not_include_unexpected_rows(
     assert result.result == expected_evr_without_unexpected_rows.result
 
 
+@pytest.mark.unit
 def test_pandas_specify_not_include_unexpected_rows(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
@@ -730,6 +758,7 @@ def test_pandas_specify_not_include_unexpected_rows(
     assert result.result == expected_evr_without_unexpected_rows.result
 
 
+@pytest.mark.unit
 def test_include_unexpected_rows_without_explicit_result_format_raises_error(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
@@ -770,6 +799,7 @@ def test_include_unexpected_rows_without_explicit_result_format_raises_error(
 
 
 # Spark
+@pytest.mark.spark
 def test_spark_single_column_complete_result_format(
     in_memory_runtime_context,
     spark_dataframe_for_unexpected_rows_with_index,
@@ -816,6 +846,8 @@ def test_spark_single_column_complete_result_format(
         ],
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
+        "unexpected_index_query": "df.filter(F.expr((animals IS NOT NULL) AND (NOT "
+        "(animals IN (cat, fish, dog)))))",
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -823,6 +855,7 @@ def test_spark_single_column_complete_result_format(
     }
 
 
+@pytest.mark.spark
 def test_spark_single_column_complete_result_format_with_id_pk(
     in_memory_runtime_context,
     spark_dataframe_for_unexpected_rows_with_index,
@@ -894,6 +927,7 @@ def test_spark_single_column_complete_result_format_with_id_pk(
     }
 
 
+@pytest.mark.spark
 def test_spark_single_column_summary_result_format(
     in_memory_runtime_context,
     spark_dataframe_for_unexpected_rows_with_index,
@@ -946,6 +980,7 @@ def test_spark_single_column_summary_result_format(
     }
 
 
+@pytest.mark.spark
 def test_spark_single_column_basic_result_format(
     in_memory_runtime_context,
     spark_dataframe_for_unexpected_rows_with_index,
@@ -993,6 +1028,7 @@ def test_spark_single_column_basic_result_format(
     }
 
 
+@pytest.mark.sqlite
 def test_sqlite_single_column_complete_result_format(
     sa,
     in_memory_runtime_context,
@@ -1025,6 +1061,10 @@ def test_sqlite_single_column_complete_result_format(
         ],
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
+        "unexpected_index_query": "SELECT animals \n"
+        "FROM animal_names \n"
+        "WHERE animals IS NOT NULL AND (animals NOT IN "
+        "('cat', 'fish', 'dog'));",
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -1032,6 +1072,7 @@ def test_sqlite_single_column_complete_result_format(
     }
 
 
+@pytest.mark.sqlite
 def test_sqlite_single_column_complete_result_format_id_pk(
     sa,
     in_memory_runtime_context,
@@ -1079,7 +1120,7 @@ def test_sqlite_single_column_complete_result_format_id_pk(
             {"animals": "lion", "pk_1": 4},
             {"animals": "zebra", "pk_1": 5},
         ],
-        "unexpected_index_query": "SELECT animals, pk_1 \n"
+        "unexpected_index_query": "SELECT pk_1, animals \n"
         "FROM animal_names \n"
         "WHERE animals IS NOT NULL AND (animals NOT IN "
         "('cat', 'fish', 'dog'));",
@@ -1090,6 +1131,7 @@ def test_sqlite_single_column_complete_result_format_id_pk(
     }
 
 
+@pytest.mark.sqlite
 def test_sqlite_single_column_summary_result_format(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
@@ -1126,6 +1168,7 @@ def test_sqlite_single_column_summary_result_format(
     }
 
 
+@pytest.mark.sqlite
 def test_sqlite_single_column_basic_result_format(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import inspect
 import logging
 from unittest import mock
 
@@ -12,11 +11,15 @@ from great_expectations.core.usage_statistics.usage_statistics import ENABLED_ME
 logger = logging.getLogger(__name__)
 
 
-def filter_enabled_methods(
-    enabled_methods: dict[str, UsageStatsEvents]
-) -> dict[str, UsageStatsEvents]:
+@pytest.fixture
+def enable_usage_stats(monkeypatch):
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+
+@pytest.mark.unit
+def test_enabled_methods_map_to_appropriate_usage_stats_events():
     filtered = {}
-    for qualified_method_name, event in enabled_methods.items():
+    for qualified_method_name, event in ENABLED_METHODS.items():
         parts = qualified_method_name.split(".")
         assert (
             len(parts) == 2
@@ -30,18 +33,9 @@ def filter_enabled_methods(
         method_name = parts[-1]
         filtered[method_name] = event
 
-    return filtered
-
-
-@pytest.fixture
-def enable_usage_stats(monkeypatch):
-    monkeypatch.delenv("GE_USAGE_STATS")
-
-
-@pytest.mark.unit
-def test_enabled_methods_map_to_appropriate_usage_stats_events():
-    assert filter_enabled_methods(ENABLED_METHODS) == {
+    assert filtered == {
         "add_datasource": UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE,
+        "add_or_update_expectation_suite": UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
         "build_data_docs": UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS,
         "get_batch_list": UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST,
         "open_data_docs": UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS,
@@ -50,15 +44,72 @@ def test_enabled_methods_map_to_appropriate_usage_stats_events():
         "run_profiler_with_dynamic_arguments": UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS,
         "run_validation_operator": UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR,
         "save_expectation_suite": UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
+        "update_expectation_suite": UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
     }
 
 
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @pytest.mark.parametrize(
-    "method_name,expected_event",
-    [(name, event) for name, event in filter_enabled_methods(ENABLED_METHODS).items()],
+    "method_name,expected_event,required_args",
+    [
+        pytest.param(
+            "add_datasource",
+            UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE,
+            ["name"],
+            id="add datasource",
+        ),
+        pytest.param(
+            "build_data_docs",
+            UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS,
+            [],
+            id="build_data_docs",
+        ),
+        pytest.param(
+            "get_batch_list",
+            UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST,
+            [],
+            id="get_batch_list",
+        ),
+        pytest.param(
+            "open_data_docs",
+            UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS,
+            [],
+            id="open_data_docs",
+        ),
+        pytest.param(
+            "run_checkpoint",
+            UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT,
+            [],
+            id="run_checkpoint",
+        ),
+        pytest.param(
+            "run_profiler_on_data",
+            UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_ON_DATA,
+            [],
+            id="run_profiler_on_data",
+        ),
+        pytest.param(
+            "run_profiler_with_dynamic_arguments",
+            UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS,
+            [],
+            id="run_profiler_with_dynamic_arguments",
+        ),
+        pytest.param(
+            "run_validation_operator",
+            UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR,
+            ["validation_operator_name", "assets_to_validate"],
+            id="run_validation_operator",
+        ),
+        pytest.param(
+            "save_expectation_suite",
+            UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
+            ["expectation_suite"],
+            id="save_expectation_suite",
+        ),
+    ],
 )
 @pytest.mark.parametrize(
     "data_context_fixture_name",
@@ -69,18 +120,14 @@ def test_enabled_methods_map_to_appropriate_usage_stats_events():
         # Source: https://stackoverflow.com/a/64348247
         pytest.param("in_memory_runtime_context", id="EphemeralDataContext"),
         pytest.param("empty_data_context", id="FileDataContext"),
-        pytest.param(
-            "empty_data_context_in_cloud_mode",
-            id="CloudDataContext",
-        ),
     ],
 )
-@pytest.mark.integration
 def test_all_relevant_context_methods_emit_usage_stats(
     mock_emit: mock.MagicMock,
     enable_usage_stats,  # Needs to be before context fixtures to ensure usage stats handlers are attached
     method_name: str,
     expected_event: UsageStatsEvents,
+    required_args: list[str],
     data_context_fixture_name: str,
     request,
 ):
@@ -106,8 +153,7 @@ def test_all_relevant_context_methods_emit_usage_stats(
 
         # Generate a set of dummy values to trigger the target method
         # and invoke the usage stats decorator without causing side-effects
-        signature = inspect.signature(method)
-        kwargs = {param: None for param in signature.parameters}
+        kwargs = {param: mock.MagicMock() for param in required_args}
         method(**kwargs)
 
         mock_fn.assert_called_once()

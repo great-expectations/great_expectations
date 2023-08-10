@@ -42,7 +42,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 try:
-    import sqlalchemy as sa  # noqa: F401
+    import sqlalchemy as sa  # noqa: F401, TID251
 except ImportError:
     pass
 
@@ -290,7 +290,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
-    def _prescriptive_template(
+    def _prescriptive_template(  # noqa: PLR0912
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
@@ -321,7 +321,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                     renderer_configuration=renderer_configuration
                 )
 
-            if params.mostly and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -331,7 +331,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                     template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
                 else:
                     template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
-            else:
+            else:  # noqa: PLR5501
                 if params.min_value and params.max_value:
                     template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
                 elif not params.min_value:
@@ -390,7 +390,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         else:
             at_least_str, at_most_str = handle_strict_min_max(params)
 
-            if params["mostly"] is not None and params["mostly"] < 1.0:
+            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -403,7 +403,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 
                 elif params["max_value"] is None:
                     template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
-            else:
+            else:  # noqa: PLR5501
                 if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
 

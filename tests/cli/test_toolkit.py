@@ -10,8 +10,13 @@ from great_expectations.cli.toolkit import (
     get_relative_path_from_config_file_to_base_path,
     is_cloud_file_url,
 )
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.exceptions import UnsupportedConfigVersionError
 from great_expectations.util import get_context
+
+pytestmark = pytest.mark.cli
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -128,17 +133,19 @@ def test_parse_cli_config_file_location_posix_paths(tmp_path_factory):
 
         expected_filename = fixture.get("expected").get("filename")
         if expected_dir:
-            test_directory = os.path.join(root_dir, expected_dir)
-            os.makedirs(test_directory, exist_ok=True)
+            test_directory = os.path.join(root_dir, expected_dir)  # noqa: PTH118
+            os.makedirs(test_directory, exist_ok=True)  # noqa: PTH103
             if expected_filename:
-                expected_filepath = os.path.join(test_directory, expected_filename)
-                with open(expected_filepath, "w") as fp:
+                expected_filepath = os.path.join(  # noqa: PTH118
+                    test_directory, expected_filename
+                )
+                with open(expected_filepath, "w"):
                     pass
 
                 output = toolkit.parse_cli_config_file_location(expected_filepath)
 
                 assert output == {
-                    "directory": os.path.join(root_dir, expected_dir),
+                    "directory": os.path.join(root_dir, expected_dir),  # noqa: PTH118
                     "filename": expected_filename,
                 }
 
@@ -146,7 +153,6 @@ def test_parse_cli_config_file_location_posix_paths(tmp_path_factory):
 def test_parse_cli_config_file_location_posix_paths_existing_files_with_no_extension(
     tmp_path_factory,
 ):
-
     filename_no_extension_fixtures = [
         {
             "input_path": "relative/path/to/file/no_extension",
@@ -188,23 +194,24 @@ def test_parse_cli_config_file_location_posix_paths_existing_files_with_no_exten
 
         expected_filename = fixture.get("expected").get("filename")
         if expected_dir:
-            test_directory = os.path.join(root_dir, expected_dir)
-            os.makedirs(test_directory, exist_ok=True)
+            test_directory = os.path.join(root_dir, expected_dir)  # noqa: PTH118
+            os.makedirs(test_directory, exist_ok=True)  # noqa: PTH103
             if expected_filename:
-                expected_filepath = os.path.join(test_directory, expected_filename)
-                with open(expected_filepath, "w") as fp:
+                expected_filepath = os.path.join(  # noqa: PTH118
+                    test_directory, expected_filename
+                )
+                with open(expected_filepath, "w"):
                     pass
 
                 output = toolkit.parse_cli_config_file_location(expected_filepath)
 
                 assert output == {
-                    "directory": os.path.join(root_dir, expected_dir),
+                    "directory": os.path.join(root_dir, expected_dir),  # noqa: PTH118
                     "filename": expected_filename,
                 }
 
 
 def test_parse_cli_config_file_location_empty_paths():
-
     posix_fixtures = [
         {
             "input_path": None,
@@ -308,46 +315,39 @@ def test_parse_cli_config_file_location_windows_paths(tmp_path_factory):
     # We are unable to create files with windows paths on our unix test CI
 
 
-@pytest.mark.cloud
 def test_is_cloud_file_path_local_posix():
     assert not is_cloud_file_url("bucket/files/ ")
     assert not is_cloud_file_url("./bucket/files/ ")
     assert not is_cloud_file_url("/full/path/files/ ")
 
 
-@pytest.mark.cloud
 def test_is_cloud_file_path_file_url():
     assert not is_cloud_file_url("file://bucket/files/ ")
     assert not is_cloud_file_url("file://./bucket/files/ ")
     assert not is_cloud_file_url("file:///full/path/files/ ")
 
 
-@pytest.mark.cloud
 def test_is_cloud_file_path_ftp_url():
     assert is_cloud_file_url("ftp://bucket/files/ ")
     assert is_cloud_file_url("ftp://./bucket/files/ ")
     assert is_cloud_file_url("ftp:///full/path/files/ ")
 
 
-@pytest.mark.cloud
 def test_is_cloud_file_path_s3():
     assert is_cloud_file_url("s3://bucket/files/")
     assert is_cloud_file_url(" s3://bucket/files/ ")
 
 
-@pytest.mark.cloud
 def test_is_cloud_file_path_google_storage():
     assert is_cloud_file_url("gs://bucket/files/")
     assert is_cloud_file_url(" gs://bucket/files/ ")
 
 
-@pytest.mark.cloud
 def test_is_cloud_file_path_azure_storage():
     assert is_cloud_file_url("wasb://bucket/files/")
     assert is_cloud_file_url(" wasb://bucket/files/ ")
 
 
-@pytest.mark.cloud
 def test_is_cloud_file_path_http_url():
     assert is_cloud_file_url("http://bucket/files/")
     assert is_cloud_file_url(" http://bucket/files/ ")
@@ -365,15 +365,15 @@ def simulated_project_directories(tmp_path_factory):
     /random/pytest/dir/projects/data/pipeline1
     """
     test_dir = tmp_path_factory.mktemp("projects", numbered=False)
-    assert os.path.isabs(test_dir)
+    assert os.path.isabs(test_dir)  # noqa: PTH117
 
-    ge_dir = os.path.join(test_dir, "pipeline1", "great_expectations")
-    os.makedirs(ge_dir)
-    assert os.path.isdir(ge_dir)
+    ge_dir = os.path.join(test_dir, "pipeline1", FileDataContext.GX_DIR)  # noqa: PTH118
+    os.makedirs(ge_dir)  # noqa: PTH103
+    assert os.path.isdir(ge_dir)  # noqa: PTH112
 
-    data_dir = os.path.join(test_dir, "data", "pipeline1")
-    os.makedirs(data_dir)
-    assert os.path.isdir(data_dir)
+    data_dir = os.path.join(test_dir, "data", "pipeline1")  # noqa: PTH118
+    os.makedirs(data_dir)  # noqa: PTH103
+    assert os.path.isdir(data_dir)  # noqa: PTH112
 
     yield ge_dir, data_dir
     shutil.rmtree(test_dir)
@@ -395,12 +395,12 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_within_g
     """
     ge_dir, data_dir = simulated_project_directories
     monkeypatch.chdir(ge_dir)
-    assert str(os.path.abspath(os.path.curdir)) == str(ge_dir)
+    assert str(os.path.abspath(os.path.curdir)) == str(ge_dir)  # noqa: PTH100
 
     obs = get_relative_path_from_config_file_to_base_path(
-        ge_dir, os.path.join("..", "..", "data", "pipeline1")
+        ge_dir, os.path.join("..", "..", "data", "pipeline1")  # noqa: PTH118
     )
-    assert obs == os.path.join("..", "..", "data", "pipeline1")
+    assert obs == os.path.join("..", "..", "data", "pipeline1")  # noqa: PTH118
 
 
 def test_get_relative_path_from_config_file_to_data_base_file_path_from_within_ge_directory_and_absolute_data_path(
@@ -419,11 +419,13 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_within_g
     """
     ge_dir, data_dir = simulated_project_directories
     monkeypatch.chdir(ge_dir)
-    assert str(os.path.abspath(os.path.curdir)) == str(ge_dir)
+    assert str(os.path.abspath(os.path.curdir)) == str(ge_dir)  # noqa: PTH100
 
-    absolute_path = os.path.abspath(os.path.join("..", "..", "data", "pipeline1"))
+    absolute_path = os.path.abspath(  # noqa: PTH100
+        os.path.join("..", "..", "data", "pipeline1")  # noqa: PTH118
+    )
     obs = get_relative_path_from_config_file_to_base_path(ge_dir, absolute_path)
-    assert obs == os.path.join("..", "..", "data", "pipeline1")
+    assert obs == os.path.join("..", "..", "data", "pipeline1")  # noqa: PTH118
 
 
 def test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent_directory_and_relative_data_path(
@@ -441,14 +443,14 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent
     expected results in yaml: ../../data/pipeline1
     """
     ge_dir, data_dir = simulated_project_directories
-    adjacent_dir = os.path.dirname(ge_dir)
+    adjacent_dir = os.path.dirname(ge_dir)  # noqa: PTH120
     monkeypatch.chdir(adjacent_dir)
-    assert str(os.path.abspath(os.path.curdir)) == str(adjacent_dir)
+    assert str(os.path.abspath(os.path.curdir)) == str(adjacent_dir)  # noqa: PTH100
 
     obs = get_relative_path_from_config_file_to_base_path(
-        ge_dir, os.path.join("..", "data", "pipeline1")
+        ge_dir, os.path.join("..", "data", "pipeline1")  # noqa: PTH118
     )
-    assert obs == os.path.join("..", "..", "data", "pipeline1")
+    assert obs == os.path.join("..", "..", "data", "pipeline1")  # noqa: PTH118
 
 
 def test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent_directory_and_absolute_data_path(
@@ -466,13 +468,15 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent
     expected results in yaml: ../../data/pipeline1
     """
     ge_dir, data_dir = simulated_project_directories
-    adjacent_dir = os.path.dirname(ge_dir)
+    adjacent_dir = os.path.dirname(ge_dir)  # noqa: PTH120
     monkeypatch.chdir(adjacent_dir)
-    assert str(os.path.abspath(os.path.curdir)) == str(adjacent_dir)
+    assert str(os.path.abspath(os.path.curdir)) == str(adjacent_dir)  # noqa: PTH100
 
-    absolute_path = os.path.abspath(os.path.join("..", "data", "pipeline1"))
+    absolute_path = os.path.abspath(  # noqa: PTH100
+        os.path.join("..", "data", "pipeline1")  # noqa: PTH118
+    )
     obs = get_relative_path_from_config_file_to_base_path(ge_dir, absolute_path)
-    assert obs == os.path.join("..", "..", "data", "pipeline1")
+    assert obs == os.path.join("..", "..", "data", "pipeline1")  # noqa: PTH118
 
 
 def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_directory_and_relative_data_path(
@@ -492,12 +496,13 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_dir
     """
     ge_dir, data_dir = simulated_project_directories
     monkeypatch.chdir(misc_directory)
-    assert str(os.path.abspath(os.path.curdir)) == str(misc_directory)
+    assert str(os.path.abspath(os.path.curdir)) == str(misc_directory)  # noqa: PTH100
 
     obs = get_relative_path_from_config_file_to_base_path(
-        ge_dir, os.path.join("..", "..", "projects", "data", "pipeline1")
+        ge_dir,
+        os.path.join("..", "..", "projects", "data", "pipeline1"),  # noqa: PTH118
     )
-    assert obs == os.path.join("..", "..", "data", "pipeline1")
+    assert obs == os.path.join("..", "..", "data", "pipeline1")  # noqa: PTH118
 
 
 def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_directory_and_absolute_data_path(
@@ -517,10 +522,20 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_dir
     """
     ge_dir, data_dir = simulated_project_directories
     monkeypatch.chdir(misc_directory)
-    assert str(os.path.abspath(os.path.curdir)) == str(misc_directory)
+    assert str(os.path.abspath(os.path.curdir)) == str(misc_directory)  # noqa: PTH100
 
-    absolute_path = os.path.abspath(
-        os.path.join("..", "..", "projects", "data", "pipeline1")
+    absolute_path = os.path.abspath(  # noqa: PTH100
+        os.path.join("..", "..", "projects", "data", "pipeline1")  # noqa: PTH118
     )
     obs = get_relative_path_from_config_file_to_base_path(ge_dir, absolute_path)
-    assert obs == os.path.join("..", "..", "data", "pipeline1")
+    assert obs == os.path.join("..", "..", "data", "pipeline1")  # noqa: PTH118
+
+
+def test_get_batch_request_using_datasource_name_has_data_asset_name_(
+    in_memory_runtime_context, basic_datasource
+):
+    in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
+    batch_request = toolkit.get_batch_request_using_datasource_name(
+        in_memory_runtime_context, "my_datasource"
+    )
+    assert batch_request["data_asset_name"] == "default_data_asset_name"

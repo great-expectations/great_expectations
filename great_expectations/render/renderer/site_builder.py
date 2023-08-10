@@ -1,10 +1,11 @@
 import logging
 import os
 import traceback
+import urllib
 from collections import OrderedDict
 from typing import Any, List, Optional, Tuple
 
-import great_expectations.exceptions as exceptions
+from great_expectations import exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
@@ -110,7 +111,7 @@ class SiteBuilder:
                         class_name: DefaultJinjaIndexPageView
     """
 
-    def __init__(  # noqa: C901 - 16
+    def __init__(  # noqa: C901, PLR0912, PLR0913
         self,
         data_context,
         store_backend,
@@ -147,19 +148,21 @@ class SiteBuilder:
         # set custom_styles_directory if present
         custom_styles_directory = None
         plugins_directory = data_context.plugins_directory
-        if plugins_directory and os.path.isdir(
-            os.path.join(plugins_directory, "custom_data_docs", "styles")
+        if plugins_directory and os.path.isdir(  # noqa: PTH112
+            os.path.join(  # noqa: PTH118
+                plugins_directory, "custom_data_docs", "styles"
+            )
         ):
-            custom_styles_directory = os.path.join(
+            custom_styles_directory = os.path.join(  # noqa: PTH118
                 plugins_directory, "custom_data_docs", "styles"
             )
 
         # set custom_views_directory if present
         custom_views_directory = None
-        if plugins_directory and os.path.isdir(
-            os.path.join(plugins_directory, "custom_data_docs", "views")
+        if plugins_directory and os.path.isdir(  # noqa: PTH112
+            os.path.join(plugins_directory, "custom_data_docs", "views")  # noqa: PTH118
         ):
-            custom_views_directory = os.path.join(
+            custom_views_directory = os.path.join(  # noqa: PTH118
                 plugins_directory, "custom_data_docs", "views"
             )
 
@@ -340,7 +343,7 @@ class SiteBuilder:
 
 
 class DefaultSiteSectionBuilder:
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name,
         data_context,
@@ -413,7 +416,7 @@ class DefaultSiteSectionBuilder:
                 class_name=view["class_name"],
             )
 
-    def build(self, resource_identifiers=None) -> None:
+    def build(self, resource_identifiers=None) -> None:  # noqa: PLR0912
         source_store_keys = self.source_store.list_keys()
         if self.name == "validations" and self.validation_results_limit:
             source_store_keys = sorted(
@@ -423,7 +426,7 @@ class DefaultSiteSectionBuilder:
         for resource_key in source_store_keys:
             # if no resource_identifiers are passed, the section
             # builder will build
-            # a page for every keys in its source store.
+            # a page for every key in its source store.
             # if the caller did pass resource_identifiers, the section builder
             # will build pages only for the specified resources
             if resource_identifiers and resource_key not in resource_identifiers:
@@ -463,7 +466,6 @@ class DefaultSiteSectionBuilder:
                         f"        Rendering profiling for batch {resource_key.batch_identifier}"
                     )
                 else:
-
                     logger.debug(
                         f"        Rendering validation: run name: {run_name}, run time: {run_time}, suite {expectation_suite_name} for batch {resource_key.batch_identifier}"
                     )
@@ -478,7 +480,7 @@ class DefaultSiteSectionBuilder:
                         ),
                         rendered_content,
                         source_type=resource_key.resource_type,
-                        source_id=resource_key.cloud_id,
+                        source_id=resource_key.id,
                     )
                 else:
                     viewable_content = self.view_class.render(
@@ -509,7 +511,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
 
 class DefaultSiteIndexBuilder:
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name,
         site_name,
@@ -579,7 +581,7 @@ class DefaultSiteIndexBuilder:
                 class_name=view["class_name"],
             )
 
-    def add_resource_info_to_index_links_dict(
+    def add_resource_info_to_index_links_dict(  # noqa: PLR0913
         self,
         index_links_dict,
         expectation_suite_name,
@@ -600,7 +602,7 @@ class DefaultSiteIndexBuilder:
 
         if run_id:
             filepath = (
-                os.path.join(
+                os.path.join(  # noqa: PTH118
                     "validations",
                     *expectation_suite_name.split("."),
                     *run_id.to_tuple(),
@@ -610,11 +612,15 @@ class DefaultSiteIndexBuilder:
             )
         else:
             filepath = (
-                os.path.join("expectations", *expectation_suite_name.split("."))
+                os.path.join(  # noqa: PTH118
+                    "expectations", *expectation_suite_name.split(".")
+                )
                 + ".html"
             )
 
-        expectation_suite_filepath = os.path.join(
+        url_encoded_filepath = urllib.parse.quote(filepath)
+
+        expectation_suite_filepath = os.path.join(  # noqa: PTH118
             "expectations", *expectation_suite_name.split(".")
         )
         expectation_suite_filepath += ".html"
@@ -622,7 +628,7 @@ class DefaultSiteIndexBuilder:
         index_links_dict[f"{section_name}_links"].append(
             {
                 "expectation_suite_name": expectation_suite_name,
-                "filepath": filepath,
+                "filepath": url_encoded_filepath,
                 "run_id": run_id,
                 "batch_identifier": batch_identifier,
                 "validation_success": validation_success,

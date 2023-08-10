@@ -24,7 +24,7 @@ validation_result_identifier = checkpoint_result.list_validation_result_identifi
 context.open_data_docs(resource_identifier=validation_result_identifier)
 {%- else -%}
 print(context.get_expectation_suite(expectation_suite_name=expectation_suite_name))
-context.save_expectation_suite(expectation_suite=suite, expectation_suite_name=expectation_suite_name)
+context.add_or_update_expectation_suite(expectation_suite=suite)
 
 suite_identifier = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
 context.build_data_docs(resource_identifiers=[suite_identifier])

@@ -4,12 +4,11 @@ import json
 from copy import deepcopy
 from enum import Enum
 from string import Template as pTemplate
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Final, List, Optional, Union
 
 from marshmallow import Schema, fields, post_dump, post_load
-from typing_extensions import Final
 
-from great_expectations.alias_types import JSONValues
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
@@ -208,7 +207,7 @@ class RenderedComponentContent(RenderedContent):
 
 
 class RenderedHeaderContent(RenderedComponentContent):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         header,
         subheader=None,
@@ -244,7 +243,7 @@ class RenderedHeaderContent(RenderedComponentContent):
 
 
 class RenderedGraphContent(RenderedComponentContent):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         graph,
         header=None,
@@ -301,7 +300,7 @@ class RenderedTableContent(RenderedComponentContent):
             sortable: A boolean indicating whether the column is sortable.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         table: list[RenderedContent],
         header: Optional[Union[RenderedContent, dict]] = None,
@@ -351,7 +350,7 @@ class RenderedTableContent(RenderedComponentContent):
 
 
 class RenderedTabsContent(RenderedComponentContent):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self, tabs, header=None, subheader=None, styling=None, content_block_type="tabs"
     ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
@@ -384,7 +383,7 @@ class RenderedTabsContent(RenderedComponentContent):
 
 
 class RenderedBootstrapTableContent(RenderedComponentContent):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         table_data,
         table_columns,
@@ -522,7 +521,7 @@ class RenderedStringTemplateContent(RenderedComponentContent):
 
 
 class RenderedBulletListContent(RenderedComponentContent):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         bullet_list,
         header=None,
@@ -560,7 +559,7 @@ class RenderedBulletListContent(RenderedComponentContent):
 
 
 class ValueListContent(RenderedComponentContent):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         value_list,
         header=None,
@@ -596,7 +595,7 @@ class ValueListContent(RenderedComponentContent):
 
 
 class TextContent(RenderedComponentContent):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self, text, header=None, subheader=None, styling=None, content_block_type="text"
     ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
@@ -641,7 +640,7 @@ class CollapseContent(RenderedComponentContent):
         inline_link: Whether to include a link inline.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         collapse: Union[RenderedContent, list],
         collapse_toggle_link: Optional[Union[RenderedContent, dict]] = None,
@@ -689,7 +688,7 @@ class CollapseContent(RenderedComponentContent):
 
 class RenderedDocumentContent(RenderedContent):
     # NOTE: JPC 20191028 - review these keys to consolidate and group
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         sections,
         data_asset_name=None,
@@ -704,7 +703,7 @@ class RenderedDocumentContent(RenderedContent):
         ge_cloud_id=None,
     ) -> None:
         if not isinstance(sections, list) and all(
-            [isinstance(section, RenderedSectionContent) for section in sections]
+            isinstance(section, RenderedSectionContent) for section in sections
         ):
             raise InvalidRenderedContentError(
                 "RenderedDocumentContent requires a list of RenderedSectionContent for "
@@ -747,10 +746,8 @@ class RenderedDocumentContent(RenderedContent):
 class RenderedSectionContent(RenderedContent):
     def __init__(self, content_blocks, section_name=None) -> None:
         if not isinstance(content_blocks, list) and all(
-            [
-                isinstance(content_block, RenderedComponentContent)
-                for content_block in content_blocks
-            ]
+            isinstance(content_block, RenderedComponentContent)
+            for content_block in content_blocks
         ):
             raise InvalidRenderedContentError(
                 "Rendered section content requires a list of RenderedComponentContent "
@@ -775,7 +772,7 @@ class RenderedSectionContent(RenderedContent):
 
 
 class RenderedAtomicValue(DictDot):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         schema: Optional[dict] = None,
         header: Optional[RenderedAtomicValue] = None,
@@ -809,19 +806,25 @@ class RenderedAtomicValue(DictDot):
         return json.dumps(self.to_json_dict(), indent=2)
 
     @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
+    def to_json_dict(self, remove_null_attrs: bool = True) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this RenderedAtomicValue.
 
         Returns:
             A JSON-serializable dict representation of this RenderedAtomicValue.
         """
-        d = renderedAtomicValueSchema.dump(self)
-        json_dict: dict = {}
-        for key in d:
+        json_dict = super().to_dict()
+        if remove_null_attrs:
+            json_dict = RenderedAtomicValueSchema.remove_null_attrs(data=json_dict)
+        for key in json_dict:
+            value = getattr(self, key)
             if key == "graph":
-                json_dict[key] = getattr(self, key).to_json_dict()
-            else:
-                json_dict[key] = getattr(self, key)
+                json_dict[key] = value.to_json_dict()
+            elif key == "params":
+                for param_name, param in value.items():
+                    if not isinstance(param["schema"]["type"], str):
+                        json_dict[key][param_name]["schema"]["type"] = param["schema"][
+                            "type"
+                        ].value
         return json_dict
 
 
@@ -880,21 +883,31 @@ class RenderedAtomicValueSchema(Schema):
         "meta_notes",
     )
 
-    @post_dump
-    def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
-        """Removes the attributes in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE during serialization if
+    @staticmethod
+    def remove_null_attrs(data: dict) -> dict:
+        """Removes the attributes in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE if
         their values are None."""
-        data = deepcopy(data)
+        cleaned_serialized_dict = deepcopy(data)
         for key in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE:
             if (
                 key == "graph"
-                and key in data
-                and data.get(key, {}).get("graph") is None
+                and key in cleaned_serialized_dict
+                and cleaned_serialized_dict.get(key, {}).get("graph") is None
             ):
-                data.pop(key)
-            elif key in data and data[key] is None:
-                data.pop(key)
-        return data
+                cleaned_serialized_dict.pop(key)
+            elif key == "meta_notes" and key in cleaned_serialized_dict:
+                meta_notes = cleaned_serialized_dict.get(key, {})
+                if meta_notes is None or not meta_notes.get("content"):
+                    cleaned_serialized_dict.pop(key)
+            elif (
+                key in cleaned_serialized_dict and cleaned_serialized_dict[key] is None
+            ):
+                cleaned_serialized_dict.pop(key)
+        return cleaned_serialized_dict
+
+    @post_dump
+    def clean_null_attrs(self, data, **kwargs: dict):
+        return RenderedAtomicValueSchema.remove_null_attrs(data=data)
 
 
 class RenderedAtomicContent(RenderedContent):
@@ -918,7 +931,7 @@ class RenderedAtomicContent(RenderedContent):
         return json.dumps(self.to_json_dict(), indent=2)
 
     @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
+    def to_json_dict(self, remove_null_attrs: bool = True) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this RenderedAtomicContent.
 
         Returns:
@@ -926,7 +939,7 @@ class RenderedAtomicContent(RenderedContent):
         """
         """Returns RenderedAtomicContent as a json dictionary."""
         d = renderedAtomicContentSchema.dump(self)
-        d["value"] = self.value.to_json_dict()
+        d["value"] = self.value.to_json_dict(remove_null_attrs=remove_null_attrs)
         return d
 
 

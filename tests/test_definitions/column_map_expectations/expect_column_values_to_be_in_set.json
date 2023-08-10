@@ -1,6 +1,7 @@
 {
   "expectation_type": "expect_column_values_to_be_in_set",
   "datasets" : [{
+    "dataset_name": "expect_column_values_to_be_in_set_1",
     "data" : {
       "x" : [1,2,4],
       "y" : [1.1,2.2,5.5],
@@ -169,6 +170,7 @@
     }
     ]},
     {
+      "dataset_name": "expect_column_values_to_be_in_set_2",
       "data": {
         "empty_column": []
       },
@@ -203,6 +205,7 @@
       }]
   },
   {
+    "dataset_name": "expect_column_values_to_be_in_set_3",
     "data" : {
       "dates" : ["2018-01-01", "2018-01-02", "2018-01-02 00:34:01"]
     },
@@ -300,7 +303,12 @@
       },
       "out": {
         "success": false,
-        "unexpected_index_list": [0],
+        "unexpected_index_list": [
+          {
+            "pk_index": 0,
+            "dates": "2018-01-01"
+          }
+        ],
         "unexpected_list": ["2018-01-01"]
       }
     }

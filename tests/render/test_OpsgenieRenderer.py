@@ -1,12 +1,16 @@
+import pytest
+
 from great_expectations.core.batch import BatchDefinition, IDDict
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.render.renderer import OpsgenieRenderer
 
+# module level markers
+pytestmark = pytest.mark.big
+
 
 def test_OpsgenieRenderer_validation_results_success():
-
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
         success=True,
@@ -68,7 +72,6 @@ def test_OpsgenieRenderer_checkpoint_validation_results_success():
 
 
 def test_OpsgenieRenderer_validation_results_failure():
-
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
         success=False,

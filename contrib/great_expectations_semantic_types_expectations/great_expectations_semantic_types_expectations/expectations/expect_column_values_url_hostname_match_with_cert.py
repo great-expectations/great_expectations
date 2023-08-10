@@ -3,17 +3,11 @@ This is a template for creating custom ColumnMapExpectations.
 For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
-import datetime
-import json
 import socket
 import ssl
-from datetime import datetime
 from typing import Optional
 
-from dateutil.parser import parse
-
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -33,14 +27,13 @@ def is_cert_match(host: str) -> bool:
             return True
         else:
             return False
-    except Exception as e:
+    except Exception:
         return False
 
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesUrlHostnameMatchWithCert(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.match_cert"
 

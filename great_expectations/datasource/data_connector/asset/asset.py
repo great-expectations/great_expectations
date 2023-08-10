@@ -10,7 +10,7 @@ class Asset:
     the same name and/or semantics, such as "partitioner_name", "base_directory", and "glob_directive").
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         base_directory: Optional[str] = None,

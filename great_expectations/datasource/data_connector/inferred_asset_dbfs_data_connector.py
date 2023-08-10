@@ -26,7 +26,7 @@ class InferredAssetDBFSDataConnector(InferredAssetFilesystemDataConnector):
         id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -55,16 +55,10 @@ class InferredAssetDBFSDataConnector(InferredAssetFilesystemDataConnector):
     def _get_full_file_path(
         self, path: str, data_asset_name: Optional[str] = None
     ) -> str:
-
         full_path = super()._get_full_file_path(
             path=path, data_asset_name=data_asset_name
         )
-
         template_arguments: dict = {
             "path": full_path,
         }
-
-        return self.execution_engine.resolve_data_reference(
-            data_connector_name=self.__class__.__name__,
-            template_arguments=template_arguments,
-        )
+        return self.resolve_data_reference(template_arguments=template_arguments)

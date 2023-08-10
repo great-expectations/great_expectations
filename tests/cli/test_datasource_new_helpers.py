@@ -4,6 +4,7 @@ import pytest
 
 from great_expectations import DataContext
 from great_expectations.cli.datasource import (
+    AthenaCredentialYamlHelper,
     BigqueryCredentialYamlHelper,
     ConnectionStringCredentialYamlHelper,
     MySQLCredentialYamlHelper,
@@ -18,8 +19,9 @@ from great_expectations.cli.datasource import (
 )
 from great_expectations.datasource.types import DatasourceTypes
 
+pytestmark = pytest.mark.cli
 
-@pytest.mark.unit
+
 def test_SQLCredentialYamlHelper_defaults(empty_data_context):
     helper = SQLCredentialYamlHelper(usage_stats_payload={"foo": "bar"})
     expected_credentials_snippet = '''\
@@ -69,7 +71,6 @@ data_connectors:
     assert renderer.sql_credentials_code_snippet == expected_credentials_snippet
 
 
-@pytest.mark.unit
 def test_SQLCredentialYamlHelper_driver(empty_data_context):
     helper = SQLCredentialYamlHelper(usage_stats_payload={"foo": "bar"}, driver="stuff")
     expected_credentials_snippet = '''\
@@ -772,7 +773,6 @@ data_connectors:
 def test_check_if_datasource_name_exists(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     assert [d["name"] for d in context.list_datasources()] == [
         "my_datasource",
@@ -791,3 +791,67 @@ def test_check_if_datasource_name_exists(
         )
         is False
     )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_AthenaCredentialYamlHelper(mock_emit, empty_data_context_stats_enabled):
+    helper = AthenaCredentialYamlHelper("my_datasource")
+    assert (
+        helper.credentials_snippet()
+        == '''\
+# The SQLAlchemy url/connection string for the Athena connection
+# (reference: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/athena or https://github.com/laughingman7743/PyAthena/#sqlalchemy)"""
+
+schema_name = "YOUR_SCHEMA"  # or database name. It is optional
+table_name = "YOUR_TABLE_NAME"
+region = "YOUR_REGION"
+s3_path = "s3://YOUR_S3_BUCKET/path/to/"  # ignore partitioning
+
+connection_string = f"awsathena+rest://@athena.{region}.amazonaws.com/{schema_name}?s3_staging_dir={s3_path}"
+            '''
+    )
+
+    assert (
+        helper.yaml_snippet()
+        == '''f"""
+name: {datasource_name}
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  connection_string: {connection_string}
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    assets:
+      {table_name}:
+        class_name: Asset
+        schema_name: {schema_name}
+"""'''
+    )
+
+    helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "cli.new_ds_choice",
+                "event_payload": {
+                    "type": "sqlalchemy",
+                    "db": "Athena",
+                    "api_version": "v3",
+                },
+                "success": True,
+            }
+        ),
+    ]

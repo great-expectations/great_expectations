@@ -3,9 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Optional
 
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core import (
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationSuite,  # noqa: TCH001
+)
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.domain import Domain
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
@@ -16,7 +19,9 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.helpers.util import (
     get_or_create_expectation_suite,
 )
-from great_expectations.rule_based_profiler.parameter_container import ParameterNode
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterNode,  # noqa: TCH001
+)
 from great_expectations.types import SerializableDictDot
 
 if TYPE_CHECKING:
@@ -40,6 +45,10 @@ class RuleBasedProfilerResult(SerializableDictDot):
             List of `ExpectationConfiguration` objects.
         citation:
             `dict` of citations.
+        catch_exceptions (boolean): \
+            Defaults to False.
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
 
     """
 
@@ -51,6 +60,8 @@ class RuleBasedProfilerResult(SerializableDictDot):
     citation: dict
     rule_domain_builder_execution_time: Dict[str, float]
     rule_execution_time: Dict[str, float]
+    rule_exception_tracebacks: Dict[str, Optional[str]]
+    catch_exceptions: bool = field(default=False)
     # Reference to  "UsageStatisticsHandler" object for this "RuleBasedProfilerResult" object (if configured).
     _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 

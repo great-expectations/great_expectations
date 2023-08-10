@@ -14,7 +14,6 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 # This class defines a Metric to support your Expectation.
 # For most MulticolumnMapExpectations, the main business logic for calculation will live in this class.
 class MulticolumnValuesNotAllNull(MulticolumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
 
     condition_metric_name = "multicolumn_values.not_all_null"
@@ -34,8 +33,7 @@ class MulticolumnValuesNotAllNull(MulticolumnMapMetricProvider):
 
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_list, **kwargs):
-        row_wise_cond = column_list.isna().sum(axis=1) < len(column_list)
-        return row_wise_cond
+        return column_list.notna().any(axis=1)
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -62,6 +60,7 @@ class ExpectMulticolumnValuesNotToBeAllNull(MulticolumnMapExpectation):
                 "one_non_null": [np.nan, 2, np.nan, np.nan, np.nan],
                 "all_nulls": [np.nan, np.nan, np.nan, np.nan, np.nan],
             },
+            "only_for": ["pandas"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -97,12 +96,6 @@ class ExpectMulticolumnValuesNotToBeAllNull(MulticolumnMapExpectation):
                     },
                 },
             ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-            ],
         }
     ]
 
@@ -118,7 +111,7 @@ class ExpectMulticolumnValuesNotToBeAllNull(MulticolumnMapExpectation):
     )
 
     # This dictionary contains default values for any parameters that should have default values
-    default_kwarg_values = {}
+    default_kwarg_values = {"ignore_row_if": "never"}
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -159,5 +152,4 @@ class ExpectMulticolumnValuesNotToBeAllNull(MulticolumnMapExpectation):
 
 
 if __name__ == "__main__":
-
     ExpectMulticolumnValuesNotToBeAllNull().print_diagnostic_checklist()

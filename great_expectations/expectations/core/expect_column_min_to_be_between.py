@@ -6,7 +6,7 @@ from great_expectations.core import (
 )
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import (
@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnMinToBeBetween(ColumnExpectation):
+class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
     """Expect the column minimum to be between a minimum value and a maximum value.
 
     expect_column_min_to_be_between is a \
@@ -254,7 +254,10 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
                 )
 
             if params.min_value and params.max_value:
-                template_str = f"minimum value must be {at_least_str} $min_value and {at_most_str} $max_value."
+                if params.min_value == params.max_value:
+                    template_str = "minimum value must be $min_value"
+                else:
+                    template_str = f"minimum value must be {at_least_str} $min_value and {at_most_str} $max_value."
             elif not params.min_value:
                 template_str = f"minimum value must be {at_most_str} $max_value."
             else:

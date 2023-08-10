@@ -1,5 +1,3 @@
-Using v3 (Batch Request) API
-
 Checking project...
 
 ================================================================================
@@ -22,10 +20,6 @@ The following Stores and/or Store Names will be upgraded:
 
 Manual Steps
 =============
-
-The following Checkpoints must be upgraded manually, due to using the old Checkpoint format, which is being deprecated:
-
-    - Checkpoints: my_checkpoint, titanic_checkpoint_0, titanic_checkpoint_1, titanic_checkpoint_2
 
 The following Data Sources must be upgraded manually, due to using the old Datasource format, which is being deprecated:
 

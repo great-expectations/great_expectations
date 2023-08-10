@@ -9,16 +9,9 @@ from great_expectations.expectations.expectation import QueryExpectation
 TODAY: date = datetime(year=2022, month=8, day=10).date()
 TODAY_STR: str = datetime.strftime(TODAY, "%Y-%m-%d")
 
-DAYS_AGO = {
-    3: TODAY - timedelta(days=3),
-    7: TODAY - timedelta(days=7),
-    14: TODAY - timedelta(days=14),
-    21: TODAY - timedelta(days=21),
-    28: TODAY - timedelta(days=28),
-}
 date_format = "%Y-%m-%d"
 
-FOUR_PREVIOUS_WEEKS = [7, 14, 21, 28]
+DAYS_IN_WEEK = 7
 
 
 def generate_data_sample(n_appearances: dict):
@@ -31,13 +24,27 @@ def generate_data_sample(n_appearances: dict):
 
 
 class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
-    """
+    """Expect the daily sums of the given column to be close to the average sums calculated 4 weeks back.
+
     This metric expects daily sums of the given column, to be close to the average sums calculated 4 weeks back,
     respective to the specific day of the week.
     The expectation fails if the difference in percentage ((current_sum - average_sum) / average_sum) is more than the
     threshold given by user (default value is 25%).
     The threshold parameter should be given in fraction and not percent, i.e. for 25% define threshold = 0.25.
+
+    Keyword args:
+        - threshold (float; default = 0.25): threshold of difference between current and past weeks over which expectation fails
+        - weeks_back (int; default = 4): how many weeks back to compare the current metric with
     """
+
+    FOUR_PREVIOUS_WEEKS = [7, 14, 21, 28]
+    DAYS_AGO = {
+        3: TODAY - timedelta(days=3),
+        7: TODAY - timedelta(days=7),
+        14: TODAY - timedelta(days=14),
+        21: TODAY - timedelta(days=21),
+        28: TODAY - timedelta(days=28),
+    }
 
     query = """
     SELECT {date_column} as date_column, SUM({summed_column}) as column_sum_over_date
@@ -55,11 +62,12 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
         "meta": None,
         "threshold": 0.25,
         "query": query,
+        "weeks_back": 4,
     }
 
     examples = [
         {
-            # column a - good counts - 3 rows for every day
+            # INFO: column a - good counts - 3 rows for every day
             "data": {
                 "date_column_a": generate_data_sample(
                     {
@@ -85,7 +93,7 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
                 "summed_column_zero_current": generate_data_sample({1: 3, 0: 12}),
                 "summed_column_zero_both": generate_data_sample({1: 3, 0: 12}),
             },
-            # "column_b": [today, yesterday, yesterday, two_days_ago]},
+            # INFO: "column_b": [today, yesterday, yesterday, two_days_ago]},
             "suppress_test_for": ["bigquery"],
             "tests": [
                 {
@@ -99,6 +107,7 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
                         },
                         "run_date": TODAY_STR,
                         "threshold": default_kwarg_values["threshold"],
+                        "weeks_back": default_kwarg_values["weeks_back"],
                     },
                     "out": {"success": True},
                 },
@@ -164,7 +173,7 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
 
     metric_dependencies = ("query.template_values",)
 
-    success_keys = ("template_dict", "threshold", "query", "run_date")
+    success_keys = ("template_dict", "threshold", "query", "run_date", "weeks_back")
 
     domain_keys = (
         "template_dict",
@@ -186,16 +195,19 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        success_kwargs = self.get_success_kwargs(configuration)
+        run_date: str = success_kwargs.get("run_date")
+        threshold: float = float(success_kwargs.get("threshold"))
+        weeks_back = success_kwargs.get("weeks_back")
 
-        run_date: str = self.get_success_kwargs(configuration).get("run_date")
-        threshold: float = float(
-            self.get_success_kwargs(configuration).get("threshold")
-        )
+        days_back_list = [
+            DAYS_IN_WEEK * week_index for week_index in range(1, weeks_back + 1)
+        ]
 
         result_dict = get_results_dict(metrics)
 
         yesterday_sum: int = result_dict[run_date]
-        diff_fraction = get_diff_fraction(yesterday_sum, result_dict)
+        diff_fraction = get_diff_fraction(yesterday_sum, result_dict, days_back_list)
 
         if diff_fraction > threshold:
             msg = (
@@ -227,8 +239,12 @@ def average_if_nonempty(list_: list):
     return sum(list_) / len(list_) if len(list_) > 0 else 0
 
 
-def get_diff_fraction(yesterday_sum: int, result_dict: dict):
-    equivalent_previous_days: List[date] = [DAYS_AGO[i] for i in FOUR_PREVIOUS_WEEKS]
+def get_diff_fraction(yesterday_sum: int, result_dict: dict, days_back_list: List[int]):
+    days_ago_dict = {
+        days_ago: TODAY - timedelta(days=days_ago) for days_ago in days_back_list
+    }
+
+    equivalent_previous_days: List[date] = list(days_ago_dict.values())
     equivalent_previous_days_str: List[str] = [
         datetime.strftime(i, date_format) for i in equivalent_previous_days
     ]

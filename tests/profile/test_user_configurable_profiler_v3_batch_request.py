@@ -1,5 +1,4 @@
 import logging
-import os
 import random
 import string
 from typing import List
@@ -9,6 +8,11 @@ import pandas as pd
 import pytest
 
 import great_expectations as gx
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.not_imported import is_version_greater_or_equal
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.types.base import ProgressBarsConfig
@@ -25,7 +29,6 @@ from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
 from great_expectations.self_check.util import (
-    connection_manager,
     get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations.util import is_library_loadable
@@ -33,8 +36,7 @@ from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 
 try:
-    import sqlalchemy as sqlalchemy
-    import sqlalchemy.dialects.postgresql as postgresqltypes
+    postgresqltypes = sqlalchemy.dialects.postgresql
 
     POSTGRESQL_TYPES = {
         "TEXT": postgresqltypes.TEXT,
@@ -48,8 +50,7 @@ try:
         "BOOLEAN": postgresqltypes.BOOLEAN,
         "NUMERIC": postgresqltypes.NUMERIC,
     }
-except ImportError:
-    sqlalchemy = None
+except (ImportError, AttributeError):
     postgresqltypes = None
     POSTGRESQL_TYPES = {}
 
@@ -66,9 +67,7 @@ def get_pandas_runtime_validator(context, df):
         },
     )
 
-    expectation_suite = context.create_expectation_suite(
-        "my_suite", overwrite_existing=True
-    )
+    expectation_suite = context.add_expectation_suite("my_suite")
 
     validator = context.get_validator(
         batch_request=batch_request, expectation_suite=expectation_suite
@@ -97,9 +96,7 @@ def get_spark_runtime_validator(context, df):
         },
     )
 
-    expectation_suite = context.create_expectation_suite(
-        "my_suite", overwrite_existing=True
-    )
+    expectation_suite = context.add_expectation_suite("my_suite")
 
     validator = context.get_validator(
         batch_request=batch_request, expectation_suite=expectation_suite
@@ -109,16 +106,17 @@ def get_spark_runtime_validator(context, df):
 
 
 def get_sqlalchemy_runtime_validator_postgresql(
-    df, schemas=None, caching=True, table_name=None
+    df,
+    postgresql_engine,
+    schemas=None,
+    caching=True,
+    table_name=None,
 ):
     sa_engine_name = "postgresql"
-    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     # noinspection PyUnresolvedReferences
     try:
-        engine = connection_manager.get_engine(
-            f"postgresql://postgres@{db_hostname}/test_ci"
-        )
-    except (sqlalchemy.exc.OperationalError, ModuleNotFoundError):
+        engine = postgresql_engine
+    except (sqlalchemy.OperationalError, ModuleNotFoundError):
         return None
 
     sql_dtypes = {}
@@ -162,7 +160,8 @@ def get_sqlalchemy_runtime_validator_postgresql(
         table_name = "test_data_" + "".join(
             [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
         )
-    df.to_sql(
+    add_dataframe_to_db(
+        df=df,
         name=table_name,
         con=engine,
         index=False,
@@ -219,12 +218,13 @@ def taxi_validator_spark(spark_session, titanic_data_context_modular_api):
             "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
         ),
         parse_dates=["pickup_datetime", "dropoff_datetime"],
+        date_format="%Y-%m-%d %H:%M:%S",
     )
     return get_spark_runtime_validator(titanic_data_context_modular_api, df)
 
 
 @pytest.fixture
-def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api):
+def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api, postgresql_engine):
     """
     What does this test do and why?
     Ensures that all available expectation types work as expected
@@ -236,7 +236,9 @@ def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api):
         ),
         parse_dates=["pickup_datetime", "dropoff_datetime"],
     )
-    return get_sqlalchemy_runtime_validator_postgresql(df)
+    return get_sqlalchemy_runtime_validator_postgresql(
+        df, postgresql_engine=postgresql_engine
+    )
 
 
 @pytest.fixture()
@@ -306,6 +308,7 @@ def taxi_data_semantic_types():
     }
 
 
+@pytest.mark.big
 def test_profiler_init_no_config(
     cardinality_validator,
 ):
@@ -321,6 +324,7 @@ def test_profiler_init_no_config(
     assert profiler.excluded_expectations == []
 
 
+@pytest.mark.big
 def test_profiler_init_full_config_no_semantic_types(cardinality_validator):
     """
     What does this test do and why?
@@ -346,6 +350,7 @@ def test_profiler_init_full_config_no_semantic_types(cardinality_validator):
     assert "col_one" not in profiler.column_info
 
 
+@pytest.mark.big
 def test_init_with_semantic_types(cardinality_validator):
     """
     What does this test do and why?
@@ -400,6 +405,7 @@ def test_init_with_semantic_types(cardinality_validator):
     }
 
 
+@pytest.mark.big
 def test__validate_config(cardinality_validator):
     """
     What does this test do and why?
@@ -418,6 +424,7 @@ def test__validate_config(cardinality_validator):
 
 
 @pytest.mark.slow  # 1.18s
+@pytest.mark.big
 def test__validate_semantic_types_dict(cardinality_validator):
     """
     What does this test do and why?
@@ -463,6 +470,7 @@ def test__validate_semantic_types_dict(cardinality_validator):
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @pytest.mark.slow  # 1.76s
+@pytest.mark.filesystem
 def test_build_suite_no_config(
     mock_emit,
     titanic_validator,
@@ -515,6 +523,7 @@ def test_build_suite_no_config(
 
 
 @pytest.mark.slow  # 1.32s
+@pytest.mark.filesystem
 def test_all_table_columns_populates(taxi_validator_pandas):
     taxi_profiler = UserConfigurableProfiler(taxi_validator_pandas)
 
@@ -540,6 +549,7 @@ def test_all_table_columns_populates(taxi_validator_pandas):
     ]
 
 
+@pytest.mark.filesystem
 def test_profiler_works_with_batch_object(cardinality_validator):
     profiler = UserConfigurableProfiler(cardinality_validator.active_batch)
     assert profiler.primary_or_compound_key == []
@@ -563,6 +573,7 @@ def test_profiler_works_with_batch_object(cardinality_validator):
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @pytest.mark.slow  # 1.37s
+@pytest.mark.filesystem
 def test_build_suite_with_config_and_no_semantic_types_dict(
     mock_emit, titanic_validator, possible_expectations_set
 ):
@@ -627,6 +638,7 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @pytest.mark.slow  # 1.18s
+@pytest.mark.filesystem
 def test_build_suite_with_semantic_types_dict(
     mock_emit,
     cardinality_validator,
@@ -707,6 +719,7 @@ def test_build_suite_with_semantic_types_dict(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.filesystem
 def test_build_suite_when_suite_already_exists(
     mock_emit,
     cardinality_validator,
@@ -780,6 +793,7 @@ def test_build_suite_when_suite_already_exists(
 
 
 @pytest.mark.slow  # 1.01s
+@pytest.mark.filesystem
 def test_primary_or_compound_key_not_found_in_columns(cardinality_validator):
     """
     What does this test do and why?
@@ -814,6 +828,7 @@ like to use it as a primary_or_compound_key.
 
 
 @pytest.mark.slow  # 1.28s
+@pytest.mark.filesystem
 def test_config_with_not_null_only(nulls_validator, possible_expectations_set):
     """
     What does this test do and why?
@@ -851,6 +866,7 @@ def test_config_with_not_null_only(nulls_validator, possible_expectations_set):
     assert "expect_column_values_to_be_null" in expectations
 
 
+@pytest.mark.filesystem
 def test_nullity_expectations_mostly_tolerance(
     nulls_validator, possible_expectations_set
 ):
@@ -868,6 +884,7 @@ def test_nullity_expectations_mostly_tolerance(
 
 
 @pytest.mark.slow  # 2.44s
+@pytest.mark.filesystem
 def test_profiled_dataset_passes_own_validation(
     cardinality_validator, titanic_data_context
 ):
@@ -881,7 +898,7 @@ def test_profiled_dataset_passes_own_validation(
     )
     suite = profiler.build_suite()
 
-    context.save_expectation_suite(suite)
+    context.add_expectation_suite(expectation_suite=suite)
     results = context.run_validation_operator(
         "action_list_operator", assets_to_validate=[cardinality_validator]
     )
@@ -889,6 +906,7 @@ def test_profiled_dataset_passes_own_validation(
     assert results["success"]
 
 
+@pytest.mark.filesystem
 def test_column_cardinality_functions(cardinality_validator):
     profiler = UserConfigurableProfiler(cardinality_validator)
     # assert profiler.column_info.get("col_none").get("cardinality") == "NONE"
@@ -921,6 +939,7 @@ def test_column_cardinality_functions(cardinality_validator):
 
 
 @pytest.mark.slow  # 1.94s
+@pytest.mark.filesystem
 def test_profiler_all_expectation_types_pandas(
     titanic_data_context_modular_api,
     taxi_validator_pandas,
@@ -982,6 +1001,7 @@ def test_profiler_all_expectation_types_pandas(
     not is_library_loadable(library_name="pyspark"),
     reason="requires pyspark to be installed",
 )
+@pytest.mark.spark
 def test_profiler_all_expectation_types_spark(
     titanic_data_context_modular_api,
     taxi_validator_spark,
@@ -1046,6 +1066,7 @@ def test_profiler_all_expectation_types_spark(
     reason="requires sqlalchemy to be installed",
 )
 @pytest.mark.slow  # 4.70s
+@pytest.mark.postgresql
 def test_profiler_all_expectation_types_sqlalchemy(
     titanic_data_context_modular_api,
     taxi_validator_sqlalchemy,
@@ -1107,6 +1128,13 @@ def test_profiler_all_expectation_types_sqlalchemy(
 
 
 # TODO: When this expectation is implemented for V3, remove this test and test for this expectation.
+@pytest.mark.skipif(
+    is_version_greater_or_equal(pd.__version__, "2.0.0"),
+    reason="pyspark 3.4.0 is not compatible with pandas 2.0.0.",
+    run=True,
+    strict=True,
+)
+@pytest.mark.spark
 def test_expect_compound_columns_to_be_unique(
     taxi_validator_spark, taxi_data_ignored_columns, caplog
 ):
@@ -1200,6 +1228,7 @@ def test_expect_compound_columns_to_be_unique(
 
 @mock.patch("great_expectations.profile.user_configurable_profiler.tqdm")
 @pytest.mark.slow  # 1.28s
+@pytest.mark.filesystem
 def test_user_configurable_profiler_progress_bar_config_enabled(
     mock_tqdm, cardinality_validator
 ):
@@ -1221,6 +1250,7 @@ def test_user_configurable_profiler_progress_bar_config_enabled(
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 @pytest.mark.slow  # 1.34s
+@pytest.mark.filesystem
 def test_user_configurable_profiler_progress_bar_config_disabled(
     mock_tqdm, cardinality_validator
 ):

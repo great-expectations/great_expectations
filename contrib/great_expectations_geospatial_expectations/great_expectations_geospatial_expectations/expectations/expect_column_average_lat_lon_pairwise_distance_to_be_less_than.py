@@ -7,7 +7,7 @@ from sklearn.metrics.pairwise import haversine_distances
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
@@ -15,9 +15,8 @@ from great_expectations.expectations.metrics import (
 
 
 # This class defines a Metric to support your Expectation.
-# For most ColumnExpectations, the main business logic for calculation will live in this class.
+# For most ColumnAggregateExpectations, the main business logic for calculation will live in this class.
 class ColumnAverageLatLonPairwiseDistance(ColumnAggregateMetricProvider):
-
     metric_name = "column.average_lat_lon_pairwise_distance"
     value_keys = ()
 
@@ -46,7 +45,7 @@ class ColumnAverageLatLonPairwiseDistance(ColumnAggregateMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnAverageLatLonPairwiseDistanceToBeLessThan(ColumnExpectation):
+class ExpectColumnAverageLatLonPairwiseDistanceToBeLessThan(ColumnAggregateExpectation):
     """Expect the average pairwise haversine distance between lat/lon points in a column is less than some value in km.
 
     This expectation will compute the pairwise haversine distance between each (latitude, longitude) pair and test that the average is less than some value in km.

@@ -16,6 +16,7 @@ from great_expectations.render.util import (
 )
 
 
+@pytest.mark.unit
 def test_substitute_none_for_missing():
     assert substitute_none_for_missing(
         kwargs={"a": 1, "b": 2}, kwarg_list=["c", "d"]
@@ -34,6 +35,7 @@ def test_substitute_none_for_missing():
     }, "substitute_none_for_missing should not change input kwargs in place."
 
 
+@pytest.mark.unit
 def test_parse_row_condition_string_pandas_engine():
     test_condition_string = ""
     assert parse_row_condition_string_pandas_engine(test_condition_string) == (
@@ -59,8 +61,7 @@ def test_parse_row_condition_string_pandas_engine():
     )
 
 
-@pytest.mark.smoketest
-@pytest.mark.rendered_output
+@pytest.mark.filesystem
 @pytest.mark.slow  # 1.52s
 def test_all_expectations_using_test_definitions():
     # Chetan - 20220129 - During v0.14.4, it was revealed that this test was broken.
@@ -73,8 +74,8 @@ def test_all_expectations_using_test_definitions():
     #
     # As this behavior is implemented, the `UNSUPPORTED_EXPECTATIONS` list will be updated to reflect GX's current capabilities.
 
-    dir_path = os.path.dirname(os.path.abspath(__file__))
-    pattern = os.path.join(
+    dir_path = os.path.dirname(os.path.abspath(__file__))  # noqa: PTH120, PTH100
+    pattern = os.path.join(  # noqa: PTH118
         dir_path, "..", "..", "tests", "test_definitions", "*", "expect*.json"
     )
     test_files = glob.glob(pattern)

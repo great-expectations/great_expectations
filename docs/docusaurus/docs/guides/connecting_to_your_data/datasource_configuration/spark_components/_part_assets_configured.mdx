@@ -1,0 +1,42 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+import ConfigForAssetsConfiguredSingle from '../filesystem_components/_config_for_assets_configured_single.mdx'
+import NoteExplicitConfiguredAssetsSingle from '../filesystem_components/_note_explicit_configured_assets_single.mdx'
+import ConfigForAssetsConfiguredMulti from '../filesystem_components/_config_for_assets_configured_multi.mdx'
+import NoteExplicitConfiguredAssetsMulti from '../filesystem_components/_note_explicit_configured_assets_multi.mdx'
+
+<Tabs
+  groupId="batch-count"
+  defaultValue='single'
+  values={[
+  {label: 'Single Batch Configuration', value:'single'},
+  {label: 'Multi-Batch Configuration', value:'multi'},
+  ]}>
+
+  <TabItem value="single">
+
+<ConfigForAssetsConfiguredSingle />
+
+And the full configuration for your Data Source should look like:
+
+```python name="full datasource_config for configured spark single batch datasource"
+```
+
+<NoteExplicitConfiguredAssetsSingle />
+
+  </TabItem>
+  <TabItem value="multi">
+
+
+<ConfigForAssetsConfiguredMulti />
+
+And the full configuration for your Data Source should look like:
+
+```python name="full datasource_config for configured spark multi batch datasource"
+```
+
+<NoteExplicitConfiguredAssetsMulti />
+
+  </TabItem>
+  </Tabs>

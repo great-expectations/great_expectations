@@ -2,6 +2,7 @@
   "expectation_type": "expect_column_values_to_be_json_parseable",
   "datasets": [
     {
+      "dataset_name": "expect_column_values_to_be_json_parseable_1",
       "data": {
         "a": [
           "{\"a\":1}",

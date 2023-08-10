@@ -1,195 +1,50 @@
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py imports">
-import pandas as pd
-from ruamel import yaml
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py setup">
+import pandas
 
 import great_expectations as gx
-from great_expectations.core.batch import RuntimeBatchRequest
 
-# </snippet>
-
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py get_context">
 context = gx.get_context()
 # </snippet>
 
-# YAML <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py datasource_yaml">
-datasource_yaml = r"""
-name: taxi_datasource
-class_name: Datasource
-module_name: great_expectations.datasource
-execution_engine:
-  module_name: great_expectations.execution_engine
-  class_name: PandasExecutionEngine
-data_connectors:
-  default_runtime_data_connector_name:
-    class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
-"""
-context.add_datasource(**yaml.safe_load(datasource_yaml))
-# </snippet>
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py read_dataframe">
+df = pandas.read_csv("./data/yellow_tripdata_sample_2019-01.csv")
 
-test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
+validator = context.sources.add_pandas("taxi_datasource").read_dataframe(
+    df, asset_name="taxi_frame", batch_metadata={"year": "2019", "month": "01"}
+)
+validator.save_expectation_suite()  # this allows the checkpoint to reference the expectation suite
 
-# Python <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py datasource_config">
-datasource_config = {
-    "name": "taxi_datasource",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "module_name": "great_expectations.execution_engine",
-        "class_name": "PandasExecutionEngine",
-    },
-    "data_connectors": {
-        "default_runtime_data_connector_name": {
-            "class_name": "RuntimeDataConnector",
-            "batch_identifiers": ["default_identifier_name"],
-        },
-    },
-}
-context.add_datasource(**datasource_config)
-# </snippet>
-
-test_python = context.test_yaml_config(
-    yaml.dump(datasource_config), return_mode="report_object"
+checkpoint = context.add_or_update_checkpoint(
+    name="my_taxi_validator_checkpoint", validator=validator
 )
 
-# CLI
-datasource_cli = """
-<snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py datasource_new_cli">
-great_expectations datasource new
-</snippet>
-"""
-
-# NOTE: The following code is only for testing and can be ignored by users.
-assert test_yaml == test_python
-assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
-
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py create_expectation_suite">
-context.create_expectation_suite("my_expectation_suite")
+checkpoint_result = checkpoint.run()
 # </snippet>
 
-# YAML <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py checkpoint_config_yaml_missing_keys">
-checkpoint_yaml = """
-name: my_missing_keys_checkpoint
-config_version: 1
-class_name: SimpleCheckpoint
-validations:
-  - batch_request:
-      datasource_name: taxi_datasource
-      data_connector_name: default_runtime_data_connector_name
-      data_asset_name: taxi_data
-    expectation_suite_name: my_expectation_suite
-"""
-context.add_checkpoint(**yaml.safe_load(checkpoint_yaml))
-# </snippet>
+# NOTE: The following code is only for testing and can be ignored
+assert checkpoint_result["success"]
 
-test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object")
+# clean-up between examples
+context.delete_datasource("taxi_datasource")
 
-# Python <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py checkpoint_config_python_missing_keys">
-checkpoint_config = {
-    "name": "my_missing_keys_checkpoint",
-    "config_version": 1,
-    "class_name": "SimpleCheckpoint",
-    "validations": [
-        {
-            "batch_request": {
-                "datasource_name": "taxi_datasource",
-                "data_connector_name": "default_runtime_data_connector_name",
-                "data_asset_name": "taxi_data",
-            },
-            "expectation_suite_name": "my_expectation_suite",
-        }
-    ],
-}
-context.add_checkpoint(**checkpoint_config)
-# </snippet>
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py add_dataframe">
+dataframe_asset = context.sources.add_pandas(
+    "my_taxi_validator_checkpoint"
+).add_dataframe_asset(
+    name="taxi_frame", dataframe=df, batch_metadata={"year": "2019", "month": "01"}
+)
+context.add_or_update_expectation_suite("my_expectation_suite")
 
-test_python = context.test_yaml_config(
-    yaml.dump(checkpoint_config), return_mode="report_object"
+batch_request = dataframe_asset.build_batch_request()
+
+checkpoint = context.add_or_update_checkpoint(
+    name="my_taxi_dataframe_checkpoint",
+    batch_request=batch_request,
+    expectation_suite_name="my_expectation_suite",
 )
 
-# NOTE: The following code is only for testing and can be ignored by users.
-assert test_yaml == test_python
-assert context.list_checkpoints() == ["my_missing_keys_checkpoint"]
-
-df = pd.read_csv("./data/yellow_tripdata_sample_2019-01.csv")
-
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py run_checkpoint">
-results = context.run_checkpoint(
-    checkpoint_name="my_missing_keys_checkpoint",
-    batch_request={
-        "runtime_parameters": {"batch_data": df},
-        "batch_identifiers": {
-            "default_identifier_name": "<YOUR MEANINGFUL IDENTIFIER>"
-        },
-    },
-)
+checkpoint_result = checkpoint.run()
 # </snippet>
 
-# NOTE: The following code is only for testing and can be ignored by users.
-assert results["success"] == True
-
-# YAML <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py checkpoint_config_yaml_missing_batch_request">
-checkpoint_yaml = """
-name: my_missing_batch_request_checkpoint
-config_version: 1
-class_name: SimpleCheckpoint
-expectation_suite_name: my_expectation_suite
-"""
-context.add_checkpoint(**yaml.safe_load(checkpoint_yaml))
-# </snippet>
-
-test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object")
-
-# Python <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py checkpoint_config_python_missing_batch_request">
-checkpoint_config = {
-    "name": "my_missing_batch_request_checkpoint",
-    "config_version": 1,
-    "class_name": "SimpleCheckpoint",
-    "expectation_suite_name": "my_expectation_suite",
-}
-context.add_checkpoint(**checkpoint_config)
-# </snippet>
-
-test_python = context.test_yaml_config(
-    yaml.dump(checkpoint_config), return_mode="report_object"
-)
-
-# NOTE: The following code is only for testing and can be ignored by users.
-assert test_yaml == test_python
-assert set(context.list_checkpoints()) == {
-    "my_missing_keys_checkpoint",
-    "my_missing_batch_request_checkpoint",
-}
-
-df_1 = pd.read_csv("./data/yellow_tripdata_sample_2019-01.csv")
-df_2 = pd.read_csv("./data/yellow_tripdata_sample_2019-02.csv")
-
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py runtime_batch_request">
-batch_request_1 = RuntimeBatchRequest(
-    datasource_name="taxi_datasource",
-    data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="<YOUR MEANINGFUL NAME 1>",  # This can be anything that identifies this data_asset for you
-    runtime_parameters={"batch_data": df_1},  # Pass your DataFrame here.
-    batch_identifiers={"default_identifier_name": "<YOUR MEANINGFUL IDENTIFIER 1>"},
-)
-
-batch_request_2 = RuntimeBatchRequest(
-    datasource_name="taxi_datasource",
-    data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="<YOUR MEANINGFUL NAME 2>",  # This can be anything that identifies this data_asset for you
-    runtime_parameters={"batch_data": df_2},  # Pass your DataFrame here.
-    batch_identifiers={"default_identifier_name": "<YOUR MEANINGFUL IDENTIFIER 2>"},
-)
-
-results = context.run_checkpoint(
-    checkpoint_name="my_missing_batch_request_checkpoint",
-    validations=[
-        {"batch_request": batch_request_1},
-        {"batch_request": batch_request_2},
-    ],
-)
-# </snippet>
-
-# NOTE: The following code is only for testing and can be ignored by users.
-assert results["success"] == True
+# NOTE: The following code is only for testing and can be ignored
+assert checkpoint_result["success"]

@@ -2,17 +2,18 @@ from __future__ import annotations
 
 import logging
 from collections import OrderedDict
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence
 
 from great_expectations.core.batch import (
     Batch,
-    BatchDataType,
+    BatchDataUnion,
     BatchDefinition,
     BatchMarkers,
+    _get_fluent_batch_class,
 )
-from great_expectations.experimental.datasources.interfaces import Batch as XBatch
 
 if TYPE_CHECKING:
+    from great_expectations.core.batch import AnyBatch
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.execution_engine import ExecutionEngine
 
@@ -36,14 +37,14 @@ class BatchManager:
         self._active_batch_id: Optional[str] = None
         self._active_batch_data_id: Optional[str] = None
 
-        self._batch_cache: Dict[str, Batch] = OrderedDict()
-        self._batch_data_cache: Dict[str, BatchDataType] = {}
+        self._batch_cache: Dict[str, AnyBatch] = OrderedDict()
+        self._batch_data_cache: Dict[str, BatchDataUnion] = {}
 
         if batch_list:
             self.load_batch_list(batch_list=batch_list)
 
     @property
-    def batch_data_cache(self) -> Dict[str, BatchDataType]:
+    def batch_data_cache(self) -> Dict[str, BatchDataUnion]:
         """Dictionary of loaded BatchData objects."""
         return self._batch_data_cache
 
@@ -73,7 +74,7 @@ class BatchManager:
         return None
 
     @property
-    def active_batch_data(self) -> Optional[BatchDataType]:
+    def active_batch_data(self) -> Optional[BatchDataUnion]:
         """The BatchData object from the currently-active Batch object."""
         if self.active_batch_data_id is None:
             return None
@@ -81,7 +82,7 @@ class BatchManager:
         return self._batch_data_cache.get(self.active_batch_data_id)
 
     @property
-    def batch_cache(self) -> Dict[str, Batch]:
+    def batch_cache(self) -> Dict[str, AnyBatch]:
         """Getter for ordered dictionary (cache) of "Batch" objects in use (with batch_id as key)."""
         return self._batch_cache
 
@@ -105,10 +106,10 @@ class BatchManager:
         return self._active_batch_id
 
     @property
-    def active_batch(self) -> Optional[Batch]:
+    def active_batch(self) -> Optional[AnyBatch]:
         """Getter for active Batch"""
         active_batch_id: Optional[str] = self.active_batch_id
-        batch: Optional[Batch] = (
+        batch: Optional[AnyBatch] = (
             None if active_batch_id is None else self.batch_cache.get(active_batch_id)
         )
         return batch
@@ -142,12 +143,12 @@ class BatchManager:
         self._batch_cache = OrderedDict()
         self._active_batch_id = None
 
-    def load_batch_list(self, batch_list: List[Batch]) -> None:
-        batch: Batch
+    def load_batch_list(self, batch_list: Sequence[AnyBatch]) -> None:
+        batch: AnyBatch
         for batch in batch_list:
             try:
                 assert isinstance(
-                    batch, (Batch, XBatch)
+                    batch, (Batch, _get_fluent_batch_class())
                 ), "Batch objects provided to BatchManager must be formal Great Expectations Batch typed objects."
             except AssertionError as e:
                 logger.error(str(e))
@@ -161,7 +162,7 @@ class BatchManager:
             # that has been loaded.  Hence, the final active_batch_id will be that of the final BatchData loaded.
             self._active_batch_id = batch.id
 
-    def save_batch_data(self, batch_id: str, batch_data: BatchDataType) -> None:
+    def save_batch_data(self, batch_id: str, batch_data: BatchDataUnion) -> None:
         """
         Updates the data for the specified Batch in the cache
         """

@@ -5,7 +5,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.expectations.expectation import (
-    TableExpectation,
+    BatchExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import (
@@ -25,8 +25,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
-
+class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",

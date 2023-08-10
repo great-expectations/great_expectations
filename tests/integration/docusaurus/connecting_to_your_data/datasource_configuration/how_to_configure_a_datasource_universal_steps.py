@@ -28,17 +28,19 @@ import great_expectations as gx
 # The following methods correspond to the section headings in the how-to guide linked in the module docstring.
 
 
-def section_1_import_necessary_modules_and_initialize_your_data_context() -> gx.DataContext:
+def section_1_import_necessary_modules_and_initialize_your_data_context() -> (
+    gx.DataContext
+):
     """Provides and tests the snippets for section 1 of the Spark, Pandas, and SQL Datasource configuration guides.
 
     Returns:
         a Great Expectations DataContext object
     """
     # <snippet name="import necessary modules and initialize your data context">
-    from ruamel import yaml
-
     import great_expectations as gx
+    from great_expectations.core.yaml_handler import YAMLHandler
 
+    yaml = YAMLHandler()
     data_context: gx.DataContext = gx.get_context()
     # </snippet>
 

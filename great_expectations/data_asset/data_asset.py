@@ -12,7 +12,6 @@ from collections.abc import Hashable
 from functools import wraps
 from typing import Any, Dict, List, Optional, Union
 
-from dateutil.parser import parse
 from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
@@ -40,7 +39,6 @@ logging.captureWarnings(True)
 
 
 class DataAsset:
-
     # This should in general only be changed when a subclass *adds expectations* or *changes expectation semantics*
     # That way, multiple backends can implement the same data_asset_type
     _data_asset_type = "DataAsset"
@@ -70,12 +68,6 @@ class DataAsset:
         batch_parameters = kwargs.pop("batch_parameters", {})
         batch_markers = kwargs.pop("batch_markers", {})
 
-        if "autoinspect_func" in kwargs:
-            # deprecated-v0.10.10
-            warnings.warn(
-                "Autoinspect_func is deprecated as of v0.10.10 and will be removed in v0.16; use a profiler instead (migration is easy!).",
-                category=DeprecationWarning,
-            )
         super().__init__(*args, **kwargs)
         self._config = {"interactive_evaluation": interactive_evaluation}
         self._data_context = data_context
@@ -101,26 +93,6 @@ class DataAsset:
             expectation for expectation in keys if expectation.startswith("expect_")
         ]
 
-    def autoinspect(self, profiler):
-        """Deprecated: use profile instead.
-
-        Use the provided profiler to evaluate this data_asset and assign the resulting expectation suite as its own.
-
-        Args:
-            profiler: The profiler to use
-
-        Returns:
-            tuple(expectation_suite, validation_results)
-        """
-        # deprecated-v0.10.10
-        warnings.warn(
-            "The term autoinspect is deprecated as of v0.10.10 and will be removed in v0.16. Please use 'profile'\
-        instead.",
-            DeprecationWarning,
-        )
-        expectation_suite, validation_results = profiler.profile(self)
-        return expectation_suite, validation_results
-
     def profile(self, profiler, profiler_configuration=None):
         """Use the provided profiler to evaluate this data_asset and assign the resulting expectation suite as its own.
 
@@ -143,8 +115,8 @@ class DataAsset:
             self
         )
 
-    @classmethod  # noqa: C901 - complexity 24
-    def expectation(cls, method_arg_names):  # noqa: C901
+    @classmethod  # - complexity 24
+    def expectation(cls, method_arg_names):  # noqa: C901, PLR0915
         """Manages configuration and running of expectation objects.
 
         Expectation builds and saves a new expectation configuration to the DataAsset object. It is the core decorator \
@@ -176,10 +148,9 @@ class DataAsset:
                     modification. For more detail, see :ref:`meta`.
         """
 
-        def outer_wrapper(func):  # noqa: C901 - 22
+        def outer_wrapper(func):  # noqa: C901, PLR0915
             @wraps(func)
-            def wrapper(self, *args, **kwargs):  # noqa: C901 - 21
-
+            def wrapper(self, *args, **kwargs):  # noqa: C901, PLR0912, PLR0915
                 # Get the name of the method
                 method_name = func.__name__
 
@@ -217,7 +188,7 @@ class DataAsset:
 
                 if "result_format" in argspec:
                     all_args["result_format"] = result_format
-                else:
+                else:  # noqa: PLR5501
                     if "result_format" in all_args:
                         del all_args["result_format"]
 
@@ -402,67 +373,6 @@ class DataAsset:
             "result_format": "BASIC",
         }
 
-    def append_expectation(self, expectation_config) -> None:
-        """This method is a thin wrapper for ExpectationSuite.append_expectation"""
-        # deprecated-v0.12.0
-        warnings.warn(
-            "append_expectation is deprecated as of v0.12.0 and will be removed in v0.16. "
-            + "Please use ExpectationSuite.add_expectation instead.",
-            DeprecationWarning,
-        )
-        self._expectation_suite.append_expectation(expectation_config)
-
-    def find_expectation_indexes(
-        self,
-        expectation_configuration: ExpectationConfiguration,
-        match_type: str = "domain",
-    ) -> List[int]:
-        """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
-        # deprecated-v0.12.0
-        warnings.warn(
-            "find_expectation_indexes is deprecated as of v0.12.0 and will be removed in v0.16. "
-            + "Please use ExpectationSuite.find_expectation_indexes instead.",
-            DeprecationWarning,
-        )
-        return self._expectation_suite.find_expectation_indexes(
-            expectation_configuration=expectation_configuration, match_type=match_type
-        )
-
-    def find_expectations(
-        self,
-        expectation_configuration: ExpectationConfiguration,
-        match_type: str = "domain",
-    ) -> List[ExpectationConfiguration]:
-        """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
-        # deprecated-v0.12.0
-        warnings.warn(
-            "find_expectations is deprecated as of v0.12.0 and will be removed in v0.16. "
-            + "Please use ExpectationSuite.find_expectation_indexes instead.",
-            DeprecationWarning,
-        )
-        return self._expectation_suite.find_expectations(
-            expectation_configuration=expectation_configuration, match_type=match_type
-        )
-
-    def remove_expectation(
-        self,
-        expectation_configuration: ExpectationConfiguration,
-        match_type: str = "domain",
-        remove_multiple_matches: bool = False,
-    ) -> List[ExpectationConfiguration]:
-        """This method is a thin wrapper for ExpectationSuite.remove()"""
-        # deprecated-v0.12.0
-        warnings.warn(
-            "DataAsset.remove_expectations is deprecated as of v0.12.0 and will be removed in v0.16. "
-            + "Please use ExpectationSuite.remove_expectation instead.",
-            DeprecationWarning,
-        )
-        return self._expectation_suite.remove_expectation(
-            expectation_configuration=expectation_configuration,
-            match_type=match_type,
-            remove_multiple_matches=remove_multiple_matches,
-        )
-
     def set_config_value(self, key, value) -> None:
         self._config[key] = value
 
@@ -488,8 +398,9 @@ class DataAsset:
     def discard_failing_expectations(self) -> None:
         res = self.validate(only_return_failures=True).results
         if any(res):
+            suite = self._expectation_suite
             for item in res:
-                self.remove_expectation(
+                suite.remove_expectation(
                     expectation_configuration=item.expectation_config,
                     match_type="runtime",
                 )
@@ -531,29 +442,7 @@ class DataAsset:
 
         self.default_expectation_args[argument] = value
 
-    def get_expectations_config(
-        self,
-        discard_failed_expectations=True,
-        discard_result_format_kwargs=True,
-        discard_include_config_kwargs=True,
-        discard_catch_exceptions_kwargs=True,
-        suppress_warnings=False,
-    ):
-        # deprecated-v0.10.10
-        warnings.warn(
-            "get_expectations_config is deprecated as of v0.10.10 and will be removed in v0.16. "
-            + "Please use get_expectation_suite instead.",
-            DeprecationWarning,
-        )
-        return self.get_expectation_suite(
-            discard_failed_expectations,
-            discard_result_format_kwargs,
-            discard_include_config_kwargs,
-            discard_catch_exceptions_kwargs,
-            suppress_warnings,
-        )
-
-    def get_expectation_suite(  # noqa: C901 - complexity 17
+    def get_expectation_suite(  # noqa: C901, PLR0912, PLR0913
         self,
         discard_failed_expectations=True,
         discard_result_format_kwargs=True,
@@ -655,7 +544,7 @@ class DataAsset:
             logger.info(message + settings_message)
         return expectation_suite
 
-    def save_expectation_suite(
+    def save_expectation_suite(  # noqa: PLR0913
         self,
         filepath=None,
         discard_failed_expectations=True,
@@ -699,7 +588,9 @@ class DataAsset:
             suppress_warnings,
         )
         if filepath is None and self._data_context is not None:
-            self._data_context.save_expectation_suite(expectation_suite)
+            self._data_context.add_or_update_expectation_suite(
+                expectation_suite=expectation_suite
+            )
         elif filepath is not None:
             with open(filepath, "w") as outfile:
                 json.dump(
@@ -713,7 +604,7 @@ class DataAsset:
                 "Unable to save config: filepath or data_context must be available."
             )
 
-    def validate(  # noqa: C901 - complexity 36
+    def validate(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         expectation_suite=None,
         run_id=None,
@@ -798,21 +689,7 @@ class DataAsset:
             assert not (run_id and run_name) and not (
                 run_id and run_time
             ), "Please provide either a run_id or run_name and/or run_time."
-            if isinstance(run_id, str) and not run_name:
-                # deprecated-v0.11.0
-                warnings.warn(
-                    "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                    "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                    "and run_time (both optional). Instead of providing a run_id, you may also provide"
-                    "run_name and run_time separately.",
-                    DeprecationWarning,
-                )
-                try:
-                    run_time = parse(run_id)
-                except (ValueError, TypeError):
-                    pass
-                run_id = RunIdentifier(run_name=run_id, run_time=run_time)
-            elif isinstance(run_id, dict):
+            if isinstance(run_id, dict):
                 run_id = RunIdentifier(**run_id)
             elif not isinstance(run_id, RunIdentifier):
                 run_id = RunIdentifier(run_name=run_name, run_time=run_time)
@@ -923,10 +800,9 @@ class DataAsset:
                 expectations_to_evaluate.extend(columns[col])
 
             for expectation in expectations_to_evaluate:
-
                 try:
                     # copy the config so we can modify it below if needed
-                    expectation = copy.deepcopy(expectation)
+                    expectation = copy.deepcopy(expectation)  # noqa: PLW2901
 
                     expectation_method = getattr(self, expectation.expectation_type)
 
@@ -1065,7 +941,7 @@ class DataAsset:
             {parameter_name: parameter_value}
         )
 
-    def add_citation(
+    def add_citation(  # noqa: PLR0913
         self,
         comment,
         batch_kwargs=None,
@@ -1103,7 +979,7 @@ class DataAsset:
     #
     ###
 
-    def _format_map_output(  # noqa: C901 - complexity 21
+    def _format_map_output(  # noqa: PLR0912, PLR0913
         self,
         result_format,
         success,
@@ -1277,8 +1153,8 @@ class DataAsset:
 
         Args:
             function (func): The function to be tested. (Must be a valid expectation function.)
-            *args          : Positional arguments to be passed the the function
-            **kwargs       : Keyword arguments to be passed the the function
+            *args          : Positional arguments to be passed the function
+            **kwargs       : Keyword arguments to be passed the function
 
         Returns:
             A JSON-serializable expectation result object.

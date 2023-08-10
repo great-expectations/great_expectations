@@ -1,18 +1,24 @@
+from __future__ import annotations
+
 import logging
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchMarkers,
-    BatchRequestBase,
+    BatchDefinition,  # noqa: TCH001
+    BatchMarkers,  # noqa: TCH001
+    BatchRequestBase,  # noqa: TCH001
 )
 from great_expectations.core.id_dict import BatchSpec
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.metrics_calculator import MetricsCalculator
+
+if TYPE_CHECKING:
+    import pandas as pd
+
+    from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +53,7 @@ class DataConnector:
         id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -174,7 +180,7 @@ class DataConnector:
         """
         raise NotImplementedError
 
-    def get_data_reference_list_count(self) -> int:
+    def get_data_reference_count(self) -> int:
         raise NotImplementedError
 
     def get_unmatched_data_references(self) -> List[Any]:
@@ -377,33 +383,28 @@ class DataConnector:
             batch_definition=batch_definition
         )
 
-        # Note: get_batch_data_and_metadata will have loaded the data into the currently-defined execution engine.
-        # Consequently, when we build a Validator, we do not need to specifically load the batch into it to
-        # resolve metrics.
-        validator = Validator(execution_engine=batch_data.execution_engine)
-        data: Any = validator.get_metric(
-            metric=MetricConfiguration(
-                metric_name="table.head",
-                metric_domain_kwargs={
-                    "batch_id": batch_definition.id,
-                },
-                metric_value_kwargs={
-                    "n_rows": 5,
-                },
-            )
+        metrics_calculator = MetricsCalculator(
+            execution_engine=batch_data.data.execution_engine,
+            show_progress_bars=True,
         )
-        n_rows: int = validator.get_metric(
+        metric_domain_kwargs = {
+            "batch_id": batch_definition.id,
+        }
+        table_head_df: pd.DataFrame = metrics_calculator.head(
+            n_rows=5,
+            domain_kwargs=metric_domain_kwargs,
+            fetch_all=False,
+        )
+        n_rows: int = metrics_calculator.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.row_count",
-                metric_domain_kwargs={
-                    "batch_id": batch_definition.id,
-                },
+                metric_domain_kwargs=metric_domain_kwargs,
             )
         )
 
-        if pretty_print and data is not None:
+        if pretty_print and table_head_df is not None:
             print("\n\t\tShowing 5 rows")
-            print(data)
+            print(table_head_df)
 
         return {
             "batch_spec": batch_spec,

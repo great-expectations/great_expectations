@@ -6,7 +6,10 @@ import pytest
 from freezegun import freeze_time
 from requests import Session
 
-from great_expectations.checkpoint.actions import SNSNotificationAction
+from great_expectations.checkpoint.actions import (
+    APINotificationAction,
+    SNSNotificationAction,
+)
 from great_expectations.checkpoint.util import smtplib
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -26,6 +29,7 @@ from great_expectations.validation_operators import (
     SlackNotificationAction,
     StoreValidationResultAction,
 )
+from tests.test_ge_utils import file_data_asset
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +57,7 @@ class MockCloudResponse:
         self.content = json.dumps({"ok": "True"})
 
 
+@pytest.mark.big
 @freeze_time("09/26/2019 13:42:41")
 def test_StoreAction():
     fake_in_memory_store = ValidationsStore(
@@ -112,6 +117,7 @@ def test_StoreAction():
     ) == ExpectationSuiteValidationResult(success=False, results=[])
 
 
+@pytest.mark.big
 @mock.patch.object(Session, "post", return_value=MockSlackResponse(200))
 def test_SlackNotificationAction(
     data_context_parameterized_expectation_suite,
@@ -231,6 +237,7 @@ def test_SlackNotificationAction(
     ) == {"slack_notification_result": "none required"}
 
 
+@pytest.mark.big
 @pytest.mark.skipif(
     not is_library_loadable(library_name="pypd"),
     reason="pypd is not installed",
@@ -269,12 +276,12 @@ def test_PagerdutyAlertAction(
     ) == {"pagerduty_alert_result": "none sent"}
 
 
+@pytest.mark.big
 def test_OpsgenieAlertAction(
     data_context_parameterized_expectation_suite,
     validation_result_suite,
     validation_result_suite_id,
 ):
-
     renderer = {
         "module_name": "great_expectations.render.renderer.opsgenie_renderer",
         "class_name": "OpsgenieRenderer",
@@ -307,6 +314,7 @@ def test_OpsgenieAlertAction(
     ) == {"opsgenie_alert_result": "error"}
 
 
+@pytest.mark.big
 @mock.patch.object(Session, "post", return_value=MockTeamsResponse(200))
 def test_MicrosoftTeamsNotificationAction_good_request(
     data_context_parameterized_expectation_suite,
@@ -417,6 +425,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     ) == {"microsoft_teams_notification_result": None}
 
 
+@pytest.mark.big
 @mock.patch.object(Session, "post", return_value=MockTeamsResponse(400))
 def test_MicrosoftTeamsNotificationAction_bad_request(
     data_context_parameterized_expectation_suite,
@@ -461,22 +470,18 @@ class MockSMTPServer:
     def starttls(self, *args, **kwargs):
         if self.raise_on == "starttls":
             raise self.exception
-        return None
 
     def login(self, *args, **kwargs):
         if self.raise_on == "login":
             raise self.exception
-        return None
 
     def sendmail(self, *args, **kwargs):
         if self.raise_on == "sendmail":
             raise self.exception
-        return None
 
     def quit(self, *args, **kwargs):
         if self.raise_on == "quit":
             raise self.exception
-        return None
 
 
 @pytest.mark.parametrize(
@@ -531,6 +536,7 @@ class MockSMTPServer:
     ],
     scope="module",
 )
+@pytest.mark.big
 def test_EmailAction(
     class_to_patch,
     use_tls,
@@ -577,6 +583,40 @@ def test_EmailAction(
             validation_result_suite=validation_result_suite,
             data_asset=None,
         ) == {"email_result": expected}
+
+
+@pytest.mark.unit
+def test_api_action_create_payload():
+    mock_data_context = ""
+    mock_validation_results = []
+    expected_payload = '{"test_suite_name": "my_suite", "data_asset_name": "my_schema.my_table", "validation_results": []}'
+    api_notification_action = APINotificationAction(
+        mock_data_context, "http://www.example.com"
+    )
+    payload = api_notification_action.create_payload(
+        "my_schema.my_table", "my_suite", mock_validation_results
+    )
+    assert payload == expected_payload
+
+
+@pytest.mark.big
+@mock.patch("great_expectations.checkpoint.actions.requests")
+def test_api_action_run(
+    mock_requests,
+    validation_result_suite,
+    validation_result_suite_id,
+    data_context_simple_expectation_suite,
+):
+    mock_response = mock.MagicMock()
+    mock_response.status_code = 200
+    mock_requests.post.return_value = mock_response
+    api_notification_action = APINotificationAction(
+        data_context_simple_expectation_suite, "http://www.example.com"
+    )
+    response = api_notification_action.run(
+        validation_result_suite, validation_result_suite_id, file_data_asset
+    )
+    assert response == "Successfully Posted results to API, status code - 200"
 
 
 # def test_ExtractAndStoreEvaluationParamsAction():

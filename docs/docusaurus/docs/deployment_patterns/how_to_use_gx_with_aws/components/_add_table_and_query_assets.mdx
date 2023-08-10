@@ -1,0 +1,19 @@
+Now that our Data Source has been created, we will use it to connect to a specific set of data in the database it is configured for.  This is done by defining a Data Asset in the Data Source.  A Data Source may contain multiple Data Assets, each of which will serve as the interface between GX and the specific set of data it has been configured for.
+
+With SQL databases, there are two types of Data Assets that can be used.  The first is a Table Data Asset, which connects GX to the data contained in a single table in the source database.  The other is a Query Data Asset, which connects GX to the data returned by a SQL query.  We will demonstrate how to create both of these in the following steps.
+
+:::tip How many Data Assets can my Data Source contain?
+
+Although there is no set maximum number of Data Assets you can define for a datasource, there is a functional minimum.  In order for GX to retrieve data from your Data Source you will need to create *at least one* Data Asset.
+
+:::
+
+We will indicate a table to connect to with a Table Data Asset.  This is done by providing the `add_table_asset(...)` method a `name` by which we will reference the Data Asset in the future and a `table_name` to specify the table we wish the Data Asset to connect to.
+
+```python name="tests/integration/docusaurus/deployment_patterns/aws_redshift_deployment_patterns.py table_asset"
+```
+
+To indicate the query that provides data to connect to we will define a Query Data Asset.  This done by providing the `add_query_asset(...)` method a `name` by which we will reference the Data Asset in the future and a `query` which will provide the data we wish the Data Asset to connect to.
+
+```python name="tests/integration/docusaurus/deployment_patterns/aws_redshift_deployment_patterns.py query_asset"
+```

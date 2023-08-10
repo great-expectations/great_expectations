@@ -1,6 +1,7 @@
 import copy
 import datetime
 import logging
+from decimal import Decimal
 from typing import Dict, Tuple, Union
 
 import numpy as np
@@ -8,6 +9,10 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core.batch import Batch
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
@@ -22,17 +27,13 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import (
-    pyspark_sql_Column,
-    quoted_name,
-)
 from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
 )
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.self_check.util import (
     build_pandas_engine,
-    build_sa_engine,
+    build_sa_execution_engine,
     build_spark_engine,
 )
 from great_expectations.util import isclose
@@ -41,10 +42,12 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from tests.expectations.test_util import get_table_columns_metric
 
 
+@pytest.mark.unit
 def test_metric_loads_pd():
     assert get_metric_provider("column.max", PandasExecutionEngine()) is not None
 
 
+@pytest.mark.big
 def test_basic_metric_pd():
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     batch = Batch(data=df)
@@ -55,7 +58,7 @@ def test_basic_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -74,15 +77,120 @@ def test_basic_metric_pd():
     assert results == {desired_metric.id: 3}
 
 
-def test_mean_metric_pd():
-    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "build_engine,dataframe,expected_result",
+    [
+        [
+            build_pandas_engine,
+            pd.DataFrame({"a": [1, 2, 3, None]}),
+            6,
+        ],
+        [
+            build_pandas_engine,
+            pd.DataFrame({"a": [Decimal(2.0), Decimal(0.18781)]}),
+            2.18781,
+        ],
+    ],
+)
+def test_column_sum_metric_pd(build_engine, dataframe, expected_result):
+    engine = build_engine(df=dataframe)
 
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.sum",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+    )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert results == {desired_metric.id: expected_result}
+
+
+@pytest.mark.spark
+@pytest.mark.parametrize(
+    "dataframe,expected_result",
+    [
+        [
+            pd.DataFrame({"a": [1, 2, 3, None]}),
+            6,
+        ],
+        [
+            pd.DataFrame({"a": [Decimal(2.0), Decimal(0.18781)]}),
+            2.18781,
+        ],
+    ],
+)
+def test_column_sum_metric_spark(spark_session, dataframe, expected_result):
+    engine = build_spark_engine(spark=spark_session, df=dataframe, batch_id="my_id")
+
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+
+    table_columns_metric: MetricConfiguration
+    results: Dict[Tuple[str, str, str], MetricValue]
+
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
+    metrics.update(results)
+
+    aggregate_fn_metric = MetricConfiguration(
+        metric_name=f"column.sum.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+        metric_domain_kwargs={
+            "column": "a",
+        },
+        metric_value_kwargs=None,
+    )
+    aggregate_fn_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.sum",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric,
+    }
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=results
+    )
+
+    assert results == {desired_metric.id: expected_result}
+
+
+@pytest.mark.big
+@pytest.mark.parametrize(
+    "dataframe,expected_result",
+    [
+        [pd.DataFrame({"a": [1, 2, 3, None]}), 2],
+        [
+            pd.DataFrame({"a": [Decimal(2.0), Decimal(0.18781)]}),
+            1.093905,
+        ],
+    ],
+)
+def test_column_mean_metric_pd(dataframe, expected_result):
+    engine = build_pandas_engine(dataframe)
+
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+
+    table_columns_metric: MetricConfiguration
+    results: Dict[Tuple[str, str, str], MetricValue]
+
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -97,18 +205,83 @@ def test_mean_metric_pd():
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     metrics.update(results)
-    assert results == {desired_metric.id: 2}
+    assert results == {desired_metric.id: expected_result}
 
 
-def test_stdev_metric_pd():
-    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
+@pytest.mark.spark
+@pytest.mark.parametrize(
+    "dataframe,expected_result",
+    [
+        [pd.DataFrame({"a": [1, 2, 3, None]}), 2],
+        [
+            pd.DataFrame({"a": [Decimal(2.0), Decimal(0.18781)]}),
+            1.093905,
+        ],
+    ],
+)
+def test_column_mean_metric_spark(spark_session, dataframe, expected_result):
+    engine = build_spark_engine(spark=spark_session, df=dataframe, batch_id="my_id")
 
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
+    metrics.update(results)
+
+    aggregate_fn_metric = MetricConfiguration(
+        metric_name=f"column.mean.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+        metric_domain_kwargs={
+            "column": "a",
+        },
+        metric_value_kwargs=None,
+    )
+    aggregate_fn_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.mean",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric,
+    }
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=results
+    )
+
+    assert results == {desired_metric.id: expected_result}
+
+
+@pytest.mark.big
+@pytest.mark.parametrize(
+    "build_engine,dataframe,expected_result",
+    [
+        [
+            build_pandas_engine,
+            pd.DataFrame({"a": [1, 2, 3, None]}),
+            1,
+        ],
+        [
+            build_pandas_engine,
+            pd.DataFrame({"a": [Decimal(2.0), Decimal(0.18781)]}),
+            1.2814118377984496,
+        ],
+    ],
+)
+def test_column_standard_deviation_metric_pd(build_engine, dataframe, expected_result):
+    engine = build_engine(df=dataframe)
+
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+
+    table_columns_metric: MetricConfiguration
+    results: Dict[Tuple[str, str, str], MetricValue]
+
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -123,9 +296,10 @@ def test_stdev_metric_pd():
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     metrics.update(results)
-    assert results == {desired_metric.id: 1}
+    assert results == {desired_metric.id: expected_result}
 
 
+@pytest.mark.unit
 def test_column_value_lengths_min_metric_pd():
     engine = build_pandas_engine(
         pd.DataFrame(
@@ -149,7 +323,7 @@ def test_column_value_lengths_min_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -167,8 +341,9 @@ def test_column_value_lengths_min_metric_pd():
     assert results == {desired_metric.id: 8}
 
 
+@pytest.mark.sqlite
 def test_column_quoted_name_type_sa(sa):
-    engine = build_sa_engine(
+    engine = build_sa_execution_engine(
         pd.DataFrame(
             {
                 "names": [
@@ -191,7 +366,7 @@ def test_column_quoted_name_type_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     table_columns_metric: MetricConfiguration = MetricConfiguration(
@@ -204,7 +379,7 @@ def test_column_quoted_name_type_sa(sa):
 
     column_name: str
     quoted_batch_column_list = [
-        quoted_name(value=str(column_name), quote=True)
+        sqlalchemy.quoted_name(value=str(column_name), quote=True)
         for column_name in batch_column_list
     ]
 
@@ -220,7 +395,9 @@ def test_column_quoted_name_type_sa(sa):
         column_names=column_name,
         batch_columns_list=quoted_batch_column_list,
     )
-    assert isinstance(quoted_column_name, sa.sql.elements.quoted_name)
+    assert sqlalchemy.quoted_name and isinstance(
+        quoted_column_name, sqlalchemy.quoted_name
+    )
     assert quoted_column_name.quote is True
 
     for column_name in [
@@ -241,7 +418,7 @@ def test_column_quoted_name_type_sa(sa):
         )
 
     quoted_batch_column_list = [
-        quoted_name(value=str(column_name), quote=True)
+        sqlalchemy.quoted_name(value=str(column_name), quote=True)
         for column_name in [
             "Names",
             "names",
@@ -264,8 +441,9 @@ def test_column_quoted_name_type_sa(sa):
         )
 
 
+@pytest.mark.sqlite
 def test_column_value_lengths_min_metric_sa(sa):
-    engine = build_sa_engine(
+    engine = build_sa_execution_engine(
         pd.DataFrame(
             {
                 "names": [
@@ -288,7 +466,7 @@ def test_column_value_lengths_min_metric_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
@@ -318,6 +496,7 @@ def test_column_value_lengths_min_metric_sa(sa):
     assert results == {desired_metric.id: 8}
 
 
+@pytest.mark.spark
 def test_column_value_lengths_min_metric_spark(spark_session):
     engine = build_spark_engine(
         spark=spark_session,
@@ -343,7 +522,7 @@ def test_column_value_lengths_min_metric_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
@@ -373,6 +552,7 @@ def test_column_value_lengths_min_metric_spark(spark_session):
     assert results == {desired_metric.id: 8}
 
 
+@pytest.mark.big
 def test_column_value_lengths_max_metric_pd():
     engine = build_pandas_engine(
         pd.DataFrame(
@@ -396,7 +576,7 @@ def test_column_value_lengths_max_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -414,8 +594,9 @@ def test_column_value_lengths_max_metric_pd():
     assert results == {desired_metric.id: 16}
 
 
+@pytest.mark.sqlite
 def test_column_value_lengths_max_metric_sa(sa):
-    engine = build_sa_engine(
+    engine = build_sa_execution_engine(
         pd.DataFrame(
             {
                 "names": [
@@ -438,7 +619,7 @@ def test_column_value_lengths_max_metric_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
@@ -468,6 +649,7 @@ def test_column_value_lengths_max_metric_sa(sa):
     assert results == {desired_metric.id: 16}
 
 
+@pytest.mark.spark
 def test_column_value_lengths_max_metric_spark(spark_session):
     engine = build_spark_engine(
         spark=spark_session,
@@ -493,7 +675,7 @@ def test_column_value_lengths_max_metric_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
@@ -523,6 +705,7 @@ def test_column_value_lengths_max_metric_spark(spark_session):
     assert results == {desired_metric.id: 16}
 
 
+@pytest.mark.unit
 def test_quantiles_metric_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 4]}))
 
@@ -531,7 +714,7 @@ def test_quantiles_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -552,15 +735,16 @@ def test_quantiles_metric_pd():
     assert results == {desired_metric.id: [1.75, 2.5, 3.25]}
 
 
+@pytest.mark.sqlite
 def test_quantiles_metric_sa(sa):
-    engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4]}), sa)
+    engine = build_sa_execution_engine(pd.DataFrame({"a": [1, 2, 3, 4]}), sa)
 
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
@@ -605,6 +789,7 @@ def test_quantiles_metric_sa(sa):
     assert results == {desired_metric.id: [1.0, 2.0, 3.0]}
 
 
+@pytest.mark.spark
 def test_quantiles_metric_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -617,7 +802,7 @@ def test_quantiles_metric_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -637,6 +822,7 @@ def test_quantiles_metric_spark(spark_session):
     assert results == {desired_metric.id: [1.0, 2.0, 3.0]}
 
 
+@pytest.mark.unit
 def test_column_histogram_metric_pd():
     engine = build_pandas_engine(
         pd.DataFrame(
@@ -662,7 +848,7 @@ def test_column_histogram_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -682,8 +868,9 @@ def test_column_histogram_metric_pd():
     assert results == {desired_metric.id: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
 
 
+@pytest.mark.sqlite
 def test_column_histogram_metric_sa(sa):
-    engine = build_sa_engine(
+    engine = build_sa_execution_engine(
         pd.DataFrame(
             {
                 "a": [
@@ -720,7 +907,7 @@ def test_column_histogram_metric_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -756,6 +943,7 @@ def test_column_histogram_metric_sa(sa):
     assert results == {desired_metric.id: [10]}
 
 
+@pytest.mark.spark
 def test_column_histogram_metric_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -783,7 +971,7 @@ def test_column_histogram_metric_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -803,6 +991,7 @@ def test_column_histogram_metric_spark(spark_session):
     assert results == {desired_metric.id: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
 
 
+@pytest.mark.big
 def test_column_partition_metric_pd():
     """
     Test of "column.partition" metric for both, standard numeric column and "datetime.datetime" valued column.
@@ -858,7 +1047,7 @@ def test_column_partition_metric_pd():
 
     # Test using standard numeric column.
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     column_min_metric: MetricConfiguration = MetricConfiguration(
@@ -918,7 +1107,7 @@ def test_column_partition_metric_pd():
     # Test using "datetime.datetime" column.
 
     metrics = {}
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     column_min_metric: MetricConfiguration = MetricConfiguration(
@@ -981,7 +1170,8 @@ def test_column_partition_metric_pd():
     )
 
 
-def test_column_partition_metric_sa(sa):
+@pytest.mark.sqlite
+def test_column_partition_metric_sa(sa):  # noqa: PLR0915
     """
     Test of "column.partition" metric for both, standard numeric column and "datetime.datetime" valued column.
 
@@ -996,7 +1186,7 @@ def test_column_partition_metric_sa(sa):
     Expected partition boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
     """
     week_idx: int
-    engine = build_sa_engine(
+    engine = build_sa_execution_engine(
         pd.DataFrame(
             {
                 "a": [
@@ -1038,7 +1228,7 @@ def test_column_partition_metric_sa(sa):
 
     # Test using standard numeric column.
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_column_min_metric = MetricConfiguration(
@@ -1125,7 +1315,7 @@ def test_column_partition_metric_sa(sa):
     # Test using "datetime.datetime" column.
 
     metrics = {}
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_column_min_metric = MetricConfiguration(
@@ -1215,7 +1405,8 @@ def test_column_partition_metric_sa(sa):
     )
 
 
-def test_column_partition_metric_spark(spark_session):
+@pytest.mark.spark
+def test_column_partition_metric_spark(spark_session):  # noqa: PLR0915
     """
     Test of "column.partition" metric for both, standard numeric column and "datetime.datetime" valued column.
 
@@ -1229,8 +1420,6 @@ def test_column_partition_metric_spark(spark_session):
 
     Expected partition boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
     """
-    from great_expectations.expectations.metrics.import_manager import sparktypes
-
     week_idx: int
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -1257,10 +1446,10 @@ def test_column_partition_metric_spark(spark_session):
                 ],
             },
         ),
-        schema=sparktypes.StructType(
+        schema=pyspark.types.StructType(
             [
-                sparktypes.StructField("a", sparktypes.IntegerType(), True),
-                sparktypes.StructField("b", sparktypes.TimestampType(), True),
+                pyspark.types.StructField("a", pyspark.types.IntegerType(), True),
+                pyspark.types.StructField("b", pyspark.types.TimestampType(), True),
             ]
         ),
         batch_id="my_id",
@@ -1281,7 +1470,7 @@ def test_column_partition_metric_spark(spark_session):
 
     # Test using standard numeric column.
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_column_min_metric = MetricConfiguration(
@@ -1368,7 +1557,7 @@ def test_column_partition_metric_spark(spark_session):
     # Test using "datetime.datetime" column.
 
     metrics = {}
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_column_min_metric = MetricConfiguration(
@@ -1458,6 +1647,7 @@ def test_column_partition_metric_spark(spark_session):
     )
 
 
+@pytest.mark.unit
 def test_max_metric_column_exists_pd():
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     batch = Batch(data=df)
@@ -1468,7 +1658,7 @@ def test_max_metric_column_exists_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -1486,6 +1676,7 @@ def test_max_metric_column_exists_pd():
     assert results == {desired_metric.id: 3}
 
 
+@pytest.mark.unit
 def test_max_metric_column_does_not_exist_pd():
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     batch = Batch(data=df)
@@ -1496,7 +1687,7 @@ def test_max_metric_column_does_not_exist_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -1520,15 +1711,16 @@ def test_max_metric_column_does_not_exist_pd():
     )
 
 
+@pytest.mark.sqlite
 def test_max_metric_column_exists_sa(sa):
-    engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 1, None]}), sa)
+    engine = build_sa_execution_engine(pd.DataFrame({"a": [1, 2, 1, None]}), sa)
 
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
@@ -1562,15 +1754,16 @@ def test_max_metric_column_exists_sa(sa):
     assert results == {desired_metric.id: 2}
 
 
+@pytest.mark.sqlite
 def test_max_metric_column_does_not_exist_sa(sa):
-    engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 1, None]}), sa)
+    engine = build_sa_execution_engine(pd.DataFrame({"a": [1, 2, 1, None]}), sa)
 
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
@@ -1594,6 +1787,7 @@ def test_max_metric_column_does_not_exist_sa(sa):
     )
 
 
+@pytest.mark.spark
 def test_max_metric_column_exists_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -1606,7 +1800,7 @@ def test_max_metric_column_exists_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
@@ -1640,6 +1834,7 @@ def test_max_metric_column_exists_spark(spark_session):
     assert results == {desired_metric.id: 2}
 
 
+@pytest.mark.spark
 def test_max_metric_column_does_not_exist_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -1652,7 +1847,7 @@ def test_max_metric_column_does_not_exist_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
@@ -1676,15 +1871,16 @@ def test_max_metric_column_does_not_exist_spark(spark_session):
     )
 
 
+@pytest.mark.sqlite
 def test_map_value_set_sa(sa):
-    engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}), sa)
+    engine = build_sa_execution_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}), sa)
 
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -1726,10 +1922,11 @@ def test_map_value_set_sa(sa):
     assert results == {desired_metric.id: 0}
 
 
+@pytest.mark.sqlite
 def test_map_of_type_sa(sa):
     eng = sa.create_engine("sqlite://")
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
-    df.to_sql(name="test", con=eng, index=False)
+    add_dataframe_to_db(df=df, name="test", con=eng, index=False)
     batch_data = SqlAlchemyBatchData(
         execution_engine=eng, table_name="test", source_table_name="test"
     )
@@ -1749,6 +1946,7 @@ def test_map_of_type_sa(sa):
     assert isinstance(results[desired_metric.id][0]["type"], sa.FLOAT)
 
 
+@pytest.mark.spark
 def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -1763,7 +1961,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -1868,6 +2066,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
     assert results == {desired_metric.id: 1}
 
 
+@pytest.mark.unit
 def test_map_column_value_lengths_between_pd():
     engine = build_pandas_engine(
         pd.DataFrame({"a": ["a", "aaa", "bcbc", "defgh", None]})
@@ -1878,7 +2077,7 @@ def test_map_column_value_lengths_between_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -1903,6 +2102,7 @@ def test_map_column_value_lengths_between_pd():
 @pytest.mark.filterwarnings(
     "ignore:pandas.Int64Index is deprecated*:FutureWarning:tests.expectations.metrics"
 )
+@pytest.mark.big
 def test_map_column_values_increasing_pd():
     engine = build_pandas_engine(
         pd.DataFrame(
@@ -1925,7 +2125,7 @@ def test_map_column_values_increasing_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -1991,12 +2191,11 @@ def test_map_column_values_increasing_pd():
     )
     metrics.update(results)
 
-    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Int64Index(
-        [4], dtype="int64"
-    )
+    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Index([4], dtype="int64")
     assert metrics[unexpected_rows_metric.id]["a"].values == ["2021-02-21"]
 
 
+@pytest.mark.spark
 def test_map_column_values_increasing_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -2013,7 +2212,7 @@ def test_map_column_values_increasing_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     table_column_types = MetricConfiguration(
@@ -2089,6 +2288,7 @@ def test_map_column_values_increasing_spark(spark_session):
     ]
 
 
+@pytest.mark.big
 @pytest.mark.filterwarnings(
     "ignore:pandas.Int64Index is deprecated*:FutureWarning:tests.expectations.metrics"
 )
@@ -2114,7 +2314,7 @@ def test_map_column_values_decreasing_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -2180,12 +2380,11 @@ def test_map_column_values_decreasing_pd():
     )
     metrics.update(results)
 
-    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Int64Index(
-        [3], dtype="int64"
-    )
+    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Index([3], dtype="int64")
     assert metrics[unexpected_rows_metric.id]["a"].values == ["2021-03-20"]
 
 
+@pytest.mark.spark
 def test_map_column_values_decreasing_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -2202,7 +2401,7 @@ def test_map_column_values_decreasing_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     table_column_types = MetricConfiguration(
@@ -2276,6 +2475,7 @@ def test_map_column_values_decreasing_spark(spark_session):
     assert metrics[unexpected_rows_metric.id] == [(6,)]
 
 
+@pytest.mark.big
 def test_map_unique_column_exists_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, 4, None]}))
 
@@ -2284,7 +2484,7 @@ def test_map_unique_column_exists_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -2338,6 +2538,7 @@ def test_map_unique_column_exists_pd():
     assert metrics[unexpected_rows_metric.id]["a"].values == [3]
 
 
+@pytest.mark.unit
 def test_map_unique_column_does_not_exist_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
 
@@ -2346,7 +2547,7 @@ def test_map_unique_column_does_not_exist_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -2369,8 +2570,9 @@ def test_map_unique_column_does_not_exist_pd():
     )
 
 
+@pytest.mark.sqlite
 def test_map_unique_column_exists_sa(sa):
-    engine = build_sa_engine(
+    engine = build_sa_execution_engine(
         pd.DataFrame(
             {"a": [1, 2, 3, 3, None], "b": ["foo", "bar", "baz", "qux", "fish"]}
         ),
@@ -2382,7 +2584,7 @@ def test_map_unique_column_exists_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -2465,8 +2667,9 @@ def test_map_unique_column_exists_sa(sa):
     assert results[desired_metric.id] == [(3, "baz"), (3, "qux")]
 
 
+@pytest.mark.sqlite
 def test_map_unique_column_does_not_exist_sa(sa):
-    engine = build_sa_engine(
+    engine = build_sa_execution_engine(
         pd.DataFrame(
             {"a": [1, 2, 3, 3, None], "b": ["foo", "bar", "baz", "qux", "fish"]}
         ),
@@ -2478,7 +2681,7 @@ def test_map_unique_column_does_not_exist_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -2500,16 +2703,17 @@ def test_map_unique_column_does_not_exist_sa(sa):
     )
 
 
+@pytest.mark.sqlite
 def test_map_unique_empty_query_sa(sa):
     """If the table contains zero rows then there must be zero unexpected values."""
-    engine = build_sa_engine(
+    engine = build_sa_execution_engine(
         pd.DataFrame({"a": [], "b": []}),
         sa,
     )
 
     table_columns_metric: MetricConfiguration
     metrics: dict
-    table_columns_metric, metrics = get_table_columns_metric(engine=engine)
+    table_columns_metric, metrics = get_table_columns_metric(execution_engine=engine)
 
     condition_metric = MetricConfiguration(
         metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
@@ -2540,6 +2744,7 @@ def test_map_unique_empty_query_sa(sa):
     assert results[desired_metric.id] == 0
 
 
+@pytest.mark.spark
 def test_map_unique_column_exists_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -2557,7 +2762,7 @@ def test_map_unique_column_exists_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -2642,6 +2847,7 @@ def test_map_unique_column_exists_spark(spark_session):
     assert results[desired_metric.id] == [(3, "bar"), (3, "baz")]
 
 
+@pytest.mark.spark
 def test_map_unique_column_does_not_exist_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -2659,7 +2865,7 @@ def test_map_unique_column_does_not_exist_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -2682,6 +2888,7 @@ def test_map_unique_column_does_not_exist_spark(spark_session):
     )
 
 
+@pytest.mark.big
 def test_z_score_under_threshold_pd():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
@@ -2691,7 +2898,7 @@ def test_z_score_under_threshold_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     mean = MetricConfiguration(
@@ -2761,6 +2968,7 @@ def test_z_score_under_threshold_pd():
     assert results[desired_metric.id] == 0
 
 
+@pytest.mark.spark
 def test_z_score_under_threshold_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -2775,7 +2983,7 @@ def test_z_score_under_threshold_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     column_mean_aggregate_fn_metric = MetricConfiguration(
@@ -2881,6 +3089,7 @@ def test_z_score_under_threshold_spark(spark_session):
     assert results[desired_metric.id] == 0
 
 
+@pytest.mark.unit
 def test_table_metric_pd(caplog):
     df = pd.DataFrame({"a": [1, 2, 3, 3, None], "b": [1, 2, 3, 3, None]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
@@ -2897,7 +3106,8 @@ def test_table_metric_pd(caplog):
     )
 
 
-def test_map_column_pairs_equal_metric_pd():
+@pytest.mark.big
+def test_map_column_pairs_equal_metric_pd():  # noqa: PLR0915
     engine = build_pandas_engine(
         pd.DataFrame(
             data={
@@ -2914,7 +3124,7 @@ def test_map_column_pairs_equal_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     """
@@ -3120,8 +3330,9 @@ def test_map_column_pairs_equal_metric_pd():
     assert metrics[unexpected_values_metric.id] == [(0, 7), (1, 8), (2, 0)]
 
 
+@pytest.mark.sqlite
 def test_table_metric_sa(sa):
-    engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}), sa)
+    engine = build_sa_execution_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}), sa)
 
     aggregate_fn_metric = MetricConfiguration(
         metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
@@ -3145,8 +3356,9 @@ def test_table_metric_sa(sa):
     assert results == {desired_metric.id: 6}
 
 
-def test_map_column_pairs_equal_metric_sa(sa):
-    engine = build_sa_engine(
+@pytest.mark.sqlite
+def test_map_column_pairs_equal_metric_sa(sa):  # noqa: PLR0915
+    engine = build_sa_execution_engine(
         pd.DataFrame(
             data={
                 "a": [0, 1, 9, 2],
@@ -3163,7 +3375,7 @@ def test_map_column_pairs_equal_metric_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     """
@@ -3359,7 +3571,8 @@ def test_map_column_pairs_equal_metric_sa(sa):
     assert metrics[unexpected_values_metric.id] == [(0, 7), (1, 8), (2, 0)]
 
 
-def test_map_column_pairs_equal_metric_spark(spark_session):
+@pytest.mark.spark
+def test_map_column_pairs_equal_metric_spark(spark_session):  # noqa: PLR0915
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -3378,7 +3591,7 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     """
@@ -3576,6 +3789,7 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
     assert metrics[unexpected_values_metric.id] == [(0, 7), (1, 8), (2, 0)]
 
 
+@pytest.mark.big
 def test_map_column_pairs_greater_metric_pd():
     df = pd.DataFrame({"a": [2, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
@@ -3585,7 +3799,7 @@ def test_map_column_pairs_greater_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -3646,8 +3860,9 @@ def test_map_column_pairs_greater_metric_pd():
     assert metrics[unexpected_values_metric.id] == []
 
 
+@pytest.mark.sqlite
 def test_map_column_pairs_greater_metric_sa(sa):
-    engine = build_sa_engine(
+    engine = build_sa_execution_engine(
         pd.DataFrame(
             data={
                 "a": [2, 3, 4, None, 3, None],
@@ -3662,7 +3877,7 @@ def test_map_column_pairs_greater_metric_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -3717,6 +3932,7 @@ def test_map_column_pairs_greater_metric_sa(sa):
     assert metrics[unexpected_values_metric.id] == []
 
 
+@pytest.mark.spark
 def test_map_column_pairs_greater_metric_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -3734,7 +3950,7 @@ def test_map_column_pairs_greater_metric_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -3789,6 +4005,7 @@ def test_map_column_pairs_greater_metric_spark(spark_session):
     assert metrics[unexpected_values_metric.id] == []
 
 
+@pytest.mark.unit
 def test_map_column_pairs_in_set_metric_pd():
     df = pd.DataFrame({"a": [10, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
@@ -3798,7 +4015,7 @@ def test_map_column_pairs_in_set_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -3828,8 +4045,9 @@ def test_map_column_pairs_in_set_metric_pd():
     )
 
 
+@pytest.mark.sqlite
 def test_map_column_pairs_in_set_metric_sa(sa):
-    engine = build_sa_engine(
+    engine = build_sa_execution_engine(
         pd.DataFrame(
             {"a": [10, 9, 3, 4, None, 3, None], "b": [1, 4, 2, 3, None, 3, 5]}
         ),
@@ -3841,7 +4059,7 @@ def test_map_column_pairs_in_set_metric_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -3951,6 +4169,7 @@ def test_map_column_pairs_in_set_metric_sa(sa):
     ]
 
 
+@pytest.mark.spark
 def test_map_column_pairs_in_set_metric_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -3965,7 +4184,7 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -4075,6 +4294,7 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
     ]
 
 
+@pytest.mark.spark
 def test_table_metric_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -4106,6 +4326,7 @@ def test_table_metric_spark(spark_session):
     assert results == {desired_metric.id: 3}
 
 
+@pytest.mark.unit
 def test_column_median_metric_pd():
     engine = build_pandas_engine(
         pd.DataFrame(
@@ -4118,7 +4339,7 @@ def test_column_median_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -4136,6 +4357,7 @@ def test_column_median_metric_pd():
     assert results == {desired_metric.id: 2}
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "dataframe,median,",
     [
@@ -4150,7 +4372,7 @@ def test_column_median_metric_pd():
     ],
 )
 def test_column_median_metric_sa(sa, dataframe: pd.DataFrame, median: int):
-    engine = build_sa_engine(
+    engine = build_sa_execution_engine(
         dataframe,
         sa,
     )
@@ -4160,7 +4382,7 @@ def test_column_median_metric_sa(sa, dataframe: pd.DataFrame, median: int):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
@@ -4232,6 +4454,7 @@ def test_column_median_metric_sa(sa, dataframe: pd.DataFrame, median: int):
     assert results == {desired_metric.id: median}
 
 
+@pytest.mark.spark
 def test_column_median_metric_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -4272,7 +4495,7 @@ def test_column_median_metric_spark(spark_session):
     assert results == {desired_metric.id: 2}
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_value_counts_metric_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}))
 
@@ -4281,7 +4504,7 @@ def test_value_counts_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -4300,9 +4523,9 @@ def test_value_counts_metric_pd():
     assert pd.Series(index=[1, 2, 3], data=[2, 2, 2]).equals(metrics[desired_metric.id])
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_value_counts_metric_sa(sa):
-    engine = build_sa_engine(
+    engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
@@ -4330,10 +4553,8 @@ def test_value_counts_metric_sa(sa):
     ).equals(metrics[desired_metric_b.id])
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_value_counts_metric_spark(spark_session):
-    from great_expectations.expectations.metrics.import_manager import sparktypes
-
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -4342,10 +4563,10 @@ def test_value_counts_metric_spark(spark_session):
                 "b": [None, None, None, None, None, None, None],
             },
         ),
-        schema=sparktypes.StructType(
+        schema=pyspark.types.StructType(
             [
-                sparktypes.StructField("a", sparktypes.FloatType(), True),
-                sparktypes.StructField("b", sparktypes.NullType(), True),
+                pyspark.types.StructField("a", pyspark.types.FloatType(), True),
+                pyspark.types.StructField("b", pyspark.types.NullType(), True),
             ]
         ),
         batch_id="my_id",
@@ -4372,7 +4593,7 @@ def test_value_counts_metric_spark(spark_session):
     assert pd.Series(index=[], data=[]).equals(metrics[desired_metric.id])
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.parametrize(
     "dataframe",
     [
@@ -4395,7 +4616,7 @@ def test_distinct_metric_spark(
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     column_distinct_values_metric = MetricConfiguration(
@@ -4428,9 +4649,9 @@ def test_distinct_metric_spark(
         metrics=metrics,
     )
     metrics.update(results)
-    assert isinstance(
+    assert pyspark.Column and isinstance(
         metrics[column_distinct_values_count_metric_partial_fn.id][0],
-        pyspark_sql_Column,
+        pyspark.Column,
     )
 
     column_distinct_values_count_metric = MetricConfiguration(
@@ -4465,11 +4686,11 @@ def test_distinct_metric_spark(
     assert metrics[column_distinct_values_count_threshold_metric.id] is True
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_distinct_metric_sa(
     sa,
 ):
-    engine: SqlAlchemyExecutionEngine = build_sa_engine(
+    engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(
         pd.DataFrame(
             {
                 "a": [1, 2, 1, 2, 3, 3, None],
@@ -4483,7 +4704,7 @@ def test_distinct_metric_sa(
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     column_distinct_values_metric = MetricConfiguration(
@@ -4553,7 +4774,7 @@ def test_distinct_metric_sa(
     assert metrics[column_distinct_values_count_threshold_metric.id] is True
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_distinct_metric_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}))
 
@@ -4562,7 +4783,7 @@ def test_distinct_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     column_distinct_values_metric = MetricConfiguration(
@@ -4614,6 +4835,7 @@ def test_distinct_metric_pd():
     assert metrics[column_distinct_values_count_threshold_metric.id] is True
 
 
+@pytest.mark.big
 def test_batch_aggregate_metrics_pd():
     import datetime
 
@@ -4647,7 +4869,7 @@ def test_batch_aggregate_metrics_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric_1 = MetricConfiguration(
@@ -4716,10 +4938,11 @@ def test_batch_aggregate_metrics_pd():
     assert results[desired_metric_4.id] == pd.Timestamp(year=2021, month=1, day=1)
 
 
+@pytest.mark.sqlite
 def test_batch_aggregate_metrics_sa(caplog, sa):
     import datetime
 
-    engine = build_sa_engine(
+    engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
@@ -4728,7 +4951,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_aggregate_fn_metric_1 = MetricConfiguration(
@@ -4842,6 +5065,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
     assert found_message
 
 
+@pytest.mark.spark
 def test_batch_aggregate_metrics_spark(caplog, spark_session):
     import datetime
 
@@ -4858,7 +5082,7 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_aggregate_fn_metric_1 = MetricConfiguration(
@@ -4967,7 +5191,8 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
     assert found_message
 
 
-def test_map_multicolumn_sum_equal_pd():
+@pytest.mark.big
+def test_map_multicolumn_sum_equal_pd():  # noqa: PLR0915
     engine = build_pandas_engine(
         pd.DataFrame(
             data={"a": [0, 1, 2], "b": [5, 4, 3], "c": [0, 0, 1], "d": [7, 8, 9]}
@@ -4979,7 +5204,7 @@ def test_map_multicolumn_sum_equal_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     """
@@ -5178,8 +5403,9 @@ def test_map_multicolumn_sum_equal_pd():
     assert metrics[unexpected_values_metric.id] == [{"a": 2, "b": 3, "c": 1}]
 
 
-def test_map_multicolumn_sum_equal_sa(sa):
-    engine = build_sa_engine(
+@pytest.mark.sqlite
+def test_map_multicolumn_sum_equal_sa(sa):  # noqa: PLR0915
+    engine = build_sa_execution_engine(
         pd.DataFrame(
             data={"a": [0, 1, 2], "b": [5, 4, 3], "c": [0, 0, 1], "d": [7, 8, 9]}
         ),
@@ -5191,7 +5417,7 @@ def test_map_multicolumn_sum_equal_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     """
@@ -5379,7 +5605,8 @@ def test_map_multicolumn_sum_equal_sa(sa):
     assert metrics[unexpected_values_metric.id] == [{"a": 2, "b": 3, "c": 1}]
 
 
-def test_map_multicolumn_sum_equal_spark(spark_session):
+@pytest.mark.spark
+def test_map_multicolumn_sum_equal_spark(spark_session):  # noqa: PLR0915
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -5393,7 +5620,7 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     """
@@ -5583,7 +5810,8 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
     assert metrics[unexpected_values_metric.id] == [{"a": 2, "b": 3, "c": 1}]
 
 
-def test_map_compound_columns_unique_pd():
+@pytest.mark.big
+def test_map_compound_columns_unique_pd():  # noqa: PLR0915
     engine = build_pandas_engine(
         pd.DataFrame(data={"a": [0, 1, 1], "b": [1, 2, 3], "c": [0, 2, 2]})
     )
@@ -5593,7 +5821,7 @@ def test_map_compound_columns_unique_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     """
@@ -5788,8 +6016,9 @@ def test_map_compound_columns_unique_pd():
     assert metrics[unexpected_values_metric.id] == [{"a": 1, "c": 2}, {"a": 1, "c": 2}]
 
 
-def test_map_compound_columns_unique_sa(sa):
-    engine = build_sa_engine(
+@pytest.mark.sqlite
+def test_map_compound_columns_unique_sa(sa):  # noqa: PLR0915
+    engine = build_sa_execution_engine(
         pd.DataFrame(data={"a": [0, 1, 1], "b": [1, 2, 3], "c": [0, 2, 2]}),
         sa,
     )
@@ -5799,7 +6028,7 @@ def test_map_compound_columns_unique_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     """
@@ -6022,7 +6251,8 @@ def test_map_compound_columns_unique_sa(sa):
     assert metrics[unexpected_values_metric.id] == [{"a": 1, "c": 2}, {"a": 1, "c": 2}]
 
 
-def test_map_compound_columns_unique_spark(spark_session):
+@pytest.mark.big
+def test_map_compound_columns_unique_spark(spark_session):  # noqa: PLR0915
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(data={"a": [0, 1, 1], "b": [1, 2, 3], "c": [0, 2, 2]}),
@@ -6034,7 +6264,7 @@ def test_map_compound_columns_unique_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     """
@@ -6220,7 +6450,8 @@ def test_map_compound_columns_unique_spark(spark_session):
     assert metrics[unexpected_values_metric.id] == [{"a": 1, "c": 2}, {"a": 1, "c": 2}]
 
 
-def test_map_select_column_values_unique_within_record_pd():
+@pytest.mark.big
+def test_map_select_column_values_unique_within_record_pd():  # noqa: PLR0915
     engine = build_pandas_engine(
         pd.DataFrame(
             data={
@@ -6236,7 +6467,7 @@ def test_map_select_column_values_unique_within_record_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     # Save original metrics for testing unexpected results.
@@ -6470,8 +6701,9 @@ def test_map_select_column_values_unique_within_record_pd():
     ]
 
 
-def test_map_select_column_values_unique_within_record_sa(sa):
-    engine = build_sa_engine(
+@pytest.mark.sqlite
+def test_map_select_column_values_unique_within_record_sa(sa):  # noqa: PLR0915
+    engine = build_sa_execution_engine(
         pd.DataFrame(
             data={
                 "a": [1, 1, 8, 1, 4, None, None, 7],
@@ -6487,7 +6719,7 @@ def test_map_select_column_values_unique_within_record_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     # Save original metrics for testing unexpected results.
@@ -6683,7 +6915,10 @@ def test_map_select_column_values_unique_within_record_sa(sa):
     ]
 
 
-def test_map_select_column_values_unique_within_record_spark(spark_session):
+@pytest.mark.spark
+def test_map_select_column_values_unique_within_record_spark(  # noqa: PLR0915 # 56
+    spark_session,
+):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -6701,7 +6936,7 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     # Save original metrics for testing unexpected results.

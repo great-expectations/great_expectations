@@ -1,5 +1,8 @@
 from typing import Optional
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypeSuffixes,
@@ -10,10 +13,13 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, Window, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
+)
+from great_expectations.expectations.metrics.map_metric_provider.multicolumn_condition_partial import (
     multicolumn_condition_partial,
+)
+from great_expectations.expectations.metrics.map_metric_provider.multicolumn_function_partial import (
     multicolumn_function_partial,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -80,7 +86,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             sa.column(column_name) for column_name in table_columns
         ]
         original_table_clause = (
-            sa.select(table_columns_selector)
+            sa.select(*table_columns_selector)
             .select_from(table)
             .alias("original_table_clause")
         )
@@ -91,7 +97,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         # Give the resulting sub-query a unique alias in order to disambiguate column names in subsequent queries.
         count_selector = column_list + [sa.func.count().label("_num_rows")]
         group_count_query = (
-            sa.select(count_selector)
+            sa.select(*count_selector)
             .group_by(*column_list)
             .select_from(original_table_clause)
             .alias("group_counts_subquery")
@@ -111,10 +117,8 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         # noinspection PyProtectedMember
         compound_columns_count_query = (
             sa.select(
-                [
-                    original_table_clause,
-                    group_count_query.c._num_rows.label("_num_rows"),
-                ]
+                original_table_clause,
+                group_count_query.c._num_rows.label("_num_rows"),
             )
             .select_from(
                 original_table_clause.join(
@@ -147,7 +151,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         ]
 
         # noinspection PyProtectedMember
-        row_wise_cond = compound_columns_count_query.c._num_rows < 2
+        row_wise_cond = compound_columns_count_query.c._num_rows < 2  # noqa: PLR2004
 
         return row_wise_cond
 
@@ -155,7 +159,8 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
     def _spark(cls, column_list, **kwargs):
         column_names = column_list.columns
         row_wise_cond = (
-            F.count(F.lit(1)).over(Window.partitionBy(F.struct(*column_names))) <= 1
+            F.count(F.lit(1)).over(pyspark.Window.partitionBy(F.struct(*column_names)))
+            <= 1
         )
         return row_wise_cond
 

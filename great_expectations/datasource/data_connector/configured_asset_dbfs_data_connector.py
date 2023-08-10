@@ -31,7 +31,7 @@ class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilesystemDataConnector):
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -62,14 +62,8 @@ class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilesystemDataConnector):
     def _get_full_file_path_for_asset(
         self, path: str, asset: Optional[Asset] = None
     ) -> str:
-
         full_path = super()._get_full_file_path_for_asset(path=path, asset=asset)
-
         template_arguments: dict = {
             "path": full_path,
         }
-
-        return self.execution_engine.resolve_data_reference(
-            data_connector_name=self.__class__.__name__,
-            template_arguments=template_arguments,
-        )
+        return self.resolve_data_reference(template_arguments=template_arguments)

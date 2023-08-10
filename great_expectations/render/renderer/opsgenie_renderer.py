@@ -16,7 +16,6 @@ class OpsgenieRenderer(Renderer):
         data_docs_pages=None,
         notify_with=None,
     ):
-
         summary_text = (
             "No validation occurred. Please ensure you passed a validation_result."
         )

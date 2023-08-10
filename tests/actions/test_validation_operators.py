@@ -1,5 +1,4 @@
 # TODO: ADD TESTS ONCE GET_BATCH IS INTEGRATED!
-
 import dateutil.parser
 import pandas as pd
 import pytest
@@ -7,6 +6,9 @@ from freezegun import freeze_time
 
 import great_expectations as gx
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.self_check.util import modify_locale
 from great_expectations.util import get_context
 from great_expectations.validation_operators.validation_operators import (
@@ -52,7 +54,7 @@ def warning_failure_validation_operator_data_context(
     tmp_path_factory,
     filesystem_csv_4,
 ):
-    project_path = str(tmp_path_factory.mktemp("great_expectations"))
+    project_path = str(tmp_path_factory.mktemp(FileDataContext.GX_DIR))
 
     # NOTE: This setup is almost identical to test_DefaultDataContextAwareValidationOperator.
     # Consider converting to a single fixture.
@@ -73,7 +75,7 @@ def warning_failure_validation_operator_data_context(
         },
     )
 
-    data_context.create_expectation_suite(expectation_suite_name="f1.failure")
+    data_context.add_expectation_suite(expectation_suite_name="f1.failure")
     df = data_context.get_batch(
         expectation_suite_name="f1.failure",
         batch_kwargs=data_context.build_batch_kwargs(
@@ -82,11 +84,11 @@ def warning_failure_validation_operator_data_context(
     )
     df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
     failure_expectations = df.get_expectation_suite(discard_failed_expectations=False)
-    data_context.save_expectation_suite(
-        failure_expectations, expectation_suite_name="f1.failure"
-    )
 
-    data_context.create_expectation_suite(expectation_suite_name="f1.warning")
+    failure_expectations.expectation_suite_name = "f1.failure"
+    data_context.update_expectation_suite(expectation_suite=failure_expectations)
+
+    data_context.add_expectation_suite(expectation_suite_name="f1.warning")
     df = data_context.get_batch(
         expectation_suite_name="f1.warning",
         batch_kwargs=data_context.build_batch_kwargs(
@@ -98,22 +100,22 @@ def warning_failure_validation_operator_data_context(
     )
     df.expect_column_values_to_not_be_null(column="y")
     warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
-    data_context.save_expectation_suite(
-        warning_expectations, expectation_suite_name="f1.warning"
-    )
 
-    data_context.save_expectation_suite(
-        failure_expectations, expectation_suite_name="f2.failure"
-    )
-    data_context.save_expectation_suite(
-        failure_expectations, expectation_suite_name="f3.failure"
-    )
-    data_context.save_expectation_suite(
-        warning_expectations, expectation_suite_name="f2.warning"
-    )
-    data_context.save_expectation_suite(
-        warning_expectations, expectation_suite_name="f3.warning"
-    )
+    warning_expectations.expectation_suite_name = "f1.warning"
+    data_context.update_expectation_suite(expectation_suite=warning_expectations)
+
+    failure_expectations.expectation_suite_name = "f2.failure"
+    data_context.add_expectation_suite(expectation_suite=failure_expectations)
+
+    failure_expectations.expectation_suite_name = "f3.failure"
+    data_context.add_expectation_suite(expectation_suite=failure_expectations)
+
+    warning_expectations.expectation_suite_name = "f2.warning"
+    data_context.add_expectation_suite(expectation_suite=warning_expectations)
+
+    warning_expectations.expectation_suite_name = "f3.warning"
+    data_context.add_expectation_suite(expectation_suite=warning_expectations)
+
     return data_context
 
 
@@ -122,6 +124,7 @@ def warning_failure_validation_operator_data_context(
 @pytest.mark.filterwarnings(
     "ignore:System time is way off:urllib3.exceptions.SystemTimeWarning:urllib3"
 )
+@pytest.mark.filesystem
 def test_errors_warnings_validation_operator_run_slack_query(
     warning_failure_validation_operator_data_context, assets_to_validate
 ):
@@ -215,6 +218,7 @@ def test_errors_warnings_validation_operator_run_slack_query(
     assert slack_query == expected_slack_query
 
 
+@pytest.mark.filesystem
 def test_errors_warnings_validation_operator_failed_vo_result(
     warning_failure_validation_operator_data_context, assets_to_validate
 ):
@@ -239,21 +243,17 @@ def test_errors_warnings_validation_operator_failed_vo_result(
 
     # make sure there is at least one failed validation with a "failure-level" suite
     assert any(
-        [
-            run_result
-            for run_result in run_results
-            if run_result["expectation_suite_severity_level"] == "failure"
-            and not run_result["validation_result"].success
-        ]
+        run_result
+        for run_result in run_results
+        if run_result["expectation_suite_severity_level"] == "failure"
+        and not run_result["validation_result"].success
     )
     # no failed warning suites
     assert not any(
-        [
-            run_result
-            for run_result in run_results
-            if run_result["expectation_suite_severity_level"] == "warning"
-            and not run_result["validation_result"].success
-        ]
+        run_result
+        for run_result in run_results
+        if run_result["expectation_suite_severity_level"] == "warning"
+        and not run_result["validation_result"].success
     )
     assert not return_obj.success
 
@@ -267,25 +267,22 @@ def test_errors_warnings_validation_operator_failed_vo_result(
 
     # make sure there is at least one failed validation with a "failure-level" suite
     assert any(
-        [
-            run_result
-            for run_result in run_results_2
-            if run_result["expectation_suite_severity_level"] == "failure"
-            and not run_result["validation_result"].success
-        ]
+        run_result
+        for run_result in run_results_2
+        if run_result["expectation_suite_severity_level"] == "failure"
+        and not run_result["validation_result"].success
     )
     # with at least one failed warning suite
     assert any(
-        [
-            run_result
-            for run_result in run_results_2
-            if run_result["expectation_suite_severity_level"] == "warning"
-            and not run_result["validation_result"].success
-        ]
+        run_result
+        for run_result in run_results_2
+        if run_result["expectation_suite_severity_level"] == "warning"
+        and not run_result["validation_result"].success
     )
     assert not return_obj_2.success
 
 
+@pytest.mark.filesystem
 def test_errors_warnings_validation_operator_succeeded_vo_result_with_only_failed_warning_suite(
     warning_failure_validation_operator_data_context, assets_to_validate
 ):
@@ -310,21 +307,17 @@ def test_errors_warnings_validation_operator_succeeded_vo_result_with_only_faile
 
     # make sure there are no failed validations with suite severity of failure
     assert not any(
-        [
-            run_result
-            for run_result in run_results
-            if run_result["expectation_suite_severity_level"] == "failure"
-            and not run_result["validation_result"].success
-        ]
+        run_result
+        for run_result in run_results
+        if run_result["expectation_suite_severity_level"] == "failure"
+        and not run_result["validation_result"].success
     )
     # make sure there is at least one failed validation with suite severity of warning
     assert any(
-        [
-            run_result
-            for run_result in run_results
-            if run_result["expectation_suite_severity_level"] == "warning"
-            and not run_result["validation_result"].success
-        ]
+        run_result
+        for run_result in run_results
+        if run_result["expectation_suite_severity_level"] == "warning"
+        and not run_result["validation_result"].success
     )
     assert return_obj.success
 
@@ -338,25 +331,22 @@ def test_errors_warnings_validation_operator_succeeded_vo_result_with_only_faile
 
     # make sure there are no failed validations with suite severity of failure
     assert not any(
-        [
-            run_result
-            for run_result in run_results_2
-            if run_result["expectation_suite_severity_level"] == "failure"
-            and not run_result["validation_result"].success
-        ]
+        run_result
+        for run_result in run_results_2
+        if run_result["expectation_suite_severity_level"] == "failure"
+        and not run_result["validation_result"].success
     )
     # make sure there are no failed validation with suite severity of warning
     assert not any(
-        [
-            run_result
-            for run_result in run_results_2
-            if run_result["expectation_suite_severity_level"] == "warning"
-            and not run_result["validation_result"].success
-        ]
+        run_result
+        for run_result in run_results_2
+        if run_result["expectation_suite_severity_level"] == "warning"
+        and not run_result["validation_result"].success
     )
     assert return_obj_2.success
 
 
+@pytest.mark.filesystem
 def test_passing_run_id_as_a_parameter_to_warning_and_failure_vo(
     warning_failure_validation_operator_data_context, assets_to_validate
 ):

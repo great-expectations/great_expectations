@@ -1,22 +1,26 @@
+from __future__ import annotations
+
 import copy
 import json
-from typing import Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional
 
 from marshmallow import Schema, fields, post_load, pre_dump
 
-from great_expectations.alias_types import JSONValues
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
-)
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
-from great_expectations.data_context.types.base import CheckpointConfig
-from great_expectations.data_context.types.resource_identifiers import (
-    ValidationResultIdentifier,
-)
 from great_expectations.types import SerializableDictDot, safe_deep_copy
+
+if TYPE_CHECKING:
+    from great_expectations.alias_types import JSONValues
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+    )
+    from great_expectations.data_context.types.base import CheckpointConfig
+    from great_expectations.data_context.types.resource_identifiers import (
+        ValidationResultIdentifier,
+    )
 
 
 @public_api
@@ -61,12 +65,12 @@ class CheckpointResult(SerializableDictDot):
     # JC: I think this needs to be changed to be an instance of a new type called CheckpointResult,
     # which would include the top-level keys run_id, config, name, and a list of results.
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         run_id: RunIdentifier,
-        run_results: Dict[
+        run_results: dict[
             ValidationResultIdentifier,
-            Dict[str, Union[ExpectationSuiteValidationResult, dict, str]],
+            dict[str, ExpectationSuiteValidationResult | dict | str],
         ],
         checkpoint_config: CheckpointConfig,
         validation_result_url: Optional[str] = None,
@@ -78,26 +82,30 @@ class CheckpointResult(SerializableDictDot):
         self._checkpoint_config = checkpoint_config
         if success is None:
             self._success = all(
-                [
-                    run_result["validation_result"].success
-                    for run_result in run_results.values()
-                ]
+                run_result["validation_result"].success  # type: ignore[union-attr] # no `.success` attr for ExpectationSuiteValidationResult | dict | str
+                for run_result in run_results.values()
             )
         else:
             self._success = success
 
-        self._validation_results = None
-        self._data_assets_validated = None
-        self._data_assets_validated_by_batch_id = None
-        self._validation_result_identifiers = None
-        self._expectation_suite_names = None
-        self._data_asset_names = None
-        self._validation_results_by_expectation_suite_name = None
-        self._validation_results_by_data_asset_name = None
-        self._batch_identifiers = None
-        self._statistics = None
-        self._validation_statistics = None
-        self._validation_results_by_validation_result_identifier = None
+        self._validation_results: list[
+            ExpectationSuiteValidationResult
+        ] | dict | None = None
+        self._data_assets_validated: list[dict] | dict | None = None
+        self._data_assets_validated_by_batch_id: dict | None = None
+        self._validation_result_identifiers: list[
+            ValidationResultIdentifier
+        ] | None = None
+        self._expectation_suite_names: list[str] | None = None
+        self._data_asset_names: list[str] | None = None
+        self._validation_results_by_expectation_suite_name: dict | None = None
+        self._validation_results_by_data_asset_name: dict | None = None
+        self._batch_identifiers: list[str] | None = None
+        self._statistics: dict | None = None
+        self._validation_statistics: dict[
+            ValidationResultIdentifier, dict
+        ] | None = None
+        self._validation_results_by_validation_result_identifier: dict | None = None
 
     @property
     def name(self) -> str:
@@ -110,9 +118,9 @@ class CheckpointResult(SerializableDictDot):
     @property
     def run_results(
         self,
-    ) -> Dict[
+    ) -> dict[
         ValidationResultIdentifier,
-        Dict[str, Union[ExpectationSuiteValidationResult, dict]],
+        dict[str, ExpectationSuiteValidationResult | dict | str],
     ]:
         return self._run_results
 
@@ -128,7 +136,7 @@ class CheckpointResult(SerializableDictDot):
     def success(self) -> bool:
         return self._success
 
-    def list_batch_identifiers(self) -> List[str]:
+    def list_batch_identifiers(self) -> list[str]:
         if self._batch_identifiers is None:
             self._batch_identifiers = list(
                 {
@@ -182,8 +190,12 @@ class CheckpointResult(SerializableDictDot):
 
     @public_api
     def list_validation_results(
-        self, group_by=None
-    ) -> Union[List[ExpectationSuiteValidationResult], dict]:
+        self,
+        group_by: Literal[
+            "validation_result_identifier", "expectation_suite_name", "data_asset_name"
+        ]
+        | None = None,
+    ) -> list[ExpectationSuiteValidationResult] | dict:
         """Obtain the ExpectationValidationResults belonging to this CheckpointResult.
 
         Args:
@@ -203,7 +215,7 @@ class CheckpointResult(SerializableDictDot):
         if group_by is None:
             if self._validation_results is None:
                 self._validation_results = [
-                    run_result["validation_result"]
+                    run_result["validation_result"]  # type: ignore[misc] # List comprehension has incompatible type `list | dict | str`; expected `list``
                     for run_result in self.run_results.values()
                 ]
             return self._validation_results
@@ -228,7 +240,7 @@ class CheckpointResult(SerializableDictDot):
                 expectation_suite_name: [
                     run_result["validation_result"]
                     for run_result in self.run_results.values()
-                    if run_result["validation_result"].meta["expectation_suite_name"]
+                    if run_result["validation_result"].meta["expectation_suite_name"]  # type: ignore[union-attr] # .meta attribute
                     == expectation_suite_name
                 ]
                 for expectation_suite_name in self.list_expectation_suite_names()
@@ -258,8 +270,8 @@ class CheckpointResult(SerializableDictDot):
         return self._validation_results_by_data_asset_name
 
     def list_data_assets_validated(
-        self, group_by: Optional[str] = None
-    ) -> Union[List[dict], dict]:
+        self, group_by: Optional[Literal["batch_id"]] = None
+    ) -> list[dict] | dict:
         if group_by is None:
             if self._data_assets_validated is None:
                 self._data_assets_validated = list(
@@ -330,7 +342,7 @@ class CheckpointResult(SerializableDictDot):
     def _list_validation_statistics(self) -> Dict[ValidationResultIdentifier, dict]:
         if self._validation_statistics is None:
             self._validation_statistics = {
-                validation_result_identifier: run_result["validation_result"].statistics
+                validation_result_identifier: run_result["validation_result"].statistics  # type: ignore[union-attr] # .statistics attribute
                 for validation_result_identifier, run_result in self.run_results.items()
             }
         return self._validation_statistics

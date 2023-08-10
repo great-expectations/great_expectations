@@ -11,7 +11,7 @@ from great_expectations.core.domain import (
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
+    ParameterContainer,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 class ColumnPairDomainBuilder(ColumnDomainBuilder):
     """
-    This DomainBuilder uses relative tolerance of specified map metric to identify domains.
+    This DomainBuilder uses "include_column_names" property of its parent class to specify "column_A" and "column_B" (order-preserving).
     """
 
     exclude_field_names: ClassVar[
@@ -70,7 +70,7 @@ class ColumnPairDomainBuilder(ColumnDomainBuilder):
         variables: Optional[ParameterContainer] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
-        """Return domains matching the specified tolerance limits.
+        """Obtains and returns Domain object, whose domain_kwargs consists of "column_A" and "column_B" (order-preserving) column-pair.
 
         Args:
             rule_name: name of Rule object, for which "Domain" objects are obtained.
@@ -90,7 +90,10 @@ class ColumnPairDomainBuilder(ColumnDomainBuilder):
             variables=variables,
         )
 
-        if not (effective_column_names and (len(effective_column_names) == 2)):
+        if not (
+            effective_column_names
+            and (len(effective_column_names) == 2)  # noqa: PLR2004
+        ):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Error: Columns specified for {self.__class__.__name__} in sorted order must correspond to \
 "column_A" and "column_B" (in this exact order).

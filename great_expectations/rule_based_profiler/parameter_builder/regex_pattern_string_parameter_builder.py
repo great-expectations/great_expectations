@@ -3,22 +3,26 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Set, Union
 
+import pandas as pd
+
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.domain import Domain
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
-    AttributedResolvedMetrics,
+    AttributedResolvedMetrics,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricComputationResult,
-    MetricValues,
+    MetricComputationResult,  # noqa: TCH001
+    MetricValues,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.parameter_container import (
@@ -60,7 +64,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         r"\b[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}-[0-5][0-9a-fA-F]{3}-[089ab][0-9a-fA-F]{3}-\b[0-9a-fA-F]{12}\b ",  # UUID
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
@@ -174,7 +178,11 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
         metric_values = metric_values[:, 0]
 
-        nonnull_count: int = sum(metric_values)
+        nonnull_count: int
+        if pd.isnull(metric_values).any():
+            nonnull_count = 0
+        else:
+            nonnull_count = sum(metric_values)
 
         # Obtain candidate_regexes from "rule state" (i.e, variables and parameters); from instance variable otherwise.
         candidate_regexes: Union[
@@ -231,7 +239,12 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
             metric_values = attributed_resolved_metrics.conditioned_metric_values[:, 0]
 
-            match_regex_unexpected_count: int = sum(metric_values)
+            match_regex_unexpected_count: int
+            if pd.isnull(metric_values).any():
+                match_regex_unexpected_count = 0
+            else:
+                match_regex_unexpected_count = sum(metric_values)
+
             success_ratio: float = (nonnull_count - match_regex_unexpected_count) / (
                 nonnull_count + NP_EPSILON
             )

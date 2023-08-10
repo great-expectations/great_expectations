@@ -13,7 +13,7 @@ the snippets that are specified for use in documentation are maintained.  These 
 
 To run this code as a local test, use the following console command:
 ```
-pytest -v --docs-tests -m integration -k "how_to_configure_a_sql_datasource" tests/integration/test_script_runner.py
+pytest -v --docs-tests -k "how_to_configure_a_sql_datasource" tests/integration/test_script_runner.py
 ```
 
 To validate the snippets in this file, use the following console command:
@@ -21,9 +21,8 @@ To validate the snippets in this file, use the following console command:
 yarn snippet-check ./tests/integration/docusaurus/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.py
 ```
 """
-from ruamel import yaml
-
 import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
 from tests.integration.docusaurus.connecting_to_your_data.datasource_configuration.datasource_configuration_test_utilities import (
     is_subset,
 )
@@ -35,6 +34,7 @@ from tests.integration.docusaurus.connecting_to_your_data.datasource_configurati
     get_partial_config_universal_datasource_config_elements,
 )
 
+yaml = YAMLHandler()
 CONNECTION_STRING = "sqlite:///data/yellow_tripdata_sample_2020_all_months_combined.db"
 data_context: gx.DataContext = gx.get_context()
 
@@ -405,7 +405,6 @@ def section_9_test_your_configuration__inferred_and_configured():
             12,
         ),
     ):
-
         test_result = data_context.test_yaml_config(yaml.dump(datasource_config))
         datasource_check = test_result.self_check(max_examples=12)
         assert (

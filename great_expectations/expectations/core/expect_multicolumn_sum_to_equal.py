@@ -80,7 +80,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         """
         Validates the configuration for the Expectation.
 
-        For this expectation, `configuraton.kwargs` may contain `min_value` and `max_value` whose value is a number.
+        For this expectation, `configuration.kwargs` may contain `min_value` and `max_value` whose value is a number.
 
         Args:
             configuration: An `ExpectationConfiguration` to validate. If no configuration is provided,
@@ -103,6 +103,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ) -> None:
+        # TODO: Need for prescriptive renderer for Expectation if we want to render in DataDocs.
         pass
 
     @classmethod
@@ -114,4 +115,5 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ) -> None:
+        # TODO: Need for diagnostic renderer for Expectation if we want to render in DataDocs.
         pass

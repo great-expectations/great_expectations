@@ -3,10 +3,9 @@ import shutil
 from collections import OrderedDict
 
 import pytest
-from ruamel.yaml import YAML
 
-import great_expectations as gx
 from great_expectations.core.config_provider import _ConfigurationSubstitutor
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -21,9 +20,7 @@ from great_expectations.exceptions import InvalidConfigError, MissingConfigVaria
 from great_expectations.util import get_context
 from tests.data_context.conftest import create_data_context_files
 
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.default_flow_style = False
+yaml = YAMLHandler()
 
 dataContextConfigSchema = DataContextConfigSchema()
 
@@ -37,19 +34,23 @@ def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
         __file__,
         "../test_fixtures/great_expectations_basic_with_variables.yml",
     )
-    shutil.copy(ge_config_path, os.path.join(root_dir, "great_expectations.yml"))
+    shutil.copy(
+        ge_config_path, os.path.join(root_dir, FileDataContext.GX_YML)  # noqa: PTH118
+    )
     config_variables_path = file_relative_path(
         __file__,
         "../test_fixtures/config_variables.yml",
     )
-    shutil.copy(config_variables_path, os.path.join(root_dir, "uncommitted"))
+    shutil.copy(
+        config_variables_path, os.path.join(root_dir, "uncommitted")  # noqa: PTH118
+    )
     return get_context(context_root_dir=root_dir)
 
 
+@pytest.mark.filesystem
 def test_config_variables_on_context_without_config_variables_filepath_configured(
     data_context_without_config_variables_filepath_configured,
 ):
-
     # test the behavior on a context that does not config_variables_filepath (the location of
     # the file with config variables values) configured.
 
@@ -65,13 +66,14 @@ def test_config_variables_on_context_without_config_variables_filepath_configure
     )
 
 
+@pytest.mark.filesystem
 def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     # this test uses a great_expectations.yml with almost all values replaced
     # with substitution variables
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
 
     create_data_context_files(
         context_path,
@@ -104,6 +106,7 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     assert context_config_commented_map == expected_config_commented_map
 
 
+@pytest.mark.filesystem
 def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypatch):
     monkeypatch.setenv("FOO", "BAR")
     monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", r"ive_been_\$replaced")
@@ -114,8 +117,8 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
     runtime_environment = {"replace_me": value_from_runtime_override}
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     create_data_context_files(
         context_path,
         asset_config_path,
@@ -147,6 +150,7 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
         del os.environ["replace_me"]
 
 
+@pytest.mark.unit
 def test_substitute_config_variable():
     config_substitutor = _ConfigurationSubstitutor()
     config_variables_dict = {
@@ -193,7 +197,7 @@ def test_substitute_config_variable():
     )
     assert (
         config_substitutor.substitute_config_variable(None, config_variables_dict)
-        == None
+        is None
     )
 
     # Test with mixed case
@@ -245,6 +249,7 @@ def test_substitute_config_variable():
     )
 
 
+@pytest.mark.filesystem
 def test_substitute_env_var_in_config_variable_file(
     monkeypatch, empty_data_context_with_config_variables
 ):
@@ -274,6 +279,7 @@ def test_substitute_env_var_in_config_variable_file(
     )
 
 
+@pytest.mark.unit
 def test_escape_all_config_variables(empty_data_context_with_config_variables):
     """
     Make sure that all types of input to escape_all_config_variables are escaped properly: str, dict, OrderedDict, list
@@ -388,6 +394,7 @@ def test_escape_all_config_variables(empty_data_context_with_config_variables):
     )
 
 
+@pytest.mark.unit
 def test_escape_all_config_variables_skip_substitution_vars(
     empty_data_context_with_config_variables,
 ):
@@ -633,6 +640,7 @@ def test_escape_all_config_variables_skip_substitution_vars(
     )
 
 
+@pytest.mark.filesystem
 def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypatch):
     """
     What does this test and why?
@@ -675,26 +683,31 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     monkeypatch.setenv("DB_HOST_FROM_ENV_VAR", "DB_HOST_FROM_ENV_VAR_VALUE")
 
     datasource_config = DatasourceConfig(
-        class_name="SqlAlchemyDatasource",
-        credentials={
-            "drivername": "postgresql",
-            "host": "$DB_HOST",
-            "port": "65432",
-            "database": "${DB_NAME}",
-            "username": "${DB_USER}",
-            "password": "${DB_PWD}",
+        class_name="Datasource",
+        execution_engine={
+            "class_name": "SqlAlchemyExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+            "credentials": {
+                "drivername": "postgresql",
+                "host": "$DB_HOST",
+                "port": "65432",
+                "database": "${DB_NAME}",
+                "username": "${DB_USER}",
+                "password": "${DB_PWD}",
+            },
         },
     )
+
     datasource_config_schema = DatasourceConfigSchema()
 
     # use context.add_datasource to test this by adding a datasource with values to substitute.
     context.add_datasource(
         initialize=False,
         name="test_datasource",
-        **datasource_config_schema.dump(datasource_config)
+        **datasource_config_schema.dump(datasource_config),
     )
 
-    assert context.list_datasources()[0]["credentials"] == {
+    assert context.list_datasources()[0]["execution_engine"]["credentials"] == {
         "drivername": "postgresql",
         "host": "DB_HOST_FROM_ENV_VAR_VALUE",
         "port": "65432",
@@ -712,7 +725,7 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
 
     test_datasource_credentials = context_with_variables_substituted_dict[
         "datasources"
-    ]["test_datasource"]["credentials"]
+    ]["test_datasource"]["execution_engine"]["credentials"]
 
     assert test_datasource_credentials["host"] == "DB_HOST_FROM_ENV_VAR_VALUE"
     assert test_datasource_credentials["username"] == "DB_USER"

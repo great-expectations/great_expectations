@@ -2,6 +2,7 @@
   "expectation_type" : "expect_table_columns_to_match_set",
   "datasets" : [
     {
+      "dataset_name": "expect_table_columns_to_match_set_1",
       "data": {
         "c1" : [4,5,6,7],
         "c2" : ["a","b","c","d"],

@@ -1,0 +1,10 @@
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+
+Your <TechnicalTag tag="expectation_store" text="Expectation Store" /> configuration is in your <TechnicalTag tag="data_context" text="Data Context" />.
+
+The following section in your <TechnicalTag relative="../../../" tag="data_context" text="Data Context" /> ``great_expectations.yml`` file tells Great Expectations to look for Expectations in a Store named ``expectations_store``:
+
+```python name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py existing_expectations_store"
+```
+
+The default ``base_directory`` for ``expectations_store`` is ``expectations/``.

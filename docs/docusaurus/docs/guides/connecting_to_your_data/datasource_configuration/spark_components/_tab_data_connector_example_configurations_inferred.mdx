@@ -1,0 +1,36 @@
+import TipInferredDataConnectorOverview from '../components/_tip_inferred_data_connector_overview.mdx'
+import PartNameTheDataConnector from '../components/_part_name_the_data_connector.mdx'
+import PartDataConnectorKeysOverview from '../components/_part_data_connector_keys_overview.mdx'
+import PartGlobDirectiveDetails from './_part_glob_directive_details.mdx'
+import TipCustomDataConnectorModuleName from '../components/_tip_custom_data_connector_module_name.mdx'
+import PartFilesystemBaseDirectory from '../components/_part_base_directory_for_filesystem.mdx'
+
+<TipInferredDataConnectorOverview />
+
+<PartNameTheDataConnector data_connector_name="name_of_my_inferred_data_connector" />
+
+At this point, your configuration should look like:
+
+```python name="spark Data Source configuration up to adding an empty inferred data connector"
+```
+
+<PartDataConnectorKeysOverview data_connector_type="InferredAssetFilesystemDataConnector" data_connector_name="name_of_my_inferred_data_connector" runtime={false} batch_spec_passthrough={true} glob_directive={true} />
+
+For this example, you will be using the `InferredAssetFilesystemDataConnector` as your `class_name`.  This is a subclass of the `InferredAssetDataConnector` that is specialized to support filesystem Execution Engines, such as the `SparkDFExecutionEngine`.  This key/value entry will therefore look like:
+
+```python name="inferred data connector define class_name as InferredAssetFilesystemDataConnector"
+```
+
+<TipCustomDataConnectorModuleName />
+
+<PartFilesystemBaseDirectory />
+
+With these values added, along with blank dictionary for `default_regex` (we will define it in the next step) and `batch_spec_passthrough`, your full configuration should now look like:
+
+```python name="inferred spark datasource_config up to adding empty default_regex and batch_spec_passthrough dictionaries"
+```
+:::info Optional parameter: `glob_directive`
+
+<PartGlobDirectiveDetails />
+
+:::

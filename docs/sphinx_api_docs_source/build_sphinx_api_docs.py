@@ -30,13 +30,15 @@ from typing import Dict
 from urllib.parse import urlparse
 
 import invoke
-from bs4 import BeautifulSoup
 
-from scripts.check_public_api_docstrings import (
+from docs.sphinx_api_docs_source.check_public_api_docstrings import (
     get_public_api_definitions,
     get_public_api_module_level_function_definitions,
 )
-from scripts.public_api_report import Definition, get_shortest_dotted_path
+from docs.sphinx_api_docs_source.public_api_report import (
+    Definition,
+    get_shortest_dotted_path,
+)
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
@@ -65,21 +67,29 @@ class SidebarEntry:
 class SphinxInvokeDocsBuilder:
     """Utility class to support building API docs using Sphinx and Invoke."""
 
-    def __init__(self, ctx: invoke.context.Context, base_path: pathlib.Path) -> None:
+    def __init__(
+        self,
+        ctx: invoke.context.Context,
+        api_docs_source_path: pathlib.Path,
+        repo_root: pathlib.Path,
+    ) -> None:
         """Creates SphinxInvokeDocsBuilder instance.
 
         Args:
             ctx: Invoke context for use in running commands.
-            base_path: Path command is run in for use in determining relative paths.
+            api_docs_source_path: Path to the api docs source. Where sphinx-build is run, should include conf.py.
+            repo_root: Path to the repo root.
         """
         self.ctx = ctx
-        self.base_path = base_path
-        self.docs_path = base_path.parent
-        self.repo_root = self.docs_path.parent
+        self.api_docs_source_path = api_docs_source_path
+        self.docs_path = api_docs_source_path.parent
+        self.repo_root = repo_root
         self.gx_path = self.repo_root / "great_expectations"
 
         self.temp_sphinx_html_dir = self.repo_root / "temp_sphinx_api_docs_build_dir"
-        self.docusaurus_api_docs_path = self.docs_path / pathlib.Path("reference/api")
+        self.docusaurus_api_docs_path = self.docs_path / pathlib.Path(
+            "docusaurus/docs/reference/api"
+        )
         self.definitions: Dict[str, Definition] = {}
         self.sidebar_entries: Dict[str, SidebarEntry] = {}
         self.written_class_md_stubs: dict[
@@ -100,17 +110,18 @@ class SphinxInvokeDocsBuilder:
 
         self._build_html_api_docs_in_temp_folder()
 
+        logger.info("Creating mdx files from HTML for serving with docusaurus.")
         self._create_mdx_files_for_docusaurus_from_sphinx_html()
+        logger.info("Created mdx files for serving with docusaurus.")
 
         self._remove_md_stubs()
 
         self._remove_temp_html()
 
-    @staticmethod
-    def exit_with_error_if_docs_dependencies_are_not_installed() -> None:
+    def exit_with_error_if_docs_dependencies_are_not_installed(self) -> None:
         """Checks and report which dependencies are not installed."""
 
-        module_dependencies = ("sphinx", "myst_parser", "pydata_sphinx_theme")
+        module_dependencies = ("sphinx", "myst_parser", "pydata_sphinx_theme", "bs4")
         modules_not_installed = []
 
         for module_name in module_dependencies:
@@ -121,20 +132,19 @@ class SphinxInvokeDocsBuilder:
 
         if modules_not_installed:
             raise invoke.Exit(
-                f"Please make sure to install missing docs dependencies: {', '.join(modules_not_installed)} by running pip install -r docs/sphinx_api_docs_source/requirements-dev-api-docs.txt",
+                f"Please make sure to install missing docs dependencies: {', '.join(modules_not_installed)} by running pip install -r {self.api_docs_source_path / 'requirements-dev-api-docs.txt'}",
                 code=1,
             )
-
         logger.debug("Dependencies installed, proceeding.")
 
     def _build_html_api_docs_in_temp_folder(self):
         """Builds html api documentation in temporary folder."""
 
-        sphinx_api_docs_source_dir = pathlib.Path.cwd()
+        sphinx_api_docs_source_dir = self.api_docs_source_path
         if sphinx_api_docs_source_dir not in sys.path:
             sys.path.append(str(sphinx_api_docs_source_dir))
 
-        cmd = f"sphinx-build -M html ./ {self.temp_sphinx_html_dir} -E"
+        cmd = f"sphinx-build -M html {self.api_docs_source_path} {self.temp_sphinx_html_dir} -E"
         self.ctx.run(cmd, echo=True, pty=True)
         logger.debug("Raw Sphinx HTML generated.")
 
@@ -155,9 +165,8 @@ class SphinxInvokeDocsBuilder:
         # Read the generated html and process the content for conversion to mdx
         # Write out to .mdx file using the relative file directory structure
         for html_file_path in self._get_generated_html_file_paths():
-            logger.info(f"Processing: {str(html_file_path.absolute())}")
+            logger.debug(f"Processing: {str(html_file_path.absolute())}")
             with open(html_file_path.absolute()) as f:
-
                 html_file_contents = f.read()
                 doc_str = self._parse_and_process_html_to_mdx(
                     html_file_path, html_file_contents
@@ -168,11 +177,9 @@ class SphinxInvokeDocsBuilder:
                     sidebar_entry=self._get_sidebar_entry(html_file_path=html_file_path)
                 )
                 output_path.parent.mkdir(parents=True, exist_ok=True)
-                logger.info(f"Writing out mdx file: {str(output_path.absolute())}")
+                logger.debug(f"Writing out mdx file: {str(output_path.absolute())}")
                 with open(output_path, "w") as fout:
                     fout.write(doc_str)
-
-        logger.info("Created mdx files for serving with docusaurus.")
 
     def _get_generated_html_file_paths(self):
         """Collect html file paths from Sphinx-generated html, skipping known index paths."""
@@ -200,6 +207,10 @@ class SphinxInvokeDocsBuilder:
         Returns:
             Content suitable for use in a docusaurus mdx file.
         """
+        from bs4 import (
+            BeautifulSoup,
+        )  # Importing here since it is not a library requirement
+
         soup = BeautifulSoup(html_file_contents, "html.parser")
 
         # Retrieve and remove the title (it will also be autogenerated by docusaurus)
@@ -401,7 +412,7 @@ class SphinxInvokeDocsBuilder:
 
     def _write_stub(self, stub: str, path: pathlib.Path) -> None:
         """Write the markdown stub file with appropriate filename."""
-        filepath = self.base_path / path
+        filepath = self.api_docs_source_path / path
         filepath.parent.mkdir(parents=True, exist_ok=True)
         with filepath.open("w") as f:
             f.write(stub)
@@ -412,7 +423,6 @@ class SphinxInvokeDocsBuilder:
         definitions = get_public_api_module_level_function_definitions()
 
         for definition in definitions:
-
             self.definitions[definition.name] = definition
 
             sidebar_entry = SidebarEntry(
@@ -487,7 +497,13 @@ class SphinxInvokeDocsBuilder:
         dotted_import = get_shortest_dotted_path(
             definition=definition, repo_root_path=self.repo_root
         )
-        return f"""# {class_name}
+        return f"""```{{eval-rst}}
+
+:orphan:
+
+```
+
+# {class_name}
 
 ```{{eval-rst}}
 .. autoclass:: {dotted_import}
@@ -506,12 +522,19 @@ class SphinxInvokeDocsBuilder:
         dotted_path_prefix = self._get_dotted_path_prefix(definition=definition)
         file_name = dotted_path_prefix.split(".")[-1]
 
-        return f"""# {file_name}
+        return f"""```{{eval-rst}}
+
+:orphan:
+
+```
+
+# {file_name}
 
 ```{{eval-rst}}
 .. automodule:: {dotted_path_prefix}
    :members:
    :inherited-members:
+   :noindex:
 
 ```
 """
@@ -520,11 +543,11 @@ class SphinxInvokeDocsBuilder:
         """Remove all markdown stub files."""
 
         excluded_files: tuple[pathlib.Path, ...] = (
-            self.base_path / "index.md",
-            self.base_path / "README.md",
+            self.api_docs_source_path / "index.md",
+            self.api_docs_source_path / "README.md",
         )
 
-        all_files: tuple[pathlib.Path] = tuple(self.base_path.glob("*.md"))
+        all_files: tuple[pathlib.Path] = tuple(self.api_docs_source_path.glob("*.md"))
 
         for file in all_files:
             if file not in excluded_files:

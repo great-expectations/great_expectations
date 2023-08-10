@@ -1,23 +1,22 @@
-from typing import Dict, List, Optional, Union
+from __future__ import annotations
 
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
+
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
     ConfiguredAssetSqlDataConnector,
 )
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import deep_filter_properties_iterable
 
-try:
-    import sqlalchemy as sa
-    from sqlalchemy.engine import Engine
-    from sqlalchemy.engine.reflection import Inspector
-    from sqlalchemy.exc import OperationalError
-except ImportError:
-    sa = None
-    Engine = None
-    Inspector = None
-    OperationalError = None
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import (
+        SqlAlchemyExecutionEngine,
+    )
 
 
 @public_api
@@ -53,11 +52,11 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
-        execution_engine: Optional[ExecutionEngine] = None,
+        execution_engine: SqlAlchemyExecutionEngine,
         data_asset_name_prefix: str = "",
         data_asset_name_suffix: str = "",
         include_schema_name: bool = False,
@@ -163,7 +162,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                     data_asset_name=data_asset_name,
                     data_asset_config=data_asset_config,
                 )
-            except OperationalError as e:
+            except sqlalchemy.OperationalError as e:
                 # If it doesn't work, then...
                 if self._skip_inapplicable_tables:
                     # No harm done. Just don't include this table in the list of assets.
@@ -178,7 +177,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             introspected_assets[data_asset_name] = data_asset_config
             self.add_data_asset(name=table_name, config=data_asset_config)
 
-    def _introspect_db(  # noqa: C901 - 16
+    def _introspect_db(  # noqa: C901, PLR0912, PLR0913
         self,
         schema_name: Union[str, None] = None,
         ignore_information_schemas_and_system_tables: bool = True,
@@ -198,8 +197,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         if system_tables is None:
             system_tables = ["sqlite_master"]  # sqlite
 
-        engine: Engine = self.execution_engine.engine
-        inspector: Inspector = sa.inspect(engine)
+        engine: sqlalchemy.Engine = self.execution_engine.engine
+        inspector: sqlalchemy.Inspector = sa.inspect(engine)
 
         selected_schema_name = schema_name
 
@@ -259,8 +258,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         try:
             if engine.dialect.name.lower() == GXSqlDialect.REDSHIFT:
                 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
-                result = engine.execute(
-                    "select schemaname, tablename from svv_external_tables"
+                result = self.execution_engine.execute_query(
+                    sa.text("select schemaname, tablename from svv_external_tables")
                 ).fetchall()
                 for row in result:
                     tables.append(

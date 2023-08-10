@@ -30,7 +30,6 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesCoordinatesDegreeDecimal(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.coordinates.degree_decimal"
 

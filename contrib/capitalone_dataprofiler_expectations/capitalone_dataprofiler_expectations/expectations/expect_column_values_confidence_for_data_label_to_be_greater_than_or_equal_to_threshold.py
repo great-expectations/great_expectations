@@ -4,7 +4,6 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
 
-import json
 from typing import Any
 
 import dataprofiler as dp
@@ -15,11 +14,7 @@ import tensorflow as tf
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -76,7 +71,8 @@ class ColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualToThreshold(
 class ExpectColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualToThreshold(
     ColumnMapExpectation
 ):
-    """
+    """Expect the column values to have a DataProfiler confidence threshold greater than or equal to the specified threshold for the data label.
+
     This function builds upon the custom column map expectations of Great Expectations. This function asks the question a yes/no question of each row in the user-specified column; namely, does the confidence threshold provided by the DataProfiler model exceed the user-specified threshold.
 
     Args:

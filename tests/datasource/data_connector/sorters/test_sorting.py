@@ -13,6 +13,9 @@ from great_expectations.datasource.data_connector.sorter import (
     Sorter,
 )
 
+# module level markers
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture()
 def example_batch_def_list():
@@ -164,7 +167,6 @@ def example_hierarchical_batch_def_list():
     return [a, b, c, d, e, f, g, h, i, j]
 
 
-@pytest.mark.integration
 def test_create_three_batch_definitions_sort_lexicographically():
     a = BatchDefinition(
         datasource_name="A",
@@ -202,7 +204,6 @@ def test_create_three_batch_definitions_sort_lexicographically():
     assert sorted_batch_list == [a, b, c]
 
 
-@pytest.mark.integration
 def test_create_three_batch_definitions_sort_numerically():
     one = BatchDefinition(
         datasource_name="A",
@@ -245,7 +246,6 @@ def test_create_three_batch_definitions_sort_numerically():
         sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
 
 
-@pytest.mark.integration
 def test_date_time():
     first = BatchDefinition(
         datasource_name="A",
@@ -277,7 +277,9 @@ def test_date_time():
 
     with pytest.raises(gx_exceptions.SorterError):
         # numeric date_time_format
-        i_dont_work = DateTimeSorter(name="date", datetime_format=12345, orderby="desc")
+        i_dont_work = DateTimeSorter(  # noqa: F841
+            name="date", datetime_format=12345, orderby="desc"
+        )
 
     my_date_is_not_a_string = BatchDefinition(
         datasource_name="C",
@@ -293,7 +295,6 @@ def test_date_time():
         sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
 
 
-@pytest.mark.integration
 def test_custom_list(periodic_table_of_elements):
     Hydrogen = BatchDefinition(
         datasource_name="A",
@@ -328,7 +329,6 @@ def test_custom_list(periodic_table_of_elements):
     assert sorted_batch_list == [Hydrogen, Helium, Lithium]
 
 
-@pytest.mark.integration
 def test_dictionary(example_hierarchical_batch_def_list):
     [a, b, c, d, e, f, g, h, i, j] = example_hierarchical_batch_def_list
     batch_list = [a, b, c, d, e, f, g, h, i, j]
@@ -387,7 +387,6 @@ def test_dictionary(example_hierarchical_batch_def_list):
     assert sorted_batch_list == [c, a, f, j, e, i, g, b, h, d]
 
 
-@pytest.mark.integration
 def test_example_file_list_sorters(example_batch_def_list):
     [a, b, c, d, e, f, g, h, i, j] = example_batch_def_list
     batch_list = [a, b, c, d, e, f, g, h, i, j]

@@ -4,18 +4,23 @@ from typing import List, Union
 
 import pytest
 
-from scripts.public_api_report import (
+from docs.sphinx_api_docs_source.include_exclude_definition import (
+    IncludeExcludeDefinition,
+)
+from docs.sphinx_api_docs_source.public_api_report import (
     CodeParser,
     CodeReferenceFilter,
     Definition,
     DocsExampleParser,
     FileContents,
-    IncludeExcludeDefinition,
     PublicAPIChecker,
     PublicAPIReport,
     _get_import_names,
     get_shortest_dotted_path,
+    parse_docs_contents_for_class_names,
 )
+
+pytestmark = pytest.mark.filesystem
 
 
 @pytest.fixture
@@ -51,6 +56,20 @@ example_public_api_module_level_function()
 epub = ExamplePublicAPIClass()
 
 assert d
+
+some_yaml_contents = \"\"\"
+name: {datasource_name}
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    port: '{port}'
+    username: {username}
+    password: {password}
+    database: {database}
+\"\"\"
+
 """
 
 
@@ -120,6 +139,33 @@ class ExamplePublicAPIClass:
 
 
 @pytest.fixture
+def sample_markdown_doc_with_yaml() -> str:
+    return """# Title
+
+Content.
+
+More content.
+
+Some yaml:
+
+yaml_contents = \"\"\"
+name: {datasource_name}
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    port: '{port}'
+    username: {username}
+    password: {password}
+    database: {database}
+\"\"\"
+
+End of content.
+"""
+
+
+@pytest.fixture
 def repo_root() -> pathlib.Path:
     return pathlib.Path("/some/absolute/path/repo_root/")
 
@@ -171,6 +217,16 @@ def sample_with_definitions_file_contents(
 
 
 @pytest.fixture
+def sample_markdown_doc_with_yaml_file_contents(
+    sample_markdown_doc_with_yaml: str,
+) -> FileContents:
+    return FileContents(
+        filepath=pathlib.Path("some/random/filepath/markdown.md"),
+        contents=sample_markdown_doc_with_yaml,
+    )
+
+
+@pytest.fixture
 def docs_example_parser(
     sample_docs_example_file_contents: FileContents,
 ) -> DocsExampleParser:
@@ -180,14 +236,19 @@ def docs_example_parser(
     return docs_example_parser
 
 
+@pytest.fixture
+def empty_docs_example_parser(
+    sample_docs_example_file_contents: FileContents,
+) -> DocsExampleParser:
+    docs_example_parser = DocsExampleParser(file_contents=set())
+    return docs_example_parser
+
+
 class TestDocExampleParser:
-    @pytest.mark.unit
     def test_instantiate(self, docs_example_parser: DocsExampleParser):
         assert isinstance(docs_example_parser, DocsExampleParser)
 
-    @pytest.mark.unit
     def test_retrieve_all_usages_in_files(self, docs_example_parser: DocsExampleParser):
-
         usages = docs_example_parser.get_names_from_usage_in_docs_examples()
         assert usages == {
             "ExampleClass",
@@ -202,6 +263,8 @@ class TestDocExampleParser:
             "example_public_classmethod",
             "example_public_staticmethod",
             "example_staticmethod",
+            "Datasource",
+            "SqlAlchemyExecutionEngine",
         }
 
 
@@ -212,11 +275,9 @@ def code_parser(sample_with_definitions_file_contents: FileContents) -> CodePars
 
 
 class TestCodeParser:
-    @pytest.mark.unit
     def test_instantiate(self, code_parser: CodeParser):
         assert isinstance(code_parser, CodeParser)
 
-    @pytest.mark.unit
     def test_get_all_class_method_and_function_names(self, code_parser: CodeParser):
         names = code_parser.get_all_class_method_and_function_names()
         assert names == {
@@ -238,7 +299,6 @@ class TestCodeParser:
             "example_staticmethod",
         }
 
-    @pytest.mark.unit
     def test_get_all_class_method_and_function_definitions(
         self, code_parser: CodeParser
     ):
@@ -268,6 +328,14 @@ class TestCodeParser:
                 "great_expectations/sample_with_definitions_python_file_string.py"
             )
         }
+
+
+def test_parse_docs_contents_for_class_names(
+    sample_markdown_doc_with_yaml_file_contents: FileContents,
+):
+    assert parse_docs_contents_for_class_names(
+        file_contents={sample_markdown_doc_with_yaml_file_contents}
+    ) == {"Datasource", "SqlAlchemyExecutionEngine"}
 
 
 def test_get_shortest_dotted_path(monkeypatch):
@@ -339,11 +407,9 @@ def public_api_checker(
 
 
 class TestPublicAPIChecker:
-    @pytest.mark.unit
     def test_instantiate(self, public_api_checker: PublicAPIChecker):
         assert isinstance(public_api_checker, PublicAPIChecker)
 
-    @pytest.mark.integration
     def test_get_all_public_api_definitions(self, public_api_checker: PublicAPIChecker):
         observed = public_api_checker.get_all_public_api_definitions()
         assert len(observed) == 6
@@ -368,7 +434,7 @@ class TestPublicAPIChecker:
         definitions = []
         for node in ast.walk(tree):
             if (
-                isinstance(node, ast.ClassDef)
+                isinstance(node, ast.ClassDef)  # noqa: PLR1701
                 or isinstance(node, ast.FunctionDef)
                 or isinstance(node, ast.AsyncFunctionDef)
             ):
@@ -376,7 +442,6 @@ class TestPublicAPIChecker:
 
         return definitions
 
-    @pytest.mark.integration
     def test_is_definition_marked_public_api_yes(
         self, public_api_checker: PublicAPIChecker
     ):
@@ -424,7 +489,6 @@ class ExamplePublicAPIClass:
             for definition in definitions
         )
 
-    @pytest.mark.integration
     def test_is_definition_marked_public_api_no(
         self, public_api_checker: PublicAPIChecker
     ):
@@ -545,6 +609,22 @@ def code_reference_filter_with_exclude_by_file(
                 ),
             )
         ],
+    )
+
+
+@pytest.fixture
+def code_reference_filter_with_references_from_docs_content(
+    repo_root: pathlib.Path,
+    empty_docs_example_parser: DocsExampleParser,
+    code_parser: CodeParser,
+    public_api_checker: PublicAPIChecker,
+) -> CodeReferenceFilter:
+    return CodeReferenceFilter(
+        repo_root=repo_root,
+        docs_example_parser=empty_docs_example_parser,
+        code_parser=code_parser,
+        public_api_checker=public_api_checker,
+        references_from_docs_content={"ExampleClass", "ExamplePublicAPIClass"},
     )
 
 
@@ -684,13 +764,11 @@ def code_reference_filter_with_include_by_file_and_name_not_used_in_docs_example
 
 
 class TestCodeReferenceFilter:
-    @pytest.mark.unit
     def test_instantiate(self, code_reference_filter: CodeReferenceFilter):
         assert isinstance(code_reference_filter, CodeReferenceFilter)
         assert code_reference_filter.excludes
         assert code_reference_filter.includes
 
-    @pytest.mark.integration
     def test_instantiate_with_non_default_include_exclude(
         self,
         code_reference_filter_with_non_default_include_exclude: CodeReferenceFilter,
@@ -702,7 +780,6 @@ class TestCodeReferenceFilter:
         assert len(code_reference_filter.excludes) == 1
         assert len(code_reference_filter.includes) == 1
 
-    @pytest.mark.integration
     def test_filter_definitions_no_include_exclude(
         self, code_reference_filter_with_no_include_exclude: CodeReferenceFilter
     ):
@@ -725,7 +802,21 @@ class TestCodeReferenceFilter:
             )
         }
 
-    @pytest.mark.integration
+    def test_filter_definitions_with_references_from_docs_content(
+        self,
+        code_reference_filter_with_references_from_docs_content: CodeReferenceFilter,
+    ):
+        observed = (
+            code_reference_filter_with_references_from_docs_content.filter_definitions()
+        )
+        assert len(observed) == 1
+        assert {d.name for d in observed} == {"ExampleClass"}
+        assert {d.filepath for d in observed} == {
+            pathlib.Path(
+                "great_expectations/sample_with_definitions_python_file_string.py"
+            )
+        }
+
     def test_filter_definitions_exclude_by_file(
         self, code_reference_filter_with_exclude_by_file: CodeReferenceFilter
     ):
@@ -734,7 +825,6 @@ class TestCodeReferenceFilter:
         assert {d.name for d in observed} == set()
         assert {d.filepath for d in observed} == set()
 
-    @pytest.mark.integration
     def test_filter_definitions_exclude_by_file_and_name(
         self, code_reference_filter_with_exclude_by_file_and_name: CodeReferenceFilter
     ):
@@ -754,7 +844,6 @@ class TestCodeReferenceFilter:
             )
         }
 
-    @pytest.mark.integration
     def test_filter_definitions_include_by_file_and_name_already_included(
         self,
         code_reference_filter_with_include_by_file_and_name_already_included: CodeReferenceFilter,
@@ -785,7 +874,6 @@ class TestCodeReferenceFilter:
             )
         }
 
-    @pytest.mark.integration
     def test_filter_definitions_include_by_file_and_name_already_excluded(
         self,
         code_reference_filter_with_include_by_file_and_name_already_excluded: CodeReferenceFilter,
@@ -810,7 +898,6 @@ class TestCodeReferenceFilter:
             )
         }
 
-    @pytest.mark.integration
     def test_filter_definitions_include_by_file_and_name_already_excluded_not_used_in_docs_example(
         self,
         code_reference_filter_with_include_by_file_and_name_not_used_in_docs_example_exclude_file: CodeReferenceFilter,
@@ -857,11 +944,9 @@ def public_api_report_filter_out_file(
 
 
 class TestPublicAPIReport:
-    @pytest.mark.unit
     def test_instantiate(self, public_api_report: PublicAPIReport):
         assert isinstance(public_api_report, PublicAPIReport)
 
-    @pytest.mark.integration
     def test_generate_printable_definitions(self, public_api_report: PublicAPIReport):
         expected: List[str] = [
             "File: great_expectations/sample_with_definitions_python_file_string.py Name: "
@@ -880,7 +965,6 @@ class TestPublicAPIReport:
         observed = public_api_report.generate_printable_definitions()
         assert observed == expected
 
-    @pytest.mark.integration
     def test_generate_printable_definitions_exclude_by_file(
         self, public_api_report_filter_out_file: PublicAPIReport
     ):
@@ -890,26 +974,22 @@ class TestPublicAPIReport:
 
 
 class TestIncludeExcludeDefinition:
-    @pytest.mark.unit
     def test_instantiate_name_and_filepath(self):
         definition = IncludeExcludeDefinition(
             reason="reason", name="name", filepath=pathlib.Path("filepath")
         )
         assert isinstance(definition, IncludeExcludeDefinition)
 
-    @pytest.mark.unit
     def test_instantiate_filepath_only(self):
         definition = IncludeExcludeDefinition(
             reason="reason", filepath=pathlib.Path("filepath")
         )
         assert isinstance(definition, IncludeExcludeDefinition)
 
-    @pytest.mark.unit
     def test_instantiate_name_and_filepath_no_reason(self):
         with pytest.raises(TypeError):
             IncludeExcludeDefinition(name="name", filepath=pathlib.Path("filepath"))
 
-    @pytest.mark.unit
     def test_instantiate_name_only(self):
         with pytest.raises(ValueError) as exc:
             IncludeExcludeDefinition(reason="reason", name="name")
@@ -918,7 +998,6 @@ class TestIncludeExcludeDefinition:
             "You must provide a filepath if also providing a name" in exc.value.args[0]
         )
 
-    @pytest.mark.unit
     def test_instantiate_reason_only(self):
         with pytest.raises(ValueError) as exc:
             IncludeExcludeDefinition(reason="reason")

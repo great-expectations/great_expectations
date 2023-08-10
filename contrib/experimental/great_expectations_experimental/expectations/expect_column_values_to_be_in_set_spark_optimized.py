@@ -1,29 +1,18 @@
-import warnings
 from typing import Dict, Optional
 
-import numpy as np
-
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.exceptions.exceptions import MetricResolutionError
 from great_expectations.execution_engine import ExecutionEngine, SparkDFExecutionEngine
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import ColumnAggregateMetricProvider
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
-from great_expectations.expectations.metrics.map_metric_provider import (
-    ColumnMapMetricProvider,
-    column_condition_partial,
-    metric_partial,
-)
 from great_expectations.expectations.metrics.metric_provider import metric_value
 
 
 # This class defines a Metric to support your Expectation.
-# For most ColumnExpectations, the main business logic for calculation will live in this class.
+# For most ColumnAggregateExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesInSetSparkOptimized(ColumnAggregateMetricProvider):
-
     metric_name = "column_values.in_set.spark_optimized"
     value_keys = (
         "column",
@@ -68,7 +57,7 @@ class ColumnValuesInSetSparkOptimized(ColumnAggregateMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToBeInSetSparkOptimized(ColumnExpectation):
+class ExpectColumnValuesToBeInSetSparkOptimized(ColumnAggregateExpectation):
     """Expect each column value to be in a given set; optimized using **join** for spark backends.
 
     Args:

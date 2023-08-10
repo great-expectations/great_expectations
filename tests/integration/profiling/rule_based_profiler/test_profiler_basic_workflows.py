@@ -1,7 +1,6 @@
 from typing import List
 
 import pytest
-from ruamel import yaml
 
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain import (
@@ -10,6 +9,7 @@ from great_expectations.core.domain import (
 )
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
@@ -25,6 +25,8 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 )
 from great_expectations.rule_based_profiler.rule.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+
+yaml = YAMLHandler()
 
 
 @pytest.fixture
@@ -69,6 +71,7 @@ def data_context_with_taxi_data(empty_data_context):
     return context
 
 
+@pytest.mark.big
 def test_domain_builder(data_context_with_taxi_data):
     """
     What does this test and why?
@@ -145,6 +148,7 @@ def test_domain_builder(data_context_with_taxi_data):
     ]
 
 
+@pytest.mark.big
 def test_add_rule_and_run_profiler(data_context_with_taxi_data):
     """
     What does this test and why?
@@ -191,13 +195,14 @@ def test_add_rule_and_run_profiler(data_context_with_taxi_data):
     assert len(expectation_configurations) == 4
 
 
+@pytest.mark.big
 def test_profiler_parameter_builder_added(data_context_with_taxi_data):
     """
     What does this test and why?
 
     This test now adds a simple ParameterBuilder to our Rule. More specifically,
     we use a MetricMultiBatchParameterBuilder to pass in the min_value parameter to
-    expect_column_values_to_be_greater_than.
+    "expect_column_values_to_be_between".
     """
     context: DataContext = data_context_with_taxi_data
     batch_request: BatchRequest = BatchRequest(
@@ -221,7 +226,7 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
     )
     config_builder: DefaultExpectationConfigurationBuilder = (
         DefaultExpectationConfigurationBuilder(
-            expectation_type="expect_column_values_to_be_greater_than",
+            expectation_type="expect_column_values_to_be_between",
             value="$parameter.my_column_min.value[-1]",
             column="$domain.domain_kwargs.column",
         )
@@ -246,6 +251,7 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
     assert len(expectation_configurations) == 4
 
 
+@pytest.mark.big
 def test_profiler_save_and_load(data_context_with_taxi_data):
     """
     What does this test and why?
@@ -271,7 +277,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
     )
     config_builder: DefaultExpectationConfigurationBuilder = (
         DefaultExpectationConfigurationBuilder(
-            expectation_type="expect_column_values_to_be_greater_than",
+            expectation_type="expect_column_values_to_be_between",
             value="$parameter.my_column_min.value[-1]",
             column="$domain.domain_kwargs.column",
         )
@@ -345,7 +351,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                     {
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                         "class_name": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_values_to_be_greater_than",
+                        "expectation_type": "expect_column_values_to_be_between",
                         "meta": {},
                         "column": "$domain.domain_kwargs.column",
                         "validation_parameter_builder_configs": None,

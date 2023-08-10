@@ -2,6 +2,8 @@ from typing import Optional
 
 import pandas as pd
 
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypeSuffixes,
@@ -12,7 +14,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,

@@ -14,7 +14,8 @@ from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     MulticolumnMapExpectation,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa, sparktypes
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
     multicolumn_condition_partial,
@@ -68,6 +69,7 @@ class ExpectMulticolumnValuesToBeMultiplesOfThree(MulticolumnMapExpectation):
                 "col_c": [1, 5, 6, 27, 3],
                 "col_d": [-2, 3, 21, 0, 1],
             },
+            "only_for": ["pandas", "sqlite", "postgresql"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -86,16 +88,6 @@ class ExpectMulticolumnValuesToBeMultiplesOfThree(MulticolumnMapExpectation):
                     "out": {
                         "success": False,
                     },
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite", "postgresql"],
                 },
             ],
         }

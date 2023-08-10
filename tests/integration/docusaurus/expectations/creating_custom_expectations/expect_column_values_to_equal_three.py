@@ -18,7 +18,7 @@ from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.import_manager import F
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.expectations.metrics.metric_provider import metric_partial
 from great_expectations.render import CollapseContent, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
