@@ -161,6 +161,7 @@ def test_construct_csv_asset_directly():
     m1 = asset.batching_regex.match("alex_20200819_1300.csv")
     assert m1 is not None
 
+
 @pytest.mark.aws_creds
 def test_invalid_connect_options(pandas_s3_datasource: PandasS3Datasource):
     with pytest.raises(pydantic.ValidationError) as exc_info:
