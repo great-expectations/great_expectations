@@ -42,7 +42,7 @@ You can also render your Data Docs outside a Checkpoint by utilizing the `build_
 
 Unlike other Stores, Data Docs stores are configured in the `store_backend` section under `data_doc_sites` in the `great_expectations.yml` config file.  For detailed information on how to configure a Data Docs Store for a given backend, please see the corresponding how-to guide:
 
-- [How to host and share Data Docs on a filesystem](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.md)
+- [How to host and share Data Docs on a filesystem](../guides/setup/configuring_data_docs/host_and_share_data_docs.md)
 - [How to host and share Data Docs on Azure Blob Storage](../guides/setup/configuring_data_docs/host_and_share_data_docs.md)
 - [How to host and share Data Docs on GCS](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md)
 - [How to host and share Data Docs on Amazon S3](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3.md)

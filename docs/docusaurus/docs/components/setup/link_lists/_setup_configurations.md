@@ -58,9 +58,9 @@ While some source data systems provide their own means of configuring credential
 
 </summary>
 
-- [How to host and share Data Docs on Amazon S3](/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3)
+- [How to host and share Data Docs on Amazon S3](/docs/guides/setup/configuring_data_docs/host_and_share_data_docs)
 - [How to host and share Data Docs on Azure Blob Storage](/docs/guides/setup/configuring_data_docs/host_and_share_data_docs)
-- [How to host and share Data Docs on GCS](/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs)
-- [How to host and share Data Docs on a filesystem](/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem)
+- [How to host and share Data Docs on GCS](/docs/guides/setup/configuring_data_docs/host_and_share_data_docs)
+- [How to host and share Data Docs on a filesystem](/docs/guides/setup/configuring_data_docs/host_and_share_data_docs)
 
 </details>
