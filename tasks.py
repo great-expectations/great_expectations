@@ -831,7 +831,6 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         ),
     ),
     "docs-spark": TestDependencies(
-        # these installs are handled by the CI
         requirement_files=(
             "reqs/requirements-dev-test.txt",
             "reqs/requirements-dev-spark.txt",
