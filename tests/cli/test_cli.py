@@ -14,7 +14,7 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 yaml = YAMLHandler()
 
 
-pytestmark = [pytest.mark.cli]
+pytestmark = pytest.mark.cli
 
 
 @pytest.mark.parametrize("invocation", [None, "--help"])
@@ -92,7 +92,9 @@ def test_cli_works_from_adjacent_directory_without_config_flag(
 ):
     """We don't care about the NOUN here just combinations of the config flag"""
     runner = CliRunner(mix_stderr=True)
-    monkeypatch.chdir(os.path.dirname(empty_data_context.root_directory))
+    monkeypatch.chdir(
+        os.path.dirname(empty_data_context.root_directory)  # noqa: PTH120
+    )
     result = runner.invoke(cli, "checkpoint list", catch_exceptions=False)
     assert result.exit_code == 0
     assert "No Checkpoints found" in result.output
@@ -461,7 +463,7 @@ def test_assume_yes_using_full_flag_using_checkpoint_delete(
     All versions of the --assume-yes flag (--assume-yes/--yes/-y) should behave the same.
     """
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     runner: CliRunner = CliRunner(mix_stderr=False)
     checkpoint_name: str = "my_v1_checkpoint"
     result: Result = runner.invoke(
@@ -533,7 +535,7 @@ def test_assume_yes_using_yes_flag_using_checkpoint_delete(
     All versions of the --assume-yes flag (--assume-yes/--yes/-y) should behave the same.
     """
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     runner: CliRunner = CliRunner(mix_stderr=False)
     checkpoint_name: str = "my_v1_checkpoint"
     result: Result = runner.invoke(
@@ -605,7 +607,7 @@ def test_assume_yes_using_y_flag_using_checkpoint_delete(
     All versions of the --assume-yes flag (--assume-yes/--yes/-y) should behave the same.
     """
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     runner: CliRunner = CliRunner(mix_stderr=False)
     checkpoint_name: str = "my_v1_checkpoint"
     result: Result = runner.invoke(
@@ -677,7 +679,7 @@ def test_using_assume_yes_flag_on_command_with_no_assume_yes_implementation(
     The --assume-yes flag should not cause issues when run with commands that do not implement any logic based on it.
     """
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
@@ -697,7 +699,7 @@ def test_using_assume_yes_flag_on_command_with_no_assume_yes_implementation(
         "my_simple_checkpoint_with_slack",
         "my_simple_template_checkpoint",
     ]
-    assert all([checkpoint_name in stdout for checkpoint_name in checkpoint_names_list])
+    assert all(checkpoint_name in stdout for checkpoint_name in checkpoint_names_list)
 
     expected_call_args_list = [
         mock.call(

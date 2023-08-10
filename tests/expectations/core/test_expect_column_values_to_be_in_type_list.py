@@ -9,7 +9,6 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.self_check.util import (
-    build_pandas_validator_with_data,
     build_sa_validator_with_data,
     get_test_validator_with_data,
 )
@@ -20,6 +19,8 @@ from great_expectations.util import build_in_memory_runtime_context, is_library_
     not (aws.sqlalchemy_athena and is_library_loadable(library_name="pyathena")),
     reason="pyathena is not installed",
 )
+@pytest.mark.athena
+@pytest.mark.external_sqldialect
 def test_expect_column_values_to_be_in_type_list_dialect_pyathena_string(sa):
     df = pd.DataFrame({"col": ["test_val1", "test_val2"]})
     validator = build_sa_validator_with_data(
@@ -68,6 +69,8 @@ def test_expect_column_values_to_be_in_type_list_dialect_pyathena_string(sa):
     not (aws.sqlalchemy_athena and is_library_loadable(library_name="pyathena")),
     reason="pyathena is not installed",
 )
+@pytest.mark.athena
+@pytest.mark.external_sqldialect
 def test_expect_column_values_to_be_in_type_list_dialect_pyathena_boolean(sa):
     df = pd.DataFrame({"col": [True, False]})
     validator = build_sa_validator_with_data(
@@ -112,6 +115,7 @@ def test_expect_column_values_to_be_in_type_list_dialect_pyathena_boolean(sa):
     )
 
 
+@pytest.mark.big
 def test_expect_column_values_to_be_in_type_list_nullable_int():
     from packaging.version import parse
 

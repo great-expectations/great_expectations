@@ -29,7 +29,7 @@ In this guide we will demonstrate the ways in which Batches can be organized in 
 <Prerequisites>
 
 - A working installation of Great Expectations
-- A Data Asset in a SQL-based Datasource
+- A Data Asset in a SQL-based Data Source
 
 </Prerequisites>
 
@@ -50,7 +50,7 @@ Please reference the appropriate one of these guides:
 <details>
 <summary>
 
-### If you still need to connect a Datasource to a SQL database...
+### If you still need to connect a Data Source to a SQL database...
 
 </summary>
 
@@ -63,7 +63,7 @@ Please reference the appropriate one of these guides:
 
 :::caution Datasources defined with the block-config method
 
-If you're using a Datasource that was created with the advanced block-config method, see [How to configure a SQL Datasource with the block-config method](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource).
+If you're using a Data Source that was created with the advanced block-config method, see [How to configure a SQL Data Source with the block-config method](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource).
 
 :::
 
@@ -73,11 +73,11 @@ If you're using a Datasource that was created with the advanced block-config met
 
 <ImportGxAndInstantiateADataContext />
 
-### 2. Retrieve a SQL Datasource and Data Asset
+### 2. Retrieve a SQL Data Source and Data Asset
 
-For this guide, we will use a previously defined SQL Datasource named `"my_datasource"` with a Table Data Asset called `"my_asset"` which points to a table with taxi data. 
+For this guide, we will use a previously defined SQL Data Source named `"my_datasource"` with a Table Data Asset called `"my_asset"` which points to a table with taxi data. 
 
-To retrieve this Datasource, we will supply the `get_datasource(...)` method of our Data Context with the name of the Datasource we wish to retrieve:
+To retrieve this Data Source, we will supply the `get_datasource(...)` method of our Data Context with the name of the Data Source we wish to retrieve:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_sqlite_datasource.py my_datasource"
 ```

@@ -50,9 +50,11 @@ class ColumnValueMissingDataAssistant(DataAssistant):
 
     ColumnValueMissingDataAssistant.run() Returns:
         ColumnValueMissingDataAssistantResult
+
+    WARNING: ColumnValueMissingDataAssistant is experimental and may change in future releases.
     """
 
-    __alias__: str = "_missingness"
+    __alias__: str = "missingness"
 
     def __init__(
         self,
@@ -91,14 +93,14 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             profiler_execution_time=data_assistant_result.profiler_execution_time,
             rule_domain_builder_execution_time=data_assistant_result.rule_domain_builder_execution_time,
             rule_execution_time=data_assistant_result.rule_execution_time,
+            rule_exception_tracebacks=data_assistant_result.rule_exception_tracebacks,
             metrics_by_domain=data_assistant_result.metrics_by_domain,
             expectation_configurations=data_assistant_result.expectation_configurations,
             citation=data_assistant_result.citation,
             _usage_statistics_handler=data_assistant_result._usage_statistics_handler,
         )
 
-    @staticmethod
-    def _build_column_value_missing_rule() -> Rule:
+    def _build_column_value_missing_rule(self) -> Rule:
         """
         This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for columns missingness.
         """
@@ -110,6 +112,8 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         # Step-3.2: Set up "UnexpectedCountStatisticsMultiBatchParameterBuilder" to compute "mostly" for emitting "ExpectationConfiguration" (based on "Domain" data).
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
         # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
+
+        is_multi_batch: bool = len(self._batches or []) > 1
 
         column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
             include_column_names=None,
@@ -170,12 +174,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             data_context=None,
         )
 
-        # TODO: <Alex>ALEX</Alex>
-        # mode = "auto"
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        mode = "single_batch"
-        # TODO: <Alex>ALEX</Alex>
+        mode = "multi_batch" if is_multi_batch else "single_batch"
 
         expectation_type = "expect_column_values_to_not_be_null"
 
@@ -195,11 +194,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
                 **column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.to_json_dict()
             ),
         ]
-        # TODO: <Alex>ALEX</Alex>
-        # ({column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}mostly > {VARIABLES_KEY}min_mostly))
-        # &
-        # ({column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}error_rate < {VARIABLES_KEY}max_error_rate))
-        # TODO: <Alex>ALEX</Alex>
+
         condition = f"""
         ({column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}single_batch_mode == True
         &
@@ -223,10 +218,10 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         map_metric_name = "column_values.null"
         evaluation_parameter_builder_configs = [
             ParameterBuilderConfig(
-                **total_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
+                **column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
             ),
             ParameterBuilderConfig(
-                **column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
+                **total_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
             ),
         ]
 
@@ -243,12 +238,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             data_context=None,
         )
 
-        # TODO: <Alex>ALEX</Alex>
-        # mode = "auto"
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        mode = "single_batch"
-        # TODO: <Alex>ALEX</Alex>
+        mode = "multi_batch" if is_multi_batch else "single_batch"
 
         expectation_type = "expect_column_values_to_be_null"
 
@@ -268,11 +258,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
                 **column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.to_json_dict()
             ),
         ]
-        # TODO: <Alex>ALEX</Alex>
-        # ({column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}mostly > {VARIABLES_KEY}min_mostly))
-        # &
-        # ({column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}error_rate < {VARIABLES_KEY}max_error_rate))
-        # TODO: <Alex>ALEX</Alex>
+
         condition = f"""\
         ({column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}single_batch_mode == True
         &

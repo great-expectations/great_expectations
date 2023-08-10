@@ -24,6 +24,9 @@ from pydantic import ValidationError
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
@@ -47,7 +50,7 @@ from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine, MockSaInspector
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-    from great_expectations.data_context import AbstractDataContext, FileDataContext
+    from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
@@ -636,6 +639,7 @@ def test_get_batch_list_from_batch_request_with_malformed_batch_request(
             asset.get_batch_list_from_batch_request(batch_request)
 
 
+@pytest.mark.unit
 def test_get_bad_batch_request(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
@@ -1038,12 +1042,16 @@ def test_test_connection_failures(
     get_schema_names.return_value = ["good_schema"]
     has_table = mocker.patch("tests.sqlalchemy_test_doubles.MockSaInspector.has_table")
     has_table.return_value = False
+    get_table_names = mocker.patch(
+        "tests.sqlalchemy_test_doubles.MockSaInspector.get_table_names"
+    )
+    get_table_names.return_value = ["good_table", "bad_table"]
 
     with pytest.raises(TestConnectionError):
         bad_configuration_datasource.test_connection()
 
 
-@pytest.mark.unit
+@pytest.mark.filesystem
 def test_query_data_asset(empty_data_context, create_source):
     query = "SELECT * FROM my_table"
 
@@ -1077,12 +1085,13 @@ def test_non_select_query_data_asset(create_source):
             source.add_query_asset(name="query_asset", query="* FROM my_table")
 
 
+@pytest.mark.filesystem
 def test_adding_splitter_persists_results(
     empty_data_context: FileDataContext,
     mock_test_connection,
 ):
     gx_yaml = pathlib.Path(
-        empty_data_context.root_directory, "great_expectations.yml"
+        empty_data_context.root_directory, FileDataContext.GX_YML
     ).resolve(strict=True)
 
     empty_data_context.sources.add_postgres(

@@ -43,7 +43,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
     RECOGNIZED_UNEXPECTED_RATIO_AGGREGATION_METHODS: set = {
         "unexpected_count_fraction_values",
         "single_batch",
-        "auto",
+        "multi_batch",
     }
 
     def __init__(  # noqa: PLR0913
@@ -86,6 +86,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
             unexpected_count_parameter_builder_name
         )
         self._mode = mode
+
         self._expectation_type = expectation_type
 
         if max_error_rate is None:
@@ -207,11 +208,8 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         if mode == "unexpected_count_fraction_values":
             result = unexpected_count_fraction_values
         else:
-            num_batches: int = len(total_count_values)
-            single_batch_mode: bool = num_batches == 1 or mode == "single_batch"
-
             result = {
-                "single_batch_mode": single_batch_mode,
+                "single_batch_mode": mode == "single_batch",
                 "unexpected_count_fraction_active_batch_value": unexpected_count_fraction_values[
                     -1
                 ],
@@ -219,14 +217,14 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
 
             mostly: np.float64
 
-            if single_batch_mode:
+            if mode == "single_batch":
                 unexpected_fraction: np.float64 = unexpected_count_fraction_values[-1]
                 expected_fraction: np.float64 = np.float64(1.0 - unexpected_fraction)
                 result["mostly"] = _standardize_mostly_for_single_batch(
                     self._expectation_type, expected_fraction
                 )
                 result["error_rate"] = np.float64(0.0)
-            else:
+            elif mode == "multi_batch":
                 # Obtain max_error_rate directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
                 max_error_rate: float = get_parameter_value_and_validate_return_type(
                     domain=domain,
@@ -269,22 +267,22 @@ def _standardize_mostly_for_single_batch(  # noqa: PLR0911
     Applies business logic to standardize "mostly" value for single-Batch case.
     """
     if expectation_type == "expect_column_values_to_be_null":
-        if mostly >= 1.0:  # noqa:  PLR0915
+        if mostly >= 1.0:  # noqa: PLR2004
             return np.float64(1.0)
 
-        if mostly >= 0.99:  # noqa:  PLR0915
+        if mostly >= 0.99:  # noqa: PLR2004
             return np.float64(0.99)
 
-        if mostly >= 0.975:  # noqa:  PLR0915
+        if mostly >= 0.975:  # noqa: PLR2004
             return np.float64(0.975)
 
         return mostly
 
     if expectation_type == "expect_column_values_to_not_be_null":
-        if mostly >= 1.0:  # noqa:  PLR0915
+        if mostly >= 1.0:  # noqa: PLR2004
             return np.float64(1.0)
 
-        if mostly >= 0.99:  # noqa:  PLR0915
+        if mostly >= 0.99:  # noqa: PLR2004
             return np.float64(0.99)
 
         # round down to nearest 0.025

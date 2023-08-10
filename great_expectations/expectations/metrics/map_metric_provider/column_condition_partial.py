@@ -30,7 +30,7 @@ from great_expectations.expectations.metrics.metric_provider import (
     metric_partial,
 )
 from great_expectations.expectations.metrics.util import (
-    get_dbms_compatible_column_names,
+    get_dbms_compatible_metric_domain_kwargs,
 )
 
 logger = logging.getLogger(__name__)
@@ -74,6 +74,10 @@ def column_condition_partial(  # noqa: C901, PLR0915
             )
 
         def wrapper(metric_fn: Callable):
+            assert (
+                partial_fn_type is not None
+            )  # mypy has trouble type narrowing with closures
+
             @metric_partial(
                 engine=engine,
                 partial_fn_type=partial_fn_type,
@@ -89,6 +93,11 @@ def column_condition_partial(  # noqa: C901, PLR0915
                 metrics: Dict[str, Any],
                 runtime_configuration: dict,
             ):
+                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    batch_columns_list=metrics["table.columns"],
+                )
+
                 (
                     df,
                     compute_domain_kwargs,
@@ -100,11 +109,6 @@ def column_condition_partial(  # noqa: C901, PLR0915
                 column_name: Union[
                     str, sqlalchemy.quoted_name
                 ] = accessor_domain_kwargs["column"]
-
-                column_name = get_dbms_compatible_column_names(
-                    column_names=column_name,
-                    batch_columns_list=metrics["table.columns"],
-                )
 
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", True)
@@ -143,6 +147,10 @@ def column_condition_partial(  # noqa: C901, PLR0915
             )
 
         def wrapper(metric_fn: Callable):
+            assert (
+                partial_fn_type is not None
+            )  # mypy has trouble type narrowing with closures
+
             @metric_partial(
                 engine=engine,
                 partial_fn_type=partial_fn_type,
@@ -158,6 +166,11 @@ def column_condition_partial(  # noqa: C901, PLR0915
                 metrics: Dict[str, Any],
                 runtime_configuration: dict,
             ):
+                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    batch_columns_list=metrics["table.columns"],
+                )
+
                 (
                     selectable,
                     compute_domain_kwargs,
@@ -169,11 +182,6 @@ def column_condition_partial(  # noqa: C901, PLR0915
                 column_name: Union[
                     str, sqlalchemy.quoted_name
                 ] = accessor_domain_kwargs["column"]
-
-                column_name = get_dbms_compatible_column_names(
-                    column_names=column_name,
-                    batch_columns_list=metrics["table.columns"],
-                )
 
                 sqlalchemy_engine: sqlalchemy.Engine = execution_engine.engine
 
@@ -245,6 +253,11 @@ def column_condition_partial(  # noqa: C901, PLR0915
                 metrics: Dict[str, Any],
                 runtime_configuration: dict,
             ):
+                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    batch_columns_list=metrics["table.columns"],
+                )
+
                 (
                     data,
                     compute_domain_kwargs,
@@ -256,11 +269,6 @@ def column_condition_partial(  # noqa: C901, PLR0915
                 column_name: Union[
                     str, sqlalchemy.quoted_name
                 ] = accessor_domain_kwargs["column"]
-
-                column_name = get_dbms_compatible_column_names(
-                    column_names=column_name,
-                    batch_columns_list=metrics["table.columns"],
-                )
 
                 column = data[column_name]
                 expected_condition = metric_fn(
@@ -283,8 +291,8 @@ def column_condition_partial(  # noqa: C901, PLR0915
                             )
                         )
                     unexpected_condition = ~expected_condition
-                else:
-                    if filter_column_isnull:  # noqa: PLR5501
+                else:  # noqa: PLR5501
+                    if filter_column_isnull:
                         unexpected_condition = column.isNotNull() & ~expected_condition
                     else:
                         unexpected_condition = ~expected_condition

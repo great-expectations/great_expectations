@@ -14,13 +14,9 @@ This guide will walk you through the process of creating a Custom `SetBasedColum
 
 <Prerequisites>
 
-- Completion of the [overview for creating Custom Expectations](./overview.md).
-
 </Prerequisites>
 
-## Steps
-
-### 1. Choose a name for your Expectation
+## Choose a name for your Expectation
 
 First, decide on a name for your own Expectation. By convention, all `ColumnMapExpectations`, including `SetBasedColumnMapExpectations`, start with `expect_column_values_`.
 
@@ -29,7 +25,7 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 - `ExpectColumnValuesToBeInSolfegeScaleSet`
 - `expect_column_values_to_be_in_solfege_scale_set`
 
-### 2. Copy and rename the template file
+## Copy and rename the template file
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
@@ -60,7 +56,7 @@ cp set_based_column_map_expectation_template.py /SOME_DIRECTORY/expect_column_va
   </div>
 </details>
 
-### 3. Generate a diagnostic checklist for your Expectation
+## Generate a diagnostic checklist for your Expectation
 
 Once you've copied and renamed the template file, you can execute it as follows.
 
@@ -73,7 +69,7 @@ The template file is set up so that this will run the Expectation's `print_diagn
 ```
 Completeness checklist for ExpectColumnValuesToBeInSomeSet:
   ✔ Has a valid library_metadata object
-    Has a docstring, including a one-line short description
+    Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
     Passes all linting checks
@@ -86,7 +82,7 @@ Completeness checklist for ExpectColumnValuesToBeInSomeSet:
 
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it. This guide covers the first five steps on the checklist.
 
-### 4. Change the Expectation class name and add a docstring
+## Change the Expectation class name and add a docstring
 
 Let's start by updating your Expectation's name and docstring.
 
@@ -106,7 +102,7 @@ with something like:
 ```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py docstring"
 ```
 
-You'll also need to change the class name at the bottom of the file, by replacing this line:
+Make sure your one-line docstring begins with "Expect " and ends with a period. You'll also need to change the class name at the bottom of the file, by replacing this line:
 
 ```python name="tests/integration/docusaurus/expectations/examples/set_based_column_map_expectation_template.py diagnostics"
 ```
@@ -115,7 +111,7 @@ with this one:
 ```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py diagnostics"
 ```
 
-Later, you can go back and write a more thorough docstring.
+Later, you can go back and write a more thorough docstring. See [Expectation Docstring Formatting](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/3-expectation-docstring-formatting.md).
 
 At this point you can re-run your diagnostic checklist. You should see something like this:
 ```
@@ -123,7 +119,7 @@ $ python expect_column_values_to_be_in_solfege_scale_set.py
 
 Completeness checklist for ExpectColumnValuesToBeInSolfegeScaleSet:
   ✔ Has a valid library_metadata object
-  ✔ Has a docstring, including a one-line short description
+  ✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
     Passes all linting checks
@@ -132,7 +128,7 @@ Completeness checklist for ExpectColumnValuesToBeInSolfegeScaleSet:
 
 Congratulations! You're one step closer to implementing a Custom Expectation.
 
-### 5. Add example cases
+## Add example cases
 
 Next, we're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve a dual purpose:
 
@@ -164,7 +160,7 @@ $ python expect_column_values_to_be_in_solfege_scale_set.py
 
 Completeness checklist for ExpectColumnValuesToBeInSolfegeScaleSet:
   ✔ Has a valid library_metadata object
-  ✔ Has a docstring, including a one-line short description
+  ✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
 ...
 	Has core logic that passes tests for all applicable Execution Engines and SQL dialects
 		  Only 0 / 2 tests for pandas are passing
@@ -180,7 +176,7 @@ For more information on tests and example cases, <br/>
 see our guide on [how to create example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
 :::
 
-### 6. Define your set and connect it to your Expectation
+## Define your set and connect it to your Expectation
 
 This is the stage where you implement the actual business logic for your Expectation.
 
@@ -230,14 +226,14 @@ $ python expect_column_values_to_be_in_solfege_scale_set.py
 
 Completeness checklist for ExpectColumnValuesToBeInSolfegeScaleSet:
   ✔ Has a valid library_metadata object
-  ✔ Has a docstring, including a one-line short description
+  ✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
   ✔ Has at least one positive and negative example case, and all test cases pass
   ✔ Has core logic and passes tests on at least one Execution Engine
     Passes all linting checks
 ...
 ```
 
-### 7. Linting
+## Linting
 
 Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, and `ruff`.
 
@@ -259,7 +255,7 @@ $ python expect_column_values_to_be_in_solfege_scale_set.py
 
 Completeness checklist for ExpectColumnValuesToBeInSolfegeScaleSet:
   ✔ Has a valid library_metadata object
-  ✔ Has a docstring, including a one-line short description
+  ✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
   ✔ Has at least one positive and negative example case, and all test cases pass
   ✔ Has core logic and passes tests on at least one Execution Engine
   ✔ Passes all linting checks
@@ -273,12 +269,12 @@ Congratulations!<br/>&#127881; You've just built your first Custom Set-Based Col
 </div>
 
 :::note
-If you've already built a [Custom Expectation](./overview.md) of a different type,
+If you've already built a [Custom Expectation](../custom_expectations_lp.md) of a different type,
 you may notice that we didn't explicitly implement a `_validate` method or Metric class here. While we have to explicitly create these for other types of Custom Expectations,
 the `SetBasedColumnMapExpectation` class handles Metric creation and result validation implicitly; no extra work needed!
 :::
 
-### 8. Contribution (Optional)
+## Contribute (Optional)
 
 This guide will leave you with a Custom Expectation sufficient for [contribution](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) to Great Expectations at an Experimental level.
 

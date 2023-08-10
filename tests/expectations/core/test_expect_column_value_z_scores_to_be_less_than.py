@@ -44,6 +44,7 @@ def z_score_validation_result():
     )
 
 
+@pytest.mark.unit
 def test_pandas_expect_column_value_z_scores_to_be_less_than_impl(
     z_score_validation_result,
 ):
@@ -65,6 +66,7 @@ def test_pandas_expect_column_value_z_scores_to_be_less_than_impl(
     assert result == z_score_validation_result
 
 
+@pytest.mark.postgresql
 def test_sa_expect_column_value_z_scores_to_be_less_than_impl(
     z_score_validation_result, test_backends
 ):
@@ -91,6 +93,7 @@ def test_sa_expect_column_value_z_scores_to_be_less_than_impl(
 
 
 # noinspection PyUnusedLocal
+@pytest.mark.spark
 def test_spark_expect_column_value_z_scores_to_be_less_than_impl(
     spark_session, basic_spark_df_execution_engine, z_score_validation_result
 ):

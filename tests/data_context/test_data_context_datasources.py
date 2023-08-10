@@ -56,7 +56,6 @@ def pandas_enabled_datasource_config() -> dict:
     return config
 
 
-@pytest.mark.integration
 @pytest.mark.cloud
 def test_data_context_instantiates_gx_cloud_store_backend_with_cloud_config(
     tmp_path: pathlib.Path,
@@ -82,7 +81,6 @@ def test_data_context_instantiates_gx_cloud_store_backend_with_cloud_config(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_data_context_instantiates_inline_store_backend_with_filesystem_config(
     tmp_path: pathlib.Path,
     data_context_config_with_datasources: DataContextConfig,
@@ -198,7 +196,6 @@ def test_get_datasource_cache_miss(
     assert not mock_get.called
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_DataContext_add_datasource_updates_cache_and_store(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: CloudDataContext,
@@ -231,7 +228,6 @@ def test_DataContext_add_datasource_updates_cache_and_store(
     assert name in context.datasources
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_DataContext_update_datasource_updates_existing_value_in_cache_and_store(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: CloudDataContext,
@@ -273,7 +269,6 @@ def test_DataContext_update_datasource_updates_existing_value_in_cache_and_store
     assert retrieved_datasource.data_connectors.keys() == data_connectors.keys()
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_DataContext_update_datasource_creates_new_value_in_cache_and_store(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: CloudDataContext,
@@ -305,7 +300,6 @@ def test_DataContext_update_datasource_creates_new_value_in_cache_and_store(
     assert name in context.datasources
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_DataContext_delete_datasource_updates_cache(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: CloudDataContext,
@@ -462,7 +456,6 @@ def test_list_datasources() -> None:
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_get_available_data_assets_names(empty_data_context) -> None:
     datasource_name = "my_fluent_pandas_datasource"
     datasource = empty_data_context.sources.add_pandas(datasource_name)

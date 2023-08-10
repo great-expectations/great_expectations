@@ -10,6 +10,9 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.expectations.metrics.util import (
+    get_dbms_compatible_metric_domain_kwargs,
+)
 
 if TYPE_CHECKING:
     from great_expectations.execution_engine import (
@@ -23,9 +26,6 @@ from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (
     _is_sqlalchemy_metric_selectable,
-)
-from great_expectations.expectations.metrics.util import (
-    get_dbms_compatible_column_names,
 )
 
 if TYPE_CHECKING:
@@ -49,7 +49,6 @@ def _pandas_column_map_condition_values(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
-    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -58,12 +57,14 @@ def _pandas_column_map_condition_values(
 """
         )
 
-    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
-
-    column_name = get_dbms_compatible_column_names(
-        column_names=column_name,
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
+
+    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
+
+    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
     ###
     # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
@@ -116,7 +117,6 @@ def _pandas_column_map_series_and_domain_values(
     assert (
         accessor_domain_kwargs == accessor_domain_kwargs_2
     ), "map_series and condition must have the same accessor kwargs"
-    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -125,12 +125,14 @@ def _pandas_column_map_series_and_domain_values(
 """
         )
 
-    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
-
-    column_name = get_dbms_compatible_column_names(
-        column_names=column_name,
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
+
+    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
+
+    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
     ###
     # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
@@ -177,10 +179,7 @@ def _pandas_column_map_condition_value_counts(
         boolean_mapped_unexpected_values,
         compute_domain_kwargs,
         accessor_domain_kwargs,
-    ) = metrics.get("unexpected_condition")
-    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
-
-    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
+    ) = metrics["unexpected_condition"]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -189,10 +188,14 @@ def _pandas_column_map_condition_value_counts(
 """
         )
 
-    column_name = get_dbms_compatible_column_names(
-        column_names=column_name,
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
+
+    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
+
+    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
     ###
     # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
@@ -242,12 +245,9 @@ def _sqlalchemy_column_map_condition_values(
     Particularly for the purpose of finding unexpected values, returns all the metric values which do not meet an
     expected Expectation condition for ColumnMapExpectation Expectations.
     """
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
-    )
-    selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs
-    )
+    ]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -256,11 +256,15 @@ def _sqlalchemy_column_map_condition_values(
 """
         )
 
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
+        batch_columns_list=metrics["table.columns"],
+    )
+
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
-    column_name = get_dbms_compatible_column_names(
-        column_names=column_name,
-        batch_columns_list=metrics["table.columns"],
+    selectable = execution_engine.get_domain_records(
+        domain_kwargs=compute_domain_kwargs
     )
 
     query = sa.select(sa.column(column_name).label("unexpected_values")).where(
@@ -300,12 +304,9 @@ def _sqlalchemy_column_map_condition_value_counts(
     Returns value counts for all the metric values which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
     """
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
-    )
-    selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs
-    )
+    ]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -314,14 +315,18 @@ def _sqlalchemy_column_map_condition_value_counts(
 """
         )
 
-    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
-
-    column_name = get_dbms_compatible_column_names(
-        column_names=column_name,
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
 
+    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
+
     column: sa.Column = sa.column(column_name)
+
+    selectable = execution_engine.get_domain_records(
+        domain_kwargs=compute_domain_kwargs
+    )
 
     query = (
         sa.select(column, sa.func.count(column))
@@ -343,10 +348,9 @@ def _spark_column_map_condition_values(
     **kwargs,
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
-    )
-    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
+    ]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -355,12 +359,14 @@ def _spark_column_map_condition_values(
 """
         )
 
-    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
-
-    column_name = get_dbms_compatible_column_names(
-        column_names=column_name,
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
+
+    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
+
+    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
@@ -392,9 +398,10 @@ def _spark_column_map_condition_value_counts(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
-    )
+    ]
+
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
@@ -402,11 +409,12 @@ def _spark_column_map_condition_value_counts(
 """
         )
 
-    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
-    column_name = get_dbms_compatible_column_names(
-        column_names=column_name,
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
+
+    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
     df: pyspark.DataFrame = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs

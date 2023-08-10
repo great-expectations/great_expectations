@@ -4,7 +4,7 @@ title: Quickstart
 tag: [tutorial, getting started]
 ---
 import Prerequisites from '/docs/components/_prerequisites.jsx'
-import PythonVersion from '/docs/components/prerequisites/_python_version.md'
+import PrereqPython from '/docs/components/prerequisites/_python_version.md'
 import SetupAndInstallGx from '/docs/components/setup/link_lists/_setup_and_install_gx.md'
 import DataContextInitializeInstantiateSave from '/docs/components/setup/link_lists/_data_context_initialize_instatiate_save.md'
 
@@ -26,7 +26,7 @@ Windows support for the open source Python version of GX is currently unavailabl
 
 ## Prerequisites
 
-- <PythonVersion />
+- <PrereqPython />
 - pip
 - An internet browser
 
@@ -57,7 +57,7 @@ Windows support for the open source Python version of GX is currently unavailabl
     ```python name="tutorials/quickstart/quickstart.py connect_to_data"
     ```
 
-    The example code uses the default Data Context Datasource for Pandas to access the `.csv` data in the file at the specified `path`.
+    The example code uses the default Data Context Data Source for Pandas to access the `.csv` data in the file at the specified `path`.
 
 ## Create Expectations
 
@@ -91,4 +91,3 @@ If you're ready to continue your Great Expectations journey, the following topic
 
 - [Install GX in a specific environment with support for a specific source data system](/docs/guides/setup/installation/install_gx).
 - [Initialize, instantiate, and save a Data Contex](/docs/guides/setup/configure_data_contexts_lp).
-

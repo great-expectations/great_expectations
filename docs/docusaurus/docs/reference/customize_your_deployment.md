@@ -26,8 +26,8 @@ The simplest way to manage your Great Expectations configuration is usually by c
 
 Here’s how to handle each of those cases:
 
-* [How to configure credentials](../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
-* [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context)
+* [Configure credentials](../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
+* [Instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
 
 ## Options for storing Expectations
 Many teams find it convenient to store Expectations in Git. Essentially, this approach treats Expectations like test fixtures: they live adjacent to code and are stored within version control. Git acts as a collaboration tool and source of record.
@@ -72,10 +72,10 @@ Great Expectations allows you to connect to data in a wide variety of sources, a
 ## Options for hosting Data Docs
 By default, Data Docs are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. A better pattern is usually to deploy to a cloud-based blob store (S3, GCS, or Azure Blob Storage), configured to share a static website.
 
-* [How to host and share Data Docs on a filesystem](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.md)
-* [How to host and share Data Docs on Azure Blob Storage](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md)
-* [How to host and share Data Docs on GCS](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md)
-* [How to host and share Data Docs on Amazon S3](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3.md)
+* [How to host and share Data Docs on a filesystem](../guides/setup/configuring_data_docs/host_and_share_data_docs.md)
+* [How to host and share Data Docs on Azure Blob Storage](../guides/setup/configuring_data_docs/host_and_share_data_docs.md)
+* [How to host and share Data Docs on GCS](../guides/setup/configuring_data_docs/host_and_share_data_docs.md)
+* [How to host and share Data Docs on Amazon S3](../guides/setup/configuring_data_docs/host_and_share_data_docs.md)
 
 ## Additional Checkpoints and Actions
 Most teams will want to configure various Checkpoints and Validation Actions as part of their deployment. There are two primary patterns for deploying Checkpoints. Sometimes Checkpoints are executed during data processing (e.g. as a task within Airflow). From this vantage point, they can control program flow. Sometimes Checkpoints are executed against materialized data. Great Expectations supports both patterns. There are also some rare instances where you may want to validate data without using a Checkpoint.

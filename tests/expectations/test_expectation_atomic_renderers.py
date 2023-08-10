@@ -2,7 +2,6 @@ import re
 from pprint import pprint
 from typing import Callable, Dict, Union
 
-import pandas as pd
 import pytest
 
 from great_expectations.core import ExpectationValidationResult
@@ -89,6 +88,7 @@ def get_diagnostic_rendered_content(
 # "atomic.prescriptive.summary" tests
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(
     snapshot,
     get_prescriptive_rendered_content,
@@ -97,6 +97,7 @@ def test_atomic_prescriptive_summary_expect_column_bootstrapped_ks_test_p_value_
     pass
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_chisquare_test_p_value_to_be_greater_than(
     snapshot,
     get_prescriptive_rendered_content,
@@ -105,6 +106,7 @@ def test_atomic_prescriptive_summary_expect_column_chisquare_test_p_value_to_be_
     pass
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_distinct_values_to_be_in_set(
     snapshot,
     get_prescriptive_rendered_content,
@@ -123,6 +125,7 @@ def test_atomic_prescriptive_summary_expect_column_distinct_values_to_be_in_set(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_distinct_values_to_contain_set(
     snapshot,
     get_prescriptive_rendered_content,
@@ -142,6 +145,7 @@ def test_atomic_prescriptive_summary_expect_column_distinct_values_to_contain_se
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_distinct_values_to_equal_set(
     snapshot,
     get_prescriptive_rendered_content,
@@ -161,6 +165,7 @@ def test_atomic_prescriptive_summary_expect_column_distinct_values_to_equal_set(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than(
     snapshot,
     get_prescriptive_rendered_content,
@@ -189,6 +194,7 @@ def test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less_than(
     snapshot, get_diagnostic_rendered_content
 ):
@@ -235,6 +241,7 @@ def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_diagnostic_observed_value_with_boolean_column_expect_column_kl_divergence_to_be_less_than(
     snapshot, get_diagnostic_rendered_content
 ):
@@ -281,6 +288,7 @@ def test_atomic_diagnostic_observed_value_with_boolean_column_expect_column_kl_d
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_max_to_be_between(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -300,6 +308,7 @@ def test_atomic_prescriptive_summary_expect_column_max_to_be_between(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_mean_to_be_between(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -319,6 +328,7 @@ def test_atomic_prescriptive_summary_expect_column_mean_to_be_between(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_median_to_be_between(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -338,6 +348,7 @@ def test_atomic_prescriptive_summary_expect_column_median_to_be_between(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_min_to_be_between(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -357,6 +368,7 @@ def test_atomic_prescriptive_summary_expect_column_min_to_be_between(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_most_common_value_to_be_in_set(
     snapshot,
     get_prescriptive_rendered_content,
@@ -376,6 +388,7 @@ def test_atomic_prescriptive_summary_expect_column_most_common_value_to_be_in_se
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_pair_cramers_phi_value_to_be_less_than(
     snapshot,
     get_prescriptive_rendered_content,
@@ -394,6 +407,7 @@ def test_atomic_prescriptive_summary_expect_column_pair_cramers_phi_value_to_be_
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_pair_values_a_to_be_greater_than_b(
     snapshot,
     get_prescriptive_rendered_content,
@@ -416,6 +430,7 @@ def test_atomic_prescriptive_summary_expect_column_pair_values_a_to_be_greater_t
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_pair_values_to_be_equal(
     snapshot,
     get_prescriptive_rendered_content,
@@ -436,6 +451,7 @@ def test_atomic_prescriptive_summary_expect_column_pair_values_to_be_equal(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_pair_values_to_be_in_set(
     snapshot,
     get_prescriptive_rendered_content,
@@ -444,6 +460,7 @@ def test_atomic_prescriptive_summary_expect_column_pair_values_to_be_in_set(
     pass
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(
     snapshot,
     get_prescriptive_rendered_content,
@@ -452,6 +469,7 @@ def test_atomic_prescriptive_summary_expect_column_parameterized_distribution_ks
     pass
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_proportion_of_unique_values_to_be_between(
     snapshot,
     get_prescriptive_rendered_content,
@@ -471,6 +489,7 @@ def test_atomic_prescriptive_summary_expect_column_proportion_of_unique_values_t
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_quantile_values_to_be_between(
     snapshot,
     get_prescriptive_rendered_content,
@@ -501,6 +520,7 @@ def test_atomic_prescriptive_summary_expect_column_quantile_values_to_be_between
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_diagnostic_observed_value_expect_column_quantile_values_to_be_between(
     snapshot, get_diagnostic_rendered_content
 ):
@@ -545,6 +565,7 @@ def test_atomic_diagnostic_observed_value_expect_column_quantile_values_to_be_be
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_stdev_to_be_between(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -563,6 +584,7 @@ def test_atomic_prescriptive_summary_expect_column_stdev_to_be_between(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_sum_to_be_between(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -581,6 +603,7 @@ def test_atomic_prescriptive_summary_expect_column_sum_to_be_between(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_to_exist(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -598,6 +621,7 @@ def test_atomic_prescriptive_summary_expect_column_to_exist(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_unique_value_count_to_be_between(
     snapshot,
     get_prescriptive_rendered_content,
@@ -618,6 +642,7 @@ def test_atomic_prescriptive_summary_expect_column_unique_value_count_to_be_betw
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_value_lengths_to_be_between(
     snapshot,
     get_prescriptive_rendered_content,
@@ -638,6 +663,7 @@ def test_atomic_prescriptive_summary_expect_column_value_lengths_to_be_between(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_value_lengths_to_equal(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -656,6 +682,7 @@ def test_atomic_prescriptive_summary_expect_column_value_lengths_to_equal(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_value_z_scores_to_be_less_than(
     snapshot,
     get_prescriptive_rendered_content,
@@ -664,6 +691,7 @@ def test_atomic_prescriptive_summary_expect_column_value_z_scores_to_be_less_tha
     pass
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_be_between(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -683,6 +711,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_between(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_be_dateutil_parseable(
     snapshot,
     get_prescriptive_rendered_content,
@@ -701,6 +730,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_dateutil_parseab
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_be_decreasing(
     snapshot,
     get_prescriptive_rendered_content,
@@ -721,6 +751,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_decreasing(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_be_in_set(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -741,6 +772,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_in_set(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_be_in_type_list(
     snapshot,
     get_prescriptive_rendered_content,
@@ -761,6 +793,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_in_type_list(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_be_increasing(
     snapshot,
     get_prescriptive_rendered_content,
@@ -781,6 +814,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_increasing(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_be_json_parseable(
     snapshot,
     get_prescriptive_rendered_content,
@@ -799,6 +833,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_json_parseable(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_be_null(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -816,6 +851,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_null(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_be_null_with_mostly_equals_1(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -833,6 +869,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_null_with_mostly
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_be_of_type(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -851,6 +888,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_of_type(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_be_unique(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -868,6 +906,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_unique(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_match_json_schema(
     snapshot,
     get_prescriptive_rendered_content,
@@ -887,6 +926,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_match_json_schema(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_match_like_pattern(
     snapshot,
     get_prescriptive_rendered_content,
@@ -895,6 +935,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_match_like_pattern(
     pass
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_match_like_pattern_list(
     snapshot,
     get_prescriptive_rendered_content,
@@ -903,6 +944,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_match_like_pattern_
     pass
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_match_regex(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -921,6 +963,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_match_regex(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_match_regex_list(
     snapshot,
     get_prescriptive_rendered_content,
@@ -941,6 +984,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_match_regex_list(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_match_strftime_format(
     snapshot,
     get_prescriptive_rendered_content,
@@ -960,6 +1004,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_match_strftime_form
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_not_be_in_set(
     snapshot,
     get_prescriptive_rendered_content,
@@ -980,6 +1025,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_not_be_in_set(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_not_be_null(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -997,6 +1043,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_not_be_null(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_not_match_like_pattern(
     snapshot,
     get_prescriptive_rendered_content,
@@ -1005,6 +1052,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_not_match_like_patt
     pass
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_not_match_like_pattern_list(
     snapshot,
     get_prescriptive_rendered_content,
@@ -1013,6 +1061,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_not_match_like_patt
     pass
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_not_match_regex(
     snapshot,
     get_prescriptive_rendered_content,
@@ -1032,6 +1081,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_not_match_regex(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_column_values_to_not_match_regex_list(
     snapshot,
     get_prescriptive_rendered_content,
@@ -1051,6 +1101,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_not_match_regex_lis
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_compound_columns_to_be_unique(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -1068,6 +1119,7 @@ def test_atomic_prescriptive_summary_expect_compound_columns_to_be_unique(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_multicolumn_sum_to_equal(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -1075,6 +1127,7 @@ def test_atomic_prescriptive_summary_expect_multicolumn_sum_to_equal(
     pass
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_multicolumn_values_to_be_unique(
     snapshot,
     get_prescriptive_rendered_content,
@@ -1094,6 +1147,7 @@ def test_atomic_prescriptive_summary_expect_multicolumn_values_to_be_unique(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_select_column_values_to_be_unique_within_record(
     snapshot,
     get_prescriptive_rendered_content,
@@ -1113,6 +1167,7 @@ def test_atomic_prescriptive_summary_expect_select_column_values_to_be_unique_wi
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_table_column_count_to_be_between(
     snapshot,
     get_prescriptive_rendered_content,
@@ -1131,6 +1186,7 @@ def test_atomic_prescriptive_summary_expect_table_column_count_to_be_between(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_table_column_count_to_equal(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -1147,6 +1203,7 @@ def test_atomic_prescriptive_summary_expect_table_column_count_to_equal(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_table_columns_to_match_ordered_list(
     snapshot,
     get_prescriptive_rendered_content,
@@ -1162,6 +1219,7 @@ def test_atomic_prescriptive_summary_expect_table_columns_to_match_ordered_list(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_table_columns_to_match_set(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -1179,6 +1237,7 @@ def test_atomic_prescriptive_summary_expect_table_columns_to_match_set(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_table_row_count_to_be_between(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -1193,6 +1252,7 @@ def test_atomic_prescriptive_summary_expect_table_row_count_to_be_between(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_table_row_count_to_equal(
     snapshot, get_prescriptive_rendered_content
 ):
@@ -1207,6 +1267,7 @@ def test_atomic_prescriptive_summary_expect_table_row_count_to_equal(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_prescriptive_summary_expect_table_row_count_to_equal_other_table(
     snapshot,
     get_prescriptive_rendered_content,
@@ -1230,6 +1291,7 @@ def test_atomic_prescriptive_summary_expect_table_row_count_to_equal_other_table
 # "atomic.diagnostic.observed_value" tests
 
 
+@pytest.mark.unit
 def test_atomic_diagnostic_observed_value_without_result(
     snapshot, get_diagnostic_rendered_content
 ):
@@ -1249,6 +1311,7 @@ def test_atomic_diagnostic_observed_value_without_result(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_diagnostic_observed_value_with_numeric_observed_value(
     snapshot, get_diagnostic_rendered_content
 ):
@@ -1269,6 +1332,7 @@ def test_atomic_diagnostic_observed_value_with_numeric_observed_value(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_diagnostic_observed_value_with_str_observed_value(
     snapshot, get_diagnostic_rendered_content
 ):
@@ -1289,6 +1353,7 @@ def test_atomic_diagnostic_observed_value_with_str_observed_value(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_diagnostic_observed_value_with_unexpected_percent(
     snapshot, get_diagnostic_rendered_content
 ):
@@ -1309,6 +1374,7 @@ def test_atomic_diagnostic_observed_value_with_unexpected_percent(
     snapshot.assert_match(res)
 
 
+@pytest.mark.unit
 def test_atomic_diagnostic_observed_value_with_empty_result(
     snapshot, get_diagnostic_rendered_content
 ):

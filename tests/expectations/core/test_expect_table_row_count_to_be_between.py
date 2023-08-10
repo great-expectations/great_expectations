@@ -1,3 +1,5 @@
+import pytest
+
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -5,6 +7,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.data_context import DataContext
 
 
+@pytest.mark.big
 def test_expect_table_row_count_to_be_between_runtime_custom_query_no_temp_table_sa(
     titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -46,6 +49,7 @@ def test_expect_table_row_count_to_be_between_runtime_custom_query_no_temp_table
     )
 
 
+@pytest.mark.spark
 def test_expect_table_row_count_to_be_between_runtime_custom_query_with_where_no_temp_table_sa(
     titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -87,6 +91,7 @@ def test_expect_table_row_count_to_be_between_runtime_custom_query_with_where_no
     )
 
 
+@pytest.mark.big
 def test_expect_table_row_count_to_be_between_no_temp_table_sa(
     titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):

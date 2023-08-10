@@ -1,4 +1,6 @@
 """This file is meant for integration tests related to datasource CRUD."""
+from __future__ import annotations
+
 import copy
 import random
 import string
@@ -8,8 +10,7 @@ from unittest import mock
 import pytest
 
 import great_expectations as gx
-from great_expectations import DataContext
-from great_expectations.data_context import BaseDataContext, CloudDataContext
+from great_expectations.data_context import CloudDataContext
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
@@ -23,7 +24,6 @@ from tests.data_context.conftest import MockResponse
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "save_changes",
     [
@@ -46,7 +46,7 @@ from tests.data_context.conftest import MockResponse
 def test_base_data_context_in_cloud_mode_add_datasource(
     save_changes: bool,
     config_includes_name_setting: str,
-    empty_base_data_context_in_cloud_mode: BaseDataContext,
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
     block_config_datasource_config: DatasourceConfig,
     datasource_config_with_names_and_ids: DatasourceConfig,
     fake_datasource_id: str,
@@ -60,7 +60,7 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     with save_changes=True and not save when save_changes=False. When saving, it should use the id from the response
     to create the datasource."""
 
-    context: BaseDataContext = empty_base_data_context_in_cloud_mode
+    context: CloudDataContext = empty_base_data_context_in_cloud_mode
     # Make sure the fixture has the right configuration
     assert isinstance(context, CloudDataContext)
     assert len(context.list_datasources()) == 0
@@ -156,7 +156,6 @@ def test_base_data_context_in_cloud_mode_add_datasource(
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "config_includes_name_setting",
     [
@@ -171,7 +170,7 @@ def test_base_data_context_in_cloud_mode_add_datasource(
 )
 def test_data_context_in_cloud_mode_add_datasource(
     config_includes_name_setting: str,
-    empty_data_context_in_cloud_mode: DataContext,
+    empty_data_context_in_cloud_mode: CloudDataContext,
     block_config_datasource_config: DatasourceConfig,
     datasource_config_with_names_and_ids: DatasourceConfig,
     fake_datasource_id: str,
@@ -184,7 +183,7 @@ def test_data_context_in_cloud_mode_add_datasource(
     """A DataContext in cloud mode should save to the cloud backed Datasource store when calling add_datasource. When saving, it should use the id from the response
     to create the datasource."""
 
-    context: DataContext = empty_data_context_in_cloud_mode
+    context: CloudDataContext = empty_data_context_in_cloud_mode
     # Make sure the fixture has the right configuration
     assert isinstance(context, CloudDataContext)
     assert len(context.list_datasources()) == 0
@@ -271,7 +270,6 @@ def test_data_context_in_cloud_mode_add_datasource(
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "config_includes_name_setting",
     [

@@ -1,22 +1,12 @@
-<!--
+import PythonVersion from '/docs/components/_python_version.mdx';
 
----Import---
-import CheckPythonVersion from './_check_python_version.mdx'
-<CheckPythonVersion />
-
----Header---
-### 1. Check Python version
--->
-
-First, check the version of Python that you have installed.  As of this writing, Great Expectations supports versions 3.7 through 3.10 of Python.
-
-You can check your version of Python by running:
+Run the following code to check what version of Python is currently installed:
 
 ```console title="Terminal command"
 python --version
 ```
 
-If this command returns something other than a Python 3 version number (like Python 3.X.X), you may need to try this:
+Great Expectations supports <PythonVersion />. If a Python 3 version number is not returned, run the following code:
 
 ```console title="Terminal command"
 python3 --version

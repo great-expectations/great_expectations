@@ -1,8 +1,6 @@
-from __future__ import annotations
-
 import re
 from logging import Logger
-from typing import TYPE_CHECKING, Literal, Optional, Union
+from typing import Literal, Optional, Union
 
 from great_expectations.compatibility.pyspark import (
     types as pyspark_types,
@@ -13,19 +11,17 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
     DBFSDataConnector as DBFSDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import (
+    BatchMetadata,
+)
+from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition as SortersDefinition,
 )
 from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError as TestConnectionError,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.interfaces import (
-        BatchMetadata,
-    )
-    from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        CSVAsset,
-    )
+from great_expectations.datasource.fluent.spark_file_path_datasource import (
+    CSVAsset,
+)
 
 logger: Logger
 
