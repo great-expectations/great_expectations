@@ -40,7 +40,7 @@ Windows support for the open source Python version of GX is currently unavailabl
 
     It can take several minutes for the installation to complete.
 
-2. In Python run the following command to import the `great_expectations` module:
+2. Run the following Python code to import the `great_expectations` module:
 
     ```python name="tutorials/quickstart/quickstart.py import_gx"
     ```
