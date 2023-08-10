@@ -276,7 +276,7 @@ class TestTableIdentifiers:
         table_factory(engine=snowflake_ds.get_engine(), table_names={table_name})
 
         table_names: list[str] = inspect(snowflake_ds.get_engine()).get_table_names()
-        print(f"postgres tables:\n{pf(table_names)}))")
+        print(f"snowflake tables:\n{pf(table_names)}))")
 
         snowflake_ds.add_table_asset(asset_name, table_name=table_name)
 
