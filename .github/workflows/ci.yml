@@ -37,14 +37,14 @@ jobs:
       with:
         filters: |
           docs:
-            - "docs/**"
-            - tests/integration/docusaurus/**
-            - tests/integration/fixtures/**
-            - tests/test_sets/**
+            - 'docs/**'
+            - 'tests/integration/docusaurus/**'
+            - 'tests/integration/fixtures/**'
+            - 'tests/test_sets/**'
   doc-checks:
     # run on every PR that is not a draft that has docs changes, and on non-pull request events (ie. releases)
     needs: docs-changes
-    if: (github.event.pull_request.draft == false && ${{ needs.docs-changes.outputs.docs }})
+    if: (github.event.pull_request.draft == false && ${{ needs.docs-changes.outputs.docs == 'true' }}) || github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -109,8 +109,8 @@ jobs:
   docs-snippets:
     name: docs-snippets
     needs: docs-changes
-    # run on every PR that is not a draft has docs changes, and on non-pull request events (ie. releases)
-    if: (github.event.pull_request.draft == false && ${{ needs.docs-changes.outputs.docs }})
+    # run on every PR that is not a draft that has docs changes, and on non-pull request events (ie. releases)
+    if: (github.event.pull_request.draft == false && ${{ needs.docs-changes.outputs.docs == 'true' }}) || github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     env:
       # google
