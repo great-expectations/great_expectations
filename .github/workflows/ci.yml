@@ -137,8 +137,6 @@ jobs:
       SNOWFLAKE_SCHEMA: ${{secrets.SNOWFLAKE_SCHEMA}}
       SNOWFLAKE_WAREHOUSE: ${{secrets.SNOWFLAKE_WAREHOUSE}}
       SNOWFLAKE_ROLE: ${{secrets.SNOWFLAKE_ROLE}}
-      # spark
-      PYARROW_IGNORE_TIMEZONE: 1
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -250,8 +248,6 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
       AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-      # spark
-      PYARROW_IGNORE_TIMEZONE: 1
     runs-on: ubuntu-latest
     strategy:
       matrix:
