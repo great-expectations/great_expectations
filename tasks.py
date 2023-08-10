@@ -869,6 +869,10 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         services=("postgresql",),
         extra_pytest_args=("--postgresql",),
     ),
+    "snowflake": TestDependencies(
+        requirement_files=("reqs/requirements-dev-snowflake.txt",),
+        extra_pytest_args=("--snowflake",),
+    ),
     "spark": TestDependencies(
         requirement_files=("reqs/requirements-dev-spark.txt",),
         services=("spark",),

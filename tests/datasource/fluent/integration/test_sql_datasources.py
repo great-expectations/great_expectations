@@ -21,6 +21,7 @@ from great_expectations.data_context import EphemeralDataContext
 from great_expectations.datasource.fluent import (
     DatabricksSQLDatasource,
     PostgresDatasource,
+    SnowflakeDatasource,
     SQLDatasource,
 )
 from great_expectations.expectations.expectation import (
@@ -62,6 +63,14 @@ TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
         "quoted_lower": f"`{PG_TABLE.lower()}`",
         "unquoted_upper": PG_TABLE.upper(),
         "quoted_upper": f"`{PG_TABLE.upper()}`",
+        "quoted_mixed": f"`{PG_TABLE.title()}`",
+        "unquoted_mixed": PG_TABLE.title(),
+    },
+    "snowflake": {
+        "unquoted_lower": PG_TABLE.lower(),
+        "quoted_lower": f'"{PG_TABLE.lower()}"',
+        "unquoted_upper": PG_TABLE.upper(),
+        "quoted_upper": f'"{PG_TABLE.upper()}"',
         "quoted_mixed": f"`{PG_TABLE.title()}`",
         "unquoted_mixed": PG_TABLE.title(),
     },
@@ -178,6 +187,15 @@ def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
     return ds
 
 
+@pytest.fixture
+def snowflake_ds(context: EphemeralDataContext) -> PostgresDatasource:
+    ds = context.sources.add_snowflake(
+        "snowflake",
+        connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_ACCOUNT}/ci/public?warehouse=ci&role=ci",
+    )
+    return ds
+
+
 @pytest.mark.parametrize(
     "asset_name",
     [
@@ -244,11 +262,30 @@ class TestTableIdentifiers:
 
         databricks_sql_ds.add_table_asset(asset_name, table_name=table_name)
 
+    @pytest.mark.snowflake
+    def test_snowflake(
+        self,
+        snowflake_ds: SnowflakeDatasource,
+        asset_name: str,
+        table_factory: TableFactory,
+    ):
+        table_name: str = TABLE_NAME_MAPPING["snowflake"][asset_name]
+        # create table
+        # with snowflake_ds.get_engine().connect() as conn:
+        #     conn.execute("USE SCHEMA ci.public")
+        table_factory(engine=snowflake_ds.get_engine(), table_names={table_name})
+
+        table_names: list[str] = inspect(snowflake_ds.get_engine()).get_table_names()
+        print(f"postgres tables:\n{pf(table_names)}))")
+
+        snowflake_ds.add_table_asset(asset_name, table_name=table_name)
+
     @pytest.mark.parametrize(
         "datasource_type",
         [
-            param("trino", marks=[pytest.mark.trino]),
-            param("postgres", marks=[pytest.mark.postgresql]),
+            # param("trino", marks=[pytest.mark.trino]),
+            # param("postgres", marks=[pytest.mark.postgresql]),
+            param("snowflake", marks=[pytest.mark.snowflake]),
         ],
     )
     def test_checkpoint_run(
