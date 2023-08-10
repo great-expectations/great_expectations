@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Union, overload
+from typing import TYPE_CHECKING, ClassVar, List, Literal, Type, Union, overload
 from urllib import parse
 
 import pydantic
@@ -11,15 +11,26 @@ from great_expectations.compatibility.sqlalchemy import (
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.config_str import ConfigStr
-from great_expectations.datasource.fluent.interfaces import TestConnectionError
+from great_expectations.datasource.fluent.interfaces import (
+    DataAsset,
+    TestConnectionError,
+)
+from great_expectations.datasource.fluent.sql_datasource import (
+    QueryAsset as SqlQueryAsset,
+)
 from great_expectations.datasource.fluent.sql_datasource import (
     SQLDatasource,
+)
+from great_expectations.datasource.fluent.sql_datasource import (
+    TableAsset as SqlTableAsset,
 )
 
 if TYPE_CHECKING:
     from pydantic.networks import Parts
-    from great_expectations.core.config_provider import _ConfigurationProvider
+    from sqlalchemy.sql import quoted_name  # noqa: TID251 # type-checking only
+
     from great_expectations.compatibility import sqlalchemy
+    from great_expectations.core.config_provider import _ConfigurationProvider
 
 
 def _parse_param_from_query_string(param: str, query: str) -> str | None:
@@ -127,6 +138,42 @@ class DatabricksDsn(AnyUrl):
         return parsed_url
 
 
+class DatabricksTableAsset(SqlTableAsset):
+    ...
+
+    @pydantic.validator("table_name")
+    def _resolve_quoted_name(cls, table_name: str) -> str | quoted_name:
+        table_name_is_quoted: bool = cls._is_bracketed_by_quotes(table_name)
+
+        from great_expectations.compatibility import sqlalchemy
+
+        if sqlalchemy.quoted_name:
+            if isinstance(table_name, sqlalchemy.quoted_name):
+                return table_name
+
+            if table_name_is_quoted:
+                # TODO: make sqlalchemy.quoted_name work with backticks
+                pass
+
+        return table_name
+
+    @staticmethod
+    def _is_bracketed_by_quotes(target: str) -> bool:
+        """Returns True if the target string is bracketed by quotes.
+
+        Arguments:
+            target: A string to check if it is bracketed by quotes.
+
+        Returns:
+            True if the target string is bracketed by quotes.
+        """
+        # TODO: what do with regular quotes?
+        for quote in ["`"]:
+            if target.startswith(quote) and target.endswith(quote):
+                return True
+        return False
+
+
 @public_api
 class DatabricksSQLDatasource(SQLDatasource):
     """Adds a DatabricksSQLDatasource to the data context.
@@ -139,8 +186,15 @@ class DatabricksSQLDatasource(SQLDatasource):
             are TableAsset or QueryAsset objects.
     """
 
+    # class var definitions
+    asset_types: ClassVar[List[Type[DataAsset]]] = [DatabricksTableAsset, SqlQueryAsset]
+
     type: Literal["databricks_sql"] = "databricks_sql"  # type: ignore[assignment]
     connection_string: Union[ConfigStr, DatabricksDsn]
+
+    # These are instance var because ClassVars can't contain Type variables. See
+    # https://peps.python.org/pep-0526/#class-and-instance-variable-annotations
+    _TableAsset: Type[SqlTableAsset] = pydantic.PrivateAttr(DatabricksTableAsset)
 
     def test_connection(self, test_assets: bool = True) -> None:
         try:
