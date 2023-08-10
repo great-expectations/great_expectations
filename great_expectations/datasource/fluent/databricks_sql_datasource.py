@@ -152,9 +152,15 @@ class DatabricksTableAsset(SqlTableAsset):
                 return table_name
 
             if table_name_is_quoted:
-                # TODO: make sqlalchemy.quoted_name work with backticks
-                pass
+                # https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.quoted_name.quote
+                # Remove the quotes and add them back using the sqlalchemy.quoted_name function
+                # TODO: We need to handle nested quotes
+                table_name = table_name.strip("`")
 
+            return sqlalchemy.quoted_name(
+                value=table_name,
+                quote=table_name_is_quoted,
+            )
         return table_name
 
     @staticmethod
@@ -167,7 +173,7 @@ class DatabricksTableAsset(SqlTableAsset):
         Returns:
             True if the target string is bracketed by quotes.
         """
-        # TODO: what do with regular quotes?
+        # TODO: what todo with regular quotes? Error? Warn? "Fix"?
         for quote in ["`"]:
             if target.startswith(quote) and target.endswith(quote):
                 return True
