@@ -107,7 +107,7 @@ jobs:
 
   docs-snippets:
     name: docs-snippets
-    if: github.event.pull_request.draft == false
+    if: (github.event.pull_request.draft == false && steps.changed-files.outputs.docs == 'true')
     runs-on: ubuntu-latest
     env:
       # google
@@ -143,7 +143,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Run docs_snippet_checker
-        if: steps.changed-files.outputs.docs == 'true'
         run: |
           yarn install
           python ci/checks/validate_docs_snippets.py
