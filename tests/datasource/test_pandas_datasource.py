@@ -299,7 +299,7 @@ def test_pandas_source_read_csv(
     reason="pyarrow and fastparquet are not installed",
 )
 @mock_s3
-@pytest.mark.filesystem
+@pytest.mark.aws_creds
 def test_s3_pandas_source_read_parquet(
     data_context_parameterized_expectation_suite, tmp_path_factory
 ):
