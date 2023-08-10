@@ -141,23 +141,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Run docs_snippet_checker
-        if: steps.changed-files.outputs.docs == 'true'
+        if: github.event.pull_request.head.repo.full_name == github.repository
         run: |
           yarn install
           python ci/checks/validate_docs_snippets.py
       - name: Authenticate with GCP
-        if: ${{secrets.GE_TEST_GCP_CREDENTIALS != ''}}
+        if: github.event.pull_request.head.repo.full_name == github.repository
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
 
       - name: Create JSON file for following step
-        if: ${{secrets.GE_TEST_GCP_CREDENTIALS != ''}}
+        if: github.event.pull_request.head.repo.full_name == github.repository
         run: |
           echo "$GE_TEST_GCP_CREDENTIALS" > gcp-credentials.json
 
       - name: Install and setup Google Cloud SDK
-        if: ${{secrets.GE_TEST_GCP_CREDENTIALS != ''}}
+        if: github.event.pull_request.head.repo.full_name == github.repository
         run: |
           # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
           curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
@@ -172,7 +172,7 @@ jobs:
           ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 
       - name: Set up Python bigquery
-        if: ${{secrets.GE_TEST_GCP_CREDENTIALS != ''}}
+        if: github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/setup-python@v4
         with:
           python-version: "3.8"
@@ -186,6 +186,11 @@ jobs:
       - name: Run the tests
         run: |
           invoke docs-snippet-tests 'docs' --up-services --verbose
+      - name: Run the tests needing cloud credentials
+        # run only on main repo, and not user-forks
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          invoke docs-snippet-tests 'docs-creds-needed' --up-services --verbose
 
   unit-tests:
     strategy:
@@ -214,7 +219,7 @@ jobs:
         run: invoke ci-tests -m "unit" --xdist --timeout=1.5 --slowest=8
 
   cloud-tests:
-    if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
