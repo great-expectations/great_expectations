@@ -221,6 +221,7 @@ class TestTableIdentifiers:
 
         postgres_ds.add_table_asset(asset_name, table_name=table_name)
 
+    @pytest.mark.skip(reason="TODO: implement Databricks SQL integration service")
     @pytest.mark.databricks
     def test_databricks_sql(
         self,
