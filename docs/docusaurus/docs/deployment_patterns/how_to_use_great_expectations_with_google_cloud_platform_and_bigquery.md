@@ -54,7 +54,7 @@ Relevant documentation for the components can also be found here:
 
 - [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md)
 - [How to configure a Validation Result store in GCS](../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.md)
-- [How to host and share Data Docs on GCS](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md)
+- [How to host and share Data Docs on GCS](../guides/setup/configuring_data_docs/host_and_share_data_docs.md)
 - Optionally, you can also use a [Secret Manager for GCP Credentials](../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
 
 ## Part 1: Local Configuration of Great Expectations that connects to Google Cloud Platform
@@ -117,7 +117,7 @@ Great Expectations can then be configured to use this new Validations Store, `va
 For additional details and example configurations, please refer to  [How to configure an Validation Result store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.md).
 
 #### Add Data Docs Store
-To host and share Datadocs on GCS, we recommend using the [following guide](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md), which will explain how to host and share Data Docs on Google Cloud Storage using IP-based access.
+To host and share Datadocs on GCS, we recommend using the [following guide](../guides/setup/configuring_data_docs/host_and_share_data_docs.md), which will explain how to host and share Data Docs on Google Cloud Storage using IP-based access.
 
 Afterwards, your `great-expectations.yml` will contain the following configuration under `data_docs_sites`,  with `project`, and `bucket` being replaced with your information.
 

@@ -39,16 +39,45 @@ jobs:
             reqs/requirements-dev-test.txt
       - name: Install dependencies
         run: pip install -r reqs/requirements-dev-test.txt
+      - name: Get docs files that have changed
+        id: changed-files
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            docs:
+              - "docs/**"
+              - tests/integration/docusaurus/**
+              - tests/integration/fixtures/**
+              - tests/test_sets/**
       - name: check_repo_root_size
+        if: steps.changed-files.outputs.docs == 'true'
         run: sh ./ci/checks/check_repo_root_size.sh
       - name: Docstring linter
+        if: steps.changed-files.outputs.docs == 'true'
         run: invoke docstrings
       - name: line_number_snippet_checker
+        if: steps.changed-files.outputs.docs == 'true'
         run: python ci/checks/check_no_line_number_snippets.py
       - name: name_tag_snippet_checker
+        if: steps.changed-files.outputs.docs == 'true'
         run: python ci/checks/check_only_name_tag_snippets.py
+      - name: integration_test_gets_run_checker
+        if: steps.changed-files.outputs.docs == 'true'
+        run: python ci/checks/check_integration_test_gets_run.py
+      - name: name_tag_snippet_referenced_checker
+        if: steps.changed-files.outputs.docs == 'true'
+        run: python ci/checks/check_name_tag_snippets_referenced.py
       - name: public_api_report
+        if: steps.changed-files.outputs.docs == 'true'
         run: invoke public-api
+      - name: link_checker
+        if: steps.changed-files.outputs.docs == 'true'
+        run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -s docs --skip-external
+      - name: docs_build
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
+        if: steps.changed-files.outputs.docs == 'true'
+        run: cd docs/docusaurus && yarn install && bash ../build_docs
 
   static-analysis:
     runs-on: ubuntu-latest
@@ -79,7 +108,6 @@ jobs:
   docs-snippets:
     name: docs-snippets
     if: github.event.pull_request.draft == false
-    #add more scope here
     runs-on: ubuntu-latest
     env:
       # google
@@ -112,7 +140,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
+      - name: Run docs_snippet_checker
+        if: steps.changed-files.outputs.docs == 'true'
+        run: |
+          yarn install
+          python ci/checks/validate_docs_snippets.py
       - name: Authenticate with GCP
         uses: google-github-actions/auth@v1
         with:
@@ -357,33 +389,6 @@ jobs:
         # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
         run: pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
 
-  notify_on_failure:
-    needs: [
-      doc-checks,
-      static-analysis,
-      docs-snippets,
-      unit-tests,
-      cloud-tests,
-      marker-tests,
-      py38-min-versions,
-      py39-min-versions,
-      py310-min-versions,
-      import_gx,
-      usage_stats_integration
-    ]
-    if: always() && !cancelled() && contains(needs.*.result, 'failure') && github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Scheduled CI job failure
-        id: slack
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CI_WEBHOOK_URL }}
   build-n-publish:
     needs: [
       doc-checks,
@@ -397,7 +402,7 @@ jobs:
       py310-min-versions,
       import_gx,
       usage_stats_integration
-      ]
+    ]
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     name: Build and publish Python distributions to PyPI
     runs-on: ubuntu-latest
@@ -427,3 +432,43 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         skip-existing: true # prevent against pushing duplicate versions
+
+  notify_on_failure:
+    needs: [
+      doc-checks,
+      static-analysis,
+      docs-snippets,
+      unit-tests,
+      cloud-tests,
+      marker-tests,
+      py38-min-versions,
+      py39-min-versions,
+      py310-min-versions,
+      import_gx,
+      usage_stats_integration,
+      build-n-publish
+    ]
+    if: always() && !cancelled() && contains(needs.*.result, 'failure') && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scheduled CI job failure
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "event_name": "${{ github.event_name }}",
+              "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CI_WEBHOOK_URL }}
+
+  notify_on_release:
+    needs: [build-n-publish]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Announce Release
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_WEBHOOK_URL }}
