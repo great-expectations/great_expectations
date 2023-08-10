@@ -513,6 +513,7 @@ markers = [
     "cli: mark all tests in the /cli directory.",
     "cloud: mark test as being relevant to Great Expectations Cloud.",
     "docs: mark a test as a docs test.",
+    "docs-spark: temporarily mark a test as a docs test that depends on spark.",
     "e2e: mark test as an E2E test.",
     "external_sqldialect: mark test as requiring install of an external sql dialect.",
     "filesystem: mark tests using the filesystem as the storage backend.",
