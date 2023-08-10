@@ -107,7 +107,8 @@ jobs:
 
   docs-snippets:
     name: docs-snippets
-    if: (github.event.pull_request.draft == false && steps.changed-files.outputs.docs == 'true')
+    # run only on PRs where docs have changed, and non-pull request events (ie. releases)
+    if: (github.event.pull_request.draft == false && steps.changed-files.outputs.docs == 'true') || github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     env:
       # google
