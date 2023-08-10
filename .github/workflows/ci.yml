@@ -33,6 +33,8 @@ jobs:
     outputs:
       docs: ${{ steps.filter.outputs.docs }}
     steps:
+    - name: Checkout source code
+      uses: actions/checkout@v2
     - uses: dorny/paths-filter@v2
       id: filter
       with:
