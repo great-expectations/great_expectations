@@ -35,12 +35,12 @@ jobs:
     - uses: dorny/paths-filter@v2
       id: filter
       with:
-          filters: |
-            docs:
-              - "docs/**"
-              - tests/integration/docusaurus/**
-              - tests/integration/fixtures/**
-              - tests/test_sets/**
+        filters: |
+          docs:
+            - "docs/**"
+            - tests/integration/docusaurus/**
+            - tests/integration/fixtures/**
+            - tests/test_sets/**
   doc-checks:
     # run on every PR that is not a draft has docs changes, and on non-pull request events (ie. releases)
     if: (github.event.pull_request.draft == false && ${{ needs.docs-changes.outputs.docs }}) || github.event_name != 'pull_request'
