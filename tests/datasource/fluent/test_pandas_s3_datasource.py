@@ -40,6 +40,10 @@ pytestmark = [
     pytest.mark.skipif(
         PANDAS_VERSION < 1.2, reason=f"Fluent pandas not supported on {PANDAS_VERSION}"
     ),
+    pytest.mark.skipif(
+        not aws.boto3,
+        reason="Unable to load AWS connection object. Please install boto3 and botocore.",
+    ),
 ]
 
 
