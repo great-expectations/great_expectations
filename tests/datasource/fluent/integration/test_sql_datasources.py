@@ -188,7 +188,7 @@ def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
 
 
 @pytest.fixture
-def snowflake_ds(context: EphemeralDataContext) -> PostgresDatasource:
+def snowflake_ds(context: EphemeralDataContext) -> SnowflakeDatasource:
     ds = context.sources.add_snowflake(
         "snowflake",
         connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
