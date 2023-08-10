@@ -44,7 +44,7 @@ jobs:
   doc-checks:
     # run on every PR that is not a draft that has docs changes, and on non-pull request events (ie. releases)
     needs: docs-changes
-    if:
+    if: |
       ${{ needs.docs-changes.outputs.docs == 'true' }}
     runs-on: ubuntu-latest
     steps:
