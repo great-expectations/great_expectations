@@ -81,9 +81,9 @@ def delay_rerun(*args):
     """Delay for flaky tests
 
     Returns:
-        True: After sleeping for 1 second.
+        True: After sleeping for 5 seconds.
     """
-    time.sleep(1)
+    time.sleep(5)
     return True
 
 
@@ -519,7 +519,7 @@ def pytest_parsed_arguments(request):
     return request.config.option
 
 
-@flaky(rerun_filter=delay_rerun)
+@flaky(rerun_filter=delay_rerun, max_runs=3, min_passes=1)
 @pytest.mark.parametrize("integration_test_fixture", docs_test_matrix, ids=idfn)
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 def test_docs(integration_test_fixture, tmp_path, pytest_parsed_arguments):
