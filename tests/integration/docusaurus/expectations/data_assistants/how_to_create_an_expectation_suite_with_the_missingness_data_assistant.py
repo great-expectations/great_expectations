@@ -75,7 +75,7 @@ context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
 # Use a Checkpoint to verify that your new Expectation Suite works.
 
 # <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py save_validator">
-validator.save_expectation_suite(discard_failed_expectations=False)
+validator.expectation_suite_name = "my_custom_expectation_suite_name"
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py checkpoint">
@@ -83,7 +83,6 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 checkpoint = context.add_or_update_checkpoint(
     name="yellow_tripdata_sample_all_years_checkpoint",
     validator=validator,
-    expectation_suite_name="my_custom_expectation_suite_name",
 )
 checkpoint_result = checkpoint.run()
 
