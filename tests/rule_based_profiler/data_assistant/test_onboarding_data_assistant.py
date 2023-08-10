@@ -1014,6 +1014,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
 
 @pytest.mark.big
+@oytest.mark.trino
 def test_onboarding_data_assistant__trino_with_string_fields(empty_data_context):
     CONNECTION_STRING = "trino://test@localhost:8088/memory/schema"
 
