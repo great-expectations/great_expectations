@@ -263,9 +263,7 @@ class TestTableIdentifiers:
         # create table
         table_factory(engine=datasource.get_engine(), table_names={table_name})
 
-        asset = datasource.add_table_asset(
-            asset_name, table_name=TABLE_NAME_MAPPING[datasource_type][asset_name]
-        )
+        asset = datasource.add_table_asset(asset_name, table_name=table_name)
 
         suite = context.add_expectation_suite(
             expectation_suite_name=f"{datasource.name}-{asset.name}"
