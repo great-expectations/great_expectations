@@ -53,7 +53,7 @@ export default class Prerequisites extends React.Component {
   defaultPrerequisiteItems () {
     const returnItems = []
     if (this.props.requirePython === true) {
-      returnItems.push(<li>A supported version of Python ({GxData.min_python} to {GxData.max_python}). To download and install Python, see <a href='https://www.python.org/downloads/'>Python downloads.</a></li>)
+      returnItems.push(<li>An installation of Python {GxData.min_python} to {GxData.max_python}. To download and install Python, see <a href='https://www.python.org/downloads/'>Python downloads.</a></li>)
     }
     if (this.props.requireInstallation === true) {
       returnItems.push(<li>A Great Expectations instance. See <a href='/docs/guides/setup/installation/local'>Install Great Expectations locally</a>.</li>)
