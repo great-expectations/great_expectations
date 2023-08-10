@@ -100,6 +100,15 @@ class DatabricksDsn(AnyUrl):
 
         return AnyUrl.validate_parts(parts=parts, validate_port=validate_port)
 
+    @classmethod
+    def parse_url(cls, url: ConfigStr | str, config_provider=None) -> DatabricksDsn:
+        if isinstance(url, ConfigStr):
+            assert config_provider
+            url = url.get_config_value(config_provider=config_provider)
+        # TODO: ensure sensitive parts are not leaked as part of error message
+        parsed_url = pydantic.parse_obj_as(DatabricksDsn, url)
+        return parsed_url
+
 
 @public_api
 class DatabricksSQLDatasource(SQLDatasource):
@@ -136,7 +145,14 @@ class DatabricksSQLDatasource(SQLDatasource):
             exclude=self._get_exec_engine_excludes(),
             config_provider=self._config_provider,
         )
+
         connection_string = model_dict.pop("connection_string")
+        # is connection_string was a ConfigStr it's parts will not have been validated yet
+        if not isinstance(connection_string, DatabricksDsn):
+            connection_string = DatabricksDsn.parse_url(
+                url=connection_string, config_provider=self._config_provider
+            )
+
         kwargs = model_dict.pop("kwargs", {})
 
         http_path = _parse_param_from_query_string(
