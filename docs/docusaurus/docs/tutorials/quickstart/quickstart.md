@@ -4,6 +4,7 @@ title: Quickstart
 tag: [tutorial, getting started]
 ---
 import Prerequisites from '/docs/components/_prerequisites.jsx'
+import PrereqPython from '/docs/components/prerequisites/_python_version.md'
 import SetupAndInstallGx from '/docs/components/setup/link_lists/_setup_and_install_gx.md'
 import DataContextInitializeInstantiateSave from '/docs/components/setup/link_lists/_data_context_initialize_instatiate_save.md'
 
@@ -25,7 +26,7 @@ Windows support for the open source Python version of GX is currently unavailabl
 
 ## Prerequisites
 
-- Python versions 3.8 to 3.10. See [Python downloads](https://www.python.org/downloads/).
+- <PrereqPython />
 - pip
 - An internet browser
 
