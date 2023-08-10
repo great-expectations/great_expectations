@@ -13,7 +13,6 @@ the snippets that are specified for use in documentation are maintained.  These 
     https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant
 """
 import great_expectations as gx
-from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource.fluent.interfaces import DataAsset
@@ -98,25 +97,17 @@ expectation_suite = data_assistant_result.get_expectation_suite(
 context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
 # </snippet>
 
-# Use a SimpleCheckpoint to verify that your new Expectation Suite works.
+# Use a Checkpoint to verify that your new Expectation Suite works.
 
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py checkpoint_config">
-checkpoint_config = {
-    "class_name": "SimpleCheckpoint",
-    "validations": [
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py checkpoint">
+checkpoint = context.add_or_update_checkpoint(
+    name=f"yellow_tripdata_sample_{expectation_suite_name}",
+    validations=[
         {
             "batch_request": multi_batch_all_years_batch_request,
             "expectation_suite_name": expectation_suite_name,
         }
     ],
-}
-# </snippet>
-
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py checkpoint">
-checkpoint = SimpleCheckpoint(
-    f"yellow_tripdata_sample_{expectation_suite_name}",
-    context,
-    **checkpoint_config,
 )
 checkpoint_result = checkpoint.run()
 

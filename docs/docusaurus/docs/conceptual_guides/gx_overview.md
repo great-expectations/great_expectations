@@ -55,7 +55,7 @@ For more information, see [Host and share Data Docs](/docs/guides/setup/configur
 
 ## Datasources
 
-![Datasource overview](./images_overview/datasource_flowchart.png)
+![Data Source overview](./images_overview/datasource_flowchart.png)
 
 Datasources connect GX to source data such as CSV files in a folder, a PostgreSQL database hosted on AWS, or any combination of data formats and environments. Regardless of the format of your source data or where it resides, Datasources provide GX with a unified API for working with it.
 
@@ -63,9 +63,9 @@ For more information, see [Connect to data](/docs/guides/connecting_to_your_data
 
 ### Data Assets and Batches
 
-Data Assets are collections of records within a Datasource.  While a Datasource tells GX how to connect to your source data, Data Assets tell GX how to organize that data. Although the records in your Data Assets can correspond directly to the contents of tables or files in your source data they do not necessarily need to. For instance, you could combine multiple tables worth of records in a SQL Datasource into a single Query Data Asset that joins the tables in question.  For a File Datasource, you could use regular expressions to define a Data Asset as the contents of all of the `.csv` files in a specific subfolder.
+Data Assets are collections of records within a Data Source.  While a Data Source tells GX how to connect to your source data, Data Assets tell GX how to organize that data. Although the records in your Data Assets can correspond directly to the contents of tables or files in your source data they do not necessarily need to. For instance, you could combine multiple tables worth of records in a SQL Data Source into a single Query Data Asset that joins the tables in question.  For a File Data Source, you could use regular expressions to define a Data Asset as the contents of all of the `.csv` files in a specific subfolder.
 
-Data Assets can be further partitioned into Batches.  Batches are unique subsets of records within a Data Asset.  For example, say you have a Data Asset in a SQL Datasource that consists of all records from last year in a given table.  You could then partition those records into Batches of data that correspond to the records for individual months of that year.
+Data Assets can be further partitioned into Batches.  Batches are unique subsets of records within a Data Asset.  For example, say you have a Data Asset in a SQL Data Source that consists of all records from last year in a given table.  You could then partition those records into Batches of data that correspond to the records for individual months of that year.
 
 For more information, see [Manage Data Assets](/docs/guides/connecting_to_your_data/manage_data_assets_lp).
 
@@ -73,7 +73,7 @@ For more information, see [Manage Data Assets](/docs/guides/connecting_to_your_d
 
 A Batch Request specifies one or more Batches within the Data Asset.  Batch Requests are the primary way of retrieving data for use in GX.  Because Batch Requests can retrieve multiple Batches they provide significant flexibility in how you utilize the data in a single Data Asset.
 
-As an example, GX can automate the process of running statistical analyzes for multiple Batches of data.  This is possible because you can provide a Batch Request that corresponds to multiple Batches in a Data Asset.  Alternatively, you can specify a single Batch from that same Data Asset so that you do not need to re-run the analyzes on all of your data when you are only interested in a single subset.
+As an example, GX can automate the process of running statistical analyses for multiple Batches of data.  This is possible because you can provide a Batch Request that corresponds to multiple Batches in a Data Asset.  Alternatively, you can specify a single Batch from that same Data Asset so that you do not need to re-run the analyses on all of your data when you are only interested in a single subset.
 
 Taking the example of a Data Asset that has been partitioned into Batches by months, this would let you build a statistical model off of each month of your existing data by providing all of the Batches in a single Batch Request.  Then, after an update, you could specify that you only wanted to run your analysis on the most recent month's data by providing a Batch Request that only indicates that one Batch.
 
@@ -81,7 +81,7 @@ For more information, see [Request data from a Data Asset](/docs/guides/connecti
 
 ## Expectations
 
-An Expectation is a verifiable assertion about Source Data.  Similar to assertions in traditional Python unit tests, Expectations provide a flexible, declarative language for describing expected behaviors. Unlike traditional unit tests which describe the expected behavior of code given a specific input, Expectations apply to the input data itself. For example, you can define an Expectation that a column contains no null values. When GX runs that Expectation on your data it generates a report which indicates if a null value was found.
+An Expectation is a verifiable assertion about source data.  Similar to assertions in traditional Python unit tests, Expectations provide a flexible, declarative language for describing expected behaviors. Unlike traditional unit tests which describe the expected behavior of code given a specific input, Expectations apply to the input data itself. For example, you can define an Expectation that a column contains no null values. When GX runs that Expectation on your data it generates a report which indicates if a null value was found.
 
 Expectations can be built directly from the domain knowledge of subject matter experts, interactively while introspecting a set of data, or through automated tools provided by GX.
 

@@ -1,17 +1,16 @@
-import pathlib
 from typing import List
 from unittest.mock import patch
 
-import pytest
 import pandas as pd
-from great_expectations.data_context.data_context.data_context import DataContext
+import pytest
 
+from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.rule_based_profiler.data_assistant import (
     ColumnValueMissingDataAssistant,
 )
 from great_expectations.rule_based_profiler.data_assistant_result import (
-    DataAssistantResult,
     ColumnValueMissingDataAssistantResult,
+    DataAssistantResult,
 )
 from great_expectations.rule_based_profiler.data_assistant_result.plot_result import (
     PlotResult,
@@ -36,7 +35,7 @@ def test_column_value_missing_data_assistant_result_plot_expectations_and_metric
     assert len(column_domain_charts) == 0
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow
 def test_single_batch_multiple_columns(ephemeral_context_with_defaults):
     context = ephemeral_context_with_defaults

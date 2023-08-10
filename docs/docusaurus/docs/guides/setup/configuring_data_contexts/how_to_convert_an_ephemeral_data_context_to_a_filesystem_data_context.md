@@ -43,7 +43,7 @@ The `get_context()` method will return an Ephemeral Data Context if your system 
 - [How to quickly instantiate a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
 
 You can also instantiate an Ephemeral Data Context (for those occasions when your system is set up to work with GX Cloud or you do have a previously initialized Filesystem Data Context).  For more information, see:
-- [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context)
+- [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
 
 </details>
 

@@ -41,17 +41,17 @@ context = gx.get_context(
 
 In order to profile our first table and validate our second table, we need to set up our Batch Requests pointing to each set of data.
 
-In this guide, we will use a MySQL <TechnicalTag tag="datasource" text= "Datasource" /> as our source data -- the data we trust to be correct.
+In this guide, we will use a MySQL <TechnicalTag tag="datasource" text= "Data Source" /> as our source data -- the data we trust to be correct.
 
 ```python name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py mysql_batch_request"
 ```
 
-From this data, we will create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> and use that suite to validate our second table, pulled from a PostgreSQL Datasource.
+From this data, we will create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> and use that suite to validate our second table, pulled from a PostgreSQL Data Source.
 
 ```python name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py pg_batch_request"
 ```
 
-## Profile Source Data
+## Profile source data
 
 We can now use the `OnboardingDataAssistant` to profile our MySQL data defined in the `mysql_batch_request` above.
 

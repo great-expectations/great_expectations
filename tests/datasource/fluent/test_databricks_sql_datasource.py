@@ -60,6 +60,38 @@ from great_expectations.datasource.fluent.databricks_sql_datasource import (
             ],
             id="multiple http_paths",
         ),
+        pytest.param(
+            "databricks+connector://token:my_token>@my_host:1234/my_db?http_path=/a/b/c&schema=dev",
+            [
+                {
+                    "loc": ("connection_string",),
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "type": "value_error",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "'catalog' query param is invalid or missing",
+                    "type": "value_error.url.query.catalog",
+                },
+            ],
+            id="missing catalog",
+        ),
+        pytest.param(
+            "databricks+connector://token:my_token>@my_host:1234/my_db?http_path=/a/b/c&catalog=dev",
+            [
+                {
+                    "loc": ("connection_string",),
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "type": "value_error",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "'schema' query param is invalid or missing",
+                    "type": "value_error.url.query.schema",
+                },
+            ],
+            id="missing schema",
+        ),
     ],
 )
 def test_invalid_connection_string_raises_dsn_error(

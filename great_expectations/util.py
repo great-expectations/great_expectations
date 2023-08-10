@@ -1055,7 +1055,7 @@ def validate(  # noqa: PLR0913, PLR0912
 
 
 # https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
-def gen_directory_tree_str(startpath):
+def gen_directory_tree_str(startpath: PathStr):
     """Print the structure of directory as a tree:
 
     Ex:
@@ -1074,7 +1074,7 @@ def gen_directory_tree_str(startpath):
     tuples.sort()
 
     for root, dirs, files in tuples:
-        level = root.replace(startpath, "").count(os.sep)
+        level = root.replace(str(startpath), "").count(os.sep)
         indent = " " * 4 * level
         output_str += f"{indent}{os.path.basename(root)}/\n"  # noqa: PTH119
         subindent = " " * 4 * (level + 1)
@@ -1374,7 +1374,7 @@ def deep_filter_properties_iterable(  # noqa: PLR0913
         # Upon unwinding the call stack, do a sanity check to ensure cleaned properties.
         keys_to_delete: List[str] = list(
             filter(
-                lambda k: k not in keep_fields  # type: ignore[arg-type]
+                lambda k: k not in keep_fields
                 and _is_to_be_removed_from_deep_filter_properties_iterable(
                     value=properties[k],
                     clean_nulls=clean_nulls,

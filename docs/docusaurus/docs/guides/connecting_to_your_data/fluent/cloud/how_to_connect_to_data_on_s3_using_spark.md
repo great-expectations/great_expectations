@@ -11,7 +11,7 @@ import Prerequisites from '/docs/components/_prerequisites.jsx'
 <!-- ### 1. Import GX and instantiate a Data Context -->
 import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
 
-<!-- ### 3. Add S3 data to the Datasource as a Data Asset -->
+<!-- ### 3. Add S3 data to the Data Source as a Data Asset -->
 import BatchingRegexExplaination from '/docs/components/connect_to_data/cloud/_batching_regex_explaination.mdx'
 import S3FluentAddDataAssetConfigKeys from '/docs/components/connect_to_data/cloud/_s3_fluent_data_asset_config_keys.mdx'
 
@@ -36,10 +36,10 @@ In this guide we will demonstrate how to use Spark to connect to data stored on 
 
 <ImportGxAndInstantiateADataContext />
 
-### 2. Create a Datasource
+### 2. Create a Data Source
 
 We can define a S3 datasource by providing three pieces of information:
-- `name`: In our example, we will name our Datasource `"my_s3_datasource"`
+- `name`: In our example, we will name our Data Source `"my_s3_datasource"`
 - `bucket_name`: The name of our S3 bucket
 - `boto3_options`: We can provide various additional options here, but in this example we will leave this empty and use the default values.
 
@@ -54,12 +54,12 @@ The parameter `boto3_options` will allow you to pass such things as:
 
 :::
 
-Once we have those three elements, we can define our Datasource like so:
+Once we have those three elements, we can define our Data Source like so:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_spark.py create_datasource"
 ```
 
-### 3. Add S3 data to the Datasource as a Data Asset
+### 3. Add S3 data to the Data Source as a Data Asset
 
 <S3FluentAddDataAssetConfigKeys />
 
@@ -89,7 +89,7 @@ To see the full source code used for the examples in this guide, please referenc
  
  - `get_context(...)`
  - `DataContext.datasources.add_spark_s3(...)`
- - `Datasource.add_csv_asset(...)` -->
+ - `Data Source.add_csv_asset(...)` -->
 
 ### Related reading
 

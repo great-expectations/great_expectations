@@ -91,7 +91,7 @@ class CLI(click.MultiCommand):
             return None
 
 
-@click.group(cls=CLI, name="great_expectations")
+@click.command(cls=CLI, name="great_expectations")
 @click.version_option(version=ge_version)
 @click.option(
     "--verbose",

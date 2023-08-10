@@ -328,7 +328,6 @@ def test_sanitize_config_doesnt_change_config_without_datasources(
     assert config_without_creds == basic_data_context_config_dict
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_sanitize_config_masks_cloud_store_backend_access_tokens(
     data_context_config_dict_with_cloud_backed_stores, ge_cloud_access_token
@@ -474,7 +473,6 @@ def test_sanitize_config_regardless_of_parent_key():
     )
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_sanitize_config_masks_cloud_access_token(ge_cloud_access_token):
     # expect the access token to be found and masked
@@ -501,6 +499,7 @@ def test_sanitize_config_works_with_list():
     assert res["some_key"][0]["access_token"] == PasswordMasker.MASKED_PASSWORD_STRING
 
 
+@pytest.mark.unit
 def test_parse_substitution_variable():
     """
     What does this test and why?

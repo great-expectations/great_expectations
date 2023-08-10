@@ -1,8 +1,9 @@
-from typing import List
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, List
 
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
@@ -19,15 +20,18 @@ from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     CardinalityLimitMode,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
+
 # module level markers
-pytestmark = pytest.mark.integration
+pytestmark = pytest.mark.big
 
 
 @pytest.mark.slow  # 1.29s
 def test_instantiate_with_cardinality_limit_modes_from_class_variable(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="alice_columnar_table_single_batch_datasource",
@@ -48,7 +52,7 @@ def test_instantiate_with_cardinality_limit_modes_from_class_variable(
 def test_instantiate_with_cardinality_limit_modes_from_enum(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="alice_columnar_table_single_batch_datasource",
@@ -69,7 +73,7 @@ def test_instantiate_with_cardinality_limit_modes_from_enum(
 def test_instantiate_with_cardinality_limit_modes_from_string(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="alice_columnar_table_single_batch_datasource",
@@ -90,7 +94,7 @@ def test_instantiate_with_cardinality_limit_modes_from_string(
 def test_instantiate_with_cardinality_limit_modes_from_dictionary(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="alice_columnar_table_single_batch_datasource",
@@ -113,7 +117,7 @@ def test_instantiate_with_cardinality_limit_modes_from_dictionary(
 
 @pytest.mark.slow  # 1.24s
 def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_context):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="alice_columnar_table_single_batch_datasource",
@@ -161,7 +165,7 @@ def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_con
 
 @pytest.mark.slow  # 1.21s
 def test_single_batch_one_cardinality(alice_columnar_table_single_batch_context):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="alice_columnar_table_single_batch_datasource",
@@ -206,7 +210,7 @@ def test_single_batch_one_cardinality(alice_columnar_table_single_batch_context)
 def test_unsupported_cardinality_limit_from_string(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -216,7 +220,7 @@ def test_unsupported_cardinality_limit_from_string(
 
     with pytest.raises(ProfilerConfigurationError) as excinfo:
         # noinspection PyUnusedLocal,PyArgumentList
-        domains: List[Domain] = CategoricalColumnDomainBuilder(
+        CategoricalColumnDomainBuilder(
             cardinality_limit_mode="&*#$&INVALID&*#$*&",
             data_context=data_context,
         ).get_domains(rule_name="my_rule", batch_request=batch_request)
@@ -230,7 +234,7 @@ def test_unsupported_cardinality_limit_from_string(
 def test_unsupported_cardinality_limit_from_dictionary(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="alice_columnar_table_single_batch_datasource",
@@ -240,7 +244,7 @@ def test_unsupported_cardinality_limit_from_dictionary(
 
     with pytest.raises(ProfilerConfigurationError) as excinfo:
         # noinspection PyUnusedLocal,PyArgumentList
-        domains: List[Domain] = CategoricalColumnDomainBuilder(
+        CategoricalColumnDomainBuilder(
             cardinality_limit_mode={
                 "name": "&*#$&INVALID&*#$*&",
                 "max_proportion_unique": 10,
@@ -258,7 +262,7 @@ def test_unsupported_cardinality_limit_from_dictionary(
 def test_unspecified_cardinality_limit(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -268,7 +272,7 @@ def test_unspecified_cardinality_limit(
 
     with pytest.raises(ProfilerConfigurationError) as excinfo:
         # noinspection PyUnusedLocal,PyArgumentList
-        domains: List[Domain] = CategoricalColumnDomainBuilder(
+        _: List[Domain] = CategoricalColumnDomainBuilder(
             data_context=data_context
         ).get_domains(rule_name="my_rule", batch_request=batch_request)
 
@@ -278,7 +282,7 @@ def test_unspecified_cardinality_limit(
 
 @pytest.mark.slow  # 1.33s
 def test_excluded_columns_single_batch(alice_columnar_table_single_batch_context):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="alice_columnar_table_single_batch_datasource",
@@ -329,7 +333,7 @@ def test_excluded_columns_single_batch(alice_columnar_table_single_batch_context
 
 @pytest.mark.slow  # 1.30s
 def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_context):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="alice_columnar_table_single_batch_datasource",
@@ -379,7 +383,7 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
 def test_multi_batch_very_few_cardinality(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
+    data_context: AbstractDataContext = (
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 
@@ -503,7 +507,7 @@ def test_multi_batch_very_few_cardinality(
 def test_multi_batch_one_cardinality(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
+    data_context: AbstractDataContext = (
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 

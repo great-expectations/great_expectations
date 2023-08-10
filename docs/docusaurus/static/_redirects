@@ -151,7 +151,7 @@
 /en/latest/reference/core_concepts/expectations/result_format.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/result_format.html
 /en/latest/reference/core_concepts/expectations/standard_arguments.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/standard_arguments.html
 /en/latest/reference/core_concepts/expectations/distributional_expectations.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/distributional_expectations.html
-/en/latest/reference/core_concepts/expectations/implemented_expectations.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/implemented_expectations.html
+/en/latest/reference/core_concepts/expectations/implemented_expectations.html https://greatexpectations.io/expectations.html
 /en/latest/reference/core_concepts/expectations/expectations.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html
 /en/latest/reference/core_concepts/checkpoints_and_actions.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html
 /en/latest/reference/core_concepts/expectation_suite_operations.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectation_suite_operations.html
@@ -172,7 +172,7 @@
 
 
 # Redirects for old style guides
-/docs/contributing/contributing_style https://docs.greatexpectations.io/docs/contributing/style_guides/docs_style
+/docs/contributing/contributing_style /docs/contributing/contributing/
 
 # Redirects for consolidated pages
 
@@ -206,10 +206,10 @@
 /docs/reference/data_discovery/ https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant/
 /docs/reference/evaluation_parameters/ https://docs.greatexpectations.io/docs/terms/evaluation_parameter
 /docs/guides/validation/advanced/how_to_implement_custom_notifications https://docs.greatexpectations.io/docs/guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions
-/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_metrics https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
-/docs/guides/expectations/advanced/how_to_create_renderers_for_custom_expectations https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
-/docs/guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
-/docs/guides/expectations/features_custom_expectations/how_to_add_statement_renderers_for_an_expectation https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
+/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_metrics https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp
+/docs/guides/expectations/advanced/how_to_create_renderers_for_custom_expectations https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp
+/docs/guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp
+/docs/guides/expectations/features_custom_expectations/how_to_add_statement_renderers_for_an_expectation https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp
 /docs/reference/expectations/expectations https://docs.greatexpectations.io/docs/terms/expectation/
 /docs/reference/expectations/expectation_suite_operations https://docs.greatexpectations.io/docs/reference/expectation_suite_operations/
 /docs/reference/checkpoints_and_actions https://docs.greatexpectations.io/docs/terms/checkpoint
@@ -259,7 +259,7 @@
 
 # Removing yml-driven datacontext in favor of ephemeral
 
-/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context
+/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context
 
 # Redirects for Contributing docs
 
@@ -380,9 +380,13 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query /docs/guides/connecting_to_your_data/fluent/database/sql_data_assets
 /docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset /docs/guides/connecting_to_your_data/fluent/database/sql_data_assets
 /docs/deployment_patterns/how_to_use_great_expectations_in_databricks /docs/tutorials/getting_started/how_to_use_great_expectations_in_databricks
+/docs/guides/expectations/creating_custom_expectations/overview /docs/guides/expectations/custom_expectations_lp
+/docs/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas /docs/guides/connecting_to_your_data/fluent/in_memory/connect_in_memory_data
 
 # Redirects for pages removed as no longer applicable
+
 /docs/guides/validation/advanced/how_to_validate_data_without_a_checkpoint /docs/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint
+/docs/reference/expectations/implemented_expectations/ https://greatexpectations.io/expectations.html
 
 # Redirects for removed index pages and new landing pages
 

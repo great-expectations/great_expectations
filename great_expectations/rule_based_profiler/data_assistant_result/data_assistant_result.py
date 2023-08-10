@@ -131,6 +131,7 @@ class DataAssistantResult(SerializableDictDot):
         profiler_execution_time: Effective Rule-Based Profiler overall execution time in seconds.
         rule_domain_builder_execution_time: Effective Rule-Based Profiler per-Rule DomainBuilder execution time in seconds.
         rule_execution_time: Effective Rule-Based Profiler per-Rule execution time in seconds.
+        rule_exception_tracebacks: Effective Rule-Based Profiler per-Rule exception tracebacks.
         metrics_by_domain: Metrics by Domain.
         expectation_configurations: Expectation configurations.
         citation: Citations.
@@ -143,6 +144,7 @@ class DataAssistantResult(SerializableDictDot):
         "profiler_execution_time",
         "rule_domain_builder_execution_time",
         "rule_execution_time",
+        "rule_exception_tracebacks",
         "metrics_by_domain",
         "expectation_configurations",
         "citation",
@@ -159,6 +161,7 @@ class DataAssistantResult(SerializableDictDot):
     profiler_execution_time: Optional[float] = None
     rule_domain_builder_execution_time: Optional[Dict[str, float]] = None
     rule_execution_time: Optional[Dict[str, float]] = None
+    rule_exception_tracebacks: Optional[Dict[str, Optional[str]]] = None
     metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = None
     expectation_configurations: Optional[List[ExpectationConfiguration]] = None
     citation: Optional[dict] = None
@@ -271,6 +274,9 @@ class DataAssistantResult(SerializableDictDot):
             ),
             "rule_execution_time": convert_to_json_serializable(
                 data=self.rule_execution_time
+            ),
+            "rule_exception_tracebacks": convert_to_json_serializable(
+                data=self.rule_exception_tracebacks
             ),
             "metrics_by_domain": [
                 {
@@ -1385,8 +1391,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 batch_plot_component=batch_plot_component,
                 domain_plot_component=domain_plot_component,
             )
-        else:
-            if "column_quantile_values" in df.columns:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if "column_quantile_values" in df.columns:
                 return DataAssistantResult._get_range_chart(
                     df=df,
                     metric_plot_components=metric_plot_components,
@@ -1402,7 +1408,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
 
     @staticmethod
-    def _get_expect_domain_values_to_be_between_chart(  # noqa: PLR0912
+    def _get_expect_domain_values_to_be_between_chart(  # noqa: PLR0912, PLR0915
         expectation_type: str,
         df: pd.DataFrame,
         sanitized_metric_names: Set[str],
@@ -1554,8 +1560,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                     expectation_kwarg_plot_components=expectation_kwarg_plot_components,
                 )
             )
-        else:
-            if "column_quantile_values" in df.columns:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if "column_quantile_values" in df.columns:
                 return DataAssistantResult._get_expect_domain_values_to_be_between_range_chart(
                     expectation_type=expectation_type,
                     df=df,
@@ -1645,8 +1651,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 batch_plot_component=batch_plot_component,
                 domain_plot_component=domain_plot_component,
             )
-        else:
-            if "column_quantile_values" in df.columns:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if "column_quantile_values" in df.columns:
                 return DataAssistantResult._get_interactive_range_chart(
                     df=df,
                     metric_plot_components=metric_plot_components,
@@ -1868,8 +1874,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 expectation_kwarg_plot_components=expectation_kwarg_plot_components,
                 predicates=predicates,
             )
-        else:
-            if "column_quantile_values" in df.columns:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if "column_quantile_values" in df.columns:
                 return DataAssistantResult._get_interactive_expect_column_values_to_be_between_range_chart(
                     expectation_type=expectation_type,
                     df=df,
@@ -3217,7 +3223,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         first_chart_idx: int = 0
         for idx, chart_title in enumerate(chart_titles):
             if (
-                chart_title == "Table Row Count per Batch"
+                chart_title == "Table Row Count per Batch"  # noqa: PLR1714
                 or chart_title == "expect_table_row_count_to_be_between"
             ):
                 first_chart_idx = idx

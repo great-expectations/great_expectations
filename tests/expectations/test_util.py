@@ -4,6 +4,10 @@ from typing import Dict, List, cast
 import pandas as pd
 import pytest
 
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -27,22 +31,17 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.expectations.metrics.util import column_reflection_fallback
 from great_expectations.render import RenderedStringTemplateContent
-from great_expectations.self_check.util import build_sa_validator_with_data
 from great_expectations.self_check.util import (
-    build_test_backends_list as build_test_backends_list_v3,
-)
-from great_expectations.self_check.util import (
+    build_sa_validator_with_data,
     generate_expectation_tests,
     generate_test_table_name,
     should_we_generate_this_test,
 )
-from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.compatibility import sqlalchemy
-from great_expectations.validator.validator import Validator
-from great_expectations.compatibility.sqlalchemy import (
-    sqlalchemy as sa,
+from great_expectations.self_check.util import (
+    build_test_backends_list as build_test_backends_list_v3,
 )
-from great_expectations.compatibility import sqlalchemy
+from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -106,6 +105,7 @@ def expectation_and_runtime_configuration_with_evaluation_parameters():
     return configuration, runtime_configuration_with_eval
 
 
+@pytest.mark.unit
 def test_prescriptive_renderer_no_decorator(
     expectation_and_runtime_configuration_with_evaluation_parameters,
 ):
@@ -331,7 +331,7 @@ def test_prescriptive_renderer_with_decorator(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.external_sqldialect
+@pytest.mark.all_backends
 def test_table_column_reflection_fallback(test_backends, sa):
     include_sqlalchemy: bool = "sqlite" in test_backends
     include_postgresql: bool = "postgresql" in test_backends
@@ -443,7 +443,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
     sa is None,
     reason="sqlalchemy is not installed",
 )
-@pytest.mark.external_sqldialect
+@pytest.mark.all_backends
 def test__generate_expectation_tests():
     expectation_type = "whatever"
     data = TestData(stuff=[1, 2, 3, 4, 5])
@@ -538,17 +538,17 @@ def test__TestBackend__bad_dialects():
 
 @pytest.mark.unit
 def test__TestBackend__good_backends_and_dialects():
-    tb1 = TestBackend(
+    tb1 = TestBackend(  # noqa: F841
         backend="pandas",
         dialects=None,
     )
 
-    tb2 = TestBackend(
+    tb2 = TestBackend(  # noqa: F841
         backend="spark",
         dialects=None,
     )
 
-    tb3 = TestBackend(
+    tb3 = TestBackend(  # noqa: F841
         backend="sqlalchemy",
         dialects=["sqlite", "postgresql", "mysql"],
     )
@@ -567,7 +567,7 @@ def test__should_we_generate_this_test__obvious():
     )
     backend = "spark"
 
-    assert should_we_generate_this_test(backend, test_case) == True
+    assert should_we_generate_this_test(backend, test_case) is True
 
     test_case2 = ExpectationTestCase(
         title="",
@@ -580,7 +580,7 @@ def test__should_we_generate_this_test__obvious():
     )
     backend2 = "sqlite"
 
-    assert should_we_generate_this_test(backend2, test_case2) == False
+    assert should_we_generate_this_test(backend2, test_case2) is False
 
     test_case3 = ExpectationTestCase(
         title="",
@@ -593,7 +593,7 @@ def test__should_we_generate_this_test__obvious():
     )
     backend3 = "sqlite"
 
-    assert should_we_generate_this_test(backend3, test_case3) == True
+    assert should_we_generate_this_test(backend3, test_case3) is True
 
     test_case4 = ExpectationTestCase(
         title="",
@@ -606,7 +606,7 @@ def test__should_we_generate_this_test__obvious():
     )
     backend4 = "sqlite"
 
-    assert should_we_generate_this_test(backend4, test_case4) == False
+    assert should_we_generate_this_test(backend4, test_case4) is False
 
     test_case5 = ExpectationTestCase(
         title="",
@@ -619,9 +619,11 @@ def test__should_we_generate_this_test__obvious():
     )
     backend5 = "pandas"
 
-    assert should_we_generate_this_test(backend5, test_case5) == True
+    assert should_we_generate_this_test(backend5, test_case5) is True
 
 
+# this is really a series of unit tests
+@pytest.mark.unit
 def test__should_we_generate_this_test__sqlalchemy():
     test_case = ExpectationTestCase(
         title="",
@@ -634,7 +636,7 @@ def test__should_we_generate_this_test__sqlalchemy():
     )
     backend = "mysql"
 
-    assert should_we_generate_this_test(backend, test_case) == True
+    assert should_we_generate_this_test(backend, test_case) is True
 
     test_case2 = ExpectationTestCase(
         title="",
@@ -647,7 +649,7 @@ def test__should_we_generate_this_test__sqlalchemy():
     )
     backend2 = "postgresql"
 
-    assert should_we_generate_this_test(backend2, test_case2) == True
+    assert should_we_generate_this_test(backend2, test_case2) is True
 
     test_case3 = ExpectationTestCase(
         title="",
@@ -660,7 +662,7 @@ def test__should_we_generate_this_test__sqlalchemy():
     )
     backend3 = "mysql"
 
-    assert should_we_generate_this_test(backend3, test_case3) == False
+    assert should_we_generate_this_test(backend3, test_case3) is False
 
     test_case4 = ExpectationTestCase(
         title="",
@@ -673,7 +675,7 @@ def test__should_we_generate_this_test__sqlalchemy():
     )
     backend4 = "sqlite"
 
-    assert should_we_generate_this_test(backend4, test_case4) == False
+    assert should_we_generate_this_test(backend4, test_case4) is False
 
     test_case5 = ExpectationTestCase(
         title="",
@@ -686,7 +688,7 @@ def test__should_we_generate_this_test__sqlalchemy():
     )
     backend5 = "spark"
 
-    assert should_we_generate_this_test(backend5, test_case5) == True
+    assert should_we_generate_this_test(backend5, test_case5) is True
 
 
 @pytest.mark.unit
@@ -709,7 +711,7 @@ def test__should_we_generate_this_test__pandas():
     )
     backend = "pandas"
 
-    assert should_we_generate_this_test(backend, test_case) == True
+    assert should_we_generate_this_test(backend, test_case) is True
 
     test_case2 = ExpectationTestCase(
         title="",
@@ -722,7 +724,7 @@ def test__should_we_generate_this_test__pandas():
     )
     backend2 = "pandas"
 
-    assert should_we_generate_this_test(backend2, test_case2) == True
+    assert should_we_generate_this_test(backend2, test_case2) is True
 
     test_case3 = ExpectationTestCase(
         title="",
@@ -769,4 +771,4 @@ def test__should_we_generate_this_test__pandas():
     )
     backend5 = "pandas"
 
-    assert should_we_generate_this_test(backend5, test_case5) == False
+    assert should_we_generate_this_test(backend5, test_case5) is False

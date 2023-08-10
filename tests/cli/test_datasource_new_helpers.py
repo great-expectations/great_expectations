@@ -19,11 +19,9 @@ from great_expectations.cli.datasource import (
 )
 from great_expectations.datasource.types import DatasourceTypes
 
-
 pytestmark = pytest.mark.cli
 
 
-@pytest.mark.unit
 def test_SQLCredentialYamlHelper_defaults(empty_data_context):
     helper = SQLCredentialYamlHelper(usage_stats_payload={"foo": "bar"})
     expected_credentials_snippet = '''\
@@ -73,7 +71,6 @@ data_connectors:
     assert renderer.sql_credentials_code_snippet == expected_credentials_snippet
 
 
-@pytest.mark.unit
 def test_SQLCredentialYamlHelper_driver(empty_data_context):
     helper = SQLCredentialYamlHelper(usage_stats_payload={"foo": "bar"}, driver="stuff")
     expected_credentials_snippet = '''\

@@ -142,7 +142,7 @@ def file_data_context(
 ) -> FileDataContext:
     project_path = tmp_path / "file_data_context"
     project_path.mkdir()
-    context_root_dir = project_path / "great_expectations"
+    context_root_dir = project_path / FileDataContext.GX_DIR
     context = FileDataContext(
         project_config=data_context_config, context_root_dir=context_root_dir
     )
@@ -157,7 +157,7 @@ def cloud_data_context(
 ) -> CloudDataContext:
     project_path = tmp_path / "cloud_data_context"
     project_path.mkdir()
-    context_root_dir = project_path / "great_expectations"
+    context_root_dir = project_path / FileDataContext.GX_DIR
 
     cloud_data_context = CloudDataContext(
         project_config=data_context_config,
@@ -322,6 +322,7 @@ def test_data_context_variables_get(
     _test_variables_get(cloud_data_context_variables)
 
 
+@pytest.mark.unit
 def test_data_context_variables_get_with_substitutions(
     data_context_config_dict: dict,
 ) -> None:
@@ -527,7 +528,6 @@ def test_data_context_variables_repr_and_str_only_reveal_config(
 
 
 @pytest.mark.big
-@pytest.mark.integration
 def test_file_data_context_variables_e2e(
     monkeypatch,
     file_data_context: FileDataContext,
