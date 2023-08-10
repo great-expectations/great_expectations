@@ -42,10 +42,10 @@ jobs:
             - 'tests/integration/fixtures/**'
             - 'tests/test_sets/**'
   doc-checks:
-    # run on every PR that is not a draft that has docs changes, and on non-pull request events (ie. releases)
     needs: docs-changes
+    # run on every PR that is not a draft that has docs changes, and on tagged push events (ie. releases)
     if: |
-      needs.docs-changes.outputs.docs == 'true' ||
+      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
       (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     steps:
@@ -111,9 +111,9 @@ jobs:
   docs-snippets:
     name: docs-snippets
     needs: docs-changes
-    # run on every PR that is not a draft that has docs changes, and on non-pull request events (ie. releases)
+    # run on every PR that is not a draft that has docs changes, and on tagged push events (ie. releases)
     if: |
-      needs.docs-changes.outputs.docs == 'true' ||
+      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
       (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     env:
