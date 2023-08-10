@@ -180,7 +180,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     def _question_renderer(cls, configuration, result=None, runtime_configuration=None):
         column = configuration.kwargs.get("column")
         mostly = configuration.kwargs.get("mostly")
-        set_ = getattr(cls, "set_")
+        set_ = cls.set_
         set_semantic_name = getattr(cls, "set_semantic_name", None)
 
         if mostly == 1 or mostly is None:
@@ -201,7 +201,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     ):
         column = result.expectation_config.kwargs.get("column")
         mostly = result.expectation_config.kwargs.get("mostly")
-        set_ = getattr(cls, "set_")
+        set_ = cls.set_
         set_semantic_name = getattr(cls, "set_semantic_name", None)
 
         if result.success:

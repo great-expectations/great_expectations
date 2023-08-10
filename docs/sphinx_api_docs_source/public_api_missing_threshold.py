@@ -41,7 +41,6 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/datasource/fluent/sources.py Name: delete_datasource",
     "File: great_expectations/datasource/fluent/config_str.py Name: ConfigStr",
     "File: great_expectations/datasource/simple_sqlalchemy_datasource.py Name: SimpleSqlalchemyDatasource",
-    "File: great_expectations/exceptions/exceptions.py Name: DataContextError",
     "File: great_expectations/exceptions/exceptions.py Name: InvalidExpectationConfigurationError",
     "File: great_expectations/expectations/core/expect_column_distinct_values_to_contain_set.py Name: validate_configuration",
     "File: great_expectations/expectations/core/expect_column_median_to_be_between.py Name: validate_configuration",

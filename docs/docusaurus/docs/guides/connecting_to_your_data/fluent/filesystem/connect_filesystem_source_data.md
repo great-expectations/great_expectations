@@ -7,6 +7,7 @@ toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 import Introduction from '/docs/components/connect_to_data/filesystem/_intro_connect_to_one_or_more_files_pandas_or_spark.mdx'
 import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
@@ -466,6 +467,30 @@ Run the following Python code to read the data in individual files directly into
 ```
 
 <InfoUsingPandasToConnectToDifferentFileTypes this_example_file_extension="csv"/>
+
+### Create Data Source (Optional)
+
+Modify the following code to connect to your <TechnicalTag tag="datasource" text="Data Source"/>. If you don't have data available for testing, you can use the [NYC taxi data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page). The NYC taxi data is open source, and it is updated every month. An individual record in the data corresponds to one taxi trip.
+
+:::caution
+Do not include sensitive information such as credentials in the configuration when you connect to your Data Source. This information appears as plain text in the database. If you must include credentials or a full connection string, GX recommends using a [config variables file](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials/).
+:::
+
+```python title="Jupyter Notebook"
+# Give your Datasource a name
+datasource_name = None
+datasource = context.sources.add_pandas(datasource_name)
+
+# Give your first Asset a name
+asset_name = None
+path_to_data = None
+# to use sample data uncomment next line
+# path_to_data = "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
+asset = datasource.add_csv_asset(asset_name, filepath_or_buffer=path_to_data)
+
+# Build batch request
+batch_request = asset.build_batch_request()
+```
 
 ### Next steps
 
