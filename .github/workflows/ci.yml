@@ -27,7 +27,11 @@ jobs:
   docs-changes:
     # check whether docs were changed
     runs-on: ubuntu-latest
-    permissions: read-all
+    permissions:
+      actions: read
+      checks: read
+      contents: read
+      pull-requests: read
     outputs:
       docs: ${{ steps.filter.outputs.docs }}
     steps:
