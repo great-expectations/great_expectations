@@ -44,7 +44,9 @@ jobs:
   doc-checks:
     # run on every PR that is not a draft that has docs changes, and on non-pull request events (ie. releases)
     needs: docs-changes
-    if: ${{ needs.docs-changes.outputs.docs == 'true' }}
+    if: |
+      ${{ needs.docs-changes.outputs.docs == 'true' }} ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -110,7 +112,9 @@ jobs:
     name: docs-snippets
     needs: docs-changes
     # run on every PR that is not a draft that has docs changes, and on non-pull request events (ie. releases)
-    if: ${{ needs.docs-changes.outputs.docs == 'true' }}
+    if: |
+      ${{ needs.docs-changes.outputs.docs == 'true' }} ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     env:
       # google
