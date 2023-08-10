@@ -1010,7 +1010,9 @@ class SQLDatasource(Datasource):
             self._cached_execution_engine_kwargs = current_execution_engine_kwargs
             engine_kwargs = current_execution_engine_kwargs.pop("kwargs", {})
             self._execution_engine = self._execution_engine_type()(
-                **current_execution_engine_kwargs, **engine_kwargs
+                **current_execution_engine_kwargs,
+                **engine_kwargs,
+                engine=self.get_engine()
             )
         return self._execution_engine
 
