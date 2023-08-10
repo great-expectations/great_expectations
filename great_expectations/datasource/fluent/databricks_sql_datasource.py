@@ -76,6 +76,7 @@ class DatabricksDsn(AnyUrl):
         "databricks",
         "databricks+connector",
     }
+    query: str  # if query is not provided, validate_parts() will raise an error
 
     @classmethod
     def validate_parts(cls, parts: Parts, validate_port: bool = True) -> Parts:
