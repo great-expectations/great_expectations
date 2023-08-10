@@ -25,7 +25,8 @@ jobs:
       - run: echo "CI jobs won't run because this is a draft pull request."
 
   doc-checks:
-    if: github.event.pull_request.draft == false
+    # run on every PR that is not a draft, and on non-pull request events (ie. releases)
+    if: github.event.pull_request.draft == false || github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
