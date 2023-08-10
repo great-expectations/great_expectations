@@ -43,6 +43,7 @@ jobs:
             - tests/test_sets/**
   doc-checks:
     # run on every PR that is not a draft has docs changes, and on non-pull request events (ie. releases)
+    needs: docs-changes
     if: (github.event.pull_request.draft == false && ${{ needs.docs-changes.outputs.docs }}) || github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
@@ -107,6 +108,7 @@ jobs:
 
   docs-snippets:
     name: docs-snippets
+    needs: docs-changes
     # run on every PR that is not a draft has docs changes, and on non-pull request events (ie. releases)
     if: (github.event.pull_request.draft == false && ${{ needs.docs-changes.outputs.docs }}) || github.event_name != 'pull_request'
     runs-on: ubuntu-latest
