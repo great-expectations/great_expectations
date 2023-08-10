@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Union
+from typing import TYPE_CHECKING, Literal, Union, overload
 from urllib import parse
 
 import pydantic
@@ -18,7 +18,7 @@ from great_expectations.datasource.fluent.sql_datasource import (
 
 if TYPE_CHECKING:
     from pydantic.networks import Parts
-
+    from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.compatibility import sqlalchemy
 
 
@@ -101,8 +101,24 @@ class DatabricksDsn(AnyUrl):
 
         return AnyUrl.validate_parts(parts=parts, validate_port=validate_port)
 
+    @overload
     @classmethod
-    def parse_url(cls, url: ConfigStr | str, config_provider=None) -> DatabricksDsn:
+    def parse_url(
+        cls, url: ConfigStr, config_provider: _ConfigurationProvider = ...
+    ) -> DatabricksDsn:
+        ...
+
+    @overload
+    @classmethod
+    def parse_url(
+        cls, url: str, config_provider: _ConfigurationProvider | None = ...
+    ) -> DatabricksDsn:
+        ...
+
+    @classmethod
+    def parse_url(
+        cls, url: ConfigStr | str, config_provider: _ConfigurationProvider | None = None
+    ) -> DatabricksDsn:
         if isinstance(url, ConfigStr):
             assert config_provider
             url = url.get_config_value(config_provider=config_provider)
