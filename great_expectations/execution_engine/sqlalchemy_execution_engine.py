@@ -84,6 +84,7 @@ from great_expectations.expectations.row_conditions import (
 )
 from great_expectations.util import (
     filter_properties_dict,
+    get_sqlalchemy_inspector,
     get_sqlalchemy_selectable,
     get_sqlalchemy_url,
     import_library_module,
@@ -329,6 +330,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "Ignoring credentials."
                 )
             self.engine = engine
+            self._inspector = get_sqlalchemy_inspector(engine)
         else:
             if data_context is None or data_context.concurrency is None:
                 concurrency = ConcurrencyConfig()
@@ -516,6 +518,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             raise InvalidConfigError(
                 "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
             )
+
+        self._inspector = get_sqlalchemy_inspector(engine=self.engine)
 
     @property
     def credentials(self) -> Optional[dict]:
