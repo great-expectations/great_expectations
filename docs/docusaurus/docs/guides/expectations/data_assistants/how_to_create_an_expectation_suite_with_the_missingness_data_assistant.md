@@ -21,38 +21,30 @@ All the code used in the examples is available in GitHub at this location: [how_
 
 - A [configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
 - An understanding of how to [configure a Datasource](../../connecting_to_your_data/connect_to_data_lp.md).
-- An understanding of how to [configure a Batch Request](/docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource).
 
 </Prerequisites>
 
-## Prepare your Batch Request
+## Prepare your Datasource and Validator
 
-In the following examples, you'll be using a Batch Request with multiple Batches and the Datasource that the Batch Request queries uses existing New York taxi trip data.
+In the following examples, you'll be using existing New York taxi trip data to create a Validator.
 
 This is the `Datasource` configuration:
  
 ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py datasource_config"
 ```
 
-This is the `BatchRequest` configuration:
+This is the `Validator` configuration:
 
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py batch_request"
+```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py validator"
 ```
 
 :::caution
-The Missingness Data Assistant runs multiple queries against your `Datasource`. Data Assistant performance can vary significantly depending on the number of Batches, the number of records per Batch, and network latency. If Data Assistant runtimes are too long, use a smaller `BatchRequest`. You can also run the Missingness Data Assistant on a single Batch when you expect the number of null records to be similar across Batches.
+The Missingness Data Assistant runs multiple queries against your `Datasource`. Data Assistant performance can vary significantly depending on the number of Batches, the number of records per Batch, and network latency. If Data Assistant runtimes are too long, use a subset of your data when defining your `Datasource` and `Validator`.
 :::
-
-## Prepare a new Expectation Suite
-
-Run the following code to prepare a new Expectation Suite with the Data Context `add_expectation_suite(...)` method:
-
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py expectation_suite"
-```
 
 ## Run the Missingness Data Assistant
 
-To run a Data Assistant, you can call the `run(...)` method for the assistant. However, there are numerous parameters available for the `run(...)` method of the Missingness Data Assistant. For instance, the `exclude_column_names` parameter allows you to define the columns that should not be Profiled.
+To run a Data Assistant, you can call the `run(...)` method for the assistant. There are numerous parameters available for the `run(...)` method of the Missingness Data Assistant. For instance, the `exclude_column_names` parameter allows you to define the columns that should not be Profiled.
 
 1. Run the following code to define the columns to exclude:
 
@@ -67,7 +59,11 @@ To run a Data Assistant, you can call the `run(...)` method for the assistant. H
   In this example, `context` is your Data Context instance.
 
   :::note
-  If you consider your `BatchRequest` data valid, and want to produce Expectations with ranges that are identical to the data in the `BatchRequest`, you don't need to alter the example code. You're using the default `estimation` parameter (`"exact"`). To identify potential outliers in your `BatchRequest` data, pass `estimation="flag_outliers"` to the `run(...)` method.
+  The example code uses the default `estimation` parameter (`"exact"`).
+
+  If you consider your data to be valid, and want to produce Expectations with ranges that are identical to the data in the `Validator`, you don't need to alter the example code. 
+  
+  To identify potential outliers in your `BatchRequest` data, pass `estimation="flag_outliers"` to the `run(...)` method.
   :::
 
   :::note
@@ -81,14 +77,20 @@ To run a Data Assistant, you can call the `run(...)` method for the assistant. H
   ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py get_expectation_suite"
   ```
 
-2. Run the following code to save the Expectation Suite:
+  The above code will generate a new Expectation Suite containing the Expectations generated from the Data Assistant.
+
+2. Run the following code to add the Expectation Suite to your Data Context:
 
   ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py save_expectation_suite"
   ```
 
 ## Test your Expectation Suite
 
-  Run the following code to use a Checkpoint to operate with the Expectation Suite and Batch Request that you defined:
+1. Save the Expectation Suite to your Validator:
+
+  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py save_validator"
+  ```
+2.  Run the following code to use a Checkpoint to operate with the Expectation Suite and Validator that you defined:
 
   ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py checkpoint"
   ```
@@ -108,35 +110,14 @@ To run a Data Assistant, you can call the `run(...)` method for the assistant. H
   Hover over a data point to view more information about the Batch and its calculated Metric value.
   :::
 
-2. Run the following code to view all Metrics computed by the Missingness Data Assistant:
-
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py metrics_by_domain"
-  ```
-
-3. Run the following code to plot the Expectations and the associated Metrics calculated by the Missingness Data Assistant:
-
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py plot_expectations_and_metrics"
-  ```
-
-  ![Plot Expectations and Metrics](../../../images/data_assistant_plot_expectations_and_metrics.png)
-
-  :::note
-  The Expectation and the Metric are not visualized by the `plot_expectations_and_metrics()` method when an Expectation is not produced by the Missingness Data Assistant for a given Metric.
-  :::
-
-4. Run the following command to view the Expectations produced and grouped by Domain:
-
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py show_expectations_by_domain_type"
-  ```
-
-5. Run the following command to view the Expectations produced and grouped by Expectation type:
+2. Run the following command to view the Expectations produced and grouped by Expectation type:
 
   ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py show_expectations_by_expectation_type"
   ```
 
 ## Edit your Expectation Suite (Optional)
 
-The Missingness Data Assistant creates as many Expectations as it can for the permitted columns. Although this can help with data analysis, it might be unnecessary.  It is also possible that you may possess some domain knowledge that is not reflected in the data that was sampled for the Profiling process. In these types of scenarios, you can edit your Expectation Suite to better align with your business requirements.
+The Missingness Data Assistant creates as many Expectations as it can for the permitted columns. Although this can help with data analysis, it might be unnecessary.  You might have some domain knowledge that is not reflected in the data that was sampled for the Profiling process. In these types of scenarios, you can edit your Expectation Suite to better align with your business requirements.
 
 Run the following code to edit an existing Expectation Suite:
 
@@ -144,4 +125,4 @@ Run the following code to edit an existing Expectation Suite:
 great_expectations suite edit <expectation_suite_name>
 ```
 
-A Jupyter Notebook opens. You can review, edit, and save changes to the Expectation Suite.
+A Jupyter Notebook will open. You can review, edit, and save changes to the Expectation Suite.
