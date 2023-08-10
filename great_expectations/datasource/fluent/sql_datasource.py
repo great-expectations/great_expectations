@@ -17,6 +17,8 @@ from typing import (
 )
 
 import pydantic
+from pydantic import Field
+from typing_extensions import Annotated
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import (
@@ -925,6 +927,9 @@ class TableAsset(_SQLAsset):
         return False
 
 
+SQLAssets = Annotated[Union[TableAsset, QueryAsset], Field(discriminator="type")]
+
+
 @public_api
 class SQLDatasource(Datasource):
     """Adds a generic SQL datasource to the data context.
@@ -955,7 +960,7 @@ class SQLDatasource(Datasource):
     )
     # We need to explicitly add each asset type to the Union due to how
     # deserialization is implemented in our pydantic base model.
-    assets: List[Union[TableAsset, QueryAsset]] = []
+    assets: List[SQLAssets] = []
 
     # private attrs
     _cached_connection_string: Union[str, ConfigStr] = pydantic.PrivateAttr("")
