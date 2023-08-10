@@ -75,6 +75,7 @@ class GXDependencies:
             "clickhouse-sqlalchemy",
             "docstring-parser",
             "feather-format",
+            "flaky",
             "ruff",
             "flask",
             "freezegun",

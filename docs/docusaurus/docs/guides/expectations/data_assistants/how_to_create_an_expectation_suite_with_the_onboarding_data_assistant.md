@@ -93,7 +93,7 @@ And once the Expectation Suite has been retrieved from the Data Assistant result
 ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py save_expectation_suite"
 ```
 
-## Test your Expectation Suite with a `heckpoint`
+## Test your Expectation Suite with a `Checkpoint`
 
 To verify that your Expectation Suite is working, you can use a Checkpoint. First, you will configure one to
  operate with the Expectation Suite and Batch Request that you have already defined:
