@@ -241,7 +241,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
             metric_values = attributed_resolved_metrics.conditioned_metric_values
 
-            if metric_values is None:
+            if not metric_values:
                 raise gx_exceptions.ProfilerExecutionError(
                     message=f"Result of metric computations for {self.__class__.__name__} is empty."
                 )
