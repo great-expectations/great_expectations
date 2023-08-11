@@ -47,6 +47,7 @@ TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
         "unquoted_upper": PG_TABLE.upper(),
         "quoted_upper": f'"{PG_TABLE.upper()}"',
         "quoted_mixed": f'"{PG_TABLE.title()}"',
+        "unquoted_mixed": PG_TABLE.title(),
     },
     "trino": {
         "unquoted_lower": TRINO_TABLE.lower(),
@@ -54,6 +55,7 @@ TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
         # "unquoted_upper": TRINO_TABLE.upper(),
         # "quoted_upper": f"'{TRINO_TABLE.upper()}'",
         # "quoted_mixed": f"'TRINO_TABLE.title()'",
+        # "unquoted_mixed": TRINO_TABLE.title(),
     },
     "databricks_sql": {
         "unquoted_lower": PG_TABLE.lower(),
@@ -61,6 +63,7 @@ TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
         "unquoted_upper": PG_TABLE.upper(),
         "quoted_upper": f"`{PG_TABLE.upper()}`",
         "quoted_mixed": f"`{PG_TABLE.title()}`",
+        "unquoted_mixed": PG_TABLE.title(),
     },
 }
 
@@ -186,6 +189,10 @@ def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
         ),
         param("quoted_upper"),
         param("quoted_mixed"),
+        param(
+            "unquoted_mixed",
+            marks=[pytest.mark.xfail(reason="TODO: fix this")],
+        ),
     ],
 )
 class TestTableIdentifiers:
