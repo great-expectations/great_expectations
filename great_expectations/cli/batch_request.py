@@ -429,7 +429,7 @@ Would you like to continue?"""
 
 def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
     execution_engine: SqlAlchemyExecutionEngine = datasource.execution_engine
-    inspector: sqlalchemy.Inspector = get_sqlalchemy_inspector(execution_engine.engine)
+    inspector: sqlalchemy.Inspector = execution_engine.get_inspector()
     return inspector.default_schema_name
 
 

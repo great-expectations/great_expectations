@@ -13,6 +13,7 @@ import traceback
 import warnings
 from contextlib import contextmanager
 from pathlib import Path
+from packaging import version
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -84,7 +85,6 @@ from great_expectations.expectations.row_conditions import (
 )
 from great_expectations.util import (
     filter_properties_dict,
-    get_sqlalchemy_inspector,
     get_sqlalchemy_selectable,
     get_sqlalchemy_url,
     import_library_module,
@@ -323,6 +323,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # then we get errors like sqlite3.ProgrammingError: Cannot operate on a closed database.
         self._connection = None
 
+        # Use a single instance of SQLAlchemy engine to avoid creating multiple engine instances
+        # for the same SQLAlchemy engine. This allows us to take advantage of SQLAlchemy's
+        # built-in caching.
+        self._inspector = None
+
         if engine is not None:
             if credentials is not None:
                 logger.warning(
@@ -330,7 +335,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "Ignoring credentials."
                 )
             self.engine = engine
-            self._inspector = get_sqlalchemy_inspector(engine)
         else:
             if data_context is None or data_context.concurrency is None:
                 concurrency = ConcurrencyConfig()
@@ -518,8 +522,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             raise InvalidConfigError(
                 "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
             )
-
-        self._inspector = get_sqlalchemy_inspector(engine=self.engine)
 
     @property
     def credentials(self) -> Optional[dict]:
@@ -1380,6 +1382,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         return batch_data, batch_markers
+
+    def get_inspector(self) -> sqlalchemy.engine.reflection.Inspector:
+        if self._inspector is None:
+            if version.parse(sa.__version__) < version.parse("1.4"):
+                # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
+                self._inspector = sqlalchemy.reflection.Inspector.from_engine(
+                    self.engine
+                )
+            else:
+                self._inspector = sa.inspect(self.engine)
+
+        return self._inspector
 
     @contextmanager
     def get_connection(self) -> sqlalchemy.Connection:

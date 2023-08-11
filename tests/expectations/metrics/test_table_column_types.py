@@ -5,7 +5,6 @@ from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.util import get_sqlalchemy_inspector
 from tests.expectations.test_util import get_table_columns_metric
 
 
@@ -25,7 +24,7 @@ def test_table_column_introspection(sa, capfd):
     assert batch_data.selectable.name == "table_partitioned_by_date_column__A"
     assert batch_data.selectable.schema is None
 
-    insp = get_sqlalchemy_inspector(eng)
+    insp = engine.get_inspector()
     columns = insp.get_columns(
         batch_data.selectable.name, schema=batch_data.selectable.schema
     )
@@ -53,7 +52,7 @@ def test_table_column_introspection(sa, capfd):
 
 
 @pytest.mark.sqlite
-def test_table_column_type(sa, capfd):
+def test_table_column_type__sqlalchemy_happy_path(sa, capfd):
     db_file = file_relative_path(
         __file__,
         "../../test_sets/test_cases_for_sql_data_connector.db",
@@ -95,3 +94,29 @@ def test_table_column_type(sa, capfd):
         "event_type",
         "favorite_color",
     ]
+
+    # Add another batch
+    batch_data = SqlAlchemyBatchData(
+        execution_engine=engine, table_name="table_partitioned_by_date_column__B"
+    )
+    engine.load_batch_data("__1", batch_data)
+    assert isinstance(batch_data.selectable, sa.Table)
+    assert batch_data.selectable.name == "table_partitioned_by_date_column__B"
+    assert batch_data.selectable.schema is None
+
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
+    std, err = capfd.readouterr()
+    # Should have to re-inspect due to new batch
+    assert std
+    assert not err
+
+    assert results[("table.columns", (), ())] == [
+        "index",
+        "id",
+        "date",
+        "event_type",
+        "favorite_color",
+    ]
+
+
+def test_table_column_types__sqlalchemy_

@@ -314,7 +314,7 @@ def get_sqlalchemy_column_metadata(
         columns: List[Dict[str, Any]]
 
         engine = execution_engine.engine
-        inspector = execution_engine._inspector
+        inspector = execution_engine.get_inspector()
         try:
             # if a custom query was passed
             if sqlalchemy.TextClause and isinstance(
@@ -581,7 +581,11 @@ def column_reflection_fallback(  # noqa: PLR0915
                         .limit(1)
                     )
                 else:
-                    query = sa.select(sa.text("*")).select_from(selectable).limit(1)
+                    query = (
+                        sa.select(sa.text("*"))
+                        .select_from(sa.text(selectable))
+                        .limit(1)
+                    )
 
             result_object = connection.execute(query)
             # noinspection PyProtectedMember
