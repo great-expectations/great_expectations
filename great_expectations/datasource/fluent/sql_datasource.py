@@ -927,7 +927,7 @@ class TableAsset(_SQLAsset):
         return False
 
 
-SQLAssets = Annotated[Union[TableAsset, QueryAsset], Field(discriminator="type")]
+AssetTypes = Annotated[Union[TableAsset, QueryAsset], Field(discriminator="type")]
 
 
 @public_api
@@ -960,7 +960,7 @@ class SQLDatasource(Datasource):
     )
     # We need to explicitly add each asset type to the Union due to how
     # deserialization is implemented in our pydantic base model.
-    assets: List[SQLAssets] = []
+    assets: List[AssetTypes] = []
 
     # private attrs
     _cached_connection_string: Union[str, ConfigStr] = pydantic.PrivateAttr("")
