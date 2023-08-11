@@ -235,7 +235,7 @@ class TestTableIdentifiers:
     ):
         table_name = TABLE_NAME_MAPPING["databricks"].get(asset_name)
         if not table_name:
-            pytest.skip(f"no '{asset_name}' table_name for trino")
+            pytest.skip(f"no '{asset_name}' table_name for databricks")
 
         table_names: list[str] = inspect(
             databricks_sql_ds.get_engine()
