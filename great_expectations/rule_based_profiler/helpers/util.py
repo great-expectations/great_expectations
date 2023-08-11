@@ -17,15 +17,16 @@ from typing import (
     Iterable,
     List,
     Optional,
+    Protocol,
     Tuple,
     Union,
 )
 
 import numpy as np
-import scipy.stats as stats
-from typing_extensions import Protocol, TypeGuard
+from scipy import stats
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import numpy
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
@@ -38,7 +39,9 @@ from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     SemanticDomainTypes,
 )
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_domain_types import (
+    MetricDomainTypes,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
     NUM_HISTOGRAM_BINS,
     NumericRangeEstimationResult,
@@ -50,19 +53,22 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     ParameterNode,
     get_parameter_value_by_fully_qualified_parameter_name,
-    is_fully_qualified_parameter_name_literal_string_format,
+    is_fully_qualified_parameter_name_prefix_in_literal,
 )
 from great_expectations.types import safe_deep_copy
 from great_expectations.util import (
     convert_ndarray_datetime_to_float_dtype_utc_timezone,
     convert_ndarray_float_to_datetime_dtype,
     convert_ndarray_to_datetime_dtype_best_effort,
-    numpy_quantile,
 )
-from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,  # noqa: TCH001
+)
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeGuard
+
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
@@ -86,7 +92,7 @@ RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS: set = {
 }
 
 
-def get_validator(
+def get_validator(  # noqa: PLR0913
     purpose: str,
     *,
     data_context: Optional[AbstractDataContext] = None,
@@ -109,7 +115,7 @@ def get_validator(
         )
 
     batch: Batch
-    if batch_list is None or all([batch is None for batch in batch_list]):
+    if batch_list is None or all(batch is None for batch in batch_list):
         if batch_request is None:
             return None
 
@@ -143,7 +149,7 @@ def get_validator(
     return validator
 
 
-def get_batch_ids(
+def get_batch_ids(  # noqa: PLR0913
     data_context: Optional[AbstractDataContext] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
@@ -153,13 +159,13 @@ def get_batch_ids(
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[List[str]]:
     batch: Batch
-    if batch_list is None or all([batch is None for batch in batch_list]):
+    if batch_list is None or all(batch is None for batch in batch_list):
         if batch_request is None:
             return None
 
         batch_request = build_batch_request(
-            domain=domain,
             batch_request=batch_request,
+            domain=domain,
             variables=variables,
             parameters=parameters,
         )
@@ -308,7 +314,7 @@ def get_parameter_value(
         )
     elif isinstance(
         parameter_reference, str
-    ) and is_fully_qualified_parameter_name_literal_string_format(
+    ) and is_fully_qualified_parameter_name_prefix_in_literal(
         fully_qualified_parameter_name=parameter_reference
     ):
         parameter_reference = get_parameter_value_by_fully_qualified_parameter_name(
@@ -406,10 +412,8 @@ def get_resolved_metrics_by_key(
         key
         for key, metric_configuration_ids in metric_configuration_ids_by_key.items()
         if all(
-            [
-                metric_configuration_id in metric_configuration_ids_resolved_metrics
-                for metric_configuration_id in metric_configuration_ids
-            ]
+            metric_configuration_id in metric_configuration_ids_resolved_metrics
+            for metric_configuration_id in metric_configuration_ids
         )
     ]
 
@@ -510,14 +514,12 @@ def integer_semantic_domain_type(domain: Domain) -> bool:
 
     semantic_domain_type: SemanticDomainTypes
     return inferred_semantic_domain_type and all(
-        [
-            semantic_domain_type
-            in [
-                SemanticDomainTypes.LOGIC,
-                SemanticDomainTypes.IDENTIFIER,
-            ]
-            for semantic_domain_type in inferred_semantic_domain_type.values()
+        semantic_domain_type
+        in [
+            SemanticDomainTypes.LOGIC,
+            SemanticDomainTypes.IDENTIFIER,
         ]
+        for semantic_domain_type in inferred_semantic_domain_type.values()
     )
 
 
@@ -541,10 +543,8 @@ def datetime_semantic_domain_type(domain: Domain) -> bool:
 
     semantic_domain_type: SemanticDomainTypes
     return inferred_semantic_domain_type and all(
-        [
-            semantic_domain_type == SemanticDomainTypes.DATETIME
-            for semantic_domain_type in inferred_semantic_domain_type.values()
-        ]
+        semantic_domain_type == SemanticDomainTypes.DATETIME
+        for semantic_domain_type in inferred_semantic_domain_type.values()
     )
 
 
@@ -568,7 +568,7 @@ def get_false_positive_rate_from_rule_state(
         variables=variables,
         parameters=parameters,
     )
-    if not (0.0 <= false_positive_rate <= 1.0):
+    if not (0.0 <= false_positive_rate <= 1.0):  # noqa: PLR2004
         raise gx_exceptions.ProfilerExecutionError(
             f"""false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1], but \
 {false_positive_rate} was provided.
@@ -637,13 +637,13 @@ def compute_quantiles(
     false_positive_rate: np.float64,
     quantile_statistic_interpolation_method: str,
 ) -> NumericRangeEstimationResult:
-    lower_quantile = numpy_quantile(
+    lower_quantile = numpy.numpy_quantile(
         a=metric_values,
         q=(false_positive_rate / 2.0),
         axis=0,
         method=quantile_statistic_interpolation_method,
     )
-    upper_quantile = numpy_quantile(
+    upper_quantile = numpy.numpy_quantile(
         a=metric_values,
         q=1.0 - (false_positive_rate / 2.0),
         axis=0,
@@ -656,7 +656,7 @@ def compute_quantiles(
     )
 
 
-def compute_kde_quantiles_point_estimate(
+def compute_kde_quantiles_point_estimate(  # noqa: PLR0913
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
@@ -708,14 +708,14 @@ def compute_kde_quantiles_point_estimate(
 
     lower_quantile_point_estimate: Union[
         np.float64, datetime.datetime
-    ] = numpy_quantile(
+    ] = numpy.numpy_quantile(
         metric_values_gaussian_sample,
         q=lower_quantile_pct,
         method=quantile_statistic_interpolation_method,
     )
     upper_quantile_point_estimate: Union[
         np.float64, datetime.datetime
-    ] = numpy_quantile(
+    ] = numpy.numpy_quantile(
         metric_values_gaussian_sample,
         q=upper_quantile_pct,
         method=quantile_statistic_interpolation_method,
@@ -728,7 +728,7 @@ def compute_kde_quantiles_point_estimate(
     )
 
 
-def compute_bootstrap_quantiles_point_estimate(
+def compute_bootstrap_quantiles_point_estimate(  # noqa: PLR0913
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
@@ -794,12 +794,12 @@ def compute_bootstrap_quantiles_point_estimate(
     lower_quantile_pct: float = false_positive_rate / 2.0
     upper_quantile_pct: float = 1.0 - false_positive_rate / 2.0
 
-    sample_lower_quantile: np.ndarray = numpy_quantile(
+    sample_lower_quantile: np.ndarray = numpy.numpy_quantile(
         a=metric_values,
         q=lower_quantile_pct,
         method=quantile_statistic_interpolation_method,
     )
-    sample_upper_quantile: np.ndarray = numpy_quantile(
+    sample_upper_quantile: np.ndarray = numpy.numpy_quantile(
         a=metric_values,
         q=upper_quantile_pct,
         method=quantile_statistic_interpolation_method,
@@ -895,7 +895,7 @@ def build_numeric_range_estimation_result(
     )
 
 
-def _determine_quantile_bias_corrected_point_estimate(
+def _determine_quantile_bias_corrected_point_estimate(  # noqa: PLR0913
     bootstraps: np.ndarray,
     quantile_pct: float,
     quantile_statistic_interpolation_method: str,
@@ -903,7 +903,7 @@ def _determine_quantile_bias_corrected_point_estimate(
     quantile_bias_std_error_ratio_threshold: float,
     sample_quantile: np.ndarray,
 ) -> np.float64:
-    bootstrap_quantiles: Union[np.ndarray, np.float64] = numpy_quantile(
+    bootstrap_quantiles: Union[np.ndarray, np.float64] = numpy.numpy_quantile(
         bootstraps,
         q=quantile_pct,
         axis=1,
@@ -921,7 +921,7 @@ def _determine_quantile_bias_corrected_point_estimate(
 
     if (
         not quantile_bias_correction
-        and bootstrap_quantile_standard_error > 0.0
+        and bootstrap_quantile_standard_error > 0.0  # noqa: PLR2004
         and bootstrap_quantile_bias / bootstrap_quantile_standard_error
         <= quantile_bias_std_error_ratio_threshold
     ):
@@ -972,7 +972,7 @@ def convert_metric_values_to_float_dtype_best_effort(
     return ndarray_is_datetime_type, metric_values_converted
 
 
-def get_validator_with_expectation_suite(
+def get_validator_with_expectation_suite(  # noqa: PLR0913
     data_context: AbstractDataContext,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
@@ -1051,7 +1051,7 @@ def get_or_create_expectation_suite(
                     expectation_suite_name=expectation_suite_name
                 )
             except gx_exceptions.DataContextError:
-                expectation_suite = data_context.create_expectation_suite(
+                expectation_suite = data_context.add_expectation_suite(
                     expectation_suite_name=expectation_suite_name
                 )
                 logger.info(

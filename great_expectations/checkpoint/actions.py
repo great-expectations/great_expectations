@@ -5,21 +5,17 @@ The only requirement from an action is for it to have a take_action method.
 """
 from __future__ import annotations
 
+import json
 import logging
-import warnings
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
-from typing_extensions import Final
-
-from great_expectations.core import ExpectationSuiteValidationResult
-from great_expectations.core._docs_decorators import deprecated_argument
-from great_expectations.data_context.cloud_constants import CLOUD_APP_DEFAULT_BASE_URL
-from great_expectations.data_context.types.refs import GXCloudResourceRef
+import requests
 
 try:
     import pypd
 except ImportError:
     pypd = None
+
 
 from great_expectations.checkpoint.util import (
     send_email,
@@ -29,7 +25,9 @@ from great_expectations.checkpoint.util import (
     send_sns_notification,
 )
 from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.store.metric_store import MetricStore
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -39,7 +37,10 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import AbstractDataContext, DataContext
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+    )
+    from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +53,7 @@ class ValidationAction:
         data_context: Data Context that is used by the Action.
     """
 
-    def __init__(self, data_context: DataContext) -> None:
+    def __init__(self, data_context: AbstractDataContext) -> None:
         """Create a ValidationAction"""
         self.data_context = data_context
 
@@ -67,7 +68,7 @@ class ValidationAction:
         return isinstance(self.data_context, CloudDataContext)
 
     @public_api
-    def run(
+    def run(  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -104,7 +105,7 @@ class ValidationAction:
         )
 
     @public_api
-    def _run(
+    def _run(  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -142,7 +143,7 @@ class NoOpAction(ValidationAction):
     ) -> None:
         super().__init__(data_context)
 
-    def _run(
+    def _run(  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -197,9 +198,9 @@ class SlackNotificationAction(ValidationAction):
         show_failed_expectations: Shows a list of failed expectation types.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         renderer: dict,
         slack_webhook: Optional[str] = None,
         slack_token: Optional[str] = None,
@@ -235,7 +236,7 @@ class SlackNotificationAction(ValidationAction):
         self.notify_with = notify_with
         self.show_failed_expectations = show_failed_expectations
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -272,9 +273,7 @@ class SlackNotificationAction(ValidationAction):
                     data_docs_pages = payload[action_names]
 
         # Assemble complete GX Cloud URL for a specific validation result
-        data_docs_urls: list[
-            dict[str, str | None]
-        ] = self.data_context.get_docs_sites_urls(
+        data_docs_urls: list[dict[str, str]] = self.data_context.get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier
         )
 
@@ -285,11 +284,18 @@ class SlackNotificationAction(ValidationAction):
         ]
         if (
             isinstance(validation_result_suite_identifier, GXCloudIdentifier)
-            and validation_result_suite_identifier.cloud_id
+            and validation_result_suite_identifier.id
         ):
-            cloud_base_url: Final[str] = CLOUD_APP_DEFAULT_BASE_URL
-            validation_result_url = f"{cloud_base_url}?validationResultId={validation_result_suite_identifier.cloud_id}"
-            validation_result_urls.append(validation_result_url)
+            # To send a notification with a link to the validation result, we need to have created the validation
+            # result in cloud. If the user has configured the store action after the notification action, they will
+            # get a warning that no link will be provided. See the __init__ method for ActionListValidationOperator.
+            if (
+                "store_validation_result" in payload
+                and "validation_result_url" in payload["store_validation_result"]
+            ):
+                validation_result_urls.append(
+                    payload["store_validation_result"]["validation_result_url"]
+                )
 
         if (
             self.notify_on == "all"
@@ -341,7 +347,7 @@ class PagerdutyAlertAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         api_key: str,
         routing_key: str,
         notify_on: str = "failure",
@@ -356,7 +362,7 @@ class PagerdutyAlertAction(ValidationAction):
         assert routing_key, "No Pagerduty routing_key found in action config."
         self.notify_on = notify_on
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -449,7 +455,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         renderer: dict,
         microsoft_teams_webhook: str,
         notify_on: str = "all",
@@ -474,7 +480,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         ), "No Microsoft teams webhook found in action config."
         self.notify_on = notify_on
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -556,9 +562,9 @@ class OpsgenieAlertAction(ValidationAction):
         tags: Tags to include in the alert
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         renderer: dict,
         api_key: str,
         region: Optional[str] = None,
@@ -588,7 +594,7 @@ class OpsgenieAlertAction(ValidationAction):
         self.notify_on = notify_on
         self.tags = tags
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -696,9 +702,9 @@ class EmailAction(ValidationAction):
         notify_with: Optional list of DataDocs site names to display  in Slack messages. Defaults to all.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         renderer: dict,
         smtp_address: str,
         smtp_port: str,
@@ -750,7 +756,7 @@ class EmailAction(ValidationAction):
         self.notify_on = notify_on
         self.notify_with = notify_with
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -851,7 +857,7 @@ class StoreValidationResultAction(ValidationAction):
         else:
             self.target_store = data_context.stores[target_store_name]
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -863,7 +869,28 @@ class StoreValidationResultAction(ValidationAction):
         checkpoint_identifier: Optional[GXCloudIdentifier] = None,
     ):
         logger.debug("StoreValidationResultAction.run")
+        run_return_value = self._basic_run(
+            validation_result_suite,
+            validation_result_suite_identifier,
+            expectation_suite_identifier,
+            checkpoint_identifier,
+        )
+        if self._using_cloud_context and isinstance(
+            run_return_value, GXCloudResourceRef
+        ):
+            return self._run_cloud_post_process_resource_ref(
+                run_return_value, validation_result_suite_identifier
+            )
 
+    def _basic_run(
+        self,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: Union[
+            ValidationResultIdentifier, GXCloudIdentifier
+        ],
+        expectation_suite_identifier,
+        checkpoint_identifier: Optional[GXCloudIdentifier],
+    ) -> Union[bool, GXCloudResourceRef]:
         if validation_result_suite is None:
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
@@ -882,22 +909,31 @@ class StoreValidationResultAction(ValidationAction):
 
         checkpoint_ge_cloud_id = None
         if self._using_cloud_context and checkpoint_identifier:
-            checkpoint_ge_cloud_id = checkpoint_identifier.cloud_id
+            checkpoint_ge_cloud_id = checkpoint_identifier.id
 
         expectation_suite_ge_cloud_id = None
         if self._using_cloud_context and expectation_suite_identifier:
-            expectation_suite_ge_cloud_id = str(expectation_suite_identifier.cloud_id)
+            expectation_suite_ge_cloud_id = expectation_suite_identifier.id
 
-        return_val = self.target_store.set(
+        return self.target_store.set(
             validation_result_suite_identifier,
             validation_result_suite,
             checkpoint_id=checkpoint_ge_cloud_id,
             expectation_suite_id=expectation_suite_ge_cloud_id,
         )
-        if self._using_cloud_context:
-            return_val: GXCloudResourceRef
-            new_ge_cloud_id = return_val.cloud_id
-            validation_result_suite_identifier.cloud_id = new_ge_cloud_id
+
+    def _run_cloud_post_process_resource_ref(
+        self,
+        gx_cloud_resource_ref: GXCloudResourceRef,
+        validation_result_suite_identifier: Union[
+            ValidationResultIdentifier, GXCloudIdentifier
+        ],
+    ):
+        store_set_return_value: GXCloudResourceRef
+        new_ge_cloud_id = gx_cloud_resource_ref.id
+        # ValidationResultIdentifier has no `.id`
+        validation_result_suite_identifier.id = new_ge_cloud_id  # type: ignore[union-attr]
+        return gx_cloud_resource_ref
 
 
 @public_api
@@ -933,7 +969,7 @@ class StoreEvaluationParametersAction(ValidationAction):
         else:
             self.target_store = data_context.stores[target_store_name]
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -1020,7 +1056,7 @@ class StoreMetricsAction(ValidationAction):
                 "StoreMetricsAction must have a valid MetricsStore for its target store."
             )
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -1050,16 +1086,13 @@ class StoreMetricsAction(ValidationAction):
             )
 
         self.data_context.store_validation_result_metrics(
-            self._requested_metrics, validation_result_suite, self._target_store_name
+            requested_metrics=self._requested_metrics,
+            validation_results=validation_result_suite,
+            target_store_name=self._target_store_name,
         )
 
 
 @public_api
-@deprecated_argument(
-    argument_name="target_site_names",
-    version="0.10.10",
-    message="target_site_names is deprecated as of v0.10.10 and will be removed in v0.16. Please use site_names instead.",
-)
 class UpdateDataDocsAction(ValidationAction):
     """Notify the site builders of all data docs sites of a Data Context that a validation result should be added to the data docs.
 
@@ -1085,35 +1118,21 @@ class UpdateDataDocsAction(ValidationAction):
     Args:
         data_context: Data Context that is used by the Action.
         site_names: Optional. A list of the names of sites to update.
-        target_site_names: Optional. Deprecated. A list of the names of sites to update.
     """
 
     def __init__(
         self,
-        data_context: DataContext,
-        site_names: Optional[Union[List[str], str]] = None,
-        target_site_names: Optional[Union[List[str], str]] = None,
+        data_context: AbstractDataContext,
+        site_names: list[str] | str | None = None,
     ) -> None:
         """
         :param data_context: Data Context
         :param site_names: *optional* List of site names for building data docs
         """
         super().__init__(data_context)
-        if target_site_names:
-            # deprecated-v0.10.10
-            warnings.warn(
-                "target_site_names is deprecated as of v0.10.10 and will be removed in v0.16. Please use site_names instead.",
-                DeprecationWarning,
-            )
-            if site_names:
-                raise DataContextError(
-                    "Invalid configuration: legacy key target_site_names and site_names key are "
-                    "both present in UpdateDataDocsAction configuration"
-                )
-            site_names = target_site_names
         self._site_names = site_names
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -1152,7 +1171,7 @@ class UpdateDataDocsAction(ValidationAction):
             ],
         )
         # <snippet name="great_expectations/checkpoint/actions.py empty dict">
-        data_docs_validation_results = {}
+        data_docs_validation_results: dict = {}
         # </snippet>
         if self._using_cloud_context:
             return data_docs_validation_results
@@ -1161,7 +1180,7 @@ class UpdateDataDocsAction(ValidationAction):
         # <snippet name="great_expectations/checkpoint/actions.py get_docs_sites_urls">
         docs_site_urls_list = self.data_context.get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier,
-            site_names=self._site_names,
+            site_names=self._site_names,  # type: ignore[arg-type] # could be a `str`
         )
         # </snippet>
         # process payload
@@ -1197,7 +1216,7 @@ class SNSNotificationAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         sns_topic_arn: str,
         sns_message_subject: Optional[str],
     ) -> None:
@@ -1206,7 +1225,7 @@ class SNSNotificationAction(ValidationAction):
         self.sns_topic_arn = sns_topic_arn
         self.sns_message_subject = sns_message_subject
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,
@@ -1240,3 +1259,69 @@ class SNSNotificationAction(ValidationAction):
         return send_sns_notification(
             self.sns_topic_arn, subject, validation_result_suite.__str__(), **kwargs
         )
+
+
+class APINotificationAction(ValidationAction):
+    def __init__(self, data_context, url) -> None:
+        super().__init__(data_context)
+        self.url = url
+
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
+        self,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: ValidationResultIdentifier,
+        data_asset,
+        expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
+        checkpoint_identifier=None,
+        **kwargs,
+    ):
+        suite_name: str = validation_result_suite.meta["expectation_suite_name"]
+        if "batch_kwargs" in validation_result_suite.meta:
+            data_asset_name = validation_result_suite.meta["batch_kwargs"].get(
+                "data_asset_name", "__no_data_asset_name__"
+            )
+        elif "active_batch_definition" in validation_result_suite.meta:
+            data_asset_name = (
+                validation_result_suite.meta["active_batch_definition"].data_asset_name
+                if validation_result_suite.meta[
+                    "active_batch_definition"
+                ].data_asset_name
+                else "__no_data_asset_name__"
+            )
+        else:
+            data_asset_name = "__no_data_asset_name__"
+
+        validation_results: list = validation_result_suite.get("results")
+        validation_results_serializable: list = convert_to_json_serializable(
+            validation_results
+        )
+
+        payload = self.create_payload(
+            data_asset_name, suite_name, validation_results_serializable
+        )
+
+        response = self.send_results(payload)
+        return (
+            f"Successfully Posted results to API, status code - {response.status_code}"
+        )
+
+    def send_results(self, payload) -> requests.Response:
+        try:
+            headers = {"Content-Type": "application/json"}
+            return requests.post(self.url, headers=headers, data=payload)
+        except Exception as e:
+            print(f"Exception when sending data to API - {e}")
+            raise e
+
+    @staticmethod
+    def create_payload(
+        data_asset_name, suite_name, validation_results_serializable
+    ) -> str:
+        payload = json.dumps(
+            {
+                "test_suite_name": suite_name,
+                "data_asset_name": data_asset_name,
+                "validation_results": validation_results_serializable,
+            }
+        )
+        return payload

@@ -187,7 +187,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     def _question_renderer(cls, configuration, result=None, runtime_configuration=None):
         column = configuration.kwargs.get("column")
         mostly = configuration.kwargs.get("mostly")
-        regex = getattr(cls, "regex")
+        regex = getattr(cls, "regex", None)
         semantic_type_name_plural = getattr(cls, "semantic_type_name_plural", None)
 
         if mostly == 1 or mostly is None:
@@ -195,7 +195,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                 return f'Are all values in column "{column}" valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}?'
             else:
                 return f'Do all values in column "{column}" match the regular expression {regex}?'
-        else:
+        else:  # noqa: PLR5501
             if semantic_type_name_plural is not None:
                 return f'Are at least {mostly * 100}% of values in column "{column}" valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}?'
             else:
@@ -219,12 +219,12 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                     return f'All values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'
                 else:
                     return f'All values in column "{column}" match the regular expression {regex}.'
-            else:
+            else:  # noqa: PLR5501
                 if semantic_type_name_plural is not None:
                     return f'At least {mostly * 100}% of values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'
                 else:
                     return f'At least {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'
-        else:
+        else:  # noqa: PLR5501
             if semantic_type_name_plural is not None:
                 return f' Less than {mostly * 100}% of values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'
             else:
@@ -252,7 +252,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         else:
             template_str = "values must match this regular expression: $regex"
 
-            if params.mostly and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )

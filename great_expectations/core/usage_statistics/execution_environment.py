@@ -9,24 +9,17 @@ access to features of new package versions.
         dependencies: List[PackageInfo] = ge_execution_environment.dependencies
 
 """
+from __future__ import annotations
 
 import enum
-import sys
 from dataclasses import dataclass
+from importlib import metadata
 from typing import Iterable, List, Optional, cast
 
 from marshmallow import Schema, fields
 from packaging import version
 
 from great_expectations.core.usage_statistics.package_dependencies import GXDependencies
-
-if sys.version_info < (3, 8):
-    # Note: importlib_metadata is included in the python standard library as importlib
-    # starting with v3.8. At the time we remove support for python v3.7
-    # this conditional can be removed.
-    import importlib_metadata as metadata
-else:
-    from importlib import metadata
 
 
 class InstallEnvironment(enum.Enum):
@@ -100,11 +93,14 @@ class GXExecutionEnvironment:
         """
         if not self._all_installed_packages:
             # Only retrieve once
-            self._all_installed_packages = [
-                item.metadata.get("Name")
-                for item in metadata.distributions()
-                if item.metadata.get("Name") is not None
-            ]
+            package_names: list[str] = []
+            for package in metadata.distributions():
+                package_name = package.metadata.get("Name")
+                if package_name:
+                    package_names.append(package_name)
+            package_names = [pn.lower() for pn in package_names]
+            self._all_installed_packages = package_names
+
         return self._all_installed_packages
 
     def _build_dependencies_info(
@@ -124,7 +120,6 @@ class GXExecutionEnvironment:
         """
         dependencies: List[PackageInfo] = []
         for dependency_name in dependency_names:
-
             package_version: Optional[version.Version]
             installed: bool
             if dependency_name in self._get_all_installed_packages():

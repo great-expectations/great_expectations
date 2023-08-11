@@ -17,14 +17,13 @@ def is_valid_arxiv_id(arxiv_id: str) -> bool:
     try:
         next(search.results())
         return True
-    except:
+    except Exception:
         return False
 
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidArxivId(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_arxiv_id"
 

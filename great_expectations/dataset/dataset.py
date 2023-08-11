@@ -11,6 +11,7 @@ import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
 
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
@@ -21,15 +22,6 @@ from great_expectations.dataset.util import (
 )
 
 logger = logging.getLogger(__name__)
-
-try:
-    from sqlalchemy.sql import quoted_name
-
-except:
-    logger.debug(
-        "Unable to load quoted name from SqlAlchemy; install optional sqlalchemy dependency for support"
-    )
-    quoted_name = None
 
 
 class MetaDataset(DataAsset):
@@ -94,7 +86,7 @@ class MetaDataset(DataAsset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(
+        def inner_wrapper(  # noqa: PLR0912
             self,
             column=None,
             result_format=None,
@@ -124,9 +116,9 @@ class MetaDataset(DataAsset):
                 if (
                     hasattr(self, "engine")
                     and self.batch_kwargs.get("use_quoted_name")
-                    and quoted_name
+                    and sqlalchemy.quoted_name
                 ):
-                    column = quoted_name(column, quote=True)
+                    column = sqlalchemy.quoted_name(column, quote=True)
 
                 nonnull_count = self.get_column_nonnull_count(
                     kwargs.get("column", column)
@@ -204,7 +196,6 @@ class MetaDataset(DataAsset):
 
 # noinspection PyIncorrectDocstring
 class Dataset(MetaDataset):
-
     # This should in general only be changed when a subclass *adds expectations* or *changes expectation semantics*
     # That way, multiple backends can implement the same data_asset_type
     _data_asset_type = "Dataset"
@@ -244,7 +235,8 @@ class Dataset(MetaDataset):
     @classmethod
     def from_dataset(cls, dataset=None):
         """This base implementation naively passes arguments on to the real constructor, which
-        is suitable really when a constructor knows to take its own type. In general, this should be overridden"""
+        is suitable really when a constructor knows to take its own type. In general, this should be overridden
+        """
         return cls(dataset)
 
     def get_row_count(self) -> None:
@@ -372,7 +364,9 @@ class Dataset(MetaDataset):
                 allow_relative_error=allow_relative_error,
             )
             iqr = _75 - _25
-            if iqr < 1e-10:  # Consider IQR 0 and do not use variance-based estimator
+            if (
+                iqr < 1e-10  # noqa: PLR2004
+            ):  # Consider IQR 0 and do not use variance-based estimator
                 n_bins = sturges
             else:
                 fd = (2 * float(iqr)) / (nonnull_count ** (1 / 3))
@@ -393,13 +387,13 @@ class Dataset(MetaDataset):
         Returns: List[int], a list of counts corresponding to bins"""
         raise NotImplementedError
 
-    def get_column_count_in_range(
+    def get_column_count_in_range(  # noqa: PLR0913
         self, column, min_val=None, max_val=None, strict_min=False, strict_max=True
     ) -> None:
         """Returns: int"""
         raise NotImplementedError
 
-    def get_crosstab(
+    def get_crosstab(  # noqa: PLR0913
         self,
         column_A,
         column_B,
@@ -416,8 +410,8 @@ class Dataset(MetaDataset):
 
         Args:
             function (func): The function to be tested. (Must be a valid column_map_expectation function.)
-            *args          : Positional arguments to be passed the the function
-            **kwargs       : Keyword arguments to be passed the the function
+            *args          : Positional arguments to be passed the function
+            **kwargs       : Keyword arguments to be passed the function
 
         Returns:
             An ExpectationSuiteValidationResult
@@ -438,8 +432,8 @@ class Dataset(MetaDataset):
 
         Args:
             function (func): The function to be tested. (Must be a valid column_aggregate_expectation function.)
-            *args          : Positional arguments to be passed the the function
-            **kwargs       : Keyword arguments to be passed the the function
+            *args          : Positional arguments to be passed the function
+            **kwargs       : Keyword arguments to be passed the function
 
         Returns:
             An ExpectationSuiteValidationResult
@@ -463,7 +457,7 @@ class Dataset(MetaDataset):
 
     @DocInherit
     @DataAsset.expectation(["column"])
-    def expect_column_to_exist(
+    def expect_column_to_exist(  # noqa: PLR0913
         self,
         column,
         column_index=None,
@@ -518,7 +512,7 @@ class Dataset(MetaDataset):
 
     @DocInherit
     @DataAsset.expectation(["column_list"])
-    def expect_table_columns_to_match_ordered_list(
+    def expect_table_columns_to_match_ordered_list(  # noqa: PLR0913
         self,
         column_list,
         result_format=None,
@@ -585,7 +579,7 @@ class Dataset(MetaDataset):
 
     @DocInherit
     @DataAsset.expectation(["column_set", "exact_match"])
-    def expect_table_columns_to_match_set(
+    def expect_table_columns_to_match_set(  # noqa: PLR0913
         self,
         column_set: Optional[Union[Set[str], List[str]]],
         exact_match: bool = True,
@@ -668,7 +662,7 @@ class Dataset(MetaDataset):
 
             if exact_match:
                 return return_failed
-            else:
+            else:  # noqa: PLR5501
                 # Failed if there are items in the missing list (but OK to have unexpected_list)
                 if len(missing_list) > 0:
                     return return_failed
@@ -679,7 +673,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @DataAsset.expectation(["min_value", "max_value"])
-    def expect_table_column_count_to_be_between(
+    def expect_table_column_count_to_be_between(  # noqa: PLR0913
         self,
         min_value=None,
         max_value=None,
@@ -763,7 +757,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @DataAsset.expectation(["value"])
-    def expect_table_column_count_to_equal(
+    def expect_table_column_count_to_equal(  # noqa: PLR0913
         self,
         value,
         result_format=None,
@@ -820,7 +814,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @DataAsset.expectation(["min_value", "max_value"])
-    def expect_table_row_count_to_be_between(
+    def expect_table_row_count_to_be_between(  # noqa: PLR0913
         self,
         min_value=None,
         max_value=None,
@@ -907,7 +901,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @DataAsset.expectation(["value"])
-    def expect_table_row_count_to_equal(
+    def expect_table_row_count_to_equal(  # noqa: PLR0913
         self,
         value,
         result_format=None,
@@ -964,7 +958,7 @@ class Dataset(MetaDataset):
     #
     ###
 
-    def expect_column_values_to_be_unique(
+    def expect_column_values_to_be_unique(  # noqa: PLR0913
         self,
         column,
         mostly=None,
@@ -1016,7 +1010,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_not_be_null(
+    def expect_column_values_to_not_be_null(  # noqa: PLR0913
         self,
         column,
         mostly=None,
@@ -1071,7 +1065,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_null(
+    def expect_column_values_to_be_null(  # noqa: PLR0913
         self,
         column,
         mostly=None,
@@ -1123,7 +1117,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_of_type(
+    def expect_column_values_to_be_of_type(  # noqa: PLR0913
         self,
         column,
         type_,
@@ -1190,7 +1184,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_in_type_list(
+    def expect_column_values_to_be_in_type_list(  # noqa: PLR0913
         self,
         column,
         type_list,
@@ -1260,7 +1254,7 @@ class Dataset(MetaDataset):
     #
     ####
 
-    def expect_column_values_to_be_in_set(
+    def expect_column_values_to_be_in_set(  # noqa: PLR0913
         self,
         column,
         value_set,
@@ -1339,7 +1333,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_not_be_in_set(
+    def expect_column_values_to_not_be_in_set(  # noqa: PLR0913
         self,
         column,
         value_set,
@@ -1416,7 +1410,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_between(
+    def expect_column_values_to_be_between(  # noqa: PLR0913
         self,
         column,
         min_value=None,
@@ -1494,7 +1488,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_increasing(
+    def expect_column_values_to_be_increasing(  # noqa: PLR0913
         self,
         column,
         strictly=None,
@@ -1558,7 +1552,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_decreasing(
+    def expect_column_values_to_be_decreasing(  # noqa: PLR0913
         self,
         column,
         strictly=None,
@@ -1628,7 +1622,7 @@ class Dataset(MetaDataset):
     #
     ###
 
-    def expect_column_value_lengths_to_be_between(
+    def expect_column_value_lengths_to_be_between(  # noqa: PLR0913
         self,
         column,
         min_value=None,
@@ -1695,7 +1689,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_value_lengths_to_equal(
+    def expect_column_value_lengths_to_equal(  # noqa: PLR0913
         self,
         column,
         value,
@@ -1752,7 +1746,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_match_regex(
+    def expect_column_values_to_match_regex(  # noqa: PLR0913
         self,
         column,
         regex,
@@ -1812,7 +1806,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_not_match_regex(
+    def expect_column_values_to_not_match_regex(  # noqa: PLR0913
         self,
         column,
         regex,
@@ -1872,7 +1866,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_match_regex_list(
+    def expect_column_values_to_match_regex_list(  # noqa: PLR0913
         self,
         column,
         regex_list,
@@ -1936,7 +1930,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_not_match_regex_list(
+    def expect_column_values_to_not_match_regex_list(  # noqa: PLR0913
         self,
         column,
         regex_list,
@@ -1998,7 +1992,7 @@ class Dataset(MetaDataset):
     #
     ###
 
-    def expect_column_values_to_match_strftime_format(
+    def expect_column_values_to_match_strftime_format(  # noqa: PLR0913
         self,
         column,
         strftime_format,
@@ -2049,7 +2043,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_dateutil_parseable(
+    def expect_column_values_to_be_dateutil_parseable(  # noqa: PLR0913
         self,
         column,
         mostly=None,
@@ -2097,7 +2091,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_be_json_parseable(
+    def expect_column_values_to_be_json_parseable(  # noqa: PLR0913
         self,
         column,
         mostly=None,
@@ -2149,7 +2143,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_values_to_match_json_schema(
+    def expect_column_values_to_match_json_schema(  # noqa: PLR0913
         self,
         column,
         json_schema,
@@ -2210,7 +2204,7 @@ class Dataset(MetaDataset):
     #
     ####
 
-    def expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(
+    def expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(  # noqa: PLR0913
         self,
         column,
         distribution,
@@ -2298,7 +2292,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_distinct_values_to_be_in_set(
+    def expect_column_distinct_values_to_be_in_set(  # noqa: PLR0913
         self,
         column,
         value_set,
@@ -2413,7 +2407,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_distinct_values_to_equal_set(
+    def expect_column_distinct_values_to_equal_set(  # noqa: PLR0913
         self,
         column,
         value_set,
@@ -2503,7 +2497,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_distinct_values_to_contain_set(
+    def expect_column_distinct_values_to_contain_set(  # noqa: PLR0913
         self,
         column,
         value_set,
@@ -2595,7 +2589,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_mean_to_be_between(
+    def expect_column_mean_to_be_between(  # noqa: PLR0913
         self,
         column,
         min_value=None,
@@ -2710,7 +2704,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_median_to_be_between(
+    def expect_column_median_to_be_between(  # noqa: PLR0913
         self,
         column,
         min_value=None,
@@ -2814,7 +2808,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_quantile_values_to_be_between(
+    def expect_column_quantile_values_to_be_between(  # noqa: PLR0913
         self,
         column,
         quantile_ranges,
@@ -2954,7 +2948,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_stdev_to_be_between(
+    def expect_column_stdev_to_be_between(  # noqa: PLR0913
         self,
         column,
         min_value=None,
@@ -3055,7 +3049,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_unique_value_count_to_be_between(
+    def expect_column_unique_value_count_to_be_between(  # noqa: PLR0913
         self,
         column,
         min_value=None,
@@ -3137,7 +3131,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_proportion_of_unique_values_to_be_between(
+    def expect_column_proportion_of_unique_values_to_be_between(  # noqa: PLR0913
         self,
         column,
         min_value=0,
@@ -3250,7 +3244,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_most_common_value_to_be_in_set(
+    def expect_column_most_common_value_to_be_in_set(  # noqa: PLR0913
         self,
         column,
         value_set,
@@ -3322,7 +3316,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_sum_to_be_between(
+    def expect_column_sum_to_be_between(  # noqa: PLR0913
         self,
         column,
         min_value=None,
@@ -3420,7 +3414,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_min_to_be_between(
+    def expect_column_min_to_be_between(  # noqa: PLR0913, PLR0912
         self,
         column,
         min_value=None,
@@ -3515,7 +3509,6 @@ class Dataset(MetaDataset):
         if column_min is None:
             success = False
         else:
-
             if min_value is not None:
                 if isinstance(column_min, datetime):
                     try:
@@ -3560,7 +3553,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_max_to_be_between(
+    def expect_column_max_to_be_between(  # noqa: PLR0913, PLR0912
         self,
         column,
         min_value=None,
@@ -3702,7 +3695,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_chisquare_test_p_value_to_be_greater_than(
+    def expect_column_chisquare_test_p_value_to_be_greater_than(  # noqa: PLR0913
         self,
         column,
         partition_object=None,
@@ -3830,7 +3823,7 @@ class Dataset(MetaDataset):
             },
         }
 
-    def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(
+    def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(  # noqa: PLR0913
         self,
         column,
         partition_object=None,
@@ -3923,7 +3916,7 @@ class Dataset(MetaDataset):
     # noinspection PyUnusedLocal
     @DocInherit
     @MetaDataset.column_aggregate_expectation
-    def expect_column_kl_divergence_to_be_less_than(
+    def expect_column_kl_divergence_to_be_less_than(  # noqa: PLR0913, PLR0912, PLR0915
         self,
         column,
         partition_object=None,
@@ -4228,7 +4221,6 @@ class Dataset(MetaDataset):
                 observed_weights = observed_weights[1:-1]
 
             elif partition_object["bins"][0] == -np.inf:
-
                 if "tail_weights" in partition_object:
                     raise ValueError(
                         "There can be no tail weights for partitions with one or both endpoints at infinity"
@@ -4264,7 +4256,6 @@ class Dataset(MetaDataset):
                 observed_weights = observed_weights[1:]
 
             elif partition_object["bins"][-1] == np.inf:
-
                 if "tail_weights" in partition_object:
                     raise ValueError(
                         "There can be no tail weights for partitions with one or both endpoints at infinity"
@@ -4376,7 +4367,7 @@ class Dataset(MetaDataset):
         return return_obj
 
     @MetaDataset.column_aggregate_expectation
-    def expect_column_pair_cramers_phi_value_to_be_less_than(
+    def expect_column_pair_cramers_phi_value_to_be_less_than(  # noqa: PLR0913
         self,
         column_A,
         column_B,
@@ -4455,7 +4446,7 @@ class Dataset(MetaDataset):
     #
     ###
 
-    def expect_column_pair_values_to_be_equal(
+    def expect_column_pair_values_to_be_equal(  # noqa: PLR0913
         self,
         column_A,
         column_B,
@@ -4498,7 +4489,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_pair_values_A_to_be_greater_than_B(
+    def expect_column_pair_values_A_to_be_greater_than_B(  # noqa: PLR0913
         self,
         column_A,
         column_B,
@@ -4549,7 +4540,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_column_pair_values_to_be_in_set(
+    def expect_column_pair_values_to_be_in_set(  # noqa: PLR0913
         self,
         column_A,
         column_B,
@@ -4600,7 +4591,7 @@ class Dataset(MetaDataset):
     #
     ###
 
-    def expect_multicolumn_values_to_be_unique(
+    def expect_multicolumn_values_to_be_unique(  # noqa: PLR0913
         self,
         column_list,
         ignore_row_if="all_values_are_missing",
@@ -4654,7 +4645,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_select_column_values_to_be_unique_within_record(
+    def expect_select_column_values_to_be_unique_within_record(  # noqa: PLR0913
         self,
         column_list,
         ignore_row_if="all_values_are_missing",
@@ -4707,7 +4698,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_compound_columns_to_be_unique(
+    def expect_compound_columns_to_be_unique(  # noqa: PLR0913
         self,
         column_list,
         ignore_row_if="all_values_are_missing",
@@ -4759,7 +4750,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def expect_multicolumn_sum_to_equal(
+    def expect_multicolumn_sum_to_equal(  # noqa: PLR0913
         self,
         column_list,
         sum_total,

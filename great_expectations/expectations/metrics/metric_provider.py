@@ -4,6 +4,7 @@ from typing import Callable, Dict, Optional, Tuple, Type, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricFunctionTypes,
@@ -21,6 +22,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 logger = logging.getLogger(__name__)
 
 
+@public_api
 def metric_value(
     engine: Type[ExecutionEngine],
     metric_fn_type: Union[str, MetricFunctionTypes] = MetricFunctionTypes.VALUE,
@@ -32,7 +34,7 @@ def metric_value(
     the value of the requested metric.
 
     ---Documentation---
-        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
+        - https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp
 
     Args:
         engine: the *type* of ExecutionEngine that this partial supports
@@ -55,6 +57,7 @@ def metric_value(
     return wrapper
 
 
+@public_api
 def metric_partial(
     engine: Type[ExecutionEngine],
     partial_fn_type: Union[str, MetricPartialFunctionTypes],
@@ -97,6 +100,7 @@ def metric_partial(
     return wrapper
 
 
+@public_api
 class MetricProvider(metaclass=MetaMetricProvider):
     """Base class for all metric providers.
 
@@ -149,8 +153,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 # This is not a metric or renderer.
                 continue
 
-            if hasattr(attr_obj, "metric_engine"):
-                engine = getattr(attr_obj, "metric_engine")
+            if engine := getattr(attr_obj, "metric_engine", None):
                 if not issubclass(engine, ExecutionEngine):
                     raise ValueError(
                         "metric functions must be defined with an Execution Engine"
@@ -185,7 +188,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 To instruct "ExecutionEngine" accordingly, original metric is registered with its "declared" name, but
                 with "metric_provider" function omitted (set to "None"), and additional "AGGREGATE_FN" metric, with its
                 "metric_provider" set to (decorated) implementation function, defined in metric class, is registered.
-                Then "AGGREGATE_FN" metric can specified with key "metric_partial_fn" as evaluation metric dependency.
+                Then "AGGREGATE_FN" metric is specified with key "metric_partial_fn" as evaluation metric dependency.
                 By convention, aggregate partial metric implementation functions return three-valued tuple, containing
                 deferred execution metric implementation function of corresponding "ExecutionEngine" backend (called
                 "metric_aggregate") as well as "compute_domain_kwargs" and "accessor_domain_kwargs", which are relevant

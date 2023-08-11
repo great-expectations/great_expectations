@@ -1,0 +1,71 @@
+# This file is responsible for configuring the `manual-staging-json-to-prod` pipeline (https://dev.azure.com/great-expectations/great_expectations/_build)
+#
+# The pipeline is run under the following conditions:
+#   - Manually triggered
+#
+# The sole purpose of this pipeline is to copy staging JSON files to prod for the Expectation Gallery and trigger the prod algolia indices.
+
+variables:
+  isManual: $[eq(variables['Build.Reason'], 'Manual')]
+
+stages:
+  - stage: deploy_gallery_prod
+    pool:
+      vmImage: 'ubuntu-22.04'
+
+    jobs:
+      - job: copy_staging_to_prod
+        condition: eq(variables.isManual, true)
+        timeoutInMinutes: 15
+        variables:
+          python.version: '3.8'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip awscli
+            displayName: 'Update pip and install awscli'
+
+          - bash: bash ./copy_s3_staging_to_prod.sh
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Copy staging JSON files in S3 to prod'
+            env:
+              # AWS credentials
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '16.16'
+
+          - bash: bash ./trigger_algolia.sh
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Update Algolia indexes from S3'
+            env:
+              # algolia credentials
+              ALGOLIA_ACCOUNT: $(ALGOLIA_ACCOUNT)
+              ALGOLIA_EXPECTATION_INDEX: $(ALGOLIA_EXPECTATION_INDEX)
+              ALGOLIA_PACKAGE_EXPEC_INDEX: $(ALGOLIA_PACKAGE_EXPEC_INDEX)
+              ALGOLIA_PACKAGE_INDEX: $(ALGOLIA_PACKAGE_INDEX)
+              ALGOLIA_WRITE_KEY: $(ALGOLIA_WRITE_KEY)
+              # Build Gallery Paths
+              ALGOLIA_S3_PACKAGES_URL: $(ALGOLIA_S3_PACKAGES_URL)
+              ALGOLIA_S3_EXPECTATIONS_URL: $(ALGOLIA_S3_EXPECTATIONS_URL)
+              # replica indices from expectations for sorting
+              ALGOLIA_EXPEC_REPLICA_ALPHA_ASC_INDEX: $(ALGOLIA_EXPEC_REPLICA_ALPHA_ASC_INDEX)
+              ALGOLIA_EXPEC_REPLICA_ALPHA_DSC_INDEX: $(ALGOLIA_EXPEC_REPLICA_ALPHA_DSC_INDEX)
+              ALGOLIA_EXPEC_REPLICA_COVERAGE_ASC_INDEX: $(ALGOLIA_EXPEC_REPLICA_COVERAGE_ASC_INDEX)
+              ALGOLIA_EXPEC_REPLICA_COVERAGE_DSC_INDEX: $(ALGOLIA_EXPEC_REPLICA_COVERAGE_DSC_INDEX)
+              ALGOLIA_EXPEC_REPLICA_CREATED_ASC_INDEX: $(ALGOLIA_EXPEC_REPLICA_CREATED_ASC_INDEX)
+              ALGOLIA_EXPEC_REPLICA_CREATED_DSC_INDEX: $(ALGOLIA_EXPEC_REPLICA_CREATED_DSC_INDEX)
+              ALGOLIA_EXPEC_REPLICA_UPDATED_ASC_INDEX: $(ALGOLIA_EXPEC_REPLICA_UPDATED_ASC_INDEX)
+              ALGOLIA_EXPEC_REPLICA_UPDATED_DSC_INDEX: $(ALGOLIA_EXPEC_REPLICA_UPDATED_DSC_INDEX)
+              # replica indices from package expectations for sorting
+              ALGOLIA_PACK_EXPEC_REPLICA_ALPHA_ASC_INDEX: $(ALGOLIA_PACK_EXPEC_REPLICA_ALPHA_ASC_INDEX)
+              ALGOLIA_PACK_EXPEC_REPLICA_ALPHA_DSC_INDEX: $(ALGOLIA_PACK_EXPEC_REPLICA_ALPHA_DSC_INDEX)
+              ALGOLIA_PACK_EXPEC_REPLICA_COVERAGE_ASC_INDEX: $(ALGOLIA_PACK_EXPEC_REPLICA_COVERAGE_ASC_INDEX)
+              ALGOLIA_PACK_EXPEC_REPLICA_COVERAGE_DSC_INDEX: $(ALGOLIA_PACK_EXPEC_REPLICA_COVERAGE_DSC_INDEX)

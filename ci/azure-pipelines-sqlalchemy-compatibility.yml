@@ -1,0 +1,227 @@
+# This file is responsible for configuring the `sqlalchemy-compatibility` pipeline (https://dev.azure.com/great-expectations/great_expectations/_build)
+#
+# The pipeline is run under the following conditions:
+#   - On the develop branch whenever a commit is made to an open PR
+#
+# In this pipeline we run tests against several databases using the latest patch
+# version of currently supported sqlalchemy versions. E.g 1.3.x, 1.4.x, 2.0.x
+# where x is the latest patch. This will help ensure we are compatible with all
+# previously supported versions as we make changes to support later versions.
+
+trigger:
+  branches:
+    include:
+    - develop
+
+resources:
+  containers:
+  - container: postgres
+    image: postgres:11
+    ports:
+    - 5432:5432
+    env:
+      POSTGRES_DB: "test_ci"
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+  - container: mssql
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    env:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
+      MSSQL_DB: test_ci
+      MSSQL_PID: Developer
+    ports:
+      - 1433:1433
+
+variables:
+  GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+
+
+stages:
+  - stage: scope_check
+    pool:
+      vmImage: 'ubuntu-latest'
+    jobs:
+      - job: changes
+        steps:
+          - task: ChangedFiles@1
+            name: CheckChanges
+            inputs:
+              verbose: true
+              rules: |
+                [GXChanged]
+                great_expectations/**/*.py
+                pyproject.toml
+                setup.cfg
+                setup.py
+                MANIFEST.in
+                tests/**
+                /*.txt
+                /*.yml
+                requirements*
+                reqs/*.txt
+                ci/**/*.yml
+                assets/scripts/**
+                scripts/*.py
+                scripts/*.sh
+
+  - stage: lint
+    dependsOn: scope_check
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+      - job: lint
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: 3.8
+            displayName: 'Use Python 3.8'
+
+          - script: |
+              pip install $(grep -E '^(black|invoke|ruff)' reqs/requirements-dev-contrib.txt)
+              EXIT_STATUS=0
+              invoke fmt --check || EXIT_STATUS=$?
+              invoke lint || EXIT_STATUS=$?
+              exit $EXIT_STATUS
+
+  - stage: import_ge
+    dependsOn: scope_check
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+      - job: import_ge
+
+        steps:
+         - task: UsePythonVersion@0
+           inputs:
+             versionSpec: '3.8'
+           displayName: 'Use Python 3.8'
+
+         - script: |
+             pip install .
+           displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
+
+         - script: |
+             python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
+           displayName: 'Import Great Expectations'
+
+  - stage: sqlalchemy_and_pandas_compatibility
+    dependsOn: [scope_check, lint, import_ge]
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+      - job: compatibility_postgres
+        timeoutInMinutes: 90
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+        strategy:
+          # This matrix is intended to run against the latest patch versions of
+          # sqlalchemy and pandas minor versions that we support.
+          # (versions as semver major.minor.patch)
+          matrix:
+            less_than_2:
+              comparison: '<'
+            greater_than_2:
+              comparison: '>='
+
+        services:
+          postgres: postgres
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - script: |
+              cp constraints-dev.txt constraints-dev-temp.txt
+              echo "SQLAlchemy$(comparison)2.0.0" >> constraints-dev-temp.txt
+              echo "pandas$(comparison)2.0.0" >> constraints-dev-temp.txt
+              
+              pip install --constraint constraints-dev-temp.txt ".[test, postgresql]" pytest-azurepipelines
+            displayName: 'Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)'
+
+          - script: |
+              # Run pytest
+              pytest --postgresql -m sqlalchemy_version_compatibility
+              pytest --postgresql -m unit
+
+            displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              SQLALCHEMY_WARN_20: true
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
+      - job: compatibility_mssql
+        timeoutInMinutes: 90
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+        strategy:
+          # This matrix is intended to run against the latest patch versions of
+          # sqlalchemy and pandas minor versions that we support.
+          # (versions as semver major.minor.patch)
+          matrix:
+            less_than_2:
+              comparison: '<'
+            greater_than_2:
+              comparison: '>='
+
+        services:
+          mssql: mssql 
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - script: |
+              sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
+
+          - script: |
+              cp constraints-dev.txt constraints-dev-temp.txt
+              echo "SQLAlchemy$(comparison)2.0.0" >> constraints-dev-temp.txt
+              echo "pandas$(comparison)2.0.0" >> constraints-dev-temp.txt
+              
+              pip install --constraint constraints-dev-temp.txt ".[test, mssql]" pytest-azurepipelines
+            displayName: 'Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)'
+
+          - script: |
+              # Run pytest
+              pytest --mssql -m sqlalchemy_version_compatibility
+              pytest --mssql -m unit
+
+            displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              SQLALCHEMY_WARN_20: true
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'

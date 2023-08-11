@@ -2,6 +2,7 @@ import logging
 import re
 from typing import List, Optional
 
+from great_expectations.compatibility import azure
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
@@ -9,21 +10,13 @@ from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
-from great_expectations.datasource.data_connector.file_path_data_connector import (
-    FilePathDataConnector,
+from great_expectations.datasource.data_connector.util import (
+    list_azure_keys,
+    sanitize_prefix,
 )
-from great_expectations.datasource.data_connector.util import list_azure_keys
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
-
-try:
-    from azure.storage.blob import BlobServiceClient
-except ImportError:
-    BlobServiceClient = None
-    logger.debug(
-        "Unable to load BlobServiceClient connection object; install optional Azure Storage Blob dependency for support"
-    )
 
 
 @public_api
@@ -48,7 +41,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -76,7 +69,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
         self._container = container
-        self._name_starts_with = FilePathDataConnector.sanitize_prefix(name_starts_with)
+        self._name_starts_with = sanitize_prefix(name_starts_with)
         self._delimiter = delimiter
 
         if azure_options is None:
@@ -96,13 +89,15 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
                 self._account_name = re.search(  # type: ignore[union-attr]
                     r".*?AccountName=(.+?);.*?", conn_str
                 ).group(1)
-                self._azure = BlobServiceClient.from_connection_string(**azure_options)
+                self._azure = azure.BlobServiceClient.from_connection_string(
+                    **azure_options
+                )
             elif account_url is not None:
                 self._account_name = re.search(  # type: ignore[union-attr]
                     r"(?:https?://)?(.+?).blob.core.windows.net", account_url
                 ).group(1)
-                self._azure = BlobServiceClient(**azure_options)
-        except (TypeError, AttributeError):
+                self._azure = azure.BlobServiceClient(**azure_options)
+        except (TypeError, AttributeError, ModuleNotFoundError):
             raise ImportError(
                 "Unable to load Azure BlobServiceClient (it is required for ConfiguredAssetAzureDataConnector). \
                 Please ensure that you have provided the appropriate keys to `azure_options` for authentication."
@@ -138,7 +133,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
                 query_options["delimiter"] = asset.delimiter
 
         path_list: List[str] = list_azure_keys(
-            azure=self._azure,
+            azure_client=self._azure,
             query_options=query_options,
             recursive=False,
         )
@@ -154,7 +149,4 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             "container": self._container,
             "path": path,
         }
-        return self.execution_engine.resolve_data_reference(
-            data_connector_name=self.__class__.__name__,
-            template_arguments=template_arguments,
-        )
+        return self.resolve_data_reference(template_arguments=template_arguments)

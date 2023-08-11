@@ -1,6 +1,7 @@
 {
   "expectation_type" : "expect_column_value_lengths_to_equal",
   "datasets" : [{
+    "dataset_name": "expect_column_value_lengths_to_equal_1",
     "data" : {
       "s1":["smart","silly","sassy","slimy","sexy"],
       "s2":["cool","calm","collected","casual","creepy"],
@@ -31,7 +32,7 @@
       },
       "out":{
         "success":false,
-        "unexpected_index_list": [0, 1, 2, 3, 4],
+        "unexpected_index_list": [{"equal_length_string": "a", "pk_index": 0}, {"equal_length_string": "b", "pk_index": 1}, {"equal_length_string": "c", "pk_index": 2}, {"equal_length_string": "d", "pk_index": 3}, {"equal_length_string": "e", "pk_index": 4}],
         "unexpected_list": ["a", "b", "c", "d", "e"]
       }
     },{
@@ -44,7 +45,7 @@
       },
       "out":{
         "success": true,
-        "unexpected_index_list": [2, 3],
+        "unexpected_index_list": [{"s3": "collected", "pk_index": 2}, {"s3": "casual",  "pk_index": 3}],
         "unexpected_list": ["collected", "casual"]
       }
     },{
@@ -56,7 +57,7 @@
       },
       "out" : {
         "success": false,
-        "unexpected_index_list": [4],
+        "unexpected_index_list": [{"s1": "sexy", "pk_index": 4}],
         "unexpected_list": ["sexy"]
       }
     },{
@@ -69,7 +70,7 @@
       },
       "out" : {
         "success": true,
-        "unexpected_index_list": [4],
+        "unexpected_index_list": [{"s1": "sexy", "pk_index": 4}],
         "unexpected_list": ["sexy"]
       }
     },{
@@ -113,7 +114,7 @@
       },
       "out" : {
         "success": false,
-        "unexpected_index_list": [3],
+        "unexpected_index_list": [{"s1": "slimy", "pk_index": 3}],
         "unexpected_list": ["slimy"]
       }
     },{

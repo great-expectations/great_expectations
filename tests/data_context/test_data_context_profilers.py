@@ -1,17 +1,23 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 from unittest import mock
 
 import pytest
 from marshmallow import ValidationError
 
 from great_expectations.core.batch import BatchRequest
-from great_expectations.data_context import DataContext
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
+if TYPE_CHECKING:
+    from great_expectations.data_context import FileDataContext
 
+
+@pytest.mark.unit
 def test_add_profiler(
-    empty_data_context: DataContext,
+    empty_data_context: FileDataContext,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     args = profiler_config_with_placeholder_args.to_json_dict()
@@ -22,8 +28,9 @@ def test_add_profiler(
     assert isinstance(profiler, RuleBasedProfiler)
 
 
+@pytest.mark.unit
 def test_add_profiler_with_invalid_config_raises_error(
-    empty_data_context: DataContext,
+    empty_data_context: FileDataContext,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     args = profiler_config_with_placeholder_args.to_json_dict()
@@ -39,6 +46,7 @@ def test_add_profiler_with_invalid_config_raises_error(
     assert "config_version" in str(e.value)
 
 
+@pytest.mark.unit
 @mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
@@ -46,7 +54,7 @@ def test_add_profiler_with_invalid_config_raises_error(
 def test_run_profiler_with_dynamic_arguments_emits_proper_usage_stats(
     mock_emit: mock.MagicMock,
     mock_profiler_run: mock.MagicMock,
-    empty_data_context_stats_enabled: DataContext,
+    empty_data_context_stats_enabled: FileDataContext,
     populated_profiler_store: ProfilerStore,
     profiler_name: str,
 ):
@@ -70,6 +78,7 @@ def test_run_profiler_with_dynamic_arguments_emits_proper_usage_stats(
     ]
 
 
+@pytest.mark.unit
 @mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
@@ -77,7 +86,7 @@ def test_run_profiler_with_dynamic_arguments_emits_proper_usage_stats(
 def test_run_profiler_on_data_emits_proper_usage_stats(
     mock_emit: mock.MagicMock,
     mock_profiler_run: mock.MagicMock,
-    empty_data_context_stats_enabled: DataContext,
+    empty_data_context_stats_enabled: FileDataContext,
     populated_profiler_store: ProfilerStore,
     profiler_name: str,
 ):
@@ -108,6 +117,7 @@ def test_run_profiler_on_data_emits_proper_usage_stats(
     ]
 
 
+@pytest.mark.unit
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 def test_save_profiler(
     mock_data_context: mock.MagicMock,
@@ -122,7 +132,7 @@ def test_save_profiler(
             profiler=profiler_config_with_placeholder_args,
             profiler_store=populated_profiler_store,
             name="my_profiler",
-            ge_cloud_id=None,
+            id=None,
         )
 
     with mock.patch(
@@ -133,6 +143,6 @@ def test_save_profiler(
             data_context=mock_data_context,
             profiler_store=populated_profiler_store,
             name="my_profiler",
-            ge_cloud_id=None,
+            id=None,
         )
     assert isinstance(profiler, RuleBasedProfiler)

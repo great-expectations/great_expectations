@@ -1,9 +1,8 @@
 import re
 import sys
-from typing import List, Optional, Tuple
+from typing import Final, List, Optional, Tuple
 
 import click
-from typing_extensions import Final
 
 SUPPORTED_CLI_COLORS: Final[Tuple[str, ...]] = (
     "blue",

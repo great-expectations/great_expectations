@@ -33,6 +33,7 @@ class ExpectationOnlyDataAsset(DataAsset):
         raise ValueError("Gotcha!")
 
 
+@pytest.mark.unit
 def test_expectation_decorator_build_config():
     eds = ExpectationOnlyDataAsset()
     eds.no_op_expectation()
@@ -53,6 +54,7 @@ def test_expectation_decorator_build_config():
     )
 
 
+@pytest.mark.unit
 def test_expectation_decorator_include_config():
     eds = ExpectationOnlyDataAsset()
     out = eds.no_op_value_expectation("a", include_config=True)
@@ -66,6 +68,7 @@ def test_expectation_decorator_include_config():
     )
 
 
+@pytest.mark.unit
 def test_expectation_decorator_meta():
     metadata = {"meta_key": "meta_value"}
     eds = ExpectationOnlyDataAsset()
@@ -89,6 +92,7 @@ def test_expectation_decorator_meta():
     )
 
 
+@pytest.mark.unit
 def test_expectation_decorator_catch_exceptions():
     eds = ExpectationOnlyDataAsset()
 
@@ -111,6 +115,7 @@ def test_expectation_decorator_catch_exceptions():
     )
 
 
+@pytest.mark.unit
 def test_pandas_column_map_decorator_partial_exception_counts():
     df = PandasDataset({"a": [0, 1, 2, 3, 4]})
     out = df.expect_column_values_to_be_between(
@@ -124,8 +129,8 @@ def test_pandas_column_map_decorator_partial_exception_counts():
     assert 3 == len(out.result["unexpected_list"])
 
 
+@pytest.mark.big
 def test_column_map_expectation_decorator():
-
     # Create a new CustomPandasDataset to
     # (1) demonstrate that custom subclassing works, and
     # (2) Test expectation business logic without dependencies on any other functions.
@@ -305,6 +310,7 @@ def test_column_map_expectation_decorator():
     )
 
 
+@pytest.mark.big
 def test_column_aggregate_expectation_decorator():
     # Create a new CustomPandasDataset to
     # (1) demonstrate that custom subclassing works, and
@@ -388,6 +394,7 @@ def test_column_aggregate_expectation_decorator():
     )
 
 
+@pytest.mark.big
 def test_column_pair_map_expectation_decorator():
     # Create a new CustomPandasDataset to
     # (1) Demonstrate that custom subclassing works, and

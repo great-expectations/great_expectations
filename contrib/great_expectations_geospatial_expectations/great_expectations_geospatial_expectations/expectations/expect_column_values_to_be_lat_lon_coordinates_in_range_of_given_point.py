@@ -7,6 +7,8 @@ For detailed instructions on how to use it, please see:
 from math import cos, pi, sqrt
 from typing import Any, List, Optional, Union
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import ExpectationValidationResult
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -22,7 +24,6 @@ from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.render import (
     RenderedBulletListContent,
     RenderedGraphContent,
@@ -36,7 +37,6 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesAreLatLonCoordinatesInRange(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.coordinates.in_range"
     condition_value_keys = ("center_point", "range", "unit", "projection")
@@ -83,12 +83,12 @@ class ColumnValuesAreLatLonCoordinatesInRange(ColumnMapMetricProvider):
             if unit == "kilometers":
                 distances = F.udf(
                     lambda x, y=center_point: fcc_projection(x, y),
-                    sparktypes.FloatType(),
+                    pyspark.types.FloatType(),
                 )
             elif unit == "miles":
                 distances = F.udf(
                     lambda x, y=center_point: fcc_projection(x, y) * 1.609344,
-                    sparktypes.FloatType(),
+                    pyspark.types.FloatType(),
                 )
                 range = range * 1.609344
 
@@ -100,12 +100,12 @@ class ColumnValuesAreLatLonCoordinatesInRange(ColumnMapMetricProvider):
             if unit == "kilometers":
                 distances = F.udf(
                     lambda x, y=center_point: pythagorean_projection(x, y),
-                    sparktypes.FloatType(),
+                    pyspark.types.FloatType(),
                 )
             elif unit == "miles":
                 distances = F.udf(
                     lambda x, y=center_point: pythagorean_projection(x, y) * 1.609344,
-                    sparktypes.FloatType(),
+                    pyspark.types.FloatType(),
                 )
                 range = range * 1.609344
 

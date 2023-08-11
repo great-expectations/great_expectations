@@ -5,6 +5,7 @@ from typing import Dict, Iterator, List, Optional, Sized
 import numpy as np
 import pandas as pd
 
+from great_expectations.compatibility import pyspark, sqlalchemy
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.metric_computation_result import (
     MetricValues,
@@ -16,24 +17,6 @@ from great_expectations.validator.computed_metric import MetricValue
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy as sa
-except ImportError:
-    logger.debug("No SqlAlchemy module available.")
-    sa = None
-
-try:
-    from sqlalchemy.engine import Row as sqlalchemy_engine_Row
-except ImportError:
-    logger.debug("No SqlAlchemy.engine module available.")
-    sqlalchemy_engine_Row = None
-
-try:
-    from pyspark.sql import Row as pyspark_sql_Row
-except ImportError:
-    logger.debug("No spark SQLContext available.")
-    pyspark_sql_Row = None
-
 
 def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
     def _detect_illegal_array_type_or_shape(values: MetricValues) -> bool:
@@ -44,8 +27,8 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
                 properties=(
                     pd.DataFrame,
                     pd.Series,
-                    sqlalchemy_engine_Row,
-                    pyspark_sql_Row,
+                    sqlalchemy.Row if sqlalchemy.Row else None,
+                    pyspark.Row if pyspark.Row else None,  # type: ignore[truthy-function]
                     set,
                 )
             ),

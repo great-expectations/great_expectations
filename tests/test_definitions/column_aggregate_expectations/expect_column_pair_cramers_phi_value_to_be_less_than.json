@@ -2,6 +2,7 @@
   "expectation_type": "expect_column_pair_cramers_phi_value_to_be_less_than",
   "datasets": [
     {
+      "dataset_name": "expect_column_pair_cramers_phi_value_to_be_less_than_1",
       "data": {
         "integer_1": [
           1,

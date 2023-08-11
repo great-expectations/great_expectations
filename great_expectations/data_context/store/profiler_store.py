@@ -2,11 +2,12 @@ import random
 import uuid
 from typing import Union
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.configuration_store import ConfigurationStore
 from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
-    GXCloudIdentifier,
+    ConfigurationIdentifier,  # noqa: TCH001
+    GXCloudIdentifier,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
@@ -72,3 +73,19 @@ class ProfilerStore(ConfigurationStore):
         profiler_config_dict["id"] = ge_cloud_profiler_id
 
         return profiler_config_dict
+
+    def _add(self, key, value, **kwargs):
+        try:
+            return super()._add(key=key, value=value, **kwargs)
+        except gx_exceptions.StoreBackendError:
+            raise gx_exceptions.ProfilerError(
+                f"A Profiler named {value.name} already exists."
+            )
+
+    def _update(self, key, value, **kwargs):
+        try:
+            return super()._update(key=key, value=value, **kwargs)
+        except gx_exceptions.StoreBackendError:
+            raise gx_exceptions.ProfilerNotFoundError(
+                f"Could not find an existing Profiler named {value.name}."
+            )

@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 
+from great_expectations.compatibility import aws
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -9,17 +10,21 @@ from great_expectations.util import is_library_loadable
 
 
 @pytest.mark.skipif(
-    not is_library_loadable(library_name="pyathena"),
+    not (aws.sqlalchemy_athena and is_library_loadable(library_name="pyathena")),
     reason="pyathena is not installed",
 )
+@pytest.mark.athena
+@pytest.mark.external_sqldialect
 def test_expect_column_values_to_be_of_type_string_dialect_pyathena(sa):
-    from pyathena import sqlalchemy_athena
-
     df = pd.DataFrame({"col": ["test_val1", "test_val2"]})
-    validator = build_sa_validator_with_data(df, "sqlite")
+    validator = build_sa_validator_with_data(
+        df=df,
+        sa_engine_name="sqlite",
+        table_name="expect_column_values_to_be_of_type_string_dialect_pyathena_1",
+    )
 
     # Monkey-patch dialect for testing purposes.
-    validator.execution_engine.dialect_module = sqlalchemy_athena
+    validator.execution_engine.dialect_module = aws.sqlalchemy_athena
 
     result = validator.expect_column_values_to_be_of_type("col", type_="string")
 
@@ -52,10 +57,15 @@ def test_expect_column_values_to_be_of_type_string_dialect_pyathena(sa):
     )
 
 
+@pytest.mark.sqlite
+@pytest.mark.external_sqldialect
 def test_expect_column_values_to_be_of_type_string_dialect_sqlite(sa):
-
     df = pd.DataFrame({"col": ["test_val1", "test_val2"]})
-    validator = build_sa_validator_with_data(df, "sqlite")
+    validator = build_sa_validator_with_data(
+        df=df,
+        sa_engine_name="sqlite",
+        table_name="expect_column_values_to_be_of_type_string_dialect_sqlite_1",
+    )
 
     result = validator.expect_column_values_to_be_of_type("col", type_="TEXT")
 

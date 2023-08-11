@@ -1,49 +1,17 @@
-import json
-from typing import Any, Dict, Optional, Tuple
+from typing import Dict, Optional
 
-import numpy as np
-import pandas as pd
-from scipy import stats as stats
+from scipy import stats
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import (
-    ColumnExpectation,
-    Expectation,
-    ExpectationConfiguration,
-    InvalidExpectationConfigurationError,
-    _format_map_output,
-    render_evaluation_parameter_string,
-)
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
-from great_expectations.expectations.metrics.metric_provider import (
-    MetricProvider,
-    metric_value,
-)
-from great_expectations.render import RenderedStringTemplateContent
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import (
-    handle_strict_min_max,
-    num_to_str,
-    parse_row_condition_string_pandas_engine,
-    substitute_none_for_missing,
-)
-from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnNormallyDistributed(ColumnMetricProvider):
+class ColumnNormallyDistributed(ColumnAggregateMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
     metric_name = "column.custom.normally_distributed"
@@ -53,7 +21,7 @@ class ColumnNormallyDistributed(ColumnMetricProvider):
         return stats.normaltest(column, nan_policy="omit")[1]  # Should we omit nan?
 
     #
-    # @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
+    # @metric_value(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(
     #     cls,
     #     execution_engine: "SqlAlchemyExecutionEngine",
@@ -80,7 +48,7 @@ class ColumnNormallyDistributed(ColumnMetricProvider):
     #
     #     return column_median
     #
-    # @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
+    # @metric_value(engine=SparkDFExecutionEngine)
     # def _spark(
     #     cls,
     #     execution_engine: "SqlAlchemyExecutionEngine",
@@ -147,7 +115,7 @@ class ColumnNormallyDistributed(ColumnMetricProvider):
     #     return dependencies
 
 
-class ExpectColumnValuesToBeNormallyDistributed(ColumnExpectation):
+class ExpectColumnValuesToBeNormallyDistributed(ColumnAggregateExpectation):
     """Expect column values to be normally distributed. NaN values are omitted."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -314,7 +282,6 @@ class ExpectColumnValuesToBeNormallyDistributed(ColumnExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-
         return self._validate_metric_value_between(
             metric_name="column.custom.normally_distributed",
             configuration=configuration,

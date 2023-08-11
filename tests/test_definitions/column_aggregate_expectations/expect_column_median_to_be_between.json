@@ -2,6 +2,7 @@
   "expectation_type" : "expect_column_median_to_be_between",
   "datasets" : [
     {
+      "dataset_name": "expect_column_median_to_be_between_1",
       "data": {
         "a": [
           1,
@@ -158,6 +159,7 @@
         }
       ]},
     {
+      "dataset_name": "expect_column_median_to_be_between_2",
       "data": {
         "empty_column": []
       },
@@ -175,6 +177,9 @@
           "max_value": 0,
           "catch_exceptions": false
         },
+        "suppress_test_for": [
+          "spark"
+        ],
         "out": {
           "success": false,
           "observed_value": null

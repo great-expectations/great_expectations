@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Optional, Tuple, overload
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, Literal, Optional, Tuple, overload
 
 from great_expectations.core._docs_decorators import deprecated_argument
 from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,
+    AbstractDataContext,  # noqa: TCH001
 )
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
@@ -21,14 +19,14 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.data_context.serializable_data_context import (
     SerializableDataContext,
 )
-from great_expectations.data_context.types.base import GXCloudConfig
+from great_expectations.data_context.types.base import GXCloudConfig  # noqa: TCH001
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
 
 
 @overload
-def DataContext(
+def DataContext(  # noqa: PLR0913
     context_root_dir: PathStr = ...,
     runtime_environment: Optional[dict] = ...,
     cloud_mode: Literal[False] = ...,
@@ -46,7 +44,7 @@ def DataContext(
 
 
 @overload
-def DataContext(
+def DataContext(  # noqa: PLR0913
     context_root_dir: Optional[PathStr] = ...,
     runtime_environment: Optional[dict] = ...,
     cloud_mode: bool = ...,
@@ -69,7 +67,7 @@ def DataContext(
 @deprecated_argument(argument_name="ge_cloud_base_url", version="0.15.37")
 @deprecated_argument(argument_name="ge_cloud_access_token", version="0.15.37")
 @deprecated_argument(argument_name="ge_cloud_organization_id", version="0.15.37")
-def DataContext(
+def DataContext(  # noqa: PLR0913
     context_root_dir: Optional[PathStr] = None,
     runtime_environment: Optional[dict] = None,
     cloud_mode: bool = False,
@@ -186,7 +184,7 @@ def DataContext(
     return context
 
 
-def _resolve_cloud_args(
+def _resolve_cloud_args(  # noqa: PLR0913
     cloud_mode: bool = False,
     cloud_base_url: Optional[str] = None,
     cloud_access_token: Optional[str] = None,
@@ -241,4 +239,4 @@ def _init_context_root_directory(
             else context_root_dir
         )
 
-    return os.path.abspath(os.path.expanduser(context_root_dir))
+    return os.path.abspath(os.path.expanduser(context_root_dir))  # noqa: PTH111, PTH100

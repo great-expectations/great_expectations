@@ -85,6 +85,7 @@ def s3_generator(mock_s3_bucket, basic_sparkdf_datasource):
     yield generator
 
 
+@pytest.mark.big
 def test_s3_generator_basic_operation(s3_generator):
     # S3 Generator sees *only* configured assets
     assets = s3_generator.get_available_data_asset_names()
@@ -120,6 +121,7 @@ def test_s3_generator_basic_operation(s3_generator):
     assert "common_prefixes" in err.value.batch_kwargs
 
 
+@pytest.mark.big
 def test_s3_generator_incremental_fetch(s3_generator, caplog):
     caplog.set_level(
         logging.DEBUG,
@@ -148,6 +150,7 @@ def test_s3_generator_incremental_fetch(s3_generator, caplog):
     assert len(batch_kwargs) == 3
 
 
+@pytest.mark.unit
 def test_s3_generator_get_directories(s3_generator):
     # Verify that an asset configured to return directories can do so
     batch_kwargs_list = [
@@ -162,13 +165,15 @@ def test_s3_generator_get_directories(s3_generator):
     } == paths
 
 
+@pytest.mark.unit
 def test_s3_generator_limit(s3_generator):
     batch_kwargs_list = [
         kwargs for kwargs in s3_generator.get_iterator(data_asset_name="data", limit=10)
     ]
-    assert all(["limit" in batch_kwargs for batch_kwargs in batch_kwargs_list])
+    assert all("limit" in batch_kwargs for batch_kwargs in batch_kwargs_list)
 
 
+@pytest.mark.unit
 def test_s3_generator_reader_method_configuration(s3_generator):
     batch_kwargs_list = [
         kwargs
@@ -177,6 +182,7 @@ def test_s3_generator_reader_method_configuration(s3_generator):
     assert batch_kwargs_list[0]["reader_method"] == "delta"
 
 
+@pytest.mark.unit
 def test_s3_generator_build_batch_kwargs_no_partition_id(s3_generator):
     batch_kwargs = s3_generator.build_batch_kwargs("data")
     assert batch_kwargs["s3"] in [
@@ -185,11 +191,13 @@ def test_s3_generator_build_batch_kwargs_no_partition_id(s3_generator):
     ]
 
 
+@pytest.mark.unit
 def test_s3_generator_build_batch_kwargs_partition_id(s3_generator):
     batch_kwargs = s3_generator.build_batch_kwargs("data", "you")
     assert batch_kwargs["s3"] == "s3a://test_bucket/data/for/you.csv"
 
 
+@pytest.mark.unit
 def test_s3_generator_directory_asset(s3_generator):
     batch_kwargs = s3_generator.build_batch_kwargs("dir")
     assert batch_kwargs["s3"] in [
@@ -198,12 +206,14 @@ def test_s3_generator_directory_asset(s3_generator):
     ]
 
 
+@pytest.mark.unit
 def test_s3_generator_misconfigured_directory_asset(s3_generator):
     with pytest.raises(BatchKwargsError) as exc:
         _ = s3_generator.build_batch_kwargs("dir_misconfigured")
     assert "The asset may not be configured correctly." in str(exc.value)
 
 
+@pytest.mark.unit
 def test_s3_get_available_partition_ids(s3_generator):
     assert s3_generator.get_available_partition_ids(data_asset_name="data") == [
         "me",

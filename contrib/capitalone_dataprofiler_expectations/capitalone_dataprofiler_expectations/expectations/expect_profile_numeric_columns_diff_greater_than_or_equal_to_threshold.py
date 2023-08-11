@@ -141,7 +141,8 @@ class DataProfilerProfileNumericColumnsDiffGreaterThanOrEqualToThreshold(
 class ExpectProfileNumericColumnsDiffGreaterThanOrEqualToThreshold(
     ProfileNumericColumnsDiffExpectation
 ):
-    """
+    """Expect a statistic's value for a given column of a DataProfiler difference report to be greater than or equal to the specified threshold.
+
     This expectation takes the difference report between the data it is called on and a DataProfiler profile of the same schema loaded from a provided path.
     This function builds upon the custom ProfileNumericColumnsDiff Expectation of Capital One's DataProfiler Expectations.
     Each numerical column will be checked against a user provided dictionary of columns paired with dictionaries of statistics containing a threshold value.
@@ -192,7 +193,7 @@ class ExpectProfileNumericColumnsDiffGreaterThanOrEqualToThreshold(
         "/example_profiles/expect_profile_diff_less_than_threshold_profile.pkl"
     )
 
-    dir_path = os.path.dirname(os.path.abspath(__file__))
+    dir_path = os.path.dirname(os.path.abspath(__file__))  # noqa: PTH120, PTH100
     profile_path = dir_path + profile_path
 
     example_profile.save(filepath=profile_path)

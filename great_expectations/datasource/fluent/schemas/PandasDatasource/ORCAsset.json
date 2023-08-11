@@ -1,0 +1,89 @@
+{
+    "title": "ORCAsset",
+    "description": "Load an ORC object from the file path, returning a DataFrame.\n\n.. versionadded:: 1.0.0\n\nParameters\n----------\npath : str, path object, or file-like object\n    String, path object (implementing ``os.PathLike[str]``), or file-like\n    object implementing a binary ``read()`` function. The string could be a URL.\n    Valid URL schemes include http, ftp, s3, and file. For file URLs, a host is\n    expected. A local file could be:\n    ``file://localhost/path/to/table.orc``.\ncolumns : list, default None\n    If not None, only these columns will be read from the file.\n**kwargs\n    Any additional kwargs are passed to pyarrow.\n\nReturns\n-------\nDataFrame\n\nNotes\n-----\nBefore using this function you should read the :ref:`user guide about ORC <io.orc>`\nand :ref:`install optional dependencies <install.warn_orc>`.",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "orc",
+            "enum": [
+                "orc"
+            ],
+            "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Sorter"
+            }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
+        "path": {
+            "title": "Path",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "file-path"
+                },
+                {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 65536,
+                    "format": "uri"
+                },
+                {}
+            ]
+        },
+        "columns": {
+            "title": "Columns",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "kwargs": {
+            "title": "Kwargs",
+            "description": "Extra keyword arguments that will be passed to the reader method",
+            "type": "object"
+        }
+    },
+    "required": [
+        "name",
+        "path"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        }
+    }
+}

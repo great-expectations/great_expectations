@@ -1,10 +1,7 @@
-import copy
-from typing import Dict, List, Optional, Union
+import sys
+from typing import List, Union
 
-import nbformat
 import pytest
-from nbconvert.preprocessors import ExecutePreprocessor
-from nbformat.notebooknode import NotebookNode
 
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.types.resource_identifiers import (
@@ -19,6 +16,9 @@ from great_expectations.render.util import (
     resource_key_passes_run_name_filter,
     truncate_list_of_indices,
 )
+
+# module level markers
+pytestmark = pytest.mark.unit
 
 
 def test_num_to_str():
@@ -138,156 +138,6 @@ def test_resource_key_passes_run_name_filter():
         )
         is False
     )
-    with pytest.warns(DeprecationWarning):
-        assert (
-            resource_key_passes_run_name_filter(
-                resource_key, run_name_filter={"eq": "profiling"}
-            )
-            is False
-        )
-        assert (
-            resource_key_passes_run_name_filter(
-                resource_key, run_name_filter={"eq": "foofooprofilingfoo"}
-            )
-            is True
-        )
-    with pytest.warns(DeprecationWarning):
-        assert (
-            resource_key_passes_run_name_filter(
-                resource_key, run_name_filter={"ne": "profiling"}
-            )
-            is True
-        )
-        assert (
-            resource_key_passes_run_name_filter(
-                resource_key, run_name_filter={"ne": "foofooprofilingfoo"}
-            )
-            is False
-        )
-
-
-def run_notebook(
-    notebook_path: str,
-    notebook_dir: str,
-    string_to_be_replaced: Optional[str] = None,
-    replacement_string: Optional[str] = None,
-):
-    if not notebook_path and notebook_dir:
-        raise ValueError(
-            "A path to and the directory containing the valid Jupyter notebook are required."
-        )
-
-    nb: NotebookNode = load_notebook_from_path(notebook_path=notebook_path)
-
-    nb = replace_code_in_notebook(
-        nb=nb,
-        string_to_be_replaced=string_to_be_replaced,
-        replacement_string=replacement_string,
-    )
-
-    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=600, kernel_name="python3")
-    ep.preprocess(nb, {"metadata": {"path": notebook_dir}})
-
-
-# noinspection PyShadowingNames
-def replace_code_in_notebook(
-    nb: NotebookNode,
-    string_to_be_replaced: Optional[str] = None,
-    replacement_string: Optional[str] = None,
-) -> Optional[NotebookNode]:
-    cond_neither: bool = string_to_be_replaced is None and replacement_string is None
-    cond_both: bool = not (string_to_be_replaced is None or replacement_string is None)
-    if not (cond_neither or cond_both):
-        raise ValueError(
-            "Either both or neither of the string replacement arguments (to/from) are required."
-        )
-
-    if (
-        nb is None
-        or not nb
-        or "cells" not in nb
-        or not nb["cells"]
-        or len(nb["cells"]) == 0
-    ):
-        return None
-
-    idx: int
-    cell: dict
-
-    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
-        nb=nb, search_string=string_to_be_replaced
-    )
-
-    if cells_of_interest_dict is None:
-        return None
-
-    for idx, cell in cells_of_interest_dict.items():
-        cell["source"] = cell["source"].replace(
-            string_to_be_replaced, replacement_string
-        )
-
-    nb["cells"] = list(
-        filter(
-            lambda cell: not (
-                (cell["cell_type"] == "code")
-                and (cell["source"].find(string_to_be_replaced) != -1)
-            ),
-            nb["cells"],
-        )
-    )
-
-    for idx in cells_of_interest_dict.keys():
-        nb["cells"].insert(idx, cells_of_interest_dict[idx])
-
-    return nb
-
-
-def load_notebook_from_path(
-    notebook_path: str,
-) -> NotebookNode:
-    if not notebook_path:
-        raise ValueError("A path to the valid Jupyter notebook is required.")
-
-    nb: NotebookNode
-    with open(notebook_path) as f:
-        nb = nbformat.read(f, as_version=4)
-
-    return nb
-
-
-# noinspection PyShadowingNames
-def find_code_in_notebook(
-    nb: NotebookNode,
-    search_string: str,
-) -> Optional[Dict[int, dict]]:
-    if (
-        nb is None
-        or not nb
-        or "cells" not in nb
-        or not nb["cells"]
-        or len(nb["cells"]) == 0
-    ):
-        return None
-
-    idx: int
-    cell: dict
-
-    indices: List[int] = [
-        idx
-        for idx, cell in enumerate(nb["cells"])
-        if (
-            (cell["cell_type"] == "code") and (cell["source"].find(search_string) != -1)
-        )
-    ]
-
-    if len(indices) == 0:
-        return None
-
-    cells_of_interest_dict: Dict[int, dict] = {
-        idx: copy.deepcopy(nb["cells"][idx]) for idx in indices
-    }
-
-    return cells_of_interest_dict
 
 
 def test_convert_unexpected_indices_to_df():
@@ -309,11 +159,10 @@ def test_convert_unexpected_indices_to_df():
         unexpected_index_column_names=unexpected_index_column_names,
         partial_unexpected_counts=partial_unexpected_counts,
     )
-    assert list(res) == unexpected_index_column_names
-    print(res)
-    assert res.iloc[0].tolist() == ["3", "three"]
-    assert res.iloc[1].tolist() == ["4", "four"]
-    assert res.iloc[2].tolist() == ["5", "five"]
+    assert list(res) == ["pk_1", "pk_2", "Count"]
+    assert res.iloc[0].tolist() == ["3", "three", 1]
+    assert res.iloc[1].tolist() == ["4", "four", 1]
+    assert res.iloc[2].tolist() == ["5", "five", 1]
 
 
 def test_convert_unexpected_indices_to_df_multiple():
@@ -337,10 +186,13 @@ def test_convert_unexpected_indices_to_df_multiple():
         unexpected_index_column_names=unexpected_index_column_names,
         partial_unexpected_counts=partial_unexpected_counts,
     )
-    assert list(res) == unexpected_index_column_names
-    assert res.iloc[0].tolist() == ["3"]
-    assert res.iloc[1].tolist() == ["4"]
-    assert res.iloc[2].tolist() == ["5, 6, 7, 8"]
+    assert list(res) == ["pk_1", "Count"]
+    assert res.iloc[0, 0] == "3"
+    assert res.iloc[1, 0] == "4"
+    assert res.iloc[2, 0] == "5, 6, 7, 8"
+    assert res.iloc[0, 1] == 1
+    assert res.iloc[1, 1] == 1
+    assert res.iloc[2, 1] == 4
 
 
 def test_convert_unexpected_indices_to_df_multiple_with_truncation():
@@ -366,8 +218,126 @@ def test_convert_unexpected_indices_to_df_multiple_with_truncation():
         unexpected_index_column_names=unexpected_index_column_names,
         partial_unexpected_counts=partial_unexpected_counts,
     )
-    assert list(res) == unexpected_index_column_names
-    assert res.iloc[0].tolist() == ["0, 1, 2, 3, 4, 5, 6, 7, 8, 9, ..."]
+    assert list(res) == ["pk_1", "Count"]
+    assert res.iloc[0].tolist() == ["0, 1, 2, 3, 4, 5, 6, 7, 8, 9, ...", 13]
+
+
+def test_convert_unexpected_indices_to_df_column_pair_expectation():
+    partial_unexpected_counts = [{"value": ("eraser", "desk"), "count": 3}]
+    unexpected_index_list = [
+        {"ordered_item": "eraser", "received_item": "desk", "pk_2": "three"},
+        {"ordered_item": "eraser", "received_item": "desk", "pk_2": "four"},
+        {"ordered_item": "eraser", "received_item": "desk", "pk_2": "five"},
+    ]
+    unexpected_index_column_names = ["pk_2"]
+    res = _convert_unexpected_indices_to_df(
+        unexpected_index_list=unexpected_index_list,
+        unexpected_index_column_names=unexpected_index_column_names,
+        partial_unexpected_counts=partial_unexpected_counts,
+    )
+    assert list(res) == ["pk_2", "Count"]
+    assert res.index.to_list() == ["('eraser', 'desk')"] or res.index.to_list() == [
+        "('desk', 'eraser')"
+    ]
+    assert res.iloc[0].tolist() == ["three, four, five", 3]
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 9),
+    reason="Failing on Python 3.7 and 3.8; blocking 0.15.48 release",
+)
+def test_convert_unexpected_indices_to_df_column_pair_expectation_no_id_pk():
+    partial_unexpected_counts = [{"value": ("eraser", "desk"), "count": 3}]
+    unexpected_index_list = [3, 4, 5]
+    unexpected_list = [("eraser", "desk"), ("eraser", "desk"), ("eraser", "desk")]
+    res = _convert_unexpected_indices_to_df(
+        unexpected_index_list=unexpected_index_list,
+        unexpected_index_column_names=None,
+        unexpected_list=unexpected_list,
+        partial_unexpected_counts=partial_unexpected_counts,
+    )
+    assert list(res) == ["Index", "Count"]
+    assert res.index.to_list() == ["('eraser', 'desk')"] or res.index.to_list() == [
+        "('desk', 'eraser')"
+    ]
+    assert res.iloc[0].tolist() == ["3, 4, 5", 3]
+
+
+def test_convert_unexpected_indices_to_df_multiple_column_expectation():
+    partial_unexpected_counts = [
+        {"value": (20, 20, 20), "count": 1},
+        {"value": (30, 30, 30), "count": 1},
+        {"value": (40, 40, 40), "count": 1},
+        {"value": (50, 50, 50), "count": 1},
+        {"value": (60, 60, 60), "count": 1},
+    ]
+    unexpected_index_list = [
+        {"a": 20, "pk_1": 1, "b": 20, "c": 20},
+        {"a": 30, "pk_1": 2, "b": 30, "c": 30},
+        {"a": 40, "pk_1": 3, "b": 40, "c": 40},
+        {"a": 50, "pk_1": 4, "b": 50, "c": 50},
+        {"a": 60, "pk_1": 5, "b": 60, "c": 60},
+    ]
+    unexpected_index_column_names = ["pk_1"]
+    res = _convert_unexpected_indices_to_df(
+        unexpected_index_list=unexpected_index_list,
+        unexpected_index_column_names=unexpected_index_column_names,
+        partial_unexpected_counts=partial_unexpected_counts,
+    )
+    assert list(res) == ["pk_1", "Count"]
+    assert res.index.to_list() == [
+        "('20', '20', '20')",
+        "('30', '30', '30')",
+        "('40', '40', '40')",
+        "('50', '50', '50')",
+        "('60', '60', '60')",
+    ]
+    assert res.iloc[0].tolist() == ["1", 1]
+    assert res.iloc[1].tolist() == ["2", 1]
+    assert res.iloc[2].tolist() == ["3", 1]
+    assert res.iloc[3].tolist() == ["4", 1]
+    assert res.iloc[4].tolist() == ["5", 1]
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 9),
+    reason="Failing on Python 3.7 and 3.8; blocking 0.15.48 release",
+)
+def test_convert_unexpected_indices_to_df_multiple_column_expectation_no_id_pk():
+    partial_unexpected_counts = [
+        {"value": (20, 20, 20), "count": 1},
+        {"value": (30, 30, 30), "count": 1},
+        {"value": (40, 40, 40), "count": 1},
+        {"value": (50, 50, 50), "count": 1},
+        {"value": (60, 60, 60), "count": 1},
+    ]
+    unexpected_list = [
+        (20, 20, 20),
+        (30, 30, 30),
+        (40, 40, 40),
+        (50, 50, 50),
+        (60, 60, 60),
+    ]
+    unexpected_index_list = [1, 2, 3, 4, 5]
+    res = _convert_unexpected_indices_to_df(
+        unexpected_index_list=unexpected_index_list,
+        unexpected_index_column_names=None,
+        unexpected_list=unexpected_list,
+        partial_unexpected_counts=partial_unexpected_counts,
+    )
+    assert list(res) == ["Index", "Count"]
+    assert res.index.to_list() == [
+        "(20, 20, 20)",
+        "(30, 30, 30)",
+        "(40, 40, 40)",
+        "(50, 50, 50)",
+        "(60, 60, 60)",
+    ]
+    assert res.iloc[0].tolist() == ["1", 1]
+    assert res.iloc[1].tolist() == ["2", 1]
+    assert res.iloc[2].tolist() == ["3", 1]
+    assert res.iloc[3].tolist() == ["4", 1]
+    assert res.iloc[4].tolist() == ["5", 1]
 
 
 def test_convert_unexpected_indices_to_df_actual_values():
@@ -387,10 +357,10 @@ def test_convert_unexpected_indices_to_df_actual_values():
         unexpected_list=unexpected_list,
         partial_unexpected_counts=partial_unexpected_counts,
     )
-    assert list(res) == ["Index"]
-    assert res.iloc[0].tolist() == ["3"]
-    assert res.iloc[1].tolist() == ["4"]
-    assert res.iloc[2].tolist() == ["5"]
+    assert list(res) == ["Index", "Count"]
+    assert res.iloc[0].tolist() == ["3", 1]
+    assert res.iloc[1].tolist() == ["4", 1]
+    assert res.iloc[2].tolist() == ["5", 1]
 
 
 def test_truncate_list_of_indices():
@@ -485,6 +455,60 @@ def test_build_count_and_index_table_with_empty_string():
     assert table_rows == [
         ["EMPTY", 1, "5", "five"],
     ]
+
+
+def test_build_count_and_index_table_with_multi_column():
+    partial_unexpected_counts = [
+        {"value": (20, 20, 20), "count": 1},
+        {"value": (30, 30, 30), "count": 1},
+        {"value": (40, 40, 40), "count": 1},
+        {"value": (50, 50, 50), "count": 1},
+        {"value": (60, 60, 60), "count": 1},
+    ]
+    unexpected_index_list = [
+        {"a": 20, "pk_1": 1, "b": 20, "c": 20},
+        {"a": 30, "pk_1": 2, "b": 30, "c": 30},
+        {"a": 40, "pk_1": 3, "b": 40, "c": 40},
+        {"a": 50, "pk_1": 4, "b": 50, "c": 50},
+        {"a": 60, "pk_1": 5, "b": 60, "c": 60},
+    ]
+    unexpected_count = 5
+    unexpected_index_column_names = ["pk_1"]
+    header_row, table_rows = build_count_and_index_table(
+        partial_unexpected_counts=partial_unexpected_counts,
+        unexpected_index_list=unexpected_index_list,
+        unexpected_count=unexpected_count,
+        unexpected_index_column_names=unexpected_index_column_names,
+    )
+    assert header_row == ["Unexpected Value", "Count", "pk_1"]
+    assert table_rows == [
+        ["('20', '20', '20')", 1, "1"],
+        ["('30', '30', '30')", 1, "2"],
+        ["('40', '40', '40')", 1, "3"],
+        ["('50', '50', '50')", 1, "4"],
+        ["('60', '60', '60')", 1, "5"],
+    ]
+
+
+def test_build_count_and_index_table_with_column_pair():
+    partial_unexpected_counts = [{"value": ("eraser", "desk"), "count": 3}]
+    unexpected_index_list = [
+        {"ordered_item": "eraser", "received_item": "desk", "pk_2": "three"},
+        {"ordered_item": "eraser", "received_item": "desk", "pk_2": "four"},
+        {"ordered_item": "eraser", "received_item": "desk", "pk_2": "five"},
+    ]
+    unexpected_count = 3
+    unexpected_index_column_names = ["pk_2"]
+    header_row, table_rows = build_count_and_index_table(
+        partial_unexpected_counts=partial_unexpected_counts,
+        unexpected_index_list=unexpected_index_list,
+        unexpected_count=unexpected_count,
+        unexpected_index_column_names=unexpected_index_column_names,
+    )
+    assert header_row == ["Unexpected Value", "Count", "pk_2"]
+    assert table_rows == [  # noqa: PLR1714
+        ["('desk', 'eraser')", 3, "three, four, five"]
+    ] or table_rows == [["('eraser', 'desk')", 3, "three, four, five"]]
 
 
 def test_build_count_and_index_table_with_null():

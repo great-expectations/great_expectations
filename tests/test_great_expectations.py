@@ -5,18 +5,15 @@ import unittest
 
 import pandas as pd
 import pytest
-from freezegun import freeze_time
 
 import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationConfiguration,
     expectationSuiteSchema,
-    expectationSuiteValidationResultSchema,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
 from great_expectations.data_asset.data_asset import (
@@ -107,8 +104,9 @@ class CustomPandasDataset(PandasDataset):
             }
 
 
+@pytest.mark.filesystem
 def test_custom_class():
-    script_path = os.path.dirname(os.path.realpath(__file__))
+    script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
     df = gx.read_csv(
         script_path + "/test_sets/Titanic.csv", dataset_class=CustomPandasDataset
     )
@@ -153,6 +151,7 @@ def test_custom_class():
     assert df.expect_column_values_to_be_prime("primes").result["unexpected_list"] == []
 
 
+@pytest.mark.unit
 def test_custom_expectation():
     df = CustomPandasDataset({"x": [1, 1, 1, 1, 2]})
     df.set_default_expectation_argument("result_format", "COMPLETE")
@@ -169,6 +168,7 @@ def test_custom_expectation():
 
 
 # Ensure that Custom Data Set classes can properly call non-overridden methods from their parent class
+@pytest.mark.unit
 def test_base_class_expectation():
     df = CustomPandasDataset(
         {
@@ -184,91 +184,7 @@ def test_base_class_expectation():
     )
 
 
-@freeze_time("11/05/1955")
-def test_validate(empty_data_context):
-    context: DataContext = empty_data_context
-    with open(
-        file_relative_path(__file__, "./test_sets/titanic_expectations.json")
-    ) as f:
-        my_expectation_suite_dict: dict = expectationSuiteSchema.loads(f.read())
-        my_expectation_suite = ExpectationSuite(
-            **my_expectation_suite_dict, data_context=context
-        )
-
-    with mock.patch("uuid.uuid1") as uuid:
-        uuid.return_value = "1234"
-        my_df = gx.read_csv(
-            file_relative_path(__file__, "./test_sets/Titanic.csv"),
-            expectation_suite=my_expectation_suite,
-        )
-    my_df.set_default_expectation_argument("result_format", "COMPLETE")
-
-    results = my_df.validate(catch_exceptions=False)
-
-    with open(
-        file_relative_path(
-            __file__, "./test_sets/titanic_expected_data_asset_validate_results.json"
-        )
-    ) as f:
-        expected_results = expectationSuiteValidationResultSchema.loads(f.read())
-
-    del results.meta["great_expectations_version"]
-    del results.meta["expectation_suite_meta"]["great_expectations_version"]
-    assert results.to_json_dict() == expected_results.to_json_dict()
-
-    # Now, change the results and ensure they are no longer equal
-    results.results[0] = ExpectationValidationResult()
-    assert results.to_json_dict() != expected_results.to_json_dict()
-
-    # Finally, confirm that only_return_failures works
-    # and does not affect the "statistics" field.
-    validation_results = my_df.validate(only_return_failures=True)
-    del validation_results.meta["great_expectations_version"]
-    del validation_results.meta["expectation_suite_meta"]["great_expectations_version"]
-    expected_results = ExpectationSuiteValidationResult(
-        meta={
-            "expectation_suite_name": "titanic",
-            "run_id": {"run_name": None, "run_time": "1955-11-05T00:00:00+00:00"},
-            "validation_time": "19551105T000000.000000Z",
-            "batch_kwargs": {"ge_batch_id": "1234"},
-            "expectation_suite_meta": {},
-            "batch_markers": {},
-            "batch_parameters": {},
-        },
-        results=[
-            ExpectationValidationResult(
-                expectation_config=ExpectationConfiguration(
-                    expectation_type="expect_column_values_to_be_in_set",
-                    kwargs={"column": "PClass", "value_set": ["1st", "2nd", "3rd"]},
-                ),
-                success=False,
-                exception_info={
-                    "exception_message": None,
-                    "exception_traceback": None,
-                    "raised_exception": False,
-                },
-                result={
-                    "partial_unexpected_index_list": [456],
-                    "unexpected_count": 1,
-                    "unexpected_list": ["*"],
-                    "unexpected_percent": 0.07616146230007616,
-                    "element_count": 1313,
-                    "missing_percent": 0.0,
-                    "partial_unexpected_counts": [{"count": 1, "value": "*"}],
-                    "partial_unexpected_list": ["*"],
-                    "unexpected_percent_total": 0.07616146230007616,
-                    "unexpected_percent_nonmissing": 0.07616146230007616,
-                    "missing_count": 0,
-                    "unexpected_index_list": [456],
-                },
-            )
-        ],
-        success=expected_results.success,  # unaffected
-        statistics=expected_results["statistics"],  # unaffected
-    )
-    assert validation_results.to_json_dict() == expected_results.to_json_dict()
-
-
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.ExpectationValidationResult.validate_result_dict",
     return_value=False,
@@ -296,48 +212,7 @@ def test_validate_with_invalid_result_catch_exceptions_false(empty_data_context)
             my_df.validate(catch_exceptions=False)
 
 
-@freeze_time("11/05/1955")
-@mock.patch(
-    "great_expectations.core.ExpectationValidationResult.validate_result_dict",
-    return_value=False,
-)
-def test_validate_with_invalid_result(empty_data_context):
-    context: DataContext = empty_data_context
-    with open(
-        file_relative_path(__file__, "./test_sets/titanic_expectations.json")
-    ) as f:
-        my_expectation_suite_dict: dict = expectationSuiteSchema.loads(f.read())
-        my_expectation_suite = ExpectationSuite(
-            **my_expectation_suite_dict, data_context=context
-        )
-
-    with mock.patch("uuid.uuid1") as uuid:
-        uuid.return_value = "1234"
-        my_df = gx.read_csv(
-            file_relative_path(__file__, "./test_sets/Titanic.csv"),
-            expectation_suite=my_expectation_suite,
-        )
-    my_df.set_default_expectation_argument("result_format", "COMPLETE")
-
-    results = my_df.validate()  # catch_exceptions=True is default
-
-    with open(
-        file_relative_path(
-            __file__,
-            "./test_sets/titanic_expected_data_asset_validate_results_with_exceptions.json",
-        )
-    ) as f:
-        expected_results = expectationSuiteValidationResultSchema.loads(f.read())
-
-    del results.meta["great_expectations_version"]
-    del results.meta["expectation_suite_meta"]["great_expectations_version"]
-
-    for result in results.results:
-        result.exception_info.pop("exception_traceback")
-
-    assert results.to_json_dict() == expected_results.to_json_dict()
-
-
+@pytest.mark.filesystem
 def test_validate_catch_non_existent_expectation(empty_data_context):
     context: DataContext = empty_data_context
     df = gx.dataset.PandasDataset({"x": [1, 2, 3, 4, 5]})
@@ -361,6 +236,7 @@ def test_validate_catch_non_existent_expectation(empty_data_context):
     )
 
 
+@pytest.mark.filesystem
 def test_validate_catch_invalid_parameter(empty_data_context):
     context: DataContext = empty_data_context
     df = gx.dataset.PandasDataset({"x": [1, 2, 3, 4, 5]})
@@ -384,6 +260,7 @@ def test_validate_catch_invalid_parameter(empty_data_context):
     )
 
 
+@pytest.mark.unit
 def test_stats_no_expectations():
     expectation_results = []
     actual = _calc_validation_statistics(expectation_results)
@@ -397,6 +274,7 @@ def test_stats_no_expectations():
     assert 0 == actual.unsuccessful_expectations
 
 
+@pytest.mark.unit
 def test_stats_no_successful_expectations():
     expectation_results = [ExpectationValidationResult(success=False)]
     actual = _calc_validation_statistics(expectation_results)
@@ -413,6 +291,7 @@ def test_stats_no_successful_expectations():
     assert expected == actual
 
 
+@pytest.mark.unit
 def test_stats_all_successful_expectations():
     expectation_results = [
         ExpectationValidationResult(success=True),
@@ -431,6 +310,7 @@ def test_stats_all_successful_expectations():
     assert expected == actual
 
 
+@pytest.mark.unit
 def test_stats_mixed_expectations():
     expectation_results = [
         ExpectationValidationResult(success=False),
@@ -442,14 +322,16 @@ def test_stats_mixed_expectations():
 
 
 class TestIO(unittest.TestCase):
+    @pytest.mark.filesystem
     def test_read_csv(self):
-        script_path = os.path.dirname(os.path.realpath(__file__))
+        script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         _ = gx.read_csv(
             script_path + "/test_sets/Titanic.csv",
         )
 
+    @pytest.mark.filesystem
     def test_read_json(self):
-        script_path = os.path.dirname(os.path.realpath(__file__))
+        script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_json(
             script_path + "/test_sets/test_json_data_file.json",
         )
@@ -465,12 +347,13 @@ class TestIO(unittest.TestCase):
         assert isinstance(df, PandasDataset)
         assert sorted(list(df.keys())) == ["x", "y", "z"]
 
+    @pytest.mark.openpyxl
     @pytest.mark.skipif(
         not is_library_loadable(library_name="openpyxl"),
         reason="GX uses pandas to read excel files, which requires openpyxl",
     )
     def test_read_excel(self):
-        script_path = os.path.dirname(os.path.realpath(__file__))
+        script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_excel(
             script_path + "/test_sets/Titanic_multi_sheet.xlsx", engine="openpyxl"
         )
@@ -498,12 +381,14 @@ class TestIO(unittest.TestCase):
         assert isinstance(dfs_dict["Titanic_1"], PandasDataset)
         assert dfs_dict["Titanic_1"]["Name"][0] == "Allen, Miss Elisabeth Walton"
 
+    @pytest.mark.filesystem
     def test_read_table(self):
-        script_path = os.path.dirname(os.path.realpath(__file__))
+        script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_table(script_path + "/test_sets/Titanic.csv", sep=",")
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
+    @pytest.mark.pyarrow
     @pytest.mark.skipif(
         not is_library_loadable(library_name="pyarrow"),
         reason="pyarrow is not installed",
@@ -518,11 +403,12 @@ class TestIO(unittest.TestCase):
             if pandas_major_version == 0 and pandas_minor_version < 25:
                 pytest.skip("Skipping because of old pandas version.")
 
-        script_path = os.path.dirname(os.path.realpath(__file__))
+        script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_feather(script_path + "/test_sets/Titanic.feather")
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
+    @pytest.mark.pyarrow
     @pytest.mark.skipif(
         not is_library_loadable(library_name="pyarrow")
         and not is_library_loadable(library_name="fastparquet"),
@@ -550,21 +436,23 @@ class TestIO(unittest.TestCase):
             if pandas_major_version == 0 and pandas_minor_version < 23:
                 pytest.skip("Pandas version < 23 is no longer compatible with pyarrow")
 
-        script_path = os.path.dirname(os.path.realpath(__file__))
+        script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_parquet(script_path + "/test_sets/Titanic.parquet")
         assert df["Name"][1] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
+    @pytest.mark.filesystem
     def test_read_pickle(self):
-        script_path = os.path.dirname(os.path.realpath(__file__))
+        script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_pickle(
             script_path + "/test_sets/Titanic.pkl",
         )
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
+    @pytest.mark.filesystem
     def test_read_sas(self):
-        script_path = os.path.dirname(os.path.realpath(__file__))
+        script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_sas(
             script_path + "/test_sets/Titanic.sas7bdat",
             encoding="latin-1",

@@ -14,12 +14,14 @@ from great_expectations.util import gen_directory_tree_str, get_context
 from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
+pytestmark = pytest.mark.cli
+
 
 @pytest.mark.parametrize(
     "invocation,input",
     [
-        ("--v3-api init", "Y\n"),
-        ("--v3-api --assume-yes init", ""),
+        ("init", "Y\n"),
+        ("--assume-yes init", ""),
     ],
 )
 @mock.patch(
@@ -50,9 +52,9 @@ def test_cli_init_on_new_project(
     lets_create_data_context = (
         "Let's create a new Data Context to hold your project configuration."
     )
-    if invocation == "--v3-api init":
+    if invocation == "init":
         assert lets_create_data_context in stdout
-    if invocation == "--v3-api --assume-yes init":
+    if invocation == "--assume-yes init":
         assert lets_create_data_context not in stdout
     assert (
         "Congratulations! You are now ready to customize your Great Expectations configuration."
@@ -63,14 +65,20 @@ def test_cli_init_on_new_project(
         in stdout
     )
 
-    assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
-    config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
-    assert os.path.isfile(config_path)
+    assert os.path.isdir(  # noqa: PTH112
+        os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
+    )
+    config_path = os.path.join(  # noqa: PTH118
+        project_dir, "great_expectations/great_expectations.yml"
+    )
+    assert os.path.isfile(config_path)  # noqa: PTH113
 
     config = yaml.load(open(config_path))
     assert config["datasources"] == {}
 
-    obs_tree = gen_directory_tree_str(os.path.join(project_dir, "great_expectations"))
+    obs_tree = gen_directory_tree_str(
+        os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
+    )
 
     assert (
         obs_tree
@@ -123,7 +131,7 @@ def test_cli_init_on_new_project(
     )
     assert "Generating example Expectation Suite..." not in stdout
     assert "Building" not in stdout
-    assert "Done generating example Expectation Suite" not in stdout
+    assert "Done generating example Expectation Suite" not in stdout
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -143,7 +151,7 @@ def test_cancelled_cli_init_on_new_project(mock_emit, caplog, tmp_path, monkeypa
     monkeypatch.chdir(project_dir)
     result = runner.invoke(
         cli,
-        "--v3-api init",
+        "init",
         input="n\n",
         catch_exceptions=False,
     )
@@ -167,11 +175,17 @@ def test_cancelled_cli_init_on_new_project(mock_emit, caplog, tmp_path, monkeypa
         not in stdout
     )
 
-    assert not os.path.isdir(os.path.join(project_dir, "great_expectations"))
-    config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
-    assert not os.path.isfile(config_path)
+    assert not os.path.isdir(  # noqa: PTH112
+        os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
+    )
+    config_path = os.path.join(  # noqa: PTH118
+        project_dir, "great_expectations/great_expectations.yml"
+    )
+    assert not os.path.isfile(config_path)  # noqa: PTH113
 
-    obs_tree = gen_directory_tree_str(os.path.join(project_dir, "great_expectations"))
+    obs_tree = gen_directory_tree_str(
+        os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
+    )
 
     assert obs_tree == ""
 
@@ -202,7 +216,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
     monkeypatch.chdir(root_dir)
     result = runner.invoke(
         cli,
-        ["--v3-api", "init"],
+        ["init"],
         input="Y\n",
         catch_exceptions=False,
     )
@@ -215,19 +229,21 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
     )
 
     context = get_context(
-        context_root_dir=os.path.join(root_dir, FileDataContext.GX_DIR)
+        context_root_dir=os.path.join(root_dir, FileDataContext.GX_DIR)  # noqa: PTH118
     )
-    uncommitted_dir = os.path.join(context.root_directory, "uncommitted")
+    uncommitted_dir = os.path.join(  # noqa: PTH118
+        context.root_directory, "uncommitted"
+    )
     shutil.rmtree(uncommitted_dir)
-    assert not os.path.isdir(uncommitted_dir)
+    assert not os.path.isdir(uncommitted_dir)  # noqa: PTH112
 
     # Test the second invocation of init (answer N to update broken init)
     runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     with pytest.warns(UserWarning):
         result = runner.invoke(
             cli,
-            ["--v3-api", "init"],
+            ["init"],
             input="N\n",
             catch_exceptions=False,
         )
@@ -245,19 +261,21 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
     assert "You may see new files in" not in stdout
     assert "Would you like to build & view this project's Data Docs!?" not in stdout
 
-    assert not os.path.isdir(uncommitted_dir)
-    config_var_path = os.path.join(uncommitted_dir, "config_variables.yml")
-    assert not os.path.isfile(config_var_path)
+    assert not os.path.isdir(uncommitted_dir)  # noqa: PTH112
+    config_var_path = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "config_variables.yml"
+    )
+    assert not os.path.isfile(config_var_path)  # noqa: PTH113
 
     # Test the third invocation of init (answer Yes to update broken init)
     runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     with pytest.warns(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
             cli,
-            ["--v3-api", "init"],
+            ["init"],
             input="Y\n",
             catch_exceptions=False,
         )
@@ -276,9 +294,11 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
     assert "to fix the missing files!" not in stdout
     assert "Would you like to build & view this project's Data Docs!?" not in stdout
 
-    assert os.path.isdir(uncommitted_dir)
-    config_var_path = os.path.join(uncommitted_dir, "config_variables.yml")
-    assert os.path.isfile(config_var_path)
+    assert os.path.isdir(uncommitted_dir)  # noqa: PTH112
+    config_var_path = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "config_variables.yml"
+    )
+    assert os.path.isfile(config_var_path)  # noqa: PTH113
     with open(config_var_path) as f:
         assert f.read() == CONFIG_VARIABLES_TEMPLATE
 
@@ -300,7 +320,7 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     monkeypatch.chdir(root_dir)
     result: Result = runner.invoke(
         cli,
-        ["--v3-api", "init"],
+        ["init"],
         input="Y\n",
         catch_exceptions=False,
     )
@@ -315,7 +335,7 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     ):
         result = runner.invoke(
             cli,
-            ["--v3-api", "init"],
+            ["init"],
             input="",
             catch_exceptions=False,
         )

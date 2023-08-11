@@ -1,4 +1,3 @@
-import warnings
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 import pandas as pd
@@ -9,7 +8,7 @@ from great_expectations.core import (
 )
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
@@ -24,12 +23,13 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
+class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
     """Expect the set of distinct column values to contain a given set.
 
     expect_column_distinct_values_to_contain_set is a \
@@ -250,14 +250,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         value_set = self.get_success_kwargs(configuration).get("value_set")
 
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
-v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
-please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
-""",
-                DeprecationWarning,
-            )
+            warn_deprecated_parse_strings_as_datetimes()
             parsed_value_set = parse_value_set(value_set)
             observed_value_counts.index = pd.to_datetime(observed_value_counts.index)
         else:

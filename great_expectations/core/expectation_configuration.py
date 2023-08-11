@@ -18,10 +18,9 @@ from typing import (
 
 import jsonpatch
 from marshmallow import Schema, ValidationError, fields, post_dump, post_load
-from pyparsing import ParseResults
 from typing_extensions import TypedDict
 
-from great_expectations.alias_types import JSONValues
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import new_argument, public_api
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
@@ -48,6 +47,8 @@ from great_expectations.render import RenderedAtomicContent, RenderedAtomicConte
 from great_expectations.types import SerializableDictDot
 
 if TYPE_CHECKING:
+    from pyparsing import ParseResults
+
     from great_expectations.core import ExpectationValidationResult
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.execution_engine import ExecutionEngine
@@ -324,7 +325,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "max_value",
                 "strict_min",
                 "strict_max",
-                "allow_cross_type_comparisons",
                 "parse_strings_as_datetimes",
                 "output_strftime_format",
                 "mostly",
@@ -336,7 +336,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "max_value": None,
                 "strict_min": False,
                 "strict_max": False,
-                "allow_cross_type_comparisons": None,
                 "parse_strings_as_datetimes": None,
                 "output_strftime_format": None,
                 "mostly": None,
@@ -788,7 +787,6 @@ class ExpectationConfiguration(SerializableDictDot):
             "success_kwargs": (
                 "or_equal",
                 "parse_strings_as_datetimes",
-                "allow_cross_type_comparisons",
                 "ignore_row_if",
             ),
             "default_kwarg_values": {
@@ -796,7 +794,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "or_equal": None,
                 "parse_strings_as_datetimes": None,
-                "allow_cross_type_comparisons": None,
                 "ignore_row_if": "both_values_are_missing",
                 "result_format": "BASIC",
                 "include_config": True,
@@ -1005,7 +1002,7 @@ class ExpectationConfiguration(SerializableDictDot):
         "catch_exceptions",
     )
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         expectation_type: str,
         kwargs: dict,
@@ -1572,9 +1569,20 @@ class ExpectationConfigurationSchema(Schema):
                 data.pop(key)
         return data
 
+    def _convert_uuids_to_str(self, data):
+        """
+        Utilize UUID for data validation but convert to string before usage in business logic
+        """
+        attr = "ge_cloud_id"
+        uuid_val = data.get(attr)
+        if uuid_val:
+            data[attr] = str(uuid_val)
+        return data
+
     # noinspection PyUnusedLocal
     @post_load
     def make_expectation_configuration(self, data: dict, **kwargs):
+        data = self._convert_uuids_to_str(data=data)
         return ExpectationConfiguration(**data)
 
 

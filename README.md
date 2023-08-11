@@ -1,4 +1,5 @@
 
+[![Python Versions](https://img.shields.io/pypi/pyversions/great_expectations.svg)](https://pypi.python.org/pypi/great_expectations)
 [![PyPI](https://img.shields.io/pypi/v/great_expectations)](https://pypi.org/project/great-expectations/#history)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/great-expectations)](https://pypistats.org/packages/great-expectations)
 [![Build Status](https://img.shields.io/azure-devops/build/great-expectations/bedaf2c2-4c4a-4b37-87b0-3877190e71f5/1)](https://dev.azure.com/great-expectations/great_expectations/_build/latest?definitionId=1&branchName=develop)
@@ -12,7 +13,7 @@
 
 
 
-<img align="right" src="./static/img/gx-mark-160.png">
+<img align="right" src="./docs/docusaurus/static/img/gx-mark-160.png">
 
 Great Expectations
 ================================================================================
@@ -50,7 +51,7 @@ Get useful results quickly even for large data volumes. GX’s Data Assistants p
 
 
 
-![data_assistant_plot_expectations_and_metrics](./readme_assets/data_assistant_plot_expectations_and_metrics.png)
+![data_assistant_plot_expectations_and_metrics](./docs/readme_assets/data_assistant_plot_expectations_and_metrics.png)
 
 ### Unified understanding
 
@@ -72,13 +73,13 @@ GX doesn’t ask you to exchange security for your insight. It processes your da
 
 Checkpoints are a transparent, central, and automatable mechanism for testing Expectations and evaluating your data quality. Every Checkpoint run produces human-readable Data Docs reporting the results. You can also configure Checkpoints to take Actions based on the results of the evaluation, like sending alerts and preventing low-quality data from moving further in your pipelines.
 
-![Image of data contact support](./readme_assets/data-contract-support.png)
+![Image of data contact support](./docs/readme_assets/data-contract-support.png)
 
 ### Readable for collaboration
 
 Everyone stays on the same page about your data quality with GX’s inspectable, shareable, and human-readable Data Docs. You can publish Data Docs to the locations where you need them in a variety of formats, making it easy to integrate Data Docs into your existing data catalogs, dashboards, and other reporting and data governance tools.
 
-![Image of data docs](./readme_assets/datadocs-update.jpg)
+![Image of data docs](./docs/readme_assets/datadocs-update.jpg)
 
 Quick start
 -------------------------------------------------------------
@@ -92,14 +93,16 @@ pip install great_expectations
 and then run
 
 ```
-great_expectations init
+import great_expectations as gx
+
+data_context = gx.get_context()
 ```
 
 (We recommend deploying within a virtual environment. If you’re not familiar with pip, virtual environments, notebooks, or git, you may want to check out the [Supporting Resources](https://docs.greatexpectations.io/docs/terms/supporting_resource/), which will teach you how to get up and running in minutes.)
 
 For full documentation, visit [https://docs.greatexpectations.io/](https://docs.greatexpectations.io/).
 
-If you need help, hop into our [Slack channel](https://greatexpectations.io/slack)&mdash;there are always contributors and other users there. You can also use our [GitHub Discussions](https://github.com/great-expectations/great_expectations/discussions)
+If you need help, hop into our [Slack channel](https://greatexpectations.io/slack)&mdash;there are always contributors and other users there.
 
 
 Integrations
@@ -116,7 +119,7 @@ Great Expectations works with the tools and systems that you're already using wi
 	<tbody>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/datahub_logo.jpg" />
+				<img height="40" src="./docs/readme_assets/datahub_logo.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/integrations/integration_datahub/">
@@ -129,7 +132,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/aws-glue-logo__1_.jpg" />
+				<img height="40" src="./docs/readme_assets/aws-glue-logo__1_.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_aws_glue/">
@@ -142,7 +145,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/Athena_logo.jpg" />
+				<img height="40" src="./docs/readme_assets/Athena_logo.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/athena/">
@@ -155,7 +158,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/datasource_redshift.jpg" />
+				<img height="40" src="./docs/readme_assets/datasource_redshift.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/redshift/">
@@ -168,10 +171,10 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/awss3.jpg" />
+				<img height="40" src="./docs/readme_assets/awss3.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3/">
+				<a href="https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/host_and_share_data_docs">
 					AWS S3
 				</a>
 			</td>
@@ -181,7 +184,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/bigquery.jpg" />
+				<img height="40" src="./docs/readme_assets/bigquery.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery/">
@@ -194,10 +197,10 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/og-databricks.jpg" />
+				<img height="40" src="./docs/readme_assets/og-databricks.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_databricks/">
+				<a href="https://docs.greatexpectations.io/docs/tutorials/getting_started/how_to_use_great_expectations_in_databricks/">
 					Databricks
 				</a>
 			</td>
@@ -207,7 +210,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/deepnote_logo_400x.jpg" />
+				<img height="40" src="./docs/readme_assets/deepnote_logo_400x.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_deepnote/">
@@ -220,7 +223,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/Google_Cloud_logo.jpg" />
+				<img height="40" src="./docs/readme_assets/Google_Cloud_logo.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery/">
@@ -233,10 +236,10 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/microsoft-azure-blob-storage-logo.jpg" />                         
+				<img height="40" src="./docs/readme_assets/microsoft-azure-blob-storage-logo.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage/">
+				<a href="https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/host_and_share_data_docs/">
 					Microsoft Azure Blob Storage
 				</a>
 			</td>
@@ -246,7 +249,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/microsoft-sql-server-logo-96AF49E2B3-seeklogo.jpg" />                         
+				<img height="40" src="./docs/readme_assets/microsoft-sql-server-logo-96AF49E2B3-seeklogo.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/mssql">
@@ -259,7 +262,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/mysql.jpg" />                         
+				<img height="40" src="./docs/readme_assets/mysql.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/mysql/">
@@ -272,7 +275,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/pandas.jpg" />                         
+				<img height="40" src="./docs/readme_assets/pandas.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/in_memory/pandas/">
@@ -285,7 +288,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/postgres.jpg" />                         
+				<img height="40" src="./docs/readme_assets/postgres.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/postgres/">
@@ -298,7 +301,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/snowflake.jpg" />                         
+				<img height="40" src="./docs/readme_assets/snowflake.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/snowflake/">
@@ -311,7 +314,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/spark.jpg" />                         
+				<img height="40" src="./docs/readme_assets/spark.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster/">
@@ -324,7 +327,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/SQLite370.jpg" />                         
+				<img height="40" src="./docs/readme_assets/SQLite370.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/sqlite/">
@@ -337,7 +340,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/trino-og.jpg" />                         
+				<img height="40" src="./docs/readme_assets/trino-og.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/trino/">
@@ -350,7 +353,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/Apache_Airflow.jpg" />                         
+				<img height="40" src="./docs/readme_assets/Apache_Airflow.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_airflow/">
@@ -363,7 +366,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/flyte_logo.jpg" />                         
+				<img height="40" src="./docs/readme_assets/flyte_logo.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_flyte/">
@@ -376,7 +379,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/meltano-logo.jpg" />                         
+				<img height="40" src="./docs/readme_assets/meltano-logo.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_meltano/">
@@ -389,7 +392,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/prefect-logo-gradient-navy.jpg" />                         
+				<img height="40" src="./docs/readme_assets/prefect-logo-gradient-navy.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_prefect/">
@@ -402,7 +405,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/zenml.jpg" />                         
+				<img height="40" src="./docs/readme_assets/zenml.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/integrations/integration_zenml/">
@@ -415,7 +418,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/slack.jpg" />
+				<img height="40" src="./docs/readme_assets/slack.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action/">
@@ -428,7 +431,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 		<tr>
 			<td style="text-align: center; height: 40px; background-color: #fff;">
-				<img height="40" src="./readme_assets/jupyter.jpg" />
+				<img height="40" src="./docs/readme_assets/jupyter.jpg" />
 			</td>
 			<td style="width: 200px;">
 				<a href="https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_create_expectations/#creating-expectations-in-jupyter-notebooks">
@@ -450,9 +453,9 @@ Great Expectations is _not_ a pipeline execution framework. Instead, it integrat
 
 Great Expectations is _not_ a database or storage software. It processes your data in place, on your existing systems. Expectations and Validation Results that GX produces are metadata about your data.
 
-Great Expectations is _not_ a data versioning tool. If you want to bring your data itself under version control, check out tools like [DVC](https://dvc.org/) and [Quilt](https://github.com/quiltdata/quilt).
+Great Expectations is _not_ a data versioning tool. If you want to bring your data itself under version control, check out tools like [DVC](https://dvc.org/), [Quilt](https://github.com/quiltdata/quilt), and [lakeFS](https://github.com/treeverse/lakeFS/).
 
-Great Expectations is _not_ a language-agnostic platform. Instead, it follows the philosophy of “take the compute to the data” by using the popular Python language to support native execution of Expectations in pandas, SQL (via SQLAlchemy), and Spark environments. 
+Great Expectations is _not_ a language-agnostic platform. Instead, it follows the philosophy of “take the compute to the data” by using the popular Python language to support native execution of Expectations in pandas, SQL (via SQLAlchemy), and Spark environments.
 
 Great Expectations is _not_ exclusive to Python programming environments. It can be invoked from the command line without a Python environment. However, if you’re working into another ecosystem, you may want to explore ecosystem-specific alternatives such as [assertR](https://github.com/ropensci/assertr) (for R environments) or [TFDV](https://www.tensorflow.org/tfx/guide/tfdv) (for Tensorflow environments).
 
@@ -471,4 +474,4 @@ If you have questions, comments, or just want to have a good old-fashioned chat 
 Can I contribute to the library?
 --------------------------------------------------------------------------------
 
-Absolutely. Yes, please. Start [here](https://docs.greatexpectations.io/docs/contributing/index) and please don't be shy with questions.
+Absolutely. Yes, please. See [Contributing code](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md), [Contributing Expectations](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md), [Contributing packages](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_PACKAGES.md), or [Contribute to Great Expectations documentation](https://github.com/great-expectations/great_expectations/tree/develop/docs), and please don't be shy with questions.

@@ -1,0 +1,70 @@
+{
+    "title": "ClipboardAsset",
+    "description": "Read text from clipboard and pass to read_csv.\n\nParameters\n----------\nsep : str, default '\\s+'\n    A string or regex delimiter. The default of '\\s+' denotes\n    one or more whitespace characters.\n\n**kwargs\n    See read_csv for the full argument list.\n\nReturns\n-------\nDataFrame\n    A parsed DataFrame object.",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "clipboard",
+            "enum": [
+                "clipboard"
+            ],
+            "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Sorter"
+            }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
+        "sep": {
+            "title": "Sep",
+            "default": "\\s+",
+            "type": "string"
+        },
+        "kwargs": {
+            "title": "Kwargs",
+            "description": "Extra keyword arguments that will be passed to the reader method",
+            "type": "object"
+        }
+    },
+    "required": [
+        "name"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        }
+    }
+}

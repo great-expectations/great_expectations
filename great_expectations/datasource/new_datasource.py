@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import copy
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
@@ -11,11 +13,13 @@ from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
 )
-from great_expectations.core.batch_spec import PathBatchSpec
-from great_expectations.data_context.types.base import ConcurrencyConfig
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import DataConnector
-from great_expectations.execution_engine import ExecutionEngine
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch_spec import PathBatchSpec
+    from great_expectations.data_context.types.base import ConcurrencyConfig
+    from great_expectations.datasource.data_connector import DataConnector
+    from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +32,6 @@ class BaseDatasource:
     Args:
         name: the name for the datasource
         execution_engine: the type of compute engine to produce
-        data_connectors: DataConnectors to add to the datasource
         data_context_root_directory: Installation directory path (if installed on a filesystem).
         concurrency: Concurrency config used to configure the execution engine.
         id: Identifier specific to this datasource.
@@ -36,7 +39,7 @@ class BaseDatasource:
 
     recognized_batch_parameters: set = {"limit"}
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         execution_engine: Optional[dict] = None,
@@ -420,6 +423,12 @@ class BaseDatasource:
         return copy.deepcopy(self._datasource_config)
 
 
+NOT_FLUENT_ERROR_MSG: str = (
+    "Not a 'Fluent' Datasource. Please refer to `0.15` docs for info on non 'Fluent' Datasources: https://docs.greatexpectations.io/docs/0.15.50/"
+    "\n or recreate your datasource with our new 'Fluent' API: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview/"
+)
+
+
 @public_api
 class Datasource(BaseDatasource):
     """A Datasource is the glue between an `ExecutionEngine` and a `DataConnector`.
@@ -435,7 +444,7 @@ class Datasource(BaseDatasource):
 
     recognized_batch_parameters: set = {"limit"}
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         execution_engine: Optional[dict] = None,
@@ -482,3 +491,30 @@ class Datasource(BaseDatasource):
                 name=name,
                 config=config,
             )
+
+    def __getattr__(self, attr: str):
+        fluent_datasource_attrs: set[str] = set()
+        from great_expectations.datasource.fluent import PandasDatasource
+
+        # PandasDatasource has all the `read_*` methods + the normal Datasource methods
+        fluent_datasource_attrs.update(
+            {a for a in dir(PandasDatasource) if not a.startswith("_")}
+        )
+        if attr.startswith("add_"):
+            from great_expectations.datasource.fluent.sources import (  # isort: skip
+                _iter_all_registered_types,
+            )
+
+            fluent_datasource_attrs.update(
+                {
+                    f"add_{type_name}_asset"
+                    for type_name, _ in _iter_all_registered_types(
+                        include_datasource=False
+                    )
+                }
+            )
+        if attr in fluent_datasource_attrs:
+            raise NotImplementedError(f"`{attr}` - {NOT_FLUENT_ERROR_MSG}")
+
+        # normal Attribute error if attr does not exist
+        super().__getattribute__(attr)

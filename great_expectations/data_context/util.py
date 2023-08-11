@@ -1,19 +1,23 @@
+from __future__ import annotations
+
 import copy
 import inspect
 import logging
 import pathlib
+import re
 import warnings
 from typing import Any, Optional
 from urllib.parse import urlparse
 
 import pyparsing as pp
 
-from great_expectations.alias_types import PathStr
+from great_expectations.alias_types import PathStr  # noqa: TCH001
+from great_expectations.exceptions import StoreConfigurationError
 from great_expectations.types import safe_deep_copy
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TID251
 except ImportError:
     sa = None
 
@@ -22,7 +26,9 @@ logger = logging.getLogger(__name__)
 
 # TODO: Rename config to constructor_kwargs and config_defaults -> constructor_kwarg_default
 # TODO: Improve error messages in this method. Since so much of our workflow is config-driven, this will be a *super* important part of DX.
-def instantiate_class_from_config(config, runtime_environment, config_defaults=None):
+def instantiate_class_from_config(  # noqa: PLR0912
+    config, runtime_environment, config_defaults=None
+):
     """Build a GX class from configuration dictionaries."""
 
     if config_defaults is None:
@@ -183,7 +189,9 @@ class PasswordMasker:
         Returns:
             url with password masked e.g. "postgresql+psycopg2://username:***@host:65432/database"
         """
-        if sa is not None and use_urlparse is False:
+        if url.startswith("DefaultEndpointsProtocol"):
+            return cls._obfuscate_azure_blobstore_connection_string(url)
+        elif sa is not None and use_urlparse is False:
             try:
                 engine = sa.create_engine(url, **kwargs)
                 return engine.url.__repr__()
@@ -197,6 +205,25 @@ class PasswordMasker:
                 "SQLAlchemy is not installed, using urlparse to mask database url password which ignores **kwargs."
             )
         return cls._mask_db_url_no_sa(url=url)
+
+    @classmethod
+    def _obfuscate_azure_blobstore_connection_string(cls, url: str) -> str:
+        # Parse Azure Connection Strings
+        azure_conn_str_re = re.compile(
+            "(DefaultEndpointsProtocol=(http|https));(AccountName=([a-zA-Z0-9]+));(AccountKey=)(.+);(EndpointSuffix=([a-zA-Z\\.]+))"
+        )
+        try:
+            matched: re.Match[str] | None = azure_conn_str_re.match(url)
+            if not matched:
+                raise StoreConfigurationError(
+                    f"The URL for the Azure connection-string, was not configured properly. Please check and try again: {url} "
+                )
+            res = f"DefaultEndpointsProtocol={matched.group(2)};AccountName={matched.group(4)};AccountKey=***;EndpointSuffix={matched.group(8)}"
+            return res
+        except Exception as e:
+            raise StoreConfigurationError(
+                f"Something went wrong when trying to obfuscate URL for Azure connection-string. Please check your configuration: {e}"
+            )
 
     @classmethod
     def _mask_db_url_no_sa(cls, url: str) -> str:

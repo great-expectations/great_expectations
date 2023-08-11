@@ -1,6 +1,7 @@
 {
   "expectation_type": "expect_column_values_to_not_be_in_set",
   "datasets" : [{
+    "dataset_name": "expect_column_values_to_not_be_in_set_1",
     "data" : {
       "x" : [1,2,4],
       "z" : ["hello", "jello", "mello"],
@@ -30,7 +31,7 @@
         },
         "out": {
           "success": false,
-          "unexpected_index_list": [0],
+          "unexpected_index_list": [{"x": 1, "pk_index": 0}],
           "unexpected_list": [1]
         }
       },
@@ -56,7 +57,7 @@
         },
         "out": {
           "success": false,
-          "unexpected_index_list": [0, 1, 2],
+          "unexpected_index_list": [{"z": "hello", "pk_index": 0}, {"z": "jello", "pk_index": 1}, {"z": "mello", "pk_index": 2}],
           "unexpected_list": ["hello", "jello", "mello"]
         }
       },
@@ -81,7 +82,7 @@
         },
         "out": {
           "success": false,
-          "unexpected_index_list": [0, 1],
+          "unexpected_index_list":  [{"y": 1.1, "pk_index": 0}, {"y": 2.2, "pk_index": 1}],
           "unexpected_list": [1.1, 2.2]
         }
       },
@@ -95,7 +96,7 @@
         },
         "out": {
           "success": false,
-          "unexpected_index_list": [0, 1],
+          "unexpected_index_list": [{"y": 1.1, "pk_index": 0}, {"y": 2.2, "pk_index": 1}],
           "unexpected_list": [1.1, 2.2]
         },
         "only_for": [
@@ -112,7 +113,7 @@
         },
         "out": {
           "success": false,
-          "unexpected_index_list": [0, 1],
+          "unexpected_index_list": [{"y": 1.1, "pk_index": 0}, {"y": 2.2, "pk_index": 1}],
           "unexpected_list": [1.1, 2.2]
         }
       },

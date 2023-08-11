@@ -2,18 +2,18 @@ import logging
 from string import Template
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.not_imported import is_version_greater_or_equal
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.data_context_key import StringKey
 from great_expectations.data_context.store.store import Store
 from great_expectations.util import filter_properties_dict
 
-try:
-    import sqlalchemy
-    from sqlalchemy import create_engine
-    from sqlalchemy.engine.url import URL
-except ImportError:
-    sqlalchemy = None
-    create_engine = None
-    URL = None
+if sa:
+    if is_version_greater_or_equal(sa.__version__, "1.4.0"):
+        url_create_fn = sqlalchemy.URL.create
+    else:
+        url_create_fn = sqlalchemy.URL
 
 
 logger = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ class SqlAlchemyQueryStore(Store):
 
     _key_class = StringKey  # type: ignore[assignment] # StringKey is a DataContextKey??
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         credentials,
         queries=None,
@@ -33,7 +33,7 @@ class SqlAlchemyQueryStore(Store):
         runtime_environment=None,
         store_name=None,
     ) -> None:
-        if not sqlalchemy:
+        if not sa:
             raise gx_exceptions.DataContextError(
                 "sqlalchemy module not found, but is required for "
                 "SqlAlchemyQueryStore"
@@ -65,13 +65,13 @@ class SqlAlchemyQueryStore(Store):
         if "engine" in credentials:
             self.engine = credentials["engine"]
         elif "url" in credentials:
-            self.engine = create_engine(credentials["url"])
+            self.engine = sa.create_engine(credentials["url"])
         elif "connection_string" in credentials:
-            self.engine = create_engine(credentials["connection_string"])
+            self.engine = sa.create_engine(credentials["connection_string"])
         else:
             drivername = credentials.pop("drivername")
-            options = URL(drivername, **credentials)
-            self.engine = create_engine(options)
+            options = url_create_fn(drivername, **credentials)
+            self.engine = sa.create_engine(options)
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
@@ -116,13 +116,14 @@ class SqlAlchemyQueryStore(Store):
         assert query, "Query must be specified to use SqlAlchemyQueryStore"
 
         query = Template(query).safe_substitute(query_parameters)
-        res = self.engine.execute(query).fetchall()
-        # NOTE: 20200617 - JPC: this approach is probably overly opinionated, but we can
-        # adjust based on specific user requests
-        res = [val for row in res for val in row]
-        if return_type == "scalar":
-            [res] = res
-        return res
+        with self.engine.begin() as connection:
+            res = connection.execute(sa.text(query)).fetchall()
+            # NOTE: 20200617 - JPC: this approach is probably overly opinionated, but we can
+            # adjust based on specific user requests
+            res = [val for row in res for val in row]
+            if return_type == "scalar":
+                [res] = res
+            return res
 
     @property
     def config(self) -> dict:

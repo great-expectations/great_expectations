@@ -16,6 +16,9 @@ from great_expectations.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
 
+# module level markers
+pytestmark = pytest.mark.big
+
 
 @pytest.fixture
 def evr_failed_with_exception():
@@ -1299,7 +1302,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id
         "table": [
             ["giraffe", 1, "3"],
             ["lion", 1, "4"],
-            ["zebra", 1, "5, 6, 7, 8, 9, 10, 11, 12, 13, 14, ..."],
+            ["zebra", 11, "5, 6, 7, 8, 9, 10, 11, 12, 13, 14, ..."],
         ],
     }
 
@@ -1392,6 +1395,6 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id
         "table": [
             ["giraffe", 1, "3"],
             ["lion", 1, "4"],
-            ["zebra", 1, "5, 6, 7, 8, 9, 10, 11, 12, 13, 14, ..."],
+            ["zebra", 11, "5, 6, 7, 8, 9, 10, 11, 12, 13, 14, ..."],
         ],
     }

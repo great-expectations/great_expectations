@@ -37,7 +37,7 @@ class DataProfilerProfileNumericColumnsPercentDiffBetweenThresholdRange(
     )
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: C901 - 22
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
@@ -183,7 +183,8 @@ class DataProfilerProfileNumericColumnsPercentDiffBetweenThresholdRange(
 class ExpectProfileNumericColumnsPercentDiffBetweenExclusiveThresholdRange(
     ProfileNumericColumnsDiffExpectation
 ):
-    """
+    """Expect a statistic's percent delta for a given column of a DataProfiler percent difference report to be within the specified threshold, exclusive.
+
     This expectation takes the percent difference report between the data it is called on and a DataProfiler profile of the same schema loaded from a provided path.
     Each numerical column percent delta will be checked against a user provided dictionary of columns paired with dictionaries of statistics containing lower and upper bounds.
     This function builds upon the custom ProfileNumericColumnsDiff Expectation of Capital One's DataProfiler Expectations.
@@ -234,7 +235,7 @@ class ExpectProfileNumericColumnsPercentDiffBetweenExclusiveThresholdRange(
         "/example_profiles/expect_profile_diff_less_than_threshold_profile.pkl"
     )
 
-    dir_path = os.path.dirname(os.path.abspath(__file__))
+    dir_path = os.path.dirname(os.path.abspath(__file__))  # noqa: PTH120, PTH100
     profile_path = dir_path + profile_path
 
     example_profile.save(filepath=profile_path)

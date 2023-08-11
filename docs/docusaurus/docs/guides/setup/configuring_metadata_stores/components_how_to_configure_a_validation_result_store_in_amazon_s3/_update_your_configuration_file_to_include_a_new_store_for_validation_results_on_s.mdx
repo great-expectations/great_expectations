@@ -1,0 +1,58 @@
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+
+To manually add a Validation Results Store, add the following configuration to the `stores` section of your `great_expectations.yml` file:
+
+```python name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py new_validations_store"
+```
+
+As shown in the previous example, you need to change the default ``store_backend`` settings to make the Store work with S3.  The ``class_name`` is set to ``TupleS3StoreBackend``, ``bucket`` is the address of your S3 bucket, and ``prefix`` is the folder in your S3 bucket where Validation Results are located.
+
+The following example shows the additional options that are available to customize `TupleS3StoreBackend`:
+
+```yaml title="File contents: great_expectations.yml"
+class_name: ValidationsStore
+store_backend:
+  class_name: TupleS3StoreBackend
+  bucket: '<your_s3_bucket_name>'
+  prefix: '<your_s3_bucket_folder_name>'
+  boto3_options:
+    endpoint_url: ${S3_ENDPOINT} # Uses the S3_ENDPOINT environment variable to determine which endpoint to use.
+    region_name: '<your_aws_region_name>'
+```
+In the previous example, the Store name is ``validations_S3_store``. If you use a personalized Store name, you must also update the value of the `validations_store_name` key to match the Store name. For example:
+
+```python name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py set_new_validations_store"
+```
+When you update the `validations_store_name` key value, Great Expectations uses the new Store for Validation Results.
+
+Add the following code to `great_expectations.yml` to configure the IAM user:
+
+```yaml title="File contents: great_expectations.yml"
+class_name: ValidationsStore
+store_backend:
+  class_name: TupleS3StoreBackend
+  bucket: '<your_s3_bucket_name>'
+  prefix: '<your_s3_bucket_folder_name>'
+  boto3_options:
+    aws_access_key_id: ${AWS_ACCESS_KEY_ID} # Uses the AWS_ACCESS_KEY_ID environment variable to get aws_access_key_id.
+    aws_secret_access_key: ${AWS_ACCESS_KEY_ID}
+    aws_session_token: ${AWS_ACCESS_KEY_ID}
+```
+
+Add the following code to `great_expectations.yml` to configure the IAM Assume Role:
+
+```yaml title="File contents: great_expectations.yml"
+class_name: ValidationsStore
+store_backend:
+  class_name: TupleS3StoreBackend
+  bucket: '<your_s3_bucket_name>'
+  prefix: '<your_s3_bucket_folder_name>'
+  boto3_options:
+    assume_role_arn: '<your_role_to_assume>'
+    region_name: '<your_aws_region_name>'
+    assume_role_duration: session_duration_in_seconds
+```
+
+:::caution
+If you are also storing <TechnicalTag tag="expectation" text="Expectations" /> in S3 [How to configure an Expectation store to use Amazon S3](../how_to_configure_an_expectation_store_in_amazon_s3.md), or DataDocs in S3 [How to host and share Data Docs](../../configuring_data_docs/host_and_share_data_docs.md), then make sure the ``prefix`` values are disjoint and one is not a substring of the other.
+:::

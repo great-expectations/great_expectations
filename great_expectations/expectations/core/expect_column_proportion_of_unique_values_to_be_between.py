@@ -7,7 +7,7 @@ from great_expectations.core import (
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import (
@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
+class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation):
     """Expect the proportion of unique values to be between a minimum value and a maximum value.
 
     For example, in a column containing [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], there are 4 unique values and 10 total \
@@ -259,7 +259,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                 template_str = (
                     f"fraction of unique values must be {at_least_str} $min_value."
                 )
-            else:
+            else:  # noqa: PLR5501
                 if params.min_value.value != params.max_value.value:
                     template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
                 else:
@@ -314,7 +314,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                 template_str = (
                     f"fraction of unique values must be {at_least_str} $min_value."
                 )
-            else:
+            else:  # noqa: PLR5501
                 if params["min_value"] != params["max_value"]:
                     template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
                 else:

@@ -18,6 +18,7 @@ from great_expectations.cli.cli_messages import (
     SECTION_SEPARATOR,
 )
 from great_expectations.cli.pretty_printing import cli_message
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.data_context.file_data_context import (
@@ -28,9 +29,8 @@ from great_expectations.exceptions import (
     DatasourceInitializationError,
 )
 
-try:
-    from sqlalchemy.exc import SQLAlchemyError
-except ImportError:
+SQLAlchemyError = sqlalchemy.SQLAlchemyError
+if not SQLAlchemyError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
     SQLAlchemyError = gx_exceptions.ProfilerError
@@ -43,7 +43,7 @@ except ImportError:
     default=True,
 )
 @click.pass_context
-def init(ctx: click.Context, usage_stats: bool) -> None:
+def init(ctx: click.Context, usage_stats: bool) -> None:  # noqa: PLR0912
     """
     Initialize a new Great Expectations project.
 
@@ -57,8 +57,8 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
         config_file_location=ctx.obj.config_file_location
     ).get("directory")
     if directory is None:
-        directory = os.getcwd()
-    target_directory = os.path.abspath(directory)
+        directory = os.getcwd()  # noqa: PTH109
+    target_directory = os.path.abspath(directory)  # noqa: PTH100
     ge_dir = _get_full_path_to_ge_dir(target_directory)
     cli_message(GREETING)
 
@@ -66,20 +66,18 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
         message = f"""Warning. An existing `{FileDataContext.GX_YML}` was found here: {ge_dir}."""
         warnings.warn(message)
         try:
-            project_file_structure_exists = (
-                FileDataContext.does_config_exist_on_disk(ge_dir)
-                and FileDataContext.all_uncommitted_directories_exist(ge_dir)
-                and FileDataContext.config_variables_yml_exist(ge_dir)
+            project_file_structure_exists = FileDataContext.is_project_scaffolded(
+                ge_dir
             )
             if project_file_structure_exists:
                 cli_message(PROJECT_IS_COMPLETE)
                 sys.exit(0)
-            else:
+            else:  # noqa: PLR5501
                 # Prompt to modify the project to add missing files
                 if not ctx.obj.assume_yes:
                     if not click.confirm(COMPLETE_ONBOARDING_PROMPT, default=True):
                         cli_message(RUN_INIT_AGAIN)
-                        exit(0)
+                        sys.exit(0)
 
         except (DataContextError, DatasourceInitializationError) as e:
             cli_message(f"<red>{e.message}</red>")
@@ -94,12 +92,12 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
         except DataContextError as e:
             cli_message(f"<red>{e.message}</red>")
             # TODO ensure this is covered by a test
-            exit(5)
+            sys.exit(5)
     else:
         if not ctx.obj.assume_yes:
             if not click.confirm(LETS_BEGIN_PROMPT, default=True):
                 cli_message(RUN_INIT_AGAIN)
-                exit(0)
+                sys.exit(0)
 
         try:
             context = FileDataContext.create(
@@ -121,4 +119,6 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
 
 
 def _get_full_path_to_ge_dir(target_directory: str) -> str:
-    return os.path.abspath(os.path.join(target_directory, FileDataContext.GX_DIR))
+    return os.path.abspath(  # noqa: PTH100
+        os.path.join(target_directory, FileDataContext.GX_DIR)  # noqa: PTH118
+    )

@@ -32,7 +32,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -80,12 +80,14 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         return str(Path(self.base_directory).joinpath(path))
 
     @property
-    def base_directory(self):
+    def base_directory(self) -> str:
         """
         Accessor method for base_directory. If directory is a relative path, interpret it as relative to the
         root directory. If it is absolute, then keep as-is.
         """
-        return normalize_directory_path(
-            dir_path=self._base_directory,
-            root_directory_path=self.data_context_root_directory,
+        return str(
+            normalize_directory_path(
+                dir_path=self._base_directory,
+                root_directory_path=self.data_context_root_directory,
+            )
         )

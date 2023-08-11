@@ -73,7 +73,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return result
 
     @classmethod
-    def _render_list(
+    def _render_list(  # noqa: PLR0913, PLR0912
         cls,
         render_object: list,
         exception_list_content_block: bool,
@@ -87,7 +87,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
             False if isinstance(render_object[0], ExpectationValidationResult) else None
         )
         for obj_ in render_object:
-
             expectation_type = cls._get_expectation_type(obj_)
 
             content_block_fn = cls._get_content_block_fn(expectation_type)
@@ -137,7 +136,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                             runtime_configuration=runtime_configuration,
                             **kwargs,
                         )
-            else:
+            else:  # noqa: PLR5501
                 if isinstance(obj_, ExpectationValidationResult):
                     content_block_fn = (
                         cls._missing_content_block_fn
@@ -210,7 +209,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             return None
 
     @classmethod
-    def _render_other(
+    def _render_other(  # noqa: PLR0912, PLR0913
         cls,
         render_object: Any,
         exception_list_content_block: bool,
@@ -263,7 +262,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         runtime_configuration=runtime_configuration,
                         **kwargs,
                     )
-        else:
+        else:  # noqa: PLR5501
             if isinstance(render_object, ExpectationValidationResult):
                 content_block_fn = (
                     cls._missing_content_block_fn
@@ -292,7 +291,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return result
 
     @classmethod
-    def _render_expectation_meta_notes(cls, expectation):
+    def _render_expectation_meta_notes(cls, expectation):  # noqa: PLR0912
         if not expectation.meta.get("notes"):
             return None
         else:

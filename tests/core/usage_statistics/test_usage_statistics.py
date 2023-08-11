@@ -9,6 +9,9 @@ import pytest
 from great_expectations.core.usage_statistics.usage_statistics import (
     run_validation_operator_usage_statistics,
 )
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import get_context
@@ -56,6 +59,7 @@ def in_memory_data_context_config_usage_stats_enabled():
     )
 
 
+@pytest.mark.unit
 def test_consistent_name_anonymization(
     in_memory_data_context_config_usage_stats_enabled, monkeypatch
 ):
@@ -76,6 +80,7 @@ def test_consistent_name_anonymization(
     assert payload["anonymized_operator_name"] == "e079c942d946b823312054118b3b6ef4"
 
 
+@pytest.mark.unit
 def test_global_override_environment_variable_data_context(
     in_memory_data_context_config_usage_stats_enabled, monkeypatch
 ):
@@ -90,6 +95,7 @@ def test_global_override_environment_variable_data_context(
     assert project_config.anonymous_usage_statistics.enabled is False
 
 
+@pytest.mark.filesystem
 def test_global_override_from_config_file_in_etc(
     in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
 ):
@@ -102,7 +108,7 @@ def test_global_override_from_config_file_in_etc(
     etc_config_dir = str(etc_config_dir)
     config_dirs = [home_config_dir, etc_config_dir]
     config_dirs = [
-        os.path.join(config_dir, "great_expectations.conf")
+        os.path.join(config_dir, "great_expectations.conf")  # noqa: PTH118
         for config_dir in config_dirs
     ]
 
@@ -111,7 +117,7 @@ def test_global_override_from_config_file_in_etc(
         disabled_config["anonymous_usage_statistics"] = {"enabled": false_string}
 
         with open(
-            os.path.join(etc_config_dir, "great_expectations.conf"), "w"
+            os.path.join(etc_config_dir, "great_expectations.conf"), "w"  # noqa: PTH118
         ) as configfile:
             disabled_config.write(configfile)
 
@@ -130,6 +136,7 @@ def test_global_override_from_config_file_in_etc(
             assert project_config.anonymous_usage_statistics.enabled is False
 
 
+@pytest.mark.filesystem
 def test_global_override_from_config_file_in_home_folder(
     in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
 ):
@@ -142,7 +149,7 @@ def test_global_override_from_config_file_in_home_folder(
     etc_config_dir = str(etc_config_dir)
     config_dirs = [home_config_dir, etc_config_dir]
     config_dirs = [
-        os.path.join(config_dir, "great_expectations.conf")
+        os.path.join(config_dir, "great_expectations.conf")  # noqa: PTH118
         for config_dir in config_dirs
     ]
 
@@ -154,7 +161,8 @@ def test_global_override_from_config_file_in_home_folder(
         disabled_config["anonymous_usage_statistics"] = {"enabled": false_string}
 
         with open(
-            os.path.join(home_config_dir, "great_expectations.conf"), "w"
+            os.path.join(home_config_dir, "great_expectations.conf"),  # noqa: PTH118
+            "w",
         ) as configfile:
             disabled_config.write(configfile)
 
@@ -173,20 +181,21 @@ def test_global_override_from_config_file_in_home_folder(
             assert project_config.anonymous_usage_statistics.enabled is False
 
 
+@pytest.mark.filesystem
 def test_global_override_in_yml(tmp_path_factory, monkeypatch):
     monkeypatch.delenv(
         "GE_USAGE_STATS", raising=False
     )  # Undo the project-wide test default
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(context_path, exist_ok=True)
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
+    os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
 
     shutil.copy(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_basic_with_usage_stats_disabled.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
 
     assert (
@@ -197,6 +206,7 @@ def test_global_override_in_yml(tmp_path_factory, monkeypatch):
     )
 
 
+@pytest.mark.filesystem
 def test_global_override_conf_overrides_yml_and_env_variable(
     tmp_path_factory, monkeypatch
 ):
@@ -224,7 +234,7 @@ def test_global_override_conf_overrides_yml_and_env_variable(
     etc_config_dir = str(etc_config_dir)
     config_dirs = [home_config_dir, etc_config_dir]
     config_dirs = [
-        os.path.join(config_dir, "great_expectations.conf")
+        os.path.join(config_dir, "great_expectations.conf")  # noqa: PTH118
         for config_dir in config_dirs
     ]
 
@@ -232,20 +242,20 @@ def test_global_override_conf_overrides_yml_and_env_variable(
     disabled_config["anonymous_usage_statistics"] = {"enabled": "False"}
 
     with open(
-        os.path.join(etc_config_dir, "great_expectations.conf"), "w"
+        os.path.join(etc_config_dir, "great_expectations.conf"), "w"  # noqa: PTH118
     ) as configfile:
         disabled_config.write(configfile)
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(context_path, exist_ok=True)
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
+    os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
 
     shutil.copy(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_v013_basic_with_usage_stats_enabled.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
 
     assert (
@@ -264,6 +274,7 @@ def test_global_override_conf_overrides_yml_and_env_variable(
         assert project_config.anonymous_usage_statistics.enabled is False
 
 
+@pytest.mark.filesystem
 def test_global_override_env_overrides_yml_and_conf(tmp_path_factory, monkeypatch):
     """
     What does this test and why?
@@ -289,7 +300,7 @@ def test_global_override_env_overrides_yml_and_conf(tmp_path_factory, monkeypatc
     etc_config_dir = str(etc_config_dir)
     config_dirs = [home_config_dir, etc_config_dir]
     config_dirs = [
-        os.path.join(config_dir, "great_expectations.conf")
+        os.path.join(config_dir, "great_expectations.conf")  # noqa: PTH118
         for config_dir in config_dirs
     ]
 
@@ -297,20 +308,20 @@ def test_global_override_env_overrides_yml_and_conf(tmp_path_factory, monkeypatc
     disabled_config["anonymous_usage_statistics"] = {"enabled": "True"}
 
     with open(
-        os.path.join(etc_config_dir, "great_expectations.conf"), "w"
+        os.path.join(etc_config_dir, "great_expectations.conf"), "w"  # noqa: PTH118
     ) as configfile:
         disabled_config.write(configfile)
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(context_path, exist_ok=True)
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
+    os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
 
     shutil.copy(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_v013_basic_with_usage_stats_enabled.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
 
     assert (
@@ -329,6 +340,7 @@ def test_global_override_env_overrides_yml_and_conf(tmp_path_factory, monkeypatc
         assert project_config.anonymous_usage_statistics.enabled is False
 
 
+@pytest.mark.filesystem
 def test_global_override_yml_overrides_env_and_conf(tmp_path_factory, monkeypatch):
     """
     What does this test and why?
@@ -354,7 +366,7 @@ def test_global_override_yml_overrides_env_and_conf(tmp_path_factory, monkeypatc
     etc_config_dir = str(etc_config_dir)
     config_dirs = [home_config_dir, etc_config_dir]
     config_dirs = [
-        os.path.join(config_dir, "great_expectations.conf")
+        os.path.join(config_dir, "great_expectations.conf")  # noqa: PTH118
         for config_dir in config_dirs
     ]
 
@@ -362,20 +374,20 @@ def test_global_override_yml_overrides_env_and_conf(tmp_path_factory, monkeypatc
     disabled_config["anonymous_usage_statistics"] = {"enabled": "True"}
 
     with open(
-        os.path.join(etc_config_dir, "great_expectations.conf"), "w"
+        os.path.join(etc_config_dir, "great_expectations.conf"), "w"  # noqa: PTH118
     ) as configfile:
         disabled_config.write(configfile)
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(context_path, exist_ok=True)
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
+    os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
 
     shutil.copy(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_basic_with_usage_stats_disabled.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
 
     assert (

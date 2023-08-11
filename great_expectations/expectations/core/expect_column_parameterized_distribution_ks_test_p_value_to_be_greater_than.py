@@ -5,7 +5,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.expectations.expectation import (
-    TableExpectation,
+    BatchExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyDiagnosticRendererType, LegacyRendererType
@@ -13,7 +13,7 @@ from great_expectations.render.renderer.renderer import renderer
 
 
 class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
-    TableExpectation
+    BatchExpectation
 ):
     # This expectation is a stub - it needs migration to the modular expectation API
 

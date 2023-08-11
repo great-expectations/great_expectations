@@ -1,23 +1,21 @@
-from typing import Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.metrics.import_manager import (
-    pyspark_sql_DataFrame,
-    pyspark_sql_Row,
-    pyspark_sql_SparkSession,
-    sa,
-    sqlalchemy_engine_Engine,
-    sqlalchemy_engine_Row,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.query_metric_provider import (
     QueryMetricProvider,
 )
 from great_expectations.util import get_sqlalchemy_subquery_type
+
+if TYPE_CHECKING:
+    from great_expectations.compatibility import pyspark, sqlalchemy
 
 
 class QueryTemplateValues(QueryMetricProvider):
@@ -27,8 +25,18 @@ class QueryTemplateValues(QueryMetricProvider):
         "query",
     )
 
+    @classmethod
+    def get_query(cls, query, template_dict, selectable):
+        template_dict_reformatted = {
+            k: v.format(active_batch=selectable) for k, v in template_dict.items()
+        }
+        query_reformatted = query.format(
+            **template_dict_reformatted, active_batch=selectable
+        )
+        return query_reformatted
+
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -49,34 +57,46 @@ class QueryTemplateValues(QueryMetricProvider):
             raise TypeError("Query must be supplied as a string")
 
         template_dict = metric_value_kwargs.get("template_dict")
+
         if not isinstance(template_dict, dict):
             raise TypeError("template_dict supplied by the expectation must be a dict")
 
         if isinstance(selectable, sa.Table):
-            query = query.format(**template_dict, active_batch=selectable)
+            query = cls.get_query(query, template_dict, selectable)
+
         elif isinstance(
             selectable, get_sqlalchemy_subquery_type()
         ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active batch as a Subquery; sectioning
             # the active batch off w/ parentheses ensures flow of operations doesn't break
-            query = query.format(**template_dict, active_batch=f"({selectable})")
+            query = cls.get_query(query, template_dict, f"({selectable})")
+
         elif isinstance(
             selectable, sa.sql.Select
         ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation &
             # aliasing when formatting the parameterized query
-            query = query.format(
-                **template_dict,
-                active_batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
+            query = cls.get_query(
+                query,
+                template_dict,
+                f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
             )
+
         else:
-            query = query.format(**template_dict, active_batch=f"({selectable})")
+            query = cls.get_query(query, template_dict, f"({selectable})")
 
-        engine: sqlalchemy_engine_Engine = execution_engine.engine
-        result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
+        try:
+            result: List[sqlalchemy.Row] = execution_engine.execute_query(
+                sa.text(query)
+            ).fetchall()
+        except Exception as e:
+            if hasattr(e, "_query_id"):
+                # query_id removed because it duplicates the validation_results
+                e._query_id = None
+            raise e
 
-        return [dict(element) for element in result]
+        return [element._asdict() for element in result]
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,
@@ -88,7 +108,7 @@ class QueryTemplateValues(QueryMetricProvider):
             "query"
         )
 
-        df: pyspark_sql_DataFrame
+        df: pyspark.DataFrame
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
@@ -102,7 +122,7 @@ class QueryTemplateValues(QueryMetricProvider):
 
         query = query.format(**template_dict, active_batch="tmp_view")
 
-        engine: pyspark_sql_SparkSession = execution_engine.spark
-        result: List[pyspark_sql_Row] = engine.sql(query).collect()
+        engine: pyspark.SparkSession = execution_engine.spark
+        result: List[pyspark.Row] = engine.sql(query).collect()
 
         return [element.asDict() for element in result]

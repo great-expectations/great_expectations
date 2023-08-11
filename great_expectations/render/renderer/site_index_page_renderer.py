@@ -322,7 +322,8 @@ class SiteIndexPageRenderer(Renderer):
     @classmethod
     def _get_formatted_datetime(cls, _datetime):
         if isinstance(_datetime, datetime.datetime):
-            local_datetime = _datetime.astimezone(tz=tzlocal.get_localzone())
+            local_zone = tzlocal.get_localzone()
+            local_datetime = _datetime.astimezone(tz=local_zone)
             return local_datetime.strftime("%Y-%m-%d %H:%M:%S %Z")
         elif isinstance(_datetime, str):
             dt = parse(_datetime)

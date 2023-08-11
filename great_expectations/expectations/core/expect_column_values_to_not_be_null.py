@@ -123,7 +123,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
 
         params = renderer_configuration.params
 
-        if params.mostly and params.mostly.value < 1.0:
+        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
@@ -160,7 +160,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             ["column", "mostly", "row_condition", "condition_parser"],
         )
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:
+        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -171,7 +171,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
                 template_str = (
                     "values must not be null, at least $mostly_pct % of the time."
                 )
-        else:
+        else:  # noqa: PLR5501
             if include_column_name:
                 template_str = "$column values must never be null."
             else:

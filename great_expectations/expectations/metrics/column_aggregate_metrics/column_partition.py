@@ -27,7 +27,7 @@ class ColumnPartition(ColumnAggregateMetricProvider):
     }
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: PLR0913
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
@@ -42,7 +42,7 @@ class ColumnPartition(ColumnAggregateMetricProvider):
         )
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
@@ -57,7 +57,7 @@ class ColumnPartition(ColumnAggregateMetricProvider):
         )
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
@@ -195,9 +195,11 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
             min_as_float_ = min_
             max_as_float_ = max_
 
-        if iqr < 1.0e-10:  # Consider IQR 0 and do not use variance-based estimator
+        if (
+            iqr < 1.0e-10  # noqa: PLR2004
+        ):  # Consider IQR 0 and do not use variance-based estimator
             n_bins = int(np.ceil(sturges))
-        else:
+        else:  # noqa: PLR5501
             if nonnull_count == 0:
                 n_bins = 0
             else:

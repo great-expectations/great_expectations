@@ -1,0 +1,358 @@
+/* stylelint-disable docusaurus/copyright-header */
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* import Montserrat*/
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
+
+/* You can override the default Infima variables here. */
+:root {
+    --ifm-font-color-base: #404041;
+    --ifm-navbar-link-color: #404041;
+    --ifm-menu-color: #404041;
+    --ifm-footer-title-color: #FF8D3A;
+    --ifm-footer-link-color: #F8F8F8;
+    --ifm-dropdown-font-weight: 700;
+    --ifm-footer-background-color: #404041;
+    --ifm-color-primary: #ff6310;
+    --ifm-color-primary-dark: #fd326b;
+    --ifm-color-primary-darker: #fc215f;
+    --ifm-color-primary-darkest: #e80344;
+    --ifm-color-primary-light: #fd749b;
+    --ifm-color-primary-lighter: #fe85a7;
+    --ifm-color-primary-lightest: #feb7cb;
+    --ifm-code-font-size: 95%;
+
+    /* sync up some of the typography */
+    --ifm-heading-line-height: 1;
+    --ifm-h1-font-size: 48px;
+    --ifm-h2-font-size: 20px;
+    --ifm-font-family-base: Montserrat, 'Open Sans', Verdana, sans‑serif;
+    --ifm-dropdown-font-weight: bold;
+    --ifm-heading-margin-bottom: 0;
+    --ifm-heading-vertical-rhythm-bottom: 0;
+
+    /* make pagination look like the nice buttons */
+    --ifm-pagination-nav-border-radius: 35px;
+    --ifm-pagination-nav-padding: 16px;
+
+    /* enlarge the sidebar width */
+    --doc-sidebar-width: 350px !important;
+    
+     /* Colors */
+      --white: #fff;
+      --black: #000;
+      --blue-100: #eefaff;
+      --blue-200: #dff5ff;
+      --blue-300: #bfeaff;
+      --blue-400: #6eceff;
+      --blue-500: #32b8fb;
+      --blue-600: #00a7fb;
+      --blue-700: #008ace;
+      --blue-800: #005580;
+      --blue-900: #00273b;
+      --purple-100: #f5f2fc;
+      --purple-200: #ece6f9;
+      --purple-300: #dbcdf6;
+      --purple-400: #c2aef0;
+      --purple-500: #9478d2;
+      --purple-600: #7352ba;
+      --purple-700: #59418d;
+      --purple-800: #3f2971;
+      --purple-900: #1a0d36;
+      --mint-100: #effbf9;
+      --mint-200: #cff2ec;
+      --mint-300: #9ee5d9;
+      --mint-400: #6fd7c6;
+      --mint-500: #4fceba;
+      --mint-600: #30b09c;
+      --mint-700: #26907f;
+      --mint-800: #1b6054;
+      --mint-900: #134038;
+      --orange-100: #fdf3ef;
+      --orange-200: #ffe0d5;
+      --orange-300: #ffc1ad;
+      --orange-400: #fea285;
+      --orange-500: #ff865e;
+      --orange-600: #ff6632;
+      --orange-700: #f53d01;
+      --orange-800: #cc3201;
+      --orange-900: #791f00;
+      --gray-100: #f2f4f7;
+      --gray-200: #e9ebf0;
+      --gray-300: #dadce0;
+      --gray-400: #c4c7cd;
+      --gray-500: #9ba0a8;
+      --gray-600: #858993;
+      --gray-700: #65686f;
+      --gray-800: #414246;
+      --gray-900: #1a1c1f;
+    
+}
+
+/* override huge h1 */
+.h1Heading_node_modules-\@docusaurus-theme-classic-lib-next-theme-Heading-styles-module {
+    font-size: var(--ifm-h1-font-size) !important;
+}
+
+p > a {
+    text-decoration: underline;
+}
+
+h1, h2, h3 {
+    line-height: 1.4;
+    font-family: Monteserrat, sans-serif;
+}
+
+h4, h5, h6 {
+    line-height: 1.5;
+    font-family: Monteserrat, sans-serif;
+}
+
+p {
+    line-height: 1.5;
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+h3 {
+    color: #404041;
+}
+
+.markdown p {
+    line-height: 1.8;
+}
+
+/* pagination overrides */
+.pagination-nav__item {
+    flex: inherit;
+}
+
+.pagination-nav {
+    justify-content: space-between;
+}
+
+.pagination-nav__sublabel {
+    color: #fff;
+    display: none;
+}
+
+.pagination-nav__link {
+    border: none;
+    color: #fff;
+    padding: var(--ifm-pagination-nav-padding);
+    background: var(--ifm-link-color);
+    text-align: center;
+}
+
+a.pagination-nav__link:hover {
+    color: #fff;
+    background-color: #DE550A;
+}
+
+.docusaurus-highlight-code-line {
+    background-color: rgb(72, 77, 91);
+    display: block;
+    margin: 0 calc(-1 * var(--ifm-pre-padding));
+    padding: 0 var(--ifm-pre-padding);
+}
+
+/* navbar tweaks */
+.navbar--fixed-top {
+    opacity: .95;
+}
+
+.navbar__link {
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.navbar__brand {
+    width: 190px;
+    height: auto;
+}
+
+.navbar__logo{
+    height: 44px;
+}
+
+.navbar__item {
+    margin-left: 4px;
+}
+
+.navbar__items--right > :last-child {
+    padding-right: 16px;
+}
+
+.header-cloud-link {
+    border: none;
+    border-radius: 35px;
+    color: #fff;
+    padding: 8px 16px;
+    background: var(--ifm-link-color);
+    text-align: center;
+    text-transform: none;
+}
+
+.header-cloud-link:hover {
+    color: #FFF;
+    background-color: #DE550A;
+}
+
+/*footer*/
+
+.footer {
+    font-family:'Source Sans Pro', sans-serif ;
+}
+
+.footer__items {
+    box-sizing: border-box;
+    margin: 0;
+    min-width: 0;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+}
+
+.footer__item {
+    padding: 3px 0;
+    font-family:'Source Sans Pro', sans-serif ;
+}
+
+@media (max-width: 996px) {
+    .footer__links {
+        display: block !important;
+    }
+    .footer__row {
+        display: block !important;
+    }
+}
+
+.footer__link-item {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.footer__title {
+    box-sizing: border-box;
+    margin: 0;
+    min-width: 0;
+    font-family: Montserrat,'Open Sans',Verdana,sans‑serif;
+    letter-spacing: 0;
+    color: var(--ifm-color-primary);
+    text-align: left;
+    padding-left: 0;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.footer__icon {
+    height: 24px;
+    width: 24px;
+    color: white;
+}
+
+.footer__icon:hover {
+    color: var(--ifm-color-primary);
+}
+
+/* change the carat in the top menu to open carat */
+.dropdown > .navbar__link:after,
+.menu__link--sublist:after{
+    border: transparent;
+    background: url('/img/menu_carat_down.png') center center no-repeat;
+    width: 16px;
+    height: 16px;
+    top: 3px;
+    transform: none;
+    background-size: 10px;
+}
+
+.menu__list-item--collapsed .menu__link--sublist:after{
+      transform: rotateZ(-90deg);
+}
+
+.navbar__item.navbar__link svg {
+    display: none;
+}
+
+table.borderless {
+    border-collapse: collapse;
+    border: none;
+    overflow:visible;
+}
+
+table.borderless tr {
+    border-top: none;
+}
+
+table.borderless tr td {
+    border-collapse: collapse;
+    background-color: transparent;
+    border: none;
+    border-top: none;
+    vertical-align: center;
+}
+
+table.borderless tr:nth-child(2n) {
+    background-color: transparent;
+}
+
+.center {
+    margin-left: auto;
+    margin-right: auto;
+    width: 75%;
+}
+
+.tabs-container .margin-vert--md{
+    margin-top: 0 !important;
+}
+
+
+div[role="tabpanel"]{
+   --ifm-code-background: var(--ifm-alert-background-color-highlight);
+    border-radius: 0;
+    box-shadow:none;
+    border-top: 0;
+    padding: 0;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 360px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+@media (max-width: 996px) {
+    .main-wrapper {
+        overflow: hidden;
+    }
+}
+
+@import "api_docs/api_docs.scss";

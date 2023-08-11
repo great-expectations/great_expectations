@@ -1,19 +1,14 @@
 from textwrap import dedent
 from typing import Any, Callable, TypeVar
 
-try:
-    import docstring_parser
-    from docstring_parser import DocstringStyle
-except ImportError:
-    docstring_parser = None
-    DocstringStyle = None
+from great_expectations.compatibility import docstring_parser
 
 WHITELISTED_TAG = "--Public API--"
 
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-def public_api(func) -> Callable:
+def public_api(func: F) -> F:
     """Add the public API tag for processing by the auto documentation generator.
 
     Used as a decorator:
@@ -133,7 +128,7 @@ def deprecated_argument(
 
     def wrapper(func: F) -> F:
         """Wrapper method that accepts func, so we can modify the docstring."""
-        if not docstring_parser:
+        if not docstring_parser.docstring_parser:
             return func
 
         return _add_text_below_function_docstring_argument(
@@ -176,7 +171,7 @@ def new_argument(
 
     def wrapper(func: F) -> F:
         """Wrapper method that accepts func, so we can modify the docstring."""
-        if not docstring_parser:
+        if not docstring_parser.docstring_parser:
             return func
 
         return _add_text_below_function_docstring_argument(
@@ -206,7 +201,7 @@ def _add_text_to_function_docstring_after_summary(func: F, text: str) -> F:
     split_docstring = existing_docstring.split("\n", 1)
 
     docstring = ""
-    if len(split_docstring) == 2:
+    if len(split_docstring) == 2:  # noqa: PLR2004
         short_description, docstring = split_docstring
         docstring = (
             f"{short_description.strip()}\n"
@@ -265,9 +260,13 @@ def _add_text_below_string_docstring_argument(
     Returns:
         Modified docstring.
     """
-    parsed_docstring = docstring_parser.parse(docstring)
+    parsed_docstring = docstring_parser.docstring_parser.parse(
+        text=docstring,
+        style=docstring_parser.DocstringStyle.GOOGLE,
+    )
 
-    if argument_name not in (param.arg_name for param in parsed_docstring.params):
+    arg_list = list(param.arg_name for param in parsed_docstring.params)
+    if argument_name not in arg_list:
         raise ValueError(
             f"Please specify an existing argument, you specified {argument_name}."
         )
@@ -281,16 +280,17 @@ def _add_text_below_string_docstring_argument(
 
     # Returns: includes an additional ":\n" that we need to strip out.
     if parsed_docstring.returns:
-        parsed_docstring.returns.description = (
-            parsed_docstring.returns.description.strip(":\n")
-        )
+        if parsed_docstring.returns.description:
+            parsed_docstring.returns.description = (
+                parsed_docstring.returns.description.strip(":\n")
+            )
 
     # RenderingStyle.EXPANDED used to make sure any line breaks before and
     # after the added text are included (for Sphinx html rendering).
-    composed_docstring = docstring_parser.compose(
+    composed_docstring = docstring_parser.docstring_parser.compose(
         docstring=parsed_docstring,
-        style=DocstringStyle.GOOGLE,
-        rendering_style=docstring_parser.RenderingStyle.EXPANDED,
+        style=docstring_parser.DocstringStyle.GOOGLE,
+        rendering_style=docstring_parser.docstring_parser.RenderingStyle.EXPANDED,
     )
 
     return composed_docstring

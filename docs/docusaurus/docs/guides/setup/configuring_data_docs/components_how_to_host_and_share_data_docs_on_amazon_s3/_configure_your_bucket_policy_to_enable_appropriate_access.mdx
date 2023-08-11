@@ -1,0 +1,43 @@
+
+The example policy below **enforces IP-based access**. Modify the bucket name and IP addresses for your environment. After you have customized the example policy to suit your situation, name the file ``ip-policy.json`` and save it in your local directory.
+
+:::caution
+
+Your policy should limit access to authorized users. Data Docs sites can include sensitive information and should **not** be publicly accessible.
+
+:::
+
+```json title="File content: ip-policy.json"
+  {
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Sid": "Allow only based on source IP",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": [
+        "arn:aws:s3:::data-docs.my_org",
+        "arn:aws:s3:::data-docs.my_org/*"
+      ],
+      "Condition": {
+        "IpAddress": {
+          "aws:SourceIp": [
+            "192.168.0.1/32",
+            "2001:db8:1234:1234::/64"
+          ]
+        }
+      }
+    }
+    ]
+  }
+```
+
+:::tip
+
+Because Data Docs include multiple generated pages, it is important to include the `arn:aws:s3:::{your_data_docs_site}/*` path in the `Resource` list along with the `arn:aws:s3:::{your_data_docs_site}` path that permits access to your Data Docs' front page.
+
+:::
+
+:::info REMINDER
+
+Amazon Web Service's S3 buckets are a third party utility.  For more information about configuring AWS S3 bucket policies, see [Using bucket policies](https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-policies.html).

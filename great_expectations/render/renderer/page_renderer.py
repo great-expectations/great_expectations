@@ -101,9 +101,9 @@ class ValidationResultsPageRenderer(Renderer):
         )
 
         # Add datasource key to batch_kwargs if missing
-        if "datasource" not in batch_kwargs and "datasource" not in batch_kwargs:
+        if "datasource" not in batch_kwargs:
             # Check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern
-            if len(expectation_suite_name.split(".")) == 4:
+            if len(expectation_suite_name.split(".")) == 4:  # noqa: PLR2004
                 batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
 
         columns = self._group_evrs_by_column(validation_results, expectation_suite_name)
@@ -208,7 +208,6 @@ class ValidationResultsPageRenderer(Renderer):
         collapse_content_blocks: List[RenderedTableContent],
         validation_results: ExpectationSuiteValidationResult,
     ) -> CollapseContent:
-
         attrs = [
             ("batch_markers", "Batch Markers"),
             ("batch_kwargs", "Batch Kwargs"),
@@ -299,7 +298,10 @@ class ValidationResultsPageRenderer(Renderer):
             run_time_datetime = None
 
         include_run_name: bool = False
-        if run_name_as_time != run_time_datetime and run_name_as_time != "__none__":
+        if (
+            run_name_as_time != run_time_datetime  # noqa: PLR1714
+            and run_name_as_time != "__none__"
+        ):
             include_run_name = True
 
         page_title = f"Validations / {expectation_suite_name}"
@@ -364,7 +366,7 @@ class ValidationResultsPageRenderer(Renderer):
             + str(expectation_suite_name).split(".")
         )
         expectation_suite_path = (
-            f"{os.path.join(*expectation_suite_path_components)}.html"
+            f"{os.path.join(*expectation_suite_path_components)}.html"  # noqa: PTH118
         )
         # TODO: deprecate dual batch api support in 0.14
         batch_kwargs = (
@@ -796,8 +798,7 @@ class ExpectationSuitePageRenderer(Renderer):
 
     # TODO: Update tests
     @classmethod
-    def _render_expectation_suite_notes(cls, expectations):
-
+    def _render_expectation_suite_notes(cls, expectations):  # noqa: PLR0912
         content = []
 
         total_expectations = len(expectations.expectations)
@@ -934,7 +935,7 @@ class ProfilingResultsPageRenderer(Renderer):
                 class_name=column_section_renderer["class_name"],
             )
 
-    def render(self, validation_results):  # noqa: C901 - 16
+    def render(self, validation_results):  # noqa: PLR0912
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:
@@ -957,7 +958,7 @@ class ProfilingResultsPageRenderer(Renderer):
         # add datasource key to batch_kwargs if missing
         if "datasource" not in batch_kwargs and "datasource" not in batch_kwargs:
             # check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern
-            if len(expectation_suite_name.split(".")) == 4:
+            if len(expectation_suite_name.split(".")) == 4:  # noqa: PLR2004
                 if "batch_kwargs" in validation_results.meta:
                     batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
                 else:
@@ -984,7 +985,10 @@ class ProfilingResultsPageRenderer(Renderer):
             run_time_datetime = None
 
         include_run_name: bool = False
-        if run_name_as_time != run_time_datetime and run_name_as_time != "__none__":
+        if (
+            run_name_as_time != run_time_datetime  # noqa: PLR1714
+            and run_name_as_time != "__none__"
+        ):
             include_run_name = True
 
         page_title = f"Profiling Results / {str(expectation_suite_name)}"

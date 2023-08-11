@@ -3,7 +3,6 @@ from typing import List
 
 import pandas as pd
 import pytest
-from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
@@ -19,15 +18,16 @@ from great_expectations.core.batch_spec import (
     S3BatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import RuntimeDataConnector
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 @pytest.fixture
-def basic_datasource_with_assets(tmp_path_factory):
+def basic_datasource_with_assets():
     basic_datasource: Datasource = instantiate_class_from_config(
         config=yaml.load(
             """
@@ -63,6 +63,7 @@ execution_engine:
     return basic_datasource
 
 
+@pytest.mark.unit
 def test_self_check(basic_datasource):
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource.data_connectors["test_runtime_data_connector"]
@@ -79,6 +80,7 @@ def test_self_check(basic_datasource):
     }
 
 
+@pytest.mark.unit
 def test_self_check_named_assets(basic_datasource_with_assets):
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
@@ -96,6 +98,7 @@ def test_self_check_named_assets(basic_datasource_with_assets):
     }
 
 
+@pytest.mark.unit
 def test_new_self_check_after_adding_named_asset_a(
     basic_datasource_with_assets, test_df_pandas
 ):
@@ -103,7 +106,7 @@ def test_new_self_check_after_adding_named_asset_a(
         basic_datasource_with_assets.data_connectors["runtime"]
     )
     # noinspection PyUnusedLocal
-    res: List[
+    res: List[  # noqa: F841
         BatchDefinition
     ] = runtime_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=RuntimeBatchRequest(
@@ -130,13 +133,14 @@ def test_new_self_check_after_adding_named_asset_a(
     }
 
 
+@pytest.mark.unit
 def test_new_self_check_after_adding_new_asset_c(
     basic_datasource_with_assets, test_df_pandas
 ):
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
-    res: List[
+    res: List[  # noqa: F841
         BatchDefinition
     ] = runtime_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=RuntimeBatchRequest(
@@ -164,6 +168,7 @@ def test_new_self_check_after_adding_new_asset_c(
     }
 
 
+@pytest.mark.unit
 def test_add_batch_identifiers_correct(basic_datasource_with_assets):
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
@@ -175,6 +180,7 @@ def test_add_batch_identifiers_correct(basic_datasource_with_assets):
     }
 
 
+@pytest.mark.unit
 def test_batch_identifiers_missing_completely():
     # missing from base DataConnector
     with pytest.raises(gx_exceptions.DataConnectorError) as data_connector_error:
@@ -202,9 +208,10 @@ execution_engine:
     assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
 
+@pytest.mark.unit
 def test_batch_identifiers_missing_from_named_asset():
     with pytest.raises(gx_exceptions.DataConnectorError) as data_connector_error:
-        basic_datasource: Datasource = instantiate_class_from_config(
+        basic_datasource: Datasource = instantiate_class_from_config(  # noqa: F841
             config=yaml.load(
                 """
 class_name: Datasource
@@ -234,6 +241,7 @@ execution_engine:
     assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
 
+@pytest.mark.unit
 def test_error_checking_unknown_datasource(basic_datasource):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
@@ -244,7 +252,7 @@ def test_error_checking_unknown_datasource(basic_datasource):
     # Test for an unknown datasource
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
-        batch_definition_list: List[
+        batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -257,6 +265,7 @@ def test_error_checking_unknown_datasource(basic_datasource):
         )
 
 
+@pytest.mark.unit
 def test_error_checking_unknown_data_connector(basic_datasource):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
@@ -267,7 +276,7 @@ def test_error_checking_unknown_data_connector(basic_datasource):
     # Test for an unknown data_connector
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
-        batch_definition_list: List[
+        batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -280,6 +289,7 @@ def test_error_checking_unknown_data_connector(basic_datasource):
         )
 
 
+@pytest.mark.unit
 def test_error_checking_missing_runtime_parameters(basic_datasource):
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource.data_connectors["test_runtime_data_connector"]
@@ -288,7 +298,7 @@ def test_error_checking_missing_runtime_parameters(basic_datasource):
     # test for missing runtime_parameters arg
     with pytest.raises(TypeError):
         # noinspection PyUnusedLocal, PyArgumentList
-        batch_definition_list: List[
+        batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -300,6 +310,7 @@ def test_error_checking_missing_runtime_parameters(basic_datasource):
         )
 
 
+@pytest.mark.unit
 def test_asset_is_name_batch_identifier_correctly_used(
     basic_datasource_with_assets, test_df_pandas
 ):
@@ -329,6 +340,7 @@ def test_asset_is_name_batch_identifier_correctly_used(
     )
 
 
+@pytest.mark.unit
 def test_asset_is_named_but_batch_identifier_in_other_asset(
     basic_datasource_with_assets, test_df_pandas
 ):
@@ -359,6 +371,7 @@ def test_asset_is_named_but_batch_identifier_in_other_asset(
     assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
 
+@pytest.mark.unit
 def test_asset_is_named_but_batch_identifier_not_defined_anywhere(
     basic_datasource_with_assets, test_df_pandas
 ):
@@ -385,6 +398,7 @@ def test_asset_is_named_but_batch_identifier_not_defined_anywhere(
     assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
 
+@pytest.mark.unit
 def test_named_asset_is_trying_to_use_batch_identifier_defined_in_data_connector(
     basic_datasource_with_assets, test_df_pandas
 ):
@@ -415,6 +429,7 @@ def test_named_asset_is_trying_to_use_batch_identifier_defined_in_data_connector
     assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
 
+@pytest.mark.unit
 def test_runtime_batch_request_trying_to_use_batch_identifier_defined_at_asset_level(
     basic_datasource_with_assets, test_df_pandas
 ):
@@ -445,6 +460,7 @@ def test_runtime_batch_request_trying_to_use_batch_identifier_defined_at_asset_l
     assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
 
+@pytest.mark.unit
 def test_error_checking_too_many_runtime_parameters(basic_datasource):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
@@ -455,7 +471,7 @@ def test_error_checking_too_many_runtime_parameters(basic_datasource):
     # test for too many runtime_parameters keys
     with pytest.raises(gx_exceptions.InvalidBatchRequestError):
         # noinspection PyUnusedLocal
-        batch_definition_list: List[
+        batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -468,6 +484,7 @@ def test_error_checking_too_many_runtime_parameters(basic_datasource):
         )
 
 
+@pytest.mark.unit
 def test_batch_identifiers_and_batch_identifiers_success_all_keys_present(
     basic_datasource,
 ):
@@ -504,6 +521,7 @@ def test_batch_identifiers_and_batch_identifiers_success_all_keys_present(
     assert len(batch_definition_list) == 1
 
 
+@pytest.mark.unit
 def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
     basic_datasource,
 ):
@@ -568,7 +586,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
 
     with pytest.raises(gx_exceptions.DataConnectorError) as data_connector_error:
         # noinspection PyUnusedLocal
-        batch_definition_list: List[
+        batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
@@ -582,6 +600,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
     assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
 
+@pytest.mark.unit
 def test_get_available_data_asset_names(basic_datasource):
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource.data_connectors["test_runtime_data_connector"]
@@ -593,6 +612,7 @@ def test_get_available_data_asset_names(basic_datasource):
     assert available_data_asset_names == expected_available_data_asset_names
 
 
+@pytest.mark.unit
 def test_get_available_data_asset_names_named_assets(basic_datasource_with_assets):
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
@@ -603,6 +623,7 @@ def test_get_available_data_asset_names_named_assets(basic_datasource_with_asset
     ]
 
 
+@pytest.mark.unit
 def test_get_available_data_asset_names_updating_after_batch_request(
     basic_datasource_with_assets,
 ):
@@ -675,6 +696,7 @@ def test_get_available_data_asset_names_updating_after_batch_request(
     ]
 
 
+@pytest.mark.unit
 def test_data_references_cache_updating_after_batch_request(
     basic_datasource,
 ):
@@ -822,9 +844,10 @@ def test_data_references_cache_updating_after_batch_request(
         "my_data_asset_2",
     ]
 
-    assert test_runtime_data_connector.get_data_reference_list_count() == 3
+    assert test_runtime_data_connector.get_data_reference_count() == 3
 
 
+@pytest.mark.unit
 def test_data_references_cache_updating_after_batch_request_named_assets(
     basic_datasource_with_assets,
 ):
@@ -927,6 +950,7 @@ def test_data_references_cache_updating_after_batch_request_named_assets(
     }
 
 
+@pytest.mark.unit
 def test_get_batch_definition_list_from_batch_request_length_one(
     basic_datasource,
 ):
@@ -967,6 +991,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(
     assert batch_definition_list == expected_batch_definition_list
 
 
+@pytest.mark.unit
 def test_get_batch_definition_list_from_batch_request_with_and_without_data_asset_name(
     basic_datasource,
 ):
@@ -1014,6 +1039,7 @@ def test_get_batch_definition_list_from_batch_request_with_and_without_data_asse
     assert batch_definition_list[0]["data_asset_name"] == "my_data_asset"
 
 
+@pytest.mark.unit
 def test__get_data_reference_list(basic_datasource):
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource.data_connectors["test_runtime_data_connector"]
@@ -1029,6 +1055,7 @@ def test__get_data_reference_list(basic_datasource):
     assert data_reference_list == expected_data_reference_list
 
 
+@pytest.mark.unit
 def test_refresh_data_references_cache(basic_datasource):
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource.data_connectors["test_runtime_data_connector"]
@@ -1036,6 +1063,7 @@ def test_refresh_data_references_cache(basic_datasource):
     assert len(test_runtime_data_connector._data_references_cache) == 0
 
 
+@pytest.mark.unit
 def test__generate_batch_spec_parameters_from_batch_definition(
     basic_datasource,
 ):
@@ -1063,6 +1091,7 @@ def test__generate_batch_spec_parameters_from_batch_definition(
     assert batch_spec_parameters == expected_batch_spec_parameters
 
 
+@pytest.mark.unit
 def test__build_batch_spec(basic_datasource):
     batch_identifiers = {
         "custom_key_0": "staging",
@@ -1116,6 +1145,7 @@ def test__build_batch_spec(basic_datasource):
     assert type(batch_spec) == S3BatchSpec
 
 
+@pytest.mark.unit
 def test__get_data_reference_name(basic_datasource):
     data_connector_query: dict = {
         "batch_filter_parameters": {
@@ -1151,6 +1181,7 @@ def test__get_data_reference_name(basic_datasource):
     )
 
 
+@pytest.mark.unit
 def test_batch_identifiers_datetime(
     basic_datasource,
 ):
@@ -1194,6 +1225,7 @@ def test_batch_identifiers_datetime(
         pytest.fail()
 
 
+@pytest.mark.unit
 def test_temp_table_schema_name_included_in_batch_spec(basic_datasource):
     batch_identifiers = {
         "custom_key_0": "staging",

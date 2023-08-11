@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import os
 import shutil
-from typing import List, Union
+from typing import TYPE_CHECKING, List, Union
 
 import pandas as pd
 import pytest
@@ -12,7 +14,13 @@ from great_expectations.exceptions import InvalidBatchRequestError
 from great_expectations.validator.validator import Validator
 from tests.test_utils import create_files_in_directory
 
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
+
 yaml = YAMLHandler()
+
+# module level markers
+pytestmark = pytest.mark.filesystem
 
 
 @pytest.fixture
@@ -25,14 +33,16 @@ def context_with_single_titanic_csv(empty_data_context, tmp_path_factory):
         )
     )
 
-    titanic_asset_base_directory_path: str = os.path.join(base_directory, "data")
-    os.makedirs(titanic_asset_base_directory_path)
+    titanic_asset_base_directory_path: str = os.path.join(  # noqa: PTH118
+        base_directory, "data"
+    )
+    os.makedirs(titanic_asset_base_directory_path)  # noqa: PTH103
 
     titanic_csv_source_file_path: str = file_relative_path(
         __file__, "../../test_sets/Titanic.csv"
     )
     titanic_csv_destination_file_path: str = str(
-        os.path.join(base_directory, "data/Titanic_19120414_1313.csv")
+        os.path.join(base_directory, "data/Titanic_19120414_1313.csv")  # noqa: PTH118
     )
     shutil.copy(titanic_csv_source_file_path, titanic_csv_destination_file_path)
 
@@ -72,14 +82,14 @@ def context_with_single_titanic_csv(empty_data_context, tmp_path_factory):
 
 
 def test_get_validator(context_with_single_titanic_csv):
-    context: "DataContext" = context_with_single_titanic_csv
+    context: AbstractDataContext = context_with_single_titanic_csv
     batch_request_dict: Union[dict, BatchRequest] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_data_connector",
         "data_asset_name": "Titanic",
     }
     batch_request: BatchRequest = BatchRequest(**batch_request_dict)
-    context.create_expectation_suite(expectation_suite_name="temp_suite")
+    context.add_expectation_suite(expectation_suite_name="temp_suite")
     my_validator: Validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name="temp_suite"
     )
@@ -88,15 +98,17 @@ def test_get_validator(context_with_single_titanic_csv):
     assert my_validator.active_batch.data.dataframe.shape == (1313, 7)
 
 
-def test_get_validator_bad_batch_request(context_with_single_titanic_csv):
-    context: "DataContext" = context_with_single_titanic_csv
+def test_get_validator_bad_batch_request(
+    context_with_single_titanic_csv,
+):
+    context: AbstractDataContext = context_with_single_titanic_csv
     batch_request_dict: Union[dict, BatchRequest] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_data_connector",
         "data_asset_name": "I_DONT_EXIST",
     }
     batch_request: BatchRequest = BatchRequest(**batch_request_dict)
-    context.create_expectation_suite(expectation_suite_name="temp_suite")
+    context.add_expectation_suite(expectation_suite_name="temp_suite")
     with pytest.raises(InvalidBatchRequestError):
         context.get_validator(
             batch_request=batch_request, expectation_suite_name="temp_suite"

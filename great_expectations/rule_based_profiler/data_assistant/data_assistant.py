@@ -10,10 +10,14 @@ from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
+    UsageStatisticsHandler,  # noqa: TCH001
 )
-from great_expectations.experimental.datasources.interfaces import Batch as XBatch
-from great_expectations.rule_based_profiler import RuleBasedProfilerResult
+from great_expectations.datasource.fluent.interfaces import (
+    Batch as FluentBatch,  # noqa: TCH001
+)
+from great_expectations.rule_based_profiler import (
+    RuleBasedProfilerResult,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
@@ -72,7 +76,7 @@ class MetaDataAssistant(ABCMeta):
 
     def __new__(cls, clsname, bases, attrs):
         """
-        Instantiate class as part of descentants calling "__init__()" and register its type in "DataAssistant" registry.
+        Instantiate class as part of descendants calling "__init__()" and register its type in "DataAssistant" registry.
         """
         newclass = super().__new__(cls, clsname, bases, attrs)
 
@@ -81,12 +85,14 @@ class MetaDataAssistant(ABCMeta):
             # Only particular "DataAssistant" implementations must be registered.
             newclass.data_assistant_type = camel_to_snake(name=clsname)
 
-            from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
-                DataAssistantDispatcher,
-            )
+            alias: Optional[str] = getattr(newclass, "__alias__", None)
+            if alias and not alias.startswith("_"):
+                from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
+                    DataAssistantDispatcher,
+                )
 
-            # noinspection PyTypeChecker
-            DataAssistantDispatcher._register_data_assistant(data_assistant=newclass)
+                # noinspection PyTypeChecker
+                DataAssistantDispatcher._register(name=alias, data_assistant=newclass)
 
         return newclass
 
@@ -130,17 +136,18 @@ class DataAssistant(metaclass=MetaDataAssistant):
             )
 
         def get_table_columns_metric_multi_batch_parameter_builder(
-            self,
+            self, include_nested: bool = False
         ) -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
-            metric_name: str = "table.columns"
             return self.build_metric_multi_batch_parameter_builder(
-                metric_name=metric_name,
+                metric_name="table.columns",
                 suffix=None,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-                metric_value_kwargs=None,
+                metric_value_kwargs={
+                    "include_nested": include_nested,
+                },
             )
 
         def get_column_distinct_values_count_metric_multi_batch_parameter_builder(
@@ -440,7 +447,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=None,
                 threshold=1.0,
-                candidate_regexes=None,
+                candidate_regexes=f"{VARIABLES_KEY}candidate_regexes",
                 evaluation_parameter_builder_configs=None,
                 data_context=None,
             )
@@ -463,6 +470,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         CommonlyUsedParameterBuilders()
     )
 
+    # When DataAssistant subclasses are instantiated, they are registered in the DataAssistantDispatcher
+    # if __alias__ is defined and does not start with underscore _. This is handled by MetaDataAssistant.
     __alias__: Optional[str] = None
 
     def __init__(
@@ -472,7 +481,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
     ) -> None:
         """
         DataAssistant subclasses guide "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,
-        corresponding to indended exploration and validation goals.  Then executing "RuleBasedProfiler.run()" yields
+        corresponding to intended exploration and validation goals.  Then executing "RuleBasedProfiler.run()" yields
         "RuleBasedProfilerResult" object, containing "fully_qualified_parameter_names_by_domain",
         "parameter_values_for_fully_qualified_parameter_names_by_domain", "expectation_configurations", and "citation",
         immediately available for composing "ExpectationSuite" and validating underlying data "Batch" objects.
@@ -488,7 +497,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         self._data_context = (
             self._validator.data_context if self._validator is not None else None
         )
-        self._batches: Optional[Dict[str, Union[Batch, XBatch]]] = (
+        self._batches: Optional[Dict[str, Union[Batch, FluentBatch]]] = (
             self._validator.batches if self._validator is not None else None
         )
 
@@ -498,6 +507,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             config_version=1.0,
             variables=variables,
             data_context=self._data_context,
+            catch_exceptions=True,
         )
 
         self._metrics_parameter_builders_by_domain = {}
@@ -558,7 +568,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         else:
             usage_statistics_handler = self._data_context._usage_statistics_handler
 
-        batches: Dict[str, Union[Batch, XBatch]] = self._batches or {}
+        batches: Dict[str, Union[Batch, FluentBatch]] = self._batches or {}
 
         data_assistant_result = DataAssistantResult(
             _batch_id_to_batch_identifier_display_name_map=self._batch_id_to_batch_identifier_display_name_map(),
@@ -698,7 +708,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         """
         This method uses loaded "Batch" objects to return the mapping between unique "batch_id" and "batch_identifiers".
         """
-        batches: Dict[str, Union[Batch, XBatch]] = self._batches or {}
+        batches: Dict[str, Union[Batch, FluentBatch]] = self._batches or {}
 
         batch_id: str
         batch: Batch
@@ -717,7 +727,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
     execution_time_property_name="profiler_execution_time",
     pretty_print=False,
 )
-def run_profiler_on_data(
+def run_profiler_on_data(  # noqa: PLR0913
     data_assistant: DataAssistant,
     data_assistant_result: DataAssistantResult,
     profiler: BaseRuleBasedProfiler,
@@ -766,6 +776,9 @@ configuration included.
         rule_based_profiler_result.rule_domain_builder_execution_time
     )
     result.rule_execution_time = rule_based_profiler_result.rule_execution_time
+    result.rule_exception_tracebacks = (
+        rule_based_profiler_result.rule_exception_tracebacks
+    )
     result.metrics_by_domain = data_assistant.get_metrics_by_domain()
     result.expectation_configurations = (
         rule_based_profiler_result.expectation_configurations
@@ -773,7 +786,7 @@ configuration included.
     result.citation = rule_based_profiler_result.citation
 
 
-def build_map_metric_rule(
+def build_map_metric_rule(  # noqa: PLR0913
     data_assistant_class_name: str,
     rule_name: str,
     expectation_type: str,
@@ -880,7 +893,7 @@ def build_map_metric_rule(
         ),
     ]
     column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations = MeanUnexpectedMapMetricMultiBatchParameterBuilder(
-        name=f"{map_metric_name}.unexpected_value",
+        name=f"{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         map_metric_name=map_metric_name,
         total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
         null_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
@@ -912,7 +925,6 @@ def build_map_metric_rule(
     variables: dict = {
         "success_ratio": 7.5e-1,
     }
-
     expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
         expect_column_values_to_be_attribute_expectation_configuration_builder,
     ]

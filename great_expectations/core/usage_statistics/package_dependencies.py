@@ -34,7 +34,6 @@ class GXDependencies:
             "Click",
             "colorama",
             "cryptography",
-            "importlib-metadata",
             "Ipython",
             "ipywidgets",
             "jinja2",
@@ -66,28 +65,32 @@ class GXDependencies:
     ALL_GX_DEV_DEPENDENCIES: List[str] = sorted(
         [
             "PyMySQL",
+            "adr-tools-python",
             "azure-identity",
             "azure-keyvault-secrets",
             "azure-storage-blob",
             "black",
             "boto3",
+            "databricks-sql-connector",
+            "clickhouse-sqlalchemy",
             "docstring-parser",
             "feather-format",
+            "flaky",
             "ruff",
             "flask",
             "freezegun",
             "gcsfs",
             "google-cloud-bigquery",
+            "google-cloud-bigquery-storage",
             "google-cloud-secret-manager",
             "google-cloud-storage",
             "invoke",
-            "isort",
             "mistune",
-            "mock-alchemy",
             "moto",
             "mypy",
             "nbconvert",
             "openpyxl",
+            "pika",
             "pre-commit",
             "psycopg2-binary",
             "pyarrow",
@@ -96,6 +99,7 @@ class GXDependencies:
             "pyodbc",
             "pypd",
             "pyspark",
+            "pytest-xdist",
             "pytest",
             "pytest-benchmark",
             "pytest-cov",
@@ -105,12 +109,13 @@ class GXDependencies:
             "pytest-random-order",
             "pytest-timeout",
             "requirements-parser",
-            "s3fs",
+            "responses",
             "snapshottest",
             "snowflake-connector-python",
             "snowflake-sqlalchemy",
             "sqlalchemy",
             "sqlalchemy-bigquery",
+            "sqlalchemy-databricks",
             "sqlalchemy-dremio",
             "sqlalchemy-redshift",
             "teradatasqlalchemy",
@@ -121,20 +126,20 @@ class GXDependencies:
 
     GX_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING: List[str] = [
         # requirements-dev-contrib.txt:
+        "adr-tools-python",
         "black",
         "ruff",
         "invoke",
-        "isort",
         "mypy",
         "pre-commit",
         "pytest-cov",
         "pytest-order",
         "pytest-random-order",
+        "tomli",
         # requirements-dev-lite.txt:
         "flask",
         "freezegun",
         "mistune",
-        "mock-alchemy",
         "moto",
         "ipykernel",
         "nbconvert",
@@ -146,10 +151,11 @@ class GXDependencies:
         "pytest-icdiff",
         "pytest-timeout",
         "requirements-parser",
-        "s3fs",
+        "responses",
         "snapshottest",
         # "sqlalchemy",  # Not excluded from tracking
         "trino",
+        "clickhouse-sqlalchemy",
         "PyHive",
         "thrift",
         "thrift-sasl",
@@ -175,6 +181,7 @@ class GXDependencies:
         "global-land-mask",
         "gtin",
         "holidays",
+        # "indiapins",      # Currently a broken package
         "ipwhois",
         "isbnlib",
         "langid",
@@ -182,6 +189,7 @@ class GXDependencies:
         "phonenumbers",
         "price_parser",
         "primefac",
+        "prophet",
         "pwnedpasswords",
         "py-moneyed",
         "pydnsbl",
@@ -195,7 +203,6 @@ class GXDependencies:
         "scikit-learn",
         "shapely",
         "simple_icd_10",
-        "sklearn",
         "sympy",
         "tensorflow",
         "timezonefinder",
@@ -234,28 +241,29 @@ class GXDependencies:
 
     def get_required_dependency_names(self) -> List[str]:
         """Sorted list of required GX dependencies"""
-        return self.GX_REQUIRED_DEPENDENCIES
+        return [name.lower() for name in self.GX_REQUIRED_DEPENDENCIES]
 
     def get_dev_dependency_names(self) -> Set[str]:
         """Set of dev GX dependencies"""
-        return self.GX_DEV_DEPENDENCIES
+        return {name.lower() for name in self.GX_DEV_DEPENDENCIES}
 
     def get_required_dependency_names_from_requirements_file(self) -> List[str]:
-        """Get unique names of required dependencies.
+        """Get unique names of required dependencies. Lowercase names.
 
         Returns:
             List of string names of required dependencies.
         """
         return sorted(
-            set(
-                self._get_dependency_names_from_requirements_file(
+            {
+                name.lower()
+                for name in self._get_dependency_names_from_requirements_file(
                     self._requirements_paths[self.PRIMARY_REQUIREMENTS_FILE]
                 )
-            )
+            }
         )
 
     def get_dev_dependency_names_from_requirements_file(self) -> List[str]:
-        """Get unique names of dependencies from all dev requirements files.
+        """Get unique lowercase names of dependencies from all dev requirements files.
         Returns:
             List of string names of dev dependencies.
         """
@@ -272,7 +280,7 @@ class GXDependencies:
                 dev_dependency_path.absolute()
             )
             dev_dependency_names.update(dependency_names)
-        return sorted(dev_dependency_names)
+        return sorted(name.lower() for name in dev_dependency_names)
 
     def _get_dependency_names_from_requirements_file(
         self, filepath: pathlib.Path

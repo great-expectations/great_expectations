@@ -12,12 +12,15 @@ from great_expectations.core._docs_decorators import deprecated_argument
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
-from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
+from great_expectations.data_context.types.base import (
+    DataContextConfig,  # noqa: TCH001
+    GXCloudConfig,  # noqa: TCH001
+)
 
 
 @deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")
 @deprecated_argument(argument_name="ge_cloud_config", version="0.15.37")
-def BaseDataContext(
+def BaseDataContext(  # noqa: PLR0913
     project_config: Union[DataContextConfig, Mapping],
     context_root_dir: Optional[PathStr] = None,
     runtime_environment: Optional[dict] = None,
@@ -169,7 +172,7 @@ def BaseDataContext(
     )
 
     if context_root_dir is not None:
-        context_root_dir = os.path.abspath(context_root_dir)
+        context_root_dir = os.path.abspath(context_root_dir)  # noqa: PTH100
     # initialize runtime_environment as empty dict if None
     runtime_environment = runtime_environment or {}
 

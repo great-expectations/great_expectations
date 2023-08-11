@@ -1,6 +1,7 @@
 {
   "expectation_type" : "expect_column_pair_values_A_to_be_greater_than_B",
   "datasets" : [{
+    "dataset_name": "expect_column_pair_values_A_to_be_greater_than_B_1",
     "data" : {
       "w" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       "x" : [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
@@ -64,7 +65,7 @@
           [4.0,4.0],
           [5.0,5.0]
         ],
-        "unexpected_index_list": [0,1,2,3,4],
+        "unexpected_index_list": [{"w": 1, "pk_index": 0, "z": 1.0}, {"w": 2, "pk_index": 1, "z": 2.0}, {"w": 3, "pk_index": 2, "z": 3.0}, {"w": 4, "pk_index": 3, "z": 4.0}, {"w": 5, "pk_index": 4, "z": 5.0}],
         "success": false
       }
     },{
@@ -93,7 +94,7 @@
       },
       "out" : {
         "unexpected_list": [["1/1/2016", "1/1/2016"], ["5/5/2016", "5/1/2020"]],
-        "unexpected_index_list": [0,4],
+        "unexpected_index_list": [{"a": "1/1/2016", "pk_index": 0, "b": "1/1/2016"}, {"a": "5/5/2016", "pk_index": 4, "b": "5/1/2020"}],
         "success": true
       }
     },{
@@ -106,7 +107,7 @@
       },
       "out" : {
         "unexpected_list": [[5, 6], [6, 7]],
-        "unexpected_index_list": [3,4],
+        "unexpected_index_list": [{"x": 5, "pk_index": 3, "c": 6}, {"x": 6, "pk_index": 4, "c": 7}],
         "success": true
       }
     }]

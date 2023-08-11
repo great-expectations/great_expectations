@@ -1,0 +1,10 @@
+If you copied your existing Expectation Suites to the S3 bucket, run the following Python code to confirm that Great Expectations can find them:
+
+```python
+import great_expectations as gx
+
+context = gx.get_context()
+context.list_expectation_suite_names()
+```
+
+The Expectations you copied to S3 are returned as a list. Expectations that weren't copied to the new Store aren't listed.

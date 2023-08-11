@@ -16,11 +16,10 @@ from tests.data_context.conftest import MockResponse
 
 
 @pytest.mark.cloud
-@pytest.mark.unit
 def test_datasource_store_set(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    datasource_config: DatasourceConfig,
+    block_config_datasource_config: DatasourceConfig,
     datasource_config_with_names_and_ids: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
     mocked_datasource_post_response: Callable[[], MockResponse],
@@ -45,13 +44,14 @@ def test_datasource_store_set(
         autospec=True,
         side_effect=mocked_datasource_get_response,
     ):
-
         saved_datasource_config: DatasourceConfig = (
-            datasource_store_ge_cloud_backend.set(key=key, value=datasource_config)
+            datasource_store_ge_cloud_backend.set(
+                key=key, value=block_config_datasource_config
+            )
         )
 
     serializer = DictConfigSerializer(schema=datasourceConfigSchema)
-    expected_datasource_config = serializer.serialize(datasource_config)
+    expected_datasource_config = serializer.serialize(block_config_datasource_config)
 
     mock_post.assert_called_once_with(
         mock.ANY,  # requests.Session object
@@ -73,11 +73,10 @@ def test_datasource_store_set(
 
 
 @pytest.mark.cloud
-@pytest.mark.unit
 def test_datasource_store_get_by_id(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    datasource_config: DatasourceConfig,
+    block_config_datasource_config: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
 ) -> None:
     """What does this test and why?
@@ -87,15 +86,14 @@ def test_datasource_store_get_by_id(
 
     id: str = "example_id_normally_uuid"
 
-    key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATASOURCE, cloud_id=id)
+    key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATASOURCE, id=id)
 
     def mocked_response(*args, **kwargs):
-
         return MockResponse(
             {
                 "data": {
                     "id": id,
-                    "attributes": {"datasource_config": datasource_config},
+                    "attributes": {"datasource_config": block_config_datasource_config},
                 }
             },
             200,
@@ -104,7 +102,6 @@ def test_datasource_store_get_by_id(
     with mock.patch(
         "requests.Session.get", autospec=True, side_effect=mocked_response
     ) as mock_get:
-
         datasource_store_ge_cloud_backend.get(key=key)
 
         mock_get.assert_called_once_with(
@@ -115,11 +112,10 @@ def test_datasource_store_get_by_id(
 
 
 @pytest.mark.cloud
-@pytest.mark.unit
 def test_datasource_store_get_by_name(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    datasource_config: DatasourceConfig,
+    block_config_datasource_config: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
 ) -> None:
     """What does this test and why?
@@ -131,12 +127,11 @@ def test_datasource_store_get_by_name(
     datasource_name: str = "example_datasource_config_name"
 
     def mocked_response(*args, **kwargs):
-
         return MockResponse(
             {
                 "data": {
                     "id": id,
-                    "attributes": {"datasource_config": datasource_config},
+                    "attributes": {"datasource_config": block_config_datasource_config},
                 }
             },
             200,
@@ -162,7 +157,6 @@ def test_datasource_store_get_by_name(
 
 
 @pytest.mark.cloud
-@pytest.mark.unit
 def test_datasource_store_delete_by_id(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
@@ -174,7 +168,7 @@ def test_datasource_store_delete_by_id(
     """
     id: str = "example_id_normally_uuid"
 
-    key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATASOURCE, cloud_id=id)
+    key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATASOURCE, id=id)
 
     with mock.patch("requests.Session.delete", autospec=True) as mock_delete:
         type(mock_delete.return_value).status_code = mock.PropertyMock(return_value=200)
@@ -219,11 +213,10 @@ def test_datasource_http_error_handling(
 ):
     id: str = "example_id_normally_uuid"
 
-    key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATASOURCE, cloud_id=id)
+    key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATASOURCE, id=id)
     with pytest.raises(
         StoreBackendError, match=r"Unable to \w+ object in GX Cloud Store Backend: .*"
     ) as exc_info:
-
         backend_method = getattr(datasource_store_ge_cloud_backend, method)
         backend_method(key, *args)
 

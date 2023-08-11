@@ -18,7 +18,9 @@ from great_expectations.data_context.store import (
     TupleS3StoreBackend,
     ValidationsStore,
 )
-from great_expectations.data_context.store.store_backend import StoreBackend
+from great_expectations.data_context.store.store_backend import (
+    StoreBackend,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
@@ -99,7 +101,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
         self._generate_upgrade_checklist()
 
     def _generate_upgrade_checklist(self) -> None:
-        for (store_name, store) in self.data_context.stores.items():
+        for store_name, store in self.data_context.stores.items():
             if not isinstance(store, (ValidationsStore, MetricStore)):
                 continue
             elif isinstance(store, ValidationsStore):
@@ -281,7 +283,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                     exception_message=exception_message,
                 )
 
-    def _update_upgrade_log(
+    def _update_upgrade_log(  # noqa: PLR0913
         self,
         store_backend: Type[StoreBackend],
         source_key: Optional[tuple] = None,
@@ -325,7 +327,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 self.upgrade_log["upgraded_validations_stores"][store_name][
                     "validations_updated"
                 ].append(log_dict)
-        else:
+        else:  # noqa: PLR5501
             if exception_message:
                 self.upgrade_log["upgraded_docs_site_validations_stores"][site_name][
                     "exceptions"
@@ -360,12 +362,12 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 "%Y%m%dT%H%M%S.%fZ"
             )
         except (ValueError, TypeError):
-            source_path = os.path.join(
+            source_path = os.path.join(  # noqa: PTH118
                 store_backend.full_base_directory,
                 store_backend._convert_key_to_filepath(source_key),
             )
-            path_mod_timestamp = os.path.getmtime(source_path)
-            path_mod_iso_str = datetime.datetime.fromtimestamp(
+            path_mod_timestamp = os.path.getmtime(source_path)  # noqa: PTH204
+            path_mod_iso_str = datetime.datetime.fromtimestamp(  # noqa: DTZ006
                 path_mod_timestamp
             ).strftime("%Y%m%dT%H%M%S.%fZ")
             self.validation_run_times[run_name] = path_mod_iso_str
@@ -373,9 +375,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
     def _get_tuple_s3_store_backend_run_time(
         self, source_key: tuple, store_backend: Type[StoreBackend]
     ) -> None:
-        import boto3
+        from great_expectations.compatibility import aws
 
-        s3 = boto3.resource("s3")
+        s3 = aws.boto3.resource("s3")
         run_name = source_key[-2]
 
         try:
@@ -385,7 +387,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
         except (ValueError, TypeError):
             source_path = store_backend._convert_key_to_filepath(source_key)
             if not source_path.startswith(store_backend.prefix):
-                source_path = os.path.join(store_backend.prefix, source_path)
+                source_path = os.path.join(  # noqa: PTH118
+                    store_backend.prefix, source_path
+                )
             source_object = s3.Object(store_backend.bucket, source_path)
             source_object_last_mod = source_object.last_modified.strftime(
                 "%Y%m%dT%H%M%S.%fZ"
@@ -396,9 +400,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
     def _get_tuple_gcs_store_backend_run_time(
         self, source_key: tuple, store_backend: Type[StoreBackend]
     ) -> None:
-        from google.cloud import storage
+        from great_expectations.compatibility import google
 
-        gcs = storage.Client(project=store_backend.project)
+        gcs = google.storage.Client(project=store_backend.project)
         bucket = gcs.get_bucket(store_backend.bucket)
         run_name = source_key[-2]
 
@@ -409,7 +413,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
         except (ValueError, TypeError):
             source_path = store_backend._convert_key_to_filepath(source_key)
             if not source_path.startswith(store_backend.prefix):
-                source_path = os.path.join(store_backend.prefix, source_path)
+                source_path = os.path.join(  # noqa: PTH118
+                    store_backend.prefix, source_path
+                )
             source_blob_created_time = bucket.get_blob(
                 source_path
             ).time_created.strftime("%Y%m%dT%H%M%S.%fZ")
@@ -610,7 +616,7 @@ Would you like to proceed with the project upgrade?\
         current_time = datetime.datetime.now(datetime.timezone.utc).strftime(
             "%Y%m%dT%H%M%S.%fZ"
         )
-        dest_path = os.path.join(
+        dest_path = os.path.join(  # noqa: PTH118
             self.data_context._context_root_directory,
             "uncommitted",
             "logs",
@@ -618,7 +624,7 @@ Would you like to proceed with the project upgrade?\
             f"UpgradeHelperV11_{current_time}.json",
         )
         dest_dir, dest_filename = os.path.split(dest_path)
-        os.makedirs(dest_dir, exist_ok=True)
+        os.makedirs(dest_dir, exist_ok=True)  # noqa: PTH103
 
         with open(dest_path, "w") as outfile:
             json.dump(self.upgrade_log, outfile, indent=2)
@@ -652,7 +658,7 @@ A log detailing the upgrade can be found here:
     - {upgrade_log_path}\
 </green>\
 """
-        else:
+        else:  # noqa: PLR5501
             if exceptions:
                 exception_occurred = True
                 upgrade_report += f"""
@@ -679,7 +685,7 @@ A log detailing the upgrade can be found here:
 
     def upgrade_project(self) -> Tuple[str, str, bool]:
         try:
-            for (store_name, store_backend) in self.upgrade_checklist[
+            for store_name, store_backend in self.upgrade_checklist[
                 "validations_store_backends"
             ].items():
                 self.upgrade_log["upgraded_validations_stores"][store_name] = {
@@ -691,7 +697,7 @@ A log detailing the upgrade can be found here:
             pass
 
         try:
-            for (site_name, store_backend) in self.upgrade_checklist[
+            for site_name, store_backend in self.upgrade_checklist[
                 "docs_validations_store_backends"
             ].items():
                 self.upgrade_log["upgraded_docs_site_validations_stores"][site_name] = {

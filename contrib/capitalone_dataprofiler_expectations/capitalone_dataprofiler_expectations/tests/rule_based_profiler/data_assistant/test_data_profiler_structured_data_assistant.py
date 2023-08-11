@@ -1,20 +1,19 @@
+from __future__ import annotations
+
 import os
-from typing import Dict, List, Optional, cast
+import unittest
+from typing import TYPE_CHECKING, Dict, List, Optional, cast
 from unittest import mock
 
 import pytest
-
-# noinspection PyUnresolvedReferences
-import contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics.data_profiler_metrics
-
-# noinspection PyUnresolvedReferences
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant import (
+from capitalone_dataprofiler_expectations.metrics import *  # noqa: F403
+from capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant.data_profiler_structured_data_assistant import (  # noqa: F401  # registers this DataAssistant and prevents removal of "unused" import
     DataProfilerStructuredDataAssistant,
 )
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
+from capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
     DataProfilerStructuredDataAssistantResult,
 )
-from great_expectations import DataContext
+
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -27,24 +26,22 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 
-# noinspection PyUnresolvedReferences
-from tests.conftest import (
-    bobby_columnar_table_multi_batch_deterministic_data_context,
-    bobby_columnar_table_multi_batch_probabilistic_data_context,
-    no_usage_stats,
-    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
-)
+if TYPE_CHECKING:
+    from great_expectations.data_context import FileDataContext
 
-test_root_path = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
+test_root_path: str = os.path.dirname(  # noqa: PTH120
+    os.path.dirname(os.path.dirname(os.path.realpath(__file__)))  # noqa: PTH120
 )
 
 
 @pytest.fixture
 def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_enabled(
-    bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_deterministic_data_context: FileDataContext,
 ) -> DataProfilerStructuredDataAssistantResult:
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_deterministic_data_context
+    )
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -52,23 +49,27 @@ def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_ena
         "data_asset_name": "my_reports",
         "data_connector_query": {"index": -1},
     }
-    exclude_column_names = [
-        "pickup_datetime",
-        "dropoff_datetime",
-        "store_and_fwd_flag",
-        "congestion_surcharge",
-    ]
 
     data_assistant_result: DataAssistantResult = context.assistants.data_profiler.run(
         batch_request=batch_request,
         numeric_rule={
-            "profile_path": os.path.join(
+            "profile_path": os.path.join(  # noqa: PTH118
                 test_root_path,
                 "data_profiler_files",
                 "profile.pkl",
             ),
+            "profile_report_filtering_key": "data_type",
+            "profile_report_accepted_filtering_values": ["int", "float", "string"],
         },
-        exclude_column_names=exclude_column_names,
+        float_rule={
+            "profile_path": os.path.join(  # noqa: PTH118
+                test_root_path,
+                "data_profiler_files",
+                "profile.pkl",
+            ),
+            "profile_report_filtering_key": "data_type",
+            "profile_report_accepted_filtering_values": ["float"],
+        },
         estimation="flag_outliers",
     )
 
@@ -77,9 +78,11 @@ def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_ena
 
 @pytest.fixture(scope="module")
 def bobby_profile_data_profiler_structured_data_assistant_result(
-    bobby_columnar_table_multi_batch_probabilistic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_probabilistic_data_context: FileDataContext,
 ) -> DataProfilerStructuredDataAssistantResult:
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_probabilistic_data_context
+    )
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -88,22 +91,25 @@ def bobby_profile_data_profiler_structured_data_assistant_result(
         "data_connector_query": {"index": -1},
     }
 
-    exclude_column_names = [
-        "pickup_datetime",
-        "dropoff_datetime",
-        "store_and_fwd_flag",
-        "congestion_surcharge",
-    ]
-
     data_assistant_result: DataAssistantResult = context.assistants.data_profiler.run(
         batch_request=batch_request,
-        exclude_column_names=exclude_column_names,
         numeric_rule={
-            "profile_path": os.path.join(
+            "profile_path": os.path.join(  # noqa: PTH118
                 test_root_path,
                 "data_profiler_files",
                 "profile.pkl",
             ),
+            "profile_report_filtering_key": "data_type",
+            "profile_report_accepted_filtering_values": ["int", "float", "string"],
+        },
+        float_rule={
+            "profile_path": os.path.join(  # noqa: PTH118
+                test_root_path,
+                "data_profiler_files",
+                "profile.pkl",
+            ),
+            "profile_report_filtering_key": "data_type",
+            "profile_report_accepted_filtering_values": ["float"],
         },
         estimation="flag_outliers",
     )
@@ -111,7 +117,7 @@ def bobby_profile_data_profiler_structured_data_assistant_result(
     return cast(DataProfilerStructuredDataAssistantResult, data_assistant_result)
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 6.90s
 def test_profile_data_profiler_structured_data_assistant_result_serialization(
     bobby_profile_data_profiler_structured_data_assistant_result: DataProfilerStructuredDataAssistantResult,
@@ -131,11 +137,11 @@ def test_profile_data_profiler_structured_data_assistant_result_serialization(
         len(
             bobby_profile_data_profiler_structured_data_assistant_result.profiler_config.rules
         )
-        == 1
+        == 2
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -162,7 +168,7 @@ def test_profile_data_profiler_structured_data_assistant_result_get_expectation_
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_profile_data_profiler_structured_data_assistant_metrics_count(
     bobby_profile_data_profiler_structured_data_assistant_result: DataProfilerStructuredDataAssistantResult,
 ) -> None:
@@ -194,11 +200,12 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
         bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items()
     ):
         num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
+    assert (
+        num_metrics == 50
+    )  # 2 * ((numeric_rule: 6 int + 9 float + 1 string) + (float_rule: 9 float))
 
-    assert num_metrics == 28
 
-
-@pytest.mark.integration
+@pytest.mark.big
 def test_profile_data_profiler_structured_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_profile_data_profiler_structured_data_assistant_result: DataProfilerStructuredDataAssistantResult,
 ):

@@ -24,23 +24,23 @@ import numpy as np
 import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch import Batch, BatchRequestBase
-from great_expectations.core.domain import Domain
+from great_expectations.core.batch import Batch, BatchRequestBase  # noqa: TCH001
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
     AttributedResolvedMetrics,
 )
 from great_expectations.rule_based_profiler.builder import Builder
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     build_metric_domain_kwargs,
+    get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
-)
-from great_expectations.rule_based_profiler.helpers.util import (
-    get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator as get_validator_using_batch_list_or_batch_request,
@@ -58,10 +58,12 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.types.attributes import Attributes
 from great_expectations.util import is_parseable_date
-from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.validator.exception_info import ExceptionInfo
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
+from great_expectations.validator.exception_info import ExceptionInfo  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validation_graph import ValidationGraph
+from great_expectations.validator.validation_graph import (
+    ValidationGraph,  # noqa: TCH001
+)
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -128,7 +130,7 @@ class ParameterBuilder(ABC, Builder):
             data_context=self._data_context,
         )
 
-    def build_parameters(
+    def build_parameters(  # noqa: PLR0913
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
@@ -205,7 +207,7 @@ class ParameterBuilder(ABC, Builder):
                 parameter_values=parameter_values,
             )
 
-    def resolve_evaluation_dependencies(
+    def resolve_evaluation_dependencies(  # noqa: PLR0913
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
@@ -337,7 +339,7 @@ class ParameterBuilder(ABC, Builder):
             parameters=parameters,
         )
 
-    def get_metrics(
+    def get_metrics(  # noqa: PLR0913
         self,
         metric_name: str,
         metric_domain_kwargs: Optional[
@@ -587,7 +589,7 @@ specified (empty "metric_name" value detected)."""
         )
 
     @staticmethod
-    def _sanitize_metric_computation(
+    def _sanitize_metric_computation(  # noqa: PLR0913
         parameter_builder: ParameterBuilder,
         metric_name: str,
         attributed_resolved_metrics: AttributedResolvedMetrics,
@@ -665,7 +667,7 @@ specified (empty "metric_name" value detected)."""
 
                         batch_metric_values.append(0.0)
                     elif not (
-                        (
+                        (  # noqa: PLR1701
                             isinstance(metric_value, (str, np.str_))
                             and is_parseable_date(value=metric_value)
                         )

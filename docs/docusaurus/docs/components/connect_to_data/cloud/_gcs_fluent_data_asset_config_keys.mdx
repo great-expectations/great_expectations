@@ -1,0 +1,9 @@
+import CodeBlock from '@theme/CodeBlock';
+
+To specify data to connect to you can specify the following parameters:
+- `name`: A name by which you can reference the Data Asset in the future.
+- `batching_regex`: A regular expression that indicates which files to treat as batches in your Data Asset and how to identify them.
+- `gcs_prefix`: The beginning of the object key name
+- `gcs_delimiter`: (Optional) A character used to define the hierarchical structure of object keys within a bucket (default is "/")
+- `gcs_recursive_file_discovery`: (Optional) A boolean indicating if files should be searched recursively from subfolders (default is False)
+- `gcs_max_results`: (Optional) The maximum number of keys in a single response (default is 1000)

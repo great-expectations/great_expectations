@@ -1,6 +1,7 @@
 {
   "expectation_type" : "expect_select_column_values_to_be_unique_within_record",
   "datasets" : [{
+    "dataset_name": "expect_select_column_values_to_be_unique_within_record_1",
     "data": {
         "a": [1,2,3,4],
         "b": [5,6,7,8],
@@ -75,6 +76,7 @@
         }
       ]
     }, {
+    "dataset_name": "expect_select_column_values_to_be_unique_within_record_2",
     "data" : {
       "w" : [2, 3, 4, 5, 6, 7, 8, 9, 10, null],
       "x" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -126,13 +128,14 @@
       },
       "out": {
         "unexpected_list": [{"a": 1.0, "b": 1.0}, {"a": 1.0, "b": 1.0}, {"a": 1.0, "b": 1.0}, {"a": 2.0, "b": 2.0}, {"a": 2.0, "b": 2.0}],
-        "unexpected_index_list": [0,2,4,5,7],
+        "unexpected_index_list": [{"a": 1.0, "pk_index": 0, "b": 1.0}, {"a": 1.0, "pk_index": 2, "b": 1.0}, {"a": 1.0, "pk_index": 4, "b": 1.0}, {"a": 2.0, "pk_index": 5, "b": 2.0}, {"a": 2.0, "pk_index": 7, "b": 2.0}],
         "success": false
       }
-    },{
+    },
+      {
       "title": "unexpected_values_exact_match_out_with_index_list",
       "exact_match_out" : true,
-      "only_for": ["pandas"],
+      "only_for": ["pandas_v2_api"],
       "in": {
         "column_list": ["a", "b"]
       },
@@ -209,6 +212,90 @@
           ]
         }
       }
+    },{
+      "title": "unexpected_values_exact_match_out_with_index_list_pandas_v3_api",
+      "exact_match_out" : true,
+      "only_for": ["pandas_v3_api"],
+      "in": {
+        "column_list": ["a", "b"]
+      },
+      "out": {
+        "success": false,
+        "result":{
+          "unexpected_count": 5,
+          "partial_unexpected_list": [
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            }
+          ],
+          "unexpected_list": [
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            }
+          ],
+          "unexpected_index_list":
+          [
+            {
+              "a": 1.0,
+              "pk_index": 0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "pk_index": 2,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "pk_index": 4,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "pk_index": 5,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "pk_index": 7,
+              "b": 2.0
+            }
+          ]
+      }}
     },{
       "title": "unexpected_values_exact_match_out_no_index_list",
       "exact_match_out" : true,

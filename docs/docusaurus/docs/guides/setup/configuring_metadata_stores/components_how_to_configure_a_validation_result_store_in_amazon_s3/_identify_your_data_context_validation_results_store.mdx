@@ -1,0 +1,9 @@
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+
+Your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> configuration is in your <TechnicalTag tag="data_context" text="Data Context" />.
+
+The following section in your <TechnicalTag relative="../../../" tag="data_context" text="Data Context" /> ``great_expectations.yml`` file tells Great Expectations to look for Validation Results in a Store named ``validations_store``. It also creates a ``ValidationsStore`` named ``validations_store`` that is backed by a Filesystem and stores Validation Results under the ``base_directory`` ``uncommitted/validations`` (the default).
+
+```python name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py existing_validations_store"
+```
+

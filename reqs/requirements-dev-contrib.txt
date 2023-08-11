@@ -1,6 +1,7 @@
-black==22.3.0
+adr-tools-python==1.0.3
+black[jupyter]==23.3.0
 invoke>=2.0.0
-isort==5.10.1
-mypy==0.991
+mypy==1.4.1
 pre-commit>=2.21.0
-ruff==0.0.236
+ruff==0.0.280
+tomli>=2.0.1

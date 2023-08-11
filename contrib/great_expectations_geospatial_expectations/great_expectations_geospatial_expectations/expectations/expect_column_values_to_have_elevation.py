@@ -1,11 +1,6 @@
-import json
-from typing import Optional
-
 import geopandas
 from shapely.geometry import Point, mapping, shape
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -18,7 +13,6 @@ from great_expectations.expectations.metrics import (
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
 class ColumnValuesHaveElevation(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.elevated"
@@ -49,7 +43,7 @@ class ColumnValuesHaveElevation(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToHaveElevation(ColumnMapExpectation):
-    """This expectation will check a point to see if it is elevated"""
+    """Expect the column values to be points that have elevation."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [

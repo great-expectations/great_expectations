@@ -1,16 +1,10 @@
-import json
 from typing import Optional
 
 import pandas as pd
 import pygeos as geos
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -21,7 +15,6 @@ from great_expectations.expectations.metrics import (
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesGeometryNearShape(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.geometry.near_shape"
     condition_value_keys = (
@@ -34,7 +27,6 @@ class ColumnValuesGeometryNearShape(ColumnMapMetricProvider):
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-
         shape = kwargs.get("shape")
         shape_format = kwargs.get("shape_format")
         column_shape_format = kwargs.get("column_shape_format")
@@ -53,7 +45,7 @@ class ColumnValuesGeometryNearShape(ColumnMapMetricProvider):
                     raise NotImplementedError(
                         "Shape constructor method not implemented. Must be in WKT, WKB, or GeoJSON format."
                     )
-            except:
+            except Exception:
                 raise Exception("A valid reference shape was not given.")
         else:
             raise Exception("A shape must be provided for this method.")

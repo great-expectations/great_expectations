@@ -77,6 +77,7 @@ def possible_expectations_set():
     }
 
 
+@pytest.mark.unit
 def test_profiler_init_no_config(
     cardinality_dataset,
 ):
@@ -92,6 +93,7 @@ def test_profiler_init_no_config(
     assert profiler.excluded_expectations == []
 
 
+@pytest.mark.unit
 def test_profiler_init_full_config_no_semantic_types(cardinality_dataset):
     """
     What does this test do and why?
@@ -117,6 +119,7 @@ def test_profiler_init_full_config_no_semantic_types(cardinality_dataset):
     assert "col_one" not in profiler.column_info
 
 
+@pytest.mark.unit
 def test_init_with_semantic_types(cardinality_dataset):
     """
     What does this test do and why?
@@ -176,6 +179,7 @@ def test_init_with_semantic_types(cardinality_dataset):
     }
 
 
+@pytest.mark.unit
 def test__validate_config(cardinality_dataset):
     """
     What does this test do and why?
@@ -191,6 +195,7 @@ def test__validate_config(cardinality_dataset):
     assert e.typename == "AssertionError"
 
 
+@pytest.mark.unit
 def test_value_set_threshold(cardinality_dataset):
     """
     What does this test do and why?
@@ -219,6 +224,7 @@ def test_value_set_threshold(cardinality_dataset):
     )
 
 
+@pytest.mark.unit
 def test__validate_semantic_types_dict(cardinality_dataset):
     """
     What does this test do and why?
@@ -259,6 +265,7 @@ def test__validate_semantic_types_dict(cardinality_dataset):
     )
 
 
+@pytest.mark.unit
 def test_build_suite_no_config(titanic_dataset, possible_expectations_set):
     """
     What does this test do and why?
@@ -272,6 +279,7 @@ def test_build_suite_no_config(titanic_dataset, possible_expectations_set):
     assert len(suite.expectations) == 48
 
 
+@pytest.mark.unit
 def test_build_suite_with_config_and_no_semantic_types_dict(
     titanic_dataset, possible_expectations_set
 ):
@@ -303,6 +311,7 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.unit
 def test_build_suite_with_semantic_types_dict(
     mock_emit,
     cardinality_dataset,
@@ -358,6 +367,7 @@ def test_build_suite_with_semantic_types_dict(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.unit
 def test_build_suite_when_suite_already_exists(mock_emit, cardinality_dataset):
     """
     What does this test do and why?
@@ -390,6 +400,7 @@ def test_build_suite_when_suite_already_exists(mock_emit, cardinality_dataset):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.unit
 def test_primary_or_compound_key_not_found_in_columns(mock_emit, cardinality_dataset):
     """
     What does this test do and why?
@@ -429,6 +440,7 @@ would like to use it as a primary_or_compound_key.
     assert mock_emit.call_args_list == []
 
 
+@pytest.mark.unit
 def test_config_with_not_null_only(nulls_dataset, possible_expectations_set):
     """
     What does this test do and why?
@@ -466,6 +478,7 @@ def test_config_with_not_null_only(nulls_dataset, possible_expectations_set):
     assert "expect_column_values_to_be_null" in expectations
 
 
+@pytest.mark.unit
 def test_nullity_expectations_mostly_tolerance(
     nulls_dataset, possible_expectations_set
 ):
@@ -482,6 +495,7 @@ def test_nullity_expectations_mostly_tolerance(
         assert i["kwargs"]["mostly"] == 0.66
 
 
+@pytest.mark.filesystem
 def test_profiled_dataset_passes_own_validation(
     cardinality_dataset, titanic_data_context
 ):
@@ -495,7 +509,7 @@ def test_profiled_dataset_passes_own_validation(
     )
     suite = profiler.build_suite()
 
-    context.save_expectation_suite(suite)
+    context.add_expectation_suite(expectation_suite=suite)
     results = context.run_validation_operator(
         "action_list_operator", assets_to_validate=[cardinality_dataset]
     )
@@ -503,6 +517,7 @@ def test_profiled_dataset_passes_own_validation(
     assert results["success"]
 
 
+@pytest.mark.filesystem
 def test_profiler_all_expectation_types(
     titanic_data_context, possible_expectations_set
 ):
@@ -584,6 +599,7 @@ def test_profiler_all_expectation_types(
     assert results["success"]
 
 
+@pytest.mark.unit
 def test_column_cardinality_functions(cardinality_dataset):
     profiler = UserConfigurableProfiler(cardinality_dataset)
     assert profiler.column_info.get("col_none").get("cardinality") == "NONE"

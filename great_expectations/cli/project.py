@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import sys
-from typing import TYPE_CHECKING, Optional, Tuple
 
 import click
 
@@ -13,11 +12,10 @@ from great_expectations.cli.toolkit import load_data_context_with_error_handling
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import CURRENT_GX_CONFIG_VERSION
-from great_expectations.util import get_context
-
-if TYPE_CHECKING:
-    from great_expectations.data_context import AbstractDataContext
 
 
 @click.group()
@@ -72,13 +70,18 @@ def project_upgrade(ctx: click.Context) -> None:
 
 
 def do_config_check(
-    target_directory: Optional[str],
-) -> Tuple[bool, str, Optional[AbstractDataContext]]:
+    target_directory: str | None,
+) -> tuple[bool, str, FileDataContext | None]:
     is_config_ok: bool = True
     upgrade_message: str = ""
-    context: Optional[AbstractDataContext]
+    context: FileDataContext | None = None
     try:
-        context = get_context(context_root_dir=target_directory)
+        # Without this check, FileDataContext will possibly scaffold a project structure.
+        # As we want CLI users to follow the `init` workflow, we should exit early if we can't find a context YAML.
+        if not FileDataContext._find_context_yml_file(target_directory):
+            raise gx_exceptions.ConfigNotFoundError()
+
+        context = FileDataContext(context_root_dir=target_directory)
         ge_config_version: int = context.get_config().config_version  # type: ignore[union-attr] # could be dict, str
         if int(ge_config_version) < CURRENT_GX_CONFIG_VERSION:
             is_config_ok = False

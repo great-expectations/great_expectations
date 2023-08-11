@@ -40,6 +40,18 @@ if sa:
                 self.name = "dummy_dialect"
                 self.pool = DummySAEngine.DummyPool
 
+            def get_schema_names(self, *args, **kwargs) -> List[str]:
+                # This is a list of schema names we expect to see in the test cases, which is empty list.
+                return []
+
+            def get_table_names(self, *args, **kwargs) -> List[str]:
+                # This is a list of table names we expect to see in the test cases, which is an empty list.
+                return []
+
+            def get_view_names(self, *args, **kwargs) -> List[str]:
+                # This is a list of view names we expect to see in the test cases, which is an empty list.
+                return []
+
         class DummyConnection:
             def close(self):
                 pass
@@ -56,7 +68,10 @@ if sa:
             super().__init__(*args, **kwargs)
 
         def get_data_for_batch_identifiers(
-            self, table_name: str, splitter_method_name: str, splitter_kwargs: dict
+            self,
+            selectable: sa.sql.Selectable,
+            splitter_method_name: str,
+            splitter_kwargs: dict,
         ) -> List[dict]:
             return [{}]
 
@@ -226,7 +241,7 @@ def test_simple_sqlalchemy_datasource_init(
         engine=DummySAEngine(),
         introspection=introspection,
         tables=tables,
-        **kwargs
+        **kwargs,
     )
     expected_data_connector_types = _expected_data_connector_types(
         introspection, tables

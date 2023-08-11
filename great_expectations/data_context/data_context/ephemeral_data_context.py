@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import logging
-from typing import Dict, Mapping, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, Mapping, Optional, Union, cast
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.serializer import DictConfigSerializer
@@ -9,11 +11,18 @@ from great_expectations.data_context.data_context.abstract_data_context import (
 from great_expectations.data_context.data_context_variables import (
     EphemeralDataContextVariables,
 )
+from great_expectations.data_context.migrator.file_migrator import FileMigrator
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
     datasourceConfigSchema,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.file_data_context import (
+        FileDataContext,
+    )
+    from great_expectations.data_context.store.datasource_store import DatasourceStore
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +61,7 @@ class EphemeralDataContext(AbstractDataContext):
         )
         return variables
 
-    def _init_datasource_store(self) -> None:
+    def _init_datasource_store(self) -> DatasourceStore:
         from great_expectations.data_context.store.datasource_store import (
             DatasourceStore,
         )
@@ -69,6 +78,24 @@ class EphemeralDataContext(AbstractDataContext):
         # As the store is in-memory, it needs to be populated immediately
         datasources = cast(Dict[str, DatasourceConfig], self.config.datasources or {})
         for name, config in datasources.items():
-            datasource_store.set_by_name(datasource_name=name, datasource_config=config)
+            datasource_store.add_by_name(datasource_name=name, datasource_config=config)
 
-        self._datasource_store = datasource_store
+        return datasource_store
+
+    @public_api
+    def convert_to_file_context(self) -> FileDataContext:
+        """Convert existing EphemeralDataContext into a FileDataContext.
+
+        Scaffolds a file-backed project structure in the current working directory.
+
+        Returns:
+            A FileDataContext with an updated config to reflect the state of the current context.
+        """
+        self._synchronize_fluent_datasources()
+        migrator = FileMigrator(
+            primary_stores=self.stores,
+            datasource_store=self._datasource_store,
+            variables=self.variables,
+            fluent_config=self.fluent_config,
+        )
+        return migrator.migrate()

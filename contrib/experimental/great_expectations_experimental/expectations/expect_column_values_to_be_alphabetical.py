@@ -1,59 +1,23 @@
-import json
 import operator
-from typing import Any, Dict, Optional, Tuple
 
 import pandas
 
-from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.metric_domain_types import MetricDomainTypes
-
+# from great_expectations.compatibility.pyspark import functions as F
+# from great_expectations.compatibility import pyspark
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    ExpectationConfiguration,
-    render_evaluation_parameter_string,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.import_manager import F, Window, sparktypes
-from great_expectations.expectations.metrics.map_metric import (
-    ColumnMapMetricProvider,
-    column_condition_partial,
-)
-from great_expectations.expectations.metrics.metric_provider import (
-    metric_partial,
-    metric_value,
-)
-from great_expectations.expectations.metrics.table_metrics.table_column_types import (
-    ColumnTypes,
-)
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-    _registered_metrics,
-    _registered_renderers,
-)
-from great_expectations.render import RenderedStringTemplateContent
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.validation_graph import MetricConfiguration
-from great_expectations.validator.validator import Validator
 
 
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
 class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.are_alphabetical"
@@ -63,7 +27,6 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, reverse=False, **kwargs):
-
         # lowercase the whole column to avoid issues with capitalization
         # (since every capital letter is "before" the lowercase letters)
         column_lower = column.map(str.lower)
@@ -134,9 +97,9 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 #     # if isinstance(
 #     #     column_metadata["type"],
 #     #     (
-#     #         sparktypes.LongType,
-#     #         sparktypes.DoubleType,
-#     #         sparktypes.IntegerType,
+#     #         pyspark.types.LongType,
+#     #         pyspark.types.DoubleType,
+#     #         pyspark.types.IntegerType,
 #     #     ),
 #     # ):
 #     #     # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
@@ -160,7 +123,7 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 #     column = F.col(column_name)
 #     column = F.lower(column)
 #     # if isinstance(
-#     #     column_metadata["type"], (sparktypes.TimestampType, sparktypes.DateType)
+#     #     column_metadata["type"], (pyspark.types.TimestampType, pyspark.types.DateType)
 #     # ):
 #     #     diff = F.datediff(
 #     #         column, F.lag(column).over(Window.orderBy(F.lit("constant")))

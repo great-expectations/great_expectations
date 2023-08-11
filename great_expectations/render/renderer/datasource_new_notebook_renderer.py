@@ -31,7 +31,7 @@ If any of these configuration options are not applicable, they can be removed. T
 
 Also, if you would like to learn more about the **DataConnectors** used in this configuration, please see our docs on [InferredAssetDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector), [ConfiguredAssetDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector), and [RuntimeDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector).
 
-Credentials will not be saved until you run the last cell. The credentials will be saved in `uncommitted/config_variables.yml` which should not be added to source control."""
+Credentials will not be saved until you run the last cell."""
 
     FILES_DOCS = """### For files based Datasources:
 Here we are creating an example configuration.  The configuration contains an **InferredAssetFilesystemDataConnector** which will add a Data Asset for each file in the base directory you provided. It also contains a **RuntimeDataConnector** which can accept filepaths.   This is just an example, and you may customize this as you wish!
@@ -48,7 +48,7 @@ Glad you asked! Datasources are versatile. Please see our [How To Guides](https:
 
 Give your datasource a unique name:"""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         context: AbstractDataContext,
         datasource_type: DatasourceTypes,

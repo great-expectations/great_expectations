@@ -208,7 +208,6 @@ def test_gcs_url_with_special_chars():
 )
 @pytest.mark.unit
 def test_dbfs_path_protocol_conversions(input_path, expected_path):
-
     observed_path = DBFSPath.convert_to_protocol_version(path=input_path)
     assert observed_path == expected_path
 
@@ -239,6 +238,5 @@ def test_dbfs_path_protocol_conversions(input_path, expected_path):
 )
 @pytest.mark.unit
 def test_dbfs_path_file_semantics_conversions(input_path, expected_path):
-
     observed_path = DBFSPath.convert_to_file_semantics_version(path=input_path)
     assert observed_path == expected_path
