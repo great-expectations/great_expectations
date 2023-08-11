@@ -303,7 +303,7 @@ def test_pandas_source_read_csv(
 def test_s3_pandas_source_read_parquet(
     data_context_parameterized_expectation_suite, tmp_path_factory, monkeypatch
 ):
-    # remove env variables, which can get in the way the Mocked S3 client. 
+    # remove env variables, which can get in the way the Mocked S3 client.
     monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
 
     test_bucket = "test-bucket"
