@@ -31,14 +31,14 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         name (str): required name for DataConnector
         datasource_name (str): required name for datasource
         container (str): container name for Azure Blob Storage
-        assets (dict): dict of asset configuration (required for ConfiguredAssetDataConnector)
+        assets (dict): dict of asset configuration (required for ``ConfiguredAssetDataConnector``)
         execution_engine (ExecutionEngine): optional reference to ExecutionEngine
         default_regex (dict): optional regex configuration for filtering data_references
         sorters (list): optional list of sorters for sorting data_references
         name_starts_with (str): Azure prefix
         delimiter (str): Azure delimiter
-        azure_options (dict): wrapper object for **kwargs
-        batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
+        azure_options (dict): wrapper object for ``**kwargs``
+        batch_spec_passthrough (dict): dictionary with keys that will be added directly to ``batch_spec``
     """
 
     def __init__(  # noqa: PLR0913
