@@ -34,7 +34,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__file__)
 
-
 # apply markers to entire test module
 pytestmark = [
     pytest.mark.skipif(
@@ -64,6 +63,7 @@ def aws_credentials() -> None:
     os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
     os.environ["AWS_SECURITY_TOKEN"] = "testing"
     os.environ["AWS_SESSION_TOKEN"] = "testing"
+    os.environ["AWS_DEFAULT_REGION"] = "testing"
 
 
 @pytest.mark.skipif(not aws.boto3)
@@ -137,12 +137,12 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
 
 
 @pytest.mark.aws_deps
-def test_construct_pandas_s3_datasource(pandas_s3_datasource: PandasS3Datasource):
+def test_construct_pandas_s3_datasource(pandas_s3_datasource: PandasS3Datasource, aws_credentials):
     assert pandas_s3_datasource.name == "pandas_s3_datasource"
 
 
 @pytest.mark.aws_deps
-def test_add_csv_asset_to_datasource(pandas_s3_datasource: PandasS3Datasource):
+def test_add_csv_asset_to_datasource(pandas_s3_datasource: PandasS3Datasource, aws_credentials):
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
@@ -310,7 +310,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
 
 @pytest.mark.aws_deps
 def test_csv_asset_with_some_batching_regex_named_parameters(
-    pandas_s3_datasource: PandasS3Datasource,
+    pandas_s3_datasource: PandasS3Datasource, aws_credentials
 ):
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
@@ -327,7 +327,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
 
 @pytest.mark.aws_deps
 def test_csv_asset_with_non_string_batching_regex_named_parameters(
-    pandas_s3_datasource: PandasS3Datasource,
+    pandas_s3_datasource: PandasS3Datasource, aws_credentials
 ):
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
@@ -342,7 +342,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
 
 @pytest.mark.aws_deps
 def test_get_batch_list_from_fully_specified_batch_request(
-    pandas_s3_datasource: PandasS3Datasource,
+    pandas_s3_datasource: PandasS3Datasource, aws_credentials
 ):
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
@@ -384,6 +384,7 @@ def test_test_connection_failures(
     s3_mock,
     pandas_s3_datasource: PandasS3Datasource,
     bad_regex_config: tuple[re.Pattern, str],
+    aws_credentials
 ):
     regex, test_connection_error_message = bad_regex_config
     csv_asset = CSVAsset(  # type: ignore[call-arg]
@@ -413,6 +414,7 @@ def test_test_connection_failures(
 @pytest.mark.aws_deps
 def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
     pandas_s3_datasource: PandasS3Datasource,
+    aws_credentials
 ):
     """
     Tests that files from the subfolder(s) is returned

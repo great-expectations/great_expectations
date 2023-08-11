@@ -301,8 +301,9 @@ def test_pandas_source_read_csv(
 @mock_s3
 @pytest.mark.aws_deps
 def test_s3_pandas_source_read_parquet(
-    data_context_parameterized_expectation_suite, tmp_path_factory
+    data_context_parameterized_expectation_suite, tmp_path_factory, monkeypatch
 ):
+    monkeypatch.delenv("AWS_REGION", raising=False)
     test_bucket = "test-bucket"
     # set up dummy bucket
     s3 = boto3.client("s3", region_name="us-east-1")
