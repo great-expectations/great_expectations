@@ -830,6 +830,14 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
             "--docs-tests",
         ),
     ),
+    "docs-spark": TestDependencies(
+        requirement_files=(
+            "reqs/requirements-dev-test.txt",
+            "reqs/requirements-dev-spark.txt",
+        ),
+        services=("spark",),
+        extra_pytest_args=("--spark",),
+    ),
     "mssql": TestDependencies(
         ("reqs/requirements-dev-mssql.txt",),
         services=("mssql",),
