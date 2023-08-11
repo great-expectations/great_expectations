@@ -273,6 +273,7 @@ jobs:
       matrix:
         markers:
           - athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
+          - aws_deps
           - big
           - cli
           - filesystem
