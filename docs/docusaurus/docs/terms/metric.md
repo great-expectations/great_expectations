@@ -10,7 +10,7 @@ A Metric is a computed attribute of data such as the mean of a column.
 
 Metrics are values derived from one or more <TechnicalTag relative="../" tag="batch" text="Batches" /> that can be used to evaluate <TechnicalTag relative="../" tag="expectation" text="Expectations" /> or to summarize the result of <TechnicalTag relative="../" tag="validation" text="Validation" />. It can be helpful to think of a Metric as the answer to a question.  A Metric could be a statistic, such as the minimum value of the column, or a more complex object, such as a histogram. Metrics are a core part of Validating data.
 
-## When MetricProviders are required
+## When Metrics are required
 
 A minimum of one supporting Metric is required by every Expectation. For example, `expect_column_mean_to_be_between` relies on a Metric that calculates the mean of a column. Often, an Expectation requires multiple Metrics. For example, the following Metrics are required in the `expect_column_values_to_be_in_set` Expectation:
 
