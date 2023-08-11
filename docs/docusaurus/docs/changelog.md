@@ -10,6 +10,30 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.17.9
+* [BUGFIX] PR title checker's code should handle apostrophes ([#8513](https://github.com/great-expectations/great_expectations/pull/8513))
+* [BUGFIX] Patch `add_or_update_expectation_suite` with Cloud-backed contexts ([#8522](https://github.com/great-expectations/great_expectations/pull/8522))
+* [DOCS] Update Code Example for Viewing a Full Checkpoint Configuration ([#8492](https://github.com/great-expectations/great_expectations/pull/8492))
+* [DOCS] Add New Topic for Connecting to In-Memory Source Data Using Spark ([#8445](https://github.com/great-expectations/great_expectations/pull/8445))
+* [DOCS] Remove Unused Documentation Style Guide Topic ([#8496](https://github.com/great-expectations/great_expectations/pull/8496))
+* [DOCS] Update Links and Content in the Data Context Topic ([#8489](https://github.com/great-expectations/great_expectations/pull/8489))
+* [DOCS] Update Connect to filesystem source data ([#8483](https://github.com/great-expectations/great_expectations/pull/8483))
+* [DOCS] Add step to install azure-storage-blob when using azure storage blobs… ([#8156](https://github.com/great-expectations/great_expectations/pull/8156))
+* [DOCS] add python version badge to README ([#7040](https://github.com/great-expectations/great_expectations/pull/7040))
+* [DOCS] standardizes references to supported Python versions ([#8474](https://github.com/great-expectations/great_expectations/pull/8474))
+* [MAINTENANCE] Remove core team attributions from changelog ([#8493](https://github.com/great-expectations/great_expectations/pull/8493))
+* [MAINTENANCE] Remove `azure-pipeline.yml` after migrating to Github Actions ([#8494](https://github.com/great-expectations/great_expectations/pull/8494))
+* [MAINTENANCE] Notify on build-n-publish failure. ([#8495](https://github.com/great-expectations/great_expectations/pull/8495))
+* [MAINTENANCE] Send slack notification on release ([#8497](https://github.com/great-expectations/great_expectations/pull/8497))
+* [MAINTENANCE] Removed unused github action. ([#8499](https://github.com/great-expectations/great_expectations/pull/8499))
+* [MAINTENANCE] Change default testing level from WARNING to INFO ([#8506](https://github.com/great-expectations/great_expectations/pull/8506))
+* [MAINTENANCE] Flaky decorator added for docs-integration tests that access Cloud resources ([#8510](https://github.com/great-expectations/great_expectations/pull/8510))
+* [MAINTENANCE] Mob typing: update list of deprecated, never to be typed files. ([#8514](https://github.com/great-expectations/great_expectations/pull/8514))
+* [MAINTENANCE] Better testing for FDS quoted identifier logic ([#8509](https://github.com/great-expectations/great_expectations/pull/8509))
+* [MAINTENANCE] Remove Click upper bound constraint. ([#8515](https://github.com/great-expectations/great_expectations/pull/8515))
+* [MAINTENANCE] Docs Pipeline Clean up ([#8468](https://github.com/great-expectations/great_expectations/pull/8468))
+* [MAINTENANCE] Update `flaky` test ([#8527](https://github.com/great-expectations/great_expectations/pull/8527))
+
 ### 0.17.8
 * [FEATURE] Add Agent action to list table names in SQL Datasources ([#8177](https://github.com/great-expectations/great_expectations/pull/8177))
 * [FEATURE] Add Test Draft Config Workflow to Agent ([#8410](https://github.com/great-expectations/great_expectations/pull/8410))

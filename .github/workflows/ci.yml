@@ -28,10 +28,13 @@ jobs:
     # check whether docs were changed
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pull-requests: read
     outputs:
       docs: ${{ steps.filter.outputs.docs }}
     steps:
+    - name: Checkout source code
+      uses: actions/checkout@v2
     - uses: dorny/paths-filter@v2
       id: filter
       with:
