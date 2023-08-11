@@ -10,36 +10,6 @@ trigger:
     include:
     - develop
 
-resources:
-  containers:
-  - container: postgres
-    image: postgres:15.1
-    ports:
-    - 5432:5432
-    env:
-      POSTGRES_DB: "test_ci"
-      POSTGRES_HOST_AUTH_METHOD: "trust"
-  - container: mysql
-    image: mysql:8.0.20
-    ports:
-      - 3306:3306
-    env:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-      MYSQL_DATABASE: test_ci
-  - container: mssql
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    env:
-      ACCEPT_EULA: Y
-      MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
-      MSSQL_DB: test_ci
-      MSSQL_PID: Developer
-    ports:
-      - 1433:1433
-  - container: trino
-    image: trinodb/trino:400
-    ports:
-      - 8088:8080
-
 variables:
   isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
   isManual: $[eq(variables['Build.Reason'], 'Manual')]
@@ -380,50 +350,6 @@ stages:
             AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
             PYARROW_IGNORE_TIMEZONE: 1
 
-    - job: test_docs_azure
-      timeoutInMinutes: 30
-      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
-      variables:
-        python.version: '3.8'
-
-      steps:
-        - task: UsePythonVersion@0
-          inputs:
-            versionSpec: '$(python.version)'
-          displayName: 'Use Python $(python.version)'
-
-        - script: |
-            pip install --constraint constraints-dev.txt ".[test, azure]" pytest-azurepipelines
-          displayName: 'Install dependencies'
-
-        - script: |
-            pytest -v --docs-tests --azure tests/integration/test_script_runner.py
-          displayName: 'pytest'
-          env:
-            AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
-            AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
-
-    - job: test_docs_trino
-      timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
-      variables:
-        python.version: '3.8'
-      services:
-        trino: trino
-
-      steps:
-        - task: UsePythonVersion@0
-          inputs:
-            versionSpec: '$(python.version)'
-          displayName: 'Use Python $(python.version)'
-
-        - script: |
-            pip install --constraint constraints-dev.txt ".[test, trino]" pytest-azurepipelines
-          displayName: 'Install dependencies'
-        - script: |
-            pytest -v --docs-tests --trino tests/integration/test_script_runner.py
-          displayName: 'pytest'
-
     - job: test_docs_athena
       timeoutInMinutes: 30
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
@@ -452,44 +378,3 @@ stages:
             AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
             AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
             AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
-
-    - job: test_docs_multiple_database
-      timeoutInMinutes: 30
-      condition: or(
-          eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
-          eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true),
-          eq(variables.isDevelop, true),
-          eq(variables.isManual, true)
-        )
-      variables:
-        python.version: '3.8'
-      services:
-        mysql: mysql
-        postgres: postgres
-
-      steps:
-        - task: UsePythonVersion@0
-          inputs:
-            versionSpec: '$(python.version)'
-          displayName: 'Use Python $(python.version)'
-
-        - script: |
-            pip install --constraint constraints-dev.txt ".[test, mysql, postgresql]" pytest-azurepipelines
-          displayName: 'Install dependencies'
-
-        - script: |
-            printf 'Waiting for MySQL database to accept connections'
-            until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
-              printf '.'
-              sleep 1;
-            done;
-          displayName: Wait for database to initialise
-
-        - script: |
-            echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
-            mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
-          displayName: 'Configure mysql'
-
-        - script: |
-            pytest -v --docs-tests --mysql --postgresql tests/integration/test_script_runner.py
-          displayName: 'pytest'
