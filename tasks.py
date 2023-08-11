@@ -797,6 +797,7 @@ class TestDependencies(NamedTuple):
 
 MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "athena": TestDependencies(("reqs/requirements-dev-athena.txt",)),
+    "aws_deps": TestDependencies(("reqs/requirements-dev-aws.txt",)),
     "clickhouse": TestDependencies(("reqs/requirements-dev-clickhouse.txt",)),
     "cloud": TestDependencies(
         ("reqs/requirements-dev-cloud.txt",), extra_pytest_args=("--cloud",)
