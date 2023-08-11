@@ -79,7 +79,7 @@ title: <!-- Add the topic title here -->
 
 <!-- List the secondary resources that can help a user get a better understanding of the subject matter discussed in this tutorial. Don't add an introductory statement for the list. If a user needs to complete additional tasks to complete this process, use a Next steps section instead. What follows is an example provided for your reference. If there aren't any related documents, remove this section.-->
 
-- [How to install Great Expectations locally](../guides/setup/installation/local.md)
+- [How to install Great Expectations locally](../guides/setup/installation/install_gx.md)
 - [How to set up GX to work with data on AWS S3](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3.md)
 - [How to set up GX to work with data in Azure Blob Storage](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs.md)
 - [How to set up GX to work with data on GCS](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)
@@ -91,7 +91,7 @@ title: <!-- Add the topic title here -->
 
 <!-- If this tutorial is the first step in a process and there are other tasks the user must complete to finish the process, list the topics here with links to the relevant information. If you want to link to related information, use a Related topics section instead. Don't add an introductory statement for the list. What follows is an example provided for your reference. If there aren't next steps, remove this section.-->
 
-- [Install Great Expectations locally](../guides/setup/installation/local.md)
+- [Install Great Expectations locally](../guides/setup/installation/install_gx.md)
 - [Set up GX to work with data on AWS S3](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3.md)
 - [Set up GX to work with data in Azure Blob Storage](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs.md)
 - [Set up GX to work with data on GCS](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)
