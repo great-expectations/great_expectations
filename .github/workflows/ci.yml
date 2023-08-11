@@ -24,8 +24,32 @@ jobs:
     steps:
       - run: echo "CI jobs won't run because this is a draft pull request."
 
+  docs-changes:
+    # check whether docs were changed
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      docs: ${{ steps.filter.outputs.docs }}
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v2
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          docs:
+            - 'docs/**'
+            - 'tests/integration/docusaurus/**'
+            - 'tests/integration/fixtures/**'
+            - 'tests/test_sets/**'
   doc-checks:
-    if: github.event.pull_request.draft == false
+    needs: docs-changes
+    # run on every PR that is not a draft that has docs changes, and on tagged push events (ie. releases)
+    if: |
+      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,44 +63,26 @@ jobs:
             reqs/requirements-dev-test.txt
       - name: Install dependencies
         run: pip install -r reqs/requirements-dev-test.txt
-      - name: Get docs files that have changed
-        id: changed-files
-        uses: dorny/paths-filter@v2
-        with:
-          filters: |
-            docs:
-              - "docs/**"
-              - tests/integration/docusaurus/**
-              - tests/integration/fixtures/**
-              - tests/test_sets/**
+
       - name: check_repo_root_size
-        if: steps.changed-files.outputs.docs == 'true'
         run: sh ./ci/checks/check_repo_root_size.sh
       - name: Docstring linter
-        if: steps.changed-files.outputs.docs == 'true'
         run: invoke docstrings
       - name: line_number_snippet_checker
-        if: steps.changed-files.outputs.docs == 'true'
         run: python ci/checks/check_no_line_number_snippets.py
       - name: name_tag_snippet_checker
-        if: steps.changed-files.outputs.docs == 'true'
         run: python ci/checks/check_only_name_tag_snippets.py
       - name: integration_test_gets_run_checker
-        if: steps.changed-files.outputs.docs == 'true'
         run: python ci/checks/check_integration_test_gets_run.py
       - name: name_tag_snippet_referenced_checker
-        if: steps.changed-files.outputs.docs == 'true'
         run: python ci/checks/check_name_tag_snippets_referenced.py
       - name: public_api_report
-        if: steps.changed-files.outputs.docs == 'true'
         run: invoke public-api
       - name: link_checker
-        if: steps.changed-files.outputs.docs == 'true'
         run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -s docs --skip-external
       - name: docs_build
         env:
           NODE_OPTIONS: --max_old_space_size=4096
-        if: steps.changed-files.outputs.docs == 'true'
         run: cd docs/docusaurus && yarn install && bash ../build_docs
 
   static-analysis:
@@ -107,7 +113,11 @@ jobs:
 
   docs-snippets:
     name: docs-snippets
-    if: github.event.pull_request.draft == false
+    needs: docs-changes
+    # run on every PR that is not a draft that has docs changes, and on tagged push events (ie. releases)
+    if: |
+      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     env:
       # google
@@ -141,7 +151,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Run docs_snippet_checker
-        if: steps.changed-files.outputs.docs == 'true'
         run: |
           yarn install
           python ci/checks/validate_docs_snippets.py
@@ -182,6 +191,11 @@ jobs:
       - name: Run the tests
         run: |
           invoke docs-snippet-tests 'docs' --up-services --verbose
+      # Spark tests are run as part of a separate task as we have not migrated all of Spark tests just yet (ie. Spark+Athena, Spark+S3 etc)
+      - name: Run the Spark tests
+        run: |
+          invoke deps --gx-install -m 'docs-spark'
+          invoke docs-snippet-tests 'docs-spark' --up-services --verbose
 
   unit-tests:
     strategy:
