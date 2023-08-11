@@ -13,7 +13,6 @@ import traceback
 import warnings
 from contextlib import contextmanager
 from pathlib import Path
-from packaging import version
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -27,6 +26,8 @@ from typing import (
     Union,
     cast,
 )
+
+from packaging import version
 
 from great_expectations._version import get_versions  # isort:skip
 
