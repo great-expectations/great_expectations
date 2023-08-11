@@ -70,7 +70,6 @@ class PandasS3Datasource(_PandasFilePathDatasource):
                 ).get("boto3_options", {})
                 try:
                     s3_client = aws.boto3.client("s3", **boto3_options)
-                    print(f"s3: {s3_client}")
                 except Exception as e:
                     # Failure to create "s3_client" is most likely due invalid "boto3_options" dictionary.
                     raise PandasS3DatasourceError(
