@@ -276,6 +276,7 @@ jobs:
           - aws_deps
           - big
           - cli
+          - databricks
           - filesystem
           - mssql
           - mysql

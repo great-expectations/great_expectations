@@ -802,7 +802,12 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "cloud": TestDependencies(
         ("reqs/requirements-dev-cloud.txt",), extra_pytest_args=("--cloud",)
     ),
+    "databricks": TestDependencies(
+        requirement_files=("reqs/requirements-dev-databricks.txt",),
+        services=("databricks",),
+    ),
     "docs-basic": TestDependencies(
+        # these installs are handled by the CI
         requirement_files=(
             "reqs/requirements-dev-test.txt",
             "reqs/requirements-dev-mssql.txt",

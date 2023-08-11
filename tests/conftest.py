@@ -10,7 +10,7 @@ import random
 import shutil
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Final, List, Optional
 from unittest import mock
 
 import numpy as np
@@ -125,7 +125,7 @@ locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
 logger = logging.getLogger(__name__)
 
-REQUIRED_MARKERS = {
+REQUIRED_MARKERS: Final[set[str]] = {
     "all_backends",
     "athena",
     "aws_creds",
@@ -134,6 +134,7 @@ REQUIRED_MARKERS = {
     "cli",
     "clickhouse",
     "cloud",
+    "databricks",
     "docs",
     "filesystem",
     "mssql",
