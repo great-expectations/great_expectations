@@ -129,6 +129,7 @@ REQUIRED_MARKERS = {
     "all_backends",
     "athena",
     "aws_creds",
+    "aws_deps",
     "big",
     "cli",
     "clickhouse",
