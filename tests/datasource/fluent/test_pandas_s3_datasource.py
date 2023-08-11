@@ -168,8 +168,8 @@ def test_construct_csv_asset_directly():
     assert m1 is not None
 
 
-@pytest.mark.aws_creds
-def test_invalid_connect_options(pandas_s3_datasource: PandasS3Datasource):
+@pytest.mark.aws_deps
+def test_invalid_connect_options(pandas_s3_datasource: PandasS3Datasource, aws_credentials):
     with pytest.raises(pydantic.ValidationError) as exc_info:
         pandas_s3_datasource.add_csv_asset(  # type: ignore[call-arg]
             name="csv_asset",
@@ -274,7 +274,7 @@ def test_asset_connect_options_in_repr(
 
 @pytest.mark.aws_deps
 def test_csv_asset_with_batching_regex_unnamed_parameters(
-    pandas_s3_datasource: PandasS3Datasource,
+    pandas_s3_datasource: PandasS3Datasource, aws_credentials
 ):
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
@@ -291,7 +291,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
 
 @pytest.mark.aws_deps
 def test_csv_asset_with_batching_regex_named_parameters(
-    pandas_s3_datasource: PandasS3Datasource,
+    pandas_s3_datasource: PandasS3Datasource, aws_credentials
 ):
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
