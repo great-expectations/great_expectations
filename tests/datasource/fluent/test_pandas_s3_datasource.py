@@ -169,7 +169,9 @@ def test_construct_csv_asset_directly():
 
 
 @pytest.mark.aws_deps
-def test_invalid_connect_options(pandas_s3_datasource: PandasS3Datasource, aws_credentials):
+def test_invalid_connect_options(
+    pandas_s3_datasource: PandasS3Datasource, aws_credentials
+):
     with pytest.raises(pydantic.ValidationError) as exc_info:
         pandas_s3_datasource.add_csv_asset(  # type: ignore[call-arg]
             name="csv_asset",
