@@ -133,7 +133,6 @@ class DatabricksDsn(AnyUrl):
         if isinstance(url, ConfigStr):
             assert config_provider, "`config_provider` must be provided"
             url = url.get_config_value(config_provider=config_provider)
-        # TODO: ensure sensitive parts are not leaked as part of error message
         parsed_url = pydantic.parse_obj_as(DatabricksDsn, url)
         return parsed_url
 
