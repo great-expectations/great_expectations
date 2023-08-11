@@ -184,12 +184,14 @@ class SlackNotificationAction(ValidationAction):
     Args:
         data_context: Data Context that is used by the Action.
         renderer: Specifies the Renderer used to generate a query consumable by Slack API, e.g.:
-            ```python
-            {
-               "module_name": "great_expectations.render.renderer.slack_renderer",
-               "class_name": "SlackRenderer",
-           }
-           ```
+
+        ```python
+        {
+            "module_name": "great_expectations.render.renderer.slack_renderer",
+            "class_name": "SlackRenderer",
+        }
+        ```
+
         slack_webhook: The incoming Slack webhook to which to send notification.
         slack_token: Token from Slack app. Used when not using slack_webhook.
         slack_channel: Slack channel to receive notification. Used when not using slack_webhook.
@@ -443,12 +445,14 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
     Args:
         data_context: Data Context that is used by the Action.
         renderer: Specifies the renderer used to generate a query consumable by teams API, e.g.:
-            ```python
-            {
-               "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
-               "class_name": "MicrosoftTeamsRenderer",
-            }
-            ```
+
+        ```python
+        {
+            "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
+            "class_name": "MicrosoftTeamsRenderer",
+        }
+        ```
+
         microsoft_teams_webhook: Incoming Microsoft Teams webhook to which to send notifications.
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
     """
@@ -658,6 +662,7 @@ class EmailAction(ValidationAction):
     """Sends an email to a given list of email addresses.
 
     ```yaml
+
     - name: send_email_on_validation_result
     action:
       class_name: EmailAction
@@ -684,12 +689,14 @@ class EmailAction(ValidationAction):
     Args:
         data_context: Data Context that is used by the Action.
         renderer: Specifies the renderer used to generate an email, for example:
-            ```python
-            {
-               "module_name": "great_expectations.render.renderer.email_renderer",
-               "class_name": "EmailRenderer",
-            }
-            ```
+
+        ```python
+        {
+            "module_name": "great_expectations.render.renderer.email_renderer",
+            "class_name": "EmailRenderer",
+        }
+        ```
+
         smtp_address: Address of the SMTP server used to send the email.
         smtp_address: Port of the SMTP server used to send the email.
         sender_login: Login used send the email.
@@ -1006,24 +1013,27 @@ class StoreMetricsAction(ValidationAction):
     """Extract metrics from a Validation Result and store them in a metrics store.
 
     Typical usage example:
-        ```yaml
-        - name: store_evaluation_params
-        action:
-         class_name: StoreMetricsAction
-          # the name must refer to a store that is configured in the great_expectations.yml file
-          target_store_name: my_metrics_store
-        ```
+
+    ```yaml
+    - name: store_evaluation_params
+    action:
+        class_name: StoreMetricsAction
+        # the name must refer to a store that is configured in the great_expectations.yml file
+        target_store_name: my_metrics_store
+    ```
 
     Args:
         data_context: GX Data Context.
         requested_metrics: Dictionary of metrics to store.
 
             Dictionary should have the following structure:
-                    ```yaml
-                    expectation_suite_name:
-                        metric_name:
-                            - metric_kwargs_id
-                    ```
+
+            ```yaml
+            expectation_suite_name:
+                metric_name:
+                    - metric_kwargs_id
+            ```
+
             You may use "*" to denote that any expectation suite should match.
 
         target_store_name: The name of the store where the action will store the metrics.
