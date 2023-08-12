@@ -10,7 +10,7 @@ import random
 import shutil
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Final, List, Optional
 from unittest import mock
 
 import numpy as np
@@ -125,14 +125,16 @@ locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
 logger = logging.getLogger(__name__)
 
-REQUIRED_MARKERS = {
+REQUIRED_MARKERS: Final[set[str]] = {
     "all_backends",
     "athena",
     "aws_creds",
+    "aws_deps",
     "big",
     "cli",
     "clickhouse",
     "cloud",
+    "databricks",
     "docs",
     "filesystem",
     "mssql",
@@ -8386,3 +8388,13 @@ def csv_path() -> pathlib.Path:
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
     return abs_csv_path
+
+
+@pytest.fixture(scope="function")
+def aws_credentials():
+    """Mocked AWS Credentials for moto."""
+    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
+    os.environ["AWS_SECURITY_TOKEN"] = "testing"
+    os.environ["AWS_SESSION_TOKEN"] = "testing"
+    os.environ["AWS_DEFAULT_REGION"] = "testing"

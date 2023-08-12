@@ -299,10 +299,13 @@ def test_pandas_source_read_csv(
     reason="pyarrow and fastparquet are not installed",
 )
 @mock_s3
-@pytest.mark.filesystem
+@pytest.mark.aws_deps
 def test_s3_pandas_source_read_parquet(
-    data_context_parameterized_expectation_suite, tmp_path_factory
+    data_context_parameterized_expectation_suite, tmp_path_factory, monkeypatch
 ):
+    # remove env variables, which can get in the way the Mocked S3 client.
+    monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
+
     test_bucket = "test-bucket"
     # set up dummy bucket
     s3 = boto3.client("s3", region_name="us-east-1")

@@ -1,1 +1,1 @@
-- [How to install Great Expectations for use with local filesystem data](/docs/guides/setup/installation/local)
+- [How to install Great Expectations for use with local filesystem data](/docs/guides/setup/installation/install_gx)
