@@ -13,16 +13,6 @@ from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.batch_spec import AzureBatchSpec, GCSBatchSpec
 
 
-@pytest.fixture(scope="function")
-def aws_credentials():
-    """Mocked AWS Credentials for moto."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
-    os.environ["AWS_SECURITY_TOKEN"] = "testing"
-    os.environ["AWS_SESSION_TOKEN"] = "testing"
-    os.environ["AWS_DEFAULT_REGION"] = "testing"
-
-
 @pytest.fixture
 def s3(aws_credentials):
     with mock_s3():
