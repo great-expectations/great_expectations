@@ -1,11 +1,16 @@
 import string
 from typing import Optional
 
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.pyspark import types
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -31,12 +36,16 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
     condition_metric_name = "column_values.not_contain_special_character"
 
     # condition_value_keys are arguments used to determine the value of the metric.
-    condition_value_keys = ("",)
+    condition_value_keys = ("allowed_characters",)
 
     # This method defines the business logic for evaluating the metric when using a PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs):
+    def _pandas(cls, column, allowed_characters: list or set, **kwargs):
         def not_contain_special_character(val, *special_characters):
+            special_characters = [
+                char for char in special_characters if char not in allowed_characters
+            ]
+
             for c in special_characters:
                 if c in str(val):
                     return False
@@ -45,6 +54,32 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
         return column.apply(
             not_contain_special_character, args=(list(string.punctuation))
         )
+
+    # This method defines the business logic for evaluating the metric when using a SparkExecutionEngine
+    @column_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, allowed_characters: list or set, **kwargs):
+        def not_contain_special_character(val, *special_characters):
+            special_characters = [
+                char
+                for char in list(string.punctuation)
+                if char not in allowed_characters
+            ]
+
+            for c in special_characters:
+                if c in str(val):
+                    return False
+            return True
+
+        # Register the UDF
+        not_contain_special_character_udf = F.udf(
+            not_contain_special_character, types.BooleanType()
+        )
+
+        # Apply the UDF to the column
+        result_column = F.when(
+            not_contain_special_character_udf(column, F.lit(string.punctuation)), True
+        ).otherwise(False)
+        return result_column
 
 
 # This class defines the Expectation itself
@@ -56,6 +91,9 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
             The column name
 
     Keyword Args:
+        allowed_characters (list): \
+            A list of characters that will be ignored when validating that a column doesn't have special characters
+
         mostly (None or a float value between 0 and 1): \
             Successful if at least mostly fraction of values match the expectation \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
@@ -66,6 +104,28 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
 
     # These examples will be shown in the public gallery, and also executed as unit tests for the Expectation
     examples = [
+        {
+            "data": {
+                "no_special_character": [
+                    "maxwell",
+                    "neil armstrong",
+                    234,
+                ],
+            },
+            "tests": [
+                {
+                    "title": "positive_test__with_no_special_character",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "no_special_character", "mostly": 1},
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [],
+                        "unexpected_list": [],
+                    },
+                },
+            ],
+        },
         {
             "data": {
                 "mostly_no_special_character": [
@@ -79,7 +139,7 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
             },
             "tests": [
                 {
-                    "title": "negative_test_with_no_special_character",
+                    "title": "negative_test_with_special_character",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {"column": "mostly_no_special_character", "mostly": 1},
@@ -88,9 +148,69 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
                         "unexpected_index_list": [0, 1, 2],
                         "unexpected_list": ["apple@", "pear$!", "%banana%"],
                     },
-                }
+                },
+                {
+                    "title": "positive_test_with_allowed_special_character_list",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_no_special_character",
+                        "allowed_characters": ["@", "$", "%", "!"],
+                        "mostly": 1,
+                    },
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [],
+                        "unexpected_list": [],
+                    },
+                },
+                {
+                    "title": "negative_test_with_allowed_special_character_list",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_no_special_character",
+                        "allowed_characters": ["@"],
+                        "mostly": 1,
+                    },
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [1, 2],
+                        "unexpected_list": ["pear$!", "%banana%"],
+                    },
+                },
+                {
+                    "title": "positive_test_with_allowed_special_character_set",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_no_special_character",
+                        "allowed_characters": {"@", "$", "%", "!"},
+                        "mostly": 1,
+                    },
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [],
+                        "unexpected_list": [],
+                    },
+                },
+                {
+                    "title": "negative_test_with_allowed_special_character_set",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_no_special_character",
+                        "allowed_characters": {"@"},
+                        "mostly": 1,
+                    },
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [1, 2],
+                        "unexpected_list": ["pear$!", "%banana%"],
+                    },
+                },
             ],
-        }
+        },
     ]
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -100,7 +220,7 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
             "column map expectation",
             "special characters",
         ],
-        "contributors": ["@jaibirsingh"],
+        "contributors": ["@jaibirsingh", "@calvingdu"],
     }
 
     # This is the id string of the Metric used by this Expectation.
@@ -108,11 +228,29 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
     map_metric = "column_values.not_contain_special_character"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False.
-    success_keys = ("mostly",)
+    success_keys = ("mostly", "allowed_characters")
 
-    default_kwarg_values = {
-        "mostly": 1,
-    }
+    default_kwarg_values = {"mostly": 1, "allowed_characters": []}
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        necessary configuration arguments have been provided for the validation of the expectation.
+
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+        """
+
+        super().validate_configuration(configuration)
+        if configuration is None:
+            configuration = self.configuration
+
+        return True
 
     # This method defines a prescriptive Renderer
     @classmethod
@@ -132,7 +270,13 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
-            ["column", "mostly", "row_condition", "condition_parser"],
+            [
+                "column",
+                "allowed_characters",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+            ],
         )
 
         template_str = "values must not contain special characters"
