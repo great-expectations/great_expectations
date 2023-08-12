@@ -873,8 +873,8 @@ class TableAsset(_SQLAsset):
             schema=self.schema_name,
         ):
             raise TestConnectionError(
-                f'Attempt to connect to table: "{self.qualified_name}" failed because the table '
-                f'"{self.table_name}" does not exist.'
+                f"Attempt to connect to table: {self.qualified_name} failed because the table"
+                f" {self.table_name} does not exist."
             )
 
     def test_splitter_connection(self) -> None:

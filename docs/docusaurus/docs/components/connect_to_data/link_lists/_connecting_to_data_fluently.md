@@ -6,9 +6,9 @@
 </summary>
 
 **Local Filesystems**
-- [How to quickly connect to a single file using Pandas](/docs/guides/connecting_to_your_data/fluent/filesystem/how_to_quickly_connect_to_a_single_file_with_pandas)
-- [How to connect to one or more files using Pandas](/docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas)
-- [How to connect to one or more files using Spark](/docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark)
+- [How to quickly connect to a single file using Pandas](/docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data)
+- [How to connect to one or more files using Pandas](/docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data)
+- [How to connect to one or more files using Spark](/docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data)
 
 **Google Cloud Storage**
 - [How to connect to data on GCS using Pandas](/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_pandas)

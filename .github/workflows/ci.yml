@@ -24,8 +24,32 @@ jobs:
     steps:
       - run: echo "CI jobs won't run because this is a draft pull request."
 
+  docs-changes:
+    # check whether docs were changed
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      docs: ${{ steps.filter.outputs.docs }}
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v2
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          docs:
+            - 'docs/**'
+            - 'tests/integration/docusaurus/**'
+            - 'tests/integration/fixtures/**'
+            - 'tests/test_sets/**'
   doc-checks:
-    if: github.event.pull_request.draft == false
+    needs: docs-changes
+    # run on every PR that is not a draft that has docs changes, and on tagged push events (ie. releases)
+    if: |
+      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,6 +63,7 @@ jobs:
             reqs/requirements-dev-test.txt
       - name: Install dependencies
         run: pip install -r reqs/requirements-dev-test.txt
+
       - name: check_repo_root_size
         run: sh ./ci/checks/check_repo_root_size.sh
       - name: Docstring linter
@@ -47,8 +72,18 @@ jobs:
         run: python ci/checks/check_no_line_number_snippets.py
       - name: name_tag_snippet_checker
         run: python ci/checks/check_only_name_tag_snippets.py
+      - name: integration_test_gets_run_checker
+        run: python ci/checks/check_integration_test_gets_run.py
+      - name: name_tag_snippet_referenced_checker
+        run: python ci/checks/check_name_tag_snippets_referenced.py
       - name: public_api_report
         run: invoke public-api
+      - name: link_checker
+        run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -s docs --skip-external
+      - name: docs_build
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
+        run: cd docs/docusaurus && yarn install && bash ../build_docs
 
   static-analysis:
     runs-on: ubuntu-latest
@@ -78,8 +113,11 @@ jobs:
 
   docs-snippets:
     name: docs-snippets
-    if: github.event.pull_request.draft == false
-    #add more scope here
+    needs: docs-changes
+    # run on every PR that is not a draft that has docs changes, and on tagged push events (ie. releases)
+    if: |
+      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     env:
       # google
@@ -112,17 +150,23 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
+      - name: Run docs_snippet_checker
+        run: |
+          yarn install
+          python ci/checks/validate_docs_snippets.py
       - name: Authenticate with GCP
+        if: github.event.pull_request.head.repo.full_name == github.repository
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
 
       - name: Create JSON file for following step
+        if: github.event.pull_request.head.repo.full_name == github.repository
         run: |
           echo "$GE_TEST_GCP_CREDENTIALS" > gcp-credentials.json
 
       - name: Install and setup Google Cloud SDK
+        if: github.event.pull_request.head.repo.full_name == github.repository
         run: |
           # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
           curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
@@ -137,6 +181,7 @@ jobs:
           ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 
       - name: Set up Python bigquery
+        if: github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/setup-python@v4
         with:
           python-version: "3.8"
@@ -149,7 +194,18 @@ jobs:
           invoke deps --gx-install -m 'docs'
       - name: Run the tests
         run: |
-          invoke docs-snippet-tests 'docs' --up-services --verbose
+          invoke docs-snippet-tests 'docs-basic' --up-services --verbose
+      - name: Run the tests needing cloud credentials
+        run: |
+          # run only on main repo, and not user-forks
+          if: github.event.pull_request.head.repo.full_name == github.repository
+          run: |
+            invoke docs-snippet-tests 'docs-creds-needed' --up-services --verbose
+      # Spark tests are run as part of a separate task as we have not migrated all of Spark tests just yet (ie. Spark+Athena, Spark+S3 etc)
+      - name: Run the Spark tests
+        run: |
+          invoke deps --gx-install -m 'docs-spark'
+          invoke docs-snippet-tests 'docs-spark' --up-services --verbose
 
   unit-tests:
     strategy:
@@ -178,7 +234,7 @@ jobs:
         run: invoke ci-tests -m "unit" --xdist --timeout=1.5 --slowest=8
 
   cloud-tests:
-    if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -208,7 +264,7 @@ jobs:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     env:
-      # aws
+    # aws
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
       AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
@@ -217,8 +273,10 @@ jobs:
       matrix:
         markers:
           - athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
+          - aws_deps
           - big
           - cli
+          - databricks
           - filesystem
           - mssql
           - mysql
