@@ -162,7 +162,9 @@ def list_s3_bucket_contents(bucket: str, prefix: str) -> Set[str]:
 
 @pytest.mark.aws_deps
 @mock_s3
-def test_DataContext_construct_data_context_id_uses_id_of_currently_configured_expectations_store(aws_credentials):
+def test_DataContext_construct_data_context_id_uses_id_of_currently_configured_expectations_store(
+    aws_credentials,
+):
     """
     What does this test and why?
 
@@ -308,7 +310,8 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_DataContextConf
 @pytest.mark.aws_deps
 @mock_s3
 def test_DataContext_construct_data_context_id_uses_id_stored_in_env_var_GE_DATA_CONTEXT_ID_if_no_configured_expectations_store(
-    monkeypatch, aws_credentials,
+    monkeypatch,
+    aws_credentials,
 ):
     """
     What does this test and why?

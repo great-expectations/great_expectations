@@ -22,6 +22,7 @@ def aws_credentials():
     os.environ["AWS_SESSION_TOKEN"] = "testing"
     os.environ["AWS_DEFAULT_REGION"] = "testing"
 
+
 @pytest.fixture
 def s3(aws_credentials):
     with mock_s3():
