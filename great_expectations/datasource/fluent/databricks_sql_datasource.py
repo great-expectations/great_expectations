@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Union
+from typing import TYPE_CHECKING, ClassVar, List, Literal, Type, Union, overload
 from urllib import parse
 
 import pydantic
@@ -11,15 +11,26 @@ from great_expectations.compatibility.sqlalchemy import (
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.config_str import ConfigStr
-from great_expectations.datasource.fluent.interfaces import TestConnectionError
+from great_expectations.datasource.fluent.interfaces import (
+    DataAsset,
+    TestConnectionError,
+)
+from great_expectations.datasource.fluent.sql_datasource import (
+    QueryAsset as SqlQueryAsset,
+)
 from great_expectations.datasource.fluent.sql_datasource import (
     SQLDatasource,
+)
+from great_expectations.datasource.fluent.sql_datasource import (
+    TableAsset as SqlTableAsset,
 )
 
 if TYPE_CHECKING:
     from pydantic.networks import Parts
+    from sqlalchemy.sql import quoted_name  # noqa: TID251 # type-checking only
 
     from great_expectations.compatibility import sqlalchemy
+    from great_expectations.core.config_provider import _ConfigurationProvider
 
 
 def _parse_param_from_query_string(param: str, query: str) -> str | None:
@@ -76,6 +87,7 @@ class DatabricksDsn(AnyUrl):
         "databricks",
         "databricks+connector",
     }
+    query: str  # if query is not provided, validate_parts() will raise an error
 
     @classmethod
     def validate_parts(cls, parts: Parts, validate_port: bool = True) -> Parts:
@@ -100,6 +112,72 @@ class DatabricksDsn(AnyUrl):
 
         return AnyUrl.validate_parts(parts=parts, validate_port=validate_port)
 
+    @overload
+    @classmethod
+    def parse_url(
+        cls, url: ConfigStr, config_provider: _ConfigurationProvider = ...
+    ) -> DatabricksDsn:
+        ...
+
+    @overload
+    @classmethod
+    def parse_url(
+        cls, url: str, config_provider: _ConfigurationProvider | None = ...
+    ) -> DatabricksDsn:
+        ...
+
+    @classmethod
+    def parse_url(
+        cls, url: ConfigStr | str, config_provider: _ConfigurationProvider | None = None
+    ) -> DatabricksDsn:
+        if isinstance(url, ConfigStr):
+            assert config_provider, "`config_provider` must be provided"
+            url = url.get_config_value(config_provider=config_provider)
+        parsed_url = pydantic.parse_obj_as(DatabricksDsn, url)
+        return parsed_url
+
+
+class DatabricksTableAsset(SqlTableAsset):
+    ...
+
+    @pydantic.validator("table_name")
+    def _resolve_quoted_name(cls, table_name: str) -> str | quoted_name:
+        table_name_is_quoted: bool = cls._is_bracketed_by_quotes(table_name)
+
+        from great_expectations.compatibility import sqlalchemy
+
+        if sqlalchemy.quoted_name:
+            if isinstance(table_name, sqlalchemy.quoted_name):
+                return table_name
+
+            if table_name_is_quoted:
+                # https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.quoted_name.quote
+                # Remove the quotes and add them back using the sqlalchemy.quoted_name function
+                # TODO: We need to handle nested quotes
+                table_name = table_name.strip("`")
+
+            return sqlalchemy.quoted_name(
+                value=table_name,
+                quote=table_name_is_quoted,
+            )
+        return table_name
+
+    @staticmethod
+    def _is_bracketed_by_quotes(target: str) -> bool:
+        """Returns True if the target string is bracketed by quotes.
+
+        Arguments:
+            target: A string to check if it is bracketed by quotes.
+
+        Returns:
+            True if the target string is bracketed by quotes.
+        """
+        # TODO: what todo with regular quotes? Error? Warn? "Fix"?
+        for quote in ["`"]:
+            if target.startswith(quote) and target.endswith(quote):
+                return True
+        return False
+
 
 @public_api
 class DatabricksSQLDatasource(SQLDatasource):
@@ -113,8 +191,15 @@ class DatabricksSQLDatasource(SQLDatasource):
             are TableAsset or QueryAsset objects.
     """
 
+    # class var definitions
+    asset_types: ClassVar[List[Type[DataAsset]]] = [DatabricksTableAsset, SqlQueryAsset]
+
     type: Literal["databricks_sql"] = "databricks_sql"  # type: ignore[assignment]
     connection_string: Union[ConfigStr, DatabricksDsn]
+
+    # These are instance var because ClassVars can't contain Type variables. See
+    # https://peps.python.org/pep-0526/#class-and-instance-variable-annotations
+    _TableAsset: Type[SqlTableAsset] = pydantic.PrivateAttr(DatabricksTableAsset)
 
     def test_connection(self, test_assets: bool = True) -> None:
         try:
@@ -136,7 +221,14 @@ class DatabricksSQLDatasource(SQLDatasource):
             exclude=self._get_exec_engine_excludes(),
             config_provider=self._config_provider,
         )
+
         connection_string = model_dict.pop("connection_string")
+        # is connection_string was a ConfigStr it's parts will not have been validated yet
+        if not isinstance(connection_string, DatabricksDsn):
+            connection_string = DatabricksDsn.parse_url(
+                url=connection_string, config_provider=self._config_provider
+            )
+
         kwargs = model_dict.pop("kwargs", {})
 
         http_path = _parse_param_from_query_string(
