@@ -191,7 +191,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
-          invoke deps --gx-install -m 'docs'
+          invoke deps --gx-install -m 'docs-basic'
       - name: Run the tests
         run: |
           invoke docs-snippet-tests 'docs-basic' --up-services --verbose
