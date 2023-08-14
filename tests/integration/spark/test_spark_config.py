@@ -62,9 +62,7 @@ def test_spark_config_execution_engine(spark_session):
         "spark.executor.memory": "512m",
         # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
     }
-    execution_engine = SparkDFExecutionEngine(
-        spark_config=new_spark_config
-    )
+    execution_engine = SparkDFExecutionEngine(spark_config=new_spark_config)
     new_spark_session: pyspark.SparkSession = execution_engine.spark
 
     # noinspection PyProtectedMember
