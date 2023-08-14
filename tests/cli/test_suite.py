@@ -1,13 +1,18 @@
 import json
 import os
-from typing import Any, Dict, List, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 from unittest import mock
 
 import pytest
-from _pytest.capture import CaptureResult
 from click.testing import CliRunner, Result
 
 from great_expectations.cli import cli
+from great_expectations.cli.cli_messages import (
+    SUITE_EDIT_FLUENT_DATASOURCE_ERROR,
+    SUITE_EDIT_FLUENT_DATASOURCE_WARNING,
+    SUITE_NEW_FLUENT_DATASOURCE_ERROR,
+    SUITE_NEW_FLUENT_DATASOURCE_WARNING,
+)
 from great_expectations.cli.suite import (
     _process_suite_edit_flags_and_prompt,
     _process_suite_new_flags_and_prompt,
@@ -33,11 +38,14 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 from tests.render.renderer.v3.test_suite_profile_notebook_renderer import (
     EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT,
 )
-from tests.render.test_util import (
+from tests.render.util import (
     find_code_in_notebook,
     load_notebook_from_path,
     run_notebook,
 )
+
+if TYPE_CHECKING:
+    from _pytest.capture import CaptureResult
 
 PROFILER_CODE_CELL_USER_CONFIGURABLE_PROFILER: str = """\
 profiler = UserConfigurableProfiler(
@@ -64,15 +72,17 @@ validator.expectation_suite = result.get_expectation_suite(
 """
 
 
+pytestmark = pytest.mark.cli
+
+
 def test_suite_help_output(caplog):
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
-    result: Result = runner.invoke(cli, ["--v3-api", "suite"], catch_exceptions=False)
+    result: Result = runner.invoke(cli, ["suite"], catch_exceptions=False)
     assert result.exit_code == 0
     stdout: str = result.stdout
     assert (
-        """
-Usage: great_expectations suite [OPTIONS] COMMAND [ARGS]...
+        """Usage: great_expectations suite [OPTIONS] COMMAND [ARGS]...
 
   Expectation Suite operations
 
@@ -102,13 +112,13 @@ def test_suite_demo_deprecation_message(
 ):
     context = empty_data_context_stats_enabled
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite demo",
+        "suite demo",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -163,11 +173,12 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
+    # NOTE: There is a race condition in this test
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")  # noqa: PTH118
 
     expectation_suite_name: str = "warning"
 
@@ -175,7 +186,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite new",
+        "suite new",
         input="\n",
         catch_exceptions=False,
     )
@@ -187,15 +198,15 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
     assert "Opening a notebook for you now to edit your expectation suite!" in stdout
     assert "If you wish to avoid this you can add the `--no-jupyter` flag." in stdout
 
-    expected_suite_path: str = os.path.join(
+    expected_suite_path: str = os.path.join(  # noqa: PTH118
         project_dir, "expectations", f"{expectation_suite_name}.json"
     )
-    assert os.path.isfile(expected_suite_path)
+    assert os.path.isfile(expected_suite_path)  # noqa: PTH113
 
-    expected_notebook_path: str = os.path.join(
+    expected_notebook_path: str = os.path.join(  # noqa: PTH118
         uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
-    assert os.path.isfile(expected_notebook_path)
+    assert os.path.isfile(expected_notebook_path)  # noqa: PTH113
 
     run_notebook(
         notebook_path=expected_notebook_path,
@@ -279,10 +290,10 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")  # noqa: PTH118
 
     expectation_suite_name: str = "test_suite_name"
 
@@ -290,7 +301,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite new",
+        "suite new",
         input=f"1\n{expectation_suite_name}\n",
         catch_exceptions=False,
     )
@@ -302,15 +313,15 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
     assert "Opening a notebook for you now to edit your expectation suite!" in stdout
     assert "If you wish to avoid this you can add the `--no-jupyter` flag." in stdout
 
-    expected_suite_path: str = os.path.join(
+    expected_suite_path: str = os.path.join(  # noqa: PTH118
         project_dir, "expectations", f"{expectation_suite_name}.json"
     )
-    assert os.path.isfile(expected_suite_path)
+    assert os.path.isfile(expected_suite_path)  # noqa: PTH113
 
-    expected_notebook_path: str = os.path.join(
+    expected_notebook_path: str = os.path.join(  # noqa: PTH118
         uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
-    assert os.path.isfile(expected_notebook_path)
+    assert os.path.isfile(expected_notebook_path)  # noqa: PTH113
 
     run_notebook(
         notebook_path=expected_notebook_path,
@@ -394,10 +405,10 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_open
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")  # noqa: PTH118
 
     expectation_suite_name: str = "test_suite_name"
 
@@ -405,7 +416,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_open
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite new --expectation-suite {expectation_suite_name}",
+        f"suite new --expectation-suite {expectation_suite_name}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -415,15 +426,15 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_open
     assert "Opening a notebook for you now to edit your expectation suite!" in stdout
     assert "If you wish to avoid this you can add the `--no-jupyter` flag." in stdout
 
-    expected_suite_path: str = os.path.join(
+    expected_suite_path: str = os.path.join(  # noqa: PTH118
         project_dir, "expectations", f"{expectation_suite_name}.json"
     )
-    assert os.path.isfile(expected_suite_path)
+    assert os.path.isfile(expected_suite_path)  # noqa: PTH113
 
-    expected_notebook_path: str = os.path.join(
+    expected_notebook_path: str = os.path.join(  # noqa: PTH118
         uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
-    assert os.path.isfile(expected_notebook_path)
+    assert os.path.isfile(expected_notebook_path)  # noqa: PTH113
 
     run_notebook(
         notebook_path=expected_notebook_path,
@@ -507,10 +518,10 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_j
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")  # noqa: PTH118
 
     expectation_suite_name: str = "test_suite_name"
 
@@ -518,7 +529,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_j
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite new --expectation-suite {expectation_suite_name} --no-jupyter",
+        f"suite new --expectation-suite {expectation_suite_name} --no-jupyter",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -532,15 +543,15 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_j
         "If you wish to avoid this you can add the `--no-jupyter` flag." not in stdout
     )
 
-    expected_suite_path: str = os.path.join(
+    expected_suite_path: str = os.path.join(  # noqa: PTH118
         project_dir, "expectations", f"{expectation_suite_name}.json"
     )
-    assert os.path.isfile(expected_suite_path)
+    assert os.path.isfile(expected_suite_path)  # noqa: PTH113
 
-    expected_notebook_path: str = os.path.join(
+    expected_notebook_path: str = os.path.join(  # noqa: PTH118
         uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
-    assert os.path.isfile(expected_notebook_path)
+    assert os.path.isfile(expected_notebook_path)  # noqa: PTH113
 
     run_notebook(
         notebook_path=expected_notebook_path,
@@ -619,7 +630,7 @@ def test_suite_new_interactive_nonexistent_batch_request_json_file_raises_error(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
 
@@ -629,7 +640,7 @@ def test_suite_new_interactive_nonexistent_batch_request_json_file_raises_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"""--v3-api suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
+        f"""suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
 nonexistent_file.json --no-jupyter
 """,
         catch_exceptions=False,
@@ -698,14 +709,16 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")  # noqa: PTH118
 
     expectation_suite_name: str = "test_suite_name"
 
-    batch_request_file_path: str = os.path.join(uncommitted_dir, "batch_request.json")
+    batch_request_file_path: str = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "batch_request.json"
+    )
     with open(batch_request_file_path, "w") as json_file:
         json_file.write("not_proper_json")
 
@@ -713,7 +726,7 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"""--v3-api suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
+        f"""suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
 {batch_request_file_path} --no-jupyter
 """,
         catch_exceptions=False,
@@ -784,10 +797,10 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")  # noqa: PTH118
 
     expectation_suite_name: str = "test_suite_name"
 
@@ -797,7 +810,9 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
         "data_asset_name": "Titanic_1911",
     }
 
-    batch_request_file_path: str = os.path.join(uncommitted_dir, "batch_request.json")
+    batch_request_file_path: str = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "batch_request.json"
+    )
     with open(batch_request_file_path, "w") as json_file:
         json.dump(batch_request, json_file)
 
@@ -805,7 +820,7 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"""--v3-api suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
+        f"""suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
 {batch_request_file_path} --no-jupyter
 """,
         catch_exceptions=False,
@@ -815,15 +830,15 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
     stdout: str = result.stdout
     assert "Error" not in stdout
 
-    expected_suite_path: str = os.path.join(
+    expected_suite_path: str = os.path.join(  # noqa: PTH118
         project_dir, "expectations", f"{expectation_suite_name}.json"
     )
-    assert os.path.isfile(expected_suite_path)
+    assert os.path.isfile(expected_suite_path)  # noqa: PTH113
 
-    expected_notebook_path: str = os.path.join(
+    expected_notebook_path: str = os.path.join(  # noqa: PTH118
         uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
-    assert os.path.isfile(expected_notebook_path)
+    assert os.path.isfile(expected_notebook_path)  # noqa: PTH113
 
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
     batch_request = deep_filter_properties_iterable(
@@ -941,11 +956,11 @@ def test_suite_edit_without_suite_name_raises_error(
 ):
     """This is really only testing click missing arguments"""
     context = empty_data_context_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
-    result: Result = runner.invoke(cli, "--v3-api suite edit", catch_exceptions=False)
+    result: Result = runner.invoke(cli, "suite edit", catch_exceptions=False)
     assert result.exit_code == 2
 
     assert (
@@ -982,12 +997,11 @@ def test_suite_edit_datasource_and_batch_request_error(
 ):
     """This is really only testing click missing arguments"""
     context = empty_data_context_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     expectation_suite_name: str = "test_suite_name"
 
-    # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.add_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(  # noqa: F841
         expectation_suite_name=expectation_suite_name
     )
     assert (
@@ -999,7 +1013,7 @@ def test_suite_edit_datasource_and_batch_request_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite edit {expectation_suite_name} --datasource-name some_datasource_name --batch-request some_file.json --interactive",
+        f"suite edit {expectation_suite_name} --datasource-name some_datasource_name --batch-request some_file.json --interactive",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1065,13 +1079,13 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
 
     assert not context.list_expectation_suites()
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite edit not_a_real_suite",
+        "suite edit not_a_real_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1135,12 +1149,11 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     - NOT open jupyter
     """
     context = empty_data_context_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     expectation_suite_name: str = "test_suite_name"
 
-    # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.add_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(  # noqa: F841
         expectation_suite_name=expectation_suite_name
     )
     assert (
@@ -1152,7 +1165,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite edit {expectation_suite_name} --interactive --datasource-name not_real",
+        f"suite edit {expectation_suite_name} --interactive --datasource-name not_real",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1236,10 +1249,10 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
     - open jupyter
     """
     context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")  # noqa: PTH118
 
     expectation_suite_name: str = "test_suite_name"
 
@@ -1270,7 +1283,6 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -1303,12 +1315,11 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
 
     # Actual testing really starts here
     runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "edit",
             f"{expectation_suite_name}",
@@ -1324,15 +1335,15 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
     assert "A batch of data is required to edit the suite" in stdout
     assert "Select a datasource" in stdout
 
-    expected_notebook_path: str = os.path.join(
+    expected_notebook_path: str = os.path.join(  # noqa: PTH118
         uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
-    assert os.path.isfile(expected_notebook_path)
+    assert os.path.isfile(expected_notebook_path)  # noqa: PTH113
 
-    expected_suite_path: str = os.path.join(
+    expected_suite_path: str = os.path.join(  # noqa: PTH118
         project_dir, "expectations", f"{expectation_suite_name}.json"
     )
-    assert os.path.isfile(expected_suite_path)
+    assert os.path.isfile(expected_suite_path)  # noqa: PTH113
 
     cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
         nb=load_notebook_from_path(notebook_path=expected_notebook_path),
@@ -1491,10 +1502,10 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
     - NOT open jupyter
     """
     context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")  # noqa: PTH118
 
     expectation_suite_name: str = "test_suite_name"
 
@@ -1525,7 +1536,6 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -1557,12 +1567,11 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
 
     # Actual testing really starts here
     runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "edit",
             f"{expectation_suite_name}",
@@ -1577,15 +1586,15 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
     assert "A batch of data is required to edit the suite" not in stdout
     assert "Select a datasource" not in stdout
 
-    expected_notebook_path: str = os.path.join(
+    expected_notebook_path: str = os.path.join(  # noqa: PTH118
         uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
-    assert os.path.isfile(expected_notebook_path)
+    assert os.path.isfile(expected_notebook_path)  # noqa: PTH113
 
-    expected_suite_path: str = os.path.join(
+    expected_suite_path: str = os.path.join(  # noqa: PTH118
         project_dir, "expectations", f"{expectation_suite_name}.json"
     )
-    assert os.path.isfile(expected_suite_path)
+    assert os.path.isfile(expected_suite_path)  # noqa: PTH113
 
     cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
         nb=load_notebook_from_path(notebook_path=expected_notebook_path),
@@ -1727,11 +1736,12 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
     - NOT open Data Docs
     - open jupyter
     """
+
     context = titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")  # noqa: PTH118
 
     expectation_suite_name: str = "test_suite_name"
 
@@ -1762,7 +1772,6 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -1798,12 +1807,11 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
 
     # Actual testing really starts here
     runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "edit",
             f"{expectation_suite_name}",
@@ -1819,15 +1827,15 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
     assert "A batch of data is required to edit the suite" in stdout
     assert "Select a datasource" in stdout
 
-    expected_notebook_path: str = os.path.join(
+    expected_notebook_path: str = os.path.join(  # noqa: PTH118
         uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
-    assert os.path.isfile(expected_notebook_path)
+    assert os.path.isfile(expected_notebook_path)  # noqa: PTH113
 
-    expected_suite_path: str = os.path.join(
+    expected_suite_path: str = os.path.join(  # noqa: PTH118
         project_dir, "expectations", f"{expectation_suite_name}.json"
     )
-    assert os.path.isfile(expected_suite_path)
+    assert os.path.isfile(expected_suite_path)  # noqa: PTH113
 
     cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
         nb=load_notebook_from_path(notebook_path=expected_notebook_path),
@@ -1982,13 +1990,13 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
 
     The command should:
     - NOT open Data Docs
-    - NOT open jupyter
     """
+
     context = titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")  # noqa: PTH118
 
     expectation_suite_name: str = "test_suite_name"
 
@@ -2019,7 +2027,6 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -2051,12 +2058,11 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
 
     # Actual testing really starts here
     runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "edit",
             f"{expectation_suite_name}",
@@ -2071,15 +2077,15 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
     assert "A batch of data is required to edit the suite" not in stdout
     assert "Select a datasource" not in stdout
 
-    expected_notebook_path: str = os.path.join(
+    expected_notebook_path: str = os.path.join(  # noqa: PTH118
         uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
-    assert os.path.isfile(expected_notebook_path)
+    assert os.path.isfile(expected_notebook_path)  # noqa: PTH113
 
-    expected_suite_path: str = os.path.join(
+    expected_suite_path: str = os.path.join(  # noqa: PTH118
         project_dir, "expectations", f"{expectation_suite_name}.json"
     )
-    assert os.path.isfile(expected_suite_path)
+    assert os.path.isfile(expected_suite_path)  # noqa: PTH113
 
     cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
         nb=load_notebook_from_path(notebook_path=expected_notebook_path),
@@ -2205,15 +2211,14 @@ def test_suite_edit_interactive_batch_request_without_datasource_json_file_raise
     empty_data_context_stats_enabled,
 ):
     context = empty_data_context_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")  # noqa: PTH118
 
     expectation_suite_name: str = "test_suite_name"
 
-    # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.add_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(  # noqa: F841
         expectation_suite_name=expectation_suite_name
     )
     assert (
@@ -2227,7 +2232,7 @@ def test_suite_edit_interactive_batch_request_without_datasource_json_file_raise
         "datasource_name": None,
     }
 
-    batch_request_file_path: str = os.path.join(
+    batch_request_file_path: str = os.path.join(  # noqa: PTH118
         uncommitted_dir, "batch_request_missing_datasource.json"
     )
     with open(batch_request_file_path, "w") as json_file:
@@ -2237,7 +2242,7 @@ def test_suite_edit_interactive_batch_request_without_datasource_json_file_raise
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"""--v3-api suite edit {expectation_suite_name} --interactive --batch-request
+        f"""suite edit {expectation_suite_name} --interactive --batch-request
 {batch_request_file_path} --no-jupyter
 """,
         catch_exceptions=False,
@@ -2295,17 +2300,17 @@ def test_suite_list_with_zero_suites(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
     context = empty_data_context_stats_enabled
-    config_file_path: str = os.path.join(
-        context.root_directory, "great_expectations.yml"
+    config_file_path: str = os.path.join(  # noqa: PTH118
+        context.root_directory, FileDataContext.GX_YML
     )
-    assert os.path.exists(config_file_path)
+    assert os.path.exists(config_file_path)  # noqa: PTH110
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite list",
+        "suite list",
         catch_exceptions=False,
     )
 
@@ -2352,18 +2357,19 @@ def test_suite_list_with_one_suite(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
     context = empty_data_context_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
 
-    config_file_path: str = os.path.join(project_dir, "great_expectations.yml")
-    assert os.path.exists(config_file_path)
+    config_file_path: str = os.path.join(  # noqa: PTH118
+        project_dir, FileDataContext.GX_YML
+    )
+    assert os.path.exists(config_file_path)  # noqa: PTH110
 
     expectation_suite_dir_name: str = "a_dir"
     expectation_suite_name: str = "test_suite_name"
 
-    # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.add_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(  # noqa: F841
         expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
 
@@ -2371,7 +2377,7 @@ def test_suite_list_with_one_suite(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite list",
+        "suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -2418,31 +2424,30 @@ def test_suite_list_with_multiple_suites(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
     context = empty_data_context_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
 
-    # noinspection PyUnusedLocal
-    suite_0: ExpectationSuite = context.add_expectation_suite(
+    suite_0: ExpectationSuite = context.add_expectation_suite(  # noqa: F841
         expectation_suite_name="a.warning"
     )
-    # noinspection PyUnusedLocal
-    suite_1: ExpectationSuite = context.add_expectation_suite(
+    suite_1: ExpectationSuite = context.add_expectation_suite(  # noqa: F841
         expectation_suite_name="b.warning"
     )
-    # noinspection PyUnusedLocal
-    suite_2: ExpectationSuite = context.add_expectation_suite(
+    suite_2: ExpectationSuite = context.add_expectation_suite(  # noqa: F841
         expectation_suite_name="c.warning"
     )
 
-    config_file_path: str = os.path.join(project_dir, "great_expectations.yml")
-    assert os.path.exists(config_file_path)
+    config_file_path: str = os.path.join(  # noqa: PTH118
+        project_dir, FileDataContext.GX_YML
+    )
+    assert os.path.exists(config_file_path)  # noqa: PTH110
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite list",
+        "suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -2491,13 +2496,13 @@ def test_suite_delete_with_zero_suites(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
     context = empty_data_context_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite delete not_a_suite",
+        "suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2543,7 +2548,7 @@ def test_suite_delete_with_non_existent_suite(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
     context = empty_data_context_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     expectation_suite_name: str = "test_suite_name"
 
@@ -2562,7 +2567,7 @@ def test_suite_delete_with_non_existent_suite(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite delete not_a_suite",
+        "suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2608,14 +2613,13 @@ def test_suite_delete_with_one_suite(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
     context = empty_data_context_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = empty_data_context_stats_enabled.root_directory
 
     expectation_suite_dir_name: str = "a_dir"
     expectation_suite_name: str = "test_suite_name"
 
-    # noinspection PyUnusedLocal
     suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
@@ -2627,17 +2631,19 @@ def test_suite_delete_with_one_suite(
 
     mock_emit.reset_mock()
 
-    suite_dir: str = os.path.join(
+    suite_dir: str = os.path.join(  # noqa: PTH118
         project_dir, "expectations", expectation_suite_dir_name
     )
-    suite_path: str = os.path.join(suite_dir, f"{expectation_suite_name}.json")
-    assert os.path.isfile(suite_path)
+    suite_path: str = os.path.join(  # noqa: PTH118
+        suite_dir, f"{expectation_suite_name}.json"
+    )
+    assert os.path.isfile(suite_path)  # noqa: PTH113
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
+        f"suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
         input="\n",
         catch_exceptions=False,
     )
@@ -2649,7 +2655,7 @@ def test_suite_delete_with_one_suite(
         in stdout
     )
 
-    assert not os.path.isfile(suite_path)
+    assert not os.path.isfile(suite_path)  # noqa: PTH113
 
     assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
@@ -2689,14 +2695,13 @@ def test_suite_delete_canceled_with_one_suite(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
     context = empty_data_context_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = empty_data_context_stats_enabled.root_directory
 
     expectation_suite_dir_name: str = "a_dir"
     expectation_suite_name: str = "test_suite_name"
 
-    # noinspection PyUnusedLocal
     suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
@@ -2708,17 +2713,19 @@ def test_suite_delete_canceled_with_one_suite(
 
     mock_emit.reset_mock()
 
-    suite_dir: str = os.path.join(
+    suite_dir: str = os.path.join(  # noqa: PTH118
         project_dir, "expectations", expectation_suite_dir_name
     )
-    suite_path: str = os.path.join(suite_dir, f"{expectation_suite_name}.json")
-    assert os.path.isfile(suite_path)
+    suite_path: str = os.path.join(  # noqa: PTH118
+        suite_dir, f"{expectation_suite_name}.json"
+    )
+    assert os.path.isfile(suite_path)  # noqa: PTH113
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
+        f"suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
         input="n\n",
         catch_exceptions=False,
     )
@@ -2730,7 +2737,7 @@ def test_suite_delete_canceled_with_one_suite(
         in stdout
     )
 
-    assert os.path.isfile(suite_path)
+    assert os.path.isfile(suite_path)  # noqa: PTH113
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -2763,14 +2770,13 @@ def test_suite_delete_with_one_suite_assume_yes_flag(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
     context = empty_data_context_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
 
     expectation_suite_dir_name: str = "a_dir"
     expectation_suite_name: str = "test_suite_name"
 
-    # noinspection PyUnusedLocal
     suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
@@ -2782,17 +2788,19 @@ def test_suite_delete_with_one_suite_assume_yes_flag(
 
     mock_emit.reset_mock()
 
-    suite_dir: str = os.path.join(
+    suite_dir: str = os.path.join(  # noqa: PTH118
         project_dir, "expectations", expectation_suite_dir_name
     )
-    suite_path: str = os.path.join(suite_dir, f"{expectation_suite_name}.json")
-    assert os.path.isfile(suite_path)
+    suite_path: str = os.path.join(  # noqa: PTH118
+        suite_dir, f"{expectation_suite_name}.json"
+    )
+    assert os.path.isfile(suite_path)  # noqa: PTH113
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api --assume-yes suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
+        f"--assume-yes suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -2807,7 +2815,7 @@ def test_suite_delete_with_one_suite_assume_yes_flag(
     # This assertion is extra assurance since this test is too permissive if we change the confirmation message
     assert "[Y/n]" not in stdout
 
-    assert not os.path.isfile(suite_path)
+    assert not os.path.isfile(suite_path)  # noqa: PTH113
 
     assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
@@ -2842,7 +2850,7 @@ def test_suite_delete_with_one_suite_assume_yes_flag(
     # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
-        "--v3-api suite list",
+        "suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -2872,7 +2880,7 @@ def test_suite_new_profile_on_context_with_no_datasource_raises_error(
     - send a new fail message
     """
     context = empty_data_context_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     expectation_suite_name: str = "test_suite_name"
 
@@ -2881,7 +2889,6 @@ def test_suite_new_profile_on_context_with_no_datasource_raises_error(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--interactive",
@@ -2948,10 +2955,10 @@ def test_suite_new_profile_on_existing_suite_raises_error(
     - send a new fail message
     """
     context = empty_data_context_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")  # noqa: PTH118
 
     expectation_suite_name: str = "test_suite_name"
 
@@ -2970,7 +2977,9 @@ def test_suite_new_profile_on_existing_suite_raises_error(
         "data_asset_name": "Titanic_1911",
     }
 
-    batch_request_file_path: str = os.path.join(uncommitted_dir, "batch_request.json")
+    batch_request_file_path: str = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "batch_request.json"
+    )
     with open(batch_request_file_path, "w") as json_file:
         json.dump(batch_request, json_file)
 
@@ -2981,7 +2990,6 @@ def test_suite_new_profile_on_existing_suite_raises_error(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -3044,7 +3052,7 @@ def test_suite_new_profile_on_existing_suite_raises_error(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 @pytest.mark.slow  # 9.08s
-def test_suite_new_profile_runs_notebook_no_jupyter(
+def test_suite_new_profile_runs_notebook_no_jupyter(  # noqa: PLR0915
     mock_webbrowser,
     mock_subprocess,
     mock_emit,
@@ -3061,10 +3069,10 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     - send a new success message
     """
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")  # noqa: PTH118
 
     expectation_suite_name: str = "test_suite_name"
 
@@ -3074,7 +3082,9 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
         "data_asset_name": "Titanic_1911",
     }
 
-    batch_request_file_path: str = os.path.join(uncommitted_dir, "batch_request.json")
+    batch_request_file_path: str = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "batch_request.json"
+    )
     with open(batch_request_file_path, "w") as json_file:
         json.dump(batch_request, json_file)
 
@@ -3085,7 +3095,6 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -3110,15 +3119,15 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
         "If you wish to avoid this you can add the `--no-jupyter` flag." not in stdout
     )
 
-    expected_suite_path: str = os.path.join(
+    expected_suite_path: str = os.path.join(  # noqa: PTH118
         project_dir, "expectations", f"{expectation_suite_name}.json"
     )
-    assert os.path.isfile(expected_suite_path)
+    assert os.path.isfile(expected_suite_path)  # noqa: PTH113
 
-    expected_notebook_path: str = os.path.join(
+    expected_notebook_path: str = os.path.join(  # noqa: PTH118
         uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
-    assert os.path.isfile(expected_notebook_path)
+    assert os.path.isfile(expected_notebook_path)  # noqa: PTH113
 
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
     batch_request = deep_filter_properties_iterable(
@@ -3273,7 +3282,7 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 @pytest.mark.slow  # 9.29s
-def test_suite_new_profile_runs_notebook_opens_jupyter(
+def test_suite_new_profile_runs_notebook_opens_jupyter(  # noqa: PLR0915
     mock_webbrowser,
     mock_subprocess,
     mock_emit,
@@ -3291,10 +3300,10 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     - send a new success message
     """
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")  # noqa: PTH118
 
     expectation_suite_name: str = "test_suite_name"
 
@@ -3304,7 +3313,9 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
         "data_asset_name": "Titanic_1911",
     }
 
-    batch_request_file_path: str = os.path.join(uncommitted_dir, "batch_request.json")
+    batch_request_file_path: str = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "batch_request.json"
+    )
     with open(batch_request_file_path, "w") as json_file:
         json.dump(batch_request, json_file)
 
@@ -3315,7 +3326,6 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -3335,15 +3345,15 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     assert "Opening a notebook for you now to edit your expectation suite!" in stdout
     assert "If you wish to avoid this you can add the `--no-jupyter` flag." in stdout
 
-    expected_suite_path: str = os.path.join(
+    expected_suite_path: str = os.path.join(  # noqa: PTH118
         project_dir, "expectations", f"{expectation_suite_name}.json"
     )
-    assert os.path.isfile(expected_suite_path)
+    assert os.path.isfile(expected_suite_path)  # noqa: PTH113
 
-    expected_notebook_path: str = os.path.join(
+    expected_notebook_path: str = os.path.join(  # noqa: PTH118
         uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
-    assert os.path.isfile(expected_notebook_path)
+    assert os.path.isfile(expected_notebook_path)  # noqa: PTH113
 
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
     batch_request = deep_filter_properties_iterable(
@@ -3515,10 +3525,10 @@ def test_suite_new_profile_with_named_arg_runs_notebook_no_jupyter(
     """
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")  # noqa: PTH118
 
     expectation_suite_name: str = "test_suite_name"
 
@@ -3528,7 +3538,9 @@ def test_suite_new_profile_with_named_arg_runs_notebook_no_jupyter(
         "data_asset_name": "Titanic_1911",
     }
 
-    batch_request_file_path: str = os.path.join(uncommitted_dir, "batch_request.json")
+    batch_request_file_path: str = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "batch_request.json"
+    )
     with open(batch_request_file_path, "w") as json_file:
         json.dump(batch_request, json_file)
 
@@ -3541,7 +3553,6 @@ def test_suite_new_profile_with_named_arg_runs_notebook_no_jupyter(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -3567,15 +3578,15 @@ def test_suite_new_profile_with_named_arg_runs_notebook_no_jupyter(
         "If you wish to avoid this you can add the `--no-jupyter` flag." not in stdout
     )
 
-    expected_suite_path: str = os.path.join(
+    expected_suite_path: str = os.path.join(  # noqa: PTH118
         project_dir, "expectations", f"{expectation_suite_name}.json"
     )
-    assert os.path.isfile(expected_suite_path)
+    assert os.path.isfile(expected_suite_path)  # noqa: PTH113
 
-    expected_notebook_path: str = os.path.join(
+    expected_notebook_path: str = os.path.join(  # noqa: PTH118
         uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
-    assert os.path.isfile(expected_notebook_path)
+    assert os.path.isfile(expected_notebook_path)  # noqa: PTH113
 
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
     batch_request = deep_filter_properties_iterable(
@@ -3647,10 +3658,10 @@ def test_suite_new_profile_with_named_arg_runs_notebook_opens_jupyter(
     The command should create a new notebook and open it in Jupyter
     """
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     project_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")  # noqa: PTH118
 
     expectation_suite_name: str = "test_suite_name"
 
@@ -3660,7 +3671,9 @@ def test_suite_new_profile_with_named_arg_runs_notebook_opens_jupyter(
         "data_asset_name": "Titanic_1911",
     }
 
-    batch_request_file_path: str = os.path.join(uncommitted_dir, "batch_request.json")
+    batch_request_file_path: str = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "batch_request.json"
+    )
     with open(batch_request_file_path, "w") as json_file:
         json.dump(batch_request, json_file)
 
@@ -3673,7 +3686,6 @@ def test_suite_new_profile_with_named_arg_runs_notebook_opens_jupyter(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -3694,15 +3706,15 @@ def test_suite_new_profile_with_named_arg_runs_notebook_opens_jupyter(
     assert "Opening a notebook for you now to edit your expectation suite!" in stdout
     assert "If you wish to avoid this you can add the `--no-jupyter` flag." in stdout
 
-    expected_suite_path: str = os.path.join(
+    expected_suite_path: str = os.path.join(  # noqa: PTH118
         project_dir, "expectations", f"{expectation_suite_name}.json"
     )
-    assert os.path.isfile(expected_suite_path)
+    assert os.path.isfile(expected_suite_path)  # noqa: PTH113
 
-    expected_notebook_path: str = os.path.join(
+    expected_notebook_path: str = os.path.join(  # noqa: PTH118
         uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
-    assert os.path.isfile(expected_notebook_path)
+    assert os.path.isfile(expected_notebook_path)  # noqa: PTH113
 
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
     batch_request = deep_filter_properties_iterable(
@@ -4492,3 +4504,173 @@ def test__process_suite_edit_flags_and_prompt(
                 }
             ),
         ]
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_edit_fluent_datasources_message(
+    mock_emit, mock_subp, mock_web, monkeypatch, filesystem_csv_2, empty_data_context
+):
+    context = empty_data_context
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
+
+    context.sources.add_pandas_filesystem(
+        name="my_pandas_datasource", base_directory=filesystem_csv_2
+    )
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        "suite edit my_expectation_suite",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+    assert SUITE_EDIT_FLUENT_DATASOURCE_ERROR in result.stdout
+    assert SUITE_EDIT_FLUENT_DATASOURCE_WARNING not in result.stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_edit_suite_warning_both_fluent_and_block_datasources(
+    mock_emit,
+    mock_subp,
+    mock_web,
+    monkeypatch,
+    filesystem_csv_2,
+    data_context_with_fluent_datasource_and_block_datasource,
+):
+    context = data_context_with_fluent_datasource_and_block_datasource
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
+
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        "suite edit my_expectation_suite",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    assert SUITE_EDIT_FLUENT_DATASOURCE_WARNING in result.stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_edit_block_datasources_no_message(
+    mock_emit,
+    mock_subp,
+    mock_web,
+    caplog,
+    monkeypatch,
+    filesystem_csv_2,
+    data_context_with_block_datasource,
+):
+    context = data_context_with_block_datasource
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
+
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        "suite edit my_expectation_suite",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    assert SUITE_EDIT_FLUENT_DATASOURCE_WARNING not in result.stdout
+    assert SUITE_EDIT_FLUENT_DATASOURCE_ERROR not in result.stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_fluent_datasources_message(
+    mock_emit, mock_subp, mock_web, monkeypatch, filesystem_csv_2, empty_data_context
+):
+    context = empty_data_context
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
+
+    context.sources.add_pandas_filesystem(
+        name="my_pandas_datasource", base_directory=filesystem_csv_2
+    )
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        "suite new",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+    assert SUITE_NEW_FLUENT_DATASOURCE_ERROR in result.stdout
+    assert SUITE_NEW_FLUENT_DATASOURCE_WARNING not in result.stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_suite_warning_both_fluent_and_block_datasources(
+    mock_emit,
+    mock_subp,
+    mock_web,
+    monkeypatch,
+    filesystem_csv_2,
+    data_context_with_fluent_datasource_and_block_datasource,
+):
+    context = data_context_with_fluent_datasource_and_block_datasource
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
+
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        "suite new",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    assert SUITE_NEW_FLUENT_DATASOURCE_WARNING in result.stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_block_datasources_no_message(
+    mock_emit,
+    mock_subp,
+    mock_web,
+    caplog,
+    monkeypatch,
+    filesystem_csv_2,
+    data_context_with_block_datasource,
+):
+    context = data_context_with_block_datasource
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
+
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        "suite new",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    assert SUITE_NEW_FLUENT_DATASOURCE_WARNING not in result.stdout
+    assert SUITE_NEW_FLUENT_DATASOURCE_ERROR not in result.stdout

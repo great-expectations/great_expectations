@@ -1,6 +1,9 @@
 import pytest
 
-from great_expectations.util import NotImported
+from great_expectations.compatibility.not_imported import NotImported
+
+# module level markers
+pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
@@ -10,7 +13,7 @@ def not_imported() -> NotImported:
 
 def test_get_attr_on_not_installed(not_imported):
     with pytest.raises(ModuleNotFoundError, match=str(not_imported)):
-        not_imported.thing
+        _ = not_imported.thing
 
 
 def test_set_attr_on_not_installed(not_imported):

@@ -176,7 +176,6 @@ def convert_code_blocks(lines: list[str], name: str) -> None:
 
     # Replace code snippets with CodeBlock components
     for _ in range(len(code_snippet_indices)):
-
         code_snippet_start = None
         code_snippet_end = None
 

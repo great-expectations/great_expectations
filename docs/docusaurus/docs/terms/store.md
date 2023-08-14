@@ -3,22 +3,11 @@ title: Store
 id: store
 hoverText: A connector to store and retrieve information about metadata in Great Expectations.
 ---
-import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
+
 import TechnicalTag from '../term_tags/_tag.mdx';
-import SetupHeader from '/docs/images/universal_map/_um_setup_header.mdx'
-import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
-import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 
 
-<UniversalMap setup='active' connect='inactive' create='active' validate='active'/> 
-
-## Overview
-
-### Definition
-
-A Store is a connector to store and retrieve information about metadata in Great Expectations.
-
-### Features and promises
+A Store is a connector to store and retrieve information about metadata in Great Expectations. Stores are available from your Data Context.
 
 Great Expectations supports a variety of Stores for different purposes, but the most common Stores are Expectation Stores, Validations Stores, Checkpoint Stores, Metric Stores, and Evaluation Parameter Stores.  Data Docs Stores can also be configured for Data Doc Sites.  Each of these Stores is tailored to a specific type of information.
 
@@ -30,7 +19,7 @@ Great Expectations supports a variety of Stores for different purposes, but the 
 - [**Metric Stores:**](./metric_store.md) a connector to store and retrieve information about computed attributes of data, such as the mean of a column.  These differ from the Evaluation Parameter Store in how they are formatted.  The data in a Metrics Store is intended to be used for generating reports and analyzing trends, rather than as Evaluation Parameter values.
 
 
-### Relationship to other objects
+## Relationship to other objects
 
 Each type of Store is designed to interact with a specific subset of information, and thus interacts with a specific subset of objects in Great Expectations.  However, all Stores can be listed and modified through your Data Context.  For further information on how a given type of Store relates to other objects, please see the corresponding Store type's technical term page:
 
@@ -43,49 +32,38 @@ Each type of Store is designed to interact with a specific subset of information
 
 ## Use cases
 
-<SetupHeader/>
-
 **All Stores** are configured during the Setup step of working with Great Expectations.  For the most part, the default configurations will permit you to work with Great Expectations in a local environment.  You can, however, configure your Stores to be hosted elsewhere.
-
-<CreateHeader/>
 
 When creating Expectations, you will use **Expectation Stores** to store your <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />.  You may also use **Validation Result Stores** or **Evaluation Parameter Stores** to configure some <TechnicalTag relative="../" tag="expectation" text="Expectations" /> that require <TechnicalTag relative="../" tag="evaluation_parameter" text="Evaluation Parameters" /> as part of their definition, provided you have previously stored relevant <TechnicalTag relative="../" tag="metric" text="Metrics" /> in those Stores and then come back to create a new Expectation Suite that references them.
 
-<ValidateHeader/>
-
 When Validating data, you may store new <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> (or retrieve existing ones) from your **Checkpoint Store**.  Checkpoints may also use Expectation Suites retrieved by an **Expectation Store**, and Expectations that are run by a Checkpoint may retrieve Metrics as input (Evaluation Parameters) from <TechnicalTag relative="../" tag="validation_result" text="Validation Results" /> in a **Validation Results Store**, or from values stored in an **Evaluation Parameter Store**.  Checkpoints may also write information about Validation Results into a **Validation Results Store**, or information about Metrics into an **Evaluation Parameter Store** (which is why they are also known as **Metric Stores**).
 
-## Features
+## Access
 
-### Metadata storage and retrieval
+The `stores` key in your `great_expectations.yml` file lists your available Stores.
 
-Stores permit the configuration of where certain types of data and metadata will be stored and retrieved from.
+The `data_docs_sites` key in your `great_expectations.yml` file defines your Data Docs Store configurations. `store_backend` keys below `data_docs_sites` identify the Data Doc Store used by the Data Docs site.
 
-### Centralized access and convenient API
+Run the following Python command to view your Stores:
 
-Stores provide an API for Great Expectations to perform the retrieval and storage of information.  This API (e.g. the Stores themselves) is always available from your Data Context.
+```python
+import great_expectations as gx
 
-## API Basics
-
-### How to access
-
-You can find a list of almost all of your Stores in your `great_expectations.yml` file under the `stores` key.  Alternatively, from the root folder of your Data Context you can retrieve a list of Stores with a CLI command:
-
-```markdown title="Console command"
-great_expectations store list
+context = gx.get_context()
+context.stores
 ```
 
 Data Docs Stores are the one exception to the above.  They are instead configured under the `data_docs_sites` key in the `great_expectations.yml` file.  Each entry under `data_docs_sites` will have a `store_backend` key.  The information under `store_backend` will correspond to the Data Doc Store used by that site. Data Doc Stores are not listed by the `great_expectations store list` command.
 
-### Configuration
+## Configure
 
-Configuration of your Stores is located in your `great_expectations.yml` file under the `stores` key.  Three stores are required: an Expectation Store, a Validation Result Store, and an Evaluation Parameter Store must always have a valid entry in the `great_expectations.yml` file.  Additional Stores can be configured for uses such as Data Docs and Checkpoints (and a Checkpoint Store configuration entry will automatically be added if one does not exist when you attempt to save a Checkpoint for the first time.)
+Your Stores configurations are located in your `great_expectations.yml` file below the `stores` key.  Three stores are required: an Expectation Store, a Validation Result Store, and an Evaluation Parameter Store must always have a valid entry in the `great_expectations.yml` file.  Additional Stores can be configured for uses such as Data Docs and Checkpoints (and a Checkpoint Store configuration entry will automatically be added if one does not exist when you attempt to save a Checkpoint for the first time.)
 
 Note that unlike other Stores, your Data Docs Stores are configured under each individual site under the `data_docs_sites` key in the `great_expectations.yml` file.
 
-## More details
+## Related documentation
 
-For more information about a specific type of Store, please see the Store type's technical term definition page:
+For more information about a specific type of Store, see the Store type's technical term definition page:
 
 - [Expectation Store technical term page](./expectation_store.md)
 - [Checkpoint Store technical term page](./checkpoint_store.md)

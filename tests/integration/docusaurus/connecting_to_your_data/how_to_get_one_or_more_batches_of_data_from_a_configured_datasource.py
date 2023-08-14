@@ -1,9 +1,9 @@
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
+yaml = YAMLHandler()
 context = gx.get_context()
 
 # Please note the naming of this datasource is only to provide good UX for docs and tests.

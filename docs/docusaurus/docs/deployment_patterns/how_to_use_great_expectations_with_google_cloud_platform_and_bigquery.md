@@ -1,5 +1,8 @@
 ---
-title: How to Use Great Expectations with Google Cloud Platform and BigQuery
+title: Use Great Expectations with Google Cloud Platform and BigQuery
+description: "Use Great Expectations with Google Cloud Platform and BigQuery"
+sidebar_label: "Google Cloud Platform and BigQuery"
+sidebar_custom_props: { icon: 'img/integrations/google_cloud_icon.png' }
 ---
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
@@ -9,10 +12,12 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you integrate Great Expectations (GX) with [Google Cloud Platform](https://cloud.google.com/gcp) (GCP) using our recommended workflow.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Have a working local installation of Great Expectations that is at least version 0.13.49.
-- Have read through the documentation and are familiar with the Google Cloud Platform features that are used in this guide.
+- A working local installation of Great Expectations version 0.13.49 or later.
+- Familiarity with Google Cloud Platform features and functionality.
 - Have completed the set-up of a GCP project with a running Google Cloud Storage container that is accessible from your region, and read/write access to a BigQuery database if this is where you are loading your data.
 - Access to a GCP [Service Account](https://cloud.google.com/iam/docs/service-accounts) with permission to access and read objects in Google Cloud Storage, and read/write access to a BigQuery database if this is where you are loading your data.
 
@@ -33,7 +38,7 @@ This guide will help you integrate Great Expectations (GX) with [Google Cloud Pl
 
 We recommend that you use Great Expectations in GCP by using the following services:
   - [Google Cloud Composer](https://cloud.google.com/composer) (GCC) for managing workflow orchestration including validating your data. GCC is built on [Apache Airflow](https://airflow.apache.org/).
-  - [BigQuery](https://cloud.google.com/bigquery) or files in [Google Cloud Storage](https://cloud.google.com/storage) (GCS) as your <TechnicalTag tag="datasource" text="Datasource"/>
+  - [BigQuery](https://cloud.google.com/bigquery) or files in [Google Cloud Storage](https://cloud.google.com/storage) (GCS) as your <TechnicalTag tag="datasource" text="Data Source"/>
   - [GCS](https://cloud.google.com/storage) for storing metadata (<TechnicalTag tag="expectation_suite" text="Expectation Suites"/>, <TechnicalTag tag="validation_result" text="Validation Results"/>, <TechnicalTag tag="data_docs" text="Data Docs"/>)
   - [Google App Engine](https://cloud.google.com/appengine) (GAE) for hosting and controlling access to <TechnicalTag tag="data_docs" text="Data Docs"/>.
 
@@ -49,17 +54,8 @@ Relevant documentation for the components can also be found here:
 
 - [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md)
 - [How to configure a Validation Result store in GCS](../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.md)
-- [How to host and share Data Docs on GCS](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md)
+- [How to host and share Data Docs on GCS](../guides/setup/configuring_data_docs/host_and_share_data_docs.md)
 - Optionally, you can also use a [Secret Manager for GCP Credentials](../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
-
-:::note Note on V3 Expectations for BigQuery
-
-  A small number of V3 Expectations have not been migrated to BigQuery, and will be very soon. These include:
-
-  - `expect_column_quantile_values_to_be_between`
-  - `expect_column_kl_divergence_to_be_less_than`
-
-:::
 
 ## Part 1: Local Configuration of Great Expectations that connects to Google Cloud Platform
 
@@ -73,7 +69,16 @@ A local installation of Great Expectations can be upgraded using a simple `pip i
 pip install great-expectations --upgrade
 ```
 
-### 2. Connect to Metadata Stores on GCP
+### 2. Get DataContext: 
+
+One way to create a new <TechnicalTag relative="../../../" tag="data_context" text="Data Context" />  is by using the `create()` method.
+
+From a Notebook or script where you want to deploy Great Expectations run the following command. Here the `full_path_to_project_directory`  can be an empty directory where you intend to build your Great Expectations configuration.
+
+```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py get_context"
+```
+
+### 3. Connect to Metadata Stores on GCP
 
 The following sections describe how you can take a basic local configuration of Great Expectations and connect it to Metadata stores on GCP.
 
@@ -88,12 +93,12 @@ The full configuration used in this guide can be found in the [`great-expectatio
 #### Add Expectations Store
 By default, newly profiled Expectations are stored in JSON format in the `expectations/` subdirectory of your `great_expectations/` folder. A new Expectations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
 
-```YAML name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml expectations_GCS_store"
+```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py expected_expectation_store"
 ```
 
 Great Expectations can then be configured to use this new Expectations Store, `expectations_GCS_store`, by setting the `expectations_store_name` value in the `great_expectations.yml` file.
 
-```YAML name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml expectations_store_name"
+```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_expectation_store"
 ```
 
 For additional details and example configurations, please refer to [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md).
@@ -101,22 +106,22 @@ For additional details and example configurations, please refer to [How to confi
 #### Add Validations Store
 By default, Validations are stored in JSON format in the `uncommitted/validations/` subdirectory of your `great_expectations/` folder. A new Validations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
 
-```YAML name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_GCS_store"
+```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py expected_validations_store"
 ```
 
 Great Expectations can then be configured to use this new Validations Store, `validations_GCS_store`, by setting the `validations_store_name` value in the `great_expectations.yml` file.
 
-```YAML name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_store_name"
+```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_validations_store"
 ```
 
 For additional details and example configurations, please refer to  [How to configure an Validation Result store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.md).
 
 #### Add Data Docs Store
-To host and share Datadocs on GCS, we recommend using the [following guide](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md), which will explain how to host and share Data Docs on Google Cloud Storage using IP-based access.
+To host and share Datadocs on GCS, we recommend using the [following guide](../guides/setup/configuring_data_docs/host_and_share_data_docs.md), which will explain how to host and share Data Docs on Google Cloud Storage using IP-based access.
 
 Afterwards, your `great-expectations.yml` will contain the following configuration under `data_docs_sites`,  with `project`, and `bucket` being replaced with your information.
 
-```YAML name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml gs_site"
+```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_data_docs_store"
 ```
 
 
@@ -128,9 +133,10 @@ gcloud app browse
 
 If successful, the `gcloud` CLI will provide the URL to your app and launch it in a new browser window, and you should be able to view the index page of your Data Docs site.
 
-### 3. Connect to your Data
+### 4. Connect to your Data
 
-The remaining sections in Part 1 contain a simplified description of [how to connect to your data in GCS](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/gcs/pandas) or [BigQuery](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery) and eventually build a <TechnicalTag tag="checkpoint" text="Checkpoint"/> that will be migrated to Cloud Composer. The following code can be run either in an interactive Python session or Jupyter Notebook that is in your `great_expectations/` folder.
+The remaining sections in Part 1 contain descriptions of [how to connect to your data in Google Cloud Storage (GCS)](/docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/pandas) or [BigQuery](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery) and build a <TechnicalTag tag="checkpoint" text="Checkpoint"/> that you'll migrate to Google Cloud Composer. 
+
 More details can be found in the corresponding How to Guides, which have been linked.
 
 <Tabs
@@ -142,43 +148,18 @@ More details can be found in the corresponding How to Guides, which have been li
   ]}>
 <TabItem value="gcs">
 
-To connect to your data in GCS, first instantiate your project's DataContext by importing the necessary packages and modules.
+Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Context" /> that was initialized in the previous section, add the name of your GCS bucket to the `add_pandas_gcs` function.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py imports"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py datasource"
 ```
 
-Then, load your DataContext into memory using the `get_context()` method.
+In the example, we have added a Data Source that connects to data in GCS using a Pandas dataframe. The name of the new datasource is `gcs_datasource` and it refers to a GCS bucket named `test_docs_data`.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py get_context"
-```
-
-Next, load the following Datasource configuration that will connect to data in GCS,
-
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py datasource_yaml"
-```
-
-Save the configuration into your DataContext by using the `add_datasource()` function.
-
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py add_datasource"
-```
-
-For more details on how to configure the Datasource, and additional information on authentication, please refer to [How to connect to data on GCS using Pandas
-](../guides/connecting_to_your_data/cloud/gcs/pandas.md)
+For more details on how to configure the Data Source, and additional information on authentication, please refer to [How to connect to data on GCS using Pandas
+](/docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/pandas)
 
 </TabItem>
 <TabItem value="bigquery">
-
-To connect to your data in BigQuery, first instantiate your project's DataContext by importing the necessary packages and modules.
-
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py imports"
-```
-
-Then, load your DataContext into memory using the `get_context()` method.
-
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py get_context"
-```
-
-Next, load the following Datasource configuration that will connect to data in BigQuery,
 
 :::note
 
@@ -186,20 +167,69 @@ In order to support tables that are created as the result of queries in BigQuery
 
 :::
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py datasource_yaml"
+
+Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Context" /> that was initialized in the previous section, create a Data Source that will connect to data in BigQuery,
+
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_datasource"
 ```
 
-Save the configuration into your DataContext by using the `add_datasource()` function.
+In the example, we have created a Data Source named `my_bigquery_datasource`, using the `add_or_update_sql` method and passing in a connection string.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_datasource"
-```
-
-For more details on how to configure the BigQuery Datasource, please refer to [How to connect to a BigQuery database](../guides/connecting_to_your_data/database/bigquery.md)
+To configure the BigQuery Data Source, see [How to connect to a BigQuery database](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery).
 
 </TabItem>
 </Tabs>
 
-### 4. Get Batch and Create ExpectationSuite
+### 4. Create Assets
+<Tabs
+  groupId="connect-to-data-gcs-bigquery"
+  defaultValue='gcs'
+  values={[
+  {label: 'Data in GCS', value:'gcs'},
+  {label: 'Data in BigQuery', value:'bigquery'},
+  ]}>
+<TabItem value="gcs">
+
+Add a CSV `Asset` to your `Datasource` by using the `add_csv_asset` function.
+
+First, configure the `prefix` and `batching_regex`. The `prefix` is for the path in the GCS bucket where we can find our files. The `batching_regex` is a regular expression that indicates which files to treat as Batches in the Asset, and how to identify them.
+
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py prefix_and_batching_regex"
+```
+
+In our example, the pattern `r"data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"` is intended to build a Batch for each file in the GCS bucket, which are:
+
+```bash
+test_docs_data/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv
+test_docs_data/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-02.csv
+test_docs_data/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-03.csv
+```
+The `batching_regex` pattern will match the 4 digits of the year portion and assign it to the `year` domain, and match the 2 digits of the month portion and assign it to the `month` domain.
+
+Next we can add an `Asset` named `csv_taxi_gcs_asset` to our Data Source by using the `add_csv_asset` function. 
+
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py asset"
+```
+
+</TabItem>
+<TabItem value="bigquery">
+
+Add a BigQuery `Asset` into your `Datasource` either as a table asset or query asset.
+
+In the first example, a table `Asset` named `my_table_asset` is built by naming the table in our BigQuery Database, which is `taxi_data` in our case. 
+
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_table_asset"
+```
+
+In the second example, a query `Asset` named `my_query_asset` is built by submitting a query to the same table `taxi_data`. Although we are showing a simple operation here, the query can be arbitrarily complicated, including any number of `JOIN`, `SELECT` operations and subqueries. 
+
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_query_asset"
+```
+
+</TabItem>
+</Tabs>
+
+### 5. Get Batch and Create ExpectationSuite
 
 <Tabs
   groupId="connect-to-data-gcs-bigquery"
@@ -210,56 +240,51 @@ For more details on how to configure the BigQuery Datasource, please refer to [H
   ]}>
 <TabItem value="gcs">
 
-For our example, we will be creating an ExpectationSuite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), which we will describe in our `BatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md) or using the [User Configurable Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md), please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`.
+For our example, we will be creating an ExpectationSuite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), which we will describe in our `BatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md) or using a DataAssistant or a Custom Profiler, please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`.
 
-First, load a batch of data by specifying a `data_asset_name` in a `BatchRequest`.
+First create an ExpectationSuite by using the `add_or_update_expectation_suite` method on our DataContext. Then use it to get a `Validator`. 
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py batch_request"
-```
-
-Next, create an ExpectationSuite (`test_gcs_suite` in our example), and use it to get a `Validator`.
-
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py add_expectation_suite"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py add_expectation_suite"
 ```
 
 Next, use the `Validator` to run expectations on the batch and automatically add them to the ExpectationSuite. For our example, we will add `expect_column_values_to_not_be_null` and `expect_column_values_to_be_between` (`passenger_count` and `congestion_surcharge` are columns in our test data, and they can be replaced with columns in your data).
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py validator_calls"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py validator_calls"
 ```
 
 Lastly, save the ExpectationSuite, which now contains our two Expectations.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py save_expectation_suite"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py save_expectation_suite"
 ```
 
-For more details on how to configure the RuntimeBatchRequest, as well as an example of how you can load data by specifying a GCS path to a single CSV, please refer to [How to connect to data on GCS using Pandas](../guides/connecting_to_your_data/cloud/gcs/pandas.md)
+For more details on how to configure the RuntimeBatchRequest, as well as an example of how you can load data by specifying a GCS path to a single CSV, please refer to [How to connect to data on GCS using Pandas](/docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/pandas)
 
 </TabItem>
 <TabItem value="bigquery">
 
-For our example, we will be creating our ExpectationSuite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), which we will describe in our `RuntimeBatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md) or using the [User Configurable Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md), please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`.
+For our example, we will be creating our ExpectationSuite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), which we will describe in our `RuntimeBatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md) or using a DataAssistant or a Custom Profiler, please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`.
 
-First, load a batch of data by specifying an SQL query in a `RuntimeBatchRequest` (`SELECT * from demo.taxi_data LIMIT 10` is an example query for our test data and can be replaced with any query you would like).
+Using the `table_asset` from the previous step, build a `BatchRequest`. 
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py batch_request"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py batch_request"
 ```
 
-Next, create an ExpectationSuite (`test_bigquery_suite` in our example), and use it to get a `Validator`.
+Next, create an ExpectationSuite by using the `add_or_update_expectation_suite` method on our DataContext. Then use it to get a `Validator`. 
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_or_update_expectation_suite"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_or_update_expectation_suite"
 ```
 
 Next, use the `Validator` to run expectations on the batch and automatically add them to the ExpectationSuite. For our example, we will add `expect_column_values_to_not_be_null` and `expect_column_values_to_be_between` (`passenger_count` and `congestion_surcharge` are columns in our test data, and they can be replaced with columns in your data).
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py validator_calls"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py validator_calls"
 ```
 
 Lastly, save the ExpectationSuite, which now contains our two Expectations.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py save_expectation_suite"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py save_expectation_suite"
 ```
 
-For more details on how to configure the BatchRequest, as well as an example of how you can load data by specifying a table name, please refer to [How to connect to a BigQuery database](../guides/connecting_to_your_data/database/bigquery.md)
+To configure the BatchRequest and learn how you can load data by specifying a table name, see [How to connect to a BigQuery database](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery)
 
 </TabItem>
 </Tabs>
@@ -277,22 +302,14 @@ For our example, we will create a basic Checkpoint configuration using the `Simp
   ]}>
 <TabItem value="gcs">
 
-Add the following Checkpoint `gcs_checkpoint` to the DataContext.  Here we are using the same `BatchRequest` and `ExpectationSuite` name that we used to create our Validator above, translated into a YAML configuration.
+Add the following Checkpoint `gcs_checkpoint` to the DataContext.  Here we are using the same `BatchRequest` and `ExpectationSuite` name that we used to create our Validator above.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py checkpoint_config"
-```
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py add_checkpoint"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py checkpoint"
 ```
 
-Next, you can either run the Checkpoint directly in-code,
+Next, you can run the Checkpoint directly in-code by calling `checkpoint.run()`.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py run_checkpoint"
-```
-
-or through the following CLI command.
-
-```bash
-great_expectations --v3-api checkpoint run gcs_checkpoint
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py run_checkpoint"
 ```
 
 At this point, if you have successfully configured the local prototype, you will have the following:
@@ -306,23 +323,14 @@ Now you are ready to migrate the local configuration to Cloud Composer.
 </TabItem>
 <TabItem value="bigquery">
 
-Add the following Checkpoint `bigquery_checkpoint` to the DataContext.  Here we are using the same `RuntimeBatchRequest` and `ExpectationSuite` name that we used to create our Validator above, translated into a YAML configuration.
+Add the following Checkpoint `bigquery_checkpoint` to the DataContext.  Here we are using the same `BatchRequest` and `ExpectationSuite` name that we used to create our Validator above.
 
-
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py checkpoint_config"
-```
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_checkpoint"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py checkpoint"
 ```
 
-Next, you can either run the Checkpoint directly in-code,
+Next, you can run the Checkpoint directly in-code by calling `checkpoint.run()`.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py run_checkpoint"
-```
-
-or through the following CLI command.
-
-```bash
-great_expectations --v3-api checkpoint run bigquery_checkpoint
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py run_checkpoint"
 ```
 
 At this point, if you have successfully configured the local prototype, you will have the following:
@@ -409,14 +417,14 @@ Once the `great_expectations/` folder is uploaded to the Cloud Storage bucket, i
 
 We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named: [`ge_checkpoint_gcs.py`](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py).
 
-```python name=tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py full
+```python name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py full"
 ```
 
 The `BashOperator` will first change directories to `/home/airflow/gcsfuse/great_expectations`, where we have uploaded our local configuration.
 Then we will run the Checkpoint using same CLI command we used to run the Checkpoint locally:
 
 ```bash
-great_expectations --v3-api checkpoint run gcs_checkpoint
+great_expectations checkpoint run gcs_checkpoint
 ````
 
 To add the DAG to Cloud Composer, move `ge_checkpoint_gcs.py` to the environment's DAGs folder in Cloud Storage. First, open the Environments page in the Cloud Console, then click on the name of the environment to open the Environment details page.
@@ -430,7 +438,7 @@ For more details, please consult the [official documentation for Cloud Composer]
 
 We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named:  [`ge_checkpoint_bigquery.py`](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py).
 
-```python name=tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py full
+```python name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py full"
 ```
 
 The `BashOperator` will first change directories to `/home/airflow/gcsfuse/great_expectations`, where we have uploaded our local configuration.
@@ -438,7 +446,7 @@ Then we will run the Checkpoint using same CLI command we used to run the Checkp
 
 
 ```bash
-great_expectations --v3-api checkpoint run bigquery_checkpoint
+great_expectations checkpoint run bigquery_checkpoint
 ```
 
 To add the DAG to Cloud Composer, move `ge_checkpoint_bigquery.py` to the environment's DAGs folder in Cloud Storage. First, open the Environments page in the Cloud Console, then click on the name of the environment to open the Environment details page.
@@ -476,8 +484,8 @@ There are many ways to iterate and improve this initial version, which used a `b
 - [How to trigger the DAG on a schedule](https://cloud.google.com/composer/docs/triggering-dags#schedule).
 - [How to trigger the DAG in response to events](http://airflow.apache.org/docs/apache-airflow/stable/concepts/sensors.html).
 - [How to use the Google Kubernetes Engine (GKE) to deploy, manage and scale your application](https://airflow.apache.org/docs/apache-airflow-providers-google/stable/operators/cloud/kubernetes_engine.html).
-- [How to configure a DataConnector to introspect and partition tables in SQL](../guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md).
-- [How to configure a DataConnector to introspect and partition a file system or blob store](../guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store.md).
+- [How to configure a DataConnector to introspect and partition tables in SQL](/docs/0.15.50/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql).
+- [How to configure a DataConnector to introspect and partition a file system or blob store](/docs/0.15.50/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store).
 
 Also, the following scripts and configurations can be found here:
 

@@ -9,7 +9,7 @@ from great_expectations.datasource.fluent.type_lookup import (
     ValidTypes,
 )
 
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 param = pytest.param
 
 

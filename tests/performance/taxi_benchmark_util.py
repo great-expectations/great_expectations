@@ -3,6 +3,8 @@ Helper utilities for creating and testing benchmarks using NYC Taxi data (yellow
     found in the tests/test_sets/taxi_yellow_tripdata_samples directory, and used extensively in unittest and
     integration tests for Great Expectations.
 """
+from __future__ import annotations
+
 import os
 from typing import List, Optional
 
@@ -236,7 +238,6 @@ def _create_context(
     asset_names: List[str],
     html_dir: Optional[str] = None,
 ) -> DataContext:
-
     data_docs_sites = (
         {
             "local_site": {
@@ -314,8 +315,10 @@ def _add_checkpoint(
     datasource_name: str,
     data_connector_name: str,
     checkpoint_name: str,
-    suite_and_asset_names=[],
+    suite_and_asset_names: list | None = None,
 ) -> SimpleCheckpoint:
+    if suite_and_asset_names is None:
+        suite_and_asset_names = []
     if backend_api == "V3":
         validations = [
             {
@@ -358,7 +361,7 @@ def _add_checkpoint(
 
 
 def _add_expectation_configuration(context: AbstractDataContext, suite_name: str):
-    suite = context.add_expectation_suite(expectation_suite_name=suite_name)
+    suite = context.add_or_update_expectation_suite(expectation_suite_name=suite_name)
     suite.add_expectation(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_table_columns_to_match_set",
@@ -432,4 +435,4 @@ def _add_expectation_configuration(context: AbstractDataContext, suite_name: str
 
     # Save the expectation suite or else it doesn't show up in the data docs.
     suite.expectation_suite_name = suite_name
-    context.add_expectation_suite(expectation_suite=suite)
+    context.add_or_update_expectation_suite(expectation_suite=suite)

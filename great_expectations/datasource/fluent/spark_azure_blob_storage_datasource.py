@@ -2,87 +2,103 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Final, Literal, Type, Union
 
 import pydantic
-from typing_extensions import Literal
 
+from great_expectations.compatibility import azure
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
+from great_expectations.datasource.fluent.config_str import (
+    ConfigStr,
+    _check_config_substitutions_needed,
+)
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import TestConnectionError
+from great_expectations.datasource.fluent.interfaces import (
+    TestConnectionError,
+)
 from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,
 )
-from great_expectations.datasource.fluent.spark_file_path_datasource import (
-    CSVAsset,
-)
-
-if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.interfaces import (
-        Sorter,
-        SortersDefinition,
-    )
-
 
 logger = logging.getLogger(__name__)
 
 
-ABS_IMPORTED = False
-try:
-    from azure.storage.blob import (
-        BlobServiceClient,  # noqa: disable=E0602
-    )
+_MISSING: Final = object()
 
-    ABS_IMPORTED = True
-except ImportError:
-    pass
+if TYPE_CHECKING:
+    from great_expectations.compatibility.azure import BlobServiceClient
+    from great_expectations.datasource.fluent.spark_file_path_datasource import (
+        _SPARK_FILE_PATH_ASSET_TYPES_UNION,
+    )
 
 
 class SparkAzureBlobStorageDatasourceError(SparkDatasourceError):
     pass
 
 
+@public_api
 class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
+    # class attributes
+    data_connector_type: ClassVar[
+        Type[AzureBlobStorageDataConnector]
+    ] = AzureBlobStorageDataConnector
+
     # instance attributes
     type: Literal["spark_abs"] = "spark_abs"
 
     # Azure Blob Storage specific attributes
-    azure_options: Dict[str, Any] = {}
+    azure_options: Dict[str, Union[ConfigStr, Any]] = {}
 
     _account_name: str = pydantic.PrivateAttr(default="")
+    # on 3.11 the annotation must be type-checking import otherwise it will fail at import time
     _azure_client: Union[BlobServiceClient, None] = pydantic.PrivateAttr(default=None)
 
-    def _get_azure_client(self) -> BlobServiceClient:
-        azure_client: Union[BlobServiceClient, None] = self._azure_client
+    def _get_azure_client(self) -> azure.BlobServiceClient:
+        azure_client: Union[azure.BlobServiceClient, None] = self._azure_client
         if not azure_client:
+            _check_config_substitutions_needed(
+                self, self.azure_options, raise_warning_if_provider_not_present=True
+            )
+            # pull in needed config substitutions using the `_config_provider`
+            # The `FluentBaseModel.dict()` call will do the config substitution on the serialized dict if a `config_provider` is passed.
+            azure_options: dict = self.dict(config_provider=self._config_provider).get(
+                "azure_options", {}
+            )
+
             # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to
             # use in authentication (but not both). If the format or content of the provided keys is invalid,
             # the assignment of `self._account_name` and `self._azure_client` will fail and an error will be raised.
-            conn_str: str | None = self.azure_options.get("conn_str")
-            account_url: str | None = self.azure_options.get("account_url")
+            conn_str: str | None = azure_options.get("conn_str")
+            account_url: str | None = azure_options.get("account_url")
             if not bool(conn_str) ^ bool(account_url):
                 raise SparkAzureBlobStorageDatasourceError(
                     "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"
                 )
 
             # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
-            if ABS_IMPORTED:
+            if azure.BlobServiceClient:  # type: ignore[truthy-function] # False if NotImported
                 try:
                     if conn_str is not None:
-                        self._account_name = re.search(  # type: ignore[union-attr]
+                        self._account_name = re.search(  # type: ignore[union-attr] # re.search could return None
                             r".*?AccountName=(.+?);.*?", conn_str
-                        ).group(1)
-                        azure_client = BlobServiceClient.from_connection_string(
-                            **self.azure_options
+                        ).group(
+                            1
+                        )
+                        azure_client = azure.BlobServiceClient.from_connection_string(
+                            **azure_options
                         )
                     elif account_url is not None:
-                        self._account_name = re.search(  # type: ignore[union-attr]
-                            r"(?:https?://)?(.+?).blob.core.windows.net", account_url
-                        ).group(1)
-                        azure_client = BlobServiceClient(**self.azure_options)
+                        self._account_name = re.search(  # type: ignore[union-attr] # re.search could return None
+                            r"(?:https?://)?(.+?).blob.core.windows.net",
+                            account_url,
+                        ).group(
+                            1
+                        )
+                        azure_client = azure.BlobServiceClient(**azure_options)
                 except Exception as e:
                     # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
                     raise SparkAzureBlobStorageDatasourceError(
@@ -94,6 +110,11 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
                 )
 
             self._azure_client = azure_client
+
+        if not azure_client:
+            raise SparkAzureBlobStorageDatasourceError(
+                "Failed to return `azure_client`"
+            )
 
         return azure_client
 
@@ -115,62 +136,50 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             ) from e
 
         if self.assets and test_assets:
-            for asset in self.assets.values():
+            for asset in self.assets:
                 asset.test_connection()
 
-    def add_csv_asset(
+    def _build_data_connector(  # noqa: PLR0913
         self,
-        name: str,
-        batching_regex: Union[re.Pattern, str],
-        container: str,
-        header: bool = False,
-        infer_schema: bool = False,
-        name_starts_with: str = "",
-        delimiter: str = "/",
-        order_by: Optional[SortersDefinition] = None,
-    ) -> CSVAsset:
-        """Adds a CSV DataAsst to the present "SparkAzureBlobStorageDatasource" object.
+        data_asset: _SPARK_FILE_PATH_ASSET_TYPES_UNION,
+        abs_container: str = _MISSING,  # type: ignore[assignment] # _MISSING is used as sentinel value
+        abs_name_starts_with: str = "",
+        abs_delimiter: str = "/",
+        abs_recursive_file_discovery: bool = False,
+        **kwargs,
+    ) -> None:
+        """Builds and attaches the `AzureBlobStorageDataConnector` to the asset."""
+        if kwargs:
+            raise TypeError(
+                f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
+            )
+        if abs_container is _MISSING:
+            raise TypeError(
+                f"'{data_asset.name}' is missing required argument 'abs_container'"
+            )
 
-        Args:
-            name: The name of the CSV asset
-            batching_regex: regex pattern that matches csv filenames that is used to label the batches
-            container: container name for Microsoft Azure Blob Storage
-            header: boolean (default False) indicating whether or not first line of CSV file is header line
-            infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
-            name_starts_with: Microsoft Azure Blob Storage object name prefix
-            delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
-        """
-        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
-            batching_regex=batching_regex
-        )
-        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
-        asset = CSVAsset(
-            name=name,
-            batching_regex=batching_regex_pattern,
-            header=header,
-            inferSchema=infer_schema,
-            order_by=order_by_sorters,
-        )
-        asset._data_connector = AzureBlobStorageDataConnector.build_data_connector(
+        data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,
-            data_asset_name=name,
+            data_asset_name=data_asset.name,
             azure_client=self._get_azure_client(),
-            batching_regex=batching_regex_pattern,
+            batching_regex=data_asset.batching_regex,
             account_name=self._account_name,
-            container=container,
-            name_starts_with=name_starts_with,
-            delimiter=delimiter,
+            container=abs_container,
+            name_starts_with=abs_name_starts_with,
+            delimiter=abs_delimiter,
+            recursive_file_discovery=abs_recursive_file_discovery,
             file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format,
         )
-        asset._test_connection_error_message = (
-            AzureBlobStorageDataConnector.build_test_connection_error_message(
-                data_asset_name=name,
-                batching_regex=batching_regex_pattern,
+
+        # build a more specific `_test_connection_error_message`
+        data_asset._test_connection_error_message = (
+            self.data_connector_type.build_test_connection_error_message(
+                data_asset_name=data_asset.name,
+                batching_regex=data_asset.batching_regex,
                 account_name=self._account_name,
-                container=container,
-                name_starts_with=name_starts_with,
-                delimiter=delimiter,
+                container=abs_container,
+                name_starts_with=abs_name_starts_with,
+                delimiter=abs_delimiter,
+                recursive_file_discovery=abs_recursive_file_discovery,
             )
         )
-        return self.add_asset(asset=asset)

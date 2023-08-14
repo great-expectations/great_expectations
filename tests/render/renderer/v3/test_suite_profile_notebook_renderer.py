@@ -3,7 +3,6 @@ from typing import Any, List, Set
 from unittest import mock
 
 import pytest
-from ruamel.yaml import YAML
 
 # noinspection PyProtectedMember
 from great_expectations.cli.suite import _suite_edit_workflow
@@ -15,6 +14,7 @@ from great_expectations.core import (
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.render.renderer.v3.suite_profile_notebook_renderer import (
     SuiteProfileNotebookRenderer,
 )
@@ -24,10 +24,12 @@ from great_expectations.rule_based_profiler.config.base import (
 )
 from great_expectations.util import get_context
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
-from tests.render.test_util import find_code_in_notebook, run_notebook
+from tests.render.util import find_code_in_notebook, run_notebook
 
-yaml = YAML()
+yaml = YAMLHandler()
 
+# module level markers
+pytestmark = pytest.mark.filesystem
 
 SNIPPETS_USER_CONFIGURABLE_PROFILER: List[str] = [
     # Imports

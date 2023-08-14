@@ -1,20 +1,18 @@
-import logging
-from typing import Optional
+from __future__ import annotations
 
+import logging
+from typing import TYPE_CHECKING, Optional, Tuple, overload
+
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core.batch import BatchData
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import generate_temporary_table_name
 
-try:
-    import sqlalchemy as sa
-    from sqlalchemy.engine.default import DefaultDialect
-    from sqlalchemy.exc import DatabaseError
-    from sqlalchemy.sql.elements import quoted_name
-except ImportError:
-    sa = None
-    quoted_name = None
-    DefaultDialect = None
-    DatabaseError = None
+if TYPE_CHECKING:
+    from great_expectations.compatibility.sqlalchemy import Selectable
 
 logger = logging.getLogger(__name__)
 
@@ -23,17 +21,74 @@ class SqlAlchemyBatchData(BatchData):
     """A class which represents a SQL alchemy batch, with properties including the construction of the batch itself
     and several getters used to access various properties."""
 
-    def __init__(
+    # Instantiating SqlAlchemyBatchData with table_name and schema_name
+    @overload
+    def __init__(  # noqa: PLR0913
         self,
         execution_engine,
-        record_set_name: Optional[str] = None,
+        # Option 1
+        schema_name: Optional[str] = ...,
+        table_name: str = ...,
+        # Option 2
+        query: None = ...,
+        # Option 3
+        selectable: None = ...,
+        create_temp_table: bool = ...,
+        temp_table_schema_name: None = ...,
+        use_quoted_name: bool = ...,
+        source_schema_name: None = ...,
+        source_table_name: None = ...,
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(  # noqa: PLR0913
+        self,
+        execution_engine,
+        # Option 1
+        schema_name: None = ...,
+        table_name: None = ...,
+        # Option 2
+        query: str = ...,
+        # Option 3
+        selectable: None = ...,
+        create_temp_table: bool = ...,
+        temp_table_schema_name: Optional[str] = ...,
+        use_quoted_name: bool = ...,
+        source_schema_name: None = ...,
+        source_table_name: None = ...,
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(  # noqa: PLR0913
+        self,
+        execution_engine,
+        # Option 1
+        schema_name: None = ...,
+        table_name: None = ...,
+        # Option 2
+        query: None = ...,
+        # Option 3
+        selectable: Selectable = ...,
+        create_temp_table: bool = ...,
+        temp_table_schema_name: Optional[str] = ...,
+        use_quoted_name: bool = ...,
+        source_schema_name: Optional[str] = ...,
+        source_table_name: str = ...,
+    ) -> None:
+        ...
+
+    def __init__(  # noqa: PLR0913
+        self,
+        execution_engine,
         # Option 1
         schema_name: Optional[str] = None,
         table_name: Optional[str] = None,
         # Option 2
         query: Optional[str] = None,
         # Option 3
-        selectable=None,
+        selectable: Optional[Selectable] = None,
         create_temp_table: bool = True,
         temp_table_schema_name: Optional[str] = None,
         use_quoted_name: bool = False,
@@ -46,9 +101,6 @@ class SqlAlchemyBatchData(BatchData):
             Args:
                 engine (SqlAlchemy Engine): \
                     A SqlAlchemy Engine or connection that will be used to access the data
-                record_set_name: (string or None): \
-                    The name of the record set available as a domain kwarg for Great Expectations validations. record_set_name
-                    can usually be None, but is required when there are multiple record_sets in the same Batch.
                 schema_name (string or None): \
                     The name of the schema_name in which the databases lie
                 table_name (string or None): \
@@ -89,12 +141,6 @@ class SqlAlchemyBatchData(BatchData):
         super().__init__(execution_engine=execution_engine)
         engine = execution_engine.engine
         self._engine = engine
-        self._record_set_name = record_set_name or "great_expectations_sub_selection"
-        if not isinstance(self._record_set_name, str):
-            raise TypeError(
-                f"record_set_name should be of type str, not {type(record_set_name)}"
-            )
-
         self._schema_name = schema_name
         self._use_quoted_name = use_quoted_name
         self._source_table_name = source_table_name
@@ -119,73 +165,31 @@ class SqlAlchemyBatchData(BatchData):
         self._dialect = dialect
 
         if table_name:
-            # Suggestion: pull this block out as its own _function
-            if use_quoted_name:
-                table_name = quoted_name(table_name, quote=True)
-            if dialect == GXSqlDialect.BIGQUERY:
-                if schema_name is not None:
-                    logger.warning(
-                        "schema_name should not be used when passing a table_name for biquery. Instead, include the schema name in the table_name string."
-                    )
-                # In BigQuery the table name is already qualified with its schema name
-                self._selectable = sa.Table(
-                    table_name,
-                    sa.MetaData(),
-                    schema=None,
+            self._selectable = (
+                self._generate_selectable_from_schema_name_and_table_name(
+                    dialect=dialect,
+                    use_quoted_name=use_quoted_name,
+                    table_name=table_name,
+                    schema_name=schema_name,
                 )
-            else:
-                self._selectable = sa.Table(
-                    table_name,
-                    sa.MetaData(),
-                    schema=schema_name,
-                )
-        elif create_temp_table:
-            generated_table_name = generate_temporary_table_name()
-            # mssql expects all temporary table names to have a prefix '#'
-            if dialect == GXSqlDialect.MSSQL:
-                generated_table_name = f"#{generated_table_name}"
-
-            if selectable is not None:
-                if dialect in [GXSqlDialect.ORACLE, GXSqlDialect.MSSQL] and isinstance(
-                    selectable, str
-                ):
-                    # oracle, mssql query could already be passed as a string
-                    query = selectable
-                else:
-                    # compile selectable to sql statement
-                    query = selectable.compile(
-                        dialect=self.sql_engine_dialect,
-                        compile_kwargs={"literal_binds": True},
-                    )
-
-            self._create_temporary_table(
-                temp_table_name=generated_table_name,
-                query=query,
-                temp_table_schema_name=temp_table_schema_name,
             )
-            self._selectable = sa.Table(
-                generated_table_name,
-                sa.MetaData(),
-                schema=temp_table_schema_name,
+        elif query:
+            self._selectable = self._generate_selectable_from_query(
+                query, dialect, create_temp_table, temp_table_schema_name
             )
         else:
-            if query:
-                self._selectable = sa.text(query)
-            else:
-                self._selectable = selectable.alias(self._record_set_name)
+            self._selectable = self._generate_selectable_from_selectable(
+                selectable, dialect, create_temp_table, temp_table_schema_name
+            )
 
     @property
     def dialect(self) -> GXSqlDialect:
         return self._dialect
 
     @property
-    def sql_engine_dialect(self) -> DefaultDialect:
+    def sql_engine_dialect(self) -> sqlalchemy.DefaultDialect:
         """Returns the Batches' current engine dialect"""
         return self._engine.dialect
-
-    @property
-    def record_set_name(self):
-        return self._record_set_name
 
     @property
     def source_table_name(self):
@@ -203,16 +207,21 @@ class SqlAlchemyBatchData(BatchData):
     def use_quoted_name(self):
         return self._use_quoted_name
 
-    def _create_temporary_table(  # noqa: C901 - 18
-        self, temp_table_name, query, temp_table_schema_name=None
-    ) -> None:
+    def _create_temporary_table(  # noqa: C901, PLR0912, PLR0915
+        self, dialect, query, temp_table_schema_name=None
+    ) -> Tuple[str, str]:
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
         :param query:
         """
 
-        dialect: GXSqlDialect = self.dialect
+        temp_table_name = generate_temporary_table_name()
+        # mssql expects all temporary table names to have a prefix '#'
+        if dialect == GXSqlDialect.MSSQL:
+            temp_table_name = f"#{temp_table_name}"
 
+        dialect = self.dialect
+        stmt: str = ""
         # dialects that support temp schemas
         if temp_table_schema_name is not None and dialect in [
             GXSqlDialect.BIGQUERY,
@@ -240,7 +249,7 @@ class SqlAlchemyBatchData(BatchData):
             stmt = f"CREATE TEMPORARY TABLE `{temp_table_name}` AS {query}"
         elif dialect == GXSqlDialect.MSSQL:
             # Insert "into #{temp_table_name}" in the custom sql query right before the "from" clause
-            # Split is case sensitive so detect case.
+            # Split is case-sensitive so detect case.
             # Note: transforming query to uppercase/lowercase has unintended consequences (i.e.,
             # changing column names), so this is not an option!
             # noinspection PyUnresolvedReferences
@@ -258,6 +267,11 @@ class SqlAlchemyBatchData(BatchData):
         # TODO: <WILL> logger.warning is emitted in situations where a permanent TABLE is created in _create_temporary_table()
         # Similar message may be needed in the future for Trino backend.
         elif dialect == GXSqlDialect.TRINO:
+            logger.warning(
+                f"GX has created permanent view {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
+            )
+            stmt = f"CREATE TABLE {temp_table_name} AS {query}"
+        elif dialect == GXSqlDialect.CLICKHOUSE:
             logger.warning(
                 f"GX has created permanent view {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
             )
@@ -288,8 +302,124 @@ class SqlAlchemyBatchData(BatchData):
             stmt = f'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'
         if dialect == GXSqlDialect.ORACLE:
             try:
-                self._engine.execute(stmt_1)
-            except DatabaseError:
-                self._engine.execute(stmt_2)
+                self.execution_engine.execute_query_in_transaction(sa.text(stmt_1))
+            except sqlalchemy.DatabaseError:
+                self.execution_engine.execute_query_in_transaction(sa.text(stmt_2))
         else:
-            self._engine.execute(stmt)
+            self.execution_engine.execute_query_in_transaction(sa.text(stmt))
+        return (stmt, temp_table_name)
+
+    def _generate_selectable_from_schema_name_and_table_name(
+        self,
+        dialect: GXSqlDialect,
+        use_quoted_name: bool,
+        table_name: str,
+        schema_name: Optional[str] = None,
+    ) -> sqlalchemy.Table:
+        """Helper method to generate selectable using schema and table name
+
+        Args:
+            dialect (GXSqlDialect): Needed to check for BigQuery, which needs to be handled differently.
+            use_quoted_name (bool): To be passed to sqlalchemy.
+            table_name (str): Table name to build selectable from.
+            schema_name (Optional[str], optional): Optional schema name. Defaults to None.
+
+        Returns:
+            sqlalchemy.Table: SqlAlchemy Table that is Selectable.
+        """
+        if use_quoted_name:
+            table_name = sqlalchemy.quoted_name(table_name, quote=True)
+        if dialect == GXSqlDialect.BIGQUERY:
+            if schema_name is not None:
+                logger.warning(
+                    "schema_name should not be used when passing a table_name for biquery. Instead, include the schema name in the table_name string."
+                )
+            # In BigQuery the table name is already qualified with its schema name
+            return sa.Table(
+                table_name,
+                sa.MetaData(),
+                schema=None,
+            )
+        return sa.Table(
+            table_name,
+            sa.MetaData(),
+            schema=schema_name,
+        )
+
+    def _generate_selectable_from_query(
+        self,
+        query: str,
+        dialect: GXSqlDialect,
+        create_temp_table: bool,
+        temp_table_schema_name: Optional[str] = None,
+    ) -> sqlalchemy.Table:
+        """Helper method to generate Selectable from query string.
+
+        Args:
+            query (str): query passed in as RuntimeBatchRequest.
+            dialect (GXSqlDialect): Needed for _create_temporary_table, since different backends name temp_tables differently.
+            create_temp_table (bool): Should we create a temp_table?
+            temp_table_schema_name (Optional[str], optional): Optional string for temp_table schema.  Defaults to None.
+
+        Returns:
+            sqlalchemy.Table: SqlAlchemy Table that is Selectable.
+        """
+        if not create_temp_table:
+            return sa.text(query)
+        _, temp_table_name = self._create_temporary_table(
+            dialect=dialect,
+            query=query,
+            temp_table_schema_name=temp_table_schema_name,
+        )
+
+        return sa.Table(
+            temp_table_name,
+            sa.MetaData(),
+            schema=temp_table_schema_name,
+        )
+
+    def _generate_selectable_from_selectable(
+        self,
+        selectable,
+        dialect: GXSqlDialect,
+        create_temp_table: bool,
+        temp_table_schema_name: Optional[str] = None,
+    ) -> sqlalchemy.Table:
+        """Helper method to generate Selectable from Selectable that is passed into __init__.
+        This method is needed to either turn the passed-in Selectable as an alias, or to create a temp_table that refers to it.
+
+        Args:
+            selectable: selectable that is passed into SqlAlchemyBatchData's init method. It may contain sampling and splitting directives.
+            dialect (GXSqlDialect): Needed for _create_temporary_table, since different backends name temp_tables differently.
+            create_temp_table (bool): Should we create a temp_table?
+            temp_table_schema_name (Optional[str], optional): Optional string for temp_table schema. Defaults to None.
+
+        Returns:
+            sqlalchemy.Table: SqlAlchemy Table that is Selectable.
+        """
+        if not create_temp_table:
+            return selectable.alias()
+
+        if dialect in [GXSqlDialect.ORACLE, GXSqlDialect.MSSQL] and isinstance(
+            selectable, str
+        ):
+            # oracle, mssql query could already be passed as a string
+            query = selectable
+        else:
+            # compile selectable to sql statement
+            query = selectable.compile(
+                dialect=self.sql_engine_dialect,
+                compile_kwargs={"literal_binds": True},
+            )
+
+        _, temp_table_name = self._create_temporary_table(
+            dialect=dialect,
+            query=query,
+            temp_table_schema_name=temp_table_schema_name,
+        )
+
+        return sa.Table(
+            temp_table_name,
+            sa.MetaData(),
+            schema=temp_table_schema_name,
+        )

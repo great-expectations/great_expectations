@@ -3,10 +3,8 @@ from __future__ import annotations
 import copy
 import datetime
 import logging
-import warnings
 from functools import reduce
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -21,6 +19,10 @@ from typing import (
 
 from dateutil.parser import parse
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import (
+    functions as F,
+)
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
@@ -70,39 +72,12 @@ from great_expectations.validator.metric_configuration import (
 
 logger = logging.getLogger(__name__)
 
-try:
-    import pyspark
-    import pyspark.sql.functions as F
-
-    # noinspection SpellCheckingInspection
-    import pyspark.sql.types as sparktypes
-    from pyspark import SparkContext
-    from pyspark.sql import DataFrame, Row, SparkSession
-    from pyspark.sql.readwriter import DataFrameReader
-except ImportError:
-    pyspark = None  # type: ignore[assignment]
-    SparkContext = None  # type: ignore[assignment,misc]
-    SparkSession = None  # type: ignore[assignment,misc]
-    Row = None  # type: ignore[assignment,misc]
-    DataFrame = None  # type: ignore[assignment,misc]
-    DataFrameReader = None  # type: ignore[assignment,misc]
-    F = None  # type: ignore[assignment]
-    # noinspection SpellCheckingInspection
-    sparktypes = None  # type: ignore[assignment]
-
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency for support."
-    )
-
-if TYPE_CHECKING:
-    from pyspark.sql import DataFrame  # noqa: TCH004 # try imported above
-
 
 # noinspection SpellCheckingInspection
 def apply_dateutil_parse(column):
     assert len(column.columns) == 1, "Expected DataFrame with 1 column"
     col_name = column.columns[0]
-    _udf = F.udf(parse, sparktypes.TimestampType())
+    _udf = F.udf(parse, pyspark.types.TimestampType())
     return column.withColumn(col_name, _udf(col_name))
 
 
@@ -214,7 +189,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         *args,
         persist=True,
         spark_config=None,
-        force_reuse_spark_context=False,
+        force_reuse_spark_context=True,
         **kwargs,
     ) -> None:
         self._persist = persist
@@ -222,15 +197,13 @@ class SparkDFExecutionEngine(ExecutionEngine):
         if spark_config is None:
             spark_config = {}
 
-        spark: SparkSession = get_or_create_spark_application(
+        spark: pyspark.SparkSession = get_or_create_spark_application(
             spark_config=spark_config,
             force_reuse_spark_context=force_reuse_spark_context,
         )
 
-        spark_config = dict(spark_config)
         spark_config.update({k: v for (k, v) in spark.sparkContext.getConf().getAll()})
 
-        self._spark_config = spark_config
         self.spark = spark
 
         azure_options: dict = kwargs.pop("azure_options", {})
@@ -250,7 +223,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         self._data_sampler = SparkDataSampler()
 
     @property
-    def dataframe(self) -> DataFrame:
+    def dataframe(self) -> pyspark.DataFrame:
         """If a batch has been loaded, returns a Spark Dataframe containing the data within the loaded batch"""
         if self.batch_manager.active_batch_data is None:
             raise ValueError(
@@ -260,18 +233,21 @@ class SparkDFExecutionEngine(ExecutionEngine):
         return cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
 
     def load_batch_data(  # type: ignore[override]
-        self, batch_id: str, batch_data: Union[SparkDFBatchData, DataFrame]
+        self, batch_id: str, batch_data: Union[SparkDFBatchData, pyspark.DataFrame]
     ) -> None:
-        if isinstance(batch_data, DataFrame):
+        if pyspark.DataFrame and isinstance(batch_data, pyspark.DataFrame):  # type: ignore[truthy-function]
             batch_data = SparkDFBatchData(self, batch_data)
         elif not isinstance(batch_data, SparkDFBatchData):
             raise GreatExpectationsError(
                 "SparkDFExecutionEngine requires batch data that is either a DataFrame or a SparkDFBatchData object"
             )
 
+        if self._persist:
+            batch_data.dataframe.persist()
+
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
-    def get_batch_data_and_markers(
+    def get_batch_data_and_markers(  # noqa: PLR0912, PLR0915
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
         # We need to build a batch_markers to be used in the dataframe
@@ -295,8 +271,8 @@ class SparkDFExecutionEngine(ExecutionEngine):
         reader_method: str
         reader_options: dict
         path: str
-        schema: Optional[Union[pyspark.sql.types.StructType, dict, str]]
-        reader: DataFrameReader
+        schema: Optional[Union[pyspark.types.StructType, dict, str]]
+        reader: pyspark.DataFrameReader
         reader_fn: Callable
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
@@ -348,7 +324,7 @@ illegal.  Please check your config."""
             # schema can be a dict if it has been through serialization step,
             # either as part of the datasource configuration, or checkpoint config
             if isinstance(schema, dict):
-                schema = sparktypes.StructType.fromJson(schema)
+                schema = pyspark.types.StructType.fromJson(schema)
 
             # this can happen if we have not converted schema into json at Datasource-config level
             elif isinstance(schema, str):
@@ -379,7 +355,7 @@ illegal.  Please check your config."""
                     """
                 )
             # pyspark will raise an AnalysisException error if path is incorrect
-            except pyspark.sql.utils.AnalysisException:
+            except pyspark.AnalysisException:
                 raise ExecutionEngineError(
                     f"""Unable to read in batch from the following path: {path}. Please check your configuration."""
                 )
@@ -492,10 +468,10 @@ illegal.  Please check your config."""
             )
 
     @public_api
-    def get_domain_records(  # noqa: C901 - 18
+    def get_domain_records(  # noqa: C901, PLR0912, PLR0915
         self,
         domain_kwargs: dict,
-    ) -> DataFrame:
+    ) -> "pyspark.DataFrame":  # noqa F821
         """Uses the given Domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a batch.
 
         Args:
@@ -503,6 +479,11 @@ illegal.  Please check your config."""
 
         Returns:
             A DataFrame (the data on which to compute returned in the format of a Spark DataFrame)
+        """
+        """
+        # TODO: <Alex>Docusaurus run fails, unless "pyspark.DataFrame" type hint above is enclosed in quotes.
+        This may be caused by it becoming great_expectations.compatibility.not_imported.NotImported when pyspark is not installed.
+        </Alex>
         """
         table = domain_kwargs.get("table", None)
         if table:
@@ -521,7 +502,7 @@ illegal.  Please check your config."""
                 raise ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
-        else:
+        else:  # noqa: PLR5501
             if batch_id in self.batch_manager.batch_data_cache:
                 data = cast(
                     SparkDFBatchData, self.batch_manager.batch_data_cache[batch_id]
@@ -576,20 +557,10 @@ illegal.  Please check your config."""
                     F.col(column_A_name).isNull() | F.col(column_B_name).isNull()
                 )
                 data = data.filter(~ignore_condition)
-            else:
-                if ignore_row_if not in ["neither", "never"]:
+            else:  # noqa: PLR5501
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                    )
-
-                if ignore_row_if == "never":
-                    # deprecated-v0.13.29
-                    warnings.warn(
-                        f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use \
-"neither" moving forward.
-""",
-                        DeprecationWarning,
                     )
 
             return data
@@ -609,7 +580,7 @@ illegal.  Please check your config."""
                 ]
                 ignore_condition = reduce(lambda a, b: a | b, conditions)
                 data = data.filter(~ignore_condition)
-            else:
+            else:  # noqa: PLR5501
                 if ignore_row_if != "never":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
@@ -651,7 +622,7 @@ illegal.  Please check your config."""
         domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple[DataFrame, dict, dict]:
+    ) -> Tuple["pyspark.DataFrame", dict, dict]:  # noqa F821
         """Uses a DataFrame and Domain kwargs (which include a row condition and a condition parser) to obtain and/or query a Batch of data.
 
         Returns in the format of a Spark DataFrame along with Domain arguments required for computing.  If the Domain \
@@ -673,13 +644,18 @@ illegal.  Please check your config."""
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the Domain within the compute domain
         """
+        """
+        # TODO: <Alex>Docusaurus run fails, unless "pyspark.DataFrame" type hint above is enclosed in quotes.
+        This may be caused by it becoming great_expectations.compatibility.not_imported.NotImported when pyspark is not installed.
+        </Alex>
+        """
         table: str = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
                 "SparkDFExecutionEngine does not currently support multiple named tables."
             )
 
-        data: DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
+        data: pyspark.DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
 
         split_domain_kwargs: SplitDomainKwargs = self._split_domain_kwargs(
             domain_kwargs, domain_type, accessor_keys
@@ -743,7 +719,7 @@ illegal.  Please check your config."""
         """
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
-        res: List[Row]
+        res: List[pyspark.Row]
 
         aggregates: Dict[Tuple[str, str, str], dict] = {}
 
@@ -776,7 +752,7 @@ illegal.  Please check your config."""
 
         for aggregate in aggregates.values():
             domain_kwargs: dict = aggregate["domain_kwargs"]
-            df: DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
+            df: pyspark.DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
 
             assert len(aggregate["column_aggregates"]) == len(aggregate["metric_ids"])
 

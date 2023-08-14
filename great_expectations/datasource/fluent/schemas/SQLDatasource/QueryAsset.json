@@ -1,6 +1,6 @@
 {
     "title": "QueryAsset",
-    "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+    "description": "--Public API--",
     "type": "object",
     "properties": {
         "name": {
@@ -15,12 +15,22 @@
             ],
             "type": "string"
         },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
         "order_by": {
             "title": "Order By",
             "type": "array",
             "items": {
                 "$ref": "#/definitions/Sorter"
             }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
         },
         "splitter": {
             "title": "Splitter",

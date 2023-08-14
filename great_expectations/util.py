@@ -5,10 +5,12 @@ import cProfile
 import datetime
 import decimal
 import importlib
+import inspect
 import io
 import json
 import logging
 import os
+import pathlib
 import pstats
 import re
 import sys
@@ -38,6 +40,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     Mapping,
     Optional,
     Set,
@@ -52,10 +55,10 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from packaging import version
-from pkg_resources import Distribution
-from typing_extensions import Literal, TypeGuard
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
@@ -68,37 +71,21 @@ try:
 except ImportError:
     black = None  # type: ignore[assignment]
 
-try:
-    # This library moved in python 3.8
-    import importlib.metadata as importlib_metadata
-except ModuleNotFoundError:
-    # Fallback for python < 3.8
-    import importlib_metadata
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy as sa
-    from sqlalchemy import Table
-    from sqlalchemy.engine import reflection
-    from sqlalchemy.sql import Select
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    reflection = None
-    Table = None
-    Select = None
 
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
+    from typing_extensions import TypeGuard
 
     from great_expectations.alias_types import PathStr
-    from great_expectations.data_context import FileDataContext
-    from great_expectations.data_context.data_context.abstract_data_context import (
+    from great_expectations.data_context import (
         AbstractDataContext,
+        CloudDataContext,
+        EphemeralDataContext,
+        FileDataContext,
     )
     from great_expectations.data_context.types.base import DataContextConfig
 
@@ -258,21 +245,6 @@ seconds."""
     return execution_time_decorator
 
 
-# noinspection SpellCheckingInspection
-def get_project_distribution() -> Optional[Distribution]:
-    ditr: Distribution
-    for distr in importlib_metadata.distributions():
-        relative_path: Path
-        try:
-            relative_path = Path(__file__).relative_to(distr.locate_file(""))
-        except ValueError:
-            pass
-        else:
-            if relative_path in distr.files:
-                return distr
-    return None
-
-
 # Returns the object reference to the currently running function (i.e., the immediate function under execution).
 def get_currently_executing_function() -> Callable:
     cf = cast(FrameType, currentframe())
@@ -402,7 +374,7 @@ def is_library_loadable(library_name: str) -> bool:
     return module_obj is not None
 
 
-def load_class(class_name: str, module_name: str) -> Any:
+def load_class(class_name: str, module_name: str) -> type:
     if class_name is None:
         raise TypeError("class_name must not be None")
     if not isinstance(class_name, str):
@@ -478,7 +450,7 @@ def _load_and_convert_to_dataset_class(
     return _convert_to_dataset_class(df, dataset_class, expectation_suite, profiler)
 
 
-def read_csv(
+def read_csv(  # noqa: PLR0913
     filename,
     class_name="PandasDataset",
     module_name="great_expectations.dataset",
@@ -522,7 +494,7 @@ def read_csv(
         )
 
 
-def read_json(
+def read_json(  # noqa: PLR0913
     filename,
     class_name="PandasDataset",
     module_name="great_expectations.dataset",
@@ -575,7 +547,7 @@ def read_json(
         )
 
 
-def read_excel(
+def read_excel(  # noqa: PLR0913
     filename,
     class_name="PandasDataset",
     module_name="great_expectations.dataset",
@@ -630,7 +602,7 @@ def read_excel(
     return df
 
 
-def read_table(
+def read_table(  # noqa: PLR0913
     filename,
     class_name="PandasDataset",
     module_name="great_expectations.dataset",
@@ -674,7 +646,7 @@ def read_table(
         )
 
 
-def read_feather(
+def read_feather(  # noqa: PLR0913
     filename,
     class_name="PandasDataset",
     module_name="great_expectations.dataset",
@@ -718,7 +690,7 @@ def read_feather(
         )
 
 
-def read_parquet(
+def read_parquet(  # noqa: PLR0913
     filename,
     class_name="PandasDataset",
     module_name="great_expectations.dataset",
@@ -762,7 +734,7 @@ def read_parquet(
         )
 
 
-def from_pandas(
+def from_pandas(  # noqa: PLR0913
     pandas_df,
     class_name="PandasDataset",
     module_name="great_expectations.dataset",
@@ -802,7 +774,7 @@ def from_pandas(
         )
 
 
-def read_pickle(
+def read_pickle(  # noqa: PLR0913
     filename,
     class_name="PandasDataset",
     module_name="great_expectations.dataset",
@@ -846,7 +818,7 @@ def read_pickle(
         )
 
 
-def read_sas(
+def read_sas(  # noqa: PLR0913
     filename,
     class_name="PandasDataset",
     module_name="great_expectations.dataset",
@@ -890,52 +862,62 @@ def read_sas(
         )
 
 
-def build_in_memory_runtime_context() -> AbstractDataContext:
+def build_in_memory_runtime_context(
+    include_pandas: bool = True,
+    include_spark: bool = True,
+) -> AbstractDataContext:
     """
     Create generic in-memory "BaseDataContext" context for manipulations as required by tests.
+
+    Args:
+        include_pandas (bool): If True, include pandas datasource
+        include_spark (bool): If True, include spark datasource
     """
     from great_expectations.data_context.types.base import (
         DataContextConfig,
         InMemoryStoreBackendDefaults,
     )
 
+    datasources = {}
+    if include_pandas:
+        datasources["pandas_datasource"] = {
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "data_connectors": {
+                "runtime_data_connector": {
+                    "class_name": "RuntimeDataConnector",
+                    "batch_identifiers": [
+                        "id_key_0",
+                        "id_key_1",
+                    ],
+                }
+            },
+        }
+    if include_spark:
+        datasources["spark_datasource"] = {
+            "execution_engine": {
+                "class_name": "SparkDFExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "data_connectors": {
+                "runtime_data_connector": {
+                    "class_name": "RuntimeDataConnector",
+                    "batch_identifiers": [
+                        "id_key_0",
+                        "id_key_1",
+                    ],
+                }
+            },
+        }
+
     data_context_config: DataContextConfig = DataContextConfig(
-        datasources={  # type: ignore[arg-type]
-            "pandas_datasource": {
-                "execution_engine": {
-                    "class_name": "PandasExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "class_name": "Datasource",
-                "module_name": "great_expectations.datasource",
-                "data_connectors": {
-                    "runtime_data_connector": {
-                        "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": [
-                            "id_key_0",
-                            "id_key_1",
-                        ],
-                    }
-                },
-            },
-            "spark_datasource": {
-                "execution_engine": {
-                    "class_name": "SparkDFExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "class_name": "Datasource",
-                "module_name": "great_expectations.datasource",
-                "data_connectors": {
-                    "runtime_data_connector": {
-                        "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": [
-                            "id_key_0",
-                            "id_key_1",
-                        ],
-                    }
-                },
-            },
-        },
+        datasources=datasources,  # type: ignore[arg-type]
         expectations_store_name="expectations_store",
         validations_store_name="validations_store",
         evaluation_parameter_store_name="evaluation_parameter_store",
@@ -948,7 +930,7 @@ def build_in_memory_runtime_context() -> AbstractDataContext:
     return context
 
 
-def validate(
+def validate(  # noqa: PLR0913, PLR0912
     data_asset,
     expectation_suite=None,
     data_asset_name=None,
@@ -1028,7 +1010,7 @@ def validate(
         return data_asset.validate(
             expectation_suite=expectation_suite,
             data_context=data_context,
-            *args,
+            *args,  # noqa: B026 # star-arg-unpacking-after-keyword-arg
             **kwargs,
         )
 
@@ -1073,7 +1055,7 @@ def validate(
 
 
 # https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
-def gen_directory_tree_str(startpath):
+def gen_directory_tree_str(startpath: PathStr):
     """Print the structure of directory as a tree:
 
     Ex:
@@ -1092,7 +1074,7 @@ def gen_directory_tree_str(startpath):
     tuples.sort()
 
     for root, dirs, files in tuples:
-        level = root.replace(startpath, "").count(os.sep)
+        level = root.replace(str(startpath), "").count(os.sep)
         indent = " " * 4 * level
         output_str += f"{indent}{os.path.basename(root)}/\n"  # noqa: PTH119
         subindent = " " * 4 * (level + 1)
@@ -1167,7 +1149,7 @@ def _convert_json_bools_to_python_bools(code: str) -> str:
     return code
 
 
-def filter_properties_dict(
+def filter_properties_dict(  # noqa: PLR0913, PLR0912
     properties: Optional[dict] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
@@ -1283,7 +1265,7 @@ def filter_properties_dict(
 
 
 @overload
-def deep_filter_properties_iterable(
+def deep_filter_properties_iterable(  # noqa: PLR0913
     properties: dict,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -1296,7 +1278,7 @@ def deep_filter_properties_iterable(
 
 
 @overload
-def deep_filter_properties_iterable(
+def deep_filter_properties_iterable(  # noqa: PLR0913
     properties: list,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -1309,7 +1291,7 @@ def deep_filter_properties_iterable(
 
 
 @overload
-def deep_filter_properties_iterable(
+def deep_filter_properties_iterable(  # noqa: PLR0913
     properties: set,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -1322,7 +1304,7 @@ def deep_filter_properties_iterable(
 
 
 @overload
-def deep_filter_properties_iterable(
+def deep_filter_properties_iterable(  # noqa: PLR0913
     properties: tuple,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -1335,7 +1317,7 @@ def deep_filter_properties_iterable(
 
 
 @overload
-def deep_filter_properties_iterable(
+def deep_filter_properties_iterable(  # noqa: PLR0913
     properties: None,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
@@ -1347,7 +1329,7 @@ def deep_filter_properties_iterable(
     ...
 
 
-def deep_filter_properties_iterable(
+def deep_filter_properties_iterable(  # noqa: PLR0913
     properties: Union[dict, list, set, tuple, None] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
@@ -1392,7 +1374,7 @@ def deep_filter_properties_iterable(
         # Upon unwinding the call stack, do a sanity check to ensure cleaned properties.
         keys_to_delete: List[str] = list(
             filter(
-                lambda k: k not in keep_fields  # type: ignore[arg-type]
+                lambda k: k not in keep_fields
                 and _is_to_be_removed_from_deep_filter_properties_iterable(
                     value=properties[k],
                     clean_nulls=clean_nulls,
@@ -1578,8 +1560,8 @@ def isclose(
     return cast(
         bool,
         np.isclose(
-            a=np.float64(operand_a),  # type:ignore[arg-type]
-            b=np.float64(operand_b),  # type:ignore[arg-type]
+            a=np.float64(operand_a),  # type: ignore[arg-type]
+            b=np.float64(operand_b),  # type: ignore[arg-type]
             rtol=rtol,
             atol=atol,
             equal_nan=equal_nan,
@@ -1696,7 +1678,9 @@ def convert_ndarray_float_to_datetime_dtype(data: np.ndarray) -> np.ndarray:
     Note: Converts to "naive" "datetime.datetime" values (assumes "UTC" TimeZone based floating point timestamps).
     """
     value: Any
-    return np.asarray([datetime.datetime.utcfromtimestamp(value) for value in data])
+    return np.asarray(
+        [datetime.datetime.utcfromtimestamp(value) for value in data]  # noqa: DTZ004
+    )
 
 
 def convert_ndarray_float_to_datetime_tuple(
@@ -1731,38 +1715,78 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
     return convert_decimal_to_float_vectorized(data)
 
 
+def convert_pandas_series_decimal_to_float_dtype(
+    data: pd.Series, inplace: bool = False
+) -> pd.Series | None:
+    """
+    Convert all elements of "pd.Series" argument from "decimal.Decimal" type to "float" type objects "pd.Series" result.
+    """
+    series_data: np.ndarray = data.to_numpy()
+    series_data_has_decimal: bool = does_ndarray_contain_decimal_dtype(data=series_data)
+    if series_data_has_decimal:
+        series_data = convert_ndarray_decimal_to_float_dtype(data=series_data)
+        if inplace:
+            data.update(pd.Series(series_data))
+            return None
+
+        return pd.Series(series_data)
+
+    if inplace:
+        return None
+
+    return data
+
+
 @overload
-def get_context(
-    project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
+def get_context(  # type: ignore[misc] # overlapping overload false positive?  # noqa: PLR0913
+    project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: PathStr = ...,
-    runtime_environment: Optional[dict] = ...,
+    runtime_environment: dict | None = ...,
     cloud_base_url: None = ...,
     cloud_access_token: None = ...,
     cloud_organization_id: None = ...,
-    cloud_mode: Optional[Literal[False]] = ...,
+    cloud_mode: Literal[False] | None = ...,
     # <GX_RENAME> Deprecated as of 0.15.37
     ge_cloud_base_url: None = ...,
     ge_cloud_access_token: None = ...,
     ge_cloud_organization_id: None = ...,
-    ge_cloud_mode: Optional[Literal[False]] = ...,
+    ge_cloud_mode: Literal[False] | None = ...,
 ) -> FileDataContext:
     ...
 
 
 @overload
-def get_context(
-    project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
-    context_root_dir: Optional[PathStr] = ...,
-    runtime_environment: Optional[dict] = ...,
-    cloud_base_url: Optional[str] = ...,
-    cloud_access_token: Optional[str] = ...,
-    cloud_organization_id: Optional[str] = ...,
-    cloud_mode: Optional[bool] = ...,
+def get_context(  # noqa: PLR0913
+    project_config: DataContextConfig | Mapping | None = ...,
+    context_root_dir: None = ...,
+    runtime_environment: dict | None = ...,
+    cloud_base_url: str | None = ...,
+    cloud_access_token: str | None = ...,
+    cloud_organization_id: str | None = ...,
+    cloud_mode: Literal[True] = ...,
     # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_base_url: Optional[str] = ...,
-    ge_cloud_access_token: Optional[str] = ...,
-    ge_cloud_organization_id: Optional[str] = ...,
-    ge_cloud_mode: Optional[bool] = ...,
+    ge_cloud_base_url: str | None = ...,
+    ge_cloud_access_token: str | None = ...,
+    ge_cloud_organization_id: str | None = ...,
+    ge_cloud_mode: bool | None = ...,
+) -> CloudDataContext:
+    ...
+
+
+@overload
+def get_context(  # noqa: PLR0913
+    project_config: DataContextConfig | Mapping | None = ...,
+    context_root_dir: PathStr | None = ...,
+    runtime_environment: dict | None = ...,
+    cloud_base_url: str | None = ...,
+    cloud_access_token: str | None = ...,
+    cloud_organization_id: str | None = ...,
+    cloud_mode: bool | None = ...,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: str | None = ...,
+    ge_cloud_access_token: str | None = ...,
+    ge_cloud_organization_id: str | None = ...,
+    ge_cloud_mode: bool | None = ...,
 ) -> AbstractDataContext:
     ...
 
@@ -1772,19 +1796,19 @@ def get_context(
 @deprecated_argument(argument_name="ge_cloud_access_token", version="0.15.37")
 @deprecated_argument(argument_name="ge_cloud_organization_id", version="0.15.37")
 @deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")
-def get_context(
-    project_config: Optional[Union[DataContextConfig, Mapping]] = None,
-    context_root_dir: Optional[PathStr] = None,
-    runtime_environment: Optional[dict] = None,
-    cloud_base_url: Optional[str] = None,
-    cloud_access_token: Optional[str] = None,
-    cloud_organization_id: Optional[str] = None,
-    cloud_mode: Optional[bool] = None,
+def get_context(  # noqa: PLR0913
+    project_config: DataContextConfig | Mapping | None = None,
+    context_root_dir: PathStr | None = None,
+    runtime_environment: dict | None = None,
+    cloud_base_url: str | None = None,
+    cloud_access_token: str | None = None,
+    cloud_organization_id: str | None = None,
+    cloud_mode: bool | None = None,
     # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_base_url: Optional[str] = None,
-    ge_cloud_access_token: Optional[str] = None,
-    ge_cloud_organization_id: Optional[str] = None,
-    ge_cloud_mode: Optional[bool] = None,
+    ge_cloud_base_url: str | None = None,
+    ge_cloud_access_token: str | None = None,
+    ge_cloud_organization_id: str | None = None,
+    ge_cloud_mode: bool | None = None,
 ) -> AbstractDataContext:
     """Method to return the appropriate Data Context depending on parameters and environment.
 
@@ -1870,24 +1894,74 @@ def get_context(
     Raises:
         GXCloudConfigurationError: Cloud mode enabled, but missing configuration.
     """
-    from great_expectations.data_context.data_context import (
-        CloudDataContext,
-        EphemeralDataContext,
-        FileDataContext,
+    project_config = _prepare_project_config(project_config)
+
+    # First, check for GX Cloud conditions
+    cloud_context = _get_cloud_context(
+        project_config=project_config,
+        context_root_dir=context_root_dir,
+        runtime_environment=runtime_environment,
+        cloud_mode=cloud_mode,
+        cloud_base_url=cloud_base_url,
+        cloud_access_token=cloud_access_token,
+        cloud_organization_id=cloud_organization_id,
+        ge_cloud_mode=ge_cloud_mode,
+        ge_cloud_base_url=ge_cloud_base_url,
+        ge_cloud_access_token=ge_cloud_access_token,
+        ge_cloud_organization_id=ge_cloud_organization_id,
     )
-    from great_expectations.data_context.types.base import (
-        DataContextConfig,
-        InMemoryStoreBackendDefaults,
+    if cloud_context:
+        return cloud_context
+
+    # Second, check for a context_root_dir to determine if using a filesystem
+    file_context = _get_file_context(
+        project_config=project_config,
+        context_root_dir=context_root_dir,
+        runtime_environment=runtime_environment,
     )
+    if file_context:
+        return file_context
+
+    # Finally, default to ephemeral
+    return _get_ephemeral_context(
+        project_config=project_config,
+        runtime_environment=runtime_environment,
+    )
+
+
+def _prepare_project_config(
+    project_config: DataContextConfig | Mapping | None,
+) -> DataContextConfig | None:
+    from great_expectations.data_context.data_context import AbstractDataContext
+    from great_expectations.data_context.types.base import DataContextConfig
 
     # If available and applicable, convert project_config mapping into a rich config type
     if project_config:
-        project_config = EphemeralDataContext.get_or_create_data_context_config(
+        project_config = AbstractDataContext.get_or_create_data_context_config(
             project_config
         )
     assert project_config is None or isinstance(
         project_config, DataContextConfig
     ), "project_config must be of type Optional[DataContextConfig]"
+
+    return project_config
+
+
+def _get_cloud_context(  # noqa: PLR0913
+    project_config: DataContextConfig | Mapping | None = None,
+    context_root_dir: PathStr | None = None,
+    runtime_environment: dict | None = None,
+    cloud_base_url: str | None = None,
+    cloud_access_token: str | None = None,
+    cloud_organization_id: str | None = None,
+    cloud_mode: bool | None = None,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: str | None = None,
+    ge_cloud_access_token: str | None = None,
+    ge_cloud_organization_id: str | None = None,
+    ge_cloud_mode: bool | None = None,
+) -> CloudDataContext | None:
+    from great_expectations.data_context.data_context import CloudDataContext
 
     # Chetan - 20221208 - not formally deprecating these values until a future date
     (
@@ -1906,7 +1980,6 @@ def get_context(
         ge_cloud_organization_id=ge_cloud_organization_id,
     )
 
-    # First, check for GX Cloud conditions
     config_available = CloudDataContext.is_cloud_config_available(
         cloud_base_url=cloud_base_url,
         cloud_access_token=cloud_access_token,
@@ -1929,8 +2002,40 @@ def get_context(
             "GX Cloud Mode enabled, but missing env vars: GX_CLOUD_ORGANIZATION_ID, GX_CLOUD_ACCESS_TOKEN"
         )
 
-    # Second, check for which type of local
-    # Prioritize FileDataContext but default to EphemeralDataContext if no context_root_dir
+    return None
+
+
+def _resolve_cloud_args(  # noqa: PLR0913
+    cloud_base_url: str | None = None,
+    cloud_access_token: str | None = None,
+    cloud_organization_id: str | None = None,
+    cloud_mode: bool | None = None,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: str | None = None,
+    ge_cloud_access_token: str | None = None,
+    ge_cloud_organization_id: str | None = None,
+    ge_cloud_mode: bool | None = None,
+) -> tuple[str | None, str | None, str | None, bool | None]:
+    cloud_base_url = cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
+    cloud_access_token = (
+        cloud_access_token if cloud_access_token is not None else ge_cloud_access_token
+    )
+    cloud_organization_id = (
+        cloud_organization_id
+        if cloud_organization_id is not None
+        else ge_cloud_organization_id
+    )
+    cloud_mode = cloud_mode if cloud_mode is not None else ge_cloud_mode
+    return cloud_base_url, cloud_access_token, cloud_organization_id, cloud_mode
+
+
+def _get_file_context(
+    project_config: DataContextConfig | None = None,
+    context_root_dir: PathStr | None = None,
+    runtime_environment: dict | None = None,
+) -> FileDataContext | None:
+    from great_expectations.data_context.data_context import FileDataContext
+
     if not context_root_dir:
         try:
             context_root_dir = FileDataContext.find_context_root_dir()
@@ -1938,11 +2043,25 @@ def get_context(
             logger.info("Could not find local context root directory")
 
     if context_root_dir:
+        context_root_dir = pathlib.Path(context_root_dir).absolute()
         return FileDataContext(
             project_config=project_config,
             context_root_dir=context_root_dir,
             runtime_environment=runtime_environment,
         )
+
+    return None
+
+
+def _get_ephemeral_context(
+    project_config: DataContextConfig | None = None,
+    runtime_environment: dict | None = None,
+) -> EphemeralDataContext:
+    from great_expectations.data_context.data_context import EphemeralDataContext
+    from great_expectations.data_context.types.base import (
+        DataContextConfig,
+        InMemoryStoreBackendDefaults,
+    )
 
     if not project_config:
         project_config = DataContextConfig(
@@ -1957,30 +2076,6 @@ def get_context(
     )
 
 
-def _resolve_cloud_args(
-    cloud_base_url: Optional[str] = None,
-    cloud_access_token: Optional[str] = None,
-    cloud_organization_id: Optional[str] = None,
-    cloud_mode: Optional[bool] = None,
-    # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_base_url: Optional[str] = None,
-    ge_cloud_access_token: Optional[str] = None,
-    ge_cloud_organization_id: Optional[str] = None,
-    ge_cloud_mode: Optional[bool] = None,
-) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[bool]]:
-    cloud_base_url = cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
-    cloud_access_token = (
-        cloud_access_token if cloud_access_token is not None else ge_cloud_access_token
-    )
-    cloud_organization_id = (
-        cloud_organization_id
-        if cloud_organization_id is not None
-        else ge_cloud_organization_id
-    )
-    cloud_mode = cloud_mode if cloud_mode is not None else ge_cloud_mode
-    return cloud_base_url, cloud_access_token, cloud_organization_id, cloud_mode
-
-
 def is_sane_slack_webhook(url: str) -> bool:
     """Really basic sanity checking."""
     if url is None:
@@ -1990,7 +2085,7 @@ def is_sane_slack_webhook(url: str) -> bool:
 
 
 def is_list_of_strings(_list) -> TypeGuard[List[str]]:
-    return isinstance(_list, list) and all([isinstance(site, str) for site in _list])
+    return isinstance(_list, list) and all(isinstance(site, str) for site in _list)
 
 
 def generate_library_json_from_registered_expectations():
@@ -2011,7 +2106,7 @@ def delete_blank_lines(text: str) -> str:
 
 
 def generate_temporary_table_name(
-    default_table_name_prefix: str = "ge_temp_",
+    default_table_name_prefix: str = "gx_temp_",
     num_digits: int = 8,
 ) -> str:
     table_name: str = f"{default_table_name_prefix}{str(uuid.uuid4())[:num_digits]}"
@@ -2021,7 +2116,7 @@ def generate_temporary_table_name(
 def get_sqlalchemy_inspector(engine):
     if version.parse(sa.__version__) < version.parse("1.4"):
         # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
-        insp = reflection.Inspector.from_engine(engine)
+        insp = sqlalchemy.reflection.Inspector.from_engine(engine)
     else:
         insp = sa.inspect(engine)
     return insp
@@ -2036,7 +2131,9 @@ def get_sqlalchemy_url(drivername, **credentials):
     return url
 
 
-def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, Select]:
+def get_sqlalchemy_selectable(
+    selectable: Union[sa.Table, sqlalchemy.Select]
+) -> Union[sa.Table, sqlalchemy.Select]:
     """
     Beginning from SQLAlchemy 1.4, a select() can no longer be embedded inside of another select() directly,
     without explicitly turning the inner select() into a subquery first. This helper method ensures that this
@@ -2047,7 +2144,7 @@ def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, 
 
     https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
     """
-    if isinstance(selectable, Select):
+    if sqlalchemy.Select and isinstance(selectable, sqlalchemy.Select):
         if version.parse(sa.__version__) >= version.parse("1.4"):
             selectable = selectable.subquery()
         else:
@@ -2072,7 +2169,7 @@ def get_sqlalchemy_domain_data(domain_data):
     if version.parse(sa.__version__) < version.parse("1.4"):
         # Implicit coercion of SELECT and SELECT constructs is deprecated since 1.4
         # select(query).subquery() should be used instead
-        domain_data = sa.select(["*"]).select_from(domain_data)
+        domain_data = sa.select(sa.text("*")).select_from(domain_data)
     # engine.get_domain_records returns a valid select object;
     # calling fetchall at execution is equivalent to a SELECT *
     return domain_data
@@ -2084,11 +2181,28 @@ def import_make_url():
     still be accessed from sqlalchemy.engine.url to avoid import errors.
     """
     if version.parse(sa.__version__) < version.parse("1.4"):
-        from sqlalchemy.engine.url import make_url
+        make_url = sqlalchemy.url.make_url
     else:
-        from sqlalchemy.engine import make_url
+        make_url = sqlalchemy.engine.make_url
 
     return make_url
+
+
+def get_clickhouse_sqlalchemy_potential_type(type_module, type_) -> Any:
+    ch_type = type_
+    if type(ch_type) is str:
+        if type_.lower() in ("decimal", "decimaltype()"):
+            ch_type = type_module.types.Decimal
+        elif type_.lower() in ("fixedstring"):
+            ch_type = type_module.types.String
+        else:
+            ch_type = type_module.ClickHouseDialect()._get_column_type("", ch_type)
+
+    if hasattr(ch_type, "nested_type"):
+        ch_type = type(ch_type.nested_type)
+    if not inspect.isclass(ch_type):
+        ch_type = type(ch_type)
+    return ch_type
 
 
 def get_pyathena_potential_type(type_module, type_) -> str:
@@ -2126,46 +2240,3 @@ def pandas_series_between_inclusive(
         metric_series = series.between(min_value, max_value)
 
     return metric_series
-
-
-def numpy_quantile(
-    a: npt.NDArray, q: float, method: str, axis: Optional[int] = None
-) -> Union[np.float64, npt.NDArray]:
-    """
-    As of NumPy 1.21.0, the 'interpolation' arg in quantile() has been renamed to `method`.
-    Source: https://numpy.org/doc/stable/reference/generated/numpy.quantile.html
-    """
-    quantile: npt.NDArray
-    if version.parse(np.__version__) >= version.parse("1.22.0"):
-        quantile = np.quantile(  # type: ignore[call-arg]
-            a=a,
-            q=q,
-            axis=axis,
-            method=method,
-        )
-    else:
-        quantile = np.quantile(
-            a=a,
-            q=q,
-            axis=axis,
-            interpolation=method,
-        )
-
-    return quantile
-
-
-class NotImported:
-    def __init__(self, message: str):
-        self.__dict__["gx_error_message"] = message
-
-    def __getattr__(self, attr: str) -> Any:
-        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
-
-    def __setattr__(self, key: str, value: Any) -> None:
-        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
-
-    def __call__(self, *args, **kwargs) -> Any:
-        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
-
-    def __str__(self) -> str:
-        return self.__dict__["gx_error_message"]

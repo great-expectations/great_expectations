@@ -12,6 +12,7 @@ from great_expectations.core.config_provider import (
 )
 from great_expectations.datasource.fluent.config_str import ConfigStr, SecretStr
 from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
+from great_expectations.exceptions import MissingConfigVariableError
 
 pytestmark = pytest.mark.unit
 
@@ -20,6 +21,7 @@ class MyClass(FluentBaseModel):
     normal_field: str
     secret_field: SecretStr
     config_field: ConfigStr
+    config_field_w_default: ConfigStr = r"hey-${MY_SECRET}"  # type: ignore[assignment]
 
 
 @pytest.fixture
@@ -41,6 +43,17 @@ def test_config_provider_substitution(
     assert subbed != my_dict
 
 
+def test_config_provider_substitution_raises_error(
+    monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider
+):
+    monkeypatch.setenv("NOT_MY_CONFIG", "bar")
+
+    my_dict = {"my_key": r"foo${MY_CONFIG}", "another_key": r"${MY_CONFIG}"}
+
+    with pytest.raises(MissingConfigVariableError):
+        env_config_provider.substitute_config(my_dict)
+
+
 def test_config_str_validation():
     with pytest.raises(pydantic.ValidationError, match="ConfigStr"):
         m = MyClass(
@@ -53,6 +66,10 @@ def test_config_str_validation():
     ["input_value", "expected"],
     [
         (r"${VALID_CONFIG_STR}", r"${VALID_CONFIG_STR}"),
+        (
+            r"postgres://user:${VALID_CONFIG_STR}@host/dbname",
+            r"postgres://user:${VALID_CONFIG_STR}@host/dbname",
+        ),
         ("postgres://userName@hostname", "postgres://userName@hostname"),
     ],
 )
@@ -75,8 +92,13 @@ def test_config_substitution(
         normal_field="normal",
         secret_field="secret",  # type: ignore[arg-type]
         config_field=r"${MY_ENV_VAR}",  # type: ignore[arg-type]
+        config_field_w_default=r"hello-${MY_ENV_VAR}",  # type: ignore[arg-type]
     )
     assert m.config_field.get_config_value(env_config_provider) == "success"
+    assert (
+        m.config_field_w_default.get_config_value(env_config_provider)
+        == "hello-success"
+    )
 
 
 def test_config_substitution_dict(
@@ -116,6 +138,30 @@ def test_config_nested_substitution_dict(
 
     d = m.dict(config_provider=env_config_provider)
     assert d["my_classes"][0]["config_field"] == "success"
+
+
+def test_config_nested_substitution_dict_raises_error_for_missing_config_var(
+    monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider
+):
+    monkeypatch.setenv("NOT_MY_ENV_VAR", "failure")
+
+    class MyCollection(FluentBaseModel):
+        my_classes: List[MyClass] = []
+
+    MyCollection.update_forward_refs(MyClass=MyClass)
+
+    m = MyCollection(
+        my_classes=[
+            MyClass(
+                normal_field="normal",
+                secret_field="secret",  # type: ignore[arg-type]
+                config_field=r"${MY_ENV_VAR}",  # type: ignore[arg-type]
+            )
+        ]
+    )
+
+    with pytest.raises(MissingConfigVariableError):
+        m.dict(config_provider=env_config_provider)
 
 
 @pytest.mark.parametrize("method", ["yaml", "dict", "json"])

@@ -13,7 +13,7 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "lint": "standard --fix",
-    "snippet-check": "node docs/scripts/remark-named-snippets/snippet.js"
+    "snippet-check": "node scripts/remark-named-snippets/snippet.js"
   },
   "dependencies": {
     "@cmfcmf/docusaurus-search-local": "^0.11.0",
@@ -25,6 +25,7 @@
     "@docusaurus/preset-classic": "^2.0.0-beta.21",
     "@docusaurus/theme-search-algolia": "^2.0.0-beta.21",
     "@mdx-js/react": "^1.6.21",
+    "@svgr/webpack": "^5.5.0",
     "clsx": "^1.1.1",
     "docusaurus-gtm-plugin": "^0.0.2",
     "docusaurus-plugin-sass": "^0.2.2",
@@ -32,9 +33,10 @@
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-select": "^4.3.0",
+    "remark-code-import": "^0.3.0",
     "sass": "^1.56.1",
     "search-insights": "^2.2.3",
-    "standard": "^16.0.3"
+    "standard": "^17.1.0"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "2.0.0-beta.21"

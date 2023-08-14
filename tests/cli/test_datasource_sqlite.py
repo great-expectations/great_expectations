@@ -1,5 +1,4 @@
 import os
-from collections import OrderedDict
 from unittest import mock
 
 import nbformat
@@ -9,210 +8,9 @@ from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations.cli import cli
 from great_expectations.util import get_context
-from tests.cli.utils import assert_no_logging_messages_or_tracebacks, escape_ansi
+from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_cli_datasource_list(
-    mock_emit, empty_data_context_stats_enabled, empty_sqlite_db, caplog, monkeypatch
-):
-    """Test an empty project and after adding a single datasource."""
-    context = empty_data_context_stats_enabled
-
-    runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
-        cli,
-        "--v3-api datasource list",
-        catch_exceptions=False,
-    )
-
-    stdout = result.stdout.strip()
-    assert "No Datasources found" in stdout
-    assert context.list_datasources() == []
-
-    datasource_name = "wow_a_datasource"
-    _add_datasource_and_credentials_to_context(
-        context, datasource_name, empty_sqlite_db
-    )
-
-    runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
-        cli,
-        ["--v3-api", "datasource", "list"],
-        catch_exceptions=False,
-    )
-    expected_output = """\
-Using v3 (Batch Request) API
-1 Datasource found:
-
- - name: wow_a_datasource
-   class_name: SqlAlchemyDatasource
-""".strip()
-    stdout = escape_ansi(result.stdout).strip()
-
-    assert stdout == expected_output
-
-    assert_no_logging_messages_or_tracebacks(caplog, result)
-    anonymized_name: str = mock_emit.call_args_list[3][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-
-    expected_call_args_list = [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {
-                "event": "cli.datasource.list.begin",
-                "event_payload": {"api_version": "v3"},
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "cli.datasource.list.end",
-                "event_payload": {"api_version": "v3"},
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "SqlAlchemyDatasource",
-                },
-                "event": "data_context.add_datasource",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "datasource.sqlalchemy.connect",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "sqlalchemy_dialect": "sqlite",
-                },
-                "success": True,
-            }
-        ),
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {
-                "event": "cli.datasource.list.begin",
-                "event_payload": {"api_version": "v3"},
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "cli.datasource.list.end",
-                "event_payload": {"api_version": "v3"},
-                "success": True,
-            }
-        ),
-    ]
-
-    assert mock_emit.call_count == len(expected_call_args_list)
-    assert mock_emit.call_args_list == expected_call_args_list
-
-
-def _add_datasource_and_credentials_to_context(context, datasource_name, sqlite_engine):
-    original_datasources = context.list_datasources()
-
-    url = str(sqlite_engine.url)
-    credentials = {"url": url}
-    context.save_config_variable(datasource_name, credentials)
-    context.add_datasource(
-        datasource_name,
-        initialize=False,
-        module_name="great_expectations.datasource",
-        class_name="SqlAlchemyDatasource",
-        data_asset_type={"class_name": "SqlAlchemyDataset"},
-        credentials="${" + datasource_name + "}",
-        batch_kwargs_generators={
-            "default": {"class_name": "TableBatchKwargsGenerator"}
-        },
-    )
-
-    expected_datasources = original_datasources
-    expected_datasources.append(
-        {
-            "name": datasource_name,
-            "class_name": "SqlAlchemyDatasource",
-            "module_name": "great_expectations.datasource",
-            "credentials": OrderedDict([("url", url)]),
-            "data_asset_type": {"class_name": "SqlAlchemyDataset", "module_name": None},
-            "batch_kwargs_generators": {
-                "default": {"class_name": "TableBatchKwargsGenerator"}
-            },
-        }
-    )
-
-    assert context.list_datasources() == expected_datasources
-    return context
-
-
-def _add_datasource__with_two_generators_and_credentials_to_context(
-    context, datasource_name, sqlite_engine
-):
-    original_datasources = context.list_datasources()
-
-    url = str(sqlite_engine.url)
-    credentials = {"url": url}
-    context.save_config_variable(datasource_name, credentials)
-    context.add_datasource(
-        datasource_name,
-        initialize=False,
-        module_name="great_expectations.datasource",
-        class_name="SqlAlchemyDatasource",
-        data_asset_type={"class_name": "SqlAlchemyDataset"},
-        credentials="${" + datasource_name + "}",
-        batch_kwargs_generators={
-            "default": {"class_name": "TableBatchKwargsGenerator"},
-            "second_generator": {
-                "class_name": "ManualBatchKwargsGenerator",
-                "assets": {
-                    "asset_one": [
-                        {"partition_id": 1, "query": "select * from main.titanic"}
-                    ]
-                },
-            },
-        },
-    )
-
-    expected_datasources = original_datasources
-    expected_datasources.append(
-        {
-            "name": datasource_name,
-            "class_name": "SqlAlchemyDatasource",
-            "module_name": "great_expectations.datasource",
-            "credentials": {"url": url},
-            "data_asset_type": {"class_name": "SqlAlchemyDataset", "module_name": None},
-            "batch_kwargs_generators": {
-                "default": {"class_name": "TableBatchKwargsGenerator"},
-                "second_generator": {
-                    "assets": {
-                        "asset_one": [
-                            {
-                                "partition_id": 1,
-                                "query": "select " "* " "from " "main.titanic",
-                            }
-                        ]
-                    },
-                    "class_name": "ManualBatchKwargsGenerator",
-                },
-            },
-        }
-    )
-
-    assert context.list_datasources() == expected_datasources
-    return context
+pytestmark = pytest.mark.cli
 
 
 @mock.patch(
@@ -233,11 +31,11 @@ def test_cli_datasource_new_connection_string(
     assert context.list_datasources() == []
 
     runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     result = runner.invoke(
         cli,
-        "--v3-api datasource new",
-        input="2\n8\n",
+        "datasource new",
+        input="y\n2\n9\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -246,10 +44,12 @@ def test_cli_datasource_new_connection_string(
 
     assert result.exit_code == 0
 
-    uncommitted_dir = os.path.join(root_dir, context.GX_UNCOMMITTED_DIR)
-    expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
+    uncommitted_dir = os.path.join(root_dir, context.GX_UNCOMMITTED_DIR)  # noqa: PTH118
+    expected_notebook = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "datasource_new.ipynb"
+    )
 
-    assert os.path.isfile(expected_notebook)
+    assert os.path.isfile(expected_notebook)  # noqa: PTH113
     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
 
     expected_call_args_list = [

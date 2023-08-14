@@ -1,11 +1,12 @@
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py imports">
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 
+yaml = YAMLHandler()
 # </snippet>
-from great_expectations.expectations.metrics.import_manager import sa
+
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py get_context">
 context = gx.get_context()
@@ -121,8 +122,8 @@ print(validator.head(n_rows=10))
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
 batch_data = batch_list[0].data
-num_rows = batch_data.execution_engine.engine.execute(
-    sa.select([sa.func.count()]).select_from(batch_data.selectable)
+num_rows = batch_data.execution_engine.execute_query(
+    sa.select(sa.func.count()).select_from(batch_data.selectable)
 ).one()[0]
 assert num_rows == 10000
 
@@ -191,8 +192,8 @@ batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 6  # ride occupancy ranges from 1 passenger to 6 passengers
 
 batch_data = batch_list[1].data  # 2-passenger sample of batch data
-num_rows = batch_data.execution_engine.engine.execute(
-    sa.select([sa.func.count()]).select_from(batch_data.selectable)
+num_rows = batch_data.execution_engine.execute_query(
+    sa.select(sa.func.count()).select_from(batch_data.selectable)
 ).scalar()
 assert num_rows < 200
 # </snippet>

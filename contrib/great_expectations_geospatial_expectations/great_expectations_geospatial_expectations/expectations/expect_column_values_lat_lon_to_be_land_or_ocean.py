@@ -26,7 +26,6 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesLatLonLandOrOcean(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.lat_lon_land_or_ocean"
     condition_value_keys = ("land_or_ocean",)
@@ -34,7 +33,6 @@ class ColumnValuesLatLonLandOrOcean(ColumnMapMetricProvider):
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, land_or_ocean="land", **kwargs):
-
         if land_or_ocean == "land":
             return column.apply(lambda point: globe.is_land(point[0], point[1]))
         elif land_or_ocean == "ocean":

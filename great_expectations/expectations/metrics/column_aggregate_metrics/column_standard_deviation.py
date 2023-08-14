@@ -1,7 +1,9 @@
 import logging
 from typing import Optional
 
-from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
@@ -17,18 +19,10 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.util import convert_pandas_series_decimal_to_float_dtype
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
-
-try:
-    from pyspark.sql.functions import stddev_samp  # noqa: F401
-except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
-        "Unable to load spark context; install optional spark dependency for support."
-    )
 
 
 class ColumnStandardDeviation(ColumnAggregateMetricProvider):
@@ -39,6 +33,7 @@ class ColumnStandardDeviation(ColumnAggregateMetricProvider):
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         """Pandas Standard Deviation implementation"""
+        convert_pandas_series_decimal_to_float_dtype(data=column, inplace=True)
         return column.std()
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)

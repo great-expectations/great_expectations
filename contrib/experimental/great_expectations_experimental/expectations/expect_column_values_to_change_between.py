@@ -15,7 +15,6 @@ from great_expectations.expectations.metrics import (
 # To learn about the relationship between Metrics and Expectations, please visit
 # https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
 class ColumnValuesToChangeBetween(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html#metrics
     # for information on how to choose an id string for your Metric.
@@ -29,7 +28,6 @@ class ColumnValuesToChangeBetween(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, from_value, to_value, **kwargs):
-
         # throw an error if one of the values is not numeric
         if not pd.to_numeric(column, errors="coerce").notnull().all():
             raise TypeError("Column values must be numeric !")

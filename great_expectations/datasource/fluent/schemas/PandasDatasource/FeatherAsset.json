@@ -15,12 +15,22 @@
             ],
             "type": "string"
         },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
         "order_by": {
             "title": "Order By",
             "type": "array",
             "items": {
                 "$ref": "#/definitions/Sorter"
             }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
         },
         "path": {
             "title": "Path",
@@ -39,7 +49,11 @@
             ]
         },
         "columns": {
-            "title": "Columns"
+            "title": "Columns",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
         },
         "use_threads": {
             "title": "Use Threads",

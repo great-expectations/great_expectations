@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import random
 import uuid
 from typing import Dict
@@ -168,8 +170,14 @@ class ExpectationsStore(Store):
         deserialization into a GX object
         """
         suite_data: Dict
+        # if only the expectation_suite_name is passed, a list will be returned
         if isinstance(response_json["data"], list):
-            suite_data = response_json["data"][0]
+            if len(response_json["data"]) == 1:
+                suite_data = response_json["data"][0]
+            else:
+                raise ValueError(
+                    "More than one Expectation Suite was found with the expectation_suite_name."
+                )
         else:
             suite_data = response_json["data"]
         ge_cloud_suite_id: str = suite_data["id"]
@@ -178,17 +186,17 @@ class ExpectationsStore(Store):
 
         return suite_dict
 
-    def add(self, key, value, **kwargs):
+    def _add(self, key, value, **kwargs):
         try:
-            return super().add(key=key, value=value, **kwargs)
+            return super()._add(key=key, value=value, **kwargs)
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.ExpectationSuiteError(
                 f"An ExpectationSuite named {value.expectation_suite_name} already exists."
             )
 
-    def update(self, key, value, **kwargs):
+    def _update(self, key, value, **kwargs):
         try:
-            return super().update(key=key, value=value, **kwargs)
+            return super()._update(key=key, value=value, **kwargs)
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.ExpectationSuiteError(
                 f"Could not find an existing ExpectationSuite named {value.expectation_suite_name}."
@@ -196,6 +204,16 @@ class ExpectationsStore(Store):
 
     def get(self, key) -> ExpectationSuite:
         return super().get(key)  # type: ignore[return-value]
+
+    def _validate_key(  # type: ignore[override]
+        self, key: ExpectationSuiteIdentifier | GXCloudIdentifier
+    ) -> None:
+        if isinstance(key, GXCloudIdentifier) and not key.id and not key.resource_name:
+            raise ValueError(
+                "GXCloudIdentifier for ExpectationsStore must contain either "
+                "an id or a resource_name, but neither are present."
+            )
+        return super()._validate_key(key=key)
 
     def remove_key(self, key):
         return self.store_backend.remove_key(key)
@@ -212,7 +230,7 @@ class ExpectationsStore(Store):
         else:
             return self._expectationSuiteSchema.loads(value)
 
-    def self_check(self, pretty_print):
+    def self_check(self, pretty_print):  # noqa: PLR0912
         return_obj = {}
 
         if pretty_print:
@@ -229,7 +247,7 @@ class ExpectationsStore(Store):
                 print(f"\t{len_keys} keys found:")
                 for key in return_obj["keys"][:10]:
                     print(f"		{str(key)}")
-            if len_keys > 10:
+            if len_keys > 10:  # noqa: PLR2004
                 print("\t\t...")
             print()
 

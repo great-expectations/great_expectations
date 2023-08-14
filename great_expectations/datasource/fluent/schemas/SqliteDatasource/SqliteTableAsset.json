@@ -1,6 +1,6 @@
 {
     "title": "SqliteTableAsset",
-    "description": "A _SQLAsset Mixin\n\nThis is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality\nthat can be used by different SQL datasource subclasses.\n\nFor example see TableAsset defined in this module and SqliteTableAsset defined in\nsqlite_datasource.py",
+    "description": "--Public API--",
     "type": "object",
     "properties": {
         "name": {
@@ -9,11 +9,17 @@
         },
         "type": {
             "title": "Type",
-            "default": "sqlite_table",
+            "default": "table",
             "enum": [
-                "sqlite_table"
+                "table"
             ],
             "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
         },
         "order_by": {
             "title": "Order By",
@@ -21,6 +27,10 @@
             "items": {
                 "$ref": "#/definitions/Sorter"
             }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
         },
         "splitter": {
             "title": "Splitter",
@@ -59,6 +69,8 @@
         },
         "table_name": {
             "title": "Table Name",
+            "description": "Name of the SQL table. Will default to the value of `name` if not provided.",
+            "default": "",
             "type": "string"
         },
         "schema_name": {
@@ -67,8 +79,7 @@
         }
     },
     "required": [
-        "name",
-        "table_name"
+        "name"
     ],
     "additionalProperties": false,
     "definitions": {

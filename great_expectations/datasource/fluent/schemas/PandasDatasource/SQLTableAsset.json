@@ -15,12 +15,22 @@
             ],
             "type": "string"
         },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
         "order_by": {
             "title": "Order By",
             "type": "array",
             "items": {
                 "$ref": "#/definitions/Sorter"
             }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
         },
         "table_name": {
             "title": "Table Name",
@@ -65,10 +75,28 @@
             "type": "boolean"
         },
         "parse_dates": {
-            "title": "Parse Dates"
+            "title": "Parse Dates",
+            "anyOf": [
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            ]
         },
         "columns": {
-            "title": "Columns"
+            "title": "Columns",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
         },
         "chunksize": {
             "title": "Chunksize",

@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING, Dict, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
+class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
     """Expect the most common value to be within the designated value set.
 
     expect_column_most_common_value_to_be_in_set is a \

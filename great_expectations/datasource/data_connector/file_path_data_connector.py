@@ -24,7 +24,7 @@ from great_expectations.datasource.data_connector.util import (
     map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
 )
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -81,14 +81,14 @@ class DataConnectorStorageDataReferenceResolver:
         ),
         (
             "DBFS",
-            "SparkDFExecutionEngine",
-        ): lambda template_arguments: DBFSPath.convert_to_protocol_version(
+            "PandasExecutionEngine",
+        ): lambda template_arguments: DBFSPath.convert_to_file_semantics_version(
             **template_arguments
         ),
         (
             "DBFS",
-            "PandasExecutionEngine",
-        ): lambda template_arguments: DBFSPath.convert_to_file_semantics_version(
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: DBFSPath.convert_to_protocol_version(
             **template_arguments
         ),
     }
@@ -133,7 +133,7 @@ class FilePathDataConnector(DataConnector):
         id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -385,7 +385,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
             regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
             group_names: List[str] = regex_config["group_names"]
             if any(
-                [sorter_name not in group_names for sorter_name in self.sorters.keys()]
+                sorter_name not in group_names for sorter_name in self.sorters.keys()
             ):
                 raise gx_exceptions.DataConnectorError(
                     f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the

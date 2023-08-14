@@ -20,7 +20,7 @@ from great_expectations.data_context.types.base import (
 
 @deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")
 @deprecated_argument(argument_name="ge_cloud_config", version="0.15.37")
-def BaseDataContext(
+def BaseDataContext(  # noqa: PLR0913
     project_config: Union[DataContextConfig, Mapping],
     context_root_dir: Optional[PathStr] = None,
     runtime_environment: Optional[dict] = None,

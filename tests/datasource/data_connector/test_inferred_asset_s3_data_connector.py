@@ -7,11 +7,11 @@ import boto3
 import pandas as pd
 import pytest
 from moto import mock_s3
-from ruamel.yaml import YAML
 
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import InferredAssetS3DataConnector
 
@@ -22,7 +22,10 @@ from great_expectations.datasource.data_connector.inferred_asset_s3_data_connect
 )
 from great_expectations.execution_engine import PandasExecutionEngine
 
-yaml = YAML()
+yaml = YAMLHandler()
+
+# module level markers
+pytestmark = pytest.mark.big
 
 
 @mock_s3

@@ -1,10 +1,11 @@
 from datetime import datetime
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -19,7 +20,7 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
     def _pandas(cls, column, strftime_format, **kwargs):
         def is_parseable_by_format(val):
             try:
-                datetime.strptime(val, strftime_format)
+                datetime.strptime(val, strftime_format)  # noqa: DTZ007
                 return True
             except TypeError:
                 raise TypeError(
@@ -35,8 +36,9 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
         # Below is a simple validation that the provided format can both format and parse a datetime object.
         # %D is an example of a format that can format but not parse, e.g.
         try:
-            datetime.strptime(
-                datetime.strftime(datetime.now(), strftime_format), strftime_format
+            datetime.strptime(  # noqa: DTZ007
+                datetime.strftime(datetime.now(), strftime_format),  # noqa: DTZ005
+                strftime_format,
             )
         except ValueError as e:
             raise ValueError(f"Unable to use provided strftime_format: {str(e)}")
@@ -45,7 +47,7 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
             if val is None:
                 return False
             try:
-                datetime.strptime(val, strftime_format)
+                datetime.strptime(val, strftime_format)  # noqa: DTZ007
                 return True
             except TypeError:
                 raise TypeError(
@@ -54,5 +56,5 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
             except ValueError:
                 return False
 
-        success_udf = F.udf(is_parseable_by_format, sparktypes.BooleanType())
+        success_udf = F.udf(is_parseable_by_format, pyspark.types.BooleanType())
         return success_udf(column)

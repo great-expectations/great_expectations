@@ -1,6 +1,7 @@
 {
   "expectation_type": "expect_column_values_to_be_between",
   "datasets": [{
+    "dataset_name": "expect_column_values_to_be_between_tz_informed_1",
     "data": {
       "ts": [
         "1970-01-01 12:00:01.000000 +0530",
@@ -30,6 +31,9 @@
       },
       "spark": {
         "ts": "TimestampType"
+      },
+      "snowflake": {
+        "ts": "TIMESTAMP_TZ"
       }
     },
     "tests": [

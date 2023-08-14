@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
@@ -14,10 +16,12 @@ from great_expectations.core.batch_spec import (
     S3BatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
-from great_expectations.datasource.data_connector.asset import Asset  # noqa: TCH001
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.util import _build_asset_from_config
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+
+if TYPE_CHECKING:
+    from great_expectations.datasource.data_connector.asset import Asset
+    from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +45,7 @@ class RuntimeDataConnector(DataConnector):
         id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -93,7 +97,7 @@ class RuntimeDataConnector(DataConnector):
 
         for name, asset_config in config.items():
             if asset_config is None:
-                asset_config = {}
+                asset_config = {}  # noqa: PLW2901
 
             asset_config.update({"name": name})
             new_asset: Asset = _build_asset_from_config(
@@ -375,9 +379,7 @@ class RuntimeDataConnector(DataConnector):
         ):
             raise gx_exceptions.DataConnectorError(
                 f"""RuntimeDataConnector "{self.name}" requires runtime_parameters and batch_identifiers to be both
-                present and non-empty or
-                both absent in the batch_request parameter.
-                """
+                present and non-empty or both absent in the batch_request parameter."""
             )
 
         if runtime_parameters:

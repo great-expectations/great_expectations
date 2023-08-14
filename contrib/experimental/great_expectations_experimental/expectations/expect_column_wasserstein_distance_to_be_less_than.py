@@ -1,17 +1,17 @@
 from typing import Dict, Optional
 
-from scipy import stats as stats
+from scipy import stats
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.expectation import ColumnExpectation
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
 
 
-class ColumnWassersteinDistance(ColumnMetricProvider):
+class ColumnWassersteinDistance(ColumnAggregateMetricProvider):
     """MetricProvider Class for Wasserstein Distance MetricProvider"""
 
     metric_name = "column.custom.wasserstein"
@@ -129,7 +129,7 @@ class ColumnWassersteinDistance(ColumnMetricProvider):
     #     return dependencies
 
 
-class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
+class ExpectColumnWassersteinDistanceToBeLessThan(ColumnAggregateExpectation):
     """Expect that the Wasserstein Distance of the specified column with respect to an optional partition object to be lower than the provided value.
 
     See Also:

@@ -1,12 +1,27 @@
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
 from great_expectations.util import get_context
+import pathlib
+
+folder_path = str(
+    pathlib.Path(
+        gx.__file__,
+        "..",
+        "..",
+        "tests",
+        "test_sets",
+        "taxi_yellow_tripdata_samples",
+        "first_3_files",
+    ).resolve(strict=True)
+)
+data_filepath = folder_path + "/yellow_tripdata_sample_2019-01.csv"
+
+yaml = YAMLHandler()
 
 # NOTE: InMemoryStoreBackendDefaults SHOULD NOT BE USED in normal settings. You
 # may experience data loss as it persists nothing. It is used here for testing.
@@ -44,7 +59,7 @@ datasource_config = {
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "base_directory"
-] = "data"
+] = folder_path
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py test_yaml_config">
 context.test_yaml_config(yaml.dump(datasource_config))
@@ -67,7 +82,7 @@ batch_request = RuntimeBatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the BatchRequest above.
-batch_request.runtime_parameters["path"] = "data/yellow_tripdata_sample_2019-01.csv"
+batch_request.runtime_parameters["path"] = data_filepath
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py runtime_batch_request validator">
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
@@ -125,7 +140,7 @@ batch_request = RuntimeBatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the BatchRequest above.
-batch_request.runtime_parameters["path"] = "data/"
+batch_request.runtime_parameters["path"] = folder_path
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request directory validator">
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")

@@ -3,17 +3,17 @@ import os
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py imports">
 import datetime
-
 import pandas as pd
-from ruamel import yaml
 
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.util import get_context
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     FilesystemStoreBackendDefaults,
 )
 
+yaml = YAMLHandler()
 # </snippet>
 
 from great_expectations.core.util import get_or_create_spark_application
@@ -61,7 +61,8 @@ assert os.listdir(uncommitted_directory) == ["validations"]
 filename = "yellow_tripdata_sample_2019-01.csv"
 data_dir = os.path.join(os.path.dirname(root_directory), "data")
 pandas_df = pd.read_csv(os.path.join(data_dir, filename))
-df = spark.createDataFrame(data=pandas_df)
+data_file_path = os.path.join(data_dir, filename)
+df = spark.read.option("header", True).csv(data_file_path)
 # CODE ^^^^^ ^^^^^
 
 # ASSERTIONS vvvvv vvvvv
@@ -142,7 +143,7 @@ print(validator.head())
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 
 validator.expect_column_values_to_be_between(
-    column="congestion_surcharge", min_value=0, max_value=1000
+    column="total_amount", min_value=0, max_value=1000
 )
 # </snippet>
 
@@ -159,7 +160,7 @@ assert len(suite.expectations) == 2
 
 # 6. Validate your data (Dataframe)
 # CODE vvvvv vvvvv
-# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py checkpoint config">
+
 my_checkpoint_name = "insert_your_checkpoint_name_here"
 my_checkpoint_config = f"""
 name: {my_checkpoint_name}
@@ -167,7 +168,6 @@ config_version: 1.0
 class_name: SimpleCheckpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 """
-# </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py test checkpoint config">
 my_checkpoint = context.test_yaml_config(my_checkpoint_config)

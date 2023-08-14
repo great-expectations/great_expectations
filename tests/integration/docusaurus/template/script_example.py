@@ -5,12 +5,12 @@ import os
 
 # </snippet>
 
-from ruamel import yaml
+import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
 
 # </snippet>
 
-import great_expectations as gx
-
+yaml = YAMLHandler()
 context = gx.get_context()
 
 # <snippet name="tests/integration/docusaurus/template/script_example.py assert">

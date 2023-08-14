@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import copy
-from typing import TYPE_CHECKING, Optional, Union
+import logging
+from pprint import pformat as pf
+from typing import TYPE_CHECKING, Optional, Union, overload
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import (
@@ -14,13 +16,30 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
+from great_expectations.datasource.fluent import Datasource as FluentDatasource
+from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
+    from typing import Literal
+
+    from typing_extensions import TypedDict
+
     from great_expectations.core.serializer import AbstractConfigSerializer
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
+
+    class DataPayload(TypedDict):
+        id: str
+        attributes: dict
+        type: Literal["datasource"]
+
+    class CloudResponsePayloadTD(TypedDict):
+        data: DataPayload | list[DataPayload]
+
+
+logger = logging.getLogger(__name__)
 
 
 class DatasourceStore(Store):
@@ -62,34 +81,64 @@ class DatasourceStore(Store):
         """
         return self._store_backend.remove_key(key.to_tuple())
 
-    def serialize(self, value: DatasourceConfig) -> Union[str, dict, DatasourceConfig]:
+    def serialize(
+        self, value: DatasourceConfig | FluentDatasource
+    ) -> Union[str, dict, DatasourceConfig]:
         """
         See parent 'Store.serialize()' for more information
         """
+        if isinstance(value, FluentDatasource):
+            return value._json_dict()
         return self._serializer.serialize(value)
 
-    def deserialize(self, value: Union[dict, DatasourceConfig]) -> DatasourceConfig:
+    @overload
+    def deserialize(self, value: DatasourceConfig) -> DatasourceConfig:
+        ...
+
+    @overload
+    def deserialize(self, value: FluentDatasource) -> FluentDatasource:
+        ...
+
+    def deserialize(
+        self, value: dict | DatasourceConfig | FluentDatasource
+    ) -> DatasourceConfig | FluentDatasource:
         """
         See parent 'Store.deserialize()' for more information
         """
         # When using the InlineStoreBackend, objects are already converted to their respective config types.
-        if isinstance(value, DatasourceConfig):
+        if isinstance(value, (DatasourceConfig, FluentDatasource)):
             return value
         elif isinstance(value, dict):
+            # presence of a 'type' field means it's a fluent datasource
+            type_ = value.get("type")
+            if type_:
+                datasource_model = _SourceFactories.type_lookup.get(type_)
+                if not datasource_model:
+                    raise LookupError(f"Unknown Datasource 'type': '{type_}'")
+                return datasource_model(**value)
             return self._schema.load(value)
         else:
             return self._schema.loads(value)
 
-    def ge_cloud_response_json_to_object_dict(self, response_json: dict) -> dict:
+    def ge_cloud_response_json_to_object_dict(
+        self, response_json: CloudResponsePayloadTD  # type: ignore[override]
+    ) -> dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
         """
-        datasource_ge_cloud_id: str = response_json["data"]["id"]
-        datasource_config_dict: dict = response_json["data"]["attributes"][
-            "datasource_config"
-        ]
-        datasource_config_dict["ge_cloud_id"] = datasource_ge_cloud_id
+        logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
+        data = response_json["data"]
+        if isinstance(data, list):
+            if len(data) > 1:
+                # TODO: handle larger arrays of Datasources
+                raise TypeError(
+                    f"GX Cloud returned {len(data)} Datasources but expected 1"
+                )
+            data = data[0]
+        datasource_ge_cloud_id: str = data["id"]
+        datasource_config_dict: dict = data["attributes"]["datasource_config"]
+        datasource_config_dict["id"] = datasource_ge_cloud_id
 
         return datasource_config_dict
 
@@ -109,7 +158,7 @@ class DatasourceStore(Store):
         datasource_key: Union[
             DataContextVariableKey, GXCloudIdentifier
         ] = self.store_backend.build_key(name=datasource_name)
-        if not self.has_key(datasource_key):  # noqa: W601
+        if not self.has_key(datasource_key):
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )
@@ -117,7 +166,7 @@ class DatasourceStore(Store):
         datasource_config: DatasourceConfig = copy.deepcopy(self.get(datasource_key))  # type: ignore[assignment]
         return datasource_config
 
-    def delete(self, datasource_config: DatasourceConfig) -> None:
+    def delete(self, datasource_config: DatasourceConfig | FluentDatasource) -> None:
         """Deletes a DatasourceConfig persisted in the store using its config.
 
         Args:
@@ -127,16 +176,37 @@ class DatasourceStore(Store):
         self.remove_key(self._build_key_from_config(datasource_config))
 
     def _build_key_from_config(  # type: ignore[override]
-        self, datasource_config: DatasourceConfig
+        self, datasource_config: DatasourceConfig | FluentDatasource
     ) -> Union[GXCloudIdentifier, DataContextVariableKey]:
-        return self.store_backend.build_key(
-            name=datasource_config.name,
-            id=datasource_config.id,
+        id_: str | None = (
+            str(datasource_config.id) if datasource_config.id else datasource_config.id  # type: ignore[assignment] # uuid will be converted to str
         )
+        return self.store_backend.build_key(name=datasource_config.name, id=id_)
 
-    def set(  # type: ignore[override]
-        self, key: Union[DataContextKey, None], value: DatasourceConfig, **kwargs
+    @overload  # type: ignore[override]
+    def set(
+        self,
+        key: Union[DataContextKey, None],
+        value: FluentDatasource,
+        **kwargs,
+    ) -> FluentDatasource:
+        ...
+
+    @overload
+    def set(
+        self,
+        key: Union[DataContextKey, None],
+        value: DatasourceConfig,
+        **kwargs,
     ) -> DatasourceConfig:
+        ...
+
+    def set(
+        self,
+        key: Union[DataContextKey, None],
+        value: DatasourceConfig | FluentDatasource,
+        **kwargs,
+    ) -> DatasourceConfig | FluentDatasource:
         """Create a datasource config in the store using a store_backend-specific key.
         Args:
             key: Optional key to use when setting value.
@@ -150,7 +220,7 @@ class DatasourceStore(Store):
         return self._persist_datasource(key=key, config=value)
 
     def _persist_datasource(
-        self, key: DataContextKey, config: DatasourceConfig
+        self, key: DataContextKey, config: DatasourceConfig | FluentDatasource
     ) -> DatasourceConfig:
         # Make two separate requests to set and get in order to obtain any additional
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
@@ -158,7 +228,7 @@ class DatasourceStore(Store):
             key=key, value=config
         )
         if ref and isinstance(ref, GXCloudResourceRef):
-            key.cloud_id = ref.cloud_id  # type: ignore[attr-defined]
+            key.id = ref.id  # type: ignore[attr-defined]
 
         return_value: DatasourceConfig = self.get(key)  # type: ignore[assignment]
         if not return_value.name and isinstance(key, DataContextVariableKey):

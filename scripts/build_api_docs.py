@@ -388,7 +388,7 @@ def parse_method_signature(
     sig_default = ""
     sig_results = []
     for key, value in signature.parameters.items():
-        value = str(value)
+        value = str(value)  # noqa: PLW2901
         if ":" in value:
             sig_parameter, remainder = value.split(":", 1)
             if "=" in remainder:

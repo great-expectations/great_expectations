@@ -1,125 +1,36 @@
+from __future__ import annotations
+
 import difflib
-import functools
 import logging
 import pathlib
+import random
 from pprint import pformat as pf
+from typing import TYPE_CHECKING
 
 import pytest
 
-# apply markers to entire test module
-pytestmark = [pytest.mark.integration]
-
 from great_expectations import get_context
-from great_expectations.data_context import FileDataContext
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import CloudDataContext, FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import Datasource
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
+
+    from great_expectations.datasource.fluent import SqliteDatasource
+
+
+YAML = YAMLHandler()
 
 logger = logging.getLogger(__file__)
 
 
-@pytest.fixture
-def db_file() -> pathlib.Path:
-    relative_path = pathlib.Path(
-        "..",
-        "..",
-        "test_sets",
-        "taxi_yellow_tripdata_samples",
-        "sqlite",
-        "yellow_tripdata.db",
-    )
-    db_file = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    assert db_file.exists()
-    return db_file
-
-
-@pytest.fixture
-def fluent_config_dict(db_file) -> dict:
-    return {
-        "fluent_datasources": {
-            "my_sql_ds": {
-                "connection_string": f"sqlite:///{db_file}",
-                "name": "my_sql_ds",
-                "type": "sql",
-                "assets": {
-                    "my_asset": {
-                        "name": "my_asset",
-                        "table_name": "yellow_tripdata_sample_2019_01",
-                        "type": "table",
-                        "splitter": {
-                            "column_name": "pickup_datetime",
-                            "method_name": "split_on_year_and_month",
-                        },
-                        "order_by": [
-                            {"key": "year"},
-                            {"key": "month"},
-                        ],
-                    },
-                },
-            }
-        }
-    }
-
-
-@pytest.fixture
-def fluent_only_config(fluent_config_dict: dict) -> GxConfig:
-    """Creates a fluent `GxConfig` object and ensures it contains at least one `Datasource`"""
-    fluent_config = GxConfig.parse_obj(fluent_config_dict)
-    assert fluent_config.datasources
-    return fluent_config
-
-
-@pytest.fixture
-def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
-    """
-    Initialize an regular/old-style FileDataContext project config directory.
-    Removed on teardown.
-    """
-    gx_yml = tmp_path / FileDataContext.GX_DIR / FileDataContext.GX_YML
-    assert gx_yml.exists() is False
-    FileDataContext.create(tmp_path)
-    assert gx_yml.exists()
-
-    tmp_gx_dir = gx_yml.parent.absolute()
-    logger.info(f"tmp_gx_dir -> {tmp_gx_dir}")
-    return tmp_gx_dir
-
-
-@pytest.fixture
-def fluent_yaml_config_file(
-    file_dc_config_dir_init: pathlib.Path, fluent_only_config: GxConfig
-) -> pathlib.Path:
-    """
-    Dump the provided GxConfig to a temporary path. File is removed during test teardown.
-
-    Append fluent config to default config file
-    """
-    config_file_path = file_dc_config_dir_init / FileDataContext.GX_YML
-
-    assert config_file_path.exists() is True
-
-    with open(config_file_path, mode="a") as f_append:
-        yaml_string = "\n# Fluent\n" + fluent_only_config.yaml()
-        f_append.write(yaml_string)
-
-    for ds_name in fluent_only_config.datasources.keys():
-        assert ds_name in yaml_string
-
-    logger.info(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
-    return config_file_path
-
-
-@pytest.fixture
-@functools.lru_cache(maxsize=1)
-def fluent_file_context(fluent_yaml_config_file: pathlib.Path) -> FileDataContext:
-    context = get_context(
-        context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
-    )
-    assert isinstance(context, FileDataContext)
-    return context
-
-
+@pytest.mark.filesystem
 def test_load_an_existing_config(
-    fluent_yaml_config_file: pathlib.Path, fluent_only_config: GxConfig
+    cloud_storage_get_client_doubles,
+    fluent_yaml_config_file: pathlib.Path,
+    fluent_only_config: GxConfig,
 ):
     context = get_context(
         context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
@@ -128,27 +39,35 @@ def test_load_an_existing_config(
     assert context.fluent_config == fluent_only_config
 
 
-def test_serialize_fluent_config(fluent_file_context: FileDataContext):
-    dumped_yaml: str = fluent_file_context.fluent_config.yaml()
+@pytest.mark.filesystem
+def test_serialize_fluent_config(
+    cloud_storage_get_client_doubles,
+    seeded_file_context: FileDataContext,
+):
+    dumped_yaml: str = seeded_file_context.fluent_config.yaml()
     print(f"  Dumped Config\n\n{dumped_yaml}\n")
 
-    assert fluent_file_context.fluent_config.datasources
+    assert seeded_file_context.fluent_config.datasources
 
-    for ds_name, datasource in fluent_file_context.fluent_config.datasources.items():
+    for (
+        ds_name,
+        datasource,
+    ) in seeded_file_context.fluent_config.get_datasources_as_dict().items():
         assert ds_name in dumped_yaml
 
-        for asset_name in datasource.assets.keys():
+        for asset_name in datasource.get_asset_names():
             assert asset_name in dumped_yaml
 
 
-def test_fluent_simple_validate_workflow(fluent_file_context: FileDataContext):
-    datasource = fluent_file_context.get_datasource("my_sql_ds")
+@pytest.mark.filesystem
+def test_fluent_simple_validate_workflow(seeded_file_context: FileDataContext):
+    datasource = seeded_file_context.get_datasource("sqlite_taxi")
     assert isinstance(datasource, Datasource)
     batch_request = datasource.get_asset("my_asset").build_batch_request(
         {"year": 2019, "month": 1}
     )
 
-    validator = fluent_file_context.get_validator(batch_request=batch_request)
+    validator = seeded_file_context.get_validator(batch_request=batch_request)
     result = validator.expect_column_max_to_be_between(
         column="passenger_count", min_value=1, max_value=12
     )
@@ -156,24 +75,27 @@ def test_fluent_simple_validate_workflow(fluent_file_context: FileDataContext):
     assert result["success"] is True
 
 
-def test_save_project_does_not_break(fluent_file_context: FileDataContext):
-    print(fluent_file_context.fluent_config)
-    fluent_file_context._save_project_config()
+@pytest.mark.filesystem
+def test_save_project_does_not_break(seeded_file_context: FileDataContext):
+    print(seeded_file_context.fluent_config)
+    seeded_file_context._save_project_config()
 
 
-def test_variables_save_config_does_not_break(fluent_file_context: FileDataContext):
-    print(fluent_file_context.fluent_config)
-    print(fluent_file_context.variables)
-    fluent_file_context.variables.save_config()
+@pytest.mark.filesystem
+def test_variables_save_config_does_not_break(seeded_file_context: FileDataContext):
+    print(f"\tcontext.fluent_config ->\n{seeded_file_context.fluent_config}\n")
+    print(f"\tcontext.variables ->\n{seeded_file_context.variables}")
+    seeded_file_context.variables.save_config()
 
 
+@pytest.mark.filesystem
 def test_save_datacontext_persists_fluent_config(
     file_dc_config_dir_init: pathlib.Path, fluent_only_config: GxConfig
 ):
     config_file = file_dc_config_dir_init / FileDataContext.GX_YML
 
     initial_yaml = config_file.read_text()
-    for ds_name in fluent_only_config.datasources:
+    for ds_name in fluent_only_config.get_datasource_names():
         assert ds_name not in initial_yaml
 
     context: FileDataContext = get_context(
@@ -188,14 +110,15 @@ def test_save_datacontext_persists_fluent_config(
 
     print("\n".join(diff))
 
-    for ds_name in fluent_only_config.datasources:
+    for ds_name in fluent_only_config.get_datasource_names():
         assert ds_name in final_yaml
 
 
-def test_add_and_save_fluent_datasource(
+@pytest.mark.filesystem
+def test_file_context_add_and_save_fluent_datasource(
     file_dc_config_dir_init: pathlib.Path,
     fluent_only_config: GxConfig,
-    db_file: pathlib.Path,
+    sqlite_database_path: pathlib.Path,
 ):
     datasource_name = "save_ds_test"
     config_file = file_dc_config_dir_init / FileDataContext.GX_YML
@@ -208,9 +131,8 @@ def test_add_and_save_fluent_datasource(
     )
 
     ds = context.sources.add_sqlite(
-        name=datasource_name, connection_string=f"sqlite:///{db_file}"
+        name=datasource_name, connection_string=f"sqlite:///{sqlite_database_path}"
     )
-    context._save_project_config()
 
     final_yaml = config_file.read_text()
     diff = difflib.ndiff(initial_yaml.splitlines(), final_yaml.splitlines())
@@ -221,6 +143,182 @@ def test_add_and_save_fluent_datasource(
     assert datasource_name in final_yaml
     # ensure comments preserved
     assert "# Welcome to Great Expectations!" in final_yaml
+
+
+# Test markers come from empty_contexts fixture
+def test_context_add_and_save_fluent_datasource(
+    empty_contexts: CloudDataContext | FileDataContext,
+    sqlite_database_path: pathlib.Path,
+):
+    context = empty_contexts
+
+    datasource_name = "save_ds_test"
+
+    context.sources.add_sqlite(
+        name=datasource_name, connection_string=f"sqlite:///{sqlite_database_path}"
+    )
+
+    assert datasource_name in context.datasources
+
+
+# Test markers come from empty_contexts fixture
+def test_context_add_or_update_datasource(
+    empty_contexts: CloudDataContext | FileDataContext,
+    sqlite_database_path: pathlib.Path,
+):
+    context = empty_contexts
+
+    datasource: SqliteDatasource = context.sources.add_sqlite(
+        name="save_ds_test", connection_string=f"sqlite:///{sqlite_database_path}"
+    )
+
+    assert datasource.connection_string == f"sqlite:///{sqlite_database_path}"
+
+    # modify the datasource
+    datasource.connection_string = "sqlite:///"  # type: ignore[assignment]
+    context.sources.add_or_update_sqlite(datasource)
+
+    updated_datasource: SqliteDatasource = context.datasources[datasource.name]  # type: ignore[assignment]
+    assert updated_datasource.connection_string == "sqlite:///"
+
+
+@pytest.fixture
+def random_datasource(seeded_file_context: FileDataContext) -> Datasource:
+    datasource = random.choice(list(seeded_file_context.fluent_datasources.values()))
+    logger.info(f"Random DS - {pf(datasource.dict(), depth=1)}")
+    return datasource
+
+
+@pytest.mark.filesystem
+def test_sources_delete_removes_datasource_from_yaml(
+    random_datasource: Datasource,
+    seeded_file_context: FileDataContext,
+):
+    print(f"Delete -> '{random_datasource.name}'\n")
+
+    seeded_file_context.sources.delete(random_datasource.name)
+
+    yaml_path = pathlib.Path(
+        seeded_file_context.root_directory, seeded_file_context.GX_YML
+    ).resolve(strict=True)
+    yaml_contents = YAML.load(yaml_path.read_text())
+    print(f"{pf(yaml_contents, depth=2)}")
+
+    assert random_datasource.name not in yaml_contents["fluent_datasources"]  # type: ignore[operator] # always dict
+
+
+@pytest.mark.filesystem
+def test_ctx_delete_removes_datasource_from_yaml(
+    random_datasource: Datasource, seeded_file_context: FileDataContext
+):
+    print(f"Delete -> '{random_datasource.name}'\n")
+
+    seeded_file_context.delete_datasource(random_datasource.name)
+
+    yaml_path = pathlib.Path(
+        seeded_file_context.root_directory, seeded_file_context.GX_YML
+    ).resolve(strict=True)
+    yaml_contents = YAML.load(yaml_path.read_text())
+    print(f"{pf(yaml_contents, depth=2)}")
+
+    assert random_datasource.name not in yaml_contents["fluent_datasources"]  # type: ignore[operator] # always dict
+
+
+# Test marker comes from seeded_contexts
+def test_checkpoint_with_validator_workflow(
+    seeded_contexts: CloudDataContext | FileDataContext,
+):
+    context = seeded_contexts
+    if isinstance(context, CloudDataContext):
+        pytest.xfail("Checkpoint run fails in some cases on GE Cloud")
+
+    datasource_name = "sqlite_taxi"
+    asset_name = "my_asset"
+    month = 1
+    year = 2019
+
+    datasource = context.get_datasource(datasource_name)
+    assert isinstance(datasource, Datasource)
+
+    batch_request = datasource.get_asset(asset_name).build_batch_request(
+        {"year": year, "month": month}
+    )
+
+    validator = context.get_validator(batch_request=batch_request)
+    validator.save_expectation_suite()
+
+    checkpoint = context.add_checkpoint(name="my_checkpoint", validator=validator)
+
+    actual_validations = [v.to_dict() for v in checkpoint.validations]
+    actual_validations[0].pop("expectation_suite_ge_cloud_id", None)
+
+    assert actual_validations == [
+        {
+            "name": None,
+            "id": None,
+            "batch_request": {
+                "data_asset_name": asset_name,
+                "datasource_name": datasource_name,
+                "options": {
+                    "month": month,
+                    "year": year,
+                },
+                "batch_slice": None,
+            },
+            "expectation_suite_name": "default",
+        },
+    ]
+
+    result = checkpoint.run()
+
+    assert result.success
+
+
+# Test markers come from empty_contexts fixture
+def test_quickstart_workflow(
+    empty_contexts: CloudDataContext | FileDataContext,
+    csv_path: pathlib.Path,
+    mocker: MockerFixture,
+):
+    """
+    What does this test do and why?
+
+    Tests the Quickstart workflow noted in our docs: https://docs.greatexpectations.io/docs/tutorials/quickstart/
+
+    In particular, this test covers the file-backend and cloud-backed usecases with this script.
+    The ephemeral usecase is covered in: tests/integration/docusaurus/tutorials/quickstart/quickstart.py
+    """
+    # Slight deviation from the Quickstart here:
+    #   1. Using existing contexts instead of `get_context`
+    #   2. Using `read_csv` on a local file instead of making a network request
+    #
+    # These changes should be functionally equivalent to the real workflow but be better for testing
+    context = empty_contexts
+    if isinstance(context, CloudDataContext):
+        pytest.xfail("Checkpoint run fails in some cases on GE Cloud")
+
+    filepath = csv_path / "yellow_tripdata_sample_2019-01.csv"
+    assert filepath.exists()
+
+    validator = context.sources.pandas_default.read_csv(filepath)
+
+    # Create Expectations
+    validator.expect_column_values_to_not_be_null("pickup_datetime")
+    validator.expect_column_values_to_be_between("passenger_count", auto=True)
+    validator.save_expectation_suite()
+
+    # Validate data
+    checkpoint = context.add_or_update_checkpoint(
+        name="my_quickstart_checkpoint",
+        validator=validator,
+    )
+    checkpoint_result = checkpoint.run()
+
+    # View results
+    mock_open = mocker.patch("webbrowser.open")
+    context.view_validation_result(checkpoint_result)
+
+    mock_open.assert_called_once()
 
 
 if __name__ == "__main__":

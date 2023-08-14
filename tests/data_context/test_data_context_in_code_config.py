@@ -2,6 +2,7 @@ from typing import Dict, Optional, Set
 
 import boto3
 import pyparsing as pp
+import pytest
 from moto import mock_s3
 
 from great_expectations.data_context.store import StoreBackend, TupleS3StoreBackend
@@ -159,8 +160,11 @@ def list_s3_bucket_contents(bucket: str, prefix: str) -> Set[str]:
     }
 
 
+@pytest.mark.aws_deps
 @mock_s3
-def test_DataContext_construct_data_context_id_uses_id_of_currently_configured_expectations_store():
+def test_DataContext_construct_data_context_id_uses_id_of_currently_configured_expectations_store(
+    aws_credentials,
+):
     """
     What does this test and why?
 
@@ -247,9 +251,10 @@ def test_DataContext_construct_data_context_id_uses_id_of_currently_configured_e
     )
 
 
+@pytest.mark.aws_deps
 @mock_s3
 def test_DataContext_construct_data_context_id_uses_id_stored_in_DataContextConfig_if_no_configured_expectations_store(
-    monkeypatch,
+    monkeypatch, aws_credentials
 ):
     """
     What does this test and why?
@@ -302,9 +307,11 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_DataContextConf
     )
 
 
+@pytest.mark.aws_deps
 @mock_s3
 def test_DataContext_construct_data_context_id_uses_id_stored_in_env_var_GE_DATA_CONTEXT_ID_if_no_configured_expectations_store(
     monkeypatch,
+    aws_credentials,
 ):
     """
     What does this test and why?
@@ -350,6 +357,7 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_env_var_GE_DATA
     )
 
 
+@pytest.mark.big
 @mock_s3
 def test_suppress_store_backend_id_is_true_for_inactive_stores():
     """
@@ -461,8 +469,9 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
     )
 
 
+@pytest.mark.aws_deps
 @mock_s3
-def test_inaccessible_active_bucket_warning_messages(caplog):
+def test_inaccessible_active_bucket_warning_messages(caplog, aws_credentials):
     """
     What does this test do and why?
 
@@ -525,6 +534,7 @@ def test_inaccessible_active_bucket_warning_messages(caplog):
     )
 
 
+@pytest.mark.big
 @mock_s3
 def test_inaccessible_inactive_bucket_no_warning_messages(caplog):
     """

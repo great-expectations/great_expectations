@@ -1,11 +1,10 @@
 import json
 import os
 import shutil
+from typing import TYPE_CHECKING
 
 import pytest
-from nbformat.notebooknode import NotebookNode
 
-# noinspection PyProtectedMember
 from great_expectations.cli.suite import _suite_edit_workflow
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.core.batch import BatchRequest
@@ -15,6 +14,11 @@ from great_expectations.core.expectation_suite import (
 )
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
+)
+
+# noinspection PyProtectedMember
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import (
@@ -27,7 +31,10 @@ from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.util import get_context
 from great_expectations.validator.validator import Validator
-from tests.render.test_util import run_notebook
+from tests.render.util import run_notebook
+
+if TYPE_CHECKING:
+    from nbformat.notebooknode import NotebookNode
 
 
 @pytest.fixture
@@ -37,7 +44,7 @@ def data_context_v3_custom_notebooks(tmp_path):
     created with DataContext.create()
     """
     project_path = tmp_path
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     expectations_dir = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "../../../test_fixtures")
     custom_notebook_assets_dir = os.path.join("v3", "notebook_assets")  # noqa: PTH118
@@ -49,7 +56,7 @@ def data_context_v3_custom_notebooks(tmp_path):
         os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_v013_custom_notebooks.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         os.path.join(  # noqa: PTH118
@@ -80,7 +87,7 @@ def data_context_v3_custom_bad_notebooks(tmp_path):
     created with DataContext.create()
     """
     project_path = tmp_path
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     expectations_dir = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "../../../test_fixtures")
     custom_notebook_assets_dir = os.path.join("v3", "notebook_assets")  # noqa: PTH118
@@ -92,7 +99,7 @@ def data_context_v3_custom_bad_notebooks(tmp_path):
         os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_v013_bad_notebooks.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         os.path.join(  # noqa: PTH118
@@ -159,7 +166,7 @@ def critical_suite_with_citations(empty_data_context) -> ExpectationSuite:
             "notes": {
                 "format": MetaNotesFormat.MARKDOWN,
                 "content": [
-                    "#### This is an _example_ suite\n\n- This suite was made by quickly glancing at 1000 rows of your data.\n- This is **not a production suite**. It is meant to show examples of expectations.\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\n"
+                    "#### This is an _example_ suite\n\n- This suite was made by quickly glancing at 1000 rows of your data.\n- This Expectation Suite may not be a complete assessment of the quality of your data. You should review and edit the Expectations based on domain knowledge.\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\n"
                 ],
             },
             "BasicSuiteBuilderProfiler": {
@@ -490,6 +497,7 @@ def warning_suite(empty_data_context) -> ExpectationSuite:
     return ExpectationSuite(**expectation_suite_dict, data_context=context)
 
 
+@pytest.mark.filesystem
 def test_render_with_no_column_cells_without_batch_request(
     critical_suite_with_citations, empty_data_context
 ):
@@ -573,6 +581,7 @@ def test_render_with_no_column_cells_without_batch_request(
     assert obs == expected
 
 
+@pytest.mark.filesystem
 def test_complex_suite_with_batch_request(warning_suite, empty_data_context):
     batch_request: dict = {
         "datasource_name": "files_datasource",
@@ -914,6 +923,7 @@ def test_complex_suite_with_batch_request(warning_suite, empty_data_context):
     assert obs == expected
 
 
+@pytest.mark.filesystem
 @pytest.mark.slow  # 9.72s
 def test_notebook_execution_with_pandas_backend(
     titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -1090,6 +1100,7 @@ def test_notebook_execution_with_pandas_backend(
     assert suite == original_suite
 
 
+@pytest.mark.filesystem
 def test_notebook_execution_with_custom_notebooks_wrong_module(
     suite_with_multiple_citations, data_context_v3_custom_bad_notebooks
 ):
@@ -1104,6 +1115,7 @@ def test_notebook_execution_with_custom_notebooks_wrong_module(
         ).render(suite=suite_with_multiple_citations)
 
 
+@pytest.mark.filesystem
 def test_notebook_execution_with_custom_notebooks(
     suite_with_multiple_citations, data_context_v3_custom_notebooks
 ):
@@ -1225,6 +1237,7 @@ def test_notebook_execution_with_custom_notebooks(
     ],
 )
 @pytest.mark.slow  # 1.36s
+@pytest.mark.filesystem
 def test_raise_exception_quotes_or_space_with_row_condition(
     row_condition,
     titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,

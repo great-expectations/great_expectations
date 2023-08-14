@@ -8,7 +8,10 @@ from typing import Optional
 from uuid import UUID
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -27,7 +30,6 @@ def is_valid_uuid(uuid: str) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidUUID(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_uuid"
 
@@ -37,9 +39,19 @@ class ColumnValuesToBeValidUUID(ColumnMapMetricProvider):
         return column.apply(lambda x: is_valid_uuid(x))
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
-    # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
-    # def _sqlalchemy(cls, column, _dialect, **kwargs):
-    #     raise NotImplementedError
+    @column_condition_partial(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(cls, column, _dialect, **kwargs):
+        """
+        Please note that there is a stricter version to verify GUID, as can be seen in the following link:
+        https://www.techtarget.com/searchwindowsserver/definition/GUID-global-unique-identifier#:~:text=RFC%204122%20specification.-,How%20does%20GUID%20work%3F,-GUIDs%20are%20constructed
+        However, since the UUID package doesn't seem to enforce it, the chosen regex was the less stricter.
+        For future purposes, the stricter pattern can be found here as well, commented out.
+        """
+        # regex_pattern = '^(urn:uuid:)?\{?[A-Fa-f0-9]{8}-?[A-Fa-f0-9]{4}-?[1-5][A-Fa-f0-9]{3}-?[89ABab][A-Fa-f0-9]{3}-?[A-Fa-f0-9]{12}\}?$'
+        regex_pattern = (
+            "^(urn:uuid:)?\\{?[0-9a-fA-F]{8}(-?[0-9a-fA-F]{4}){3}-?[0-9a-fA-F]{12}\\}?$"
+        )
+        return column.regexp_match(regex_pattern)
 
     # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
     # @column_condition_partial(engine=SparkDFExecutionEngine)
@@ -65,9 +77,9 @@ class ExpectColumnValuesToBeValidUUID(ColumnMapExpectation):
                     # hyphens may or may not be present
                     "e8a4926e5f7643079e8acdbd49a4e15b",
                     # curly braces may or may not be present
-                    "{00010203-0405-0607-0809-0a0b0c0d0e0f}",
+                    "{00010203-0405-1607-8809-0a0b0c0d0e0f}",
                     # leading identifier "urn:uuid:" is allowed
-                    "urn:uuid:12345678-1234-5678-1234-567812345678",
+                    "urn:uuid:12345678-1234-5678-9234-567812345678",
                 ],
                 "malformed_uuids": [
                     # has non-hexidecimal value
@@ -147,6 +159,7 @@ class ExpectColumnValuesToBeValidUUID(ColumnMapExpectation):
         "tags": ["typed-entities"],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@joshua-stauffer",  # Don't forget to add your github handle here!
+            "@asafla",
         ],
     }
 

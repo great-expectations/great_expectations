@@ -1,37 +1,32 @@
+from __future__ import annotations
+
 import logging
 import uuid
 from pathlib import Path
 from typing import Dict, Tuple
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.optional_imports import sqlalchemy_version_check
 from great_expectations.util import (
     filter_properties_dict,
     get_sqlalchemy_url,
     import_make_url,
 )
 
-try:
-    import sqlalchemy as sa
-
-    sqlalchemy_version_check(sa.__version__)
-
-    from sqlalchemy import Column, MetaData, String, Table, and_, column, select
-    from sqlalchemy.engine.url import URL
-    from sqlalchemy.exc import IntegrityError, NoSuchTableError, SQLAlchemyError
-
+if sa:
     make_url = import_make_url()
-except ImportError:
-    sa = None
-    create_engine = None
+    SQLAlchemyError = sqlalchemy.SQLAlchemyError
 
 
 logger = logging.getLogger(__name__)
 
 
 class DatabaseStoreBackend(StoreBackend):
-    def __init__(  # noqa: C901 - 16
+    def __init__(  # noqa: PLR0912, PLR0913
         self,
         table_name,
         key_columns,
@@ -86,7 +81,7 @@ class DatabaseStoreBackend(StoreBackend):
                 "Credentials, url, connection_string, or an engine are required for a DatabaseStoreBackend."
             )
 
-        meta = MetaData(schema=self._schema_name)
+        meta = sa.MetaData(schema=self._schema_name)
         self.key_columns = key_columns
         # Dynamically construct a SQLAlchemy table with the name and column names we'll use
         cols = []
@@ -95,10 +90,10 @@ class DatabaseStoreBackend(StoreBackend):
                 raise gx_exceptions.InvalidConfigError(
                     "'value' cannot be used as a key_element name"
                 )
-            cols.append(Column(column_, String, primary_key=True))
-        cols.append(Column("value", String))
+            cols.append(sa.Column(column_, sa.String, primary_key=True))
+        cols.append(sa.Column("value", sa.String))
         try:
-            table = Table(table_name, meta, autoload=True, autoload_with=self.engine)
+            table = sa.Table(table_name, meta, autoload_with=self.engine)
             # We do a "light" check: if the columns' names match, we will proceed, otherwise, create the table
             if {str(col.name).lower() for col in table.columns} != (
                 set(key_columns) | {"value"}
@@ -106,13 +101,14 @@ class DatabaseStoreBackend(StoreBackend):
                 raise gx_exceptions.StoreBackendError(
                     f"Unable to use table {table_name}: it exists, but does not have the expected schema."
                 )
-        except NoSuchTableError:
-            table = Table(table_name, meta, *cols)
+        except sqlalchemy.NoSuchTableError:
+            table = sa.Table(table_name, meta, *cols)
             try:
                 if self._schema_name:
-                    self.engine.execute(
-                        f"CREATE SCHEMA IF NOT EXISTS {self._schema_name};"
-                    )
+                    with self.engine.begin() as connection:
+                        connection.execute(
+                            sa.text(f"CREATE SCHEMA IF NOT EXISTS {self._schema_name};")
+                        )
                 meta.create_all(self.engine)
             except SQLAlchemyError as e:
                 raise gx_exceptions.StoreBackendError(
@@ -160,7 +156,7 @@ class DatabaseStoreBackend(StoreBackend):
             self._store_backend_id = f"{self.STORE_BACKEND_ID_PREFIX}{store_id}"
         return self._store_backend_id.replace(self.STORE_BACKEND_ID_PREFIX, "")
 
-    def _build_engine(self, credentials, **kwargs) -> "sa.engine.Engine":
+    def _build_engine(self, credentials, **kwargs) -> "sa.engine.Engine":  # noqa: UP037
         """
         Using a set of given credentials, constructs an Execution Engine , connecting to a database using a URL or a
         private key path.
@@ -188,7 +184,7 @@ class DatabaseStoreBackend(StoreBackend):
     @staticmethod
     def _get_sqlalchemy_key_pair_auth_url(
         drivername: str, credentials: dict
-    ) -> Tuple["URL", Dict]:
+    ) -> Tuple["URL", Dict]:  # type: ignore[name-defined]  # noqa F821
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
@@ -238,10 +234,10 @@ class DatabaseStoreBackend(StoreBackend):
 
     def _get(self, key):
         sel = (
-            select([column("value")])
+            sa.select(sa.column("value"))
             .select_from(self._table)
             .where(
-                and_(
+                sa.and_(
                     *(
                         getattr(self._table.columns, key_col) == val
                         for key_col, val in zip(self.key_columns, key)
@@ -250,7 +246,9 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         try:
-            return self.engine.execute(sel).fetchone()[0]
+            with self.engine.begin() as connection:
+                row = connection.execute(sel).fetchone()[0]
+            return row
         except (IndexError, SQLAlchemyError) as e:
             logger.debug(f"Error fetching value: {str(e)}")
             raise gx_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
@@ -260,7 +258,7 @@ class DatabaseStoreBackend(StoreBackend):
         cols["value"] = value
 
         if allow_update:
-            if self.has_key(key):  # noqa: W601
+            if self.has_key(key):
                 ins = (
                     self._table.update()
                     .where(getattr(self._table.columns, self.key_columns[0]) == key[0])
@@ -272,8 +270,9 @@ class DatabaseStoreBackend(StoreBackend):
             ins = self._table.insert().values(**cols)
 
         try:
-            self.engine.execute(ins)
-        except IntegrityError as e:
+            with self.engine.begin() as connection:
+                connection.execute(ins)
+        except sqlalchemy.IntegrityError as e:
             if self._get(key) == value:
                 logger.info(f"Key {str(key)} already exists with the same value.")
             else:
@@ -304,10 +303,10 @@ class DatabaseStoreBackend(StoreBackend):
 
     def _has_key(self, key):
         sel = (
-            select([sa.func.count(column("value"))])
+            sa.select(sa.func.count(sa.column("value")))
             .select_from(self._table)
             .where(
-                and_(
+                sa.and_(
                     *(
                         getattr(self._table.columns, key_col) == val
                         for key_col, val in zip(self.key_columns, key)
@@ -316,17 +315,19 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         try:
-            return self.engine.execute(sel).fetchone()[0] == 1
+            with self.engine.begin() as connection:
+                return connection.execute(sel).fetchone()[0] == 1
         except (IndexError, SQLAlchemyError) as e:
             logger.debug(f"Error checking for value: {str(e)}")
             return False
 
     def list_keys(self, prefix=()):
+        columns = [sa.column(col) for col in self.key_columns]
         sel = (
-            select([column(col) for col in self.key_columns])
+            sa.select(*columns)
             .select_from(self._table)
             .where(
-                and_(
+                sa.and_(
                     True,
                     *(
                         getattr(self._table.columns, key_col) == val
@@ -335,11 +336,13 @@ class DatabaseStoreBackend(StoreBackend):
                 )
             )
         )
-        return [tuple(row) for row in self.engine.execute(sel).fetchall()]
+        with self.engine.begin() as connection:
+            row_list: list[sqlalchemy.Row] = connection.execute(sel).fetchall()
+        return [tuple(row) for row in row_list]
 
     def remove_key(self, key):
         delete_statement = self._table.delete().where(
-            and_(
+            sa.and_(
                 *(
                     getattr(self._table.columns, key_col) == val
                     for key_col, val in zip(self.key_columns, key)
@@ -347,7 +350,8 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         try:
-            return self.engine.execute(delete_statement)
+            with self.engine.begin() as connection:
+                return connection.execute(delete_statement)
         except SQLAlchemyError as e:
             raise gx_exceptions.StoreBackendError(
                 f"Unable to delete key: got sqlalchemy error {str(e)}"

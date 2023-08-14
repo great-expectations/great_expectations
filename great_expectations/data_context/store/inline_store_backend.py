@@ -41,7 +41,7 @@ class InlineStoreBackend(StoreBackend):
     Please note that is it only to be used with file-backed DataContexts (DataContext and FileDataContext).
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         data_context: FileDataContext,
         resource_type: DataContextVariableSchema,
@@ -100,6 +100,10 @@ class InlineStoreBackend(StoreBackend):
 
         if resource_type is DataContextVariableSchema.ALL_VARIABLES:
             config_commented_map_from_yaml = yaml.load(value)
+            # NOTE: fluent datasources may be present under both the `fluent_datasources` & `datasources` key
+            # if fluent datasource is part of `datasources` it will attempt to validate using a marshmallow Datasource schema and fail
+            for name in config_commented_map_from_yaml.get("fluent_datasources", {}):  # type: ignore[union-attr]
+                config_commented_map_from_yaml.get("datasources", {}).pop(name, None)  # type: ignore[union-attr,arg-type,call-arg]
             value = DataContextConfig.from_commented_map(
                 commented_map=config_commented_map_from_yaml
             )

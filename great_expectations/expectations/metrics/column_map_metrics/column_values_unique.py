@@ -1,10 +1,14 @@
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, Window, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -25,7 +29,7 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
     # )
     # def _sqlalchemy(cls, column, _table, **kwargs):
     #     dup_query = (
-    #         sa.select([column])
+    #         sa.select(column)
     #         .select_from(_table)
     #         .group_by(column)
     #         .having(sa.func.count(column) > 1)
@@ -42,8 +46,9 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
         # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
         # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created with
         # the column we will be performing the expectation on, and the query is performed against it.
-        dialect = kwargs.get("_dialect", None)
-        sql_engine = kwargs.get("_sqlalchemy_engine", None)
+        dialect = kwargs.get("_dialect")
+        sql_engine = kwargs.get("_sqlalchemy_engine")
+        execution_engine = kwargs.get("_execution_engine")
         try:
             dialect_name = dialect.dialect.name
         except AttributeError:
@@ -58,16 +63,16 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
                 source_table=_table,
                 column_name=column.name,
             )
-            sql_engine.execute(temp_table_stmt)
+            execution_engine.execute_query_in_transaction(sa.text(temp_table_stmt))
             dup_query = (
-                sa.select([column])
+                sa.select(column)
                 .select_from(sa.text(temp_table_name))
                 .group_by(column)
                 .having(sa.func.count(column) > 1)
             )
         else:
             dup_query = (
-                sa.select([column])
+                sa.select(column)
                 .select_from(_table)
                 .group_by(column)
                 .having(sa.func.count(column) > 1)
@@ -79,4 +84,4 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
         partial_fn_type=MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
     )
     def _spark(cls, column, **kwargs):
-        return F.count(F.lit(1)).over(Window.partitionBy(column)) <= 1
+        return F.count(F.lit(1)).over(pyspark.Window.partitionBy(column)) <= 1

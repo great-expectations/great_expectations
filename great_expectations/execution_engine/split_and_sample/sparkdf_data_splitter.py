@@ -4,6 +4,8 @@ import hashlib
 import logging
 from typing import List, Union
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.exceptions import exceptions as gx_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import (
     DataSplitter,
@@ -11,23 +13,6 @@ from great_expectations.execution_engine.split_and_sample.data_splitter import (
 )
 
 logger = logging.getLogger(__name__)
-
-try:
-    import pyspark
-    import pyspark.sql.functions as F
-
-    # noinspection SpellCheckingInspection
-    import pyspark.sql.types as sparktypes
-    from pyspark.sql import DataFrame
-except ImportError:
-    pyspark = None  # type: ignore[assignment]
-    F = None  # type: ignore[assignment]
-    DataFrame = None  # type: ignore[assignment,misc]
-    # noinspection SpellCheckingInspection
-    sparktypes = None  # type: ignore[assignment]
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
-    )
 
 
 class SparkDataSplitter(DataSplitter):
@@ -39,10 +24,10 @@ class SparkDataSplitter(DataSplitter):
 
     def split_on_year(
         self,
-        df: DataFrame,
+        df: pyspark.DataFrame,
         column_name: str,
         batch_identifiers: dict,
-    ) -> DataFrame:
+    ) -> pyspark.DataFrame:
         """Split on year values in column_name.
 
         Args:
@@ -65,10 +50,10 @@ class SparkDataSplitter(DataSplitter):
 
     def split_on_year_and_month(
         self,
-        df: DataFrame,
+        df: pyspark.DataFrame,
         column_name: str,
         batch_identifiers: dict,
-    ) -> DataFrame:
+    ) -> pyspark.DataFrame:
         """Split on year and month values in column_name.
 
         Args:
@@ -91,10 +76,10 @@ class SparkDataSplitter(DataSplitter):
 
     def split_on_year_and_month_and_day(
         self,
-        df: DataFrame,
+        df: pyspark.DataFrame,
         column_name: str,
         batch_identifiers: dict,
-    ) -> DataFrame:
+    ) -> pyspark.DataFrame:
         """Split on year and month and day values in column_name.
 
         Args:
@@ -117,11 +102,11 @@ class SparkDataSplitter(DataSplitter):
 
     def split_on_date_parts(
         self,
-        df: DataFrame,
+        df: pyspark.DataFrame,
         column_name: str,
         batch_identifiers: dict,
         date_parts: Union[List[DatePart], List[str]],
-    ) -> DataFrame:
+    ) -> pyspark.DataFrame:
         """Split on date_part values in column_name.
 
         Values are NOT truncated, for example this will return data for a
@@ -189,8 +174,8 @@ class SparkDataSplitter(DataSplitter):
 
     @staticmethod
     def split_on_whole_table(
-        df: DataFrame,
-    ) -> DataFrame:
+        df: pyspark.DataFrame,
+    ) -> pyspark.DataFrame:
         """No op. Return the same data that is passed in.
 
         Args:
@@ -204,7 +189,7 @@ class SparkDataSplitter(DataSplitter):
     @staticmethod
     def split_on_column_value(
         df, column_name: str, batch_identifiers: dict
-    ) -> DataFrame:
+    ) -> pyspark.DataFrame:
         """Return a dataframe where rows are filtered based on the specified column value.
 
         Args:
@@ -223,7 +208,7 @@ class SparkDataSplitter(DataSplitter):
         column_name: str,
         batch_identifiers: dict,
         date_format_string: str = "yyyy-MM-dd",
-    ) -> DataFrame:
+    ) -> pyspark.DataFrame:
         """Return a dataframe where rows are filtered based on whether their converted
         datetime (using date_format_string) matches the datetime string value provided
         in batch_identifiers for the specified column.
@@ -257,7 +242,7 @@ class SparkDataSplitter(DataSplitter):
         res = (
             df.withColumn(
                 "div_temp",
-                (F.col(column_name) / divisor).cast(sparktypes.IntegerType()),
+                (F.col(column_name) / divisor).cast(pyspark.types.IntegerType()),
             )
             .filter(F.col("div_temp") == matching_divisor)
             .drop("div_temp")
@@ -270,7 +255,7 @@ class SparkDataSplitter(DataSplitter):
         matching_mod_value = batch_identifiers[column_name]
         res = (
             df.withColumn(
-                "mod_temp", (F.col(column_name) % mod).cast(sparktypes.IntegerType())
+                "mod_temp", (F.col(column_name) % mod).cast(pyspark.types.IntegerType())
             )
             .filter(F.col("mod_temp") == matching_mod_value)
             .drop("mod_temp")
@@ -315,7 +300,7 @@ class SparkDataSplitter(DataSplitter):
             hashed_value = hash_func(to_encode.encode()).hexdigest()[-1 * hash_digits :]
             return hashed_value
 
-        encrypt_udf = F.udf(_encrypt_value, sparktypes.StringType())
+        encrypt_udf = F.udf(_encrypt_value, pyspark.types.StringType())
         res = (
             df.withColumn("encrypted_value", encrypt_udf(column_name))
             .filter(F.col("encrypted_value") == batch_identifiers["hash_value"])

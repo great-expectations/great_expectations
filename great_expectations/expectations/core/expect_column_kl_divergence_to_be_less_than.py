@@ -4,20 +4,20 @@ from typing import TYPE_CHECKING, Dict, Optional, Tuple
 import altair as alt
 import numpy as np
 import pandas as pd
-from scipy import stats as stats
+from scipy import stats
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.util import (
     is_valid_categorical_partition_object,
     is_valid_partition_object,
 )
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import (
@@ -48,7 +48,7 @@ from great_expectations.validator.computed_metric import MetricValue  # noqa: TC
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.validator import (
-    ValidationDependencies,  # noqa: TCH001
+    ValidationDependencies,
 )
 
 if TYPE_CHECKING:
@@ -58,7 +58,7 @@ logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
 
-class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
+class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
     """Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the partition object to be lower than the provided threshold.
 
     KL divergence compares two distributions. The higher the divergence value (relative entropy), the larger \
@@ -375,7 +375,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
 
         return validation_dependencies
 
-    def _validate(  # noqa: C901 - 29
+    def _validate(  # noqa: C901, PLR0912, PLR0915
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
@@ -587,7 +587,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 observed_weights = observed_weights[1:-1]
 
             elif partition_object["bins"][0] == -np.inf:
-
                 if "tail_weights" in partition_object:
                     raise ValueError(
                         "There can be no tail weights for partitions with one or both endpoints at infinity"
@@ -623,7 +622,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 observed_weights = observed_weights[1:]
 
             elif partition_object["bins"][-1] == np.inf:
-
                 if "tail_weights" in partition_object:
                     raise ValueError(
                         "There can be no tail weights for partitions with one or both endpoints at infinity"
@@ -736,23 +734,23 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         return return_obj
 
     @classmethod
-    def _get_kl_divergence_chart(cls, partition_object, header=None):
+    def _get_kl_divergence_chart(cls, partition_object, header=None):  # noqa: PLR0912
         weights = partition_object["weights"]
 
-        if len(weights) > 60:
+        if len(weights) > 60:  # noqa: PLR2004
             expected_distribution = cls._get_kl_divergence_partition_object_table(
                 partition_object, header=header
             )
         else:
             chart_pixel_width = (len(weights) / 60.0) * 500
-            if chart_pixel_width < 250:
+            if chart_pixel_width < 250:  # noqa: PLR2004
                 chart_pixel_width = 250
             chart_container_col_width = round((len(weights) / 60.0) * 6)
-            if chart_container_col_width < 4:
+            if chart_container_col_width < 4:  # noqa: PLR2004
                 chart_container_col_width = 4
-            elif chart_container_col_width >= 5:
+            elif chart_container_col_width >= 5:  # noqa: PLR2004
                 chart_container_col_width = 6
-            elif chart_container_col_width >= 4:
+            elif chart_container_col_width >= 4:  # noqa: PLR2004
                 chart_container_col_width = 5
 
             mark_bar_args = {}
@@ -846,14 +844,14 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         weights = partition_object.get("weights", [])
 
         chart_pixel_width = (len(weights) / 60.0) * 500
-        if chart_pixel_width < 250:
+        if chart_pixel_width < 250:  # noqa: PLR2004
             chart_pixel_width = 250
         chart_container_col_width = round((len(weights) / 60.0) * 6)
-        if chart_container_col_width < 4:
+        if chart_container_col_width < 4:  # noqa: PLR2004
             chart_container_col_width = 4
-        elif chart_container_col_width >= 5:
+        elif chart_container_col_width >= 5:  # noqa: PLR2004
             chart_container_col_width = 6
-        elif chart_container_col_width >= 4:
+        elif chart_container_col_width >= 4:  # noqa: PLR2004
             chart_container_col_width = 5
 
         mark_bar_args = {}
@@ -1081,7 +1079,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             template_str = f"$column {template_str}"
 
         # generate table or chart depending on number of weights
-        if len(weights) > 60:
+        if len(weights) > 60:  # noqa: PLR2004
             (
                 renderer_configuration.header_row,
                 renderer_configuration.table,
@@ -1250,7 +1248,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         distribution_table_header_row = None
         distribution_table_rows = None
 
-        if len(weights) > 60:
+        if len(weights) > 60:  # noqa: PLR2004
             (
                 distribution_table_header_row,
                 distribution_table_rows,
@@ -1399,7 +1397,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         assert result, "Must pass in result."
         observed_partition_object = result.result["details"]["observed_partition"]
         weights = observed_partition_object["weights"]
-        if len(weights) > 60:
+        if len(weights) > 60:  # noqa: PLR2004
             return None
 
         header = RenderedStringTemplateContent(

@@ -1,5 +1,7 @@
 from typing import Optional
 
+# from great_expectations.compatibility.pyspark import functions as F
+# from great_expectations.compatibility import pyspark
 from edtf_validate.valid_edtf import (
     conformsLevel0,
     conformsLevel1,
@@ -16,7 +18,7 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
 )
-from great_expectations.expectations.metrics.map_metric import (
+from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
@@ -84,7 +86,7 @@ class ColumnValuesEdtfParseable(ColumnMapMetricProvider):
 #         if level is not None and type(level) != int:
 #             raise TypeError("level must be of type int.")
 #
-#         is_parseable_udf = F.udf(is_parseable, sparktypes.BooleanType())
+#         is_parseable_udf = F.udf(is_parseable, pyspark.types.BooleanType())
 #         return is_parseable_udf(column)
 
 
@@ -391,7 +393,7 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = (

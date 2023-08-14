@@ -21,6 +21,9 @@ from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.new_datasource import Datasource
 
+pytestmark = pytest.mark.big
+
+
 yaml = YAMLHandler()
 
 
@@ -62,6 +65,7 @@ def datasource_with_runtime_data_connector_and_pandas_execution_engine():
 #########################################
 # Tests with data passed in as batch_data
 #########################################
+
 
 # Tests with PandasExecutionEngine : batch_data
 def test_pandas_execution_engine_self_check(
@@ -150,12 +154,9 @@ def test_batch_data_pandas_execution_engine_no_batch_identifiers(
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
-    with pytest.raises(TypeError):
-        # batch_identifiers missing (set to None)
-        batch_list: List[
-            Batch
-        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+    # both batch_identifiers and runtime_parameters parameters must be present, not just one or the other
+    with pytest.raises(ValueError):
+        datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
                 datasource_name=datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
                 data_connector_name="test_runtime_data_connector",
@@ -165,17 +166,14 @@ def test_batch_data_pandas_execution_engine_no_batch_identifiers(
             )
         )
 
-    # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
-    with pytest.raises(TypeError):
-        # batch_identifiers missing
-        batch_list: List[  # noqa: F841
-            Batch
-        ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+    with pytest.raises(ValueError):
+        datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
                 datasource_name=datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset",
-                runtime_parameters={"batch_data": test_df},
+                runtime_parameters=None,
+                batch_identifiers={"a": "1"},
             )
         )
 
@@ -183,7 +181,6 @@ def test_batch_data_pandas_execution_engine_no_batch_identifiers(
 def test_batch_data_pandas_execution_engine_incorrect_batch_identifiers(
     datasource_with_runtime_data_connector_and_pandas_execution_engine,
 ):
-
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # raised by _validate_batch_identifiers_configuration() in RuntimeDataConnector

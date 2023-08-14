@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import json
 import logging
@@ -10,6 +12,7 @@ from typing import List, Optional, Union
 import requests
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import aws
 from great_expectations.core.batch import (
     BatchRequest,
     BatchRequestBase,
@@ -18,12 +21,8 @@ from great_expectations.core.batch import (
     materialize_batch_request,
 )
 from great_expectations.core.util import nested_update
+from great_expectations.data_context.types.base import CheckpointValidationConfig
 from great_expectations.types import DictDot
-
-try:
-    import boto3
-except ImportError:
-    boto3 = None
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +56,7 @@ def send_slack_notification(
     except Exception as e:
         logger.error(str(e))
     else:
-        if response.status_code != 200 or not ok_status:
+        if response.status_code != 200 or not ok_status:  # noqa: PLR2004
             logger.warning(
                 "Request to Slack webhook "
                 f"returned error {response.status_code}: {response.text}"
@@ -92,7 +91,7 @@ def send_opsgenie_alert(query, suite_name, settings):
     except Exception as e:
         logger.error(str(e))
     else:
-        if response.status_code != 202:
+        if response.status_code != 202:  # noqa: PLR2004
             logger.warning(
                 "Request to Opsgenie API "
                 f"returned error {response.status_code}: {response.text}"
@@ -112,7 +111,7 @@ def send_microsoft_teams_notifications(query, microsoft_teams_webhook):
     except Exception as e:
         logger.error(str(e))
     else:
-        if response.status_code != 200:
+        if response.status_code != 200:  # noqa: PLR2004
             logger.warning(
                 "Request to Microsoft Teams webhook "
                 f"returned error {response.status_code}: {response.text}"
@@ -133,7 +132,7 @@ def send_webhook_notifications(query, webhook, target_platform):
     except Exception as e:
         logger.error(str(e))
     else:
-        if response.status_code != 200:
+        if response.status_code != 200:  # noqa: PLR2004
             logger.warning(
                 f"Request to {target_platform} webhook "
                 f"returned error {response.status_code}: {response.text}"
@@ -143,7 +142,7 @@ def send_webhook_notifications(query, webhook, target_platform):
 
 
 # noinspection SpellCheckingInspection
-def send_email(
+def send_email(  # noqa: PLR0913
     title,
     html,
     smtp_address,
@@ -189,7 +188,7 @@ def send_email(
 
 
 def get_substituted_validation_dict(
-    substituted_runtime_config: dict, validation_dict: dict
+    substituted_runtime_config: dict, validation_dict: CheckpointValidationConfig
 ) -> dict:
     substituted_validation_dict = {
         "batch_request": get_substituted_batch_request(
@@ -203,7 +202,7 @@ def get_substituted_validation_dict(
         )
         or substituted_runtime_config.get("expectation_suite_ge_cloud_id"),
         "action_list": get_updated_action_list(
-            base_action_list=substituted_runtime_config.get("action_list"),
+            base_action_list=substituted_runtime_config.get("action_list", []),
             other_action_list=validation_dict.get("action_list", {}),
         ),
         "evaluation_parameters": nested_update(
@@ -262,10 +261,12 @@ def get_substituted_batch_request(
         **substituted_runtime_batch_request, **validation_batch_request
     )
 
-    return materialize_batch_request(batch_request=effective_batch_request)
+    return materialize_batch_request(batch_request=effective_batch_request)  # type: ignore[return-value] # see materialize_batch_request
 
 
-def substitute_template_config(source_config: dict, template_config: dict) -> dict:
+def substitute_template_config(  # noqa: PLR0912
+    source_config: dict, template_config: dict
+) -> dict:
     if not (template_config and any(template_config.values())):
         return source_config
 
@@ -362,8 +363,14 @@ def substitute_runtime_config(source_config: dict, runtime_kwargs: dict) -> dict
         batch_request_from_runtime_kwargs = get_batch_request_as_dict(
             batch_request=batch_request_from_runtime_kwargs
         )
+
+        # If "batch_request" has Fluent Datasource form, "options" must be overwritten for DataAsset type compatibility.
+        updated_batch_request = copy.deepcopy(batch_request)
+        if batch_request_from_runtime_kwargs and "options" in updated_batch_request:
+            updated_batch_request["options"] = {}
+
         updated_batch_request = nested_update(
-            batch_request,
+            updated_batch_request,
             batch_request_from_runtime_kwargs,
             dedup=True,
         )
@@ -443,33 +450,48 @@ def get_updated_action_list(
 
 
 def does_batch_request_in_validations_contain_batch_data(
-    validations: Optional[List[dict]] = None,
+    validations: List[CheckpointValidationConfig],
 ) -> bool:
-    if validations is not None:
-        for val in validations:
-            if (
-                val.get("batch_request") is not None
-                and isinstance(val.get("batch_request"), (dict, DictDot))
-                and val["batch_request"].get("runtime_parameters") is not None
-                and val["batch_request"]["runtime_parameters"].get("batch_data")
-                is not None
-            ):
-                return True
+    for val in validations:
+        if (
+            "batch_request" in val
+            and val["batch_request"] is not None
+            and isinstance(val["batch_request"], (dict, DictDot))
+            and val["batch_request"].get("runtime_parameters") is not None
+            and val["batch_request"]["runtime_parameters"].get("batch_data") is not None
+        ):
+            return True
 
     return False
 
 
 def get_validations_with_batch_request_as_dict(
-    validations: Optional[list] = None,
-) -> Optional[list]:
-    if validations:
-        for value in validations:
-            if "batch_request" in value:
-                value["batch_request"] = get_batch_request_as_dict(
-                    batch_request=value["batch_request"]
-                )
+    validations: list[dict] | list[CheckpointValidationConfig] | None = None,
+) -> list[CheckpointValidationConfig]:
+    if not validations:
+        return []
 
-    return validations
+    for value in validations:
+        if "batch_request" in value:
+            value["batch_request"] = get_batch_request_as_dict(
+                batch_request=value["batch_request"]
+            )
+
+    return convert_validations_list_to_checkpoint_validation_configs(validations)
+
+
+def convert_validations_list_to_checkpoint_validation_configs(
+    validations: list[dict] | list[CheckpointValidationConfig] | None,
+) -> list[CheckpointValidationConfig]:
+    # We accept both dicts and rich config types but all internal usage should use the latter
+    if not validations:
+        return []
+    return [
+        CheckpointValidationConfig(**validation)
+        if isinstance(validation, dict)
+        else validation
+        for validation in validations
+    ]
 
 
 def validate_validation_dict(
@@ -498,10 +520,10 @@ def send_sns_notification(
     :param sns_subject: : The SNS Message Subject - defaults to expectation_suite_identifier.expectation_suite_name
     :param validation_results:  The results of the validation ran
     :param kwargs:  Keyword arguments to pass to the boto3 Session
-    :return:  Message ID that was published
+    :return:  Message ID that was published or error message
 
     """
-    if not boto3:
+    if not aws.boto3:
         logger.warning("boto3 is not installed")
         return "boto3 is not installed"
 
@@ -514,11 +536,13 @@ def send_sns_notification(
         },
         "MessageStructure": "json",
     }
-    session = boto3.Session(**kwargs)
+    session = aws.boto3.Session(**kwargs)
     sns = session.client("sns")
     try:
         response = sns.publish(**message_dict)
     except sns.exceptions.InvalidParameterException:
-        logger.error(f"Received invalid for message: {validation_results}")
+        error_msg = f"Received invalid for message: {validation_results}"
+        logger.error(error_msg)
+        return error_msg
     else:
         return f"Successfully posted results to {response['MessageId']} with Subject {sns_subject}"

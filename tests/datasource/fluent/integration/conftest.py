@@ -6,16 +6,19 @@ import pathlib
 import numpy as np
 import pandas as pd
 import pytest
-import sqlalchemy
 
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent import (
+    BatchRequest,
     PandasFilesystemDatasource,
     SparkFilesystemDatasource,
     SqliteDatasource,
 )
 from great_expectations.datasource.fluent.interfaces import (
-    BatchRequest,
     DataAsset,
     Datasource,
 )
@@ -39,7 +42,7 @@ def default_pandas_data(
     pandas_ds.read_csv(
         filepath_or_buffer=csv_path / "yellow_tripdata_sample_2019-02.csv",
     )
-    asset = pandas_ds.assets[DEFAULT_PANDAS_DATA_ASSET_NAME]
+    asset = pandas_ds.get_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
     batch_request = asset.build_batch_request()
     return context, pandas_ds, asset, batch_request
 
@@ -53,14 +56,14 @@ def pandas_sql_data(
             "passenger_count": passenger_count,
         }
     )
-    con = sqlalchemy.create_engine("sqlite://")
-    df.to_sql("my_table", con=con)
+    con = sa.create_engine("sqlite://")
+    add_dataframe_to_db(df=df, name="my_table", con=con)
     pandas_ds = context.sources.add_pandas("my_pandas")
     pandas_ds.read_sql(
-        sql="SELECT * FROM my_table",
+        sql=sa.text("SELECT * FROM my_table"),
         con=con,
     )
-    asset = pandas_ds.assets[DEFAULT_PANDAS_DATA_ASSET_NAME]
+    asset = pandas_ds.get_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
     batch_request = asset.build_batch_request()
     return context, pandas_ds, asset, batch_request
 
@@ -84,11 +87,13 @@ def pandas_filesystem_datasource(
 def pandas_data(
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, PandasFilesystemDatasource, DataAsset, BatchRequest]:
+    context.config_variables.update({"pipeline_filename": __file__})
     pandas_ds = pandas_filesystem_datasource(context=context)
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
+        batch_metadata={"my_pipeline": "${pipeline_filename}"},
     )
     batch_request = asset.build_batch_request({"year": "2019", "month": "01"})
     return context, pandas_ds, asset, batch_request
@@ -226,7 +231,13 @@ def multibatch_spark_data(
 
 
 @pytest.fixture(
-    params=[pandas_data, sql_data, spark_data, default_pandas_data, pandas_sql_data]
+    params=[
+        pytest.param(pandas_data, marks=pytest.mark.filesystem),
+        pytest.param(sql_data, marks=pytest.mark.sqlite),
+        pytest.param(spark_data, marks=pytest.mark.spark),
+        pytest.param(default_pandas_data, marks=pytest.mark.filesystem),
+        pytest.param(pandas_sql_data, marks=pytest.mark.filesystem),
+    ]
 )
 def datasource_test_data(
     test_backends, empty_data_context, request
@@ -238,7 +249,11 @@ def datasource_test_data(
 
 
 @pytest.fixture(
-    params=[multibatch_pandas_data, multibatch_sql_data, multibatch_spark_data]
+    params=[
+        pytest.param(multibatch_pandas_data, marks=pytest.mark.filesystem),
+        pytest.param(multibatch_sql_data, marks=pytest.mark.sqlite),
+        pytest.param(multibatch_spark_data, marks=pytest.mark.spark),
+    ]
 )
 def multibatch_datasource_test_data(
     test_backends, empty_data_context, request

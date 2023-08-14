@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 
-from typing_extensions import NotRequired, TypedDict
+from typing_extensions import TypedDict
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import DataContextKey
@@ -19,6 +19,9 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
 if TYPE_CHECKING:
+    # min version of typing_extension missing `NotRequired`, so it can't be imported at runtime
+    from typing_extensions import NotRequired
+
     from great_expectations.core.configuration import AbstractConfig
 
 logger = logging.getLogger(__name__)
@@ -29,6 +32,14 @@ class StoreConfigTypedDict(TypedDict):
     class_name: str
     module_name: NotRequired[str]
     store_backend: dict
+
+
+class DataDocsSiteConfigTypedDict(TypedDict):
+    # NOTE: TypeDict values may be incomplete, update as needed
+    class_name: str
+    module_name: NotRequired[str]
+    store_backend: dict
+    site_index_builder: dict
 
 
 class Store:
@@ -93,7 +104,9 @@ class Store:
         # STORE_BACKEND_ID_KEY always validated
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return
-        elif not isinstance(key, self.key_class):
+        elif isinstance(key, self.key_class):
+            return
+        else:
             raise TypeError(
                 f"key must be an instance of {self.key_class.__name__}, not {type(key)}"
             )
@@ -198,6 +211,9 @@ class Store:
         """
         Essentially `set` but validates that a given key-value pair does not already exist.
         """
+        return self._add(key=key, value=value, **kwargs)
+
+    def _add(self, key: DataContextKey, value: Any, **kwargs) -> None:
         self._validate_key(key)
         return self._store_backend.add(
             self.key_to_tuple(key), self.serialize(value), **kwargs
@@ -207,6 +223,9 @@ class Store:
         """
         Essentially `set` but validates that a given key-value pair does already exist.
         """
+        return self._update(key=key, value=value, **kwargs)
+
+    def _update(self, key: DataContextKey, value: Any, **kwargs) -> None:
         self._validate_key(key)
         return self._store_backend.update(
             self.key_to_tuple(key), self.serialize(value), **kwargs
@@ -216,6 +235,9 @@ class Store:
         """
         Conditionally calls `add` or `update` based on the presence of the given key.
         """
+        return self._add_or_update(key=key, value=value, **kwargs)
+
+    def _add_or_update(self, key: DataContextKey, value: Any, **kwargs) -> None:
         self._validate_key(key)
         return self._store_backend.add_or_update(
             self.key_to_tuple(key), self.serialize(value), **kwargs
@@ -231,13 +253,11 @@ class Store:
 
     def has_key(self, key: DataContextKey) -> bool:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
-            return self._store_backend.has_key(key)  # noqa: W601
+            return self._store_backend.has_key(key)
         else:
             if self._use_fixed_length_key:
-                return self._store_backend.has_key(  # noqa: W601
-                    key.to_fixed_length_tuple()
-                )
-            return self._store_backend.has_key(key.to_tuple())  # noqa: W601
+                return self._store_backend.has_key(key.to_fixed_length_tuple())
+            return self._store_backend.has_key(key.to_tuple())
 
     def self_check(self, pretty_print: bool) -> None:
         NotImplementedError(

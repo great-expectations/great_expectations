@@ -4,14 +4,14 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union
 import numpy as np
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import (
@@ -50,14 +50,14 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.util import isclose
 from great_expectations.validator.validator import (
-    ValidationDependencies,  # noqa: TCH001
+    ValidationDependencies,
 )
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
+class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     # noinspection PyUnresolvedReferences
     """Expect the specific provided column quantiles to be between a minimum value and a maximum value.
 
@@ -279,10 +279,8 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             ), "quantile_ranges should be a dictionary"
 
             assert all(
-                [
-                    True if None in x or x == sorted(x) else False
-                    for x in configuration.kwargs["quantile_ranges"]["value_ranges"]
-                ]
+                True if None in x or x == sorted(x) else False
+                for x in configuration.kwargs["quantile_ranges"]["value_ranges"]
             ), "quantile_ranges must consist of ordered pairs"
 
         except AssertionError as e:
@@ -666,7 +664,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                             else f"{quantile:3.2f}",
                             "tooltip": {
                                 "content": "expect_column_quantile_values_to_be_between \n expect_column_median_to_be_between"
-                                if quantile == 0.50
+                                if quantile == 0.50  # noqa: PLR2004
                                 else "expect_column_quantile_values_to_be_between"
                             },
                         },

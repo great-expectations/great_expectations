@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import pathlib
 from contextlib import _GeneratorContextManager, contextmanager
-from typing import Any, Callable, Generator
+from typing import TYPE_CHECKING, Any, Callable, Generator, Optional
 
 import pytest
 from pydantic import ValidationError
 
 from great_expectations.datasource.fluent import SqliteDatasource
 from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
 
 
 @pytest.fixture
@@ -30,13 +33,14 @@ def sqlite_database_path() -> pathlib.Path:
 
 
 @pytest.fixture
-def sqlite_datasource(sqlite_database_path, sqlite_datasource_name) -> SqliteDatasource:
+def sqlite_datasource(
+    empty_data_context, sqlite_database_path, sqlite_datasource_name
+) -> SqliteDatasource:
     connection_string = f"sqlite:///{sqlite_database_path}"
-    datasource = SqliteDatasource(
+    return SqliteDatasource(
         name=sqlite_datasource_name,
         connection_string=connection_string,  # type: ignore[arg-type]  # pydantic will coerce
     )
-    return datasource
 
 
 @pytest.mark.unit
@@ -79,7 +83,9 @@ def test_non_select_query_asset(sqlite_datasource):
 # Test double used to return canned responses for splitter queries.
 @contextmanager
 def _create_sqlite_source(
-    splitter_query_response: list[tuple[str]],
+    data_context: Optional[AbstractDataContext] = None,
+    splitter_query_response: Optional[list[tuple[str]]] = None,
+    create_temp_table: bool = True,
 ) -> Generator[Any, Any, Any]:
     execution_eng_cls = sqlachemy_execution_engine_mock_cls(
         validate_batch_spec=lambda _: None,
@@ -92,18 +98,24 @@ def _create_sqlite_source(
     original_override = SqliteDatasource.execution_engine_override  # type: ignore[misc]
     try:
         SqliteDatasource.execution_engine_override = execution_eng_cls  # type: ignore[misc]
-        yield SqliteDatasource(
+        sqlite_datasource = SqliteDatasource(
             name="sqlite_datasource",
             connection_string="sqlite://",  # type: ignore[arg-type]  # pydantic will coerce
+            create_temp_table=create_temp_table,
         )
+        if data_context:
+            sqlite_datasource._data_context = data_context
+        yield sqlite_datasource
     finally:
         SqliteDatasource.execution_engine_override = original_override  # type: ignore[misc]
 
 
 @pytest.fixture
-def create_sqlite_source() -> Callable[
-    [list[tuple[str]]], _GeneratorContextManager[Any]
-]:
+def create_sqlite_source() -> (
+    Callable[
+        [Optional[AbstractDataContext], list[tuple[str]]], _GeneratorContextManager[Any]
+    ]
+):
     return _create_sqlite_source
 
 
@@ -145,6 +157,7 @@ def create_sqlite_source() -> Callable[
     ],
 )
 def test_sqlite_specific_splitter(
+    empty_data_context,
     create_sqlite_source,
     add_splitter_method_name,
     splitter_kwargs,
@@ -156,6 +169,7 @@ def test_sqlite_specific_splitter(
     last_specified_batch_metadata,
 ):
     with create_sqlite_source(
+        data_context=empty_data_context,
         splitter_query_response=[response for response in splitter_query_responses],
     ) as source:
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
@@ -172,3 +186,14 @@ def test_sqlite_specific_splitter(
         )
         assert len(specified_batches) == specified_batch_cnt
         assert specified_batches[-1].metadata == last_specified_batch_metadata
+
+
+@pytest.mark.unit
+def test_create_temp_table(empty_data_context, create_sqlite_source):
+    with create_sqlite_source(
+        data_context=empty_data_context, create_temp_table=False
+    ) as source:
+        assert source.create_temp_table is False
+        asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
+        _ = asset.get_batch_list_from_batch_request(asset.build_batch_request())
+        assert source._execution_engine._create_temp_table is False

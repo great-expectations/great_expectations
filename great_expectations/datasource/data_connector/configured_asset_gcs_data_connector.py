@@ -1,27 +1,18 @@
 import logging
 from typing import List, Optional
 
+from great_expectations.compatibility import google
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch import BatchDefinition  # noqa: TCH001
+from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
-from great_expectations.datasource.data_connector.asset import Asset  # noqa: TCH001
+from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
 from great_expectations.datasource.data_connector.util import list_gcs_keys
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
-
-try:
-    from google.cloud import storage
-    from google.oauth2 import service_account
-except ImportError:
-    storage = None
-    service_account = None
-    logger.debug(
-        "Unable to load GCS connection object; install optional Google dependency for support"
-    )
 
 
 @public_api
@@ -53,7 +44,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -69,7 +60,6 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-
         logger.debug(f'Constructing ConfiguredAssetGCSDataConnector "{name}".')
 
         super().__init__(
@@ -82,28 +72,32 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             sorters=sorters,
             batch_spec_passthrough=batch_spec_passthrough,
         )
+        if gcs_options is None:
+            gcs_options = {}
+
         self._bucket_or_name = bucket_or_name
         self._prefix = prefix
         self._delimiter = delimiter
         self._max_results = max_results
 
-        if gcs_options is None:
-            gcs_options = {}
-
         try:
             credentials = None  # If configured with gcloud CLI / env vars
             if "filename" in gcs_options:
                 filename = gcs_options.pop("filename")
-                credentials = service_account.Credentials.from_service_account_file(
-                    filename=filename
+                credentials = (
+                    google.service_account.Credentials.from_service_account_file(
+                        filename=filename
+                    )
                 )
             elif "info" in gcs_options:
                 info = gcs_options.pop("info")
-                credentials = service_account.Credentials.from_service_account_info(
-                    info=info
+                credentials = (
+                    google.service_account.Credentials.from_service_account_info(
+                        info=info
+                    )
                 )
-            self._gcs = storage.Client(credentials=credentials, **gcs_options)
-        except (TypeError, AttributeError):
+            self._gcs = google.storage.Client(credentials=credentials, **gcs_options)
+        except (TypeError, AttributeError, ModuleNotFoundError):
             raise ImportError(
                 "Unable to load GCS Client (it is required for ConfiguredAssetGCSDataConnector)."
             )

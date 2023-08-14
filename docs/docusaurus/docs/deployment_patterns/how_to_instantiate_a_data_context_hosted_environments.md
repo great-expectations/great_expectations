@@ -1,46 +1,34 @@
 ---
-title: Deploying Great Expectations in a hosted environment without file system or CLI
+title: "Deploy Great Expectations in hosted environments without a file system"
+sidebar_label: "Hosted environments"
+description: "Use Great Expectations in hosted environments"
+id: how_to_instantiate_a_data_context_hosted_environments
+sidebar_custom_props: { icon: 'img/integrations/hosted_icon.svg' }
 ---
 
-If you follow the steps of the [Getting Started](../tutorials/getting_started/tutorial_overview.md) tutorial, you create a standard deployment of Great Expectations. By default, this relies on two components:
+The components in the ``great_expectations.yml`` file define the Validation Results Stores, Data Source connections, and Data Docs hosts for a Data Context. These components might be inaccessible in hosted environments, such as Databricks, Amazon EMR, and Google Cloud Composer. The information provided here is intended to help you use Great Expectations in hosted environments.
 
-1. The Great Expectations [CLI](../guides/miscellaneous/how_to_use_the_great_expectations_cli.md) to initialize a Data Context, create Expectation Suites, add Datasources, etc.
-2. The ``great_expectations.yml`` file to configure your Data Context, e.g. to point at different Stores for Validation Results, etc.
+## Configure your Data Context
+ 
+To use code to create a Data Context, see [Instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 
-
-However, you might not have these components available in hosted environments, such as Databricks, AWS EMR, Google Cloud Composer, and others. This workflow guide will outline the main steps required to successfully use Great Expectations in a hosted environment.
-
-
-Step 1: Configure your Data Context
--------------------------------------
- Instead of using the Great Expectations CLI, you can create a Data Context directly in code. Your Data Context also manages the following components described in this guide:
-
-- Datasources to connect to data
-- Stores to save Expectations and Validation Results
-- Data Docs hosting
-
-The following guide gives an overview of creating an in-code Data Context including defaults to help you more quickly set one up for common configurations:
-
-- [How to instantiate a DataContext without a YML file](../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md)
-
-The following guides will contain examples for each environment we have tested out:
+To configure a Data Context for a specific environment, see one of the following resources:
 
 - [How to instantiate a Data Context on an EMR Spark cluster](./how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-- [How to use Great Expectations in Databricks](./how_to_use_great_expectations_in_databricks.md)
+- [How to use Great Expectations in Databricks](../tutorials/getting_started/how_to_use_great_expectations_in_databricks.md)
 
-Step 2: Create Expectation Suites and add Expectations
--------------------------------------------------------
+## Create Expectation Suites and add Expectations
 
-If you want to create an Expectation Suite in your environment without using the CLI, you can follow this guide from step 5 onward to add a Datasource and an Expectation Suite: [How to connect to a PostgreSQL database](../guides/connecting_to_your_data/database/postgres.md#5-configure-your-datasource)
+To add a Data Source and an Expectation Suite, see [How to connect to a PostgreSQL database](/docs/0.15.50/guides/connecting_to_your_data/database/postgres#5-configure-your-datasource).
 
-You can then add Expectations to your Suite one at a time like this example:
+To add Expectations to your Suite individually, use the following code:
 
 ```
 validator.expect_column_values_to_not_be_null("my_column")
 validator.save_expectation_suite(discard_failed_expectations=False)
 ```
 
-In order to load the Suite at a later time, you will need to ensure that you have an Expectation store configured:
+To configure your Expectation store to load a Suite at a later time, see one of the following resources:
 
 - [How to configure an Expectation store to use Amazon S3](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3.md)
 - [How to configure an Expectation store to use Azure Blob Storage](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.md)
@@ -48,17 +36,10 @@ In order to load the Suite at a later time, you will need to ensure that you hav
 - [How to configure an Expectation store to use a filesystem](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.md)
 - [How to configure an Expectation store to use PostgreSQL](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql.md)
 
-Step 3: Run validation
---------------------------------
+## Run validation
 
-In order to use an Expectation Suite you've created to validate data, follow this guide: [How to validate data without a Checkpoint](../guides/validation/advanced/how_to_validate_data_without_a_checkpoint.md)
+To create and run a Checkpoint in code, see [How to create a new Checkpoint](../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).  In a hosted environment you will not be able to store the Checkpoint for repeated use across Python sessions, but you can recreate it each time your scripts run.
 
-Step 4: Use Data Docs
-----------------------
+## Use Data Docs
 
-Finally, if you would like to build and view Data Docs in your environment, please follow the guides for configuring Data Docs: [Options for hosting Data Docs](../reference/customize_your_deployment.md#options-for-hosting-data-docs)
-
-Additional notes
-----------------
-
-If you have successfully deployed Great Expectations in a hosted environment other than the ones listed above, we would love to hear from you. Please reach out to us on [Slack](https://greatexpectations.io/slack)
+To build and view Data Docs in your environment, see [Options for hosting Data Docs](../reference/customize_your_deployment.md#options-for-hosting-data-docs).

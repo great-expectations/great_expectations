@@ -2,23 +2,18 @@ import logging
 from typing import List, Optional
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch import BatchDefinition  # noqa: TCH001
-from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
-
-try:
-    import boto3
-except ImportError:
-    boto3 = None
-
+from great_expectations.compatibility import aws
 from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
 from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
     InferredAssetFilePathDataConnector,
 )
 from great_expectations.datasource.data_connector.util import (
     list_s3_keys,
-    sanitize_prefix_for_s3,
+    sanitize_prefix_for_gcs_and_s3,
 )
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -31,11 +26,6 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
 
     This Data Connector uses regular expressions to traverse through S3 buckets and implicitly
     determine Data Asset name.
-
-    This DataConnector supports the following methods of authentication:
-        1. Standard gcloud auth / GOOGLE_APPLICATION_CREDENTIALS environment variable workflow
-        2. Manual creation of credentials from google.oauth2.service_account.Credentials.from_service_account_file
-        3. Manual creation of credentials from google.oauth2.service_account.Credentials.from_service_account_info
 
     Much of the interaction is performed using the `boto3` S3 client. Please refer to
     the `official AWS documentation <https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html>`_ for
@@ -57,7 +47,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -85,7 +75,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         )
 
         self._bucket = bucket
-        self._prefix = sanitize_prefix_for_s3(prefix)
+        self._prefix = sanitize_prefix_for_gcs_and_s3(text=prefix)
         self._delimiter = delimiter
         self._max_keys = max_keys
 
@@ -93,7 +83,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
             boto3_options = {}
 
         try:
-            self._s3 = boto3.client("s3", **boto3_options)
+            self._s3 = aws.boto3.client("s3", **boto3_options)
         except (TypeError, AttributeError):
             raise ImportError(
                 "Unable to load boto3 (it is required for InferredAssetS3DataConnector)."

@@ -1,16 +1,22 @@
 import os
 import shutil
+from typing import TYPE_CHECKING
 
-import nbformat
 import pytest
 
 import great_expectations as gx
 from great_expectations import DataContext
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer.checkpoint_new_notebook_renderer import (
     CheckpointNewNotebookRenderer,
 )
 from great_expectations.util import get_context
+
+if TYPE_CHECKING:
+    import nbformat
 
 
 @pytest.fixture
@@ -22,7 +28,7 @@ def assetless_dataconnector_context(
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -33,7 +39,7 @@ def assetless_dataconnector_context(
             __file__,
             "../../test_fixtures/great_expectations_v013_no_datasource_stats_enabled.yml",
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     context = gx.get_context(context_root_dir=context_path)
     assert context.root_directory == context_path
@@ -66,6 +72,7 @@ def assetless_dataconnector_context(
     return context
 
 
+@pytest.mark.filesystem
 def test_find_datasource_with_asset_on_context_with_no_datasources(
     empty_data_context,
 ):
@@ -77,6 +84,7 @@ def test_find_datasource_with_asset_on_context_with_no_datasources(
     assert obs is None
 
 
+@pytest.mark.filesystem
 def test_find_datasource_with_asset_on_context_with_a_datasource_with_no_dataconnectors(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
@@ -100,6 +108,7 @@ def test_find_datasource_with_asset_on_context_with_a_datasource_with_no_datacon
 
 
 @pytest.mark.slow  # 2.27s
+@pytest.mark.filesystem
 def test_find_datasource_with_asset_on_context_with_a_datasource_with_a_dataconnector_that_has_no_assets(
     assetless_dataconnector_context,
 ):
@@ -119,10 +128,11 @@ def test_find_datasource_with_asset_on_context_with_a_datasource_with_a_dataconn
     assert obs is None
 
 
+@pytest.mark.filesystem
 def test_find_datasource_with_asset_on_happy_path_context(
-    deterministic_asset_dataconnector_context,
+    deterministic_asset_data_connector_context,
 ):
-    context = deterministic_asset_dataconnector_context
+    context = deterministic_asset_data_connector_context
     assert len(context.list_datasources()) == 1
 
     renderer = CheckpointNewNotebookRenderer(context, "foo")
@@ -135,10 +145,11 @@ def test_find_datasource_with_asset_on_happy_path_context(
     }
 
 
+@pytest.mark.filesystem
 def test_find_datasource_with_asset_on_context_with_a_full_datasource_and_one_with_no_dataconnectors(
-    deterministic_asset_dataconnector_context,
+    deterministic_asset_data_connector_context,
 ):
-    context = deterministic_asset_dataconnector_context
+    context = deterministic_asset_data_connector_context
     assert len(context.list_datasources()) == 1
     context.add_datasource(
         "aaa_datasource",
@@ -175,6 +186,8 @@ def checkpoint_new_notebook_assets():
             "metadata": {},
             "execution_count": None,
             "source": "from ruamel.yaml import YAML\nimport great_expectations as gx\nfrom pprint import pprint\n\nyaml = YAML()\ncontext = gx.get_context()",
+            # Use this commented version once YAMLHandler is in place everywhere (not just tests and docs)
+            # "source": "import great_expectations as gx\nfrom great_expectations.core.yaml_handler import YAMLHandler\nfrom pprint import pprint\n\nyaml = YAMLHandler()\ncontext = gx.get_context()",
             "outputs": [],
         },
     ]
@@ -313,9 +326,10 @@ validations:
     }
 
 
+@pytest.mark.filesystem
 @pytest.mark.slow  # 1.10s
 def test_render_checkpoint_new_notebook_with_available_data_asset(
-    deterministic_asset_dataconnector_context,
+    deterministic_asset_data_connector_context,
     titanic_expectation_suite,
     checkpoint_new_notebook_assets,
 ):
@@ -324,7 +338,7 @@ def test_render_checkpoint_new_notebook_with_available_data_asset(
     The CheckpointNewNotebookRenderer should generate a notebook with an example SimpleCheckpoint yaml config based on the first available data asset.
     """
 
-    context: DataContext = deterministic_asset_dataconnector_context
+    context: DataContext = deterministic_asset_data_connector_context
 
     assert context.list_checkpoints() == []
     context.add_expectation_suite(expectation_suite=titanic_expectation_suite)
@@ -367,6 +381,7 @@ def test_render_checkpoint_new_notebook_with_available_data_asset(
     assert obs == expected
 
 
+@pytest.mark.filesystem
 def test_render_checkpoint_new_notebook_with_unavailable_data_asset(
     assetless_dataconnector_context,
     checkpoint_new_notebook_assets,

@@ -87,7 +87,7 @@ def test_s3_files(s3, s3_bucket, test_df_small_csv):
 def batch_with_split_on_whole_table_s3(test_s3_files) -> S3BatchSpec:
     bucket, keys = test_s3_files
     path = keys[0]
-    full_path = f"s3a://{os.path.join(bucket, path)}"
+    full_path = f"s3a://{os.path.join(bucket, path)}"  # noqa: PTH118
 
     batch_spec = S3BatchSpec(
         path=full_path,
@@ -97,7 +97,7 @@ def batch_with_split_on_whole_table_s3(test_s3_files) -> S3BatchSpec:
     return batch_spec
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.parametrize(
     "splitter_kwargs_year,num_values_in_df",
     [
@@ -126,7 +126,7 @@ def test_get_batch_with_split_on_year(
     assert len(split_df.columns) == 2
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.parametrize(
     "column_batch_identifier,num_values_in_df",
     [
@@ -162,6 +162,7 @@ def test_get_batch_with_split_on_date_parts_day(
     assert len(split_df.columns) == 2
 
 
+@pytest.mark.big
 @pytest.mark.parametrize(
     "batch_identifiers_for_column",
     SINGLE_DATE_PART_BATCH_IDENTIFIERS,
@@ -191,6 +192,7 @@ def test_split_on_date_parts_single_date_parts(
     assert len(result) == 3
 
 
+@pytest.mark.big
 @pytest.mark.parametrize(
     "batch_identifiers_for_column",
     MULTIPLE_DATE_PART_BATCH_IDENTIFIERS,
@@ -220,6 +222,7 @@ def test_split_on_date_parts_multiple_date_parts(
     assert len(result) == 1
 
 
+@pytest.mark.big
 @mock.patch(
     "great_expectations.execution_engine.split_and_sample.pandas_data_splitter.PandasDataSplitter.split_on_date_parts"
 )
@@ -261,6 +264,7 @@ def test_named_date_part_methods(
     )
 
 
+@pytest.mark.big
 @pytest.mark.parametrize(
     "underscore_prefix",
     [
@@ -297,6 +301,7 @@ def test_get_splitter_method(underscore_prefix: str, splitter_method_name: str):
     ) == getattr(data_splitter, splitter_method_name)
 
 
+@pytest.mark.unit
 def test_get_batch_with_split_on_whole_table_runtime(test_df):
     split_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
@@ -306,12 +311,15 @@ def test_get_batch_with_split_on_whole_table_runtime(test_df):
     assert split_df.dataframe.shape == (120, 10)
 
 
+@pytest.mark.filesystem
 def test_get_batch_with_split_on_whole_table_filesystem(
     test_folder_connection_path_csv,
 ):
     test_df = PandasExecutionEngine().get_batch_data(
         PathBatchSpec(
-            path=os.path.join(test_folder_connection_path_csv, "test.csv"),
+            path=os.path.join(  # noqa: PTH118
+                test_folder_connection_path_csv, "test.csv"
+            ),
             reader_method="read_csv",
             splitter_method="_split_on_whole_table",
         )
@@ -319,6 +327,7 @@ def test_get_batch_with_split_on_whole_table_filesystem(
     assert test_df.dataframe.shape == (5, 2)
 
 
+@pytest.mark.big
 def test_get_batch_with_split_on_whole_table_s3(
     batch_with_split_on_whole_table_s3, test_df_small
 ):
@@ -328,6 +337,7 @@ def test_get_batch_with_split_on_whole_table_s3(
     assert df.dataframe.shape == test_df_small.shape
 
 
+@pytest.mark.big
 def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_connector(
     test_s3_files, test_df_small
 ):
@@ -382,6 +392,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
         )
 
 
+@pytest.mark.big
 def test_get_batch_with_split_on_column_value(test_df):
     split_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
@@ -409,6 +420,7 @@ def test_get_batch_with_split_on_column_value(test_df):
     assert split_df.dataframe.shape == (3, 10)
 
 
+@pytest.mark.big
 def test_get_batch_with_split_on_converted_datetime(test_df):
     split_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
@@ -423,6 +435,7 @@ def test_get_batch_with_split_on_converted_datetime(test_df):
     assert split_df.dataframe.shape == (3, 10)
 
 
+@pytest.mark.big
 def test_get_batch_with_split_on_divided_integer(test_df):
     split_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
@@ -440,6 +453,7 @@ def test_get_batch_with_split_on_divided_integer(test_df):
     assert split_df.dataframe.id.max() == 59
 
 
+@pytest.mark.big
 def test_get_batch_with_split_on_mod_integer(test_df):
     split_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
@@ -457,6 +471,7 @@ def test_get_batch_with_split_on_mod_integer(test_df):
     assert split_df.dataframe.id.max() == 115
 
 
+@pytest.mark.big
 def test_get_batch_with_split_on_multi_column_values(test_df):
     split_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
@@ -493,6 +508,7 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
         )
 
 
+@pytest.mark.big
 def test_get_batch_with_split_on_hashed_column(test_df):
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal

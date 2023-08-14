@@ -19,23 +19,13 @@ from pyparsing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot
 
-try:
-    import pyspark.sql.functions as F
-except ImportError:
-    F = None
-
-try:
-    import sqlalchemy as sa
-except ImportError:
-    sa = None
-
 if TYPE_CHECKING:
-    import pyspark.sql
-    import sqlalchemy as sa  # noqa: TCH004
-    from sqlalchemy.sql.expression import ColumnElement
+    from great_expectations.compatibility import pyspark, sqlalchemy
 
 
 def _set_notnull(s, l, t) -> None:  # noqa: E741 # ambiguous name `l`
@@ -65,9 +55,15 @@ condition_value = Suppress('"') + Word(f"{condition_value_chars}._").setResultsN
 ) + Suppress(
     "'"
 )
+date = (
+    Literal("date").setResultsName("date")
+    + Suppress(Literal("("))
+    + condition_value
+    + Suppress(Literal(")"))
+)
 not_null = CaselessLiteral(".notnull()").setResultsName("notnull")
 condition = (column_name + not_null).setParseAction(_set_notnull) ^ (
-    column_name + ops + (fnumber ^ condition_value)
+    column_name + ops + (fnumber ^ condition_value ^ date)
 )
 
 
@@ -128,9 +124,9 @@ def _parse_great_expectations_condition(row_condition: str):
 
 
 # noinspection PyUnresolvedReferences
-def parse_condition_to_spark(
+def parse_condition_to_spark(  # noqa: PLR0911, PLR0912
     row_condition: str,
-) -> pyspark.sql.Column:  # TODO: pyspark typing
+) -> pyspark.Column:
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]
     if "condition_value" in parsed:
@@ -174,10 +170,19 @@ def generate_condition_by_operator(column, op, value):
     return operators[op](column, value)
 
 
-def parse_condition_to_sqlalchemy(row_condition: str) -> ColumnElement:
+def parse_condition_to_sqlalchemy(
+    row_condition: str,
+) -> sqlalchemy.ColumnElement:
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]
-    if "condition_value" in parsed:
+    if "date" in parsed:
+        date_value: str = parsed["condition_value"]
+        cast_as_date = f"date({date_value})"
+        return generate_condition_by_operator(
+            sa.column(column), parsed["op"], cast_as_date
+        )
+
+    elif "condition_value" in parsed:
         return generate_condition_by_operator(
             sa.column(column), parsed["op"], parsed["condition_value"]
         )

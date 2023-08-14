@@ -31,7 +31,6 @@ def is_btc_tx_confirmed(tx: str) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesBitcoinTxIsConfirmed(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.bitcoin_tx_is_confirmed"
 

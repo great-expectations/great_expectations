@@ -1,18 +1,17 @@
+from __future__ import annotations
+
 import logging
 import warnings
 from collections import OrderedDict
-from typing import Optional, Union
-
-from dateutil.parser import parse
+from typing import TYPE_CHECKING, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.util import send_slack_notification
 from great_expectations.core.async_executor import AsyncExecutor
-from great_expectations.core.batch import Batch  # noqa: TCH001
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_asset import DataAsset  # noqa: TCH001
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -22,6 +21,10 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import Batch
+    from great_expectations.data_asset import DataAsset
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +74,7 @@ class ValidationOperator:
 
         raise NotImplementedError
 
-    def run(
+    def run(  # noqa: PLR0913
         self,
         assets_to_validate,
         run_id=None,
@@ -193,7 +196,7 @@ class ActionListValidationOperator(ValidationOperator):
         data_context,
         action_list,
         name,
-        result_format={"result_format": "SUMMARY"},
+        result_format={"result_format": "SUMMARY"},  # noqa: B006 # mutable default
     ) -> None:
         super().__init__()
         self.data_context = data_context
@@ -210,6 +213,11 @@ class ActionListValidationOperator(ValidationOperator):
 
         self.action_list = action_list
         self.actions = OrderedDict()
+        # For a great expectations cloud context it's important that we store the validation result before we send
+        # notifications. That's because we want to provide a link to the validation result and the validation result
+        # page won't get created until we run the store action.
+        store_action_detected = False
+        notify_before_store: Optional[str] = None
         for action_config in action_list:
             assert isinstance(action_config, dict)
             # NOTE: Eugene: 2019-09-23: need a better way to validate an action config:
@@ -219,6 +227,19 @@ class ActionListValidationOperator(ValidationOperator):
                         action_config.keys()
                     )
                 )
+
+            if "class_name" in action_config["action"]:
+                if (
+                    action_config["action"]["class_name"]
+                    == "StoreValidationResultAction"
+                ):
+                    store_action_detected = True
+                elif (
+                    action_config["action"]["class_name"].endswith("NotificationAction")
+                    and not store_action_detected
+                ):
+                    # We currently only support SlackNotifications but setting this for any notification.
+                    notify_before_store = action_config["action"]["class_name"]
 
             config = action_config["action"]
             module_name = "great_expectations.validation_operators"
@@ -234,6 +255,13 @@ class ActionListValidationOperator(ValidationOperator):
                     class_name=config["class_name"],
                 )
             self.actions[action_config["name"]] = new_action
+        if notify_before_store and self._using_cloud_context:
+            warnings.warn(
+                f"The checkpoints action_list configuration has a notification, {notify_before_store}"
+                "configured without a StoreValidationResultAction configured. This means the notification can't"
+                "provide a link the validation result. Please move all notification actions after "
+                "StoreValidationResultAction in your configuration."
+            )
 
     @property
     def _using_cloud_context(self) -> bool:
@@ -274,7 +302,7 @@ class ActionListValidationOperator(ValidationOperator):
         # if not isinstance(item, (DataAsset, Validator)):
         if isinstance(item, tuple):
             if not (
-                len(item) == 2
+                len(item) == 2  # noqa: PLR2004
                 and isinstance(item[0], dict)
                 and isinstance(item[1], str)
             ):
@@ -287,7 +315,7 @@ class ActionListValidationOperator(ValidationOperator):
 
         return batch
 
-    def run(
+    def run(  # noqa: PLR0913
         self,
         assets_to_validate,
         run_id=None,
@@ -303,35 +331,15 @@ class ActionListValidationOperator(ValidationOperator):
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
-        if isinstance(run_id, str) and not run_name:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional). Instead of providing a run_id, you may also provide"
-                "run_name and run_time separately.",
-                DeprecationWarning,
-            )
-            try:
-                run_time = parse(run_id)
-            except (ValueError, TypeError):
-                pass
-            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
-        elif isinstance(run_id, dict):
+        if isinstance(run_id, dict):
             run_id = RunIdentifier(**run_id)
         elif not isinstance(run_id, RunIdentifier):
             run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
         ###
-        # NOTE: 20211010 - jdimatteo: This method is called by both Checkpoint.run and LegacyCheckpoint.run and below
+        # NOTE: 20211010 - jdimatteo: This method is called by Checkpoint.run and below
         # usage of AsyncExecutor may speed up I/O bound validations by running them in parallel with multithreading
         # (if concurrency is enabled in the data context configuration).
-        #
-        # When this method is called by LegacyCheckpoint.run, len(assets_to_validate) may be greater than 1. If
-        # concurrency is enabled in the configuration AND len(assets_to_validate) > 1, then execution is run in multiple
-        # threads with AsyncExecutor -- otherwise AsyncExecutor only uses the current single thread to execute the work.
-        # Please see the below arguments used to initialize AsyncExecutor and the corresponding AsyncExecutor docstring
-        # for more details on when multiple threads are used.
         #
         # When this method is called by Checkpoint.run, len(assets_to_validate) may be 1 even if there are multiple
         # validations, because Checkpoint.run calls this method in a loop for each validation. AsyncExecutor is also
@@ -383,7 +391,7 @@ class ActionListValidationOperator(ValidationOperator):
                 if self._using_cloud_context:
                     expectation_suite_identifier = GXCloudIdentifier(
                         resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-                        cloud_id=batch._expectation_suite.ge_cloud_id,
+                        id=batch._expectation_suite.ge_cloud_id,
                     )
                     validation_result_id = GXCloudIdentifier(
                         resource_type=GXCloudRESTResource.VALIDATION_RESULT
@@ -401,7 +409,7 @@ class ActionListValidationOperator(ValidationOperator):
                 validation_result = async_batch_validation_result.result()
                 validation_result.meta["validation_id"] = validation_id
                 validation_result.meta["checkpoint_id"] = (
-                    checkpoint_identifier.cloud_id if checkpoint_identifier else None
+                    checkpoint_identifier.id if checkpoint_identifier else None
                 )
 
                 batch_actions_results = self._run_actions(
@@ -427,7 +435,7 @@ class ActionListValidationOperator(ValidationOperator):
             evaluation_parameters=evaluation_parameters,
         )
 
-    def _run_actions(
+    def _run_actions(  # noqa: PLR0913
         self,
         batch: Union[Batch, DataAsset],
         expectation_suite_identifier: ExpectationSuiteIdentifier,
@@ -452,7 +460,8 @@ class ActionListValidationOperator(ValidationOperator):
         batch_actions_results = {}
         for action in self.action_list:
             # NOTE: Eugene: 2019-09-23: log the info about the batch and the expectation suite
-            logger.debug(f"Processing validation action with name {action['name']}")
+            name = action["name"]
+            logger.debug(f"Processing validation action with name {name}")
 
             if hasattr(batch, "active_batch_id"):
                 batch_identifier = batch.active_batch_id
@@ -466,7 +475,7 @@ class ActionListValidationOperator(ValidationOperator):
                     batch_identifier=batch_identifier,
                 )
             try:
-                action_result = self.actions[action["name"]].run(
+                action_result = self.actions[name].run(
                     validation_result_suite_identifier=validation_result_id,
                     validation_result_suite=batch_validation_result,
                     data_asset=batch,
@@ -475,10 +484,21 @@ class ActionListValidationOperator(ValidationOperator):
                     checkpoint_identifier=checkpoint_identifier,
                 )
 
+                # Transform action_result if it not a dictionary.
+                if isinstance(action_result, GXCloudResourceRef):
+                    transformed_result = {
+                        "id": action_result.id,
+                        "validation_result_url": action_result.response["data"][
+                            "attributes"
+                        ]["validation_result"]["display_url"],
+                    }
+                elif action_result is None:
+                    transformed_result = {}
+                else:
+                    transformed_result = action_result
+
                 # add action_result
-                batch_actions_results[action["name"]] = (
-                    {} if action_result is None else action_result
-                )
+                batch_actions_results[action["name"]] = transformed_result
                 batch_actions_results[action["name"]]["class"] = action["action"][
                     "class_name"
                 ]
@@ -628,7 +648,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         data_context,
         action_list,
@@ -639,7 +659,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         slack_webhook=None,
         notify_on="all",
         notify_with=None,
-        result_format={"result_format": "SUMMARY"},
+        result_format={"result_format": "SUMMARY"},  # noqa: B006 # mutable default
     ) -> None:
         super().__init__(data_context, action_list, name)
 
@@ -649,7 +669,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         self.stop_on_first_error = stop_on_first_error
         self.base_expectation_suite_name = base_expectation_suite_name
 
-        assert len(expectation_suite_name_suffixes) == 2
+        assert len(expectation_suite_name_suffixes) == 2  # noqa: PLR2004
         for suffix in expectation_suite_name_suffixes:
             assert isinstance(suffix, str)
         self.expectation_suite_name_suffixes = expectation_suite_name_suffixes
@@ -777,7 +797,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         return query
 
-    def run(  # noqa: C901 - complexity 18
+    def run(  # noqa: PLR0912, PLR0913
         self,
         assets_to_validate,
         run_id=None,
@@ -790,21 +810,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
-        if isinstance(run_id, str) and not run_name:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional). Instead of providing a run_id, you may also provide"
-                "run_name and run_time separately.",
-                DeprecationWarning,
-            )
-            try:
-                run_time = parse(run_id)
-            except (ValueError, TypeError):
-                pass
-            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
-        elif isinstance(run_id, dict):
+        if isinstance(run_id, dict):
             run_id = RunIdentifier(**run_id)
         elif not isinstance(run_id, RunIdentifier):
             run_id = RunIdentifier(run_name=run_name, run_time=run_time)
@@ -929,11 +935,9 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             validation_operator_config=self.validation_operator_config,
             evaluation_parameters=evaluation_parameters,
             success=all(
-                [
-                    run_result_obj["validation_result"].success
-                    for run_result_obj in run_results.values()
-                    if run_result_obj["expectation_suite_severity_level"] == "failure"
-                ]
+                run_result_obj["validation_result"].success
+                for run_result_obj in run_results.values()
+                if run_result_obj["expectation_suite_severity_level"] == "failure"
             ),
         )
 

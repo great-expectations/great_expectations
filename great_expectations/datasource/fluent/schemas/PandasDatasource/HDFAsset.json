@@ -1,6 +1,6 @@
 {
     "title": "HDFAsset",
-    "description": "Read from the store, close it if we opened it.\n\nRetrieve pandas object stored in file, optionally based on where\ncriteria.\n\n.. warning::\n\n   Pandas uses PyTables for reading and writing HDF5 files, which allows\n   serializing object-dtype data with pickle when using the \"fixed\" format.\n   Loading pickled data received from untrusted sources can be unsafe.\n\n   See: https://docs.python.org/3/library/pickle.html for more.\n\nParameters\n----------\npath_or_buf : str, path object, pandas.HDFStore\n    Any valid string path is acceptable. Only supports the local file system,\n    remote URLs and file-like objects are not supported.\n\n    If you want to pass in a path object, pandas accepts any\n    ``os.PathLike``.\n\n    Alternatively, pandas accepts an open :class:`pandas.HDFStore` object.\n\nkey : object, optional\n    The group identifier in the store. Can be omitted if the HDF file\n    contains a single pandas object.\nmode : {'r', 'r+', 'a'}, default 'r'\n    Mode to use when opening the file. Ignored if path_or_buf is a\n    :class:`pandas.HDFStore`. Default is 'r'.\nerrors : str, default 'strict'\n    Specifies how encoding and decoding errors are to be handled.\n    See the errors argument for :func:`open` for a full list\n    of options.\nwhere : list, optional\n    A list of Term (or convertible) objects.\nstart : int, optional\n    Row number to start selection.\nstop  : int, optional\n    Row number to stop selection.\ncolumns : list, optional\n    A list of columns names to return.\niterator : bool, optional\n    Return an iterator object.\nchunksize : int, optional\n    Number of rows to include in an iteration when using an iterator.\n**kwargs\n    Additional keyword arguments passed to HDFStore.\n\nReturns\n-------\nitem : object\n    The selected object. Return type depends on the object stored.\n\nSee Also\n--------\nDataFrame.to_hdf : Write a HDF file from a DataFrame.\nHDFStore : Low-level access to HDF files.\n\nExamples\n--------\n>>> df = pd.DataFrame([[1, 1.0, 'a']], columns=['x', 'y', 'z'])\n>>> df.to_hdf('./store.h5', 'data')\n>>> reread = pd.read_hdf('./store.h5')",
+    "description": "Read from the store, close it if we opened it.\n\nRetrieve pandas object stored in file, optionally based on where\ncriteria.\n\n.. warning::\n\n   Pandas uses PyTables for reading and writing HDF5 files, which allows\n   serializing object-dtype data with pickle when using the \"fixed\" format.\n   Loading pickled data received from untrusted sources can be unsafe.\n\n   See: https://docs.python.org/3/library/pickle.html for more.\n\nParameters\n----------\npath_or_buf : str, path object, pandas.HDFStore\n    Any valid string path is acceptable. Only supports the local file system,\n    remote URLs and file-like objects are not supported.\n\n    If you want to pass in a path object, pandas accepts any\n    ``os.PathLike``.\n\n    Alternatively, pandas accepts an open :class:`pandas.HDFStore` object.\n\nkey : object, optional\n    The group identifier in the store. Can be omitted if the HDF file\n    contains a single pandas object.\nmode : {'r', 'r+', 'a'}, default 'r'\n    Mode to use when opening the file. Ignored if path_or_buf is a\n    :class:`pandas.HDFStore`. Default is 'r'.\nerrors : str, default 'strict'\n    Specifies how encoding and decoding errors are to be handled.\n    See the errors argument for :func:`open` for a full list\n    of options.\nwhere : list, optional\n    A list of Term (or convertible) objects.\nstart : int, optional\n    Row number to start selection.\nstop  : int, optional\n    Row number to stop selection.\ncolumns : list, optional\n    A list of columns names to return.\niterator : bool, optional\n    Return an iterator object.\nchunksize : int, optional\n    Number of rows to include in an iteration when using an iterator.\n**kwargs\n    Additional keyword arguments passed to HDFStore.\n\nReturns\n-------\nitem : object\n    The selected object. Return type depends on the object stored.\n\nSee Also\n--------\nDataFrame.to_hdf : Write a HDF file from a DataFrame.\nHDFStore : Low-level access to HDF files.\n\nExamples\n--------\n>>> df = pd.DataFrame([[1, 1.0, 'a']], columns=['x', 'y', 'z'])  # doctest: +SKIP\n>>> df.to_hdf('./store.h5', 'data')  # doctest: +SKIP\n>>> reread = pd.read_hdf('./store.h5')  # doctest: +SKIP",
     "type": "object",
     "properties": {
         "name": {
@@ -15,12 +15,22 @@
             ],
             "type": "string"
         },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
         "order_by": {
             "title": "Order By",
             "type": "array",
             "items": {
                 "$ref": "#/definitions/Sorter"
             }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
         },
         "path_or_buf": {
             "title": "Path Or Buf",
@@ -52,7 +62,16 @@
             "type": "string"
         },
         "where": {
-            "title": "Where"
+            "title": "Where",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {}
+                }
+            ]
         },
         "start": {
             "title": "Start",
@@ -63,11 +82,16 @@
             "type": "integer"
         },
         "columns": {
-            "title": "Columns"
+            "title": "Columns",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
         },
         "iterator": {
             "title": "Iterator",
-            "default": false
+            "default": false,
+            "type": "boolean"
         },
         "chunksize": {
             "title": "Chunksize",

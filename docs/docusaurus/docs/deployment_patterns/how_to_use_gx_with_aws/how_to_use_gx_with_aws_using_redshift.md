@@ -1,7 +1,9 @@
 ---
-title: How to use Great Expectations with Amazon Web Services using Redshift
+title: Use Great Expectations with Amazon Web Services using Redshift
+sidebar_label: "AWS S3 and Redshift"
 ---
 import Prerequisites from '@site/docs/components/_prerequisites.jsx'
+import PrereqPython from '@site/docs/components/prerequisites/_python_version.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import Congratulations from './components/_congratulations_aws_redshift.md'
@@ -47,12 +49,11 @@ import VerifySuccessfulGxInstallation from '@site/docs/guides/setup/installation
 
 
 <!-- 1.2.7 Install dependencies for Redshift -->
-
 import RedshiftDependencies from '@site/docs/guides/connecting_to_your_data/database/components/_redshift_dependencies.md'
 
 <!-- 1.3 Create your Data Context -->
 
-import CreateDataContextWithCli from '@site/docs/guides/setup/configuring_data_contexts/components_how_to_configure_a_new_data_context_with_the_cli/_initialize_data_context_with_the_cli.mdx'
+import CreateDataContextWithCreate from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_initialize_data_context_with_create.mdx'
 
 <!-- 1.4 Configure your Expectations Store on Amazon S3 -->
 
@@ -64,17 +65,13 @@ import IdentifyDataContextExpectationsStore from '@site/docs/guides/setup/config
 
 import AddS3ExpectationsStoreConfiguration from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_an_expectation_store_in_amazon_s3/_update_your_configuration_file_to_include_a_new_store_for_expectations_on_s.mdx'
 
-<!-- 1.4.3 Verify that the new Amazon S3 Expectations Store has been added successfully -->
-
-import VerifyS3ExpectationsStoreExists from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_an_expectation_store_in_amazon_s3/_confirm_that_the_new_expectations_store_has_been_added_by_running_great_expectations_store_list.mdx'
-
-<!-- 1.4.4 (Optional) Copy existing Expectation JSON files to the Amazon S3 bucket -->
+<!-- 1.4.3 (Optional) Copy existing Expectation JSON files to the Amazon S3 bucket -->
 
 import OptionalCopyExistingExpectationsToS3 from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_an_expectation_store_in_amazon_s3/_copy_existing_expectation_json_files_to_the_s_bucket_this_step_is_optional.mdx'
 
-<!-- 1.4.5 (Optional) Verify that copied Expectations can be accessed from Amazon S3 -->
+<!-- 1.4.4 (Optional) Verify that copied Expectations can be accessed from Amazon S3 -->
 
-import OptionalVerifyCopiedExpectationsAreAccessible from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_an_expectation_store_in_amazon_s3/_confirm_that_expectations_can_be_accessed_from_amazon_s_by_running_great_expectations_suite_list.mdx'
+import OptionalVerifyCopiedExpectationsAreAccessible from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_an_expectation_store_in_amazon_s3/_confirm_list.mdx'
 
 <!-- 1.5 Configure your Validation Results Store on Amazon S3 -->
 
@@ -86,11 +83,7 @@ import IdentifyDataContextValidationResultsStore from '@site/docs/guides/setup/c
 
 import AddS3ValidationResultsStoreConfiguration from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_a_validation_result_store_in_amazon_s3/_update_your_configuration_file_to_include_a_new_store_for_validation_results_on_s.mdx'
 
-<!-- 1.5.3 Verify that the new Amazon S3 Validation Results Store has been added successfully -->
-
-import VerifyS3ValidationResultsStoreExists from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_a_validation_result_store_in_amazon_s3/_confirm_that_the_new_validation_results_store_has_been_added_by_running_great_expectations_store_list.mdx'
-
-<!-- 1.5.4 (Optional) Copy existing Validation results to the Amazon S3 bucket -->
+<!-- 1.5.3 (Optional) Copy existing Validation results to the Amazon S3 bucket -->
 
 import OptionalCopyExistingValidationResultsToS3 from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_a_validation_result_store_in_amazon_s3/_copy_existing_validation_results_to_the_s_bucket_this_step_is_optional.mdx'
 
@@ -116,35 +109,31 @@ import AdditionalDataDocsNotes from '@site/docs/guides/setup/configuring_data_do
 
 <!-- Part 2: Connect to data -->
 
-<!-- 2.1 Choose how to run the code for configuring a new Datasource -->
+<!-- 2.1 Instantiate your project's Data Context -->
 
-import HowToRunDatasourceCode from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_datasource_code_environment.md'
+import CreateDataContextWithCreateAgain from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_initialize_data_context_with_create.mdx'
 
-<!-- 2.2 Instantiate your project's DataContext -->
-
-import InstantiateDataContext from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_instantiate_your_projects_datacontext.mdx'
-
-<!-- 2.3 Determine your connection string -->
+<!-- 2.1.1 Determine your connection string -->
 
 import ConnectionStringRedshift from '@site/docs/guides/connecting_to_your_data/database/components/_redshift_credentials.md'
 
-<!-- 2.4 Configure your Datasource -->
+<!-- 2.2 Add Data Source to your DataContext -->
 
-import ConfigureYourDatasource from '@site/docs/guides/connecting_to_your_data/database/components/_datasource_redshift_configuration.md'
+import ConfigureYourRedshiftDatasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_configure_your_redshift_datasource.mdx'
 
-<!-- 2.5 Save the Datasource configuration to your DataContext -->
+<!-- 2.3. Connect to a specific set of data with a Data Asset -->
 
-import SaveDatasourceConfigurationToDataContext from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_save_the_datasource_configuration_to_your_datacontext.mdx'
+import ConnectToDataAssets from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_add_table_and_query_assets.mdx'
 
-<!-- 2.6 Test your new Datasource -->
+<!-- 2.4 Test your new Data Source -->
 
-import TestRedshiftDatasource from '@site/docs/guides/connecting_to_your_data/database/components/_datasource_redshift_test.md'
+import TestRedshiftDatasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_test_your_new_redshift_datasource.mdx'
 
 <!-- Part 3: Create Expectations -->
 
-<!-- 3.1 Prepare a Batch Request, Empty Expectation Suite, and Validator -->
+<!-- 3.1 Prepare a Batch Request-->
 
-import PrepareABatchRequestAndValidatorForCreatingExpectations from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_expectation_suite_batch_request_validator_prepare_or_reuse.md'
+import PrepareABatchRequestAndValidatorForCreatingExpectations from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_add_expectation_suite_and_validator_for_fluent_datasource.mdx'
 
 <!-- 3.2: Use a Validator to add Expectations to the Expectation Suite -->
 
@@ -162,13 +151,9 @@ import CheckpointCreateAndRun from '@site/docs/deployment_patterns/how_to_use_gx
 
 <!-- 4.1.1 Create a Checkpoint -->
 
-import CreateCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_create_tabs.md'
+import CreateCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_create.md'
 
-<!-- 4.1.2 Save the Checkpoint -->
-
-import SaveCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_save.md'
-
-<!-- 4.1.3 Run the Checkpoint -->
+<!-- 4.1.2 Run the Checkpoint -->
 
 import RunCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_run.md'
 
@@ -179,13 +164,15 @@ Great Expectations can work within many frameworks.  In this guide you will be s
 
 This guide will demonstrate each of the steps necessary to go from installing a new instance of Great Expectations to Validating your data for the first time and viewing your Validation Results as Data Docs.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Installed Python 3. (Great Expectations requires Python 3. For details on how to download and install Python on your platform, see [python.org](https://www.python.org/downloads/)).
-- Installed the AWS CLI. (For guidance on how install this, please see [Amazon's documentation on how to install the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html))
-- Configured your AWS credentials.  (For guidance in doing this, please see [Amazon's documentation on configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
-- The ability to install Python packages ([`boto3`](https://github.com/boto/boto3) and `great_expectations`) with pip.
-- Identified the S3 bucket and prefix where Expectations and Validation Results will be stored.
+- <PrereqPython />
+- The AWS CLI. To download and install the AWS CLI, see [Installing or updating the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
+- AWS credentials. See [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
+- Permissions to install the Python packages ([`boto3`](https://github.com/boto/boto3) and `great_expectations`) with pip.
+- An S3 bucket and prefix to store Expectations and Validation Results.
 
 </Prerequisites>
 
@@ -228,7 +215,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 <RedshiftDependencies />
 
 ### 1.3 Create your Data Context
-<CreateDataContextWithCli />
+<CreateDataContextWithCreate />
 
 ### 1.4 Configure your Expectations Store on Amazon S3
 
@@ -238,13 +225,10 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 #### 1.4.2 Update your configuration file to include a new Store for Expectations on Amazon S3
 <AddS3ExpectationsStoreConfiguration />
 
-#### 1.4.3 Verify that the new Amazon S3 Expectations Store has been added successfully
-<VerifyS3ExpectationsStoreExists />
-
-#### 1.4.4 (Optional) Copy existing Expectation JSON files to the Amazon S3 bucket
+#### 1.4.3 (Optional) Copy existing Expectation JSON files to the Amazon S3 bucket
 <OptionalCopyExistingExpectationsToS3 />
 
-#### 1.4.5 (Optional) Verify that copied Expectations can be accessed from Amazon S3
+#### 1.4.4 (Optional) Verify that copied Expectations can be accessed from Amazon S3
 <OptionalVerifyCopiedExpectationsAreAccessible />
 
 ### 1.5 Configure your Validation Results Store on Amazon S3
@@ -255,10 +239,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 #### 1.5.2 Update your configuration file to include a new Store for Validation Results on Amazon S3
 <AddS3ValidationResultsStoreConfiguration />
 
-#### 1.5.3 Verify that the new Amazon S3 Validation Results Store has been added successfully
-<VerifyS3ValidationResultsStoreExists />
-
-#### 1.5.4 (Optional) Copy existing Validation results to the Amazon S3 bucket
+#### 1.5.3 (Optional) Copy existing Validation results to the Amazon S3 bucket
 <OptionalCopyExistingValidationResultsToS3 />
 
 ### 1.6 Configure Data Docs for hosting and sharing from Amazon S3
@@ -283,32 +264,30 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 ## Part 2: Connect to data
 
-### 2.1 Choose how to run the code for creating a new Datasource
-<HowToRunDatasourceCode />
+### 2.1 Instantiate your project's DataContext
+<CreateDataContextWithCreateAgain />
 
-### 2.2 Instantiate your project's DataContext
-<InstantiateDataContext />
+If you have already instantiated your `DataContext` in a previous step, this step can be skipped.
 
-### 2.3 Configure your Datasource
-
-#### 2.3.1 Determine your connection string
+#### 2.1.1 Determine your connection string
 
 <ConnectionStringRedshift />
 
-#### 2.3.2 Create your Datasource configuration
+:::tip Is there a more secure way to store my credentials than plain text in a connection string?
 
-<ConfigureYourDatasource />
+We recommend that database credentials be stored in the `config_variables.yml` file, which is located in the `uncommitted/` folder by default, and is not part of source control.
 
-:::tip
-
-Datasources can be configured in many customized ways.  For additional information on how to configure a SQL datasource such as the one used to connect to your Redshift data, please see our guide on [how to configure a SQL Datasource](../../../docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md)
+For additional options on configuring the `config_variables.yml` file or additional environment variables, please see our guide on [how to configure credentials](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials).
 
 :::
 
-### 2.4 Save the Datasource configuration to your DataContext
-<SaveDatasourceConfigurationToDataContext />
+### 2.2 Add Data Source to your DataContext
+<ConfigureYourRedshiftDatasource />
 
-### 2.5 Test your new Datasource
+### 2.3. Connect to a specific set of data with a Data Asset
+<ConnectToDataAssets />
+
+### 2.4 Test your new Data Source
 <TestRedshiftDatasource />
 
 ## Part 3: Create Expectations
@@ -335,18 +314,10 @@ Datasources can be configured in many customized ways.  For additional informati
 
 <CreateCheckpoint />
 
-#### 4.1.2 Save the Checkpoint
-
-<SaveCheckpoint />
-
-#### 4.1.3 Run the Checkpoint
+#### 4.1.2 Run the Checkpoint
 
 <RunCheckpoint />
 
 ### 4.2: Build and view Data Docs
 
 <BuildAndViewDataDocs />
-
-## Congratulations!
-
-<Congratulations />

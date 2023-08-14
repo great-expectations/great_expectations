@@ -2,44 +2,32 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, Final, List, Optional, Type, Union
 
 import click
-from typing_extensions import Final
-
-from great_expectations.cli.pretty_printing import cli_message
-from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
-from great_expectations.util import get_sqlalchemy_inspector
-
-try:
-    from pybigquery.parse_url import parse_url as parse_bigquery_url
-except (ImportError, ModuleNotFoundError):
-    parse_bigquery_url = None
 
 from great_expectations import exceptions as gx_exceptions
+from great_expectations.cli.pretty_printing import cli_message
+from great_expectations.compatibility.bigquery import parse_url as parse_bigquery_url
 from great_expectations.datasource import (
     BaseDatasource,
     DataConnector,
     Datasource,
     SimpleSqlalchemyDatasource,
 )
+from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,  # noqa: TCH001
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
-from great_expectations.util import filter_properties_dict
+from great_expectations.util import filter_properties_dict, get_sqlalchemy_inspector
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy
-    from sqlalchemy.engine.reflection import Inspector
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sqlalchemy = None
-    Inspector = None
+
+if TYPE_CHECKING:
+    from great_expectations.compatibility import sqlalchemy
+
 
 DEFAULT_DATA_CONNECTOR_NAMES: Final[List[str]] = [
     "default_runtime_data_connector_name",
@@ -191,7 +179,7 @@ def select_data_connector_name(
     if num_available_data_asset_names_by_data_connector == 1:
         return list(available_data_asset_names_by_data_connector_dict.keys())[0]
 
-    elif num_available_data_asset_names_by_data_connector == 2:
+    elif num_available_data_asset_names_by_data_connector == 2:  # noqa: PLR2004
         # if only default data_connectors are configured, select default_inferred_asset_data_connector
         default_data_connector = _check_default_data_connectors(
             available_data_asset_names_by_data_connector_dict
@@ -256,7 +244,7 @@ def _get_data_asset_name_from_data_connector(
         return None
 
     # If we have a large number of assets, give the user the ability to paginate or search
-    if num_data_assets > 100:
+    if num_data_assets > 100:  # noqa: PLR2004
         prompt = f"You have a list of {num_data_assets:,} data assets. Would you like to list them [l] or search [s]?\n"
         user_selected_option: Optional[str] = None
         while user_selected_option is None:
@@ -432,7 +420,7 @@ Would you like to continue?"""
         and parse_bigquery_url is not None
     ):
         # bigquery table needs to contain the project id if it differs from the credentials project
-        if len(data_asset_name.split(".")) < 3:
+        if len(data_asset_name.split(".")) < 3:  # noqa: PLR2004
             project_id, _, _, _, _, _ = parse_bigquery_url(datasource.engine.url)  # type: ignore[attr-defined]
             data_asset_name = f"{project_id}.{data_asset_name}"
 
@@ -441,7 +429,7 @@ Would you like to continue?"""
 
 def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
     execution_engine: SqlAlchemyExecutionEngine = datasource.execution_engine
-    inspector: Inspector = get_sqlalchemy_inspector(execution_engine.engine)
+    inspector: sqlalchemy.Inspector = get_sqlalchemy_inspector(execution_engine.engine)
     return inspector.default_schema_name
 
 

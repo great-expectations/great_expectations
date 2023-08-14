@@ -20,7 +20,6 @@ Run this code to test your configuration.
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py test datasource config"
 ```
-
 </TabItem>
 
 <TabItem value="python">

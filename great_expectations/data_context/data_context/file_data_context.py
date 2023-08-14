@@ -26,11 +26,9 @@ from great_expectations.datasource.datasource_serializer import (
 from great_expectations.datasource.fluent.config import GxConfig
 
 if TYPE_CHECKING:
-    from great_expectations.alias_types import PathStr
+    from great_expectations.alias_types import JSONValues, PathStr
     from great_expectations.core.config_provider import _ConfigurationProvider
-    from great_expectations.data_context.store.datasource_store import (
-        DatasourceStore,
-    )
+    from great_expectations.data_context.store.datasource_store import DatasourceStore
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -60,6 +58,8 @@ class FileDataContext(SerializableDataContext):
         self._context_root_directory = self._init_context_root_directory(
             context_root_dir
         )
+        self._scaffold_project()
+
         self._project_config = self._init_project_config(project_config)
         super().__init__(
             context_root_dir=self._context_root_directory,
@@ -78,6 +78,21 @@ class FileDataContext(SerializableDataContext):
                 )
 
         return context_root_dir
+
+    def _scaffold_project(self) -> None:
+        """Prepare a `great_expectations` directory with all necessary subdirectories.
+        If one already exists, no-op.
+        """
+        if self.is_project_scaffolded(self._context_root_directory):
+            return
+
+        # GX makes an important distinction between project directory and context directory.
+        # The former corresponds to the root of the user's project while the latter
+        # encapsulates any config (in the form of a great_expectations/ directory).
+        project_root_dir = pathlib.Path(self._context_root_directory).parent
+        self._scaffold(
+            project_root_dir=project_root_dir,
+        )
 
     def _init_project_config(
         self, project_config: Optional[Union[DataContextConfig, Mapping]]
@@ -128,6 +143,42 @@ class FileDataContext(SerializableDataContext):
         )
         return variables
 
+    def _save_project_config(self, _fds_datasource=None) -> None:
+        """
+        See parent 'AbstractDataContext._save_project_config()` for more information.
+
+        Explicitly override base class implementation to retain legacy behavior.
+        """
+        config_filepath = pathlib.Path(self.root_directory, self.GX_YML)
+
+        logger.debug(
+            f"Starting DataContext._save_project_config; attempting to update {config_filepath}"
+        )
+
+        try:
+            with open(config_filepath, "w") as outfile:
+                fluent_datasources = self._synchronize_fluent_datasources()
+                if fluent_datasources:
+                    self.fluent_config.update_datasources(
+                        datasources=fluent_datasources
+                    )
+                    logger.info(
+                        f"Saving {len(self.fluent_config.datasources)} Fluent Datasources to {config_filepath}"
+                    )
+                    fluent_json_dict: dict[
+                        str, JSONValues
+                    ] = self.fluent_config._json_dict()
+                    fluent_json_dict = (
+                        self.fluent_config._exclude_name_fields_from_fluent_datasources(
+                            config=fluent_json_dict
+                        )
+                    )
+                    self.config._commented_map.update(fluent_json_dict)
+
+                self.config.to_yaml(outfile)
+        except PermissionError as e:
+            logger.warning(f"Could not save project config to disk: {e}")
+
     @classmethod
     def _load_file_backed_project_config(
         cls,
@@ -168,10 +219,9 @@ class FileDataContext(SerializableDataContext):
             if path_to_fluent_yaml.exists():
                 gx_config = GxConfig.parse_yaml(path_to_fluent_yaml, _allow_empty=True)
 
-                # attach the config_provider for each loaded datasource
-                for datasource in gx_config.datasources.values():
-                    datasource._config_provider = config_provider
+                for datasource in gx_config.datasources:
+                    datasource._data_context = self
 
                 return gx_config
             logger.info(f"no fluent config at {path_to_fluent_yaml.absolute()}")
-        return GxConfig(fluent_datasources={})
+        return GxConfig(fluent_datasources=[])

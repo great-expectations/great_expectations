@@ -3,14 +3,10 @@ from __future__ import annotations
 import abc
 import logging
 import time
-import warnings
 from enum import Enum
-from typing import Any, Optional
-
-from dateutil.parser import parse
+from typing import TYPE_CHECKING, Any, Optional
 
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.expectation_suite import ExpectationSuite  # noqa: TCH001
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset import DataAsset
@@ -18,6 +14,9 @@ from great_expectations.dataset import Dataset
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.validator.validator import Validator
+
+if TYPE_CHECKING:
+    from great_expectations.core.expectation_suite import ExpectationSuite
 
 logger = logging.getLogger(__name__)
 
@@ -70,19 +69,19 @@ class OrderedProfilerCardinality(OrderedEnum):
         Returns:
             The column cardinality
         """
-        if pct_unique == 1.0:
+        if pct_unique == 1.0:  # noqa: PLR2004
             cardinality = cls.UNIQUE
         elif num_unique == 1:
             cardinality = cls.ONE
-        elif num_unique == 2:
+        elif num_unique == 2:  # noqa: PLR2004
             cardinality = cls.TWO
-        elif 0 < num_unique < 20:
+        elif 0 < num_unique < 20:  # noqa: PLR2004
             cardinality = cls.VERY_FEW
-        elif 0 < num_unique < 60:
+        elif 0 < num_unique < 60:  # noqa: PLR2004
             cardinality = cls.FEW
         elif num_unique is None or num_unique == 0 or pct_unique is None:
             cardinality = cls.NONE
-        elif pct_unique > 0.1:
+        elif pct_unique > 0.1:  # noqa: PLR2004
             cardinality = cls.VERY_MANY
         else:
             cardinality = cls.MANY
@@ -152,8 +151,10 @@ class Profiler(metaclass=abc.ABCMeta):
     def __init__(self, configuration: Optional[dict] = None) -> None:
         self.configuration = configuration
 
-    @public_api
-    def validate(self, item_to_validate: Any) -> None:
+    @public_api  # noqa: B027
+    def validate(  # empty-method-without-abstract-decorator
+        self, item_to_validate: Any
+    ) -> None:
         """Raise an exception if `item_to_validate` cannot be profiled.
 
         Args:
@@ -220,7 +221,7 @@ class DatasetProfiler(DataAssetProfiler):
         return expectation_suite
 
     @classmethod
-    def profile(
+    def profile(  # noqa: PLR0913
         cls,
         data_asset,
         run_id=None,
@@ -231,21 +232,7 @@ class DatasetProfiler(DataAssetProfiler):
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
-        if isinstance(run_id, str) and not run_name:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional). Instead of providing a run_id, you may also provide"
-                "run_name and run_time separately.",
-                DeprecationWarning,
-            )
-            try:
-                run_time = parse(run_id)
-            except (ValueError, TypeError):
-                pass
-            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
-        elif isinstance(run_id, dict):
+        if isinstance(run_id, dict):
             run_id = RunIdentifier(**run_id)
         elif not isinstance(run_id, RunIdentifier):
             run_name = run_name or "profiling"

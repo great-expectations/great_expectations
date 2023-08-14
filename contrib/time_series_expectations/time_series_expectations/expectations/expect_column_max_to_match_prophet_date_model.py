@@ -5,7 +5,7 @@ from time_series_expectations.expectations.column_aggregate_time_series_expectat
 
 
 class ExpectColumnMaxToMatchProphetDateModel(ColumnAggregateTimeSeriesExpectation):
-    """This Expectation checks to see if the max of a column matches the predictions of a prophet model for a given date.
+    """Expect the column maximum to match the predictions of a prophet model for a given date.
 
     expect_column_max_to_match_prophet_date_model is a ColumnAggregateTimeSeriesExpectation.
 
@@ -52,6 +52,7 @@ class ExpectColumnMaxToMatchProphetDateModel(ColumnAggregateTimeSeriesExpectatio
                 "x": [100, 102, 101, 100],
                 "y": [100, 100, 100, 500],
             },
+            "only_for": ["pandas"],
             "tests": [
                 {
                     "title": "positive_test",
@@ -82,16 +83,18 @@ class ExpectColumnMaxToMatchProphetDateModel(ColumnAggregateTimeSeriesExpectatio
                     },
                 },
             ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-            ],
         }
     ]
 
     metric_dependency = "column.max"
+
+    library_metadata = {
+        "tags": [],
+        "contributors": [
+            "@abegong",
+        ],
+        "requirements": ["prophet"],
+    }
 
 
 if __name__ == "__main__":

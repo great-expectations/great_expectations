@@ -1,6 +1,5 @@
 import logging
 import os
-import warnings
 from typing import Dict, Iterable
 
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
@@ -44,7 +43,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
     _default_reader_options: Dict = {}
     recognized_batch_parameters = {"data_asset_name", "partition_id"}
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name="default",
         datasource=None,
@@ -97,21 +96,8 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
         known_assets = self._get_valid_file_options(base_directory=self.base_directory)
         return {"names": known_assets, "is_complete_list": True}
 
-    # TODO: deprecate generator_asset argument
-    def get_available_partition_ids(self, generator_asset=None, data_asset_name=None):
-        assert (generator_asset and not data_asset_name) or (
-            not generator_asset and data_asset_name
-        ), "Please provide either generator_asset or data_asset_name."
-        if generator_asset:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
-                "Please use 'data_asset_name' instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = generator_asset
-
-        # If the generator asset names a single known *file*, return ONLY that
+    def get_available_partition_ids(self, data_asset_name=None):
+        # If the asset names a single known *file*, return ONLY that
         for extension in self.known_extensions:
             if os.path.isfile(  # noqa: PTH113
                 os.path.join(  # noqa: PTH118

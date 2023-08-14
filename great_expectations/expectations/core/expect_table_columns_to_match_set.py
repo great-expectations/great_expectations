@@ -1,14 +1,14 @@
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    TableExpectation,
+    BatchExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -35,17 +35,18 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectTableColumnsToMatchSet(TableExpectation):
+class ExpectTableColumnsToMatchSet(BatchExpectation):
     """Expect the columns to match an unordered set.
 
     expect_table_columns_to_match_set is a \
-    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
+    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     Args:
         column_set (list of str): \
             The column names, in any order.
         exact_match (boolean): \
-            Whether the list of columns must exactly match the observed columns.
+            If True, the list of columns must exactly match the observed columns. \
+            If False, observed columns must include column_set but additional columns will pass.
 
     Other Parameters:
         result_format (str or None): \
@@ -326,7 +327,7 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
 
             if exact_match:
                 return return_failed
-            else:
+            else:  # noqa: PLR5501
                 # Failed if there are items in the missing list (but OK to have unexpected_list)
                 if len(missing_list) > 0:
                     return return_failed

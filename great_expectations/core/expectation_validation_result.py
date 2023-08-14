@@ -44,7 +44,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def get_metric_kwargs_id(metric_name, metric_kwargs):
+def get_metric_kwargs_id(metric_kwargs: dict) -> str | None:
     ###
     #
     # WARNING
@@ -55,10 +55,15 @@ def get_metric_kwargs_id(metric_name, metric_kwargs):
     # WARNING
     #
     ###
+    if metric_kwargs is None:
+        metric_kwargs = {}
+
     if "metric_kwargs_id" in metric_kwargs:
         return metric_kwargs["metric_kwargs_id"]
+
     if "column" in metric_kwargs:
         return f"column={metric_kwargs.get('column')}"
+
     return None
 
 
@@ -81,7 +86,7 @@ class ExpectationValidationResult(SerializableDictDot):
         InvalidCacheValueError: Raised if the result does not pass validation.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         success: Optional[bool] = None,
         expectation_config: Optional[ExpectationConfiguration] = None,
@@ -123,14 +128,14 @@ class ExpectationValidationResult(SerializableDictDot):
         #         return NotImplemented
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
-            return NotImplemented
+            return other == self
         try:
             if self.result and other.result:
                 common_keys = set(self.result.keys()) & other.result.keys()
                 result_dict = self.to_json_dict()["result"]
                 other_result_dict = other.to_json_dict()["result"]
                 contents_equal = all(
-                    [result_dict[k] == other_result_dict[k] for k in common_keys]
+                    result_dict[k] == other_result_dict[k] for k in common_keys
                 )
             else:
                 contents_equal = False
@@ -285,16 +290,18 @@ class ExpectationValidationResult(SerializableDictDot):
         if result.get("unexpected_count") and result["unexpected_count"] < 0:
             return False
         if result.get("unexpected_percent") and (
-            result["unexpected_percent"] < 0 or result["unexpected_percent"] > 100
+            result["unexpected_percent"] < 0
+            or result["unexpected_percent"] > 100  # noqa: PLR2004
         ):
             return False
         if result.get("missing_percent") and (
-            result["missing_percent"] < 0 or result["missing_percent"] > 100
+            result["missing_percent"] < 0
+            or result["missing_percent"] > 100  # noqa: PLR2004
         ):
             return False
         if result.get("unexpected_percent_nonmissing") and (
             result["unexpected_percent_nonmissing"] < 0
-            or result["unexpected_percent_nonmissing"] > 100
+            or result["unexpected_percent_nonmissing"] > 100  # noqa: PLR2004
         ):
             return False
         if result.get("missing_count") and result["missing_count"] < 0:
@@ -337,23 +344,24 @@ class ExpectationValidationResult(SerializableDictDot):
             )
 
         metric_name_parts = metric_name.split(".")
-        metric_kwargs_id = get_metric_kwargs_id(metric_name, kwargs)
+        metric_kwargs_id = get_metric_kwargs_id(metric_kwargs=kwargs)
 
         if metric_name_parts[0] == self.expectation_config.expectation_type:
             curr_metric_kwargs = get_metric_kwargs_id(
-                metric_name, self.expectation_config.kwargs
+                metric_kwargs=self.expectation_config.kwargs
             )
             if metric_kwargs_id != curr_metric_kwargs:
                 raise gx_exceptions.UnavailableMetricError(
-                    "Requested metric_kwargs_id (%s) does not match the configuration of this "
-                    "ExpectationValidationResult (%s)."
-                    % (metric_kwargs_id or "None", curr_metric_kwargs or "None")
+                    "Requested metric_kwargs_id ({}) does not match the configuration of this "
+                    "ExpectationValidationResult ({}).".format(
+                        metric_kwargs_id or "None", curr_metric_kwargs or "None"
+                    )
                 )
-            if len(metric_name_parts) < 2:
+            if len(metric_name_parts) < 2:  # noqa: PLR2004
                 raise gx_exceptions.UnavailableMetricError(
                     "Expectation-defined metrics must include a requested metric."
                 )
-            elif len(metric_name_parts) == 2:
+            elif len(metric_name_parts) == 2:  # noqa: PLR2004
                 if metric_name_parts[1] == "success":
                     return self.success
                 else:
@@ -363,7 +371,7 @@ class ExpectationValidationResult(SerializableDictDot):
                     )
             elif metric_name_parts[1] == "result":
                 try:
-                    if len(metric_name_parts) == 3:
+                    if len(metric_name_parts) == 3:  # noqa: PLR2004
                         return self.result.get(metric_name_parts[2])
                     elif metric_name_parts[2] == "details":
                         return self.result["details"].get(metric_name_parts[3])
@@ -491,7 +499,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
 
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         success: Optional[bool] = None,
         results: Optional[list] = None,
@@ -559,12 +567,12 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
 
     def get_metric(self, metric_name, **kwargs):
         metric_name_parts = metric_name.split(".")
-        metric_kwargs_id = get_metric_kwargs_id(metric_name, kwargs)
+        metric_kwargs_id = get_metric_kwargs_id(metric_kwargs=kwargs)
 
         metric_value = None
         # Expose overall statistics
         if metric_name_parts[0] == "statistics":
-            if len(metric_name_parts) == 2:
+            if len(metric_name_parts) == 2:  # noqa: PLR2004
                 return self.statistics.get(metric_name_parts[1])
             else:
                 raise gx_exceptions.UnavailableMetricError(

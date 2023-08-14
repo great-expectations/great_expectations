@@ -1,6 +1,7 @@
 {
   "expectation_type" : "expect_column_values_to_not_match_like_pattern",
   "datasets" : [{
+    "dataset_name": "expect_column_values_to_not_match_like_pattern_1",
     "data" : {
       "a" : ["aaa", "abb", "acc", "add", "bee"],
       "b" : ["aaa", "abb", "acc", "bdd", null],

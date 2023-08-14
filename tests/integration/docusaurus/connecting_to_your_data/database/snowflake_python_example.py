@@ -1,9 +1,10 @@
 import os
 
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
+
+yaml = YAMLHandler()
 
 sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
 sfUser = os.environ.get("SNOWFLAKE_USER")

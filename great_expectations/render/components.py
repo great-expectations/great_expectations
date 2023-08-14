@@ -4,10 +4,9 @@ import json
 from copy import deepcopy
 from enum import Enum
 from string import Template as pTemplate
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Final, List, Optional, Union
 
 from marshmallow import Schema, fields, post_dump, post_load
-from typing_extensions import Final
 
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
@@ -208,7 +207,7 @@ class RenderedComponentContent(RenderedContent):
 
 
 class RenderedHeaderContent(RenderedComponentContent):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         header,
         subheader=None,
@@ -244,7 +243,7 @@ class RenderedHeaderContent(RenderedComponentContent):
 
 
 class RenderedGraphContent(RenderedComponentContent):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         graph,
         header=None,
@@ -301,7 +300,7 @@ class RenderedTableContent(RenderedComponentContent):
             sortable: A boolean indicating whether the column is sortable.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         table: list[RenderedContent],
         header: Optional[Union[RenderedContent, dict]] = None,
@@ -351,7 +350,7 @@ class RenderedTableContent(RenderedComponentContent):
 
 
 class RenderedTabsContent(RenderedComponentContent):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self, tabs, header=None, subheader=None, styling=None, content_block_type="tabs"
     ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
@@ -384,7 +383,7 @@ class RenderedTabsContent(RenderedComponentContent):
 
 
 class RenderedBootstrapTableContent(RenderedComponentContent):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         table_data,
         table_columns,
@@ -522,7 +521,7 @@ class RenderedStringTemplateContent(RenderedComponentContent):
 
 
 class RenderedBulletListContent(RenderedComponentContent):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         bullet_list,
         header=None,
@@ -560,7 +559,7 @@ class RenderedBulletListContent(RenderedComponentContent):
 
 
 class ValueListContent(RenderedComponentContent):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         value_list,
         header=None,
@@ -596,7 +595,7 @@ class ValueListContent(RenderedComponentContent):
 
 
 class TextContent(RenderedComponentContent):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self, text, header=None, subheader=None, styling=None, content_block_type="text"
     ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
@@ -641,7 +640,7 @@ class CollapseContent(RenderedComponentContent):
         inline_link: Whether to include a link inline.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         collapse: Union[RenderedContent, list],
         collapse_toggle_link: Optional[Union[RenderedContent, dict]] = None,
@@ -689,7 +688,7 @@ class CollapseContent(RenderedComponentContent):
 
 class RenderedDocumentContent(RenderedContent):
     # NOTE: JPC 20191028 - review these keys to consolidate and group
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         sections,
         data_asset_name=None,
@@ -704,7 +703,7 @@ class RenderedDocumentContent(RenderedContent):
         ge_cloud_id=None,
     ) -> None:
         if not isinstance(sections, list) and all(
-            [isinstance(section, RenderedSectionContent) for section in sections]
+            isinstance(section, RenderedSectionContent) for section in sections
         ):
             raise InvalidRenderedContentError(
                 "RenderedDocumentContent requires a list of RenderedSectionContent for "
@@ -747,10 +746,8 @@ class RenderedDocumentContent(RenderedContent):
 class RenderedSectionContent(RenderedContent):
     def __init__(self, content_blocks, section_name=None) -> None:
         if not isinstance(content_blocks, list) and all(
-            [
-                isinstance(content_block, RenderedComponentContent)
-                for content_block in content_blocks
-            ]
+            isinstance(content_block, RenderedComponentContent)
+            for content_block in content_blocks
         ):
             raise InvalidRenderedContentError(
                 "Rendered section content requires a list of RenderedComponentContent "
@@ -775,7 +772,7 @@ class RenderedSectionContent(RenderedContent):
 
 
 class RenderedAtomicValue(DictDot):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         schema: Optional[dict] = None,
         header: Optional[RenderedAtomicValue] = None,
@@ -898,6 +895,10 @@ class RenderedAtomicValueSchema(Schema):
                 and cleaned_serialized_dict.get(key, {}).get("graph") is None
             ):
                 cleaned_serialized_dict.pop(key)
+            elif key == "meta_notes" and key in cleaned_serialized_dict:
+                meta_notes = cleaned_serialized_dict.get(key, {})
+                if meta_notes is None or not meta_notes.get("content"):
+                    cleaned_serialized_dict.pop(key)
             elif (
                 key in cleaned_serialized_dict and cleaned_serialized_dict[key] is None
             ):

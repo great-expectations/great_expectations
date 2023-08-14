@@ -17,6 +17,7 @@ from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.exceptions import ProfilerError
 from great_expectations.execution_engine import (
+    ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
@@ -102,7 +103,7 @@ class UserConfigurableProfiler:
         ValueError: If an invalid `primary_or_compound_key` is provided.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913, PLR0912, PLR0915
         self,
         profile_dataset: Union[Batch, Dataset, Validator],
         excluded_expectations: Optional[List[str]] = None,
@@ -123,7 +124,10 @@ class UserConfigurableProfiler:
         if isinstance(self.profile_dataset, Batch):
             context = self.profile_dataset.data_context
             self.profile_dataset = Validator(
-                execution_engine=self.profile_dataset.data.execution_engine,  # type: ignore[arg-type]
+                execution_engine=cast(
+                    ExecutionEngine,
+                    self.profile_dataset.data.execution_engine,  # type: ignore[union-attr] # execution_engine
+                ),
                 batches=[self.profile_dataset],
             )
             self.all_table_columns = self.profile_dataset.get_metric(
@@ -462,7 +466,10 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             for column_name in column_list:
                 processed_column = self.column_info.get(column_name)
                 if semantic_type == "datetime":
-                    assert processed_column.get("type") in ("DATETIME", "STRING",), (
+                    assert processed_column.get("type") in (
+                        "DATETIME",
+                        "STRING",
+                    ), (
                         f"Column {column_name} must be a datetime column or a string but appears to be "
                         f"{processed_column.get('type')}"
                     )
@@ -525,7 +532,6 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
         """
         # list of types is used to support pandas and sqlalchemy
         try:
-
             if (
                 profile_dataset.expect_column_values_to_be_in_type_list(
                     column, type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
@@ -722,7 +728,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
 
         return expectation_suite
 
-    def _display_suite_by_column(self, suite):
+    def _display_suite_by_column(self, suite):  # noqa: PLR0912
         """
         Displays the expectations of a suite by column, along with the column cardinality, and semantic or data type so
         that a user can easily see which expectations were created for which columns
@@ -823,7 +829,9 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
 
         return profile_dataset
 
-    def _build_expectations_numeric(self, profile_dataset, column):  # noqa: C901 - 17
+    def _build_expectations_numeric(  # noqa: C901, PLR0912, PLR0915
+        self, profile_dataset, column
+    ):
         """
         Adds a set of numeric expectations for a given column
         Args:
@@ -840,7 +848,6 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if not is_nan(observed_min):
-
                 profile_dataset.expect_column_min_to_be_between(
                     column,
                     min_value=observed_min,
@@ -913,7 +920,6 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if not is_nan(observed_median):
-
                 profile_dataset.expect_column_median_to_be_between(
                     column,
                     min_value=observed_median,
@@ -990,7 +996,6 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 logger.debug(quantile_result.exception_info["exception_traceback"])
                 logger.debug(quantile_result.exception_info["exception_message"])
             else:
-
                 profile_dataset.expect_column_quantile_values_to_be_between(
                     column,
                     quantile_ranges={
@@ -1052,7 +1057,6 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             "expect_column_value_lengths_to_be_between"
             not in self.excluded_expectations
         ):
-
             pass
 
         return profile_dataset
@@ -1140,7 +1144,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             )
             if not not_null_result.success:
                 unexpected_percent = float(not_null_result.result["unexpected_percent"])
-                if unexpected_percent >= 50 and not self.not_null_only:
+                if unexpected_percent >= 50 and not self.not_null_only:  # noqa: PLR2004
                     potential_mostly_value = math.floor(unexpected_percent) / 100.0
                     # A safe_mostly_value of 0.001 gives us a rough way of ensuring that we don't wind up with a mostly
                     # value of 0 when we round

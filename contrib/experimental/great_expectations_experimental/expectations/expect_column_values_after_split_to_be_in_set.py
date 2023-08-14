@@ -30,7 +30,6 @@ def are_values_after_split_in_value_set(
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesAfterSplitInSet(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.values_after_split_in_set"
     condition_value_keys = (
@@ -59,7 +58,7 @@ class ColumnValuesAfterSplitInSet(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesAfterSplitToBeInSet(ColumnMapExpectation):
-    """Expect values in the column after splitting on a delimiter to be in a pre-defined set"""
+    """Expect values in the column after splitting on a delimiter to be in a pre-defined set."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

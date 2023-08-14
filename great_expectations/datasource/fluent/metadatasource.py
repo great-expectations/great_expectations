@@ -5,23 +5,17 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Set, Type
+from typing import Set, Type
 
 import pydantic
 
-from great_expectations.datasource.fluent.signatures import _merge_signatures
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.datasource.fluent.type_lookup import TypeLookup
-
-if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.interfaces import Datasource
-
 
 logger = logging.getLogger(__name__)
 
 
 class MetaDatasource(pydantic.main.ModelMetaclass):
-
     __cls_set: Set[Type] = set()
 
     def __new__(
@@ -48,27 +42,11 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
         meta_cls.__cls_set.add(cls)
         logger.debug(f"Datasources: {len(meta_cls.__cls_set)}")
 
-        def _datasource_factory(name: str, **kwargs) -> Datasource:
-            logger.debug(f"5. Adding '{name}' {cls_name}")
-            datasource = cls(name=name, **kwargs)
-            datasource.test_connection()
-            return datasource
-
-        _datasource_factory.__doc__ = cls.__doc__
-
-        # TODO: generate schemas from `cls` if needed
-
         if cls.__module__ == "__main__":
             logger.warning(
                 f"Datasource `{cls_name}` should not be defined as part of __main__ this may cause typing lookup collisions"
             )
         # instantiate new TypeLookup to prevent child classes conflicts with parent class asset types
         cls._type_lookup = TypeLookup()
-        _SourceFactories.register_types_and_ds_factory(cls, _datasource_factory)
-
-        # attr-defined issue
-        # https://github.com/python/mypy/issues/12472
-        _datasource_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
-            _datasource_factory, cls, exclude={"type", "assets"}, return_type=cls
-        )
+        _SourceFactories.register_datasource(cls)
         return cls

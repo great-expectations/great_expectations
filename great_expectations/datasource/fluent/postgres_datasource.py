@@ -1,12 +1,13 @@
-from typing import Union
+from typing import Literal, Union
 
 from pydantic import PostgresDsn
-from typing_extensions import Literal
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import SQLDatasource
 
 
+@public_api
 class PostgresDatasource(SQLDatasource):
     """Adds a postgres datasource to the data context.
 

@@ -2,6 +2,8 @@ from typing import Optional
 
 from lxml import etree
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -14,8 +16,7 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
 )
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
-from great_expectations.expectations.metrics.map_metric import (
+from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
@@ -70,7 +71,7 @@ class ColumnValuesMatchXmlSchema(ColumnMapMetricProvider):
             except:
                 raise
 
-        matches_xml_schema_udf = F.udf(matches_xml_schema, sparktypes.BooleanType())
+        matches_xml_schema_udf = F.udf(matches_xml_schema, pyspark.types.BooleanType())
 
         return matches_xml_schema_udf(column)
 
@@ -154,7 +155,7 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = (

@@ -1,0 +1,35 @@
+services:
+  jupyter:
+    image: gx/aws_postgres_example_jupyter
+    container_name: aws_postgres_example_jupyter
+    build:
+      context: .
+      dockerfile: jupyter.Dockerfile
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+      - AWS_RDS_CONNECTION_STRING=${AWS_RDS_CONNECTION_STRING}
+    networks:
+      - dbnet
+    ports:
+      - "8888:8888"
+    volumes:
+      - gx_stores:/gx/gx_stores
+  data_docs:
+    image: gx/aws_postgres_data_docs
+    container_name: gx_aws_postgres_data_docs
+    build:
+      context: .
+      dockerfile: data_docs.Dockerfile
+    networks:
+      - dbnet
+    ports:
+      - "3000:3000"
+    volumes:
+      - gx_stores:/gx/gx_stores:ro
+networks:
+  dbnet:
+    driver: bridge
+volumes:
+  gx_stores:

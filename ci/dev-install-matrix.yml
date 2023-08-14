@@ -1,6 +1,6 @@
 parameters:
   vmImage: '' # Must be specified in primary YAML
-  pythonVersion: ["3.7", "3.8", "3.9", "3.10"]
+  pythonVersion: ["3.8", "3.9", "3.10"]
 
 jobs:
   - ${{ each pythonVersion in parameters.pythonVersion }}:
@@ -13,7 +13,7 @@ jobs:
             versionSpec: ${{ pythonVersion }}
           displayName: Use Python ${{ pythonVersion }}
 
-        - bash: python -m pip install --upgrade pip==21.3.1
+        - bash: python -m pip install --upgrade pip
           displayName: 'Update pip'
 
         - script: |
@@ -26,8 +26,7 @@ jobs:
           displayName: 'Checkout latest tag'
 
         - script: |
-            pip install --requirement requirements-dev.txt --constraint constraints-dev.txt
-            pip install .
+            pip install --constraint constraints-dev.txt ".[test]"
           displayName: 'Install dependencies'
 
         - script: |
@@ -56,7 +55,7 @@ jobs:
             versionSpec: ${{ pythonVersion }}
           displayName: Use Python ${{ pythonVersion }}
 
-        - bash: python -m pip install --upgrade pip==21.3.1
+        - bash: python -m pip install --upgrade pip
           displayName: 'Update pip'
 
         - script: |
@@ -69,11 +68,7 @@ jobs:
           displayName: 'Checkout latest tag'
 
         - script: |
-            pip install \
-              --requirement requirements.txt \
-              --requirement reqs/requirements-dev-test.txt \
-              --constraint constraints-dev.txt \
-              --editable .
+            pip install --constraint constraints-dev.txt --editable ".[test]"
           displayName: 'Install dependencies'
 
         - script: |

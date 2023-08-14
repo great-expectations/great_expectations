@@ -2,6 +2,8 @@ import operator
 
 import pandas
 
+# from great_expectations.compatibility.pyspark import functions as F
+# from great_expectations.compatibility import pyspark
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
 from great_expectations.execution_engine import PandasExecutionEngine
@@ -16,7 +18,6 @@ from great_expectations.expectations.metrics import (
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
 class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.are_alphabetical"
@@ -26,7 +27,6 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, reverse=False, **kwargs):
-
         # lowercase the whole column to avoid issues with capitalization
         # (since every capital letter is "before" the lowercase letters)
         column_lower = column.map(str.lower)
@@ -97,9 +97,9 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 #     # if isinstance(
 #     #     column_metadata["type"],
 #     #     (
-#     #         sparktypes.LongType,
-#     #         sparktypes.DoubleType,
-#     #         sparktypes.IntegerType,
+#     #         pyspark.types.LongType,
+#     #         pyspark.types.DoubleType,
+#     #         pyspark.types.IntegerType,
 #     #     ),
 #     # ):
 #     #     # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
@@ -123,7 +123,7 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 #     column = F.col(column_name)
 #     column = F.lower(column)
 #     # if isinstance(
-#     #     column_metadata["type"], (sparktypes.TimestampType, sparktypes.DateType)
+#     #     column_metadata["type"], (pyspark.types.TimestampType, pyspark.types.DateType)
 #     # ):
 #     #     diff = F.datediff(
 #     #         column, F.lag(column).over(Window.orderBy(F.lit("constant")))

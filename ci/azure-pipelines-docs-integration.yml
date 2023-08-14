@@ -1,41 +1,18 @@
+# This file configures the `docs_integration` pipeline (https://dev.azure.com/great-expectations/great_expectations/_build)
+#
+# This pipeline runs tests against scripts that contain code samples that we use in our documentation.
+#
+# The pipeline is run under the following conditions:
+#   - On any PR
+
 trigger:
   branches:
     include:
-    - pre_pr_docs-*
-
-resources:
-  containers:
-  - container: postgres
-    image: postgres:11
-    ports:
-    - 5432:5432
-    env:
-      POSTGRES_DB: "test_ci"
-      POSTGRES_HOST_AUTH_METHOD: "trust"
-  - container: mysql
-    image: mysql:8.0.20
-    ports:
-      - 3306:3306
-    env:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-      MYSQL_DATABASE: test_ci
-  - container: mssql
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    env:
-      ACCEPT_EULA: Y
-      MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
-      MSSQL_DB: test_ci
-      MSSQL_PID: Developer
-    ports:
-      - 1433:1433
-  - container: trino
-    image: trinodb/trino:400
-    ports:
-      - 8088:8080
+    - develop
 
 variables:
-  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
   isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
+  isManual: $[eq(variables['Build.Reason'], 'Manual')]
   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
 stages:
@@ -54,59 +31,59 @@ stages:
                 docs/**
                 tests/integration/docusaurus/**
                 tests/integration/fixtures/**
+                tests/integration/test_definitions/**
+                tests/integration/test_script_runner.py
                 tests/test_sets/**
-
-          - bash: ./ci/checks/check_for_docs_deps_changes.sh
-            name: CheckDocsDependenciesChanges
-
-  - stage: custom_checks
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-latest'
-    jobs:
-    - job: link_checker
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
-      steps:
-      - bash: python scripts/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -s docs --skip-external
-        name: LinkChecker
-
-    - job: docs_snippet_checker
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
-      steps:
-      - script: |
-          yarn install
-          python ci/checks/validate_docs_snippets.py
-        name: DocsSnippetChecker
-
-    - job: line_number_snippet_checker
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
-      steps:
-        - script: |
-            python ci/checks/check_no_line_number_snippets.py
-          name: LineNumberSnippetChecker
-
-    - job: public_api_report
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
-      steps:
-        - script: |
-            python docs/sphinx_api_docs_source/public_api_report.py
-          name: PublicAPIReport
 
   - stage: docusaurus_tests
     dependsOn: scope_check
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
-    - job: test_docs
-      timeoutInMinutes: 120
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
+
+    - job: test_docs_aws_spark
+      timeoutInMinutes: 30
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
-      services:
-        postgres: postgres
-        mysql: mysql
-        mssql: mssql
-        trino: trino
+        spark.version: '3.3.2'
+        matching_aws_java_sdk_bundle_version: '1.11.1026'
+
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '$(python.version)'
+          displayName: 'Use Python $(python.version)'
+        - script: |
+            pip install pyspark==$(spark.version)
+          displayName: Install Pyspark $(spark.version)
+        - script: |
+            export JAVA_HOME=$JAVA_HOME_11_X64
+          displayName: Set JAVA_HOME  to existing directory
+        - script: |
+            wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/$(spark.version)/hadoop-aws-$(spark.version).jar
+            wget https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/$(matching_aws_java_sdk_bundle_version)/aws-java-sdk-bundle-$(matching_aws_java_sdk_bundle_version).jar
+            export pyspark_dir=`python -c 'import pyspark; print(pyspark.__path__[0] + "/jars/")'`
+            mv hadoop-aws-$(spark.version).jar $pyspark_dir
+            mv aws-java-sdk-bundle-$(matching_aws_java_sdk_bundle_version).jar $pyspark_dir
+
+          displayName: download the AWS JARs and move to pyspark's JAR directory.
+        - script: |
+            pip install --constraint constraints-dev.txt ".[test, spark]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
+          displayName: 'Install dependencies'
+        - script: |
+            pytest -v --docs-tests --aws --spark tests/integration/test_script_runner.py
+          displayName: 'pytest'
+          env:
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+            AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+
+    - job: test_docs_athena
+      timeoutInMinutes: 30
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      variables:
+        python.version: '3.8'
 
       steps:
         - task: UsePythonVersion@0
@@ -114,69 +91,19 @@ stages:
             versionSpec: '$(python.version)'
           displayName: 'Use Python $(python.version)'
 
-        - bash: python -m pip install --upgrade pip==20.2.4
-          displayName: 'Update pip'
-
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage git+https://github.com/awslabs/aws-glue-libs.git "cryptography==38.0.4"
+            pip install --constraint constraints-dev.txt ".[test, athena]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
-        - task: DownloadSecureFile@1
-          name: gcp_authkey
-          displayName: 'Download GCS Credentials'
-          inputs:
-              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
-              retryCount: '2'
-
         - script: |
-            # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
-            curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
-            ./google-cloud-sdk/install.sh --usage-reporting=False --path-update=True --quiet --install-python=False
-            # creating new named configuration
-            ./google-cloud-sdk/bin/gcloud config configurations create ge-oss-ci-cd-configurations
-            # setting account config using project and service account info
-            ./google-cloud-sdk/bin/gcloud config set account account-for-azure-tests --project=$(GE_TEST_GCP_PROJECT) --access-token-file=$(gcp_authkey.secureFilePath)
-            # Pass the configured Cloud SDK authentication to gsutil.
-            ./google-cloud-sdk/bin/gcloud config set pass_credentials_to_gsutil True
-            # Authorize access to Google Cloud with a service account
-            ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$(gcp_authkey.secureFilePath)
-          displayName: 'Install and setup Google Cloud SDK'
-
-        - script: |
-            sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
-          displayName: 'Create MSSQL database test_ci'
-
-        - script: |
-            pytest -v --docs-tests -m integration --mysql --bigquery --mssql --spark --postgresql --trino --aws --azure tests/integration/test_script_runner.py
+            pytest -v --docs-tests --athena tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
-            # snowflake credentials
-            SNOWFLAKE_ACCOUNT: $(SNOWFLAKE_ACCOUNT)
-            SNOWFLAKE_USER: $(SNOWFLAKE_USER)
-            SNOWFLAKE_PW: $(SNOWFLAKE_PW)
-            SNOWFLAKE_DATABASE: $(SNOWFLAKE_DATABASE)
-            SNOWFLAKE_SCHEMA: $(SNOWFLAKE_SCHEMA)
-            SNOWFLAKE_WAREHOUSE: $(SNOWFLAKE_WAREHOUSE)
-            SNOWFLAKE_ROLE: $(SNOWFLAKE_ROLE)
-            # redshift credentials
-            REDSHIFT_USERNAME: $(REDSHIFT_USERNAME)
-            REDSHIFT_PASSWORD: $(REDSHIFT_PASSWORD)
-            REDSHIFT_HOST: $(REDSHIFT_HOST)
-            REDSHIFT_PORT: $(REDSHIFT_PORT)
-            REDSHIFT_DATABASE: $(REDSHIFT_DATABASE)
-            REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
-            # AWS credentials
-            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
-            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
-            AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
             ATHENA_DB_NAME: $(ATHENA_DB_NAME)
             ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)
             ATHENA_DATA_BUCKET: $(ATHENA_DATA_BUCKET)
             ATHENA_TEN_TRIPS_DB_NAME: $(ATHENA_TEN_TRIPS_DB_NAME)
-            # GCP credentials
-            GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-            GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
-            GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
-            # Azure credentials
-            AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
-            AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
+            # aws credentials
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+            AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)

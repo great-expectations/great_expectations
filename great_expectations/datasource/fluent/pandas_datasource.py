@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import copy
-import dataclasses
 import logging
 import sqlite3
+import uuid
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -11,11 +10,11 @@ from typing import (
     Any,
     Callable,
     ClassVar,
-    Dict,
     Generic,
     List,
+    Literal,
     Mapping,
-    MutableMapping,
+    MutableSequence,
     Optional,
     Sequence,
     Set,
@@ -26,10 +25,19 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
+from great_expectations.core._docs_decorators import (
+    deprecated_argument,
+    new_argument,
+    public_api,
+)
 from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
+from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
     _FIELDS_ALWAYS_SET,
@@ -39,7 +47,6 @@ from great_expectations.datasource.fluent.dynamic_pandas import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
-    BatchRequest,
     DataAsset,
     Datasource,
     _DataAssetT,
@@ -48,24 +55,23 @@ from great_expectations.datasource.fluent.signatures import _merge_signatures
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
-from great_expectations.util import NotImported
 
 _EXCLUDE_TYPES_FROM_JSON: list[Type] = [sqlite3.Connection]
-try:
-    import sqlalchemy
 
-    _EXCLUDE_TYPES_FROM_JSON = _EXCLUDE_TYPES_FROM_JSON + [sqlalchemy.engine.Engine]
-except ImportError:
-    sqlalchemy = NotImported("sqlalchemy not found, please install.")
+if sa:
+    _EXCLUDE_TYPES_FROM_JSON = _EXCLUDE_TYPES_FROM_JSON + [sqlalchemy.Engine]
+
 
 if TYPE_CHECKING:
     import os
 
-    MappingIntStrAny = Mapping[Union[int, str], Any]
-    AbstractSetIntStr = AbstractSet[Union[int, str]]
+    from typing_extensions import TypeAlias
+
+    MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
+    AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 
     from great_expectations.datasource.fluent.interfaces import (
-        BatchRequestOptions,
+        BatchMetadata,
     )
     from great_expectations.execution_engine import PandasExecutionEngine
     from great_expectations.validator.validator import Validator
@@ -83,9 +89,11 @@ class PandasDatasourceError(Exception):
 
 class _PandasDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
+        "batch_metadata",
         "name",
         "order_by",
         "type",
+        "id",
     }
 
     class Config:
@@ -107,10 +115,9 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
     def test_connection(self) -> None:
         ...
 
-    def batch_request_options_template(
-        self,
-    ) -> BatchRequestOptions:
-        return {}
+    @property
+    def batch_request_options(self) -> tuple[str, ...]:
+        return tuple()
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
@@ -147,7 +154,9 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             batch_spec_passthrough=None,
         )
 
-        batch_metadata = copy.deepcopy(batch_request.options)
+        batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
+            batch_request=batch_request
+        )
 
         # Some pydantic annotations are postponed due to circular imports.
         # Batch.update_forward_refs() will set the annotations before we
@@ -167,17 +176,14 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
         return batch_list
 
-    def build_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
-    ) -> BatchRequest:
-        if options:
-            actual_keys = set(options.keys())
-            raise gx_exceptions.InvalidBatchRequestError(
-                "Data Assets associated with PandasDatasource can only contain a single batch,\n"
-                "therefore BatchRequest options cannot be supplied. BatchRequest options with keys:\n"
-                f"{actual_keys}\nwere passed.\n"
-            )
+    @public_api
+    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
+        """A batch request that can be used to obtain batches for this DataAsset.
 
+        Returns:
+            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
+            get_batch_list_from_batch_request method.
+        """
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
@@ -199,14 +205,15 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options={},
+                batch_slice=batch_request._batch_slice_input,
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
-                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
-                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
+                f"{pf(expect_batch_request_form.dict())}\n"
+                f"but actually has form:\n{pf(batch_request.dict())}\n"
             )
 
-    def json(
+    def json(  # noqa: PLR0913
         self,
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,
@@ -257,14 +264,14 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
 
 
-_PANDAS_READER_METHOD_UNSUPPORTED_LIST = (
+_PANDAS_READER_METHOD_UNSUPPORTED_LIST: tuple[str, ...] = (
     # "read_csv",
     # "read_json",
     # "read_excel",
     # "read_parquet",
     # "read_clipboard",
     # "read_feather",
-    "read_fwf",  # unhandled type
+    # "read_fwf",
     # "read_gbq",
     # "read_hdf",
     # "read_html",
@@ -297,6 +304,7 @@ ExcelAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("excel", _PandasDa
 FeatherAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
     "feather", _PandasDataAsset
 )
+FWFAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("fwf", _PandasDataAsset)
 GBQAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("gbq", _PandasDataAsset)
 HDFAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("hdf", _PandasDataAsset)
 HTMLAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("html", _PandasDataAsset)
@@ -324,10 +332,22 @@ XMLAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
 )  # read_xml doesn't exist for pandas < 1.3
 
 
+def _short_id() -> str:
+    """
+    Generate a unique id by shortening a uuid4.
+    Can expect collision after several million iterations.
+    https://gist.github.com/Kilo59/82f227d9dba4e5cce62bc22b245b2638
+    """
+    return str(uuid.uuid4()).replace("-", "")[:11]
+
+
 class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    dataframe: _PandasDataFrameT = pydantic.Field(..., exclude=True, repr=False)
+    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", default can be deleted.</Alex>
+    dataframe: Optional[_PandasDataFrameT] = pydantic.Field(
+        default=None, exclude=True, repr=False
+    )
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -340,14 +360,51 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
-            """DataFrameAsset is not dynamically generated by a Pandas reader method."""
+            """Pandas DataFrameAsset does not implement "_get_reader_method()" method, because DataFrame is already available."""
         )
+
+    def _get_reader_options_include(self) -> set[str]:
+        raise NotImplementedError(
+            """Pandas DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""
+        )
+
+    @public_api
+    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", its validation code must be deleted.</Alex>
+    @new_argument(
+        argument_name="dataframe",
+        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
+        version="0.16.15",
+    )
+    def build_batch_request(
+        self, dataframe: Optional[pd.DataFrame] = None
+    ) -> BatchRequest:
+        """A batch request that can be used to obtain batches for this DataAsset.
+
+        Args:
+            dataframe: The Pandas Dataframe containing the data for this DataFrame data asset.
+
+        Returns:
+            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
+            get_batch_list_from_batch_request method.
+        """
+        if dataframe is None:
+            df = self.dataframe
+        else:
+            df = dataframe
+
+        if df is None:
+            raise ValueError(
+                "Cannot build batch request for dataframe asset without a dataframe"
+            )
+
+        self.dataframe = df
+
+        return super().build_batch_request()
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> list[Batch]:
         self._validate_batch_request(batch_request)
-        batch_list: List[Batch] = []
 
         batch_spec = RuntimeDataBatchSpec(batch_data=self.dataframe)
         execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
@@ -370,13 +427,16 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             batch_spec_passthrough=None,
         )
 
-        batch_metadata = copy.deepcopy(batch_request.options)
+        batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
+            batch_request=batch_request
+        )
 
         # Some pydantic annotations are postponed due to circular imports.
         # Batch.update_forward_refs() will set the annotations before we
         # instantiate the Batch class since we can import them in this scope.
         Batch.update_forward_refs()
-        batch_list.append(
+
+        return [
             Batch(
                 datasource=self.datasource,
                 data_asset=self,
@@ -387,8 +447,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
                 legacy_batch_spec=batch_spec,
                 legacy_batch_definition=batch_definition,
             )
-        )
-        return batch_list
+        ]
 
 
 class _PandasDatasource(Datasource, Generic[_DataAssetT]):
@@ -396,10 +455,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
 
     # instance attributes
-    assets: MutableMapping[
-        str,
-        _DataAssetT,
-    ] = {}
+    assets: MutableSequence[_DataAssetT] = []
 
     # Abstract Methods
     @property
@@ -427,7 +483,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
     # End Abstract Methods
 
-    def json(
+    def json(  # noqa: PLR0913
         self,
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,
@@ -458,7 +514,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
         )
         if "assets" in self.__fields_set__:
             exclude_assets = {}
-            for asset_name, asset in self.assets.items():
+            for asset in self.assets:
                 # don't check fields that should always be set
                 check_fields: set[str] = asset.__fields_set__.copy().difference(
                     _FIELDS_ALWAYS_SET
@@ -467,7 +523,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
                     if isinstance(
                         getattr(asset, field), tuple(_EXCLUDE_TYPES_FROM_JSON)
                     ):
-                        exclude_assets[asset_name] = {field: True}
+                        exclude_assets[asset.name] = {field: True}
             if exclude_assets:
                 exclude_fields["assets"] = exclude_assets
 
@@ -484,11 +540,51 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
             **dumps_kwargs,
         )
 
+    def _add_asset(
+        self, asset: _DataAssetT, connect_options: dict | None = None
+    ) -> _DataAssetT:
+        """Adds an asset to this "_PandasDatasource" object.
+
+        The reserved asset name "DEFAULT_PANDAS_DATA_ASSET_NAME" undergoes replacement (rather than signaling error).
+
+        Args:
+            asset: The DataAsset to be added to this datasource.
+        """
+        asset_name: str = asset.name
+
+        asset_names: Set[str] = self.get_asset_names()
+
+        in_cloud_context: bool = False
+        if self._data_context:
+            in_cloud_context = self._data_context._datasource_store.cloud_mode
+
+        if asset_name == DEFAULT_PANDAS_DATA_ASSET_NAME:
+            if in_cloud_context:
+                # In cloud mode, we need to generate a unique name for the asset so that it gets persisted
+                asset_name = f"{asset.type}-{_short_id()}"
+                logger.info(
+                    f"Generating unique name for '{DEFAULT_PANDAS_DATA_ASSET_NAME}' asset '{asset_name}'"
+                )
+                asset.name = asset_name
+            elif asset_name in asset_names:
+                self.delete_asset(asset_name=asset_name)
+
+        return super()._add_asset(asset=asset, connect_options=connect_options)
+
 
 _DYNAMIC_ASSET_TYPES = list(_PANDAS_ASSET_MODELS.values())
 
 
+@public_api
 class PandasDatasource(_PandasDatasource):
+    """Adds a single-batch pandas datasource to the data context.
+
+    Args:
+        name: The name of this datasource.
+        assets: An optional dictionary whose keys are Pandas DataAsset names and whose values
+            are Pandas DataAsset objects.
+    """
+
     # class attributes
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = _DYNAMIC_ASSET_TYPES + [
         DataFrameAsset
@@ -496,525 +592,1135 @@ class PandasDatasource(_PandasDatasource):
 
     # instance attributes
     type: Literal["pandas"] = "pandas"
-    assets: Dict[str, _PandasDataAsset] = {}
+    assets: List[_PandasDataAsset] = []
+
+    def dict(self, _exclude_default_asset_names: bool = True, **kwargs):
+        """Overriding `.dict()` so that `DEFAULT_PANDAS_DATA_ASSET_NAME` is always excluded on serialization."""
+        # Overriding `.dict()` instead of `.json()` because `.json()`is only called from the outermost model,
+        # .dict() is called for deeply nested models.
+        ds_dict = super().dict(**kwargs)
+        if _exclude_default_asset_names:
+            assets = ds_dict.pop("assets", None)
+            if assets:
+                assets = [
+                    a for a in assets if a["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME
+                ]
+                if assets:
+                    ds_dict["assets"] = assets
+        return ds_dict
 
     def test_connection(self, test_assets: bool = True) -> None:
         ...
 
-    def _get_validator(self, asset: _PandasDataAsset) -> Validator:
-        batch_request: BatchRequest = asset.build_batch_request()
-        return self._data_context.get_validator(batch_request=batch_request)
-
-    def add_dataframe_asset(self, name: str, dataframe: pd.DataFrame) -> DataFrameAsset:
-        asset = DataFrameAsset(
-            name=name,
-            dataframe=dataframe,
-        )
-        return self.add_asset(asset=asset)
-
-    def read_dataframe(
-        self, dataframe: pd.DataFrame, asset_name: Optional[str] = None
-    ) -> Validator:
+    @staticmethod
+    def _validate_asset_name(asset_name: Optional[str] = None) -> str:
+        if asset_name == DEFAULT_PANDAS_DATA_ASSET_NAME:
+            raise PandasDatasourceError(
+                f"""An asset_name of {DEFAULT_PANDAS_DATA_ASSET_NAME} cannot be passed because it is a reserved name."""
+            )
         if not asset_name:
             asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
-        asset: DataFrameAsset = self.add_dataframe_asset(
-            name=asset_name, dataframe=dataframe
-        )
-        return self._get_validator(asset=asset)
+        return asset_name
 
-    def add_clipboard_asset(self, name: str, **kwargs) -> ClipboardAsset:  # type: ignore[valid-type]
+    def _get_validator(
+        self, asset: _PandasDataAsset, dataframe: pd.DataFrame | None = None
+    ) -> Validator:
+        batch_request: BatchRequest
+        if isinstance(asset, DataFrameAsset):
+            if not isinstance(dataframe, pd.DataFrame):
+                raise ValueError(
+                    'Cannot execute "PandasDatasource.read_dataframe()" without a valid "dataframe" argument.'
+                )
+
+            batch_request = asset.build_batch_request(dataframe=dataframe)
+        else:
+            batch_request = asset.build_batch_request()
+
+        # TODO: raise error if `_data_context` not set
+        return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[union-attr] # self._data_context must be set
+
+    @public_api
+    @deprecated_argument(
+        argument_name="dataframe",
+        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
+        version="0.16.15",
+    )
+    def add_dataframe_asset(
+        self,
+        name: str,
+        dataframe: Optional[pd.DataFrame] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
+    ) -> DataFrameAsset:
+        """Adds a Dataframe DataAsset to this PandasDatasource object.
+
+        Args:
+            name: The name of the Dataframe asset. This can be any arbitrary string.
+            dataframe: The Pandas Dataframe containing the data for this DataFrame data asset.
+            batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
+                            batches created from the asset.
+
+        Returns:
+            The DataFameAsset that has been added to this datasource.
+        """
+        asset: DataFrameAsset = DataFrameAsset(
+            name=name,
+            batch_metadata=batch_metadata or {},
+        )
+        asset.dataframe = dataframe
+        return self._add_asset(asset=asset)
+
+    @public_api
+    def read_dataframe(
+        self,
+        dataframe: pd.DataFrame,
+        asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
+    ) -> Validator:
+        """Reads a Dataframe and returns a Validator associated with it.
+
+        Args:
+            dataframe: The Dataframe containing the data for this data asset.
+            asset_name: The name of the Dataframe asset, should you wish to use it again.
+            batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
+                            batches created from the asset.
+
+        Returns:
+            A Validator using an ephemeral DataFrameAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
+        asset: DataFrameAsset = self.add_dataframe_asset(
+            name=name,
+            batch_metadata=batch_metadata or {},
+        )
+        return self._get_validator(asset=asset, dataframe=dataframe)
+
+    @public_api
+    def add_clipboard_asset(
+        self,
+        name: str,
+        **kwargs,
+    ) -> ClipboardAsset:  # type: ignore[valid-type]
+        """
+        Add a clipboard data asset to the datasource.
+
+        Args:
+            name: The name of the clipboard asset. This can be any arbitrary string.
+            **kwargs: Additional keyword arguments to pass to pandas.read_clipboard().
+
+        Returns:
+            The ClipboardAsset that has been added to this datasource.
+        """
         asset = ClipboardAsset(
             name=name,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
-    def read_clipboard(self, asset_name: Optional[str] = None, **kwargs) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
-        asset: ClipboardAsset = self.add_clipboard_asset(name=asset_name, **kwargs)  # type: ignore[valid-type]
+    @public_api
+    def read_clipboard(
+        self,
+        asset_name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        """
+        Read a clipboard and return a Validator associated with it.
+
+        Args:
+            asset_name: The name of the clipboard asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_clipboard().
+
+        Returns:
+            A Validator using an ephemeral ClipboardAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
+        asset: ClipboardAsset = self.add_clipboard_asset(  # type: ignore[valid-type]
+            name=name,
+            **kwargs,
+        )
         return self._get_validator(asset=asset)
 
+    @public_api
     def add_csv_asset(
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         **kwargs,
     ) -> CSVAsset:  # type: ignore[valid-type]
+        """
+        Add a CSV data asset to the datasource.
+
+        Args:
+            name: The name of the CSV asset. This can be any arbitrary string.
+            filepath_or_buffer: The path to the CSV file or a URL pointing to the CSV file.
+            **kwargs: Additional keyword arguments to pass to pandas.read_csv().
+
+        Returns:
+            The CSVAsset that has been added to this datasource.
+        """
         asset = CSVAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
+    @public_api
     def read_csv(
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        """
+        Read a CSV file and return a Validator associated with it.
+
+        Args:
+            filepath_or_buffer: The path to the CSV file or a URL pointing to the CSV file.
+            asset_name: The name of the CSV asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_csv().
+
+        Returns:
+            A Validator using an ephemeral CSVAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: CSVAsset = self.add_csv_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
+    @public_api
     def add_excel_asset(
-        self, name: str, io: os.PathLike | str | bytes, **kwargs
+        self,
+        name: str,
+        io: os.PathLike | str | bytes,
+        **kwargs,
     ) -> ExcelAsset:  # type: ignore[valid-type]
+        """
+        Add an Excel data asset to the datasource.
+
+        Args:
+            name: The name of the Excel asset. This can be any arbitrary string.
+            io: The path to the Excel file or a URL pointing to the Excel file.
+            **kwargs: Additional keyword arguments to pass to pandas.read_excel().
+
+        Returns:
+            The ExcelAsset that has been added to this datasource.
+        """
         asset = ExcelAsset(
             name=name,
             io=io,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
+    @public_api
     def read_excel(
         self,
         io: os.PathLike | str | bytes,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        """
+        Read an Excel file and return a Validator associated with it.
+
+        Args:
+            io: The path to the Excel file or a URL pointing to the Excel file.
+            asset_name: The name of the Excel asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_excel().
+
+        Returns:
+            A Validator using an ephemeral ExcelAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: ExcelAsset = self.add_excel_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             io=io,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
+    @public_api
     def add_feather_asset(
-        self, name: str, path: pydantic.FilePath | pydantic.AnyUrl, **kwargs
+        self,
+        name: str,
+        path: pydantic.FilePath | pydantic.AnyUrl,
+        **kwargs,
     ) -> FeatherAsset:  # type: ignore[valid-type]
+        """
+        Add a Feather data asset to the datasource.
+
+        Args:
+            name: The name of the Feather asset. This can be any arbitrary string.
+            path: The path to the Feather file or a URL pointing to the Feather file.
+            **kwargs: Additional keyword arguments to pass to pandas.read_feather().
+
+        Returns:
+            The FeatherAsset that has been added to this datasource.
+        """
         asset = FeatherAsset(
             name=name,
             path=path,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
+    @public_api
     def read_feather(
         self,
         path: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        """
+        Read a Feather file and return a Validator associated with it.
+
+        Args:
+            path: The path to the Feather file or a URL pointing to the Feather file.
+            asset_name: The name of the Feather asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_feather().
+
+        Returns:
+            A Validator using an ephemeral FeatherAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: FeatherAsset = self.add_feather_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path=path,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
+    @public_api
+    def add_fwf_asset(
+        self,
+        name: str,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        **kwargs,
+    ) -> FeatherAsset:  # type: ignore[valid-type]
+        """
+        Read a Fixed Width File and return a Validator associated with it.
+
+        Args:
+            filepath_or_buffer: The path to the file or a URL pointing to the Feather file.
+            asset_name: The name of the asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_fwf().
+
+        Returns:
+            The FWFAsset that has been added to this datasource.
+        """
+        asset = FWFAsset(
+            name=name,
+            filepath_or_buffer=filepath_or_buffer,
+            **kwargs,
+        )
+        return self._add_asset(asset=asset)
+
+    @public_api
+    def read_fwf(
+        self,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        asset_name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        """
+        Read a Fixed Width File and return a Validator associated with it.
+
+        Args:
+            filepath_or_buffer: The path to the file or a URL pointing to the Feather file.
+            asset_name: The name of the asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_fwf().
+
+        Returns:
+            A Validator using an ephemeral FWFAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
+        asset: FWFAsset = self.add_fwf_asset(  # type: ignore[valid-type]
+            name=name,
+            filepath_or_buffer=filepath_or_buffer,
+            **kwargs,
+        )
+        return self._get_validator(asset=asset)
+
+    @public_api
     def add_gbq_asset(
-        self, name: str, query: str, **kwargs
+        self,
+        name: str,
+        query: str,
+        **kwargs,
     ) -> GBQAsset:  # type: ignore[valid-type]
+        """
+        Add a GBQ data asset to the datasource.
+
+        Args:
+            name: The name of the GBQ asset. This can be any arbitrary string.
+            query: The SQL query to send to Google BigQuery.
+            **kwargs: Additional keyword arguments to pass to pandas.read_gbq().
+
+        Returns:
+            The GBQAsset that has been added to this datasource.
+        """
         asset = GBQAsset(
             name=name,
             query=query,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
+    @public_api
     def read_gbq(
         self,
         query: str,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        """
+        Read a Google BigQuery query and return a Validator associated with it.
+
+        Args:
+            query: The SQL query to send to Google BigQuery.
+            asset_name: The name of the GBQ asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_gbq().
+
+        Returns:
+            A Validator using an ephemeral GBQAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: GBQAsset = self.add_gbq_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             query=query,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
+    @public_api
     def add_hdf_asset(
-        self, name: str, path_or_buf: pd.HDFStore | os.PathLike | str, **kwargs
+        self,
+        name: str,
+        path_or_buf: pd.HDFStore | os.PathLike | str,
+        **kwargs,
     ) -> HDFAsset:  # type: ignore[valid-type]
+        """
+        Add an HDF data asset to the datasource.
+
+        Args:
+            name: The name of the HDF asset. This can be any arbitrary string.
+            path_or_buf: The path to the HDF file or a URL pointing to the HDF file.
+            **kwargs: Additional keyword arguments to pass to pandas.read_hdf().
+
+        Returns:
+            The HDFAsset that has been added to this datasource.
+        """
         asset = HDFAsset(
             name=name,
             path_or_buf=path_or_buf,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
+    @public_api
     def read_hdf(
         self,
         path_or_buf: pd.HDFStore | os.PathLike | str,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        """
+        Read an HDF file and return a Validator associated with it.
+
+        Args:
+            path_or_buf: The path to the HDF file or a URL pointing to the HDF file.
+            asset_name: The name of the HDF asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_hdf().
+
+        Returns:
+            A Validator using an ephemeral HDFAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: HDFAsset = self.add_hdf_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path_or_buf=path_or_buf,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
+    @public_api
     def add_html_asset(
-        self, name: str, io: os.PathLike | str, **kwargs
+        self,
+        name: str,
+        io: os.PathLike | str,
+        **kwargs,
     ) -> HTMLAsset:  # type: ignore[valid-type]
+        """
+        Add an HTML data asset to the datasource.
+
+        Args:
+            name: The name of the HTML asset. This can be any arbitrary string.
+            io: The path to the HTML file or a URL pointing to the HTML file.
+            **kwargs: Additional keyword arguments to pass to pandas.read_html().
+
+        Returns:
+            The HTMLAsset that has been added to this datasource.
+        """
         asset = HTMLAsset(
             name=name,
             io=io,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
+    @public_api
     def read_html(
         self,
         io: os.PathLike | str,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        """
+        Read an HTML file and return a Validator associated with it.
+
+        Args:
+            io: The path to the HTML file or a URL pointing to the HTML file.
+            asset_name: The name of the HTML asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_html().
+
+        Returns:
+            A Validator using an ephemeral HTMLAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: HTMLAsset = self.add_html_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             io=io,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
+    @public_api
     def add_json_asset(
         self,
         name: str,
         path_or_buf: pydantic.Json | pydantic.FilePath | pydantic.AnyUrl,
         **kwargs,
     ) -> JSONAsset:  # type: ignore[valid-type]
+        """
+        Add a JSON data asset to the datasource.
+
+        Args:
+            name: The name of the JSON asset. This can be any arbitrary string.
+            path_or_buf: The path to the JSON file or a URL pointing to the JSON file.
+            **kwargs: Additional keyword arguments to pass to pandas.read_json().
+
+        Returns:
+            The JSONAsset that has been added to this datasource.
+        """
         asset = JSONAsset(
             name=name,
             path_or_buf=path_or_buf,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
+    @public_api
     def read_json(
         self,
         path_or_buf: pydantic.Json | pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        """
+        Read a JSON file and return a Validator associated with it.
+
+        Args:
+            path_or_buf: The path to the JSON file or a URL pointing to the JSON file.
+            asset_name: The name of the JSON asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_json().
+
+        Returns:
+            A Validator using an ephemeral JSONAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: JSONAsset = self.add_json_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path_or_buf=path_or_buf,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
+    @public_api
     def add_orc_asset(
-        self, name: str, path: pydantic.FilePath | pydantic.AnyUrl, **kwargs
+        self,
+        name: str,
+        path: pydantic.FilePath | pydantic.AnyUrl,
+        **kwargs,
     ) -> ORCAsset:  # type: ignore[valid-type]
+        """
+        Add an ORC file as a DataAsset to this PandasDatasource object.
+
+        Args:
+            name: The name to use for the ORC asset. This can be any arbitrary string.
+            path: The path to the ORC file.
+            **kwargs: Additional kwargs to pass to the ORC reader.
+
+        Returns:
+            The ORCAsset that has been added to this datasource.
+        """
         asset = ORCAsset(
             name=name,
             path=path,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
+    @public_api
     def read_orc(
         self,
         path: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        """
+        Read an ORC file and return a Validator associated with it.
+
+        Args:
+            path: The path to the ORC file.
+            asset_name (optional): The asset name to use for the ORC file, should you wish to use or refer to it again.
+            **kwargs: Additional kwargs to pass to the ORC reader.
+
+        Returns:
+            A Validator using an ephemeral ORCAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: ORCAsset = self.add_orc_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path=path,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
+    @public_api
     def add_parquet_asset(
-        self, name: str, path: pydantic.FilePath | pydantic.AnyUrl, **kwargs
+        self,
+        name: str,
+        path: pydantic.FilePath | pydantic.AnyUrl,
+        **kwargs,
     ) -> ParquetAsset:  # type: ignore[valid-type]
+        """
+        Add a parquet file as a DataAsset to this PandasDatasource object.
+
+        Args:
+            name: The name to use for the parquet asset. This can be any arbitrary string.
+            path: The path to the parquet file.
+            **kwargs: Additional kwargs to pass to the parquet reader.
+
+        Returns:
+            The ParquetAsset that has been added to this datasource.
+        """
         asset = ParquetAsset(
             name=name,
             path=path,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
+    @public_api
     def read_parquet(
         self,
         path: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        """
+        Read a parquet file and return a Validator associated with it.
+
+        Args:
+            path: The path to the parquet file.
+            asset_name (optional): The asset name to use for the parquet file, should you wish to use or refer to it again.
+            **kwargs: Additional kwargs to pass to the parquet reader.
+
+        Returns:
+            A Validator using an ephemeral ParquetAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: ParquetAsset = self.add_parquet_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path=path,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
+    @public_api
     def add_pickle_asset(
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         **kwargs,
     ) -> PickleAsset:  # type: ignore[valid-type]
+        """
+        Add a pickle file as a DataAsset to this PandasDatasource object.
+
+        Args:
+            name: The name to use for the pickle asset.  This can be any arbitrary string.
+            filepath_or_buffer: The path to the pickle file.
+            **kwargs: Additional kwargs to pass to the pickle reader.
+
+        Returns:
+            The PickleAsset that has been added to this datasource.
+        """
         asset = PickleAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
+    @public_api
     def read_pickle(
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        """
+        Read a pickle file and return a Validator associated with it.
+
+        Args:
+            filepath_or_buffer: The path to the pickle file.
+            asset_name (optional): The asset name to use for the pickle file, should you wish to use or refer to it again.
+            **kwargs: Additional kwargs to pass to the pickle reader.
+
+        Returns:
+            A Validator using the pickle file as a DataAsset
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: PickleAsset = self.add_pickle_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
+    @public_api
     def add_sas_asset(
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         **kwargs,
     ) -> SASAsset:  # type: ignore[valid-type]
+        """
+        Add a SAS data asset to the datasource.
+
+        Args:
+            name: The name of the SAS asset. This can be any arbitrary string.
+            filepath_or_buffer: The path to the SAS file or a URL pointing to the SAS file.
+            **kwargs: Additional keyword arguments to pass to pandas.read_sas().
+
+        Returns:
+            The SASAsset that has been added to this datasource.
+        """
         asset = SASAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
+    @public_api
     def read_sas(
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        """
+        Read a SAS file and return a Validator associated with it.
+
+        Args:
+            filepath_or_buffer: The path to the SAS file or a URL pointing to the SAS file.
+            asset_name: The name of the SAS asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_sas().
+
+        Returns:
+            A Validator using an ephemeral SASAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SASAsset = self.add_sas_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
+    @public_api
     def add_spss_asset(
-        self, name: str, path: pydantic.FilePath, **kwargs
+        self,
+        name: str,
+        path: pydantic.FilePath,
+        **kwargs,
     ) -> SPSSAsset:  # type: ignore[valid-type]
+        """
+        Add an SPSS data asset to the datasource.
+
+        Args:
+            name: The name of the SPSS asset. This can be any arbitrary string.
+            path: The path to the SPSS file.
+            **kwargs: Additional keyword arguments to pass to pandas.read_spss().
+
+        Returns:
+            The SPSSAsset that has been added to this datasource.
+        """
         asset = SPSSAsset(
             name=name,
             path=path,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
+    @public_api
     def read_spss(
         self,
         path: pydantic.FilePath,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        """
+        Read an SPSS file and return a Validator associated with it.
+
+        Args:
+            path: The path to the SPSS file.
+            asset_name: The name of the SPSS asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_spss().
+
+        Returns:
+            A Validator using an ephemeral SPSSAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SPSSAsset = self.add_parquet_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path=path,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
+    @public_api
     def add_sql_asset(
         self,
         name: str,
-        sql: sqlalchemy.select | sqlalchemy.text | str,
-        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        sql: sa.select | sa.text | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         **kwargs,
     ) -> SQLAsset:  # type: ignore[valid-type]
+        """
+        Add a SQL data asset to the datasource.
+
+        Args:
+            name: The name of the SQL asset. This can be any arbitrary string.
+            sql: The SQL query to send to the database.
+            con: The SQLAlchemy connection engine or a string URL to connect to the database.
+            **kwargs: Additional keyword arguments to pass to pandas.read_sql().
+
+        Returns:
+            The SQLAsset that has been added to this datasource.
+        """
         asset = SQLAsset(
             name=name,
             sql=sql,
             con=con,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
+    @public_api
     def read_sql(
         self,
-        sql: sqlalchemy.select | sqlalchemy.text | str,
-        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        sql: sa.select | sa.text | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        """
+        Read a SQL query and return a Validator associated with it.
+
+        Args:
+            sql: The SQL query to send to the database.
+            con: The SQLAlchemy connection engine or a string URL to connect to the database.
+            asset_name: The name of the SQL asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_sql().
+
+        Returns:
+            A Validator using an ephemeral SQLAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SQLAsset = self.add_sql_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             sql=sql,
             con=con,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
+    @public_api
     def add_sql_query_asset(
         self,
         name: str,
-        sql: sqlalchemy.select | sqlalchemy.text | str,
-        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        sql: sa.select | sa.text | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         **kwargs,
     ) -> SQLQueryAsset:  # type: ignore[valid-type]
+        """
+        Add a SQL query data asset to the datasource.
+
+        Args:
+            name: The name of the SQL query asset. This can be any arbitrary string.
+            sql: The SQL query to send to the database.
+            con: The SQLAlchemy connection engine or a string URL to connect to the database.
+            **kwargs: Additional keyword arguments to pass to pandas.read_sql_query().
+
+        Returns:
+            The SQLQueryAsset that has been added to this datasource.
+        """
         asset = SQLQueryAsset(
             name=name,
             sql=sql,
             con=con,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
+    @public_api
     def read_sql_query(
         self,
-        sql: sqlalchemy.select | sqlalchemy.text | str,
-        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        sql: sa.select | sa.text | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        """
+        Read a SQL query and return a Validator associated with it.
+
+        Args:
+            sql: The SQL query to send to the database.
+            con: The SQLAlchemy connection engine or a string URL to connect to the database.
+            asset_name: The name of the SQL query asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_sql_query().
+
+        Returns:
+            A Validator using an ephemeral SQLQueryAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SQLQueryAsset = self.add_sql_query_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             sql=sql,
             con=con,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
+    @public_api
     def add_sql_table_asset(
-        self, name: str, table_name: str, con: sqlalchemy.engine.Engine | str, **kwargs
+        self,
+        name: str,
+        table_name: str,
+        con: sqlalchemy.Engine | str,
+        **kwargs,
     ) -> SQLTableAsset:  # type: ignore[valid-type]
+        """
+        Add a SQL table data asset to the datasource.
+
+        Args:
+            name: The name of the SQL table asset. This can be any arbitrary string.
+            table_name: The name of the SQL table to read.
+            con: The SQLAlchemy connection engine or a string URL to connect to the database.
+            **kwargs: Additional keyword arguments to pass to pandas.read_sql_table().
+
+        Returns:
+            The SQLTableAsset that has been added to this datasource.
+        """
         asset = SQLTableAsset(
             name=name,
             table_name=table_name,
             con=con,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
+    @public_api
     def read_sql_table(
         self,
         table_name: str,
-        con: sqlalchemy.engine.Engine | str,
+        con: sqlalchemy.Engine | str,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        """
+        Read a SQL table and return a Validator associated with it.
+
+        Args:
+            table_name: The name of the SQL table to read.
+            con: The SQLAlchemy connection engine or a string URL to connect to the database.
+            asset_name: The name of the SQL table asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_sql_table().
+
+        Returns:
+            A Validator using an ephemeral SQLTableAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SQLTableAsset = self.add_sql_table_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             table_name=table_name,
             con=con,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
+    @public_api
     def add_stata_asset(
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         **kwargs,
     ) -> StataAsset:  # type: ignore[valid-type]
+        """
+        Add a Stata data asset to the datasource.
+
+        Args:
+            name: The name of the Stata asset. This can be any arbitrary string.
+            filepath_or_buffer: The path to the Stata file or a URL pointing to the Stata file.
+            **kwargs: Additional keyword arguments to pass to pandas.read_stata().
+
+        Returns:
+            The StataAsset that has been added to this datasource.
+        """
         asset = StataAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
+    @public_api
     def read_stata(
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        """
+        Read a Stata file and return a Validator associated with it.
+
+        Args:
+            filepath_or_buffer: The path to the Stata file or a URL pointing to the Stata file.
+            asset_name: The name of the Stata asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_stata().
+
+        Returns:
+            A Validator using an ephemeral StataAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: StataAsset = self.add_stata_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
+    @public_api
     def add_table_asset(
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         **kwargs,
     ) -> TableAsset:  # type: ignore[valid-type]
+        """
+        Add a Table data asset to the datasource.
+
+        Args:
+            name: The name of the Table asset. This can be any arbitrary string.
+            filepath_or_buffer: The path to the Table file or a URL pointing to the Table file.
+            **kwargs: Additional keyword arguments to pass to pandas.read_table().
+
+        Returns:
+            The TableAsset that has been added to this datasource.
+        """
         asset = TableAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
+    @public_api
     def read_table(
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        """
+        Read a Table file and return a Validator associated with it.
+
+        Args:
+            filepath_or_buffer: The path to the Table file or a URL pointing to the Table file.
+            asset_name: The name of the Table asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_table().
+
+        Returns:
+            A Validator using an ephemeral TableAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: TableAsset = self.add_table_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
+    @public_api
     def add_xml_asset(
-        self, name: str, path_or_buffer: pydantic.FilePath | pydantic.AnyUrl, **kwargs
+        self,
+        name: str,
+        path_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        **kwargs,
     ) -> XMLAsset:  # type: ignore[valid-type]
+        """
+        Add an XML data asset to the datasource.
+
+        Args:
+            name: The name of the XML asset. This can be any arbitrary string.
+            path_or_buffer: The path to the XML file or a URL pointing to the XML file.
+            **kwargs: Additional keyword arguments to pass to pandas.read_xml().
+
+        Returns:
+            The XMLAsset that has been added to this datasource.
+        """
         asset = XMLAsset(
             name=name,
             path_or_buffer=path_or_buffer,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
+    @public_api
     def read_xml(
         self,
         path_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        """
+        Read an XML file and return a Validator associated with it.
+
+        Args:
+            path_or_buffer: The path to the XML file or a URL pointing to the XML file.
+            asset_name: The name of the XML asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_xml().
+
+        Returns:
+            A Validator using an ephemeral XMLAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: XMLAsset = self.add_xml_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path_or_buffer=path_or_buffer,
             **kwargs,
         )
@@ -1030,6 +1736,8 @@ class PandasDatasource(_PandasDatasource):
     read_excel.__signature__ = _merge_signatures(read_excel, ExcelAsset, exclude={"type"})  # type: ignore[attr-defined]
     add_feather_asset.__signature__ = _merge_signatures(add_feather_asset, FeatherAsset, exclude={"type"})  # type: ignore[attr-defined]
     read_feather.__signature__ = _merge_signatures(read_feather, FeatherAsset, exclude={"type"})  # type: ignore[attr-defined]
+    add_fwf_asset.__signature__ = _merge_signatures(add_fwf_asset, FWFAsset, exclude={"type"})  # type: ignore[attr-defined]
+    read_fwf.__signature__ = _merge_signatures(read_fwf, FWFAsset, exclude={"type"})  # type: ignore[attr-defined]
     add_gbq_asset.__signature__ = _merge_signatures(add_gbq_asset, GBQAsset, exclude={"type"})  # type: ignore[attr-defined]
     read_gbq.__signature__ = _merge_signatures(read_gbq, GBQAsset, exclude={"type"})  # type: ignore[attr-defined]
     add_hdf_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]

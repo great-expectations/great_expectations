@@ -1,13 +1,13 @@
 ---
 id: glossary
-title: "Glossary of Terms"
+title: "Glossary"
 ---
 
 [**Action:**](./terms/action.md) A Python class with a run method that takes a Validation Result and does something with it
 
 [**Batch:**](./terms/batch.md) A selection of records from a Data Asset.
 
-[**Batch Request:**](./terms/batch_request.md) Provided to a Datasource in order to create a Batch.
+[**Batch Request:**](./terms/batch_request.md) Provided to a Data Source in order to create a Batch.
 
 [**CLI:**](./terms/cli.md) Command Line Interface
 
@@ -17,11 +17,9 @@ title: "Glossary of Terms"
 
 [**Custom Expectation:**](./terms/custom_expectation.md) An extension of the `Expectation` class, developed outside of the Great Expectations library.
 
-[**Data Asset:**](./terms/data_asset.md) A collection of records within a Datasource which is usually named based on the underlying data system and sliced to correspond to a desired specification.
+[**Data Asset:**](./terms/data_asset.md) A collection of records within a Data Source which is usually named based on the underlying data system and sliced to correspond to a desired specification.
 
 [**Data Assistant:**](./terms/data_assistant.md) A utility that asks questions about your data, gathering information to describe what is observed, and then presents Metrics and proposes Expectations based on the answers.
-
-[**Data Connector:**](./terms/data_connector.md) Provides the configuration details based on the source data system which are needed by a Datasource to define Data Assets.
 
 [**Data Context:**](./terms/data_context.md) The primary entry point for a Great Expectations deployment, with configurations and methods for all supporting components.
 
@@ -29,7 +27,7 @@ title: "Glossary of Terms"
 
 [**Data Docs Store:**](./terms/data_docs_store.md) A connector to store and retrieve information pertaining to Human readable documentation generated from Great Expectations metadata detailing Expectations, Validation Results, etc.
 
-[**Datasource:**](./terms/datasource.md) Provides a standard API for accessing and interacting with data from a wide variety of source systems.
+[**Data Source:**](./terms/datasource.md) Provides a standard API for accessing and interacting with data from a wide variety of source systems.
 
 [**Evaluation Parameter:**](./terms/evaluation_parameter.md) A dynamic value used during Validation of an Expectation which is populated by evaluating simple expressions or by referencing previously generated metrics.
 
@@ -44,6 +42,8 @@ title: "Glossary of Terms"
 [**Expectation Suite:**](./terms/expectation_suite.md) A collection of verifiable assertions about data.
 
 [**Metric:**](./terms/metric.md) A computed attribute of data such as the mean of a column.
+
+[**MetricProviders:**](./conceptual_guides/metricproviders.md) Generate and register Metrics to support Expectations, and they are an important part of the Expectation software development kit (SDK).
 
 [**Metric Store:**](./terms/metric_store.md) A connector to store and retrieve information about computed attributes of data, such as the mean of a column.
 

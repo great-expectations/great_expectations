@@ -17,20 +17,27 @@ from typing import (
 from tqdm.auto import tqdm
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core import IDDict  # noqa: TCH001
-from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,  # noqa: TCH001
-)
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.registry import get_metric_provider
-from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.exception_info import ExceptionInfo
-from great_expectations.validator.metric_configuration import (
-    MetricConfiguration,  # noqa: TCH001
-)
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
+    from great_expectations.core import IDDict
+    from great_expectations.core.expectation_configuration import (
+        ExpectationConfiguration,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
+    from great_expectations.validator.computed_metric import MetricValue
+    from great_expectations.validator.metrics_calculator import _MetricKey
+
+__all__ = [
+    "ExpectationValidationGraph",
+    "MetricConfiguration",
+    "MetricEdge",
+    "MetricValue",
+    "ValidationGraph",
+]
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -185,17 +192,17 @@ class ValidationGraph:
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
         show_progress_bars: bool = True,
     ) -> Tuple[
-        Dict[Tuple[str, str, str], MetricValue],
+        Dict[_MetricKey, MetricValue],
         Dict[
-            Tuple[str, str, str],
+            _MetricKey,
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ],
     ]:
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+        resolved_metrics: Dict[_MetricKey, MetricValue] = {}
 
         # updates graph with aborted metrics
         aborted_metrics_info: Dict[
-            Tuple[str, str, str],
+            _MetricKey,
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ] = self._resolve(
             metrics=resolved_metrics,
@@ -206,14 +213,14 @@ class ValidationGraph:
 
         return resolved_metrics, aborted_metrics_info
 
-    def _resolve(  # noqa: C901 - complexity 16
+    def _resolve(  # noqa: C901, PLR0912, PLR0915
         self,
-        metrics: Dict[Tuple[str, str, str], MetricValue],
+        metrics: Dict[_MetricKey, MetricValue],
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,  # Set to low number (e.g., 3) to suppress progress bar for small graphs.
         show_progress_bars: bool = True,
     ) -> Dict[
-        Tuple[str, str, str],
+        _MetricKey,
         Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
     ]:
         if metrics is None:
@@ -228,11 +235,11 @@ class ValidationGraph:
             catch_exceptions = False
 
         failed_metric_info: Dict[
-            Tuple[str, str, str],
+            _MetricKey,
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ] = {}
         aborted_metrics_info: Dict[
-            Tuple[str, str, str],
+            _MetricKey,
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ] = {}
 
@@ -274,8 +281,8 @@ class ValidationGraph:
                 # Access "ExecutionEngine.resolve_metrics()" method, to resolve missing "MetricConfiguration" objects.
                 metrics.update(
                     self._execution_engine.resolve_metrics(
-                        metrics_to_resolve=computable_metrics,
-                        metrics=metrics,
+                        metrics_to_resolve=computable_metrics,  # type: ignore[arg-type]  # Metric typing needs further refinement.
+                        metrics=metrics,  # type: ignore[arg-type]  # Metric typing needs further refinement.
                         runtime_configuration=runtime_configuration,
                     )
                 )
@@ -324,7 +331,7 @@ class ValidationGraph:
 
     def _parse(
         self,
-        metrics: Dict[Tuple[str, str, str], MetricValue],
+        metrics: Dict[_MetricKey, MetricValue],
     ) -> Tuple[Set[MetricConfiguration], Set[MetricConfiguration]]:
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""
@@ -339,7 +346,7 @@ class ValidationGraph:
                     if edge.left.id not in maybe_ready_ids:
                         maybe_ready_ids.add(edge.left.id)
                         maybe_ready.add(edge.left)
-                else:
+                else:  # noqa: PLR5501
                     if edge.left.id not in unmet_dependency_ids:
                         unmet_dependency_ids.add(edge.left.id)
                         unmet_dependency.add(edge.left)
@@ -401,13 +408,13 @@ class ExpectationValidationGraph:
     def get_exception_info(
         self,
         metric_info: Dict[
-            Tuple[str, str, str],
+            _MetricKey,
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ],
     ) -> Set[ExceptionInfo]:
         metric_info = self._filter_metric_info_in_graph(metric_info=metric_info)
         metric_exception_info: Set[ExceptionInfo] = set()
-        metric_id: Tuple[str, str, str]
+        metric_id: _MetricKey
         metric_info_item: Union[MetricConfiguration, Set[ExceptionInfo], int]
         for metric_id, metric_info_item in metric_info.items():  # type: ignore[assignment]  # Incorrect flagging of 'Incompatible types in assignment (expression has type "Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]]", variable has type "Union[MetricConfiguration, Set[ExceptionInfo], int]")' in deep "Union" structure.
             # noinspection PyUnresolvedReferences
@@ -420,14 +427,14 @@ class ExpectationValidationGraph:
     def _filter_metric_info_in_graph(
         self,
         metric_info: Dict[
-            Tuple[str, str, str],
+            _MetricKey,
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ],
     ) -> Dict[
-        Tuple[str, str, str],
+        _MetricKey,
         Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
     ]:
-        graph_metric_ids: List[Tuple[str, str, str]] = []
+        graph_metric_ids: List[_MetricKey] = []
         edge: MetricEdge
         vertex: MetricConfiguration
         for edge in self.graph.edges:
@@ -435,7 +442,7 @@ class ExpectationValidationGraph:
                 if vertex is not None:
                     graph_metric_ids.append(vertex.id)
 
-        metric_id: Tuple[str, str, str]
+        metric_id: _MetricKey
         metric_info_item: Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]]
         return {
             metric_id: metric_info_item

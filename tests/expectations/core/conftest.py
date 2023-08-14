@@ -10,12 +10,10 @@ from great_expectations.data_context.util import file_relative_path
 def titanic_df() -> pd.DataFrame:
     path = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "..",
             "..",
-            "test_fixtures",
-            "configuration_for_testing_v2_v3_migration",
-            "data",
+            "test_sets",
             "Titanic.csv",
         ),
     )

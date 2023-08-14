@@ -1,4 +1,5 @@
 import logging
+import urllib
 import uuid
 from abc import ABCMeta, abstractmethod
 from typing import Any, List, Optional, Union
@@ -134,6 +135,9 @@ class StoreBackend(metaclass=ABCMeta):
         """
         Essentially `set` but validates that a given key-value pair does not already exist.
         """
+        return self._add(key=key, value=value, **kwargs)
+
+    def _add(self, key, value, **kwargs):
         if self.has_key(key):
             raise StoreBackendError(f"Store already has the following key: {key}.")
         return self.set(key=key, value=value, **kwargs)
@@ -142,6 +146,9 @@ class StoreBackend(metaclass=ABCMeta):
         """
         Essentially `set` but validates that a given key-value pair does already exist.
         """
+        return self._update(key=key, value=value, **kwargs)
+
+    def _update(self, key, value, **kwargs):
         if not self.has_key(key):
             raise StoreBackendError(
                 f"Store does not have a value associated the following key: {key}."
@@ -152,6 +159,9 @@ class StoreBackend(metaclass=ABCMeta):
         """
         Conditionally calls `add` or `update` based on the presence of the given key.
         """
+        return self._add_or_update(key=key, value=value, **kwargs)
+
+    def _add_or_update(self, key, value, **kwargs):
         if self.has_key(key):
             return self.update(key=key, value=value, **kwargs)
         return self.add(key=key, value=value, **kwargs)
@@ -164,6 +174,13 @@ class StoreBackend(metaclass=ABCMeta):
     def has_key(self, key) -> bool:
         self._validate_key(key)
         return self._has_key(key)
+
+    @staticmethod
+    def _url_path_escape_special_characters(path: str) -> str:
+        # will replace special characters with %xx escape
+        # this is meant to be used only on the path section of a URL
+        # https://docs.python.org/3/library/urllib.parse.html#url-quoting
+        return urllib.parse.quote(path)
 
     def get_url_for_key(self, key, protocol=None) -> None:
         raise StoreError(
@@ -192,7 +209,7 @@ class StoreBackend(metaclass=ABCMeta):
                 )
             )
 
-    def _validate_value(self, value) -> None:
+    def _validate_value(self, value) -> None:  # noqa: B027 # no abstract decorator
         pass
 
     @abstractmethod

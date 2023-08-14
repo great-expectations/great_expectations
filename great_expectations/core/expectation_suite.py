@@ -22,8 +22,8 @@ from typing import (
 from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
 
 import great_expectations as gx
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
-from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
     new_argument,
@@ -46,12 +46,7 @@ from great_expectations.core.util import (
     parse_string_to_datetime,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.exceptions import (
-    ClassInstantiationError,
-    DataContextError,
-    GreatExpectationsTypeError,
-    InvalidExpectationConfigurationError,
-)
+from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     RenderedAtomicContent,
@@ -60,6 +55,7 @@ from great_expectations.types import SerializableDictDot
 from great_expectations.util import deep_filter_properties_iterable
 
 if TYPE_CHECKING:
+    from great_expectations.alias_types import JSONValues
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
@@ -93,7 +89,7 @@ class ExpectationSuite(SerializableDictDot):
         ge_cloud_id: Great Expectations Cloud id for this Expectation Suite.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         expectation_suite_name: str,
         data_context: Optional[AbstractDataContext] = None,
@@ -136,7 +132,7 @@ class ExpectationSuite(SerializableDictDot):
     def name(self) -> str:
         return self.expectation_suite_name
 
-    def add_citation(
+    def add_citation(  # noqa: PLR0913
         self,
         comment: str,
         batch_request: Optional[
@@ -163,7 +159,7 @@ class ExpectationSuite(SerializableDictDot):
         elif isinstance(citation_date, datetime.datetime):
             citation_date_obj = citation_date
         else:
-            raise GreatExpectationsTypeError(
+            raise gx_exceptions.GreatExpectationsTypeError(
                 f"citation_date should be of type - {' '.join(str(t) for t in _citation_date_types)}"
             )
 
@@ -211,10 +207,8 @@ class ExpectationSuite(SerializableDictDot):
                 return NotImplemented
 
         return len(self.expectations) == len(other.expectations) and all(
-            [
-                mine.isEquivalentTo(theirs)
-                for (mine, theirs) in zip(self.expectations, other.expectations)
-            ]
+            mine.isEquivalentTo(theirs)
+            for (mine, theirs) in zip(self.expectations, other.expectations)
         )
 
     def __eq__(self, other):
@@ -252,7 +246,7 @@ class ExpectationSuite(SerializableDictDot):
         for key in attributes_to_copy:
             setattr(result, key, deepcopy(getattr(self, key)))
 
-        setattr(result, "_data_context", self._data_context)
+        result._data_context = self._data_context
 
         return result
 
@@ -450,7 +444,7 @@ class ExpectationSuite(SerializableDictDot):
         if expectation_configuration and not isinstance(
             expectation_configuration, ExpectationConfiguration
         ):
-            raise InvalidExpectationConfigurationError(
+            raise gx_exceptions.InvalidExpectationConfigurationError(
                 "Ensure that expectation configuration is valid."
             )
 
@@ -459,7 +453,7 @@ class ExpectationSuite(SerializableDictDot):
             if ge_cloud_id is not None:
                 if expectation.ge_cloud_id == ge_cloud_id:
                     match_indexes.append(idx)
-            else:
+            else:  # noqa: PLR5501
                 if expectation.isEquivalentTo(
                     other=expectation_configuration, match_type=match_type  # type: ignore[arg-type]
                 ):
@@ -467,6 +461,7 @@ class ExpectationSuite(SerializableDictDot):
 
         return match_indexes
 
+    @public_api
     def find_expectations(
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,
@@ -550,7 +545,7 @@ class ExpectationSuite(SerializableDictDot):
 
         self.expectations[found_expectation_indexes[0]] = new_expectation_configuration  # type: ignore[assignment]
 
-    def patch_expectation(
+    def patch_expectation(  # noqa: PLR0913
         self,
         expectation_configuration: ExpectationConfiguration,
         op: str,
@@ -653,7 +648,7 @@ class ExpectationSuite(SerializableDictDot):
                 if send_usage_event:
                     self.send_usage_event(success=False)
 
-                raise DataContextError(
+                raise gx_exceptions.DataContextError(
                     "A matching ExpectationConfiguration already exists. If you would like to overwrite this "
                     "ExpectationConfiguration, set overwrite_existing=True"
                 )
@@ -742,12 +737,30 @@ class ExpectationSuite(SerializableDictDot):
 
         # noqa: DAR402
         """
+        self._validate_expectation_configuration_before_adding(
+            expectation_configuration
+        )
         return self._add_expectation(
             expectation_configuration=expectation_configuration,
             send_usage_event=send_usage_event,
             match_type=match_type,
             overwrite_existing=overwrite_existing,
         )
+
+    def _validate_expectation_configuration_before_adding(
+        self, expectation_configuration: ExpectationConfiguration
+    ):
+        try:
+            class_ = get_expectation_impl(expectation_configuration.expectation_type)
+            expectation = class_()
+            expectation.validate_configuration(expectation_configuration)
+        except (
+            gx_exceptions.ExpectationNotFoundError,
+            gx_exceptions.InvalidExpectationConfigurationError,
+        ) as e:
+            raise gx_exceptions.InvalidExpectationConfigurationError(
+                f"Could not add expectation; provided configuration is not valid: {e.message}"
+            ) from e
 
     @public_api
     def show_expectations_by_domain_type(self) -> None:
@@ -1037,7 +1050,7 @@ class ExpectationSuite(SerializableDictDot):
                 config_defaults={"module_name": module_name},
             )
             if not inline_renderer:
-                raise ClassInstantiationError(
+                raise gx_exceptions.ClassInstantiationError(
                     module_name=module_name,
                     package_name=None,
                     class_name=inline_renderer_config["class_name"],

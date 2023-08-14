@@ -6,9 +6,13 @@ import tempfile
 from unittest import mock
 
 import pytest
+from ruamel.yaml.error import MarkedYAMLError
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.config_validator.yaml_config_validator import (
     _YamlConfigValidator,
@@ -40,36 +44,48 @@ def test_connectable_postgresql_db(sa, test_backends, test_df):
         database="test_ci",
     )
     engine = sa.create_engine(url)
-
-    schema_check_results = engine.execute(
-        "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'connection_test';"
-    ).fetchall()
+    with engine.begin() as connection:
+        schema_check_results = connection.execute(
+            sa.text(
+                "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'connection_test';"
+            )
+        ).fetchall()
     if len(schema_check_results) == 0:
-        engine.execute("CREATE SCHEMA connection_test;")
+        with engine.begin() as connection:
+            connection.execute(sa.text("CREATE SCHEMA connection_test;"))
 
-    table_check_results = engine.execute(
-        """
+            table_check_results = connection.execute(
+                sa.text(
+                    """
 SELECT EXISTS (
    SELECT FROM information_schema.tables
    WHERE  table_schema = 'connection_test'
    AND    table_name   = 'test_df'
 );
 """
-    ).fetchall()
-    if table_check_results != [(True,)]:
-        test_df.to_sql(name="test_df", con=engine, index=True, schema="connection_test")
+                )
+            ).fetchall()
+        if table_check_results != [(True,)]:
+            add_dataframe_to_db(
+                df=test_df,
+                name="test_df",
+                con=engine,
+                index=True,
+                schema="connection_test",
+            )
 
     # Return a connection string to this newly-created db
     return engine
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_config_with_yaml_error(mock_emit, caplog, empty_data_context_stats_enabled):
-    with pytest.raises(Exception):
+    with pytest.raises(MarkedYAMLError):
         # noinspection PyUnusedLocal
-        my_expectation_store = empty_data_context_stats_enabled.test_yaml_config(
+        empty_data_context_stats_enabled.test_yaml_config(
             yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
@@ -95,6 +111,7 @@ EGREGIOUS FORMATTING ERROR
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -103,13 +120,13 @@ def test_expectations_store_with_filesystem_store_backend(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
     tmp_dir = str(tempfile.mkdtemp())
-    with open(os.path.join(tmp_dir, "expectations_A1.json"), "w") as f_:
+    with open(os.path.join(tmp_dir, "expectations_A1.json"), "w") as f_:  # noqa: PTH118
         f_.write("\n")
-    with open(os.path.join(tmp_dir, "expectations_A2.json"), "w") as f_:
+    with open(os.path.join(tmp_dir, "expectations_A2.json"), "w") as f_:  # noqa: PTH118
         f_.write("\n")
 
     # noinspection PyUnusedLocal
-    my_expectation_store = empty_data_context_stats_enabled.test_yaml_config(
+    empty_data_context_stats_enabled.test_yaml_config(
         yaml_config=f"""
 module_name: great_expectations.data_context.store
 class_name: ExpectationsStore
@@ -145,6 +162,7 @@ store_backend:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -284,6 +302,7 @@ def test_checkpoint_store_with_filesystem_store_backend(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @pytest.mark.filterwarnings(
     "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
 )
@@ -326,6 +345,7 @@ store_backend:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -408,7 +428,7 @@ data_connectors:
     print(json.dumps(return_obj, indent=2))
 
     assert set(return_obj.keys()) == {"execution_engine", "data_connectors"}
-    sub_obj = return_obj["data_connectors"]["my_filesystem_data_connector"]
+    return_obj["data_connectors"]["my_filesystem_data_connector"]
     # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
     # sub_obj.pop("example_data_reference")
     # assert sub_obj == {
@@ -436,6 +456,7 @@ data_connectors:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -447,7 +468,7 @@ execution_engine:
     class_name: NOT_A_REAL_CLASS_NAME
 """
 
-    with pytest.raises(gx_exceptions.DatasourceInitializationError) as excinfo:
+    with pytest.raises(gx_exceptions.DatasourceInitializationError):
         empty_data_context_stats_enabled.test_yaml_config(yaml_config=first_config)
         # print(excinfo.value.message)
         # shortened_message_len = len(excinfo.value.message)
@@ -553,6 +574,7 @@ data_connectors:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -563,7 +585,9 @@ def test_config_variables_in_test_yaml_config(
 
     db_file = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
 
     context.save_config_variable("db_file", db_file)
@@ -659,6 +683,7 @@ introspection:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -673,7 +698,6 @@ def test_golden_path_sql_datasource_configuration(
     context: DataContext = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
-
         # Everything below this line (except for asserts) is what we expect users to run as part of the golden path.
         import great_expectations as gx
 
@@ -739,7 +763,7 @@ def test_golden_path_sql_datasource_configuration(
         print(json.dumps(report_object, indent=2))
         print(context.datasources)
 
-        my_batch = context.get_batch(
+        context.get_batch(
             "my_datasource",
             "whole_table_with_limits",
             "test_df",
@@ -747,7 +771,7 @@ def test_golden_path_sql_datasource_configuration(
         # assert len(my_batch.data.fetchall()) == 10
 
         with pytest.raises(KeyError):
-            my_batch = context.get_batch(
+            context.get_batch(
                 "my_datasource",
                 "whole_table_with_limits",
                 "DOES_NOT_EXIST",
@@ -780,6 +804,7 @@ def test_golden_path_sql_datasource_configuration(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -844,7 +869,7 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
     """
 
         # noinspection PyUnusedLocal
-        report_object = context.test_yaml_config(
+        context.test_yaml_config(
             name="my_directory_datasource",
             yaml_config=yaml_config,
             return_mode="report_object",
@@ -972,6 +997,7 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1062,7 +1088,7 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
     """
 
         # noinspection PyUnusedLocal
-        report_object = context.test_yaml_config(
+        context.test_yaml_config(
             name="my_directory_datasource",
             yaml_config=yaml_config,
             return_mode="report_object",
@@ -1187,6 +1213,7 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1277,6 +1304,7 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1408,6 +1436,7 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1446,6 +1475,7 @@ def test_rule_based_profiler_integration(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 def test_test_yaml_config_supported_types_have_self_check():
     # Each major category of test_yaml_config supported types has its own origin module_name
     supported_types = [
@@ -1486,7 +1516,7 @@ def test_test_yaml_config_supported_types_have_self_check():
             ), f"Class '{class_}' is missing the required `self_check()` method"
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_test_yaml_config_on_datasource_sanitizes_instantiated_objs_config(
     empty_data_context_stats_enabled,
     monkeypatch,
@@ -1531,7 +1561,7 @@ data_connectors:
     )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_test_yaml_config_on_datasources_persists_object_id(
     empty_data_context_stats_enabled,
 ):

@@ -1,5 +1,4 @@
 import re
-from glob import glob
 from pathlib import Path
 
 import pkg_resources
@@ -16,18 +15,23 @@ def get_extras_require():
         "gcp": "bigquery",
         "s3": "boto",
     }
+    sqla1x_only_keys = (
+        "bigquery",  # https://github.com/googleapis/python-bigquery-sqlalchemy/blob/main/setup.py
+        "clickhouse",  # https://github.com/xzkostyan/clickhouse-sqlalchemy/blob/master/setup.py
+        "redshift",  # https://github.com/sqlalchemy-redshift/sqlalchemy-redshift/blob/main/setup.py
+        "snowflake",  # https://github.com/snowflakedb/snowflake-sqlalchemy/blob/main/setup.cfg
+        "teradata",  # https://pypi.org/project/teradatasqlalchemy   https://support.teradata.com/knowledge?id=kb_article_view&sys_kb_id=a5a869149729251ced863fe3f153af27
+    )
     sqla_keys = (
-        "athena",
-        "bigquery",
-        "dremio",
-        "mssql",
-        "mysql",
-        "postgresql",
-        "redshift",
-        "snowflake",
-        "teradata",
-        "trino",
-        "vertica",
+        "athena",  # https://github.com/laughingman7743/PyAthena/blob/master/pyproject.toml
+        "dremio",  # https://github.com/narendrans/sqlalchemy_dremio/blob/master/setup.py
+        "hive",  # https://github.com/dropbox/PyHive/blob/master/setup.py
+        "mssql",  # https://github.com/mkleehammer/pyodbc/blob/master/setup.py
+        "mysql",  # https://github.com/PyMySQL/PyMySQL/blob/main/pyproject.toml
+        "postgresql",  # https://github.com/psycopg/psycopg2/blob/master/setup.py
+        "trino",  # https://github.com/trinodb/trino-python-client/blob/master/setup.py
+        "vertica",  # https://github.com/bluelabsio/sqlalchemy-vertica-python/blob/master/setup.py
+        "databricks",  # https://github.com/databricks/databricks-sql-python/blob/main/pyproject.toml
     )
     ignore_keys = (
         "sqlalchemy",
@@ -36,43 +40,46 @@ def get_extras_require():
         "all-contrib-expectations",
     )
 
-    # Use Path() from pathlib so we can make this section of the code OS agnostic.
     requirements_dir = "reqs"
-    glob_path = Path(f"{requirements_dir}/*.txt")
     rx_name_part = re.compile(r"requirements-dev-(.*).txt")
 
+    # Use Path() from pathlib so we can make this section of the code OS agnostic.
     # Loop through each requirement file and verify they are named
     # correctly and are in the right location.
-    for glob_file_name in glob(f"{glob_path}"):
-        path_to_file = Path(glob_file_name)
-        file_name = path_to_file.name
-        match = rx_name_part.match(file_name)
+    for file_path in Path().glob(f"{requirements_dir}/*.txt"):
+        match = rx_name_part.match(file_path.name)
         assert (
             match is not None
         ), f"The extras requirements dir ({requirements_dir}) contains files that do not adhere to the following format: requirements-dev-*.txt"
         key = match.group(1)
         if key in ignore_keys:
             continue
-        with open(glob_file_name) as parsed_file:
-            parsed = [str(req) for req in pkg_resources.parse_requirements(parsed_file)]
+        with open(file_path) as f:
+            parsed = [str(req) for req in pkg_resources.parse_requirements(f)]
             results[key] = parsed
 
     lite = results.pop("lite")
     contrib = results.pop("contrib")
     docs_test = results.pop("api-docs-test")
+    cloud = results["cloud"]
+    arrow = results["arrow"]
     results["boto"] = [req for req in lite if req.startswith("boto")]
-    results["sqlalchemy"] = [req for req in lite if req.startswith("sqlalchemy")]
-    results["test"] = lite + contrib + docs_test
+    results["sqlalchemy2"] = [req for req in lite if req.startswith("sqlalchemy")]
+    results["test"] = lite + contrib + docs_test + cloud + arrow
 
     for new_key, existing_key in extra_key_mapping.items():
         results[new_key] = results[existing_key]
+    for key in sqla1x_only_keys:
+        results[key] += results["sqlalchemy1"]
     for key in sqla_keys:
-        results[key] += results["sqlalchemy"]
+        results[key] += results["sqlalchemy2"]
 
     results.pop("boto")
-    all_requirements_set = set()
-    [all_requirements_set.update(vals) for vals in results.values()]
-    results["dev"] = sorted(all_requirements_set)
+    results.pop("sqlalchemy1")
+    results.pop("sqlalchemy2")
+    # all_requirements_set = set()
+    # [all_requirements_set.update(vals) for vals in results.values()]
+    # results["dev"] = sorted(all_requirements_set)
     return results
 
 
@@ -85,7 +92,8 @@ long_description = "Always know what to expect from your data. (See https://gith
 config = {
     "description": "Always know what to expect from your data.",
     "author": "The Great Expectations Team",
-    "url": "https://github.com/great-expectations/great_expectations",
+    "url": "https://greatexpectations.io",
+    "download_url": "https://github.com/great-expectations/great_expectations",
     "author_email": "team@greatexpectations.io",
     "version": versioneer.get_version(),
     "cmdclass": versioneer.get_cmdclass(),
@@ -95,14 +103,18 @@ config = {
         exclude=["contrib*", "docs*", "tests*", "examples*", "scripts*"]
     ),
     "entry_points": {
-        "console_scripts": ["great_expectations=great_expectations.cli:main"]
+        "console_scripts": [
+            "great_expectations=great_expectations.cli:main",
+            "gx-agent=great_expectations.agent:run_agent",
+        ]
     },
-    "package_data": {"great_expectations": ["py.typed"]},
+    "package_data": {"great_expectations": ["**/py.typed", "**/*.pyi"]},
     "name": "great_expectations",
     "long_description": long_description,
     "license": "Apache-2.0",
     "keywords": "data science testing pipeline data quality dataquality validation datavalidation",
     "include_package_data": True,
+    "python_requires": ">=3.8",
     "classifiers": [
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -113,10 +125,10 @@ config = {
         "Topic :: Software Development :: Testing",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
 }
 

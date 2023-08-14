@@ -1,32 +1,34 @@
-# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py imports">
 import boto3
-import yaml
 from awsglue.context import GlueContext
 from pyspark.context import SparkContext
 
 import great_expectations as gx
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     S3StoreBackendDefaults,
 )
 from great_expectations.util import get_context
 
-# </snippet>
+import warnings
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py set up gx">
-sc = SparkContext.getOrCreate()
-glueContext = GlueContext(sc)
-spark = glueContext.spark_session
+yaml = YAMLHandler()
+
+# needed because GlueContext(sc) function emits the following FutureWarning: Deprecated in 3.0.0. Use SparkSession.builder.getOrCreate() instead.
+with warnings.catch_warnings():
+    warnings.simplefilter(action="ignore", category=FutureWarning)
+    sc = SparkContext.getOrCreate()
+    glueContext = GlueContext(sc)
+    spark = glueContext.spark_session
+
 s3_client = boto3.client("s3")
 response = s3_client.get_object(
     Bucket="bucket", Key="bucket/great_expectations/great_expectations.yml"
 )
-config_file = yaml.safe_load(response["Body"])
-# </snippet>
+config_file = yaml.load(response["Body"])
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py connect to data">
 config = DataContextConfig(
     config_version=config_file["config_version"],
     datasources=config_file["datasources"],
@@ -47,9 +49,7 @@ config = DataContextConfig(
     ),
 )
 context_gx = get_context(project_config=config)
-# </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py create expectations">
 expectation_suite_name = "suite_name"
 suite = context_gx.add_expectation_suite(expectation_suite_name)
 batch_request = RuntimeBatchRequest(
@@ -68,9 +68,7 @@ validator.expect_column_values_to_not_be_null(
     column="passenger_count"
 )  ## add some test
 validator.save_expectation_suite(discard_failed_expectations=False)
-# </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py validate your data">
 checkpoint_config = {
     "class_name": "SimpleCheckpoint",
     "validations": [
@@ -86,4 +84,3 @@ checkpoint = SimpleCheckpoint(
 )
 results = checkpoint.run(result_format="SUMMARY", run_name="test")
 validation_result_identifier = results.list_validation_result_identifiers()[0]
-# </snippet>

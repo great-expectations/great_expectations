@@ -383,7 +383,7 @@ class FileDataContextVariables(DataContextVariables):
                 for fluent_datasource_name in config_fluent_datasources_stash.keys():
                     self.data_context.datasources.pop(fluent_datasource_name)
                 # this would be `deep_copy'ed in `instantiate_class_from_config` too
-                self.data_context.fluent_config.fluent_datasources = {}
+                self.data_context.fluent_config.fluent_datasources = []
             yield
         except Exception:
             raise
@@ -393,8 +393,8 @@ class FileDataContextVariables(DataContextVariables):
                     f"Replacing {len(config_fluent_datasources_stash)} stashed `FluentDatasource`s"
                 )
                 self.data_context.datasources.update(config_fluent_datasources_stash)
-                self.data_context.fluent_config.fluent_datasources = (
-                    config_fluent_datasources_stash
+                self.data_context.fluent_config.fluent_datasources = list(
+                    config_fluent_datasources_stash.values()
                 )
 
 

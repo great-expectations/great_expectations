@@ -2,20 +2,22 @@ import datetime
 from typing import List
 
 import pytest
-from ruamel.yaml import YAML
 
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import DataConnector
 from tests.test_utils import create_files_in_directory
 
-yaml = YAML()
+yaml = YAMLHandler()
+
+# module level markers
+pytestmark = pytest.mark.filesystem
 
 
 @pytest.fixture()
 def create_files_and_instantiate_data_connector(tmp_path_factory):
-
     base_directory = str(
         tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
     )

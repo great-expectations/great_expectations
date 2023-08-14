@@ -5,15 +5,22 @@ import inspect
 import logging
 import pathlib
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 import pytest
 from pydantic import DirectoryPath, validate_arguments
 
-from great_expectations.datasource.fluent.config import GxConfig
-from great_expectations.datasource.fluent.interfaces import (
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import AbstractDataContext, FileDataContext
+from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
+)
+from great_expectations.datasource.fluent.config import GxConfig
+from great_expectations.datasource.fluent.constants import (
+    _FLUENT_DATASOURCES_KEY,
+)
+from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
 )
@@ -23,6 +30,9 @@ from great_expectations.datasource.fluent.sources import (
     _SourceFactories,
 )
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.util import get_context as get_gx_context
+
+yaml = YAMLHandler()
 
 if TYPE_CHECKING:
     from great_expectations.core.config_provider import _ConfigurationProvider
@@ -61,7 +71,7 @@ class DataContext:
             cls._config = GxConfig.parse_yaml(config_path)
             for ds_name, datasource in cls._config.datasources.items():
                 logger.info(f"Loaded '{ds_name}' from config")
-                cls._context._attach_datasource_to_context(datasource)
+                cls._context._add_fluent_datasource(datasource)
                 # TODO: add assets?
 
         return cls._context
@@ -72,14 +82,14 @@ class DataContext:
         self._sources: _SourceFactories = _SourceFactories(self)
         self._datasources: Dict[str, Datasource] = {}
         self.config_provider: _ConfigurationProvider | None = None
-        logger.info(f"4a. Available Factories - {self._sources.factories}")
-        logger.debug(f"4b. `type_lookup` mapping ->\n{pf(self._sources.type_lookup)}")
+        logger.info(f"Available Factories - {self._sources.factories}")
+        logger.debug(f"`type_lookup` mapping ->\n{pf(self._sources.type_lookup)}")
 
     @property
     def sources(self) -> _SourceFactories:
         return self._sources
 
-    def _attach_datasource_to_context(self, datasource: Datasource) -> None:
+    def _add_fluent_datasource(self, datasource: Datasource) -> None:
         self._datasources[datasource.name] = datasource
 
     def get_datasource(self, datasource_name: str) -> Datasource:
@@ -92,12 +102,15 @@ class DataContext:
                 f"'{datasource_name}' not found. Available datasources are {list(self._datasources.keys())}"
             ) from exc
 
+    def _save_project_config(self, _fs_datasource=None) -> None:
+        ...
+
 
 def get_context(
     context_root_dir: Optional[DirectoryPath] = None, **kwargs
 ) -> DataContext:
     """Experimental get_context placeholder function."""
-    logger.info(f"3. Getting context {context_root_dir or ''}")
+    logger.info(f"Getting context {context_root_dir or ''}")
     context = DataContext.get_context(context_root_dir=context_root_dir, **kwargs)
     return context
 
@@ -116,9 +129,7 @@ def context_sources_cleanup() -> _SourceFactories:
     """Return the sources object and reset types/factories on teardown"""
     try:
         # setup
-        sources_copy = copy.deepcopy(
-            _SourceFactories._SourceFactories__source_factories
-        )
+        sources_copy = copy.deepcopy(_SourceFactories._SourceFactories__crud_registry)
         type_lookup_copy = copy.deepcopy(_SourceFactories.type_lookup)
         sources = get_context().sources
 
@@ -128,13 +139,13 @@ def context_sources_cleanup() -> _SourceFactories:
 
         yield sources
     finally:
-        _SourceFactories._SourceFactories__source_factories = sources_copy
+        _SourceFactories._SourceFactories__crud_registry = sources_copy
         _SourceFactories.type_lookup = type_lookup_copy
 
 
 @pytest.fixture(scope="function")
 def empty_sources(context_sources_cleanup) -> _SourceFactories:
-    _SourceFactories._SourceFactories__source_factories.clear()
+    _SourceFactories._SourceFactories__crud_registry.clear()
     _SourceFactories.type_lookup.clear()
     assert not _SourceFactories.type_lookup
     yield context_sources_cleanup
@@ -161,10 +172,11 @@ class TestMetaDatasource:
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
-        expected_registrants = 1
-
-        assert len(empty_sources.factories) == expected_registrants
-        assert len(empty_sources.type_lookup) == 2 * expected_registrants
+        # One for each crud method: add, update, add_or_update, delete
+        assert len(empty_sources.factories) == 4
+        # type_lookup maps the MyTestDatasource.type str to the class and vis versa
+        assert len(empty_sources.type_lookup) == 2
+        assert "my_test" in empty_sources.type_lookup
 
     def test__new__registers_sources_factory_method(
         self, context_sources_cleanup: _SourceFactories
@@ -260,7 +272,6 @@ class TestMetaDatasource:
 @pytest.mark.unit
 class TestMisconfiguredMetaDatasource:
     def test_ds_type_field_not_set(self, empty_sources: _SourceFactories):
-
         with pytest.raises(
             TypeRegistrationError,
             match=r"`MissingTypeDatasource` is missing a `type` attribute",
@@ -290,7 +301,6 @@ class TestMisconfiguredMetaDatasource:
             MissingExecEngineTypeDatasource(name="name").get_execution_engine()
 
     def test_ds_assets_type_field_not_set(self, empty_sources: _SourceFactories):
-
         with pytest.raises(
             TypeRegistrationError,
             match="No `type` field found for `BadAssetDatasource.asset_types` -> `MissingTypeAsset` unable to register asset type",
@@ -325,14 +335,21 @@ class TestMisconfiguredMetaDatasource:
             MissingTestConnectionDatasource(name="name").test_connection()
 
 
+@pytest.mark.big
 def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     # 1. Define Datasource & Assets
 
     class RedAsset(DataAsset):
         type = "red"
 
+        def test_connection(self):
+            ...
+
     class BlueAsset(DataAsset):
         type = "blue"
+
+        def test_connection(self):
+            ...
 
     class PurpleDatasource(Datasource):
         asset_types = [RedAsset, BlueAsset]
@@ -347,7 +364,7 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
 
         def add_red_asset(self, asset_name: str) -> RedAsset:
             asset = RedAsset(name=asset_name)
-            self.assets[asset_name] = asset
+            self._add_asset(asset=asset)
             return asset
 
     # 2. Get context
@@ -362,6 +379,256 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
 
     # 5. Get an asset by name - (method defined in parent `Datasource`)
     assert red_asset is purple_ds.get_asset("my_asset_name")
+
+
+# Testing crud methods
+DEFAULT_CRUD_DATASOURCE_NAME = "pandas_datasource"
+
+
+@pytest.fixture
+def context_config_data(
+    file_dc_config_dir_init: pathlib.Path,
+) -> Tuple[AbstractDataContext, pathlib.Path, pathlib.Path]:
+    config_file_path = file_dc_config_dir_init / FileDataContext.GX_YML
+    assert config_file_path.exists() is True
+    context = get_gx_context(context_root_dir=file_dc_config_dir_init)
+    data_dir = file_dc_config_dir_init.parent / "data"
+    data_dir.mkdir()
+    return context, config_file_path, data_dir
+
+
+def assert_fluent_datasource_content(
+    config_file_path: pathlib.Path, fluent_datasource_config: dict
+):
+    config = yaml.load(config_file_path.read_text())
+    assert _FLUENT_DATASOURCES_KEY in config
+    assert config[_FLUENT_DATASOURCES_KEY] == fluent_datasource_config
+
+
+@pytest.fixture
+def context_with_fluent_datasource(
+    context_config_data: Tuple[AbstractDataContext, pathlib.Path, pathlib.Path]
+) -> Tuple[AbstractDataContext, pathlib.Path, pathlib.Path]:
+    context, config_file_path, data_dir = context_config_data
+    assert 0 == len(context.datasources)
+    context.sources.add_pandas_filesystem(
+        name=DEFAULT_CRUD_DATASOURCE_NAME,
+        base_directory=data_dir,
+        data_context_root_directory=config_file_path.parent,
+    )
+    assert 1 == len(context.datasources)
+    assert_fluent_datasource_content(
+        config_file_path=config_file_path,
+        fluent_datasource_config={
+            DEFAULT_CRUD_DATASOURCE_NAME: {
+                "base_directory": str(data_dir),
+                "data_context_root_directory": str(config_file_path.parent),
+                "type": "pandas_filesystem",
+            },
+        },
+    )
+    return context, config_file_path, data_dir
+
+
+@pytest.mark.unit
+def test_add_datasource(context_with_fluent_datasource):
+    pass
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("use_positional_arg", [True, False])
+def test_add_datasource_with_datasource_object(
+    context_with_fluent_datasource, use_positional_arg
+):
+    context, config_file_path, data_dir = context_with_fluent_datasource
+    new_datasource = copy.deepcopy(context.get_datasource(DEFAULT_CRUD_DATASOURCE_NAME))
+    new_datasource.name = "new_datasource"
+    if use_positional_arg:
+        context.sources.add_pandas_filesystem(new_datasource)
+    else:
+        context.sources.add_pandas_filesystem(datasource=new_datasource)
+    assert len(context.datasources) == 2
+    assert_fluent_datasource_content(
+        config_file_path=config_file_path,
+        fluent_datasource_config={
+            "pandas_datasource": {
+                "base_directory": str(data_dir),
+                "data_context_root_directory": str(config_file_path.parent),
+                "type": "pandas_filesystem",
+            },
+            "new_datasource": {
+                "base_directory": str(data_dir),
+                "data_context_root_directory": str(config_file_path.parent),
+                "type": "pandas_filesystem",
+            },
+        },
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("use_positional_arg", [True, False])
+def test_update_datasource(context_with_fluent_datasource, use_positional_arg):
+    context, config_file_path, data_dir = context_with_fluent_datasource
+    data_dir_2 = data_dir.parent / "data2"
+    data_dir_2.mkdir()
+    if use_positional_arg:
+        context.sources.update_pandas_filesystem(
+            DEFAULT_CRUD_DATASOURCE_NAME,
+            base_directory=data_dir_2,
+            data_context_root_directory=config_file_path.parent,
+        )
+    else:
+        context.sources.update_pandas_filesystem(
+            name=DEFAULT_CRUD_DATASOURCE_NAME,
+            base_directory=data_dir_2,
+            data_context_root_directory=config_file_path.parent,
+        )
+    assert_fluent_datasource_content(
+        config_file_path=config_file_path,
+        fluent_datasource_config={
+            DEFAULT_CRUD_DATASOURCE_NAME: {
+                "base_directory": str(data_dir_2),
+                "data_context_root_directory": str(config_file_path.parent),
+                "type": "pandas_filesystem",
+            },
+        },
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("use_positional_arg", [True, False])
+def test_update_datasource_with_datasource_object(
+    context_with_fluent_datasource, use_positional_arg
+):
+    context, config_file_path, data_dir = context_with_fluent_datasource
+    datasource = context.get_datasource(DEFAULT_CRUD_DATASOURCE_NAME)
+    assert_fluent_datasource_content(
+        config_file_path=config_file_path,
+        fluent_datasource_config={
+            DEFAULT_CRUD_DATASOURCE_NAME: {
+                "base_directory": str(data_dir),
+                "data_context_root_directory": str(config_file_path.parent),
+                "type": "pandas_filesystem",
+            },
+        },
+    )
+
+    # Add an asset and update datasource
+    (data_dir / "1.csv").touch()
+    if use_positional_arg:
+        datasource.add_csv_asset("csv_asset", batching_regex=r"(?P<file_name>.*).csv")
+    else:
+        datasource.add_csv_asset(
+            name="csv_asset", batching_regex=r"(?P<file_name>.*).csv"
+        )
+
+    context.sources.update_pandas_filesystem(datasource=datasource)
+    assert_fluent_datasource_content(
+        config_file_path=config_file_path,
+        fluent_datasource_config={
+            DEFAULT_CRUD_DATASOURCE_NAME: {
+                "base_directory": str(data_dir),
+                "data_context_root_directory": str(config_file_path.parent),
+                "type": "pandas_filesystem",
+                "assets": {
+                    "csv_asset": {
+                        "batching_regex": "(?P<file_name>.*).csv",
+                        "type": "csv",
+                    },
+                },
+            },
+        },
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("use_positional_arg", [True, False])
+def test_add_or_update_datasource_using_add(
+    context_with_fluent_datasource, use_positional_arg
+):
+    context, config_file_path, data_dir = context_with_fluent_datasource
+    data_dir_2 = data_dir.parent / "data2"
+    data_dir_2.mkdir()
+    if use_positional_arg:
+        context.sources.add_or_update_pandas_filesystem(
+            f"{DEFAULT_CRUD_DATASOURCE_NAME}_2",
+            base_directory=data_dir_2,
+            data_context_root_directory=config_file_path.parent,
+        )
+    else:
+        context.sources.add_or_update_pandas_filesystem(
+            name=f"{DEFAULT_CRUD_DATASOURCE_NAME}_2",
+            base_directory=data_dir_2,
+            data_context_root_directory=config_file_path.parent,
+        )
+    assert_fluent_datasource_content(
+        config_file_path=config_file_path,
+        fluent_datasource_config={
+            f"{DEFAULT_CRUD_DATASOURCE_NAME}_2": {
+                "base_directory": str(data_dir_2),
+                "data_context_root_directory": str(config_file_path.parent),
+                "type": "pandas_filesystem",
+            },
+            DEFAULT_CRUD_DATASOURCE_NAME: {
+                "base_directory": str(data_dir),
+                "data_context_root_directory": str(config_file_path.parent),
+                "type": "pandas_filesystem",
+            },
+        },
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("use_positional_arg", [True, False])
+def test_add_or_update_datasource_using_update(
+    context_with_fluent_datasource, use_positional_arg
+):
+    context, config_file_path, data_dir = context_with_fluent_datasource
+    data_dir_2 = data_dir.parent / "data2"
+    data_dir_2.mkdir()
+    if use_positional_arg:
+        context.sources.add_or_update_pandas_filesystem(
+            DEFAULT_CRUD_DATASOURCE_NAME,
+            base_directory=data_dir_2,
+            data_context_root_directory=config_file_path.parent,
+        )
+    else:
+        context.sources.add_or_update_pandas_filesystem(
+            name=DEFAULT_CRUD_DATASOURCE_NAME,
+            base_directory=data_dir_2,
+            data_context_root_directory=config_file_path.parent,
+        )
+    assert_fluent_datasource_content(
+        config_file_path=config_file_path,
+        fluent_datasource_config={
+            DEFAULT_CRUD_DATASOURCE_NAME: {
+                "base_directory": str(data_dir_2),
+                "data_context_root_directory": str(config_file_path.parent),
+                "type": "pandas_filesystem",
+            },
+        },
+    )
+
+
+@pytest.mark.xfail(
+    reason="There is a bug in context._save_config where deletions don't get persisted",
+    run=True,
+    strict=True,
+)
+@pytest.mark.unit
+def test_delete_datasource(context_with_fluent_datasource):
+    context, config_file_path, data_dir = context_with_fluent_datasource
+    context.sources.delete(name=DEFAULT_CRUD_DATASOURCE_NAME)
+    assert_fluent_datasource_content(config_file_path, {})
+
+
+@pytest.mark.unit
+def test_legacy_delete_datasource_raises_deprecation_warning(
+    context_with_fluent_datasource,
+):
+    context, _, _ = context_with_fluent_datasource
+    with pytest.deprecated_call():
+        context.sources.delete_pandas_filesystem(name=DEFAULT_CRUD_DATASOURCE_NAME)
 
 
 if __name__ == "__main__":

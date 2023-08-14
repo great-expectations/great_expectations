@@ -29,7 +29,6 @@ def is_ip_asn_country_code_in_set(addr: str, country_codes) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBePrivateIpV6(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.ip_asn_country_code_in_set"
     condition_value_keys = ("country_codes",)

@@ -11,6 +11,7 @@ import warnings
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import azure
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.types.base import assetConfigSchema
@@ -24,39 +25,11 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-try:
-    from azure.storage.blob import BlobPrefix, BlobServiceClient, ContainerClient
-except ImportError:
-    BlobPrefix = None
-    BlobServiceClient = None
-    ContainerClient = None
-    logger.debug(
-        "Unable to load azure types; install optional Azure dependency for support."
-    )
-
-try:
-    from google.cloud import storage
-except ImportError:
-    storage = None
-    logger.debug(
-        "Unable to load GCS connection object; install optional Google dependency for support"
-    )
-
-try:
-    import pyspark
-    import pyspark.sql as pyspark_sql
-except ImportError:
-    pyspark = None  # type: ignore[assignment]
-    pyspark_sql = None  # type: ignore[assignment]
-    logger.debug(
-        "Unable to load pyspark and pyspark.sql; install optional Spark dependency for support."
-    )
-
 
 DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_ASSET_NAME"
 
 
-def batch_definition_matches_batch_request(
+def batch_definition_matches_batch_request(  # noqa: PLR0911
     batch_definition: BatchDefinition,
     batch_request: BatchRequestBase,
 ) -> bool:
@@ -112,7 +85,7 @@ def batch_definition_matches_batch_request(
     return True
 
 
-def map_data_reference_string_to_batch_definition_list_using_regex(
+def map_data_reference_string_to_batch_definition_list_using_regex(  # noqa: PLR0913
     datasource_name: str,
     data_connector_name: str,
     data_reference: str,
@@ -276,7 +249,8 @@ def _invert_regex_to_data_reference_template(
 
     # print("-"*80)
     parsed_sre = sre_parse.parse(str(regex_pattern))
-    for token, value in parsed_sre:  # type: ignore[attr-defined]
+    for parsed_sre_tuple, char in zip(parsed_sre, list(str(regex_pattern))):  # type: ignore[call-overload]
+        token, value = parsed_sre_tuple
         if token == sre_constants.LITERAL:
             # Transcribe the character directly into the template
             data_reference_template += chr(value)
@@ -292,8 +266,12 @@ def _invert_regex_to_data_reference_template(
             sre_constants.BRANCH,
             sre_constants.ANY,
         ]:
-            # Replace the uncaptured group a wildcard in the template
-            data_reference_template += "*"
+            if group_names:
+                # Replace the uncaptured group a wildcard in the template
+                data_reference_template += "*"
+            else:
+                # Don't assume that a `.` in a filename should be a star glob
+                data_reference_template += char
         elif token in [
             sre_constants.AT,
             sre_constants.ASSERT_NOT,
@@ -325,7 +303,7 @@ def sanitize_prefix(text: str) -> str:
     return os.path.join(text, "")  # noqa: PTH118
 
 
-def sanitize_prefix_for_s3(text: str) -> str:
+def sanitize_prefix_for_gcs_and_s3(text: str) -> str:
     """
     Takes in a given user-prefix and cleans it to work with file-system traversal methods
     (i.e. add '/' to the end of a string meant to represent a directory)
@@ -385,7 +363,7 @@ def get_filesystem_one_level_directory_glob_path_list(
 
 
 def list_azure_keys(
-    azure_client: BlobServiceClient,
+    azure_client: azure.BlobServiceClient,
     query_options: dict,
     recursive: bool = False,
 ) -> List[str]:
@@ -409,7 +387,7 @@ def list_azure_keys(
         List of keys representing Azure file paths (as filtered by the query_options dict)
     """
     container: str = query_options["container"]
-    container_client: ContainerClient = azure_client.get_container_client(
+    container_client: azure.ContainerClient = azure_client.get_container_client(
         container=container
     )
 
@@ -417,7 +395,7 @@ def list_azure_keys(
 
     def _walk_blob_hierarchy(name_starts_with: str) -> None:
         for item in container_client.walk_blobs(name_starts_with=name_starts_with):
-            if isinstance(item, BlobPrefix):
+            if isinstance(item, azure.BlobPrefix):
                 if recursive:
                     _walk_blob_hierarchy(name_starts_with=item.name)
 
@@ -469,6 +447,7 @@ def list_gcs_keys(
     if delimiter is None and not recursive:
         warnings.warn(
             'In order to access blobs with a ConfiguredAssetGCSDataConnector, \
+            or with a Fluent datasource without enabling recursive file discovery, \
             the delimiter that has been passed to gcs_options in your config cannot be empty; \
             please note that the value is being set to the default "/" in order to work with the Google SDK.'
         )
@@ -476,6 +455,7 @@ def list_gcs_keys(
     elif delimiter is not None and recursive:
         warnings.warn(
             "In order to access blobs with an InferredAssetGCSDataConnector, \
+            or enabling recursive file discovery with a Fluent datasource, \
             the delimiter that has been passed to gcs_options in your config must be empty; \
             please note that the value is being set to None in order to work with the Google SDK."
         )

@@ -33,7 +33,6 @@ def is_valid_mic_match_country_code(mic: str, country_code, df) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidMicMatchCountryCode(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_mic_match_country_code"
     condition_value_keys = ("country_code",)

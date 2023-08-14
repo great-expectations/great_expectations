@@ -77,7 +77,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
                 f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".'
             )
 
-    def build_expectation_configuration(
+    def build_expectation_configuration(  # noqa: PLR0913
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
@@ -111,7 +111,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
             domain=domain, variables=variables, parameters=parameters
         )
 
-    def resolve_validation_dependencies(
+    def resolve_validation_dependencies(  # noqa: PLR0913
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,

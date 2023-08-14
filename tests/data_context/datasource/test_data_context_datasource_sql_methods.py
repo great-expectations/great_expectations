@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import json
-from typing import List, Union
+from typing import TYPE_CHECKING, List, Union
 
 import pytest
 
@@ -9,12 +11,20 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
+
 yaml = YAMLHandler()
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
 except ImportError:
     sqlalchemy = None
+
+
+# module level markers
+# these tests use sqlite, which is a filesystem-based db
+pytestmark = pytest.mark.filesystem
 
 
 def test_get_batch(data_context_with_simple_sql_datasource_for_testing_get_batch):
@@ -140,7 +150,7 @@ def test_get_batch(data_context_with_simple_sql_datasource_for_testing_get_batch
 def test_get_validator_bad_batch_request(
     data_context_with_simple_sql_datasource_for_testing_get_batch,
 ):
-    context: "DataContext" = (
+    context: AbstractDataContext = (
         data_context_with_simple_sql_datasource_for_testing_get_batch
     )
     context.add_expectation_suite("my_expectations")

@@ -9,7 +9,6 @@ from great_expectations.render.renderer.renderer import Renderer
 
 
 class MicrosoftTeamsRenderer(Renderer):
-
     MICROSOFT_TEAMS_SCHEMA_URL = "http://adaptivecards.io/schemas/adaptive-card.json"
 
     def __init__(self) -> None:
@@ -98,6 +97,16 @@ class MicrosoftTeamsRenderer(Renderer):
                 if isinstance(batch_identifier, BatchIdentifier):
                     data_asset_name = batch_identifier.data_asset_name
                     batch_identifier = batch_identifier.batch_identifier
+                elif "active_batch_definition" in validation_result.meta:
+                    data_asset_name = (
+                        validation_result.meta[
+                            "active_batch_definition"
+                        ].data_asset_name
+                        if validation_result.meta[
+                            "active_batch_definition"
+                        ].data_asset_name
+                        else "__no_data_asset_name__"
+                    )
                 else:
                     data_asset_name = "__no_data_asset_name_"
 

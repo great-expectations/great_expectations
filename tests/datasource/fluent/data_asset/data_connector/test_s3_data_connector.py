@@ -12,12 +12,12 @@ from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.data_connector.util import (
     sanitize_prefix,
-    sanitize_prefix_for_s3,
+    sanitize_prefix_for_gcs_and_s3,
 )
+from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import BatchRequest
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
@@ -29,12 +29,12 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 try:
-    import boto3  # noqa: disable=E0602
+    import boto3  # : disable=E0602
 except ImportError:
     logger.debug("Unable to load boto3; install optional boto3 dependency for support.")
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock_s3
 def test_basic_instantiation():
     region_name: str = "us-east-1"
@@ -79,18 +79,8 @@ def test_basic_instantiation():
     assert my_data_connector.get_unmatched_data_references()[:3] == []
     assert my_data_connector.get_unmatched_data_reference_count() == 0
 
-    # Missing "data_asset_name" argument.
-    with pytest.raises(TypeError):
-        # noinspection PyArgumentList
-        my_data_connector.get_batch_definition_list(
-            BatchRequest(
-                datasource_name="something",
-                options={},
-            )
-        )
 
-
-@pytest.mark.integration
+@pytest.mark.big
 @mock_s3
 def test_instantiation_batching_regex_does_not_match_paths():
     region_name: str = "us-east-1"
@@ -136,7 +126,7 @@ def test_instantiation_batching_regex_does_not_match_paths():
     assert my_data_connector.get_unmatched_data_reference_count() == 3
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock_s3
 def test_return_all_batch_definitions_unsorted():
     region_name: str = "us-east-1"
@@ -167,7 +157,7 @@ def test_return_all_batch_definitions_unsorted():
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.*)\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="",
@@ -335,7 +325,7 @@ def test_return_all_batch_definitions_unsorted():
 
 # TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
 # TODO: <Alex>ALEX</Alex>
-# @pytest.mark.integration
+# @pytest.mark.big
 # @mock_s3
 # def test_return_all_batch_definitions_sorted():
 #     region_name: str = "us-east-1"
@@ -366,7 +356,7 @@ def test_return_all_batch_definitions_unsorted():
 #     my_data_connector: DataConnector = S3DataConnector(
 #         datasource_name="my_file_path_datasource",
 #         data_asset_name="my_s3_data_asset",
-#         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
+#         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.*)\.csv"),
 #         s3_client=client,
 #         bucket=bucket,
 #         prefix="",
@@ -533,7 +523,7 @@ def test_return_all_batch_definitions_unsorted():
 # TODO: <Alex>ALEX</Alex>
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock_s3
 def test_return_only_unique_batch_definitions():
     region_name: str = "us-east-1"
@@ -561,7 +551,7 @@ def test_return_only_unique_batch_definitions():
     my_data_connector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<name>.+)/.+\.csv"),
+        batching_regex=re.compile(r"(?P<name>.+).*\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="A",
@@ -587,24 +577,20 @@ def test_return_only_unique_batch_definitions():
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_s3_data_asset",
-            batch_identifiers=IDDict(
-                {"path": "B/file_1.csv", "directory": "B", "filename": "file_1.csv"}
-            ),
+            batch_identifiers=IDDict({"path": "B/file_1.csv", "filename": "file_1"}),
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_s3_data_asset",
-            batch_identifiers=IDDict(
-                {"path": "B/file_2.csv", "directory": "B", "filename": "file_2.csv"}
-            ),
+            batch_identifiers=IDDict({"path": "B/file_2.csv", "filename": "file_2"}),
         ),
     ]
 
     my_data_connector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
+        batching_regex=re.compile(r"(?P<filename>.+).*\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="B",
@@ -623,7 +609,7 @@ def test_return_only_unique_batch_definitions():
     assert expected == unsorted_batch_definition_list
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock_s3
 def test_alpha():
     region_name: str = "us-east-1"
@@ -648,7 +634,7 @@ def test_alpha():
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.*)\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="test_dir_alpha",
@@ -686,7 +672,7 @@ def test_alpha():
     my_batch_request = BatchRequest(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        options={"part_1": "test_dir_alpha/B"},
+        options={"part_1": "B"},
     )
     my_batch_definition_list = my_data_connector.get_batch_definition_list(
         batch_request=my_batch_request
@@ -694,7 +680,7 @@ def test_alpha():
     assert len(my_batch_definition_list) == 1
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock_s3
 def test_foxtrot():
     region_name: str = "us-east-1"
@@ -731,7 +717,7 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.*)\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="",
@@ -747,7 +733,7 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.*)\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="test_dir_foxtrot/A",
@@ -771,7 +757,7 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.*)\.txt"),
         s3_client=client,
         bucket=bucket,
         prefix="test_dir_foxtrot/B",
@@ -795,7 +781,7 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.*)\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="test_dir_foxtrot/C",
@@ -829,7 +815,7 @@ def test_foxtrot():
 
 # TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
 # TODO: <Alex>ALEX</Alex>
-# @pytest.mark.integration
+# @pytest.mark.big
 # @mock_s3
 # def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_group(
 #     tmp_path_factory,
@@ -906,9 +892,10 @@ def test_foxtrot():
 # TODO: <Alex>ALEX</Alex>
 
 
+@pytest.mark.unit
 def test_sanitize_prefix_behaves_the_same_as_local_files():
     def check_sameness(prefix, expected_output):
-        s3_sanitized = sanitize_prefix_for_s3(prefix)
+        s3_sanitized = sanitize_prefix_for_gcs_and_s3(text=prefix)
         file_system_sanitized = sanitize_prefix(prefix)
         if os.sep == "\\":  # Fix to ensure tests work on Windows
             file_system_sanitized = file_system_sanitized.replace("\\", "/")

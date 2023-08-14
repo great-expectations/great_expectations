@@ -4,10 +4,7 @@ import warnings
 from copy import deepcopy
 
 from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,  # noqa: TCH001
-)
-from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import (  # noqa: F401
-    ExpectColumnKlDivergenceToBeLessThan,
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render import (
@@ -101,7 +98,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 expectation_type
             )
         if expectation_string_fn is None:
-            expectation_string_fn = getattr(cls, "_missing_content_block_fn")
+            expectation_string_fn = cls._missing_content_block_fn
 
         # This function wraps expect_* methods from ExpectationStringRenderer to generate table classes
         def row_generator_fn(
@@ -127,7 +124,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             status_cell = (
                 [status_icon_renderer[1](result=result)]
                 if status_icon_renderer
-                else [getattr(cls, "_diagnostic_status_icon_renderer")(result=result)]
+                else [cls._diagnostic_status_icon_renderer(result=result)]
             )
             unexpected_statement = []
             unexpected_table = None

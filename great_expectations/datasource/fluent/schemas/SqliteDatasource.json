@@ -1,6 +1,6 @@
 {
     "title": "SqliteDatasource",
-    "description": "Adds a sqlite datasource to the data context.\n\nArgs:\n    name: The name of this sqlite datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the sqlite database.\n        For example: \"sqlite:///path/to/file.db\"\n    assets: An optional dictionary whose keys are TableAsset names and whose values\n        are TableAsset objects.",
+    "description": "--Public API--Adds a sqlite datasource to the data context.\n\nArgs:\n    name: The name of this sqlite datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the sqlite database.\n        For example: \"sqlite:///path/to/file.db\"\n    create_temp_table: Whether to leverage temporary tables during metric computation.\n    assets: An optional dictionary whose keys are TableAsset names and whose values\n        are TableAsset objects.",
     "type": "object",
     "properties": {
         "type": {
@@ -15,11 +15,17 @@
             "title": "Name",
             "type": "string"
         },
+        "id": {
+            "title": "Id",
+            "description": "Datasource id",
+            "type": "string",
+            "format": "uuid"
+        },
         "assets": {
             "title": "Assets",
-            "default": {},
-            "type": "object",
-            "additionalProperties": {
+            "default": [],
+            "type": "array",
+            "items": {
                 "anyOf": [
                     {
                         "$ref": "#/definitions/TableAsset"
@@ -45,6 +51,27 @@
                     "format": "uri"
                 }
             ]
+        },
+        "create_temp_table": {
+            "title": "Create Temp Table",
+            "default": true,
+            "type": "boolean"
+        },
+        "kwargs": {
+            "title": "Kwargs",
+            "description": "Optional dictionary of `kwargs` will be passed to the SQLAlchemy Engine as part of `create_engine(connection_string, **kwargs)`",
+            "default": {},
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "writeOnly": true,
+                        "format": "password"
+                    },
+                    {}
+                ]
+            }
         }
     },
     "required": [
@@ -278,7 +305,7 @@
         },
         "TableAsset": {
             "title": "TableAsset",
-            "description": "A _SQLAsset Mixin\n\nThis is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality\nthat can be used by different SQL datasource subclasses.\n\nFor example see TableAsset defined in this module and SqliteTableAsset defined in\nsqlite_datasource.py",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "name": {
@@ -293,12 +320,22 @@
                     ],
                     "type": "string"
                 },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
                 "order_by": {
                     "title": "Order By",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/Sorter"
                     }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
                 },
                 "splitter": {
                     "title": "Splitter",
@@ -331,6 +368,8 @@
                 },
                 "table_name": {
                     "title": "Table Name",
+                    "description": "Name of the SQL table. Will default to the value of `name` if not provided.",
+                    "default": "",
                     "type": "string"
                 },
                 "schema_name": {
@@ -339,14 +378,13 @@
                 }
             },
             "required": [
-                "name",
-                "table_name"
+                "name"
             ],
             "additionalProperties": false
         },
         "QueryAsset": {
             "title": "QueryAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "--Public API--",
             "type": "object",
             "properties": {
                 "name": {
@@ -361,12 +399,22 @@
                     ],
                     "type": "string"
                 },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
                 "order_by": {
                     "title": "Order By",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/Sorter"
                     }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
                 },
                 "splitter": {
                     "title": "Splitter",

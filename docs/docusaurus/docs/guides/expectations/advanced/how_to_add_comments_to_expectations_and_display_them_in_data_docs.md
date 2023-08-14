@@ -1,28 +1,28 @@
 ---
-title: How to add comments to Expectations and display them in Data Docs
+title: Add comments to Expectations and display them in Data Docs
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you add descriptive comments (or notes, here used interchangeably) to <TechnicalTag tag="expectation" text="Expectations" /> and display those comments in <TechnicalTag tag="data_docs" text="Data Docs" />. In these comments you can add some clarification or motivation to the Expectation definition to help you communicate more clearly with your team about specific Expectations. Markdown is supported in these comments.
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
-- [Configured a Data Context](../../../tutorials/getting_started/tutorial_setup.md).
-- [Configured an Expectations Suite](../../../tutorials/getting_started/tutorial_create_expectations.md).
+- [A working Great Expectations deployment](/docs/guides/setup/setup_overview)
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
+- [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
 
 </Prerequisites>
 
-## Steps
-
-### 1. First, edit your Expectation Suite
+## Edit your Expectation Suite
 
 ```bash
 great_expectations suite edit <your_suite_name>
 ```
 
-### 2. Next, add comments to specific Expectations
+## Add comments to specific Expectations
 
 For each Expectation you wish to add notes to, add a dictionary to the ``meta`` field with the key ``notes`` and your comment as the value. Here is an example.
 
@@ -37,7 +37,7 @@ Leads to the following representation in the <TechnicalTag tag="data_docs" text=
 
 ![Expectation with simple comment, no formatting](../../../images/table_level_no_format.png)
 
-### 3. Add styling to your comments (optional)
+## Add styling to your comments (Optional)
 
 To add styling to your comments, you can add a format tag. Here are a few examples.
 
@@ -97,6 +97,6 @@ validator.expect_column_values_to_not_be_null(
 
 
 
-### 4. Review your comments in the Expectation Suite overview of your Data Docs
+## Review your comments in the Expectation Suite overview of your Data Docs
 
 You can open your Data Docs by using the `.open_data_docs()` method of your Data Context, which should be present in the last cell of the Jupyter Notebook you did your editing in.

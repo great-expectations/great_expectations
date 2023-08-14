@@ -1,5 +1,5 @@
 ---
-title: How to add Spark support for Custom Expectations
+title: Add Spark support for Custom Expectations
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
@@ -8,9 +8,11 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you implement native Spark support for your <TechnicalTag tag="custom_expectation" text="Custom Expectation" />. 
 
+## Prerequisites
+
 <Prerequisites>
 
- - [Created a Custom Expectation](../creating_custom_expectations/overview.md)
+ - [A Custom Expectation](../custom_expectations_lp.md)
     
 </Prerequisites>
 
@@ -21,24 +23,22 @@ If you decide to contribute your <TechnicalTag tag="expectation" text="Expectati
 We will add Spark support for the Custom Expectations implemented in our guides on [how to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md) 
 and [how to create Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
 
-## Steps
-
-### 1. Specify your backends
+## Specify your backends
 
 To avoid surprises and help clearly define your Custom Expectation, it can be helpful to determine beforehand what backends you plan to support, and test them along the way.
 
-Within the `examples` defined inside your Expectation class, the `test_backends` key specifies which backends and SQLAlchemy dialects to run tests for. Add entries corresponding to the functionality you want to add: 
+Within the `examples` defined inside your Expectation class, the optional `only_for` and `suppress_test_for` keys specify which backends to use for testing. If a backend is not specified, Great Expectations attempts testing on all supported backends. Run the following command to add entries corresponding to the functionality you want to add: 
     
 ```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py examples"
 ```
 
 :::note
-You may have noticed that specifying `test_backends` isn't required for successfully testing your Custom Expectation.
+The optional `only_for` and `suppress_test_for` keys may be specified at the top-level (next to `data` and `tests`) or within specific tests (next to `title`, etc).
 
-If not specified, Great Expectations will attempt to determine the implemented backends automatically, but wll only run SQLAlchemy tests against sqlite.
+Allowed backends include: "bigquery", "mssql", "mysql", "pandas", "postgresql", "redshift", "snowflake", "spark", "sqlite", "trino"
 :::
 
-### 2. Implement the Spark logic for your Custom Expectation
+## Implement the Spark logic for your Custom Expectation
 
 Great Expectations provides a variety of ways to implement an Expectation in Spark. Two of the most common include: 
 
@@ -74,7 +74,8 @@ For our Custom Column Aggregate Expectation `ExpectColumnMaxToBeBetweenCustom`, 
 ```
 
 If we need a builtin function from `pyspark.sql.functions`, usually aliased to `F`, the import logic in 
-`from great_expectations.expectations.metrics.import_manager import F`
+`from great_expectations.compatibility.pyspark import functions as F`
+`from great_expectations.compatibility import pyspark`
 allows us to access these functions even when PySpark is not installed.
 
 <details>
@@ -90,7 +91,7 @@ def _spark(cls, column, strftime_format, **kwargs):
     def is_equal_to_three(val):
         return (val == 3)
 
-    success_udf = F.udf(is_equal_to_three, sparktypes.BooleanType())
+    success_udf = F.udf(is_equal_to_three, pyspark.types.BooleanType())
     return success_udf(column)
 ```
 
@@ -142,7 +143,7 @@ Because in Spark we are implementing the window function directly, we have to re
 </TabItem>
 </Tabs>
 
-### 3. Verifying your implementation
+## Verify your implementation
 
 If you now run your file, `print_diagnostic_checklist()` will attempt to execute your example cases using this new backend.
 
@@ -152,7 +153,7 @@ If your implementation is correctly defined, and the rest of the core logic in y
 ✔ Has at least one positive and negative example case, and all test cases pass
 ```
 
-If you've already implemented the Pandas backend covered in our How-To guides for creating [Custom Expectations](../creating_custom_expectations/overview.md) 
+If you've already implemented the Pandas backend covered in our How-To guides for creating [Custom Expectations](../custom_expectations_lp.md) 
 and the SQLAlchemy backend covered in our guide on [how to add SQLAlchemy support for Custom Expectations](./how_to_add_sqlalchemy_support_for_an_expectation.md), 
 you should see the following in your Diagnostic Checklist:
 
@@ -166,9 +167,9 @@ Congratulations!<br/>&#127881; You've successfully implemented Spark support for
 </b></p>
 </div>
 
-### 4. Contribution (Optional)
+## Contribution (Optional)
 
-This guide will leave you with core functionality sufficient for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
+This guide will leave you with core functionality sufficient for [contribution](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) to Great Expectations at an Experimental level.
 
 If you're interested in having your contribution accepted at a Beta level, your Custom Expectation will need to support SQLAlchemy, Spark, and Pandas.
 

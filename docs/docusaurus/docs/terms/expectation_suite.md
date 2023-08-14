@@ -4,31 +4,17 @@ title: Expectation Suite
 hoverText: A collection of verifiable assertions about data.
 ---
 
-import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '../term_tags/_tag.mdx';
-import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
-import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
-
-
-<UniversalMap setup='inactive' connect='inactive' create='active' validate='active'/> 
-
-## Overview
-
-### Definition
 
 An Expectation Suite is a collection of verifiable assertions about data.
 
-### Features and promises
+Expectation Suites combine multiple <TechnicalTag relative="../" tag="expectation" text="Expectations" /> into an overall description of data. For example, you can group all the Expectations about a given table in a given database into an Expectation Suite and name it `my_database.my_table`. Expectation Suite names are customizable, and the only constraint is that it must be unique to a given project.
 
-Expectation Suites combine multiple <TechnicalTag relative="../" tag="expectation" text="Expectations" /> into an overall description of data. For example, a team can group all the Expectations about a given table in given database into an Expectation Suite and call it `my_database.my_table`. Note these names are completely flexible and the only constraint on the name of a suite is that it must be unique to a given project.
-
-### Relationship to other objects
+## Relationship to other objects
 
 Expectation Suites are stored in an <TechnicalTag relative="../" tag="expectation_store" text="Expectation Store" />.  They are generated interactively using a <TechnicalTag relative="../" tag="validator" text="Validator" /> or automatically using <TechnicalTag relative="../" tag="profiler" text="Profilers" />, and are used by <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> to <TechnicalTag relative="../" tag="validation" text="Validate" /> data.
 
 ## Use cases
-
-<CreateHeader/>
 
 The lifecycle of an Expectation Suite starts with creating it. Then it goes through an iterative loop of Review and Edit as the team's understanding of the data described by the suite evolves.
 
@@ -36,26 +22,17 @@ Expectation Suites are largely managed automatically in the workflows for creati
 
 For more information on these processes, please see:
 - [Our overview on the process of Creating Expectations](../guides/expectations/create_expectations_overview.md)
-- [Our guide on how to create and edit Expectations with a Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md)
 - [Our guide on how to create and edit Expectations with instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
-
-<ValidateHeader/>
 
 Expectation Suites are *used* during the Validation of data.  In this step, you will need to provide one or more Expectation Suites to a Checkpoint.  This can either be done by configuring the Checkpoint to use a preset list of one or more Expectation Suites, or by configuring the Checkpoint to accept a list of one or more Expectation Suites at runtime.
 
-## Features
+## Reusability
+
+Expectation Suites are primarily used by Checkpoints, which can accept a list of one or more Expectation Suite and Batch Request pairs.  Because they are stored independently of the Checkpoints that use them, the same Expectation Suite can be included in the list for multiple Checkpoints, provided the Expectation Suite contains a list of Expectations that describe the data that Checkpoint will Validate.  You can even use the same Expectation Suite multiple times within the same Checkpoint by pairing it with different Batch Requests.
 
 ### CRUD operations
 
 A Great Expectations Expectation Suite enables you to perform Create, Read, Update, and Delete (CRUD) operations on the Suite's Expectations without needing to re-run them. 
-
-### Reusability
-
-Expectation Suites are primarily used by Checkpoints, which can accept a list of one or more Expectation Suite and Batch Request pairs.  Because they are stored independently of the Checkpoints that use them, the same Expectation Suite can be included in the list for multiple Checkpoints, provided the Expectation Suite contains a list of Expectations that describe the data that Checkpoint will Validate.  You can even use the same Expectation Suite multiple times within the same Checkpoint by pairing it with different Batch Requests.
-
-## API basics
-
-### CRUD operations
 
 Each of the Expectation Suite methods that support a Create, Read, Update, or Delete (CRUD) operation relies on two main parameters - `expectation_configuration` and `match_type`.
 
@@ -65,7 +42,7 @@ Each of the Expectation Suite methods that support a Create, Read, Update, or De
     - `success` criteria are more exacting - in addition to the `domain` kwargs, these include those kwargs used when evaluating the success of an Expectation, like `mostly`, `max`, or `value_set`.
     -`runtime` are the most specific - in addition to `domain_kwargs` and `success_kwargs`, these include kwargs used for runtime configuration. Currently, these include `result_format`, `include_config`, and `catch_exceptions`
 
-### How to access
+## Access
 
 You will rarely need to directly access an Expectation Suite.  If you do need to edit one, the simplest way is through the CLI.  To do so, run the command:
 
@@ -77,7 +54,7 @@ This will open a Jupyter Notebook where each Expectation in the Expectation Suit
 
 In almost all other circumstances you will simply pass the name of any relevant Expectation Suites to an object such as a Checkpoint that will manage accessing and using it for you.
 
-### Saving Expectation Suites
+## Save Expectation Suites
 
 Each Expectation Suite is saved in an Expectation Store, as a JSON file in the `great_expectations/expectations` subdirectory of the Data Context. Best practice is for users to check these files into the version control each time they are updated, in the same way they treat their source files. This discipline allows data quality to be an integral part of versioned pipeline releases.
 

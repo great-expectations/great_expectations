@@ -2,6 +2,8 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 
+pytestmarks = pytest.mark.filesystem
+
 
 def read_config_from_file(config_filename):
     with open(config_filename) as f_:
@@ -10,6 +12,7 @@ def read_config_from_file(config_filename):
     return config
 
 
+@pytest.mark.filesystem
 def test_add_store_immediately_adds_to_config(empty_data_context):
     context = empty_data_context
     config_filename = context.root_directory + "/great_expectations.yml"
@@ -25,6 +28,7 @@ def test_add_store_immediately_adds_to_config(empty_data_context):
     assert "my_new_store" in read_config_from_file(config_filename)
 
 
+@pytest.mark.filesystem
 def test_add_datasource(empty_data_context):
     context = empty_data_context
     config_filename = context.root_directory + "/great_expectations.yml"

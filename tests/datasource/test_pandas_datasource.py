@@ -7,11 +7,14 @@ import boto3
 import pandas as pd
 import pytest
 from moto import mock_s3
-from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.util import nested_update
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import (
     DataContextConfigSchema,
     DatasourceConfig,
@@ -27,9 +30,10 @@ from great_expectations.exceptions import BatchKwargsError
 from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import BridgeValidator
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
+@pytest.mark.filesystem
 def test_standalone_pandas_datasource(test_folder_connection_path_csv):
     datasource = PandasDatasource(
         "PandasCSV",
@@ -71,6 +75,7 @@ def test_standalone_pandas_datasource(test_folder_connection_path_csv):
     assert isinstance(batch.batch_markers, BatchMarkers)
 
 
+@pytest.mark.filesystem
 def test_create_pandas_datasource(
     data_context_parameterized_expectation_suite, tmp_path_factory
 ):
@@ -99,7 +104,7 @@ def test_create_pandas_datasource(
     with open(
         os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
-            "great_expectations.yml",
+            FileDataContext.GX_YML,
         ),
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
@@ -126,6 +131,7 @@ def test_create_pandas_datasource(
     )
 
 
+@pytest.mark.filesystem
 def test_pandas_datasource_custom_data_asset(
     data_context_parameterized_expectation_suite, test_folder_connection_path_csv
 ):
@@ -152,7 +158,7 @@ def test_pandas_datasource_custom_data_asset(
     with open(
         os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
-            "great_expectations.yml",
+            FileDataContext.GX_YML,
         ),
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
@@ -170,18 +176,20 @@ def test_pandas_datasource_custom_data_asset(
     data_context_parameterized_expectation_suite.add_expectation_suite(
         expectation_suite_name="test"
     )
-    with pytest.deprecated_call():  # "name being deprecated as a batch_parameter. Please use data_asset_name instead.
-        batch = data_context_parameterized_expectation_suite.get_batch(
-            expectation_suite_name="test",
-            batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
-                datasource=name, batch_kwargs_generator="subdir_reader", name="test"
-            ),
-        )
+    batch = data_context_parameterized_expectation_suite.get_batch(
+        expectation_suite_name="test",
+        batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
+            datasource=name,
+            batch_kwargs_generator="subdir_reader",
+            data_asset_name="test",
+        ),
+    )
     assert type(batch).__name__ == "CustomPandasDataset"
     res = batch.expect_column_values_to_have_odd_lengths("col_2")
     assert res.success is True
 
 
+@pytest.mark.filesystem
 def test_pandas_source_read_csv(
     data_context_parameterized_expectation_suite, tmp_path_factory
 ):
@@ -291,9 +299,13 @@ def test_pandas_source_read_csv(
     reason="pyarrow and fastparquet are not installed",
 )
 @mock_s3
+@pytest.mark.aws_deps
 def test_s3_pandas_source_read_parquet(
-    data_context_parameterized_expectation_suite, tmp_path_factory
+    data_context_parameterized_expectation_suite, tmp_path_factory, monkeypatch
 ):
+    # remove env variables, which can get in the way the Mocked S3 client.
+    monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
+
     test_bucket = "test-bucket"
     # set up dummy bucket
     s3 = boto3.client("s3", region_name="us-east-1")
@@ -342,6 +354,7 @@ def test_s3_pandas_source_read_parquet(
     assert batch["col_1"][4] == 5
 
 
+@pytest.mark.filesystem
 def test_invalid_reader_pandas_datasource(tmp_path_factory):
     basepath = str(tmp_path_factory.mktemp("test_invalid_reader_pandas_datasource"))
     datasource = PandasDatasource(
@@ -395,6 +408,7 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
     assert batch.data["a"][0] == 1
 
 
+@pytest.mark.filesystem
 def test_read_limit(test_folder_connection_path_csv):
     datasource = PandasDatasource(
         "PandasCSV",
@@ -428,6 +442,7 @@ def test_read_limit(test_folder_connection_path_csv):
     assert isinstance(batch.batch_markers, BatchMarkers)
 
 
+@pytest.mark.unit
 def test_process_batch_parameters():
     batch_kwargs = PandasDatasource("test").process_batch_parameters(limit=1)
     assert batch_kwargs == {"reader_options": {"nrows": 1}}
@@ -438,6 +453,7 @@ def test_process_batch_parameters():
     assert batch_kwargs == {"dataset_options": {"caching": False}}
 
 
+@pytest.mark.filesystem
 def test_pandas_datasource_processes_dataset_options(
     test_folder_connection_path_csv, empty_data_context
 ):
@@ -463,6 +479,7 @@ def test_pandas_datasource_processes_dataset_options(
     assert dataset.caching is False
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "reader_fn",
     [pd.read_csv, pd.read_excel, pd.read_parquet, pd.read_pickle, pd.read_sas],

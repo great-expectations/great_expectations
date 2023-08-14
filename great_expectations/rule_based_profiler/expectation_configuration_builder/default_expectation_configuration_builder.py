@@ -75,7 +75,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         "kwargs",
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         expectation_type: str,
         meta: Optional[Dict[str, Any]] = None,
@@ -274,9 +274,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         idx: int
         token: Union[str, list]
         for idx, token in enumerate(substituted_term_list):
-            if (not any([isinstance(t, ParseResults) for t in token])) and len(
-                token
-            ) > 1:
+            if (not any(isinstance(t, ParseResults) for t in token)) and len(token) > 1:
                 substituted_term_list[idx] = eval("".join([str(t) for t in token]))
             elif isinstance(token, ParseResults):
                 self._build_binary_list(substituted_term_list=token)
@@ -313,7 +311,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         for idx, token in enumerate(binary_list):
             if (
                 (not isinstance(token, bool))
-                and (not any([isinstance(t, ParseResults) for t in token]))
+                and (not any(isinstance(t, ParseResults) for t in token))
                 and (len(token) > 1)
             ):
                 binary_list[idx] = eval("".join([str(t) for t in token]))

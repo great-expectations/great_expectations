@@ -2,14 +2,14 @@ from itertools import zip_longest
 from typing import Dict, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
+    BatchExpectation,
     InvalidExpectationConfigurationError,
-    TableExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -21,11 +21,11 @@ from great_expectations.render.renderer_configuration import (
 from great_expectations.render.util import substitute_none_for_missing
 
 
-class ExpectTableColumnsToMatchOrderedList(TableExpectation):
+class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
     """Expect the columns to exactly match a specified list.
 
     expect_table_columns_to_match_ordered_list is a \
-    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
+    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     Args:
         column_list (list of str): \

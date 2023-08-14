@@ -1,0 +1,40 @@
+To make Great Expectations look for Validation Results in an S3 bucket, set the ``validations_store_name`` variable in `great_expectations.yml` to the name of your S3 Validations Store as shown in the following example:
+
+```yaml title="File contents: great_expectations.yml"
+class_name: ValidationsStore
+store_backend:
+  class_name: TupleS3StoreBackend
+  bucket: '<your_s3_bucket_name>'
+  prefix: '<your_s3_bucket_folder_name>'
+  boto3_options:
+    endpoint_url: ${S3_ENDPOINT} # Uses the S3_ENDPOINT environment variable to determine which endpoint to use.
+    region_name: '<your_aws_region_name>'
+```
+
+Add the following code to `great_expectations.yml` to configure the IAM user:
+
+```yaml title="File contents: great_expectations.yml"
+class_name: ExpectationsStore
+store_backend:
+  class_name: TupleS3StoreBackend
+  bucket: '<your_s3_bucket_name>'
+  prefix: '<your_s3_bucket_folder_name>'
+  boto3_options:
+    aws_access_key_id: ${AWS_ACCESS_KEY_ID} # Uses the AWS_ACCESS_KEY_ID environment variable to get aws_access_key_id.
+    aws_secret_access_key: ${AWS_ACCESS_KEY_ID}
+    aws_session_token: ${AWS_ACCESS_KEY_ID}
+```
+
+Add the following code to `great_expectations.yml` to configure the IAM Assume Role:
+
+```yaml title="File contents: great_expectations.yml"
+class_name: ExpectationsStore
+store_backend:
+  class_name: TupleS3StoreBackend
+  bucket: '<your_s3_bucket_name>'
+  prefix: '<your_s3_bucket_folder_name>'
+  boto3_options:
+    assume_role_arn: '<your_role_to_assume>'
+    region_name: '<your_aws_region_name>'
+    assume_role_duration: session_duration_in_seconds
+```

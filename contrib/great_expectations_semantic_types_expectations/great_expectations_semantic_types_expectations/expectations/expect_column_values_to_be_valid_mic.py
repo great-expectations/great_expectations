@@ -29,7 +29,6 @@ def is_valid_mic(mic_code: str, df) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidMic(ColumnMapMetricProvider):
-
     url = "https://www.iso20022.org/sites/default/files/ISO10383_MIC/ISO10383_MIC.csv"
     df = pd.read_csv(url, encoding="cp1250")
 

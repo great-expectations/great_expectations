@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     InvalidExpectationConfigurationError,
 )
 from great_expectations.expectations.util import (
@@ -19,7 +19,8 @@ from great_expectations.render.util import (
 )
 
 
-class ExpectColumnDistinctValuesToBeContinuous(ColumnExpectation):
+class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
+    """Expect the set of distinct column values to be continuous."""
 
     examples = [
         {

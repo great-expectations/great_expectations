@@ -498,7 +498,6 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
         return expectations, new_block
 
     def _render_bullet_list(self, expectations):
-
         new_block = self._bullet_list_renderer.render(
             expectations,
             include_column_name=False,

@@ -15,12 +15,22 @@
             ],
             "type": "string"
         },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
         "order_by": {
             "title": "Order By",
             "type": "array",
             "items": {
                 "$ref": "#/definitions/Sorter"
             }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
         },
         "filepath_or_buffer": {
             "title": "Filepath Or Buffer",
@@ -40,21 +50,59 @@
         },
         "sep": {
             "title": "Sep",
-            "default": "NO_DEFAULT"
+            "type": "string"
         },
         "delimiter": {
-            "title": "Delimiter"
+            "title": "Delimiter",
+            "type": "string"
         },
         "header": {
             "title": "Header",
-            "default": "infer"
+            "default": "infer",
+            "anyOf": [
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "enum": [
+                        "infer"
+                    ],
+                    "type": "string"
+                }
+            ]
         },
         "names": {
             "title": "Names",
-            "default": "NO_DEFAULT"
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
         },
         "index_col": {
-            "title": "Index Col"
+            "title": "Index Col",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "enum": [
+                        false
+                    ],
+                    "type": "boolean"
+                }
+            ]
         },
         "usecols": {
             "title": "Usecols",
@@ -75,22 +123,30 @@
         },
         "squeeze": {
             "title": "Squeeze",
-            "default": false
+            "type": "boolean"
         },
         "prefix": {
             "title": "Prefix",
-            "default": "NO_DEFAULT"
+            "type": "string"
         },
         "mangle_dupe_cols": {
             "title": "Mangle Dupe Cols",
-            "default": true
+            "default": true,
+            "type": "boolean"
         },
         "dtype": {
             "title": "Dtype",
             "type": "object"
         },
         "engine": {
-            "title": "Engine"
+            "title": "Engine",
+            "enum": [
+                "c",
+                "python",
+                "pyarrow",
+                "python-fwf"
+            ],
+            "type": "string"
         },
         "converters": {
             "title": "Converters"
@@ -103,7 +159,8 @@
         },
         "skipinitialspace": {
             "title": "Skipinitialspace",
-            "default": false
+            "default": false,
+            "type": "boolean"
         },
         "skiprows": {
             "title": "Skiprows",
@@ -121,29 +178,35 @@
         },
         "skipfooter": {
             "title": "Skipfooter",
-            "default": 0
+            "default": 0,
+            "type": "integer"
         },
         "nrows": {
-            "title": "Nrows"
+            "title": "Nrows",
+            "type": "integer"
         },
         "na_values": {
             "title": "Na Values"
         },
         "keep_default_na": {
             "title": "Keep Default Na",
-            "default": true
+            "default": true,
+            "type": "boolean"
         },
         "na_filter": {
             "title": "Na Filter",
-            "default": true
+            "default": true,
+            "type": "boolean"
         },
         "verbose": {
             "title": "Verbose",
-            "default": false
+            "default": false,
+            "type": "boolean"
         },
         "skip_blank_lines": {
             "title": "Skip Blank Lines",
-            "default": true
+            "default": true,
+            "type": "boolean"
         },
         "parse_dates": {
             "title": "Parse Dates",
@@ -151,36 +214,60 @@
         },
         "infer_datetime_format": {
             "title": "Infer Datetime Format",
-            "default": false
+            "default": false,
+            "type": "boolean"
         },
         "keep_date_col": {
             "title": "Keep Date Col",
-            "default": false
+            "default": false,
+            "type": "boolean"
         },
         "date_parser": {
             "title": "Date Parser"
         },
         "dayfirst": {
             "title": "Dayfirst",
-            "default": false
+            "default": false,
+            "type": "boolean"
         },
         "cache_dates": {
             "title": "Cache Dates",
-            "default": true
+            "default": true,
+            "type": "boolean"
         },
         "iterator": {
             "title": "Iterator",
-            "default": false
+            "default": false,
+            "type": "boolean"
         },
         "chunksize": {
-            "title": "Chunksize"
+            "title": "Chunksize",
+            "type": "integer"
         },
         "compression": {
             "title": "Compression",
-            "default": "infer"
+            "default": "infer",
+            "anyOf": [
+                {
+                    "enum": [
+                        "infer",
+                        "gzip",
+                        "bz2",
+                        "zip",
+                        "xz",
+                        "zstd",
+                        "tar"
+                    ],
+                    "type": "string"
+                },
+                {
+                    "type": "object"
+                }
+            ]
         },
         "thousands": {
-            "title": "Thousands"
+            "title": "Thousands",
+            "type": "string"
         },
         "decimal": {
             "title": "Decimal",
@@ -188,46 +275,55 @@
             "type": "string"
         },
         "lineterminator": {
-            "title": "Lineterminator"
+            "title": "Lineterminator",
+            "type": "string"
         },
         "quotechar": {
             "title": "Quotechar",
-            "default": "\""
+            "default": "\"",
+            "type": "string"
         },
         "quoting": {
             "title": "Quoting",
-            "default": 0
+            "default": 0,
+            "type": "integer"
         },
         "doublequote": {
             "title": "Doublequote",
-            "default": true
+            "default": true,
+            "type": "boolean"
         },
         "escapechar": {
-            "title": "Escapechar"
+            "title": "Escapechar",
+            "type": "string"
         },
         "comment": {
-            "title": "Comment"
+            "title": "Comment",
+            "type": "string"
         },
         "encoding": {
-            "title": "Encoding"
+            "title": "Encoding",
+            "type": "string"
+        },
+        "encoding_errors": {
+            "title": "Encoding Errors",
+            "default": "strict",
+            "type": "string"
         },
         "dialect": {
             "title": "Dialect",
             "type": "string"
         },
         "error_bad_lines": {
-            "title": "Error Bad Lines"
+            "title": "Error Bad Lines",
+            "type": "boolean"
         },
         "warn_bad_lines": {
-            "title": "Warn Bad Lines"
+            "title": "Warn Bad Lines",
+            "type": "boolean"
         },
         "on_bad_lines": {
             "title": "On Bad Lines"
-        },
-        "encoding_errors": {
-            "title": "Encoding Errors",
-            "default": "strict",
-            "type": "string"
         },
         "delim_whitespace": {
             "title": "Delim Whitespace",
@@ -239,10 +335,16 @@
         },
         "memory_map": {
             "title": "Memory Map",
-            "default": false
+            "default": false,
+            "type": "boolean"
         },
         "float_precision": {
-            "title": "Float Precision"
+            "title": "Float Precision",
+            "type": "string"
+        },
+        "storage_options": {
+            "title": "Storage Options",
+            "type": "object"
         }
     },
     "required": [

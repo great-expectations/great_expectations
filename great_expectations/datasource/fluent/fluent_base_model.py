@@ -22,9 +22,11 @@ from typing import (
 import pydantic
 from ruamel.yaml import YAML
 
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.config_str import ConfigStr
-from great_expectations.datasource.fluent.constants import _FIELDS_ALWAYS_SET
+from great_expectations.datasource.fluent.constants import (
+    _ASSETS_KEY,
+    _FIELDS_ALWAYS_SET,
+)
 
 if TYPE_CHECKING:
     MappingIntStrAny = Mapping[Union[int, str], Any]
@@ -57,6 +59,11 @@ class FluentBaseModel(pydantic.BaseModel):
     https://docs.pydantic.dev/usage/exporting_models/
     """
 
+    # Due to namespace collisions with certain keywords like 'schema', we've set the default of
+    # `by_alias` for the various serialization methods to `True`.
+    # If we're using an alias, the assumption is that we want to serialize with that alias.
+    # Related FastAPI thread that discusses overriding this default: https://github.com/tiangolo/fastapi/discussions/2753
+
     class Config:
         extra = pydantic.Extra.forbid
 
@@ -69,7 +76,7 @@ class FluentBaseModel(pydantic.BaseModel):
         return config
 
     @overload
-    def yaml(
+    def yaml(  # noqa: PLR0913
         self,
         stream_or_path: Union[StringIO, None] = None,
         *,
@@ -86,7 +93,7 @@ class FluentBaseModel(pydantic.BaseModel):
         ...
 
     @overload
-    def yaml(
+    def yaml(  # noqa: PLR0913
         self,
         stream_or_path: pathlib.Path,
         *,
@@ -102,14 +109,13 @@ class FluentBaseModel(pydantic.BaseModel):
     ) -> pathlib.Path:
         ...
 
-    @public_api
-    def yaml(
+    def yaml(  # noqa: PLR0913
         self,
         stream_or_path: Union[StringIO, pathlib.Path, None] = None,
         *,
         include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
         exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
-        by_alias: bool = False,
+        by_alias: bool = True,
         exclude_unset: bool = True,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
@@ -144,13 +150,12 @@ class FluentBaseModel(pydantic.BaseModel):
             return stream_or_path
         return stream_or_path.getvalue()
 
-    @public_api
-    def json(
+    def json(  # noqa: PLR0913
         self,
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,
         exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
-        by_alias: bool = False,
+        by_alias: bool = True,
         # deprecated - use exclude_unset instead
         skip_defaults: bool | None = None,
         # Default to True to prevent serializing long configs full of unset default values
@@ -172,6 +177,8 @@ class FluentBaseModel(pydantic.BaseModel):
         default.
         """
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
+        _update__fields_set__on_truthyness(self, _ASSETS_KEY)
+
         return super().json(
             include=include,
             exclude=exclude,
@@ -185,12 +192,12 @@ class FluentBaseModel(pydantic.BaseModel):
             **dumps_kwargs,
         )
 
-    def _json_dict(
+    def _json_dict(  # noqa: PLR0913
         self,
         *,
         include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
         exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
-        by_alias: bool = False,
+        by_alias: bool = True,
         exclude_unset: bool = True,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
@@ -216,13 +223,12 @@ class FluentBaseModel(pydantic.BaseModel):
             )
         )
 
-    @public_api
-    def dict(
+    def dict(  # noqa: PLR0913
         self,
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,
         exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
-        by_alias: bool = False,
+        by_alias: bool = True,
         # Default to True to prevent serializing long configs full of unset default values
         exclude_unset: bool = True,
         exclude_defaults: bool = False,
@@ -240,6 +246,8 @@ class FluentBaseModel(pydantic.BaseModel):
         default.
         """
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
+        _update__fields_set__on_truthyness(self, _ASSETS_KEY)
+
         result = super().dict(
             include=include,
             exclude=exclude,
@@ -285,16 +293,41 @@ class FluentBaseModel(pydantic.BaseModel):
 
 def _recursively_set_config_value(
     data: MutableMapping | MutableSequence, config_provider: _ConfigurationProvider
-):
+) -> None:
     if isinstance(data, MutableMapping):
         for k, v in data.items():
             if isinstance(v, ConfigStr):
                 data[k] = v.get_config_value(config_provider)
             elif isinstance(v, (MutableMapping, MutableSequence)):
-                return _recursively_set_config_value(v, config_provider)
+                _recursively_set_config_value(v, config_provider)
     elif isinstance(data, MutableSequence):
         for i, v in enumerate(data):
             if isinstance(v, ConfigStr):
                 data[i] = v.get_config_value(config_provider)
             elif isinstance(v, (MutableMapping, MutableSequence)):
-                return _recursively_set_config_value(v, config_provider)
+                _recursively_set_config_value(v, config_provider)
+
+
+def _update__fields_set__on_truthyness(model: FluentBaseModel, field_name: str) -> None:
+    """
+    This method updates the special `__fields__set__` attribute if the provided field is
+    present and the value truthy. Otherwise it removes the entry from `__fields_set__`.
+
+    For background `__fields_set__` is what determines whether or not a field is
+    serialized when `exclude_unset` is used with `.dict()`/`.json()`/`.yaml()`.
+
+    This is set automatically in most cases, but if a field was set with a `pre`
+    validator then this will not have been updated and so if we want it to be dumped
+    when `exclude_unset` is used we need to update `__fields_set__`.
+
+    https://docs.pydantic.dev/usage/validators/#pre-and-per-item-validators
+    https://docs.pydantic.dev/usage/exporting_models/#modeldict
+    """
+    if getattr(model, field_name, None):
+        model.__fields_set__.add(field_name)
+        logger.debug(f"{model.__class__.__name__}.__fields_set__ {field_name} added")
+    else:
+        model.__fields_set__.discard(field_name)
+        logger.debug(
+            f"{model.__class__.__name__}.__fields_set__ {field_name} discarded"
+        )

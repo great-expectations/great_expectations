@@ -1,8 +1,13 @@
+import pytest
+
 from great_expectations.expectations.row_conditions import (
     _parse_great_expectations_condition,
     parse_condition_to_spark,
     parse_condition_to_sqlalchemy,
 )
+
+# module level markers
+pytestmark = pytest.mark.unit
 
 
 def test_notnull_parser():
@@ -77,4 +82,7 @@ def test_parse_condition_to_sqlalchemy(sa):
     assert str(res) == "foo != :foo_1"
 
     res = parse_condition_to_sqlalchemy('col("foo") <= 1.34')
+    assert str(res) == "foo <= :foo_1"
+
+    res = parse_condition_to_sqlalchemy('col("foo") <= date("2023-03-13")')
     assert str(res) == "foo <= :foo_1"

@@ -28,6 +28,7 @@ from tests.integration.usage_statistics.test_usage_statistics_messages import (
 )
 
 
+@pytest.mark.project
 def test_comprehensive_list_of_messages():
     """Ensure that we have a comprehensive set of tests for known messages, by
     forcing a manual update to this list when a message is added or removed, and
@@ -91,6 +92,7 @@ def test_comprehensive_list_of_messages():
     )
 
 
+@pytest.mark.unit
 def test_init_message():
     usage_stats_records_messages = [
         "data_context.__init__",
@@ -109,6 +111,7 @@ def test_init_message():
             ).validate(message["event_payload"])
 
 
+@pytest.mark.unit
 def test_data_asset_validate_message():
     usage_stats_records_messages = [
         "data_asset.validate",
@@ -127,6 +130,7 @@ def test_data_asset_validate_message():
             ).validate(message["event_payload"])
 
 
+@pytest.mark.unit
 def test_data_context_add_datasource_message():
     usage_stats_records_messages = [
         "data_context.add_datasource",
@@ -145,6 +149,7 @@ def test_data_context_add_datasource_message():
             ).validate(message["event_payload"])
 
 
+@pytest.mark.unit
 def test_data_context_get_batch_list_message():
     usage_stats_records_messages = [
         "data_context.get_batch_list",
@@ -162,6 +167,7 @@ def test_data_context_get_batch_list_message():
             ).validate(message["event_payload"])
 
 
+@pytest.mark.unit
 def test_checkpoint_run_message():
     usage_stats_records_messages = [
         "checkpoint.run",
@@ -179,6 +185,7 @@ def test_checkpoint_run_message():
             ).validate(message["event_payload"])
 
 
+@pytest.mark.unit
 def test_run_validation_operator_message():
     usage_stats_records_messages = ["data_context.run_validation_operator"]
     for message_type in usage_stats_records_messages:
@@ -194,6 +201,7 @@ def test_run_validation_operator_message():
             ).validate(message["event_payload"])
 
 
+@pytest.mark.unit
 def test_legacy_profiler_build_suite_message():
     usage_stats_records_messages = [
         "legacy_profiler.build_suite",
@@ -211,6 +219,7 @@ def test_legacy_profiler_build_suite_message():
             ).validate(message["event_payload"])
 
 
+@pytest.mark.unit
 def test_data_context_save_expectation_suite_message():
     usage_stats_records_messages = [
         "data_context.save_expectation_suite",
@@ -230,6 +239,7 @@ def test_data_context_save_expectation_suite_message():
             ).validate(message["event_payload"])
 
 
+@pytest.mark.unit
 def test_datasource_sqlalchemy_connect_message():
     usage_stats_records_messages = [
         "datasource.sqlalchemy.connect",
@@ -248,13 +258,13 @@ def test_datasource_sqlalchemy_connect_message():
             ).validate(message["event_payload"])
 
 
+@pytest.mark.unit
 def test_cli_data_asset_validate():
     usage_stats_records_messages = [
         "data_asset.validate",
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
-
             # record itself
             jsonschema.validators.Draft202012Validator(
                 schema=anonymized_usage_statistics_record_schema,
@@ -262,6 +272,7 @@ def test_cli_data_asset_validate():
             ).validate(message)
 
 
+@pytest.mark.unit
 def test_cli_new_ds_choice_message():
     usage_stats_records_messages = [
         "cli.new_ds_choice",
@@ -275,6 +286,7 @@ def test_cli_new_ds_choice_message():
             ).validate(message["event_payload"])
 
 
+@pytest.mark.unit
 def test_cli_suite_new_message():
     usage_stats_records_messages = [
         "cli.suite.new",
@@ -292,6 +304,7 @@ def test_cli_suite_new_message():
             ).validate(message["event_payload"])
 
 
+@pytest.mark.unit
 def test_cli_suite_edit_message():
     usage_stats_records_messages = [
         "cli.suite.edit",
@@ -309,7 +322,7 @@ def test_cli_suite_edit_message():
             ).validate(message["event_payload"])
 
 
-@pytest.mark.slow  # 2.42s
+@pytest.mark.unit
 def test_test_yaml_config_messages():
     usage_stats_records_messages = [
         "data_context.test_yaml_config",
@@ -327,6 +340,7 @@ def test_test_yaml_config_messages():
             ).validate(message["event_payload"])
 
 
+@pytest.mark.unit
 def test_usage_stats_empty_payload_messages():
     usage_stats_records_messages = [
         "data_context.build_data_docs",
@@ -347,6 +361,7 @@ def test_usage_stats_empty_payload_messages():
             ).validate(message["event_payload"])
 
 
+@pytest.mark.unit
 def test_usage_stats_expectation_suite_messages():
     usage_stats_records_messages = [
         "expectation_suite.add_expectation",
@@ -363,7 +378,7 @@ def test_usage_stats_expectation_suite_messages():
             ).validate(message["event_payload"])
 
 
-@pytest.mark.slow  # 5.20s
+@pytest.mark.unit
 def test_usage_stats_cli_payload_messages():
     usage_stats_records_messages = [
         "cli.checkpoint.delete",
@@ -391,6 +406,7 @@ def test_usage_stats_cli_payload_messages():
         "cli.validation_operator.run",
     ]
     for message_type in usage_stats_records_messages:
+        print(message_type)
         for message in valid_usage_statistics_messages[message_type]:
             jsonschema.validators.Draft202012Validator(
                 schema=anonymized_usage_statistics_record_schema,
@@ -398,6 +414,7 @@ def test_usage_stats_cli_payload_messages():
             ).validate(message)
 
 
+@pytest.mark.unit
 def test_rule_based_profiler_run_message():
     usage_stats_records_messages = [
         "profiler.run",
@@ -414,6 +431,7 @@ def test_rule_based_profiler_run_message():
             ).validate(message["event_payload"])
 
 
+@pytest.mark.unit
 def test_cloud_migrate_event():
     usage_stats_records_messages = [
         UsageStatsEvents.CLOUD_MIGRATE,
@@ -430,6 +448,7 @@ def test_cloud_migrate_event():
             ).validate(message["event_payload"])
 
 
+@pytest.mark.unit
 def test_usage_stats_schema_in_codebase_is_up_to_date() -> None:
     path: str = file_relative_path(
         __file__,
