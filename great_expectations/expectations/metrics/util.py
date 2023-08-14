@@ -246,9 +246,9 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
         # MSSQL
         if issubclass(dialect.dialect, sa.dialects.mssql.pyodbc.MSDialect_pyodbc):
             if positive:
-                return BinaryExpression(column, literal(regex), custom_op("LIKE"))
+                return sqlalchemy.BinaryExpression(column, sqlalchemy.literal(regex), sqlalchemy.custom_op("LIKE"))
             else:
-                return BinaryExpression(column, literal(regex), custom_op("NOT LIKE"))
+                return sqlalchemy.BinaryExpression(column, sqlalchemy.literal(regex), sqlalchemy.custom_op("NOT LIKE"))
     except (
         AttributeError,
         TypeError,
