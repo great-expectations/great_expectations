@@ -396,6 +396,7 @@ filterwarnings = [
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
     # The warnings in this section should be addressed (fixed or ignored) but are ignored here temporarily to help allow
     # turning on "warnings are errors" so new warnings become errors and are addressed during PRs.
+    'ignore: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives:DeprecationWarning',
 
     # python
     # Example Actual Warning: RuntimeWarning: divide by zero encountered in divide, RuntimeWarning: divide by zero encountered in true_divide
@@ -509,9 +510,13 @@ markers = [
     "all_backends: mark tests that run against all execution engine backends",
     "athena: mark tests that require pyathena",
     "aws_creds: mark all tests that require aws credentials",
+    "aws_deps: mark tests that need aws dependencies like boto", 
     "big: mark tests that don't have external dependencies but aren't unit tests",
     "cli: mark all tests in the /cli directory.",
     "cloud: mark test as being relevant to Great Expectations Cloud.",
+    "docs-basic: mark a test as a docs test, that does not require additional credentials.",
+    "docs-creds-needed: mark a test as a docs test that needs additional cloud credentials (these will not run on public forks).",
+    "databricks: mark test as requiring databricks.",
     "docs: mark a test as a docs test.",
     "docs-spark: temporarily mark a test as a docs test that depends on spark.",
     "e2e: mark test as an E2E test.",
