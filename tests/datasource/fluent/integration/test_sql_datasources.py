@@ -203,14 +203,10 @@ def snowflake_ds(context: EphemeralDataContext) -> SnowflakeDatasource:
     [
         param("unquoted_lower"),
         param("quoted_lower"),
-        param(
-            "unquoted_upper",
-        ),
+        param("unquoted_upper"),
         param("quoted_upper"),
         param("quoted_mixed"),
-        param(
-            "unquoted_mixed",
-        ),
+        param("unquoted_mixed"),
     ],
 )
 class TestTableIdentifiers:
@@ -232,7 +228,9 @@ class TestTableIdentifiers:
         asset_name: str,
         table_factory: TableFactory,
     ):
-        table_name: str = TABLE_NAME_MAPPING["postgres"][asset_name]
+        table_name: str = TABLE_NAME_MAPPING["postgres"].get(asset_name)
+        if not table_name:
+            pytest.skip(f"no '{asset_name}' table_name for databricks")
         # create table
         table_factory(
             engine=postgres_ds.get_engine(), table_names={table_name}, schema="public"
@@ -269,10 +267,10 @@ class TestTableIdentifiers:
         asset_name: str,
         table_factory: TableFactory,
     ):
-        table_name: str = TABLE_NAME_MAPPING["snowflake"][asset_name]
+        table_name = TABLE_NAME_MAPPING["snowflake"].get(asset_name)
+        if not table_name:
+            pytest.skip(f"no '{asset_name}' table_name for databricks")
         # create table
-        # with snowflake_ds.get_engine().connect() as conn:
-        #     conn.execute("USE SCHEMA ci.public")
         table_factory(engine=snowflake_ds.get_engine(), table_names={table_name})
 
         table_names: list[str] = inspect(snowflake_ds.get_engine()).get_table_names()
