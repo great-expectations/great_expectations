@@ -235,7 +235,7 @@ jobs:
         run: invoke ci-tests -m "unit" --xdist --timeout=1.5 --slowest=8
 
   cloud-tests:
-    if: github.event.pull_request.draft == false && ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
+    if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
