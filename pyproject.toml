@@ -396,6 +396,7 @@ filterwarnings = [
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
     # The warnings in this section should be addressed (fixed or ignored) but are ignored here temporarily to help allow
     # turning on "warnings are errors" so new warnings become errors and are addressed during PRs.
+    'ignore: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives:DeprecationWarning',
 
     # python
     # Example Actual Warning: RuntimeWarning: divide by zero encountered in divide, RuntimeWarning: divide by zero encountered in true_divide
