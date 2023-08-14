@@ -8,9 +8,7 @@ from dateutil.parser import parse
 from tqdm.auto import tqdm
 
 from great_expectations.core import ExpectationSuite
-from great_expectations.core._docs_decorators import (
-    deprecated_method_or_class,
-)
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
@@ -40,14 +38,12 @@ if TYPE_CHECKING:
     from great_expectations.data_context.data_context import AbstractDataContext
 
 
-@deprecated_method_or_class(
-    version="0.17.9",
-    message="UserConfigurableProfiler is deprecated and will be removed in a future release. Please use DataAssistants instead.",
-)
+@public_api
 class UserConfigurableProfiler:
     """Build an Expectation Suite from a dataset.
 
-    The Expectations built are strict - they can be used to determine whether two tables are the same.
+    The Expectations built are
+    strict - they can be used to determine whether two tables are the same.
 
     Instantiate with or without a number of configuration arguments.
     Once instantiated, if these arguments change, a new Profiler will be needed.
@@ -63,22 +59,23 @@ class UserConfigurableProfiler:
 
     ```python
     semantic_types_dict = {
-            "numeric": ["c_acctbal"],
-            "string": ["c_address","c_custkey"],
-            "value_set": ["c_nationkey","c_mktsegment", 'c_custkey', 'c_name', 'c_address', 'c_phone']
-        }
+                "numeric": ["c_acctbal"],
+                "string": ["c_address","c_custkey"],
+                "value_set": ["c_nationkey","c_mktsegment", 'c_custkey', 'c_name', 'c_address', 'c_phone']
+            }
     profiler = UserConfigurableProfiler(dataset, semantic_types_dict=semantic_types_dict)
     suite = profiler.build_suite()
     ```
 
     Args:
         profile_dataset: A Great Expectations Dataset or Validator object.
-        excluded_expectations: A list of Expectations to omit from the suite.
+        excluded_expectations: A  list of Expectations to omit from the suite.
         ignored_columns: A list of columns for which you would like to NOT create Expectations.
-        not_null_only: By default, each column is evaluated for nullity. If the column values contain fewer
-            than 50% null values, then the Profiler will add `expect_column_values_to_not_be_null`;
-            if greater than 50% it will add `expect_column_values_to_be_null`. If `not_null_only` is set to `True`,
-            the Profiler will add a `not_null` Expectation irrespective of the percent nullity (and therefore will not add
+        not_null_only: By default, each column is evaluated for nullity. If the
+            column values contain fewer than 50% null values, then the Profiler will add
+            `expect_column_values_to_not_be_null`; if greater than 50% it will add
+            `expect_column_values_to_be_null`. If `not_null_only` is set to `True`, the Profiler will add a
+            `not_null` Expectation irrespective of the percent nullity (and therefore will not add
             `expect_column_values_to_be_null`).
         primary_or_compound_key: A list containing one or more columns which are a dataset's primary or
             compound key. This will create an `expect_column_values_to_be_unique` or
@@ -87,9 +84,8 @@ class UserConfigurableProfiler:
         semantic_types_dict: A dict where the keys are available semantic types
             (see `profiler.base.ProfilerSemanticTypes`) and the values are lists of columns for which you
             would like to create semantic-type-specific Expectations e.g.:
-
             ```python
-                "semantic_types": { "value_set": ["state","country"], "numeric":["age", "amount_due"]}
+            "semantic_types": { "value_set": ["state","country"], "numeric":["age", "amount_due"]}
             ```
         table_expectations_only: If `True`, this will only create the two table level
             Expectations available to this Profiler (`expect_table_columns_to_match_ordered_list` and
@@ -102,6 +98,7 @@ class UserConfigurableProfiler:
             column. If set to `"few"`, it will add a `value_set` Expectation for columns whose cardinality is
             one of `"one"`, `"two"`, `"very_few"`, or `"few"`. For the purposes of
             comparing whether two tables are identical, it might make the most sense to set this to `"unique"`.
+
     Raises:
         ValueError: If an invalid `primary_or_compound_key` is provided.
     """
@@ -225,6 +222,7 @@ class UserConfigurableProfiler:
             "BOOLEAN": self._build_expectations_value_set,
         }
 
+    @public_api
     def build_suite(self) -> ExpectationSuite:
         """Build an Expectation Suite based on the `semantic_types_dict` if one is provided.
 

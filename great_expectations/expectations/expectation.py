@@ -295,36 +295,32 @@ class Expectation(metaclass=MetaExpectation):
     """Base class for all Expectations.
 
     Expectation classes *must* have the following attributes set:
-
-    1. `domain_keys`: a tuple of the *keys* used to determine the domain of the
-        expectation
-    2. `success_keys`: a tuple of the *keys* used to determine the success of
-        the expectation.
+        1. `domain_keys`: a tuple of the *keys* used to determine the domain of the
+           expectation
+        2. `success_keys`: a tuple of the *keys* used to determine the success of
+           the expectation.
 
     In some cases, subclasses of Expectation (such as BatchExpectation) can
     inherit these properties from their parent class.
 
     They *may* optionally override `runtime_keys` and `default_kwarg_values`, and
     may optionally set an explicit value for expectation_type.
-
-    1. runtime_keys lists the keys that can be used to control output but will
-        not affect the actual success value of the expectation (such as result_format).
-    2. default_kwarg_values is a dictionary that will be used to fill unspecified
-        kwargs from the Expectation Configuration.
+        1. runtime_keys lists the keys that can be used to control output but will
+           not affect the actual success value of the expectation (such as result_format).
+        2. default_kwarg_values is a dictionary that will be used to fill unspecified
+           kwargs from the Expectation Configuration.
 
     Expectation classes *must* implement the following:
-
-    1. `_validate`
-    2. `get_validation_dependencies`
+        1. `_validate`
+        2. `get_validation_dependencies`
 
     In some cases, subclasses of Expectation, such as ColumnMapExpectation will already
     have correct implementations that may simply be inherited.
 
     Additionally, they *may* provide implementations of:
-
-    1. `validate_configuration`, which should raise an error if the configuration
-        will not be usable for the Expectation
-    2. Data Docs rendering methods decorated with the @renderer decorator. See the
+        1. `validate_configuration`, which should raise an error if the configuration
+           will not be usable for the Expectation
+        2. Data Docs rendering methods decorated with the @renderer decorator. See the
     """
 
     version = ge_version
