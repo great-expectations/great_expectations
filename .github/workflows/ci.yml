@@ -19,7 +19,7 @@ on:
 
 env:
   # Run the step only on PRs from the main repo, a scheduled, or triggered run.
-  RUN_ONuuuuuu_FORK_PR_AND_SCHEDULE_AND_TRIGGER: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+  RUN_ON_FORK_PR_AND_SCHEDULE_AND_TRIGGER: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
 
 jobs:
   ci-does-not-run-on-draft-pull-requests:
