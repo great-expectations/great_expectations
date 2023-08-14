@@ -797,38 +797,61 @@ class TestDependencies(NamedTuple):
 
 MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "athena": TestDependencies(("reqs/requirements-dev-athena.txt",)),
+    "aws_deps": TestDependencies(("reqs/requirements-dev-lite.txt",)),
     "clickhouse": TestDependencies(("reqs/requirements-dev-clickhouse.txt",)),
     "cloud": TestDependencies(
         ("reqs/requirements-dev-cloud.txt",), extra_pytest_args=("--cloud",)
     ),
-    "docs": TestDependencies(
+    "databricks": TestDependencies(
+        requirement_files=("reqs/requirements-dev-databricks.txt",),
+        services=("databricks",),
+    ),
+    "docs-basic": TestDependencies(
         # these installs are handled by the CI
         requirement_files=(
             "reqs/requirements-dev-test.txt",
-            "reqs/requirements-dev-azure.txt",
-            "reqs/requirements-dev-bigquery.txt",
             "reqs/requirements-dev-mssql.txt",
             "reqs/requirements-dev-mysql.txt",
             "reqs/requirements-dev-postgresql.txt",
-            "reqs/requirements-dev-redshift.txt",
-            "reqs/requirements-dev-snowflake.txt",
             # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
             "reqs/requirements-dev-sqlalchemy1.txt",
             "reqs/requirements-dev-trino.txt",
         ),
         services=("postgresql", "mssql", "mysql", "trino"),
         extra_pytest_args=(
-            "--aws",
-            "--azure",
-            "--bigquery",
             "--mssql",
             "--mysql",
             "--postgresql",
-            "--redshift",
-            "--snowflake",
             "--trino",
             "--docs-tests",
         ),
+    ),
+    "docs-creds-needed": TestDependencies(
+        # these installs are handled by the CI
+        requirement_files=(
+            "reqs/requirements-dev-azure.txt",
+            "reqs/requirements-dev-bigquery.txt",
+            "reqs/requirements-dev-redshift.txt",
+            "reqs/requirements-dev-snowflake.txt",
+            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
+            "reqs/requirements-dev-sqlalchemy1.txt",
+        ),
+        extra_pytest_args=(
+            "--aws",
+            "--azure",
+            "--bigquery",
+            "--redshift",
+            "--snowflake",
+            "--docs-tests",
+        ),
+    ),
+    "docs-spark": TestDependencies(
+        requirement_files=(
+            "reqs/requirements-dev-test.txt",
+            "reqs/requirements-dev-spark.txt",
+        ),
+        services=("spark",),
+        extra_pytest_args=("--spark",),
     ),
     "mssql": TestDependencies(
         ("reqs/requirements-dev-mssql.txt",),
@@ -923,7 +946,7 @@ def deps(  # noqa: PLR0913
     """
     Install dependencies for development and testing.
 
-    Specific requirement files needed for a specific test maker can be registered in `MARKER_REQ_MAPPING`,
+    Specific requirement files needed for a specific test marker can be registered in `MARKER_DEPENDENCY_MAP`,
     `invoke deps` will always check for and use these when installing dependencies.
 
     If no `markers` or `requirements-dev` are specified, the dev-contrib and
