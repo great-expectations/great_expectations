@@ -34,7 +34,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         assets (dict): dict of asset configuration (required for ConfiguredAssetDataConnector)
         execution_engine (ExecutionEngine): optional reference to ExecutionEngine
         default_regex (dict): optional regex configuration for filtering data_references
-        sorters (list): optional list of sorters for sorting data_references
+        sorters (list): optional list of sorters for sorting ``data_references``
         name_starts_with (str): Azure prefix
         delimiter (str): Azure delimiter
         azure_options (dict): wrapper object for **kwargs

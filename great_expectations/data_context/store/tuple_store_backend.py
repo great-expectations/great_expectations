@@ -1,7 +1,10 @@
 # PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
+from __future__ import annotations
+
 import functools
 import logging
 import os
+import pathlib
 import random
 import re
 import shutil
@@ -197,8 +200,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
 
             new_key = tuple(new_key)
         else:
-            filepath = os.path.normpath(filepath)
-            new_key = tuple(filepath.split(os.sep))
+            new_key = pathlib.Path(filepath).parts
         return new_key
 
     def verify_that_key_to_filepath_operation_is_reversible(self):
