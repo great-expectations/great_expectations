@@ -23,6 +23,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import (
+    file_relative_path,
     instantiate_class_from_config,
     load_class,
 )
@@ -393,11 +394,11 @@ class HtmlSiteStore:
         dir_exclusions: list[str] = []
 
         if not static_assets_source_dir:
-            static_assets_source_dir = pathlib.Path(
-                "..", "..", "render", "view", "static"
-            ).relative_to(__file__)
-        else:
-            static_assets_source_dir = pathlib.Path(static_assets_source_dir)
+            static_assets_source_dir = file_relative_path(
+                __file__,
+                pathlib.Path("..", "..", "render", "view", "static"),
+            )
+        static_assets_source_dir = pathlib.Path(static_assets_source_dir)
 
         # If `static_assets_source_absdir` contains the string ".zip", then we try to extract (unzip)
         # the static files. If the unzipping is successful, that means that Great Expectations is
