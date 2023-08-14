@@ -18,7 +18,7 @@ on:
       - '[0-9]+.[0-9]+.[0-9]+'
 
 env:
-  # Run the step only on PRs from the main repo, a scheduled, or triggered run.
+  # Run the step only on PRs from the main repo, on scheduled, or triggered runs.
   RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
 
 jobs:
