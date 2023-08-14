@@ -155,6 +155,7 @@ jobs:
           yarn install
           python ci/checks/validate_docs_snippets.py
       - name: Authenticate with GCP
+        # run authentication step only if this is a PR from the main repo, a scheduled, or triggered run.
         if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         uses: google-github-actions/auth@v1
         with:
