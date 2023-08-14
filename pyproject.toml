@@ -279,7 +279,7 @@ extend-exclude = [
 "__init__.py" = [
     "F401", # unused import
     "F403", # star imports
-    "PTH207", # use glob - __all__ needs to be list of str, noth Path
+    "PTH207", # use glob - __all__ needs to be list of str, not Path
 ]
 "great_expectations/_version.py" = [
     "PLR", # pylint - versioneer code
