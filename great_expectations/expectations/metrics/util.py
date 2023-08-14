@@ -343,7 +343,7 @@ def get_sqlalchemy_column_metadata(
                     columns = table_selectable.columns().columns
             else:
                 columns = inspector.get_columns(
-                    table_selectable,
+                    str(table_selectable),
                     schema=schema_name,
                 )
         except (
