@@ -5,6 +5,7 @@ from pprint import pformat as pf
 from typing import Final, Generator, Literal, Protocol
 
 import pytest
+from packaging.version import Version
 from pytest import param
 
 from great_expectations import get_context
@@ -13,8 +14,12 @@ from great_expectations.compatibility.sqlalchemy import (
     engine,
     inspect,
 )
+from great_expectations.compatibility.sqlalchemy import (
+    __version__ as sqlalchemy_version,
+)
 from great_expectations.data_context import EphemeralDataContext
 from great_expectations.datasource.fluent import (
+    DatabricksSQLDatasource,
     PostgresDatasource,
     SQLDatasource,
 )
@@ -22,6 +27,7 @@ from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
 )
 
+SQLA_VERSION: Final = Version(sqlalchemy_version or "0.0.0")
 LOGGER: Final = logging.getLogger("tests")
 
 PG_TABLE: Final[str] = "test_table"
@@ -40,6 +46,7 @@ TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
         "quoted_lower": f'"{PG_TABLE.lower()}"',
         "unquoted_upper": PG_TABLE.upper(),
         "quoted_upper": f'"{PG_TABLE.upper()}"',
+        "quoted_mixed": f'"{PG_TABLE.title()}"',
         "unquoted_mixed": PG_TABLE.title(),
     },
     "trino": {
@@ -47,7 +54,16 @@ TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
         "quoted_lower": f"'{TRINO_TABLE.lower()}'",
         # "unquoted_upper": TRINO_TABLE.upper(),
         # "quoted_upper": f"'{TRINO_TABLE.upper()}'",
+        # "quoted_mixed": f"'TRINO_TABLE.title()'",
         # "unquoted_mixed": TRINO_TABLE.title(),
+    },
+    "databricks_sql": {
+        "unquoted_lower": PG_TABLE.lower(),
+        "quoted_lower": f"`{PG_TABLE.lower()}`",
+        "unquoted_upper": PG_TABLE.upper(),
+        "quoted_upper": f"`{PG_TABLE.upper()}`",
+        "quoted_mixed": f"`{PG_TABLE.title()}`",
+        "unquoted_mixed": PG_TABLE.title(),
     },
 }
 
@@ -100,7 +116,7 @@ def table_factory(
             )
             return
         LOGGER.info(
-            f"Creating `{engine.dialect.name}` table for {table_names} if it does not exist"
+            f"SQLA:{SQLA_VERSION} - Creating `{engine.dialect.name}` table for {table_names} if it does not exist"
         )
         created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
         with engine.connect() as conn:
@@ -113,7 +129,8 @@ def table_factory(
                         f"CREATE TABLE IF NOT EXISTS {qualified_table_name} (id INTEGER, name VARCHAR(255))"
                     )
                 )
-                conn.commit()
+                if SQLA_VERSION >= Version("2.0"):
+                    conn.commit()
                 created_tables.append(dict(table_name=name, schema=schema))
         all_created_tables[engine.dialect.name] = created_tables
         engines[engine.dialect.name] = engine
@@ -130,7 +147,8 @@ def table_factory(
                 schema = table["schema"]
                 qualified_table_name = f"{schema}.{name}" if schema else name
                 conn.execute(TextClause(f"DROP TABLE IF EXISTS {qualified_table_name}"))
-            conn.commit()
+            if SQLA_VERSION >= Version("2.0"):
+                conn.commit()
 
 
 @pytest.fixture
@@ -151,6 +169,15 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
     return ds
 
 
+@pytest.fixture
+def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
+    ds = context.sources.add_databricks_sql(
+        "databricks_sql",
+        connection_string=r"databricks+connector://token:${DBS_TOKEN}@${DBS_HOST}:443/cloud_events?http_path=${DBS_HTTP_PATH}&catalog=catalog&schema=schema",
+    )
+    return ds
+
+
 @pytest.mark.parametrize(
     "asset_name",
     [
@@ -161,6 +188,7 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
             marks=[pytest.mark.xfail(reason="TODO: fix this")],
         ),
         param("quoted_upper"),
+        param("quoted_mixed"),
         param(
             "unquoted_mixed",
             marks=[pytest.mark.xfail(reason="TODO: fix this")],
@@ -177,9 +205,7 @@ class TestTableIdentifiers:
         table_names: list[str] = inspect(trino_ds.get_engine()).get_table_names()
         print(f"trino tables:\n{pf(table_names)}))")
 
-        trino_ds.add_table_asset(
-            asset_name, table_name=TABLE_NAME_MAPPING["trino"][asset_name]
-        )
+        trino_ds.add_table_asset(asset_name, table_name=table_name)
 
     @pytest.mark.postgresql
     def test_postgres(
@@ -198,6 +224,25 @@ class TestTableIdentifiers:
         print(f"postgres tables:\n{pf(table_names)}))")
 
         postgres_ds.add_table_asset(asset_name, table_name=table_name)
+
+    @pytest.mark.skip(reason="TODO: implement Databricks SQL integration service")
+    @pytest.mark.databricks
+    def test_databricks_sql(
+        self,
+        databricks_sql_ds: DatabricksSQLDatasource,
+        asset_name: str,
+        # table_factory: TableFactory,
+    ):
+        table_name = TABLE_NAME_MAPPING["databricks"].get(asset_name)
+        if not table_name:
+            pytest.skip(f"no '{asset_name}' table_name for databricks")
+
+        table_names: list[str] = inspect(
+            databricks_sql_ds.get_engine()
+        ).get_table_names()
+        print(f"databricks tables:\n{pf(table_names)}))")
+
+        databricks_sql_ds.add_table_asset(asset_name, table_name=table_name)
 
     @pytest.mark.parametrize(
         "datasource_type",
@@ -223,9 +268,7 @@ class TestTableIdentifiers:
         # create table
         table_factory(engine=datasource.get_engine(), table_names={table_name})
 
-        asset = datasource.add_table_asset(
-            asset_name, table_name=TABLE_NAME_MAPPING[datasource_type][asset_name]
-        )
+        asset = datasource.add_table_asset(asset_name, table_name=table_name)
 
         suite = context.add_expectation_suite(
             expectation_suite_name=f"{datasource.name}-{asset.name}"
