@@ -14,13 +14,15 @@ Data is always viewed through the lens of an Execution Engine in Great Expectati
 
 ## Relationship to other objects
 
-Execution Engines are components of <TechnicalTag relative="../" tag="datasource" text="Datasources" />.  They accept <TechnicalTag relative="../" tag="batch_request" text="Batch Requests" /> and deliver Batches.  The Execution Engine is an underlying component of the Datasource, and when you interact with the Datasource it will handle the Execution Engine for you.
+Execution Engines are components of <TechnicalTag relative="../" tag="datasource" text="Datasources" />.  They accept <TechnicalTag relative="../" tag="batch_request" text="Batch Requests" /> and deliver Batches.  The Execution Engine is an underlying component of the Data Source, and when you interact with the Data Source it will handle the Execution Engine for you.
 
 ## Use cases
 
-If a <TechnicalTag relative="../" tag="profiler" text="Profiler" /> is used to create Expectations, or if you use the [interactive workflow for creating Expectations](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), an Execution Engine will be involved as part of the Datasource used to provide data from a source data system for introspection.
+You define the Execution Engine that you want to use to process data to compute Metrics in the Data Source configuration.  After you define the Execution Engine, you don't need to interact with it because the Data Source it is configured for uses it automatically.
 
-When a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> Validates data, it uses a Datasource (and therefore an Execution Engine) to execute one or more Batch Requests and acquire the data that the Validation is run on.
+If a <TechnicalTag relative="../" tag="profiler" text="Profiler" /> is used to create Expectations, or if you use the [interactive workflow for creating Expectations](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), an Execution Engine will be involved as part of the Data Source used to provide data from a source data system for introspection.
+
+When a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> Validates data, it uses a Data Source (and therefore an Execution Engine) to execute one or more Batch Requests and acquire the data that the Validation is run on.
 
 When creating Custom Expectations and Metrics, often Execution Engine-specific logic is required for that Expectation or Metric. See [Custom Expectations](../guides/expectations/custom_expectations_lp.md) for more information.
 
@@ -32,15 +34,15 @@ Execution engines handle the interactions with the source data.  They also wrap 
 
 SqlAlchemyExecutionEngine and SparkDFExecutionEngine provide an additional feature that allows deferred resolution of Metrics, making it possible to bundle the request for several metrics into a single trip to the backend. Additional Execution Engines may also support this feature in the future.
 
-The `resolve_metric_bundle()` method of these engines computes values of a bundle of Metrics; this function is used internally by `resolve_metrics()` on Execution Engines that support bundled metrics
+The `resolve_metric_bundle()` method of these engines computes values of a bundle of Metrics; this function is used internally by `resolve_metrics()` on Execution Engines that support bundled metrics.
 
 ## Access
 
-You will not need to directly access an Execution Engine. When you interact with a Datasource it will handle the Execution Engine's operation under the hood.
+You will not need to directly access an Execution Engine. When you interact with a Data Source it will handle the Execution Engine's operation under the hood.
 
 ## Create
 
-You will not need to directly instantiate an Execution Engine.  Instead, they are automatically created as a component in a Datasource.
+You will not need to directly instantiate an Execution Engine.  Instead, they are automatically created as a component in a Data Source.
 
 If you are interested in using and accessing data with an Execution Engine that Great Expectations does not yet support, consider making your work a contribution to the [Great Expectations open source GitHub project](https://github.com/great-expectations/great_expectations).  This is a considerable undertaking, so you may also wish to [reach out to us on Slack](https://greatexpectations.io/slack) as we will be happy to provide guidance and support.
 
@@ -65,4 +67,4 @@ If you are interested in using and accessing data with an Execution Engine that 
 
 ## Configure
 
-Execution Engines are not configured directly, but determined based on the Datasource you choose.
+Execution Engines are not configured directly, but determined based on the Data Source you choose.

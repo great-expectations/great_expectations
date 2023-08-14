@@ -131,6 +131,7 @@ class DataAssistantResult(SerializableDictDot):
         profiler_execution_time: Effective Rule-Based Profiler overall execution time in seconds.
         rule_domain_builder_execution_time: Effective Rule-Based Profiler per-Rule DomainBuilder execution time in seconds.
         rule_execution_time: Effective Rule-Based Profiler per-Rule execution time in seconds.
+        rule_exception_tracebacks: Effective Rule-Based Profiler per-Rule exception tracebacks.
         metrics_by_domain: Metrics by Domain.
         expectation_configurations: Expectation configurations.
         citation: Citations.
@@ -143,6 +144,7 @@ class DataAssistantResult(SerializableDictDot):
         "profiler_execution_time",
         "rule_domain_builder_execution_time",
         "rule_execution_time",
+        "rule_exception_tracebacks",
         "metrics_by_domain",
         "expectation_configurations",
         "citation",
@@ -159,6 +161,7 @@ class DataAssistantResult(SerializableDictDot):
     profiler_execution_time: Optional[float] = None
     rule_domain_builder_execution_time: Optional[Dict[str, float]] = None
     rule_execution_time: Optional[Dict[str, float]] = None
+    rule_exception_tracebacks: Optional[Dict[str, Optional[str]]] = None
     metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = None
     expectation_configurations: Optional[List[ExpectationConfiguration]] = None
     citation: Optional[dict] = None
@@ -271,6 +274,9 @@ class DataAssistantResult(SerializableDictDot):
             ),
             "rule_execution_time": convert_to_json_serializable(
                 data=self.rule_execution_time
+            ),
+            "rule_exception_tracebacks": convert_to_json_serializable(
+                data=self.rule_exception_tracebacks
             ),
             "metrics_by_domain": [
                 {

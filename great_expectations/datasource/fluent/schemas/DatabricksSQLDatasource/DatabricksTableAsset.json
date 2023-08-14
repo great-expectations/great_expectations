@@ -1,6 +1,6 @@
 {
-    "title": "TableAsset",
-    "description": "A _SQLAsset Mixin\n\nThis is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality\nthat can be used by different SQL datasource subclasses.\n\nFor example see TableAsset defined in this module and SqliteTableAsset defined in\nsqlite_datasource.py",
+    "title": "DatabricksTableAsset",
+    "description": "--Public API--",
     "type": "object",
     "properties": {
         "name": {

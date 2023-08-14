@@ -11,7 +11,7 @@ import Prerequisites from '/docs/components/_prerequisites.jsx'
 <!-- ### 1. Import GX and instantiate a Data Context -->
 import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
 
-In this guide we will demonstrate how to connect Great Expectations to data in a SQLite database.  We will demonstrate how to create a SQLite Datasource.  With our SQLite Datasource we will then show the methods for connecting to data in a SQLite table and connecting to data from a SQLite query.
+In this guide we will demonstrate how to connect Great Expectations to data in a SQLite database.  We will demonstrate how to create a SQLite Data Source.  With our SQLite Data Source we will then show the methods for connecting to data in a SQLite table and connecting to data from a SQLite query.
 
 ## Prerequisites
 
@@ -35,25 +35,25 @@ For this example we will use a connection string to connect to our PostgreSQL da
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py connection_string"
 ```
 
-### 3. Create a SQLite Datasource
+### 3. Create a SQLite Data Source
 
-Creating a PostgreSQL Datasource is as simple as providing the `add_sqlite(...)` method a `name` by which to reference it in the future and the `connection_string` with which to access it.
+Creating a PostgreSQL Data Source is as simple as providing the `add_sqlite(...)` method a `name` by which to reference it in the future and the `connection_string` with which to access it.
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py datasource_name"
 ```
 
-With these two values, we can create our Datasource:
+With these two values, we can create our Data Source:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py datasource"
 ```
 
-:::caution Using `add_sql(...)` vs `add_sqlite(...)` to create a Datasource
+:::caution Using `add_sql(...)` vs `add_sqlite(...)` to create a Data Source
 
-The basic SQL Datasource created with `add_sql` can connect to data in a SQLite database, but it won't work as well as a SQLite Datasource from `add_sqlite(...)`.
+The basic SQL Data Source created with `add_sql` can connect to data in a SQLite database, but it won't work as well as a SQLite Data Source from `add_sqlite(...)`.
 
-SQLite stores datetime values as strings.  Because of this, a general SQL Datasource will see datetime columns as string columns, instead.  The SQLite Datasource has additional handling in place for these fields, and also has additional error reporting for SQLite specific issues.
+SQLite stores datetime values as strings.  Because of this, a general SQL Data Source will see datetime columns as string columns, instead.  The SQLite Data Source has additional handling in place for these fields, and also has additional error reporting for SQLite specific issues.
 
-If you are working with SQLite data, you should always use `add_sqlite(...)` to create your Datasource!  The `add_sql(...)` method may connect to your SQLite database, but it won't handle datetime columns properly or report errors as clearly.
+If you are working with SQLite data, you should always use `add_sqlite(...)` to create your Data Source!  The `add_sql(...)` method may connect to your SQLite database, but it won't handle datetime columns properly or report errors as clearly.
 
 :::
 

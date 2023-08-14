@@ -206,10 +206,9 @@ def check_store_backend_store_backend_id_functionality(
     assert test_utils.validate_uuid4(parsed_store_backend_id[1])
 
 
-@pytest.mark.filesystem
-@pytest.mark.big
+@pytest.mark.aws_deps
 @mock_s3
-def test_StoreBackend_id_initialization(tmp_path_factory):
+def test_StoreBackend_id_initialization(tmp_path_factory, aws_credentials):
     """
     What does this test and why?
 
@@ -351,8 +350,8 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
 
 
 @mock_s3
-@pytest.mark.big
-def test_TupleS3StoreBackend_store_backend_id():
+@pytest.mark.aws_deps
+def test_TupleS3StoreBackend_store_backend_id(aws_credentials):
     # TupleS3StoreBackend
     # Initialize without store_backend_id and check that it is generated correctly
     bucket = "leakybucket2"
@@ -550,8 +549,8 @@ def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
 
 
 @mock_s3
-@pytest.mark.big
-def test_TupleS3StoreBackend_with_prefix():
+@pytest.mark.aws_deps
+def test_TupleS3StoreBackend_with_prefix(aws_credentials):
     """
     What does this test test and why?
 
@@ -751,8 +750,8 @@ def test_TupleS3StoreBackend_with_prefix():
 
 
 @mock_s3
-@pytest.mark.big
-def test_tuple_s3_store_backend_slash_conditions():  # noqa: PLR0915
+@pytest.mark.aws_deps
+def test_tuple_s3_store_backend_slash_conditions(aws_credentials):  # noqa: PLR0915
     bucket = "my_bucket"
     prefix = None
     conn = boto3.resource("s3", region_name="us-east-1")
@@ -940,8 +939,8 @@ def test_tuple_s3_store_backend_slash_conditions():  # noqa: PLR0915
 
 
 @mock_s3
-@pytest.mark.big
-def test_TupleS3StoreBackend_with_empty_prefixes():
+@pytest.mark.aws_deps
+def test_TupleS3StoreBackend_with_empty_prefixes(aws_credentials):
     """
     What does this test test and why?
 
@@ -998,8 +997,8 @@ def test_TupleS3StoreBackend_with_empty_prefixes():
 
 
 @mock_s3
-@pytest.mark.big
-def test_TupleS3StoreBackend_with_s3_put_options():
+@pytest.mark.aws_deps
+def test_TupleS3StoreBackend_with_s3_put_options(aws_credentials):
     bucket = "leakybucket"
     conn = boto3.client("s3", region_name="us-east-1")
     conn.create_bucket(Bucket=bucket)
@@ -1283,8 +1282,8 @@ def test_TupleAzureBlobStoreBackend_account_url():
 
 @mock_s3
 @pytest.mark.slow  # 14.36s
-@pytest.mark.big
-def test_TupleS3StoreBackend_list_over_1000_keys():
+@pytest.mark.aws_deps
+def test_TupleS3StoreBackend_list_over_1000_keys(aws_credentials):
     """
     What does this test test and why?
 
