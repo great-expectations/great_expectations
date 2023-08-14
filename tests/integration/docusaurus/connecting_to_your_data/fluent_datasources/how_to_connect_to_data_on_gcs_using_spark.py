@@ -1,5 +1,5 @@
 """
-To run this code as a local environment, use the following console command:
+To run this code as a local test, use the following console command:
 ```
 pytest -v --docs-tests -k "how_to_connect_to_data_on_gcs_using_spark" tests/integration/test_script_runner.py
 ```
