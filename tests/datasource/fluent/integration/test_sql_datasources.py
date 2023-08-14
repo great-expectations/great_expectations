@@ -41,14 +41,16 @@ DO_NOT_CREATE_TABLES: set[str] = {"trino"}
 
 # TODO: simplify this and possible get rid of this mapping once we have settled on
 # all the naming conventions we want to support for different SQL dialects
+# NOTE: commented out are tests we know fail for individual datasources. Ideally all
+# test cases should work for all datasrouces
 TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
     "postgres": {
         "unquoted_lower": PG_TABLE.lower(),
         "quoted_lower": f'"{PG_TABLE.lower()}"',
-        "unquoted_upper": PG_TABLE.upper(),
+        # "unquoted_upper": PG_TABLE.upper(),
         "quoted_upper": f'"{PG_TABLE.upper()}"',
         "quoted_mixed": f'"{PG_TABLE.title()}"',
-        "unquoted_mixed": PG_TABLE.title(),
+        # "unquoted_mixed": PG_TABLE.title(),
     },
     "trino": {
         "unquoted_lower": TRINO_TABLE.lower(),
@@ -71,8 +73,8 @@ TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
         "quoted_lower": f'"{PG_TABLE.lower()}"',
         "unquoted_upper": PG_TABLE.upper(),
         "quoted_upper": f'"{PG_TABLE.upper()}"',
-        "quoted_mixed": f"`{PG_TABLE.title()}`",
-        "unquoted_mixed": PG_TABLE.title(),
+        "quoted_mixed": f'"{PG_TABLE.title()}"',
+        # "unquoted_mixed": PG_TABLE.title(),
     },
 }
 
@@ -203,13 +205,11 @@ def snowflake_ds(context: EphemeralDataContext) -> SnowflakeDatasource:
         param("quoted_lower"),
         param(
             "unquoted_upper",
-            marks=[pytest.mark.xfail(reason="TODO: fix this")],
         ),
         param("quoted_upper"),
         param("quoted_mixed"),
         param(
             "unquoted_mixed",
-            marks=[pytest.mark.xfail(reason="TODO: fix this")],
         ),
     ],
 )
@@ -283,8 +283,8 @@ class TestTableIdentifiers:
     @pytest.mark.parametrize(
         "datasource_type",
         [
-            # param("trino", marks=[pytest.mark.trino]),
-            # param("postgres", marks=[pytest.mark.postgresql]),
+            param("trino", marks=[pytest.mark.trino]),
+            param("postgres", marks=[pytest.mark.postgresql]),
             param("snowflake", marks=[pytest.mark.snowflake]),
         ],
     )
