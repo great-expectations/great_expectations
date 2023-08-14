@@ -19,7 +19,8 @@ on:
 
 env:
   # Run the step only on PRs from the main repo, a scheduled, or triggered run.
-  RUN_ON_PR_SCHEDULE_AND_TRIGGER: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+  RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+
 jobs:
   ci-does-not-run-on-draft-pull-requests:
     runs-on: ubuntu-latest
@@ -159,18 +160,18 @@ jobs:
           python ci/checks/validate_docs_snippets.py
       - name: Authenticate with GCP
 
-        if: ${{env.RUN_ON_PR_SCHEDULE_AND_TRIGGER}}
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
 
       - name: Create JSON file for following step
-        if: ${{env.RUN_ON_PR_SCHEDULE_AND_TRIGGER}}
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         run: |
           echo "$GE_TEST_GCP_CREDENTIALS" > gcp-credentials.json
 
       - name: Install and setup Google Cloud SDK
-        if: ${{env.RUN_ON_PR_SCHEDULE_AND_TRIGGER}}
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         run: |
           # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
           curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
@@ -199,7 +200,7 @@ jobs:
         run: |
           invoke docs-snippet-tests 'docs-basic' --up-services --verbose
       - name: Run the tests needing cloud credentials
-        if: ${{env.RUN_ON_PR_SCHEDULE_AND_TRIGGER}}
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         run: |
           invoke docs-snippet-tests 'docs-creds-needed' --up-services --verbose
       # Spark tests are run as part of a separate task as we have not migrated all of Spark tests just yet (ie. Spark+Athena, Spark+S3 etc)
@@ -234,7 +235,7 @@ jobs:
         run: invoke ci-tests -m "unit" --xdist --timeout=1.5 --slowest=8
 
   cloud-tests:
-    if: github.event.pull_request.draft == false && (github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' )
+    if: github.event.pull_request.draft == false && ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
