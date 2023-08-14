@@ -144,7 +144,7 @@ def get_expectations_info_dict(
 
     if include_core:
         files_found.extend(
-            glob(
+            glob(  # noqa: PTH207
                 os.path.join(  # noqa: PTH118
                     repo_path,
                     "great_expectations",
@@ -157,7 +157,7 @@ def get_expectations_info_dict(
         )
     if include_contrib:
         files_found.extend(
-            glob(
+            glob(  # noqa: PTH207
                 os.path.join(repo_path, "contrib", "**", "expect_*.py"),  # noqa: PTH118
                 recursive=True,
             )
@@ -328,7 +328,7 @@ def combine_backend_results(
     expected_full_backend_files = [
         f"{backend}_full.json" for backend in ALL_GALLERY_BACKENDS
     ]
-    found_full_backend_files = glob("*_full.json")
+    found_full_backend_files = glob("*_full.json")  # noqa: PTH207
 
     if sorted(found_full_backend_files) == sorted(expected_full_backend_files):
         logger.info(

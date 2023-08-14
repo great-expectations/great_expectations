@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import datetime
 import functools
-import glob
 import json
 import logging
-import os
+import pathlib
 import re
 import sys
 import time
@@ -21,6 +20,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Final,
     List,
     Optional,
     Sequence,
@@ -134,14 +134,9 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-
-_TEST_DEFS_DIR = os.path.join(  # noqa: PTH118
-    os.path.dirname(__file__),  # noqa: PTH120
-    "..",
-    "..",
-    "tests",
-    "test_definitions",
-)
+_TEST_DEFS_DIR: Final = pathlib.Path(
+    __file__, "..", "..", "..", "tests", "test_definitions"
+).resolve()
 
 
 @public_api
@@ -1550,14 +1545,9 @@ class Expectation(metaclass=MetaExpectation):
     def _get_examples_from_json(self):
         """Only meant to be called by self._get_examples"""
         results = []
-        found = glob.glob(
-            os.path.join(  # noqa: PTH118
-                _TEST_DEFS_DIR, "**", f"{self.expectation_type}.json"
-            ),
-            recursive=True,
-        )
+        found = next(_TEST_DEFS_DIR.rglob(f"**/{self.expectation_type}.json"), None)
         if found:
-            with open(found[0]) as fp:
+            with open(found) as fp:
                 data = json.load(fp)
             results = data["datasets"]
         return results
