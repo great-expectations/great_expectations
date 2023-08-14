@@ -6,7 +6,6 @@ import pathlib
 import re
 import tempfile
 from mimetypes import guess_type
-from typing import TYPE_CHECKING
 from zipfile import ZipFile, is_zipfile
 
 from great_expectations.core.data_context_key import DataContextKey
@@ -32,9 +31,6 @@ from great_expectations.util import (
     filter_properties_dict,
     verify_dynamic_loading_support,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.alias_types import PathStr
 
 logger = logging.getLogger(__name__)
 
@@ -385,7 +381,7 @@ class HtmlSiteStore:
             for key in keys:
                 target_store_backend.remove_key(key)
 
-    def copy_static_assets(self, static_assets_source_dir: PathStr | None = None):
+    def copy_static_assets(self, static_assets_source_dir: str | None = None):
         """
         Copies static assets, using a special "static_assets" backend store that accepts variable-length tuples as
         keys, with no filepath_template.
@@ -396,41 +392,47 @@ class HtmlSiteStore:
         if not static_assets_source_dir:
             static_assets_source_dir = file_relative_path(
                 __file__,
-                pathlib.Path("..", "..", "render", "view", "static"),
+                os.path.join("..", "..", "render", "view", "static"),  # noqa: PTH118
             )
-        static_assets_source_dir = pathlib.Path(static_assets_source_dir)
 
         # If `static_assets_source_absdir` contains the string ".zip", then we try to extract (unzip)
         # the static files. If the unzipping is successful, that means that Great Expectations is
         # installed into a zip file (see PEP 273) and we need to run this function again
-        if static_assets_source_dir.suffix == ".zip":
+        if ".zip" in static_assets_source_dir.lower():
             unzip_destdir = tempfile.mkdtemp()
             unzipped_ok = self._unzip_assets(static_assets_source_dir, unzip_destdir)
             if unzipped_ok:
                 return self.copy_static_assets(unzip_destdir)
 
-        for item in static_assets_source_dir.iterdir():
+        for item in os.listdir(static_assets_source_dir):
             # Directory
-            if item.is_dir():
-                if item.name in dir_exclusions:
+            if os.path.isdir(  # noqa: PTH112
+                os.path.join(static_assets_source_dir, item)  # noqa: PTH118
+            ):
+                if item in dir_exclusions:
                     continue
                 # Recurse
-                self.copy_static_assets(item.absolute())
+                new_source_dir = os.path.join(  # noqa: PTH118
+                    static_assets_source_dir, item
+                )
+                self.copy_static_assets(new_source_dir)
             # File
             else:
                 # Copy file over using static assets store backend
-                if item.name in file_exclusions:
+                if item in file_exclusions:
                     continue
-                source_name = item.absolute()
+                source_name = os.path.join(  # noqa: PTH118
+                    static_assets_source_dir, item
+                )
                 with open(source_name, "rb") as f:
                     # Only use path elements starting from static/ for key
-                    store_key = source_name.parts
+                    store_key: tuple[str, ...] = pathlib.Path(source_name).parts
                     store_key = store_key[store_key.index("static") :]
                     content_type, content_encoding = guess_type(item, strict=False)
 
                     if content_type is None:
                         # Use GX-known content-type if possible
-                        if source_name.suffix == ".otf":
+                        if source_name.endswith(".otf"):
                             content_type = "font/opentype"
                         else:
                             # fallback
@@ -451,9 +453,7 @@ class HtmlSiteStore:
                             content_type=content_type,
                         )
 
-    def _unzip_assets(
-        self, assets_full_path: pathlib.Path, unzip_directory: PathStr
-    ) -> bool:
+    def _unzip_assets(self, assets_full_path: str, unzip_directory: str) -> bool:
         """
         This function receives an `assets_full_path` parameter,
         (e.g. "/home/joe/libs/my_python_libs.zip/great_expectations/render/view/static")
@@ -464,11 +464,11 @@ class HtmlSiteStore:
         Otherwise, this function returns False
         """
 
-        static_assets_source_absdir = assets_full_path.resolve()
+        static_assets_source_absdir = os.path.abspath(assets_full_path)  # noqa: PTH100
 
         zip_re = re.match(
             f"(.+[.]zip){re.escape(os.sep)}(.+)",
-            str(static_assets_source_absdir),
+            static_assets_source_absdir,
             flags=re.IGNORECASE,
         )
 
