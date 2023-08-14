@@ -53,6 +53,11 @@
             "title": "Force Reuse Spark Context",
             "default": true,
             "type": "boolean"
+        },
+        "persist": {
+            "title": "Persist",
+            "default": true,
+            "type": "boolean"
         }
     },
     "required": [
