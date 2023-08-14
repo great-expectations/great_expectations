@@ -196,11 +196,9 @@ jobs:
         run: |
           invoke docs-snippet-tests 'docs-basic' --up-services --verbose
       - name: Run the tests needing cloud credentials
+        if: github.event.pull_request.head.repo.full_name == github.repository
         run: |
-          # run only on main repo, and not user-forks
-          if: github.event.pull_request.head.repo.full_name == github.repository
-          run: |
-            invoke docs-snippet-tests 'docs-creds-needed' --up-services --verbose
+          invoke docs-snippet-tests 'docs-creds-needed' --up-services --verbose
       # Spark tests are run as part of a separate task as we have not migrated all of Spark tests just yet (ie. Spark+Athena, Spark+S3 etc)
       - name: Run the Spark tests
         run: |
