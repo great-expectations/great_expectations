@@ -585,9 +585,7 @@ class _SQLAsset(DataAsset):
         candidate: Dict, requested_options: BatchRequestOptions
     ) -> bool:
         for k, v in requested_options.items():
-            if type(candidate[k]) == datetime:
-                candidate[k] = str(candidate[k])
-            elif type(candidate[k]) == date:
+            if isinstance(candidate[k], (datetime, date)):
                 candidate[k] = str(candidate[k])
 
             if v is not None and candidate[k] != v:
