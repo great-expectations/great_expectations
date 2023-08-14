@@ -63,6 +63,7 @@ class _SparkDatasource(Datasource):
     # instance attributes
     spark_config: Union[SparkConfig, None] = None
     force_reuse_spark_context: bool = True
+    persist: bool = True
 
     @staticmethod
     def _update_asset_forward_refs(asset_type: Type[_DataAssetT]) -> None:

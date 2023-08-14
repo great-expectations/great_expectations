@@ -112,8 +112,10 @@ def test_spark_data_asset_batch_metadata(
 
 
 @pytest.mark.spark
+@pytest.mark.parametrize("persist", [True, False])
 def test_spark_config_passed_to_execution_engine(
     empty_data_context: AbstractDataContext,
+    persist,
     spark_session,
 ):
     spark_config: SparkConfig | None = {
@@ -128,6 +130,7 @@ def test_spark_config_passed_to_execution_engine(
         name="my_spark_datasource",
         spark_config=spark_config,
         force_reuse_spark_context=False,
+        persist=persist,
     )
     spark_config = json.loads(json.dumps(spark_config), parse_int=str, parse_float=str)
     assert is_candidate_subset_of_target(
