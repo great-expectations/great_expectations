@@ -327,6 +327,8 @@ convention = "google"
 "trino".msg = "Please do not import trino directly, import from great_expectations.compatibility.trino instead."
 "pyarrow".msg = "Please do not import azure directly, import from great_expectations.compatibility.pyarrow instead."
 
+# -----------------------------------------------------------------
+
 [tool.pytest.ini_options]
 filterwarnings = [
     # Turn all warnings not explicitly filtered below into errors
