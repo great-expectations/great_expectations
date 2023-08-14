@@ -10,7 +10,7 @@ as low friction as possible. We are committed to work and iterate in the process
 The aim of this document is to provide guidance for vendors or community partners which wish to integrate with us as to how to test said integrations within our testing infrastructure.
 
 ### Scope
-While test requirements vary widly, we made some decisions to help us narrow down the cases we cover while keeping developer friction at a minimum.
+While test requirements vary wildly, we made some decisions to help us narrow down the cases we cover while keeping developer friction at a minimum.
 To this end we have created a taxonomy of the types of tests that our self-service integration tests framework supports.
 
 #### Type 1
