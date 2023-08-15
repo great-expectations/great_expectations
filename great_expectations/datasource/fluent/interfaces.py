@@ -51,7 +51,7 @@ logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     import pandas as pd
-    from typing_extensions import TypeAlias, TypeGuard
+    from typing_extensions import Self, TypeAlias, TypeGuard
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
@@ -267,9 +267,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     ) -> List[Sorter]:
         return Datasource.parse_order_by_sorters(order_by=order_by)
 
-    def add_sorters(
-        self: _DataAssetT, sorters: SortersDefinition
-    ) -> _DataAssetT:  # noqa: PYI019
+    def add_sorters(self: Self, sorters: SortersDefinition) -> Self:
         """Associates a sorter to this DataAsset
 
         The passed in sorters will replace any previously associated sorters.
