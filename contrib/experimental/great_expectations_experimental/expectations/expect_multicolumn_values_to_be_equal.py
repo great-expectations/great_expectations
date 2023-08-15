@@ -28,14 +28,14 @@ class MulticolumnValuesToBeEqual(MulticolumnMapMetricProvider):
 
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_list, **kwargs):
-        row_wise_cond = column_list.nunique(dropna=False, axis=1) <=1
+        row_wise_cond = column_list.nunique(dropna=False, axis=1) <= 1
         return row_wise_cond
 
     @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column_list, **kwargs):
-        conditions = sa.or_(*[
-            column_list[idx] != column_list[0] for idx in range(1, len(column_list))
-        ])
+        conditions = sa.or_(
+            *[column_list[idx] != column_list[0] for idx in range(1, len(column_list))]
+        )
         row_wise_cond = sa.not_(conditions)
         return row_wise_cond
 
@@ -47,7 +47,9 @@ class MulticolumnValuesToBeEqual(MulticolumnMapMetricProvider):
         for idx_src in range(num_columns - 1):
             for idx_dest in range(idx_src + 1, num_columns):
                 conditions.append(
-                    F.col(column_names[idx_src]).eqNullSafe(F.col(column_names[idx_dest]))
+                    F.col(column_names[idx_src]).eqNullSafe(
+                        F.col(column_names[idx_dest])
+                    )
                 )
         row_wise_cond = reduce(lambda a, b: a & b, conditions, F.lit(True))
         return row_wise_cond
@@ -101,10 +103,10 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
     examples = [
         {
             "data": {
-                "OPEN_DATE": ['20220531', '20220430', '20230728'],
-                "VALUE_DATE": ['20220531', '20220430', '20230728'],
-                "DUE_DATE": ['20220531', '20220430', '20230728'],
-                "EXPIRY_DATE": ['20230831', '20220430', '20240531'],
+                "OPEN_DATE": ["20220531", "20220430", "20230728"],
+                "VALUE_DATE": ["20220531", "20220430", "20230728"],
+                "DUE_DATE": ["20220531", "20220430", "20230728"],
+                "EXPIRY_DATE": ["20230831", "20220430", "20240531"],
             },
             "tests": [
                 {
@@ -128,13 +130,18 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
                     "out": {
                         "success": False,
                         "unexpected_list": [
-                            {"OPEN_DATE": '20220531', "DUE_DATE": '20220531',\
-                              "EXPIRY_DATE": '20230831'},
-                            {"OPEN_DATE": '20230728', "DUE_DATE": '20230728', \
-                             "EXPIRY_DATE": '20240531'},
-
+                            {
+                                "OPEN_DATE": "20220531",
+                                "DUE_DATE": "20220531",
+                                "EXPIRY_DATE": "20230831",
+                            },
+                            {
+                                "OPEN_DATE": "20230728",
+                                "DUE_DATE": "20230728",
+                                "EXPIRY_DATE": "20240531",
+                            },
                         ],
-                        "unexpected_index_list": [0,2],
+                        "unexpected_index_list": [0, 2],
                     },
                 },
             ],
@@ -171,10 +178,12 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
 
         try:
             assert "column_list" in configuration.kwargs, "column_list is required"
-            assert isinstance(configuration.kwargs["column_list"],list), \
-                "column_list must be a list"
-            assert len(configuration.kwargs["column_list"]) >= 2, \
-                "column_list must have at least 2 elements"
+            assert isinstance(
+                configuration.kwargs["column_list"], list
+            ), "column_list must be a list"
+            assert (
+                len(configuration.kwargs["column_list"]) >= 2
+            ), "column_list must have at least 2 elements"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -189,9 +198,8 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
         ],
     }
 
+
 if __name__ == "__main__":
     ExpectMulticolumnValuesToBeEqual().print_diagnostic_checklist(
         show_failed_tests=True
     )
-    
-                 
