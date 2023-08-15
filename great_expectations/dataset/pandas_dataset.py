@@ -1499,7 +1499,7 @@ Notes:
     ):
         def is_parseable(val):
             try:
-                if type(val) != str:
+                if type(val) != str:  # noqa: E721
                     raise TypeError(
                         "Values passed to expect_column_values_to_be_dateutil_parseable must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format."
                     )

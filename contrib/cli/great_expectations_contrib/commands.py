@@ -3,7 +3,7 @@ import logging
 import os
 import subprocess
 import sys
-from collections import namedtuple
+from typing import NamedTuple
 
 import click
 from cookiecutter.main import cookiecutter
@@ -15,7 +15,11 @@ from .package import GreatExpectationsContribPackageManifest
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-Command = namedtuple("Command", ["name", "full_command", "error_message"])
+
+class Command(NamedTuple):
+    name: str
+    full_command: str
+    error_message: str
 
 
 def init_cmd(url: str) -> None:
