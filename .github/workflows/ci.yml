@@ -386,7 +386,6 @@ jobs:
 
   airflow220-min-versions:
     needs: [unit-tests, static-analysis]
-    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
