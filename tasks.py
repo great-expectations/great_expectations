@@ -871,7 +871,6 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     ),
     "snowflake": TestDependencies(
         requirement_files=("reqs/requirements-dev-snowflake.txt",),
-        extra_pytest_args=("--snowflake",),
     ),
     "spark": TestDependencies(
         requirement_files=("reqs/requirements-dev-spark.txt",),
