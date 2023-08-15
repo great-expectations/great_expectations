@@ -17,7 +17,7 @@ import sqlalchemy as sa
 from great_expectations.compatibility.pyspark import functions as F
 from functools import reduce
     
-class ExpectMulticolumnValuesToBeEqual(MulticolumnMapMetricProvider):
+class MulticolumnValuesToBeEqual(MulticolumnMapMetricProvider):
     condition_metric_name = "multicolumn_values_to_be_equal"
     condition_domain_keys = ("column_list",)
     condition_value_keys = ()
