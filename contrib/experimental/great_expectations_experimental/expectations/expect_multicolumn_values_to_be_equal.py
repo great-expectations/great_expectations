@@ -176,15 +176,17 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     library_metadata = {
-        "maturity": "Experimental",
-        "tags": ["great-expectations-experimental", "multicolumn map expectation"],
-        "contributors": [
-            "@karthigaiselvanm",
+        "maturity": "experimental",
+        "tags": [
+            "experimental",
+            "multicolumn-map-expectation",
+        ],  # Tags for this Expectation in the Gallery
+        "contributors": [  # Github handles for all contributors to this Expectation.
+            "@karthigaiselvanm",  # Don't forget to add your github handle here!
+            "@jayamnatraj",
         ],
-        "requirements": [],
-        "has_full_test_suite": False,
-        "manually_reviewed_code": False,
     }
+
 if __name__ == "__main__":
     ExpectMulticolumnValuesToBeEqual().print_diagnostic_checklist(
         show_failed_tests=True
