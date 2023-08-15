@@ -32,7 +32,6 @@ def send_slack_notification(
 ):
     session = requests.Session()
     url = slack_webhook
-    query = query
     headers = None
 
     # Slack doc about overwritting the channel when using the legacy Incoming Webhooks
