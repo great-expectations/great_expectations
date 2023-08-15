@@ -57,7 +57,7 @@ Run the following command to retrieve and run a Checkpoint to Validate a <Techni
 ```
 
 :::note Reminder
-Our [guide on how to Validate data by running a Checkpoint](../checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional.md) has more detailed instructions for this step, including instructions on how to run a checkpoint from a Python script instead of from the <TechnicalTag tag="cli" text="CLI" />.
+Our [guide on how to Validate data by running a Checkpoint](../checkpoints/how_to_create_a_new_checkpoint.md) has more detailed instructions for this step, including instructions on how to run a checkpoint from a Python script instead of from the <TechnicalTag tag="cli" text="CLI" />.
 :::
 
 ## Related documentation
