@@ -320,7 +320,7 @@ def prepend_version_info_to_name_for_md_relative_links(verbose: bool = False) ->
     Links to ../../../../docs/guides/validation/index.md#checkpoints
     Should link to: ../../../../docs/0.16.16/guides/validation/#checkpoints
     Links to ../../../../docs/guides/validation/how_to_validate_data_by_running_a_checkpoint
-    Should link to: ../../../../docs/0.16.16/guides//validation//checkpoints/how_to_create_a_new_checkpoint
+    Should link to: ../../../../docs/0.16.16/guides/validation//checkpoints/how_to_create_a_new_checkpoint
 
     Args:
         verbose: Whether to print verbose output.
