@@ -5,7 +5,7 @@ pytest -v --docs-tests --spark  -k "test_docs[how_to_connect_to_in_memory_data_u
 ```
 """
 
-import pathlib
+# import pathlib
 import great_expectations as gx
 import os
 import pyspark.pandas as ps
@@ -13,21 +13,21 @@ import numpy as np
 import pandas as pd
 
 
-def _construct_spark_df_from_pandas(
-    spark_session,
-    pandas_df,
-):
-    spark_df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in pandas_df.to_records(index=False)
-        ],
-        pandas_df.columns.tolist(),
-    )
-    return spark_df
+# def _construct_spark_df_from_pandas(
+#     spark_session,
+#     pandas_df,
+# ):
+#     spark_df = spark_session.createDataFrame(
+#         [
+#             tuple(
+#                 None if isinstance(x, (float, int)) and np.isnan(x) else x
+#                 for x in record.tolist()
+#             )
+#             for record in pandas_df.to_records(index=False)
+#         ],
+#         pandas_df.columns.tolist(),
+#     )
+#     return spark_df
 
 
 # Required by pyarrow>=2.0.0 within Spark to suppress UserWarning
@@ -51,11 +51,11 @@ df = pd.DataFrame(
         "b": [100, 200, 300, 400, 500, 600],
         "c": ["one", "two", "three", "four", "five", "six"],
     },
-    # index=[10, 20, 30, 40, 50, 60],
+    index=[10, 20, 30, 40, 50, 60],
 )
-# dataframe = spark.createDataFrame(data=df)
+dataframe = spark.createDataFrame(data=df)
 # </snippet>
-spark_df = _construct_spark_df_from_pandas(spark_session=spark, pandas_df=df)
+# spark_df = _construct_spark_df_from_pandas(spark_session=spark, pandas_df=df)
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_spark.py name">
 name = "my_df_asset"
