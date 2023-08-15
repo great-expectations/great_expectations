@@ -138,7 +138,6 @@ class DatabricksDsn(AnyUrl):
 
 
 class DatabricksTableAsset(SqlTableAsset):
-    ...
 
     @pydantic.validator("table_name")
     def _resolve_quoted_name(cls, table_name: str) -> str | quoted_name:
