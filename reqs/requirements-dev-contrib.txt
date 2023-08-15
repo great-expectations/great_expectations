@@ -3,5 +3,5 @@ black[jupyter]==23.3.0
 invoke>=2.0.0
 mypy==1.4.1
 pre-commit>=2.21.0
-ruff==0.0.280
+ruff==0.0.284
 tomli>=2.0.1

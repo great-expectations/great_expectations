@@ -279,6 +279,7 @@ extend-exclude = [
 "__init__.py" = [
     "F401", # unused import
     "F403", # star imports
+    "PTH207", # use glob - __all__ needs to be list of str, not Path
 ]
 "great_expectations/_version.py" = [
     "PLR", # pylint - versioneer code
@@ -324,7 +325,9 @@ convention = "google"
 "google".msg = "Please do not import google directly, import from great_expectations.compatibility.google instead."
 "azure".msg = "Please do not import azure directly, import from great_expectations.compatibility.azure instead."
 "trino".msg = "Please do not import trino directly, import from great_expectations.compatibility.trino instead."
-"pyarrow".msg = "Please do not import azure directly, import from great_expectations.compatibility.pyarrow instead."
+"pyarrow".msg = "Please do not import pyarrow directly, import from great_expectations.compatibility.pyarrow instead."
+
+# -----------------------------------------------------------------
 
 [tool.pytest.ini_options]
 filterwarnings = [
@@ -396,6 +399,7 @@ filterwarnings = [
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
     # The warnings in this section should be addressed (fixed or ignored) but are ignored here temporarily to help allow
     # turning on "warnings are errors" so new warnings become errors and are addressed during PRs.
+    'ignore: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives:DeprecationWarning',
 
     # python
     # Example Actual Warning: RuntimeWarning: divide by zero encountered in divide, RuntimeWarning: divide by zero encountered in true_divide
@@ -507,11 +511,12 @@ filterwarnings = [
 junit_family = "xunit2"
 markers = [
     "all_backends: mark tests that run against all execution engine backends",
-    "athena: mark tests that require pyathena",
+    "athena: mark a test as AWS Athena-dependent.",
     "aws_creds: mark all tests that require aws credentials",
     "aws_deps: mark tests that need aws dependencies like boto", 
     "big: mark tests that don't have external dependencies but aren't unit tests",
     "cli: mark all tests in the /cli directory.",
+    "clickhouse: mark a test as Clickhouse-dependent.",
     "cloud: mark test as being relevant to Great Expectations Cloud.",
     "docs-basic: mark a test as a docs test, that does not require additional credentials.",
     "docs-creds-needed: mark a test as a docs test that needs additional cloud credentials (these will not run on public forks).",
@@ -521,22 +526,21 @@ markers = [
     "e2e: mark test as an E2E test.",
     "external_sqldialect: mark test as requiring install of an external sql dialect.",
     "filesystem: mark tests using the filesystem as the storage backend.",
-    "slow: mark tests taking longer than 1 second.",
-    "unit: mark a test as a unit test.",
-    "clickhouse: mark a test as Clickhouse-dependent.",
-    "athena: mark a test as AWS Athena-dependent.",
-    "spark: mark a test as Spark-dependent.",
-    "postgresql: mark a test as postgresql-dependent.",
-    "performance:mark a test as a performance test for BigQuery. These aren't run in our PR or release pipeline",
     "mssql: mark a test as mssql-dependent.",
     "mysql: mark a test as mysql-dependent.",
-    "trino: mark a test as trino-dependent.",
+    "openpyxl: mark a test for openpyxl-dependent, which is for Excel files.",
+    "performance: mark a test as a performance test for BigQuery. These aren't run in our PR or release pipeline",
+    "postgresql: mark a test as postgresql-dependent.",
     "project: mark a test that verifies properties of the gx project",
     "pyarrow: mark a test as PyArrow-dependent.",
-    "openpyxl: mark a test for openpyxl-dependent, which is for Excel files.",
-    "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors).",
+    "snowflake: mark a test as snowflake-dependent.",
     "sqlalchemy_version_compatibility: mark test as required for sqlalchemy version compatibility.",
     "sqlite: mark test requiring sqlite",
+    "slow: mark tests taking longer than 1 second.",
+    "spark: mark a test as Spark-dependent.",
+    "trino: mark a test as trino-dependent.",
+    "unit: mark a test as a unit test.",
+    "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors).",
 ]
 testpaths = "tests"
 # use `pytest-mock` drop-in replacement for `unittest.mock`

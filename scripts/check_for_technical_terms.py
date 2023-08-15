@@ -1,9 +1,16 @@
+from __future__ import annotations
+
 import json
 import os
 import re
-from collections import namedtuple
+from typing import NamedTuple
 
-Phrase = namedtuple("Phrase", "one_of_these but_not_in")
+
+class Phrase(NamedTuple):
+    one_of_these: tuple[str, ...]
+    but_not_in: tuple[str, ...]
+
+
 TODO = "- [ ]"
 DONE = "- [X]"
 NOTE = "-"

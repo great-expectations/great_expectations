@@ -869,6 +869,9 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         services=("postgresql",),
         extra_pytest_args=("--postgresql",),
     ),
+    "snowflake": TestDependencies(
+        requirement_files=("reqs/requirements-dev-snowflake.txt",),
+    ),
     "spark": TestDependencies(
         requirement_files=("reqs/requirements-dev-spark.txt",),
         services=("spark",),
@@ -946,7 +949,7 @@ def deps(  # noqa: PLR0913
     """
     Install dependencies for development and testing.
 
-    Specific requirement files needed for a specific test maker can be registered in `MARKER_REQ_MAPPING`,
+    Specific requirement files needed for a specific test marker can be registered in `MARKER_DEPENDENCY_MAP`,
     `invoke deps` will always check for and use these when installing dependencies.
 
     If no `markers` or `requirements-dev` are specified, the dev-contrib and

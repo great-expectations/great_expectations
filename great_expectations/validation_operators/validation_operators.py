@@ -828,7 +828,6 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             batch = self._build_batch_from_item(item)
 
             batch_id = batch.batch_id
-            run_id = run_id
 
             assert batch_id is not None
             assert run_id is not None
