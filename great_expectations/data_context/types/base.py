@@ -2800,7 +2800,7 @@ class CheckpointConfig(BaseYamlConfig):
     def __init__(  # noqa: PLR0913
         self,
         name: Optional[str] = None,
-        config_version: Union[int, float] = 1.0,
+        config_version: Union[int, float] = 1.0,  # noqa: PYI041
         template_name: Optional[str] = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: str = "Checkpoint",

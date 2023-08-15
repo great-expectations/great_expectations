@@ -504,7 +504,7 @@ def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:
     return deduplicated
 
 
-EvaluationParameterIdentifier = namedtuple(
+EvaluationParameterIdentifier = namedtuple(  # noqa: PYI024
     "EvaluationParameterIdentifier",
     ["expectation_suite_name", "metric_name", "metric_kwargs_id"],
 )

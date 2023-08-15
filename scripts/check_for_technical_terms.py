@@ -3,7 +3,7 @@ import os
 import re
 from collections import namedtuple
 
-Phrase = namedtuple("Phrase", "one_of_these but_not_in")
+Phrase = namedtuple("Phrase", "one_of_these but_not_in")  # noqa: PYI024
 TODO = "- [ ]"
 DONE = "- [X]"
 NOTE = "-"

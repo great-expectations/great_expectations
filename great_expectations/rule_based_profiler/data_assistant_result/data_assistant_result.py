@@ -87,7 +87,7 @@ if TYPE_CHECKING:
         MetricValues,
     )
 
-ColumnDataFrame = namedtuple("ColumnDataFrame", ["column", "df"])
+ColumnDataFrame = namedtuple("ColumnDataFrame", ["column", "df"])  # noqa: PYI024
 
 
 @dataclass

@@ -1173,7 +1173,7 @@ class DataAsset:
         return new_function(self, *args, **kwargs)
 
 
-ValidationStatistics = namedtuple(
+ValidationStatistics = namedtuple(  # noqa: PYI024
     "ValidationStatistics",
     [
         "evaluated_expectations",

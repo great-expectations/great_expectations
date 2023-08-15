@@ -267,7 +267,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     ) -> List[Sorter]:
         return Datasource.parse_order_by_sorters(order_by=order_by)
 
-    def add_sorters(self: _DataAssetT, sorters: SortersDefinition) -> _DataAssetT:
+    def add_sorters(self: _DataAssetT, sorters: SortersDefinition) -> _DataAssetT:  # noqa: PYI019
         """Associates a sorter to this DataAsset
 
         The passed in sorters will replace any previously associated sorters.

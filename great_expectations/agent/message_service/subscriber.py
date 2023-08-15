@@ -133,7 +133,7 @@ class Subscriber:
         return on_message(event_context)
 
     async def _redeliver_message(
-        self, delivery_tag: int, requeue: bool = True, delay: Union[float, int] = 3
+        self, delivery_tag: int, requeue: bool = True, delay: Union[float, int] = 3  # noqa: PYI041
     ):
         """Coroutine to request a redelivery with delay."""
         # not threadsafe

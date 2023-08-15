@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class MetaDatasource(pydantic.main.ModelMetaclass):
     __cls_set: Set[Type] = set()
 
-    def __new__(
+    def __new__(  # noqa: PYI034
         meta_cls: Type[MetaDatasource], cls_name: str, bases: tuple[type], cls_dict
     ) -> MetaDatasource:
         """

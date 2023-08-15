@@ -260,7 +260,7 @@ class DefaultJinjaView:
         if class_list is None:
             class_str = ""
         else:
-            if type(class_list) == str:
+            if type(class_list) == str:  # noqa: E721
                 raise TypeError("classes must be a list, not a string.")
             class_str = f"class=\"{' '.join(class_list)}\" "
 

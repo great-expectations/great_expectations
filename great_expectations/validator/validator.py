@@ -152,7 +152,7 @@ class ValidationDependencies:
         return list(self.metric_configurations.values())
 
 
-ValidationStatistics = namedtuple(
+ValidationStatistics = namedtuple(  # noqa: PYI024
     "ValidationStatistics",
     [
         "evaluated_expectations",
