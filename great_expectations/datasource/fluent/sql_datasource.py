@@ -931,6 +931,9 @@ class TableAsset(_SQLAsset):
         return False
 
 
+# This improves our error messages by providing a more specific type for pydantic to validate against
+# It also ensure the generated jsonschema has a oneOf instead of anyOf field for assets
+# https://docs.pydantic.dev/1.10/usage/types/#discriminated-unions-aka-tagged-unions
 AssetTypes = Annotated[Union[TableAsset, QueryAsset], Field(discriminator="type")]
 
 
