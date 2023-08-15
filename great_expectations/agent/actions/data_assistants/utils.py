@@ -12,6 +12,7 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.data_context import CloudDataContext
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.exceptions import StoreBackendError
+from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.rule_based_profiler.data_assistant_result.data_assistant_result import (
     DataAssistantResult,
 )
@@ -59,7 +60,7 @@ def build_action_result(
         context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
         # if that didn't error, this name exists, so we add the timestamp
         expectation_suite_name = f"{expectation_suite_name} {timestamp}"
-    except (StoreBackendError, ValueError):
+    except (StoreBackendError, ValueError, DataContextError):
         # resource is unique
         pass
 
@@ -67,7 +68,7 @@ def build_action_result(
         context.get_checkpoint(name=checkpoint_name)
         # if that didn't error, this name exists, so we add the timestamp
         checkpoint_name = f"{checkpoint_name} {timestamp}"
-    except (StoreBackendError, ValueError):
+    except (StoreBackendError, ValueError, DataContextError):
         # resource is unique
         pass
 
