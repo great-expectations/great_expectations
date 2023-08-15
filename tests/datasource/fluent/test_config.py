@@ -467,6 +467,36 @@ def test_catch_bad_top_level_config(
             "unexpected value; permitted:",
             id="unknown splitter method",
         ),
+        p(
+            {
+                "type": "table",
+                "table_name": "pool",
+            },
+            (
+                _FLUENT_DATASOURCES_KEY,
+                "assets",
+                0,
+                "TableAsset",
+                "name",
+            ),
+            "field required",
+            id="missing name",
+        ),
+        p(
+            {
+                "type": "query",
+                "name": "missing query string",
+            },
+            (
+                _FLUENT_DATASOURCES_KEY,
+                "assets",
+                0,
+                "QueryAsset",
+                "query",
+            ),
+            "field required",
+            id="missing query",
+        ),
     ],
 )
 def test_catch_bad_asset_configs(
@@ -503,6 +533,7 @@ def test_catch_bad_asset_configs(
         if expected_error_loc == all_errors[0]["loc"]:
             test_msg = error["msg"]
             break
+
     print(f"\n\ttest_msg:\n{test_msg}")
     assert test_msg.startswith(expected_msg)
 
