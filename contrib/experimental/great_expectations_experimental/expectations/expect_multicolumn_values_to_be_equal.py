@@ -1,22 +1,24 @@
+from functools import reduce
 from typing import Optional
+
+import sqlalchemy as sa
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import (
     ExpectationConfiguration,
 )
-from great_expectations.exceptions  import InvalidExpectationConfigurationError
+from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
-    SqlAlchemyExecutionEngine,
     SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import MulticolumnMapExpectation
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
     multicolumn_condition_partial,
 )
-import sqlalchemy as sa
-from great_expectations.compatibility.pyspark import functions as F
-from functools import reduce
-    
+
+
 class MulticolumnValuesToBeEqual(MulticolumnMapMetricProvider):
     condition_metric_name = "multicolumn_values_to_be_equal"
     condition_domain_keys = ("column_list",)
