@@ -7,9 +7,14 @@ pytest -v --docs-tests -k "how_to_connect_to_in_memory_data_using_spark" tests/i
 import os
 import pandas as pd
 import great_expectations as gx
+from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 
 # Required by pyarrow>=2.0.0 within Spark to suppress UserWarning
 os.environ["PYARROW_IGNORE_TIMEZONE"] = "1"
+
+# Required to make following test compatible with both Pandas > 2.0.0 and Pandas < 2.0.0
+if is_version_greater_or_equal(pd.__version__, "2.0.0"):
+    pd.DataFrame.iteritems = pd.DataFrame.items
 
 context = gx.get_context()
 
