@@ -243,7 +243,7 @@ def run_batch_head(  # noqa: PLR0915
         AbstractDataContext, Datasource, DataAsset, BatchRequest
     ],
     fetch_all: bool | str,
-    n_rows: int | float | str | None,
+    n_rows: int | float | str | None,  # noqa: PYI041
     success: bool,
 ) -> None:
     _, datasource, _, batch_request = datasource_test_data

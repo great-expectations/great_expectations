@@ -17,6 +17,16 @@ on:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+'
 
+env:
+  # Run only on PRs from the main repo, on scheduled, or triggered runs.
+  RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+
+concurrency:
+  # Only run one instance of this workflow in PRs, but allow multiple instances in develop.
+  # https://stackoverflow.com/questions/74117321/if-condition-in-concurrency-in-gha
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   ci-does-not-run-on-draft-pull-requests:
     runs-on: ubuntu-latest
@@ -155,18 +165,19 @@ jobs:
           yarn install
           python ci/checks/validate_docs_snippets.py
       - name: Authenticate with GCP
-        if: github.event.pull_request.head.repo.full_name == github.repository
+
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
 
       - name: Create JSON file for following step
-        if: github.event.pull_request.head.repo.full_name == github.repository
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         run: |
           echo "$GE_TEST_GCP_CREDENTIALS" > gcp-credentials.json
 
       - name: Install and setup Google Cloud SDK
-        if: github.event.pull_request.head.repo.full_name == github.repository
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         run: |
           # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
           curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
@@ -195,7 +206,7 @@ jobs:
         run: |
           invoke docs-snippet-tests 'docs-basic' --up-services --verbose
       - name: Run the tests needing cloud credentials
-        if: github.event.pull_request.head.repo.full_name == github.repository
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         run: |
           invoke docs-snippet-tests 'docs-creds-needed' --up-services --verbose
       # Spark tests are run as part of a separate task as we have not migrated all of Spark tests just yet (ie. Spark+Athena, Spark+S3 etc)
@@ -230,7 +241,7 @@ jobs:
         run: invoke ci-tests -m "unit" --xdist --timeout=1.5 --slowest=8
 
   cloud-tests:
-    if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.pull_request.draft == false && (github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' )
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -264,6 +275,15 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
       AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      SNOWFLAKE_CI_ACCOUNT: ${{secrets.SNOWFLAKE_CI_ACCOUNT}}
+      SNOWFLAKE_CI_USER_PASSWORD: ${{secrets.SNOWFLAKE_CI_USER_PASSWORD}}
+      SNOWFLAKE_ACCOUNT: ${{secrets.SNOWFLAKE_ACCOUNT}}
+      SNOWFLAKE_USER: ${{secrets.SNOWFLAKE_USER}}
+      SNOWFLAKE_PW: ${{secrets.SNOWFLAKE_PW}}
+      SNOWFLAKE_DATABASE: ${{secrets.SNOWFLAKE_DATABASE}}
+      SNOWFLAKE_SCHEMA: ${{secrets.SNOWFLAKE_SCHEMA}}
+      SNOWFLAKE_WAREHOUSE: ${{secrets.SNOWFLAKE_WAREHOUSE}}
+      SNOWFLAKE_ROLE: ${{secrets.SNOWFLAKE_ROLE}}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -277,6 +297,7 @@ jobs:
           - mssql
           - mysql
           - postgresql
+          - snowflake
           - spark
           - trino
         python-version: ["3.8", "3.9", "3.10", "3.11"]
@@ -434,26 +455,26 @@ jobs:
     permissions:
       id-token: write
     steps:
-    - uses: actions/checkout@master
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.8'
-    - name: Update pip
-      run: python -m pip install --upgrade pip
-    - name: Install Twine and Wheel, and prepare packaging
-      run: |
-        pip install twine wheel
-        git config --global user.email "team@greatexpectations.io"
-        git config --global user.name "Great Expectations"
-    - name: Build distribution
-      run: |
-        python setup.py sdist
-        python setup.py bdist_wheel
-    - name: Publish distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        skip-existing: true # prevent against pushing duplicate versions
+      - uses: actions/checkout@master
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.8'
+      - name: Update pip
+        run: python -m pip install --upgrade pip
+      - name: Install Twine and Wheel, and prepare packaging
+        run: |
+          pip install twine wheel
+          git config --global user.email "team@greatexpectations.io"
+          git config --global user.name "Great Expectations"
+      - name: Build distribution
+        run: |
+          python setup.py sdist
+          python setup.py bdist_wheel
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true # prevent against pushing duplicate versions
 
   notify_on_failure:
     needs: [
