@@ -1049,6 +1049,7 @@ class ExecutionEngineConfigSchema(Schema):
     caching = fields.Boolean(required=False, allow_none=True)
     batch_spec_defaults = fields.Dict(required=False, allow_none=True)
     force_reuse_spark_context = fields.Boolean(required=False, allow_none=True)
+    persist = fields.Boolean(required=False, allow_none=True)
     # BigQuery Service Account Credentials
     # https://googleapis.dev/python/sqlalchemy-bigquery/latest/README.html#connection-string-parameters
     credentials_info = fields.Dict(required=False, allow_none=True)
@@ -1219,6 +1220,7 @@ class DatasourceConfigSchema(AbstractConfigSchema):
         missing="great_expectations.datasource",
     )
     force_reuse_spark_context = fields.Bool(required=False, allow_none=True)
+    persist = fields.Bool(required=False, allow_none=True)
     spark_config = fields.Raw(required=False, allow_none=True)
     execution_engine = fields.Nested(
         ExecutionEngineConfigSchema, required=False, allow_none=True
