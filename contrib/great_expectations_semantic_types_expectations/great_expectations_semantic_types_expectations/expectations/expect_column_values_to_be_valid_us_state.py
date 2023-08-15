@@ -19,7 +19,7 @@ def is_valid_state(state: str, dc_statehood: bool):
         pass
     if len(state) > 20:
         return False
-    elif type(state) != str:
+    elif type(state) != str:  # noqa: E721
         return False
     elif state in list_of_states:
         return True

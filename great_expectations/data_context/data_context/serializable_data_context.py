@@ -389,7 +389,7 @@ class SerializableDataContext(AbstractDataContext):
     @classmethod
     def set_ge_config_version(
         cls,
-        config_version: Union[int, float],
+        config_version: Union[int, float],  # noqa: PYI041
         context_root_dir: Optional[str] = None,
         validate_config_version: bool = True,
     ) -> bool:

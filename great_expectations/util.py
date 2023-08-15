@@ -2190,7 +2190,7 @@ def import_make_url():
 
 def get_clickhouse_sqlalchemy_potential_type(type_module, type_) -> Any:
     ch_type = type_
-    if type(ch_type) is str:
+    if type(ch_type) is str:  # noqa: E721
         if type_.lower() in ("decimal", "decimaltype()"):
             ch_type = type_module.types.Decimal
         elif type_.lower() in ("fixedstring"):
