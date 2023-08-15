@@ -60,7 +60,7 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
 
     To be counted as an exception if any one column in the given column list \
         is not equal to any other column in the list
-    
+
     expect_multicolumn_values_to_be_equal is a \
     [Multicolumn Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_multicolumn_map_expectations).
 
