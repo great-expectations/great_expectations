@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
 
 
-class _Splitter(Protocol):
+class _Splitter(Protocol):  # noqa: PYI046
     @property
     def columns(self) -> list[str]:
         """The names of the column used to split the data"""
