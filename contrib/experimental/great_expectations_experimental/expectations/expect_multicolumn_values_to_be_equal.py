@@ -1,50 +1,22 @@
-from typing import List, Optional, TYPE_CHECKING, Dict
+from typing import Optional
 from great_expectations.core import (
     ExpectationConfiguration,
-    ExpectationValidationResult,
 )
-from great_expectations.core.expectation_configuration import parse_result_format
-from great_expectations.core.metric_function_types  import SummarizationMetricNameSuffixes
 from great_expectations.exceptions  import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
-    ExecutionEngine,
     PandasExecutionEngine,
     SqlAlchemyExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.expectations.expectation import (
-    MulticolumnMapExpectation,
-    _format_map_output,
-    render_evaluation_parameter_string,
-)
+from great_expectations.expectations.expectation import MulticolumnMapExpectation
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
     multicolumn_condition_partial,
 )
-from great_expectations.render import (
-    LegacyDescriptiveRendererType,
-    LegacyDiagnosticRendererType,
-    LegacyRendererType,
-    RenderedStringTemplateContent,
-)
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import (
-    num_to_str,
-    parse_row_condition_string_pandas_engine,
-    substitute_none_for_missing,
-)
-from great_expectations.render.renderer_configuration import (
-    RendererConfiguration,
-    RendererValueType,
-)
-import pandas as pd
 import sqlalchemy as sa
 from great_expectations.compatibility.pyspark import functions as F
 from functools import reduce
-
-if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import AddParamArgs
-
+    
 class ExpectMulticolumnValuesToBeEqual(MulticolumnMapMetricProvider):
     condition_metric_name = "multicolumn_values_to_be_equal"
     condition_domain_keys = ("column_list",)
@@ -81,7 +53,8 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapMetricProvider):
 class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
     """Expect the list of multicolumn values to be equal.
 
-    To be counted as an exception if any one column in the given column list is not equal to any other column in the list
+    To be counted as an exception if any one column in the given column list \
+        is not equal to any other column in the list
     
     expect_multicolumn_values_to_be_equal is a \
     [Multicolumn Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_multicolumn_map_expectations).
@@ -101,17 +74,20 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
             If True, then include the expectation config as part of the result object.
-        catch_exceptions (boolean or None): \
-            If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
+        catch_exceptions (boolean or None): If True, then catch exceptions and \
+            include them as part of the result object. \
+        For more detail, see [catch_exceptions]\
+            (https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            A JSON-serializable dictionary (nesting allowed) that will be included \
+                in the output without \
             modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format \
+            , include_config, catch_exceptions, and meta.
 
     See Also:
         [expect_column_pair_values_to_be_equal](https://greatexpectations.io/expectations/expect_column_pair_values_to_be_equal)
@@ -149,8 +125,10 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
                     "out": {
                         "success": False,
                         "unexpected_list": [
-                            {"OPEN_DATE": '20220531', "DUE_DATE": '20220531', "EXPIRY_DATE": '20230831'},
-                            {"OPEN_DATE": '20230728', "DUE_DATE": '20230728', "EXPIRY_DATE": '20240531'},
+                            {"OPEN_DATE": '20220531', "DUE_DATE": '20220531',\
+                              "EXPIRY_DATE": '20230831'},
+                            {"OPEN_DATE": '20230728', "DUE_DATE": '20230728', \
+                             "EXPIRY_DATE": '20240531'},
 
                         ],
                         "unexpected_index_list": [0,2],
@@ -172,24 +150,28 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
         """
         Validates the configuration of an Expectation.
 
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        The configuration will also be validated using each of the \
+            `validate_configuration` methods in its Expectation
         superclass hierarchy.
 
         Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                                  from the configuration attribute of the Expectation instance.
+            configuration: An `ExpectationConfiguration` to validate. \
+                If no configuration is provided, it will be pulled \
+                    from the configuration attribute of the Expectation instance.
 
         Raises:
-            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
-                                                                           Expectation."
+            `InvalidExpectationConfigurationError`: The configuration does \
+                not contain the values required by the Expectation."
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
 
         try:
             assert "column_list" in configuration.kwargs, "column_list is required"
-            assert isinstance(configuration.kwargs["column_list"],list), "column_list must be a list"
-            assert len(configuration.kwargs["column_list"]) >= 2, "column_list must have at least 2 elements"
+            assert isinstance(configuration.kwargs["column_list"],list), \
+                "column_list must be a list"
+            assert len(configuration.kwargs["column_list"]) >= 2, \
+                "column_list must have at least 2 elements"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
