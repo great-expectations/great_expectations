@@ -6,7 +6,7 @@ import { useBaseUrlUtils } from '@docusaurus/useBaseUrl'
 import Link from '@docusaurus/Link'
 import Head from '@docusaurus/Head'
 import { isRegexpStringMatch } from '@docusaurus/theme-common'
-import { useSearchPage } from '@docusaurus/theme-common/hooks'
+import { useSearchPage } from '@docusaurus/theme-common'
 import { DocSearchButton, useDocSearchKeyboardEvents } from '@docsearch/react'
 import { useAlgoliaContextualFacetFilters } from '@docusaurus/theme-search-algolia/client'
 import Translate from '@docusaurus/Translate'
@@ -23,7 +23,6 @@ function Hit ({ hit, children }) {
   return <Link to={hit.url}>{children}</Link>
 }
 function ResultsFooter ({ state, onClose }) {
-  // how do you generate a searchPagelink?
   const { generateSearchPageLink } = useSearchPage()
   return (
     <Link to={generateSearchPageLink(state.query)} onClick={onClose}>
