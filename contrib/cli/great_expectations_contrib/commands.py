@@ -17,7 +17,7 @@ logger.setLevel(logging.INFO)
 
 Command = namedtuple(  # noqa: PYI024
     "Command", ["name", "full_command", "error_message"]
-)  # noqa: PYI024, RUF100
+)
 
 
 def init_cmd(url: str) -> None:

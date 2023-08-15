@@ -36,7 +36,7 @@ maturity_details_keys = [
 
 AnnotatedNode = namedtuple(  # noqa: PYI024
     "AnnotatedNode", ["name", "path", "annotation", "type_"]
-)  # noqa: PYI024, RUF100
+)
 
 
 def parse_feature_annotation(docstring: Union[str, List[str], None]):
