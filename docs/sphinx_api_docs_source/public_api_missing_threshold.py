@@ -69,8 +69,6 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/expectations/set_based_column_map_expectation.py Name: register_metric",
     "File: great_expectations/expectations/set_based_column_map_expectation.py Name: validate_configuration",
     "File: great_expectations/profile/base.py Name: validate",
-    "File: great_expectations/profile/user_configurable_profiler.py Name: UserConfigurableProfiler",
-    "File: great_expectations/profile/user_configurable_profiler.py Name: build_suite",
     "File: great_expectations/render/renderer/email_renderer.py Name: EmailRenderer",
     "File: great_expectations/render/renderer/opsgenie_renderer.py Name: OpsgenieRenderer",
     "File: great_expectations/render/renderer/renderer.py Name: renderer",

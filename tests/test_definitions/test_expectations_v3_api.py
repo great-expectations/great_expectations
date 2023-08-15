@@ -52,7 +52,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
     validator_with_data = None
 
     for expectation_category in expectation_dirs:
-        test_configuration_files = glob.glob(
+        test_configuration_files = glob.glob(  # noqa: PTH207
             dir_path + "/" + expectation_category + "/*.json"
         )
         for backend in backends:
