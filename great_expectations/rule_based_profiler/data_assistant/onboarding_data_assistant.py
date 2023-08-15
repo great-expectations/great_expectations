@@ -303,7 +303,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting numeric columns (but not "ID-type" columns).
 
-        numeric_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
+        numeric_column_type_domain_builder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,
@@ -320,6 +320,41 @@ class OnboardingDataAssistant(DataAssistant):
                 SemanticDomainTypes.IDENTIFIER,
             ],
             data_context=None,
+        )
+
+        # TODO: This is currently failing because the domain_builder get_effective_column_names() method is failing.
+        #  It may need to be run as part of the data assistant run, or the excluded columns may need to be passed in
+        #  as a parameter builder (if that is supported).
+        #  Other options include passing a filter into the ColumnDomainBuilder for excluding delimited identifier
+        #  columns.
+
+        # Spark delimited identifiers (e.g. `my.column.name`) are not supported by some metric implementations.
+        # Here we create a domain builder that excludes columns with names that are valid delimited identifiers.
+        # https://spark.apache.org/docs/latest/sql-ref-identifier.html
+        def is_delimited_identifier(name):
+            period = "." in name
+            backtick = "`" in name
+            return period or backtick
+
+        spark_delimited_identifier_columns = [
+            col
+            for col in numeric_column_type_domain_builder.get_effective_column_names()
+            if is_delimited_identifier(col)
+        ]
+        numeric_column_type_domain_builder_exclude_spark_delimited_identifiers = (
+            ColumnDomainBuilder(
+                exclude_column_names=spark_delimited_identifier_columns,
+                exclude_column_name_suffixes=[
+                    "_id",
+                    "_ID",
+                ],
+                include_semantic_types=[
+                    SemanticDomainTypes.NUMERIC,
+                ],
+                exclude_semantic_types=[
+                    SemanticDomainTypes.IDENTIFIER,
+                ],
+            )
         )
 
         # Step-2: Declare "ParameterBuilder" for every metric of interest.
@@ -610,7 +645,7 @@ class OnboardingDataAssistant(DataAssistant):
         rule = Rule(
             name="numeric_columns_rule",
             variables=variables,
-            domain_builder=numeric_column_type_domain_builder,
+            domain_builder=numeric_column_type_domain_builder_exclude_spark_delimited_identifiers,
             parameter_builders=parameter_builders,
             expectation_configuration_builders=expectation_configuration_builders,
         )
