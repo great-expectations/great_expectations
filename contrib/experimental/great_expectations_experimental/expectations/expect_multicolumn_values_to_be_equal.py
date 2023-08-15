@@ -178,7 +178,6 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
     library_metadata = {
         "maturity": "experimental",
         "tags": [
-            "experimental",
             "multicolumn-map-expectation",
         ],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
