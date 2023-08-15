@@ -11,10 +11,14 @@ class MetricDomainTypes(enum.Enum):
     """Enum type, whose members signify the data "Domain", on which a metric can be computed.
 
     A wide variety of "Domain" types can be defined with applicable metrics associated with their respective "Domain"
-    types.  The "Domain" types currently in use (`TABLE`, `COLUMN`, `COLUMN_PAIR`, and `MULTICOLUMN`) are declared here.
+    types.  The "Domain" types currently in use (`BATCH`, `COLUMN`, `COLUMN_PAIR`, `MULTICOLUMN`, and `TABLE`) are
+    declared here.
+
+    The `TABLE` Domain type has been deprecated in favor of the `BATCH` Domain type.
     """
 
-    TABLE = "table"
+    BATCH = "batch"
     COLUMN = "column"
     COLUMN_PAIR = "column_pair"
     MULTICOLUMN = "multicolumn"
+    TABLE = "table"
