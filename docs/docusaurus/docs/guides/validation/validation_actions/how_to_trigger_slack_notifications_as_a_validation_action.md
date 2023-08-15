@@ -122,11 +122,7 @@ action_list:
 
 ## Test your Slack notifications
 
-Run your Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and receive Slack notification on the success or failure of the <TechnicalTag tag="expectation_suite" text="Expectation Suite's" /> Validation.  
-
-:::note Reminder
-Our [guide on how to Validate data by running a Checkpoint](../how_to_validate_data_by_running_a_checkpoint.md) has instructions for this step.
-:::
+Run your Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and receive Slack notification on the success or failure of the <TechnicalTag tag="expectation_suite" text="Expectation Suite's" /> Validation. See [Run your Checkpoint](../checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional.md).
 
   If successful, you should receive a Slack message that looks like this:
 

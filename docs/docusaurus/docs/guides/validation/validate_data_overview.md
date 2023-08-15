@@ -36,7 +36,7 @@ Actions are optional and are executed after a Checkpoint validates data. Some of
 
 ## Run your Checkpoint
 
-See [How to validate data by running a Checkpoint](./how_to_validate_data_by_running_a_checkpoint.md).
+See [How to validate data by running a Checkpoint](./checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional.md).
 
 ## Validation Results and Data Docs
 

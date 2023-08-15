@@ -57,7 +57,7 @@ action_list:
 Run your Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and receive an email on the success or failure of the Validation.
 
 :::note Reminder
-Our [guide on how to Validate data by running a Checkpoint](../how_to_validate_data_by_running_a_checkpoint.md) has instructions for this step.
+Our [guide on how to Validate data by running a Checkpoint](../checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional.md) has instructions for this step.
 :::
 
 If successful, you should receive an email that looks like this:

@@ -65,10 +65,5 @@ action_list:
 
 ## Validate a Batch of data to test your alerts
 
-Run your Checkpoint to <TechnicalTag tag="validate" text="Validate" /> a <TechnicalTag tag="batch" text="Batch" /> of data and receive an Opsgenie alert on the success or failure of the Validation.
-
-:::note Reminder
-Our [guide on how to Validate data by running a Checkpoint](../how_to_validate_data_by_running_a_checkpoint.md) has instructions for this step.
-:::
-
+Run your Checkpoint to <TechnicalTag tag="validate" text="Validate" /> a <TechnicalTag tag="batch" text="Batch" /> of data and receive an Opsgenie alert on the success or failure of the Validation. See [Run your Checkpoint](../checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional.md).
 
