@@ -138,8 +138,6 @@ class DatabricksDsn(AnyUrl):
 
 
 class DatabricksTableAsset(SqlTableAsset):
-    ...
-
     @pydantic.validator("table_name")
     def _resolve_quoted_name(cls, table_name: str) -> str | quoted_name:
         table_name_is_quoted: bool = cls._is_bracketed_by_quotes(table_name)
