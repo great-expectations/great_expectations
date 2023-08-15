@@ -275,6 +275,15 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
       AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      SNOWFLAKE_CI_ACCOUNT: ${{secrets.SNOWFLAKE_CI_ACCOUNT}}
+      SNOWFLAKE_CI_USER_PASSWORD: ${{secrets.SNOWFLAKE_CI_USER_PASSWORD}}
+      SNOWFLAKE_ACCOUNT: ${{secrets.SNOWFLAKE_ACCOUNT}}
+      SNOWFLAKE_USER: ${{secrets.SNOWFLAKE_USER}}
+      SNOWFLAKE_PW: ${{secrets.SNOWFLAKE_PW}}
+      SNOWFLAKE_DATABASE: ${{secrets.SNOWFLAKE_DATABASE}}
+      SNOWFLAKE_SCHEMA: ${{secrets.SNOWFLAKE_SCHEMA}}
+      SNOWFLAKE_WAREHOUSE: ${{secrets.SNOWFLAKE_WAREHOUSE}}
+      SNOWFLAKE_ROLE: ${{secrets.SNOWFLAKE_ROLE}}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -288,6 +297,7 @@ jobs:
           - mssql
           - mysql
           - postgresql
+          - snowflake
           - spark
           - trino
         python-version: ["3.8", "3.9", "3.10", "3.11"]
@@ -445,26 +455,26 @@ jobs:
     permissions:
       id-token: write
     steps:
-    - uses: actions/checkout@master
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.8'
-    - name: Update pip
-      run: python -m pip install --upgrade pip
-    - name: Install Twine and Wheel, and prepare packaging
-      run: |
-        pip install twine wheel
-        git config --global user.email "team@greatexpectations.io"
-        git config --global user.name "Great Expectations"
-    - name: Build distribution
-      run: |
-        python setup.py sdist
-        python setup.py bdist_wheel
-    - name: Publish distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        skip-existing: true # prevent against pushing duplicate versions
+      - uses: actions/checkout@master
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.8'
+      - name: Update pip
+        run: python -m pip install --upgrade pip
+      - name: Install Twine and Wheel, and prepare packaging
+        run: |
+          pip install twine wheel
+          git config --global user.email "team@greatexpectations.io"
+          git config --global user.name "Great Expectations"
+      - name: Build distribution
+        run: |
+          python setup.py sdist
+          python setup.py bdist_wheel
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true # prevent against pushing duplicate versions
 
   notify_on_failure:
     needs: [
