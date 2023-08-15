@@ -399,6 +399,7 @@ jobs:
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/airflow220-min-install.txt
       - name: Run the test
+        # ensure the great_expectations can be imported and a context created
         run: sh ci/checks/check_min_airflow_dependency_compatibility.sh
 
   import_gx:
