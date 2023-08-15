@@ -16,7 +16,7 @@ def is_valid_utah_zip(zip: str):
     list_of_utah_zips = [d["zip_code"] for d in list_of_dicts_of_utah_zips]
     if len(zip) > 10:
         return False
-    elif type(zip) != str:
+    elif type(zip) != str:  # noqa: E721
         return False
     elif zip in list_of_utah_zips:
         return True

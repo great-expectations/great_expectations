@@ -16,7 +16,7 @@ def is_validarizonazip(zip: str):
     list_ofarizonazips = [d["zip_code"] for d in list_of_dicts_ofarizonazips]
     if len(zip) > 10:
         return False
-    elif type(zip) != str:
+    elif type(zip) != str:  # noqa: E721
         return False
     elif zip in list_ofarizonazips:
         return True

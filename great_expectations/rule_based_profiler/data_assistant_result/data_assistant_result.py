@@ -5,7 +5,7 @@ import datetime
 import json
 import os
 import uuid
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from dataclasses import asdict, dataclass, field
 from typing import (
     TYPE_CHECKING,
@@ -15,6 +15,7 @@ from typing import (
     Iterable,
     KeysView,
     List,
+    NamedTuple,
     Optional,
     Set,
     Union,
@@ -87,7 +88,10 @@ if TYPE_CHECKING:
         MetricValues,
     )
 
-ColumnDataFrame = namedtuple("ColumnDataFrame", ["column", "df"])
+
+class ColumnDataFrame(NamedTuple):
+    column: str
+    df: pd.DataFrame
 
 
 @dataclass
