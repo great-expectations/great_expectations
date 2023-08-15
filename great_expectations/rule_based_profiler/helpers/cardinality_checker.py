@@ -131,7 +131,9 @@ class CardinalityChecker:
     ) -> AbsoluteCardinalityLimit | RelativeCardinalityLimit:
         return self._cardinality_limit_mode
 
-    def cardinality_within_limit(self, metric_value: Union[int, float]) -> bool:  # noqa: PYI041
+    def cardinality_within_limit(
+        self, metric_value: Union[int, float]  # noqa: PYI041
+    ) -> bool:  # noqa: PYI041, RUF100
         """Determine if the cardinality is within configured limit.
 
         The metric_value supplied should be either a proportion of unique values

@@ -15,7 +15,9 @@ from .package import GreatExpectationsContribPackageManifest
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-Command = namedtuple("Command", ["name", "full_command", "error_message"])  # noqa: PYI024
+Command = namedtuple(  # noqa: PYI024
+    "Command", ["name", "full_command", "error_message"]
+)  # noqa: PYI024, RUF100
 
 
 def init_cmd(url: str) -> None:
