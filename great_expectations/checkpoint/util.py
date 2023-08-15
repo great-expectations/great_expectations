@@ -257,7 +257,7 @@ def get_substituted_batch_request(
             and value != substituted_value
         ):
             raise gx_exceptions.CheckpointError(
-                f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
+                f'BatchRequest attribute "{key}" was provided with different values'
             )
 
     effective_batch_request: dict = dict(
