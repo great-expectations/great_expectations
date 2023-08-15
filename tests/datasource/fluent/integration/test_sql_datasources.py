@@ -21,6 +21,7 @@ from great_expectations.data_context import EphemeralDataContext
 from great_expectations.datasource.fluent import (
     DatabricksSQLDatasource,
     PostgresDatasource,
+    SnowflakeDatasource,
     SQLDatasource,
 )
 from great_expectations.expectations.expectation import (
@@ -40,14 +41,16 @@ DO_NOT_CREATE_TABLES: set[str] = {"trino"}
 
 # TODO: simplify this and possible get rid of this mapping once we have settled on
 # all the naming conventions we want to support for different SQL dialects
+# NOTE: commented out are tests we know fail for individual datasources. Ideally all
+# test cases should work for all datasrouces
 TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
     "postgres": {
         "unquoted_lower": PG_TABLE.lower(),
         "quoted_lower": f'"{PG_TABLE.lower()}"',
-        "unquoted_upper": PG_TABLE.upper(),
+        # "unquoted_upper": PG_TABLE.upper(),
         "quoted_upper": f'"{PG_TABLE.upper()}"',
         "quoted_mixed": f'"{PG_TABLE.title()}"',
-        "unquoted_mixed": PG_TABLE.title(),
+        # "unquoted_mixed": PG_TABLE.title(),
     },
     "trino": {
         "unquoted_lower": TRINO_TABLE.lower(),
@@ -64,6 +67,14 @@ TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
         "quoted_upper": f"`{PG_TABLE.upper()}`",
         "quoted_mixed": f"`{PG_TABLE.title()}`",
         "unquoted_mixed": PG_TABLE.title(),
+    },
+    "snowflake": {
+        "unquoted_lower": PG_TABLE.lower(),
+        "quoted_lower": f'"{PG_TABLE.lower()}"',
+        "unquoted_upper": PG_TABLE.upper(),
+        "quoted_upper": f'"{PG_TABLE.upper()}"',
+        "quoted_mixed": f'"{PG_TABLE.title()}"',
+        # "unquoted_mixed": PG_TABLE.title(),
     },
 }
 
@@ -178,21 +189,24 @@ def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
     return ds
 
 
+@pytest.fixture
+def snowflake_ds(context: EphemeralDataContext) -> SnowflakeDatasource:
+    ds = context.sources.add_snowflake(
+        "snowflake",
+        connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
+    )
+    return ds
+
+
 @pytest.mark.parametrize(
     "asset_name",
     [
         param("unquoted_lower"),
         param("quoted_lower"),
-        param(
-            "unquoted_upper",
-            marks=[pytest.mark.xfail(reason="TODO: fix this")],
-        ),
+        param("unquoted_upper"),
         param("quoted_upper"),
         param("quoted_mixed"),
-        param(
-            "unquoted_mixed",
-            marks=[pytest.mark.xfail(reason="TODO: fix this")],
-        ),
+        param("unquoted_mixed"),
     ],
 )
 class TestTableIdentifiers:
@@ -214,7 +228,9 @@ class TestTableIdentifiers:
         asset_name: str,
         table_factory: TableFactory,
     ):
-        table_name: str = TABLE_NAME_MAPPING["postgres"][asset_name]
+        table_name = TABLE_NAME_MAPPING["postgres"].get(asset_name)
+        if not table_name:
+            pytest.skip(f"no '{asset_name}' table_name for databricks")
         # create table
         table_factory(
             engine=postgres_ds.get_engine(), table_names={table_name}, schema="public"
@@ -244,11 +260,30 @@ class TestTableIdentifiers:
 
         databricks_sql_ds.add_table_asset(asset_name, table_name=table_name)
 
+    @pytest.mark.snowflake
+    def test_snowflake(
+        self,
+        snowflake_ds: SnowflakeDatasource,
+        asset_name: str,
+        table_factory: TableFactory,
+    ):
+        table_name = TABLE_NAME_MAPPING["snowflake"].get(asset_name)
+        if not table_name:
+            pytest.skip(f"no '{asset_name}' table_name for databricks")
+        # create table
+        table_factory(engine=snowflake_ds.get_engine(), table_names={table_name})
+
+        table_names: list[str] = inspect(snowflake_ds.get_engine()).get_table_names()
+        print(f"snowflake tables:\n{pf(table_names)}))")
+
+        snowflake_ds.add_table_asset(asset_name, table_name=table_name)
+
     @pytest.mark.parametrize(
         "datasource_type",
         [
             param("trino", marks=[pytest.mark.trino]),
             param("postgres", marks=[pytest.mark.postgresql]),
+            param("snowflake", marks=[pytest.mark.snowflake]),
         ],
     )
     def test_checkpoint_run(
