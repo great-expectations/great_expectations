@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import datetime
 import pathlib
 from typing import TYPE_CHECKING
+from unittest import mock
 
 import pandas as pd
 import pydantic
@@ -284,6 +286,18 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata.db",
             "yellow_tripdata_sample_2019_02",
+            "add_splitter_column_value",
+            {"column_name": "pickup_datetime"},
+            ["pickup_datetime"],
+            9977,
+            {"pickup_datetime": "2019-02-07 15:48:06"},
+            1,
+            {"pickup_datetime": "2019-02-07 15:48:06"},
+            id="column_value_datetime",
+        ),
+        pytest.param(
+            "yellow_tripdata.db",
+            "yellow_tripdata_sample_2019_02",
             "add_splitter_divided_integer",
             {"column_name": "passenger_count", "divisor": 3},
             ["quotient"],
@@ -372,6 +386,48 @@ def test_splitter(
     )
     assert len(specified_batches) == specified_batch_cnt
     assert specified_batches[-1].metadata == last_specified_batch_metadata
+
+
+@pytest.mark.sqlite
+def test_splitter_build_batch_request_allows_selecting_by_date_and_datetime_as_string(
+    empty_data_context,
+):
+    context = empty_data_context
+    datasource = sqlite_datasource(context, "yellow_tripdata.db")
+
+    asset = datasource.add_query_asset(
+        "query_asset",
+        "SELECT date(pickup_datetime) as pickup_date, passenger_count FROM yellow_tripdata_sample_2019_02",
+    )
+    asset.add_splitter_column_value(column_name="pickup_date")
+    asset.add_sorters(["pickup_date"])
+    # Test getting all batches
+    all_batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())
+    assert len(all_batches) == 28
+
+    with mock.patch(
+        "great_expectations.datasource.fluent.sql_datasource._splitter_and_sql_asset_to_batch_identifier_data"
+    ) as mock_batch_identifiers:
+        mock_batch_identifiers.return_value = [
+            {"pickup_date": datetime.date(2019, 2, 1)},
+            {"pickup_date": datetime.date(2019, 2, 2)},
+        ]
+        specified_batches = asset.get_batch_list_from_batch_request(
+            asset.build_batch_request({"pickup_date": "2019-02-01"})
+        )
+        assert len(specified_batches) == 1
+
+    with mock.patch(
+        "great_expectations.datasource.fluent.sql_datasource._splitter_and_sql_asset_to_batch_identifier_data"
+    ) as mock_batch_identifiers:
+        mock_batch_identifiers.return_value = [
+            {"pickup_date": datetime.datetime(2019, 2, 1)},
+            {"pickup_date": datetime.datetime(2019, 2, 2)},
+        ]
+        specified_batches = asset.get_batch_list_from_batch_request(
+            asset.build_batch_request({"pickup_date": "2019-02-01 00:00:00"})
+        )
+        assert len(specified_batches) == 1
 
 
 # This is marked by the various backend used in testing in the datasource_test_data fixture.

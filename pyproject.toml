@@ -279,6 +279,7 @@ extend-exclude = [
 "__init__.py" = [
     "F401", # unused import
     "F403", # star imports
+    "PTH207", # use glob - __all__ needs to be list of str, not Path
 ]
 "great_expectations/_version.py" = [
     "PLR", # pylint - versioneer code
@@ -325,6 +326,8 @@ convention = "google"
 "azure".msg = "Please do not import azure directly, import from great_expectations.compatibility.azure instead."
 "trino".msg = "Please do not import trino directly, import from great_expectations.compatibility.trino instead."
 "pyarrow".msg = "Please do not import azure directly, import from great_expectations.compatibility.pyarrow instead."
+
+# -----------------------------------------------------------------
 
 [tool.pytest.ini_options]
 filterwarnings = [
@@ -396,6 +399,7 @@ filterwarnings = [
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
     # The warnings in this section should be addressed (fixed or ignored) but are ignored here temporarily to help allow
     # turning on "warnings are errors" so new warnings become errors and are addressed during PRs.
+    'ignore: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives:DeprecationWarning',
 
     # python
     # Example Actual Warning: RuntimeWarning: divide by zero encountered in divide, RuntimeWarning: divide by zero encountered in true_divide

@@ -17,6 +17,16 @@ on:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+'
 
+env:
+  # Run only on PRs from the main repo, on scheduled, or triggered runs.
+  RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+
+concurrency:
+  # Only run one instance of this workflow in PRs, but allow multiple instances in develop.
+  # https://stackoverflow.com/questions/74117321/if-condition-in-concurrency-in-gha
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   ci-does-not-run-on-draft-pull-requests:
     runs-on: ubuntu-latest
@@ -155,18 +165,19 @@ jobs:
           yarn install
           python ci/checks/validate_docs_snippets.py
       - name: Authenticate with GCP
-        if: github.event.pull_request.head.repo.full_name == github.repository
+
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
 
       - name: Create JSON file for following step
-        if: github.event.pull_request.head.repo.full_name == github.repository
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         run: |
           echo "$GE_TEST_GCP_CREDENTIALS" > gcp-credentials.json
 
       - name: Install and setup Google Cloud SDK
-        if: github.event.pull_request.head.repo.full_name == github.repository
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         run: |
           # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
           curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
@@ -180,8 +191,7 @@ jobs:
           # Authorize access to Google Cloud with a service account
           ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 
-      - name: Set up Python bigquery
-        if: github.event.pull_request.head.repo.full_name == github.repository
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.8"
@@ -191,20 +201,17 @@ jobs:
       - name: Install dependencies
         run: |
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
-          invoke deps --gx-install -m 'docs-basic'
+          invoke deps --gx-install -m 'docs-basic' -m 'docs-creds-needed' -m 'docs-spark'
       - name: Run the tests
         run: |
           invoke docs-snippet-tests 'docs-basic' --up-services --verbose
       - name: Run the tests needing cloud credentials
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         run: |
-          # run only on main repo, and not user-forks
-          if: github.event.pull_request.head.repo.full_name == github.repository
-          run: |
-            invoke docs-snippet-tests 'docs-creds-needed' --up-services --verbose
+          invoke docs-snippet-tests 'docs-creds-needed' --up-services --verbose
       # Spark tests are run as part of a separate task as we have not migrated all of Spark tests just yet (ie. Spark+Athena, Spark+S3 etc)
       - name: Run the Spark tests
         run: |
-          invoke deps --gx-install -m 'docs-spark'
           invoke docs-snippet-tests 'docs-spark' --up-services --verbose
 
   unit-tests:
@@ -234,7 +241,7 @@ jobs:
         run: invoke ci-tests -m "unit" --xdist --timeout=1.5 --slowest=8
 
   cloud-tests:
-    if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.pull_request.draft == false && (github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' )
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
