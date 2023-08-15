@@ -229,7 +229,19 @@ class ColumnDomainBuilder(DomainBuilder):
                 },
             )
         )
-        self._table_column_names = table_columns
+        # TODO: Add Spark escaping here
+        # TODO: This is a temporary debugging step for spark since dotted columns need escaping e.g. `a.b`
+        escaped_column_names: List[str] = []
+        for col_name in table_columns:
+            if (
+                "." in col_name
+                and not col_name.startswith("`")
+                and not col_name.endswith("`")
+            ):
+                escaped_column_names.append(f"`{col_name}`")
+            else:
+                escaped_column_names.append(col_name)
+        self._table_column_names = escaped_column_names
 
         return self._table_column_names
 
