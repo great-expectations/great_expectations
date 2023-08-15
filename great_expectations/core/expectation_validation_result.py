@@ -377,8 +377,8 @@ class ExpectationValidationResult(SerializableDictDot):
                         return self.result["details"].get(metric_name_parts[3])
                 except KeyError:
                     raise gx_exceptions.UnavailableMetricError(
-                        "Unable to get metric {} -- KeyError in "
-                        "ExpectationValidationResult.".format(metric_name)
+                        f"Unable to get metric {metric_name} -- KeyError in "
+                        "ExpectationValidationResult."
                     )
         raise gx_exceptions.UnavailableMetricError(
             f"Unrecognized metric name {metric_name}"
