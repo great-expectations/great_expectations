@@ -82,9 +82,10 @@ class ColumnTypes(TableMetricProvider):
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        return _get_spark_column_metadata(
+        spark_column_metadata = _get_spark_column_metadata(
             df.schema, include_nested=metric_value_kwargs["include_nested"]
         )
+        return spark_column_metadata
 
 
 def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
@@ -119,7 +120,10 @@ def _get_spark_column_metadata(field, parent_name="", include_nested=True):
             )
     elif pyspark.types and isinstance(field, pyspark.types.StructField):
         if include_nested and "." in field.name:
-            name = f"{parent_name}`{field.name}`"
+            if field.name.startswith("`") and field.name.endswith("`"):
+                name = f"{parent_name}{field.name}"
+            else:
+                name = f"{parent_name}`{field.name}`"
         else:
             name = parent_name + field.name
 

@@ -757,12 +757,19 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
         column_name: str,
     ) -> Tuple[str, str | sqlalchemy.quoted_name] | None:
         typed_column_name_cursor: str | sqlalchemy.quoted_name
+
         for typed_column_name_cursor in batch_columns_list:
             if (
                 (type(typed_column_name_cursor) == str)
                 and (column_name.casefold() == typed_column_name_cursor.casefold())
             ) or (column_name == str(typed_column_name_cursor)):
                 return column_name, typed_column_name_cursor
+
+            # TODO: Handle spark quoted names
+            if column_name.casefold().strip(
+                "`"
+            ) == typed_column_name_cursor.casefold().strip("`"):
+                return column_name, column_name
 
         return None
 

@@ -398,6 +398,60 @@ def test_onboarding_data_assistant_should_fail_forward(
         )
 
 
+# TODO: Make this a unit test
+# TODO: Where should this test live?
+@pytest.mark.unit
+def test_get_domain_records_with_column_domain_all_identifier_types(
+    spark_session,
+    ephemeral_context_with_defaults,
+):
+    """What does this test and why?
+
+    Spark identifiers are less restrictive than ANSI SQL identifiers. This test ensures that we can use identifiers
+    compliant with: https://spark.apache.org/docs/latest/sql-ref-identifier.html
+    """
+    # Use the below if you want to use a pandas df as an intermediate step.
+    # pd_df = pd.DataFrame(
+    #     {
+    #         "snake_case": [1, 2, 3, 4, 5],
+    #         "kebab-case": [2, 3, 4, 5, None],
+    #         "dot.case": [1, 2, 3, 4, None],
+    #     }
+    # )
+    # df = spark_session.createDataFrame(data=pd_df)
+
+    # These columns fail:
+    # columns = ["snake_case", "kebab-case", "dot.case"]
+    # values = [(1, 2, 1), (2, 3, 2), (3, 4, 3), (4, 5, 4), (5, None, None)]
+
+    # These columns pass:
+    # columns = ["snake_case", "kebab-case"]
+    # values = [(1, 2), (2, 3), (3, 4), (4, 5), (5, None)]
+
+    # These columns fail:
+    columns = ["snake_case", "kebab-case", "dot.case"]
+    values = [(1, 2, 1), (2, 3, 2), (3, 4, 3), (4, 5, 4), (5, None, None)]
+
+    # Testing these columns:
+    # columns = ["snake_case", "kebab-case", "`space in column name`"]
+    # values = [(1, 2, 1), (2, 3, 2), (3, 4, 3), (4, 5, 4), (5, None, None)]
+
+    df = spark_session.createDataFrame(data=values, schema=columns)
+
+    context = ephemeral_context_with_defaults
+    datasource = context.sources.add_or_update_spark("my_datasource")
+    asset = datasource.add_dataframe_asset("my_asset")
+    batch_request = asset.build_batch_request(dataframe=df)
+
+    data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+        batch_request=batch_request
+    )
+    suite = data_assistant_result.get_expectation_suite()
+    assert len(suite.expectations) > 0
+
+    assert data_assistant_result.rule_exception_tracebacks == {}
+
+
 @pytest.mark.big
 @pytest.mark.slow  # 39.26s
 def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
