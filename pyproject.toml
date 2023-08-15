@@ -325,7 +325,7 @@ convention = "google"
 "google".msg = "Please do not import google directly, import from great_expectations.compatibility.google instead."
 "azure".msg = "Please do not import azure directly, import from great_expectations.compatibility.azure instead."
 "trino".msg = "Please do not import trino directly, import from great_expectations.compatibility.trino instead."
-"pyarrow".msg = "Please do not import azure directly, import from great_expectations.compatibility.pyarrow instead."
+"pyarrow".msg = "Please do not import pyarrow directly, import from great_expectations.compatibility.pyarrow instead."
 
 # -----------------------------------------------------------------
 
