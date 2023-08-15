@@ -203,4 +203,3 @@ if __name__ == "__main__":
     ExpectMulticolumnValuesToBeEqual().print_diagnostic_checklist(
         show_failed_tests=True
     )
-
