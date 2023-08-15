@@ -240,9 +240,7 @@ class TestTableIdentifiers:
         if not table_name:
             pytest.skip(f"no '{asset_name}' table_name for databricks")
         # create table
-        table_factory(
-            engine=postgres_ds.get_engine(), table_names={table_name}, schema="public"
-        )
+        table_factory(engine=postgres_ds.get_engine(), table_names={table_name})
 
         table_names: list[str] = inspect(postgres_ds.get_engine()).get_table_names()
         print(f"postgres tables:\n{pf(table_names)}))")
