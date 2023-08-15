@@ -460,6 +460,7 @@ def test_catch_bad_top_level_config(
                 _FLUENT_DATASOURCES_KEY,
                 "assets",
                 0,
+                "TableAsset",
                 "splitter",
                 "method_name",
             ),
@@ -502,6 +503,7 @@ def test_catch_bad_asset_configs(
         if expected_error_loc == all_errors[0]["loc"]:
             test_msg = error["msg"]
             break
+    print(f"\n\ttest_msg:\n{test_msg}")
     assert test_msg.startswith(expected_msg)
 
 
