@@ -458,6 +458,7 @@ jobs:
       py38-min-versions,
       py39-min-versions,
       py310-min-versions,
+      airflow220-min-versions,
       import_gx,
       usage_stats_integration
     ]
@@ -502,6 +503,7 @@ jobs:
       py38-min-versions,
       py39-min-versions,
       py310-min-versions,
+      airflow220-min-versions,
       import_gx,
       usage_stats_integration,
       build-n-publish
