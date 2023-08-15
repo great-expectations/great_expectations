@@ -21,6 +21,12 @@ env:
   # Run only on PRs from the main repo, on scheduled, or triggered runs.
   RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
 
+concurrency:
+  # Only run one instance of this workflow in PRs, but allow multiple instances in develop.
+  # https://stackoverflow.com/questions/74117321/if-condition-in-concurrency-in-gha
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   ci-does-not-run-on-draft-pull-requests:
     runs-on: ubuntu-latest
