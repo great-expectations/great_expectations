@@ -343,7 +343,9 @@ def get_sqlalchemy_column_metadata(
                     columns = table_selectable.columns().columns
             else:
                 columns = inspector.get_columns(
-                    table_selectable,
+                    str(
+                        table_selectable
+                    ),  # TODO: remove cast to a string once [this](https://github.com/snowflakedb/snowflake-sqlalchemy/issues/157) issue is resovled
                     schema=schema_name,
                 )
         except (
