@@ -131,7 +131,9 @@ class CardinalityChecker:
     ) -> AbsoluteCardinalityLimit | RelativeCardinalityLimit:
         return self._cardinality_limit_mode
 
-    def cardinality_within_limit(self, metric_value: Union[int, float]) -> bool:
+    def cardinality_within_limit(
+        self, metric_value: Union[int, float]  # noqa: PYI041
+    ) -> bool:
         """Determine if the cardinality is within configured limit.
 
         The metric_value supplied should be either a proportion of unique values
@@ -159,7 +161,7 @@ class CardinalityChecker:
         )
 
     @staticmethod
-    def _validate_metric_value(metric_value: Union[int, float]) -> None:
+    def _validate_metric_value(metric_value: Union[int, float]) -> None:  # noqa: PYI041
         if not isinstance(metric_value, (int, float)):
             raise ProfilerConfigurationError(
                 f"Value of measured cardinality must be of type int or float, you provided {type(metric_value)}"

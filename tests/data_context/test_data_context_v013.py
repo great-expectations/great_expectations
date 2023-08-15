@@ -217,8 +217,8 @@ def test_get_config(empty_data_context):
     assert type(context.get_config()) == DataContextConfig
     assert type(context.get_config(mode=ConfigOutputModes.TYPED)) == DataContextConfig
     assert type(context.get_config(mode=ConfigOutputModes.DICT)) == dict
-    assert type(context.get_config(mode=ConfigOutputModes.YAML)) == str
-    assert type(context.get_config(mode="yaml")) == str
+    assert type(context.get_config(mode=ConfigOutputModes.YAML)) == str  # noqa: E721
+    assert type(context.get_config(mode="yaml")) == str  # noqa: E721
     with pytest.raises(ValueError):
         context.get_config(mode="foobar")
 

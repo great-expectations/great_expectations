@@ -101,7 +101,7 @@ def test_batch_head(
         AbstractDataContext, Datasource, DataAsset, BatchRequest
     ],
     fetch_all: bool | str,
-    n_rows: int | float | str | None,
+    n_rows: int | float | str | None,  # noqa: PYI041
     success: bool,
 ) -> None:
     run_batch_head(
