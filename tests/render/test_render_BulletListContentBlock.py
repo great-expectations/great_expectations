@@ -78,7 +78,7 @@ def test_all_expectations_using_test_definitions():
     pattern = os.path.join(  # noqa: PTH118
         dir_path, "..", "..", "tests", "test_definitions", "*", "expect*.json"
     )
-    test_files = glob.glob(pattern)
+    test_files = glob.glob(pattern)  # noqa: PTH207
 
     # Historically, collecting all the JSON tests was an issue - this step ensures we actually have test data.
     assert (
