@@ -34,9 +34,6 @@ maturity_details_keys = [
     "expectation_completeness",
 ]
 
-AnnotatedNode = namedtuple(  # noqa: PYI024
-    "AnnotatedNode", ["name", "path", "annotation", "type_"]
-)
 
 
 def parse_feature_annotation(docstring: Union[str, List[str], None]):
