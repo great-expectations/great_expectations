@@ -62,21 +62,14 @@ data_assistant_result = context.assistants.missingness.run(
 
 # Save your Expectation Suite
 
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py get_expectation_suite">
-expectation_suite = data_assistant_result.get_expectation_suite(
-    expectation_suite_name="my_custom_expectation_suite_name"  # optional custom name for the expectation suite
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py save_validator">
+validator.expectation_suite = data_assistant_result.get_expectation_suite(
+    expectation_suite_name="my_custom_expectation_suite_name"
 )
-# </snippet>
-
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py save_expectation_suite">
-context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
+validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
 # Use a Checkpoint to verify that your new Expectation Suite works.
-
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py save_validator">
-validator.expectation_suite_name = "my_custom_expectation_suite_name"
-# </snippet>
 
 # <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py checkpoint">
 

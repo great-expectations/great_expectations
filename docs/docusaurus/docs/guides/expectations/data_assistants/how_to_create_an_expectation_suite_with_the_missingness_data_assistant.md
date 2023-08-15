@@ -72,25 +72,13 @@ To run a Data Assistant, you can call the `run(...)` method for the assistant. T
 
 ## Save your Expectation Suite
 
-1. After executing the Missingness Data Assistant's `run(...)` method and generating Expectations for your data, run the following code to load and save them into your Expectation Suite:
-
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py get_expectation_suite"
-  ```
-
-  The above code will generate a new Expectation Suite containing the Expectations generated from the Data Assistant.
-
-2. Run the following code to add the Expectation Suite to your Data Context:
-
-  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py save_expectation_suite"
-  ```
-
-## Test your Expectation Suite
-
-1. Save the Expectation Suite to your Validator:
+After executing the Missingness Data Assistant's `run(...)` method and generating Expectations for your data, run the following code to generate an Expectation Suite and save it to your Validator:
 
   ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py save_validator"
   ```
-2.  Run the following code to use a Checkpoint to operate with the Expectation Suite and Validator that you defined:
+## Test your Expectation Suite
+
+Run the following code to use a Checkpoint to operate with the Expectation Suite and Validator that you defined:
 
   ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py checkpoint"
   ```
