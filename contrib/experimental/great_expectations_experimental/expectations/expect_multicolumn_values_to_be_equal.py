@@ -119,15 +119,6 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
 
     map_metric = "multicolumn_values_to_be_equal"
 
-#     examples = [
-#     {
-#         "data": {
-#             "OPEN_DATE": [20220531, 20220430, 20230712],
-#             "VALUE_DATE": [20220531, 20220430, 20230712],
-#             "DUE_DATE": [20220531, 20220430, 20230712],
-#             "EXPIRY_DATE": [20230831, 20220430, 20240531],
-#
-
     examples = [
         {
             "data": {
