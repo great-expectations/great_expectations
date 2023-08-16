@@ -32,7 +32,7 @@ from great_expectations.expectations.expectation import (
 SQLA_VERSION: Final = Version(sqlalchemy_version or "0.0.0")
 LOGGER: Final = logging.getLogger("tests")
 
-PG_TABLE: Final[str] = "test_table"
+TEST_TABLE_NAME: Final[str] = "test_table"
 # trino container ships with default test tables
 TRINO_TABLE: Final[str] = "customer"
 
@@ -56,12 +56,12 @@ TableNameCase: TypeAlias = Literal[
 # test cases should work for all datasrouces
 TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
     "postgres": {
-        "unquoted_lower": PG_TABLE.lower(),
-        "quoted_lower": f'"{PG_TABLE.lower()}"',
-        # "unquoted_upper": PG_TABLE.upper(),
-        "quoted_upper": f'"{PG_TABLE.upper()}"',
-        "quoted_mixed": f'"{PG_TABLE.title()}"',
-        # "unquoted_mixed": PG_TABLE.title(),
+        "unquoted_lower": TEST_TABLE_NAME.lower(),
+        "quoted_lower": f'"{TEST_TABLE_NAME.lower()}"',
+        # "unquoted_upper": TEST_TABLE_NAME.upper(),
+        "quoted_upper": f'"{TEST_TABLE_NAME.upper()}"',
+        "quoted_mixed": f'"{TEST_TABLE_NAME.title()}"',
+        # "unquoted_mixed": TEST_TABLE_NAME.title(),
     },
     "trino": {
         "unquoted_lower": TRINO_TABLE.lower(),
@@ -72,20 +72,20 @@ TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
         # "unquoted_mixed": TRINO_TABLE.title(),
     },
     "databricks_sql": {
-        "unquoted_lower": PG_TABLE.lower(),
-        "quoted_lower": f"`{PG_TABLE.lower()}`",
-        "unquoted_upper": PG_TABLE.upper(),
-        "quoted_upper": f"`{PG_TABLE.upper()}`",
-        "quoted_mixed": f"`{PG_TABLE.title()}`",
-        "unquoted_mixed": PG_TABLE.title(),
+        "unquoted_lower": TEST_TABLE_NAME.lower(),
+        "quoted_lower": f"`{TEST_TABLE_NAME.lower()}`",
+        "unquoted_upper": TEST_TABLE_NAME.upper(),
+        "quoted_upper": f"`{TEST_TABLE_NAME.upper()}`",
+        "quoted_mixed": f"`{TEST_TABLE_NAME.title()}`",
+        "unquoted_mixed": TEST_TABLE_NAME.title(),
     },
     "snowflake": {
-        "unquoted_lower": PG_TABLE.lower(),
-        "quoted_lower": f'"{PG_TABLE.lower()}"',
-        "unquoted_upper": PG_TABLE.upper(),
-        "quoted_upper": f'"{PG_TABLE.upper()}"',
-        "quoted_mixed": f'"{PG_TABLE.title()}"',
-        # "unquoted_mixed": PG_TABLE.title(),
+        "unquoted_lower": TEST_TABLE_NAME.lower(),
+        "quoted_lower": f'"{TEST_TABLE_NAME.lower()}"',
+        "unquoted_upper": TEST_TABLE_NAME.upper(),
+        "quoted_upper": f'"{TEST_TABLE_NAME.upper()}"',
+        "quoted_mixed": f'"{TEST_TABLE_NAME.title()}"',
+        # "unquoted_mixed": TEST_TABLE_NAME.title(),
     },
 }
 
