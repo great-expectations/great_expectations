@@ -1,5 +1,4 @@
 from unittest.mock import MagicMock
-from great_expectations.exceptions.exceptions import DataContextError
 
 import pytest
 
@@ -14,6 +13,7 @@ from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.fluent import Datasource
 from great_expectations.exceptions import StoreBackendError
+from great_expectations.exceptions.exceptions import DataContextError
 
 pytestmark = pytest.mark.unit
 
