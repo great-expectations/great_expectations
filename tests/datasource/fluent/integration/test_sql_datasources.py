@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import logging
+import os
 import uuid
 from pprint import pformat as pf
 from typing import Final, Generator, Literal, Protocol
 
-import os
 import pytest
 from packaging.version import Version
 from pytest import param
