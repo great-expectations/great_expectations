@@ -342,8 +342,7 @@ jobs:
         with:
           python-version: "3.8"
           cache: "pip"
-          cache-dependency-path: |
-            reqs/requirements-dev-test.txt
+          cache-dependency-path: reqs/requirements-dev-test.txt
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py38-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
@@ -361,8 +360,7 @@ jobs:
         with:
           python-version: "3.9"
           cache: "pip"
-          cache-dependency-path: |
-            reqs/requirements-dev-test.txt
+          cache-dependency-path: reqs/requirements-dev-test.txt
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py39-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
@@ -380,12 +378,29 @@ jobs:
         with:
           python-version: "3.10"
           cache: "pip"
-          cache-dependency-path: |
-            reqs/requirements-dev-test.txt
+          cache-dependency-path: reqs/requirements-dev-test.txt
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py310-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
         run: invoke tests --unit
+
+  airflow220-min-versions:
+    needs: [unit-tests, static-analysis]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "pip"
+          cache-dependency-path: requirements.txt
+      - name: Install dependencies
+        run: pip install . -c ci/constraints-test/airflow220-min-install.txt
+      - name: Run the test
+        # ensure the great_expectations can be imported and a context created
+        run: sh ci/checks/check_min_airflow_dependency_compatibility.sh
 
   import_gx:
     needs: [static-analysis]
@@ -443,6 +458,7 @@ jobs:
       py38-min-versions,
       py39-min-versions,
       py310-min-versions,
+      airflow220-min-versions,
       import_gx,
       usage_stats_integration
     ]
@@ -487,6 +503,7 @@ jobs:
       py38-min-versions,
       py39-min-versions,
       py310-min-versions,
+      airflow220-min-versions,
       import_gx,
       usage_stats_integration,
       build-n-publish
