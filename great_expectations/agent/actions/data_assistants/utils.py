@@ -60,7 +60,7 @@ def build_action_result(
         context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
         # if that didn't error, this name exists, so we add the timestamp
         expectation_suite_name = f"{expectation_suite_name} {timestamp}"
-    except (StoreBackendError, ValueError, DataContextError):
+    except (DataContextError):
         # resource is unique
         pass
 
@@ -68,7 +68,7 @@ def build_action_result(
         context.get_checkpoint(name=checkpoint_name)
         # if that didn't error, this name exists, so we add the timestamp
         checkpoint_name = f"{checkpoint_name} {timestamp}"
-    except (StoreBackendError, ValueError, DataContextError):
+    except (DataContextError):
         # resource is unique
         pass
 
