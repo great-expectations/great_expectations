@@ -218,8 +218,8 @@ select = [
     "DTZ", # flake8-datetimez-dtz - prevent use of tz naive datetimes
     # https://beta.ruff.rs/docs/rules/#pylint-pl
     "PL", # pylint
-    # https://beta.ruff.rs/docs/rules/unused-noqa/
-    "RUF100", # unused-noqa
+    # https://beta.ruff.rs/docs/rules/#ruff-specific-rules-ruf
+    "RUF", # custom ruff rules
 ]
 ignore = [
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
@@ -513,7 +513,7 @@ markers = [
     "all_backends: mark tests that run against all execution engine backends",
     "athena: mark a test as AWS Athena-dependent.",
     "aws_creds: mark all tests that require aws credentials",
-    "aws_deps: mark tests that need aws dependencies like boto", 
+    "aws_deps: mark tests that need aws dependencies like boto",
     "big: mark tests that don't have external dependencies but aren't unit tests",
     "cli: mark all tests in the /cli directory.",
     "clickhouse: mark a test as Clickhouse-dependent.",
