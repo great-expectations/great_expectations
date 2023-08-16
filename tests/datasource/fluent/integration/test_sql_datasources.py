@@ -296,7 +296,9 @@ class TestTableIdentifiers:
         ).get_table_names(schema=PYTHON_VERSION)
         print(f"databricks tables:\n{pf(table_names)}))")
 
-        databricks_sql_ds.add_table_asset(asset_name, table_name=table_name)
+        databricks_sql_ds.add_table_asset(
+            asset_name, table_name=table_name, schema_name=PYTHON_VERSION
+        )
 
     @pytest.mark.snowflake
     def test_snowflake(
@@ -321,7 +323,9 @@ class TestTableIdentifiers:
         )
         print(f"snowflake tables:\n{pf(table_names)}))")
 
-        snowflake_ds.add_table_asset(asset_name, table_name=table_name)
+        snowflake_ds.add_table_asset(
+            asset_name, table_name=table_name, schema_name=schema
+        )
 
     @pytest.mark.parametrize(
         "datasource_type,schema",
