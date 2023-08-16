@@ -197,14 +197,18 @@ def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
     )
     return ds
 
+
 @pytest.fixture
 def snowflake_creds_populated() -> bool:
     if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") or os.getenv("SNOWFLAKE_CI_ACCOUNT"):
         return True
     return False
 
+
 @pytest.fixture
-def snowflake_ds(context: EphemeralDataContext, snowflake_creds_populated) -> SnowflakeDatasource:
+def snowflake_ds(
+    context: EphemeralDataContext, snowflake_creds_populated
+) -> SnowflakeDatasource:
     if not snowflake_creds_populated:
         pytest.skip("no snowflake credentials")
     ds = context.sources.add_snowflake(
