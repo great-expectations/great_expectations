@@ -192,3 +192,15 @@ class TestPrependVersionInfoForMdAbsoluteLinks:
             contents, version
         )
         assert updated_contents == expected_contents
+
+    @pytest.mark.unit
+    def test__prepend_version_info_for_md_absoulte_links_updates_two_links_on_the_same_line(
+        self,
+    ):
+        contents = """[Run a Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results Store on S3 then visualize the results by [re-building Data Docs](/docs/terms/data_docs)."""
+        version = "0.16.16"
+        expected_contents = """[Run a Checkpoint](/docs/0.16.16/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results Store on S3 then visualize the results by [re-building Data Docs](/docs/0.16.16/terms/data_docs)."""
+        updated_contents = _prepend_version_info_for_md_absolute_links(
+            contents, version
+        )
+        assert updated_contents == expected_contents
