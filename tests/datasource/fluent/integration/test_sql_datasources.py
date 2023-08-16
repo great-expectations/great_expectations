@@ -206,7 +206,7 @@ def snowflake_creds_populated():
     return True
 
 
-@pytest.skipif(
+@pytest.mark.skipif(
     not snowflake_creds_populated(), reason="Snowflake credentials not populated"
 )
 @pytest.fixture
