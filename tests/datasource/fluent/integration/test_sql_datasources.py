@@ -199,13 +199,16 @@ def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
 
 
 def snowflake_creds_populated():
-    if ( 
-        os.getenv("SNOWFLAKE_CI_USER_PASSWORD") in [None, ""] or
-        os.getenv("SNOWFLAKE_CI_ACCOUNT") in [None, ""]):
+    if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") in [None, ""] or os.getenv(
+        "SNOWFLAKE_CI_ACCOUNT"
+    ) in [None, ""]:
         return False
     return True
 
-@pytest.skipif(not snowflake_creds_populated(), reason="Snowflake credentials not populated")
+
+@pytest.skipif(
+    not snowflake_creds_populated(), reason="Snowflake credentials not populated"
+)
 @pytest.fixture
 def snowflake_ds(context: EphemeralDataContext) -> SnowflakeDatasource:
     ds = context.sources.add_snowflake(
