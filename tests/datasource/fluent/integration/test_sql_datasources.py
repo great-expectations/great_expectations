@@ -197,10 +197,9 @@ def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
     )
     return ds
 
+
 def snowflake_creds_populated() -> bool:
-    if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") or os.getenv(
-        "SNOWFLAKE_CI_ACCOUNT"
-    ):
+    if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") or os.getenv("SNOWFLAKE_CI_ACCOUNT"):
         return True
     return False
 
