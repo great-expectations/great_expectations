@@ -851,7 +851,7 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
             "reqs/requirements-dev-spark.txt",
         ),
         services=("spark",),
-        extra_pytest_args=("--spark",),
+        extra_pytest_args=("--spark", "--docs-tests"),
     ),
     "mssql": TestDependencies(
         ("reqs/requirements-dev-mssql.txt",),
@@ -868,6 +868,9 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         ("reqs/requirements-dev-postgresql.txt",),
         services=("postgresql",),
         extra_pytest_args=("--postgresql",),
+    ),
+    "snowflake": TestDependencies(
+        requirement_files=("reqs/requirements-dev-snowflake.txt",),
     ),
     "spark": TestDependencies(
         requirement_files=("reqs/requirements-dev-spark.txt",),
