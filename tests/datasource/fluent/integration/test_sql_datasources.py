@@ -207,7 +207,7 @@ def snowflake_creds_populated() -> bool:
 
 @pytest.fixture
 def snowflake_ds(
-    context: EphemeralDataContext, snowflake_creds_populated
+    context: EphemeralDataContext, snowflake_creds_populated: bool
 ) -> SnowflakeDatasource:
     if not snowflake_creds_populated:
         pytest.skip("no snowflake credentials")
