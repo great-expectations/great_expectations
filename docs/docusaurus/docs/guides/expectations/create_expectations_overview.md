@@ -35,7 +35,7 @@ Advanced users can use custom methods to generate Expectations that are based on
 
 ### Test your Expectation Suite
 
-After you've created and saved your Expectation Suite, GX recommends that you test it by Validating it. You can Validate an Expectation with `SimpleCheckpoint`.  An overview of the Validation process is provided [here](../validation/validate_data_overview.md).
+After you've created and saved your Expectation Suite, GX recommends that you test it by Validating it. You can Validate an Expectation with a Checkpoint.  An overview of the Validation process is provided [here](../validation/validate_data_overview.md).
 
 ### Edit a saved Expectation Suite
 

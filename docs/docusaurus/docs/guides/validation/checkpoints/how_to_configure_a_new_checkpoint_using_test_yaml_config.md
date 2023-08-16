@@ -41,7 +41,7 @@ Run the following command to list the Expectation Suites:
 
 ## Create your Checkpoint
 
-Run the following YAML (inline as a Python string) to define `SimpleCheckpoint` as the starting point:
+Run the following YAML (inline as a Python string) to define the Checkpoint:
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.py create_checkpoint"
 ```
@@ -63,9 +63,9 @@ Run the following command to save your Checkpoint and add it to the Data Context
 
 ## Checkpoint configuration examples
 
- If you require more fine-grained configuration options, you can use the ``Checkpoint`` base class instead of ``SimpleCheckpoint``.
+ If you require more fine-grained configuration options, use the ``Checkpoint`` base class.
 
- In this example, the Checkpoint configuration uses the nesting of `batch_request` sections inside the `validations` block so as to use the defaults defined at the top level.
+ In this example, the Checkpoint configuration uses the nesting of `batch_request` sections inside the `validations` block to define the defaults at the top level.
 
  ```python
  config = """
