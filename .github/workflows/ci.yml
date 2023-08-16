@@ -17,6 +17,16 @@ on:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+'
 
+env:
+  # Run only on PRs from the main repo, on scheduled, or triggered runs.
+  RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+
+concurrency:
+  # Only run one instance of this workflow in PRs, but allow multiple instances in develop.
+  # https://stackoverflow.com/questions/74117321/if-condition-in-concurrency-in-gha
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   ci-does-not-run-on-draft-pull-requests:
     runs-on: ubuntu-latest
@@ -24,8 +34,32 @@ jobs:
     steps:
       - run: echo "CI jobs won't run because this is a draft pull request."
 
+  docs-changes:
+    # check whether docs were changed
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      docs: ${{ steps.filter.outputs.docs }}
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v2
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          docs:
+            - 'docs/**'
+            - 'tests/integration/docusaurus/**'
+            - 'tests/integration/fixtures/**'
+            - 'tests/test_sets/**'
   doc-checks:
-    if: github.event.pull_request.draft == false
+    needs: docs-changes
+    # run on every PR that is not a draft that has docs changes, and on tagged push events (ie. releases)
+    if: |
+      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,6 +73,7 @@ jobs:
             reqs/requirements-dev-test.txt
       - name: Install dependencies
         run: pip install -r reqs/requirements-dev-test.txt
+
       - name: check_repo_root_size
         run: sh ./ci/checks/check_repo_root_size.sh
       - name: Docstring linter
@@ -47,8 +82,18 @@ jobs:
         run: python ci/checks/check_no_line_number_snippets.py
       - name: name_tag_snippet_checker
         run: python ci/checks/check_only_name_tag_snippets.py
+      - name: integration_test_gets_run_checker
+        run: python ci/checks/check_integration_test_gets_run.py
+      - name: name_tag_snippet_referenced_checker
+        run: python ci/checks/check_name_tag_snippets_referenced.py
       - name: public_api_report
         run: invoke public-api
+      - name: link_checker
+        run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -s docs --skip-external
+      - name: docs_build
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
+        run: cd docs/docusaurus && yarn install && bash ../build_docs
 
   static-analysis:
     runs-on: ubuntu-latest
@@ -78,8 +123,11 @@ jobs:
 
   docs-snippets:
     name: docs-snippets
-    if: github.event.pull_request.draft == false
-    #add more scope here
+    needs: docs-changes
+    # run on every PR that is not a draft that has docs changes, and on tagged push events (ie. releases)
+    if: |
+      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     env:
       # google
@@ -112,17 +160,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
+      - name: Run docs_snippet_checker
+        run: |
+          yarn install
+          python ci/checks/validate_docs_snippets.py
       - name: Authenticate with GCP
+
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
 
       - name: Create JSON file for following step
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         run: |
           echo "$GE_TEST_GCP_CREDENTIALS" > gcp-credentials.json
 
       - name: Install and setup Google Cloud SDK
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         run: |
           # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
           curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
@@ -136,7 +191,7 @@ jobs:
           # Authorize access to Google Cloud with a service account
           ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 
-      - name: Set up Python bigquery
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.8"
@@ -146,10 +201,18 @@ jobs:
       - name: Install dependencies
         run: |
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
-          invoke deps --gx-install -m 'docs'
+          invoke deps --gx-install -m 'docs-basic' -m 'docs-creds-needed' -m 'docs-spark'
       - name: Run the tests
         run: |
-          invoke docs-snippet-tests 'docs' --up-services --verbose
+          invoke docs-snippet-tests 'docs-basic' --up-services --verbose
+      - name: Run the tests needing cloud credentials
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
+        run: |
+          invoke docs-snippet-tests 'docs-creds-needed' --up-services --verbose
+      # Spark tests are run as part of a separate task as we have not migrated all of Spark tests just yet (ie. Spark+Athena, Spark+S3 etc)
+      - name: Run the Spark tests
+        run: |
+          invoke docs-snippet-tests 'docs-spark' --up-services --verbose
 
   unit-tests:
     strategy:
@@ -178,7 +241,7 @@ jobs:
         run: invoke ci-tests -m "unit" --xdist --timeout=1.5 --slowest=8
 
   cloud-tests:
-    if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false && (github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' )
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -208,21 +271,33 @@ jobs:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     env:
-      # aws
+    # aws
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
       AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      SNOWFLAKE_CI_ACCOUNT: ${{secrets.SNOWFLAKE_CI_ACCOUNT}}
+      SNOWFLAKE_CI_USER_PASSWORD: ${{secrets.SNOWFLAKE_CI_USER_PASSWORD}}
+      SNOWFLAKE_ACCOUNT: ${{secrets.SNOWFLAKE_ACCOUNT}}
+      SNOWFLAKE_USER: ${{secrets.SNOWFLAKE_USER}}
+      SNOWFLAKE_PW: ${{secrets.SNOWFLAKE_PW}}
+      SNOWFLAKE_DATABASE: ${{secrets.SNOWFLAKE_DATABASE}}
+      SNOWFLAKE_SCHEMA: ${{secrets.SNOWFLAKE_SCHEMA}}
+      SNOWFLAKE_WAREHOUSE: ${{secrets.SNOWFLAKE_WAREHOUSE}}
+      SNOWFLAKE_ROLE: ${{secrets.SNOWFLAKE_ROLE}}
     runs-on: ubuntu-latest
     strategy:
       matrix:
         markers:
           - athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
+          - aws_deps
           - big
           - cli
+          - databricks
           - filesystem
           - mssql
           - mysql
           - postgresql
+          - snowflake
           - spark
           - trino
         python-version: ["3.8", "3.9", "3.10", "3.11"]
@@ -275,6 +350,24 @@ jobs:
         run: pip install . -c ci/constraints-test/py3${{ matrix.py-minor }}-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
         run: invoke ci-tests -m unit
+
+  airflow220-min-versions:
+    needs: [unit-tests, static-analysis]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "pip"
+          cache-dependency-path: requirements.txt
+      - name: Install dependencies
+        run: pip install . -c ci/constraints-test/airflow220-min-install.txt
+      - name: Run the test
+        # ensure the great_expectations can be imported and a context created
+        run: sh ci/checks/check_min_airflow_dependency_compatibility.sh
 
   import_gx:
     needs: [static-analysis]
@@ -330,6 +423,7 @@ jobs:
       cloud-tests,
       marker-tests,
       min-versions,
+      airflow220-min-versions,
       import_gx,
       usage_stats_integration
     ]
@@ -342,26 +436,26 @@ jobs:
     permissions:
       id-token: write
     steps:
-    - uses: actions/checkout@master
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.8'
-    - name: Update pip
-      run: python -m pip install --upgrade pip
-    - name: Install Twine and Wheel, and prepare packaging
-      run: |
-        pip install twine wheel
-        git config --global user.email "team@greatexpectations.io"
-        git config --global user.name "Great Expectations"
-    - name: Build distribution
-      run: |
-        python setup.py sdist
-        python setup.py bdist_wheel
-    - name: Publish distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        skip-existing: true # prevent against pushing duplicate versions
+      - uses: actions/checkout@master
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.8'
+      - name: Update pip
+        run: python -m pip install --upgrade pip
+      - name: Install Twine and Wheel, and prepare packaging
+        run: |
+          pip install twine wheel
+          git config --global user.email "team@greatexpectations.io"
+          git config --global user.name "Great Expectations"
+      - name: Build distribution
+        run: |
+          python setup.py sdist
+          python setup.py bdist_wheel
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true # prevent against pushing duplicate versions
 
   notify_on_failure:
     needs: [
@@ -372,6 +466,7 @@ jobs:
       cloud-tests,
       marker-tests,
       min-versions,
+      airflow220-min-versions,
       import_gx,
       usage_stats_integration,
       build-n-publish
@@ -390,3 +485,13 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CI_WEBHOOK_URL }}
+
+  notify_on_release:
+    needs: [build-n-publish]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Announce Release
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_WEBHOOK_URL }}

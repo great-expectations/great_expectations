@@ -752,7 +752,7 @@ class Checkpoint(BaseCheckpoint):
         self,
         name: str,
         data_context: AbstractDataContext,
-        config_version: int | float = 1.0,
+        config_version: int | float = 1.0,  # noqa: PYI041
         template_name: str | None = None,
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
@@ -845,7 +845,7 @@ constructor arguments.
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
         profilers: list[dict] | None = None,
-        run_id: str | int | float | None = None,
+        run_id: str | int | float | None = None,  # noqa: PYI041
         run_name: str | None = None,
         run_time: datetime.datetime | None = None,
         result_format: str | dict | None = None,  # TODO: type-dict?
@@ -1121,7 +1121,7 @@ class SimpleCheckpoint(Checkpoint):
         self,
         name: str,
         data_context,
-        config_version: int | float | None = 1.0,
+        config_version: int | float | None = 1.0,  # noqa: PYI041
         template_name: str | None = None,
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,

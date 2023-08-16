@@ -123,7 +123,7 @@ You'll create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for
 
   To learn more about Data validation and customizing Checkpoints, see [Validate Data: Overview ](https://docs.greatexpectations.io/docs/guides/validation/validate_data_overview).
 
-  To view the full Checkpoint configuration, run `print(my_checkpoint.get_substituted_config().to_yaml_str())`.
+  To view the full Checkpoint configuration, run `print(checkpoint.get_config().to_yaml_str())`.
 
 ## Build and view Data Docs
 

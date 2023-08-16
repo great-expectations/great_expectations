@@ -160,7 +160,8 @@ def _execute_taxi_splitting_test_cases(
         ] = data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
-
+        print(len(batch_definition_list), "batch definitions found")
+        print(test_case.num_expected_batch_definitions, "expected batch definitions")
         assert len(batch_definition_list) == test_case.num_expected_batch_definitions
 
         expected_batch_definition_list: List[BatchDefinition]
