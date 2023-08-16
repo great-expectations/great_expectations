@@ -287,7 +287,7 @@ class TestTableIdentifiers:
         if not table_name:
             pytest.skip(f"no '{asset_name}' table_name for databricks")
         if not snowflake_ds:
-            pytest.skip(f"no snowflake datasource")
+            pytest.skip("no snowflake datasource")
         # create table
         table_factory(
             engine=snowflake_ds.get_engine(),
