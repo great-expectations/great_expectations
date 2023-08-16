@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import uuid
 from pprint import pformat as pf
-from typing import Final, Generator, Literal, Protocol
+from typing import Final, Generator, Literal, Protocol, TypeAlias
 
 import pytest
 from packaging.version import Version
@@ -40,11 +40,21 @@ TRINO_TABLE: Final[str] = "customer"
 # some of the trino tests probably don't make sense if we can't create tables
 DO_NOT_CREATE_TABLES: set[str] = {"trino"}
 
+DatabaseType: TypeAlias = Literal["trino", "postgres", "databricks_sql", "snowflake"]
+TableNameCase: TypeAlias = Literal[
+    "quoted_lower",
+    "quoted_mixed",
+    "quoted_upper",
+    "unquoted_lower",
+    "unquoted_mixed",
+    "unquoted_upper",
+]
+
 # TODO: simplify this and possible get rid of this mapping once we have settled on
 # all the naming conventions we want to support for different SQL dialects
 # NOTE: commented out are tests we know fail for individual datasources. Ideally all
 # test cases should work for all datasrouces
-TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
+TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
     "postgres": {
         "unquoted_lower": PG_TABLE.lower(),
         "quoted_lower": f'"{PG_TABLE.lower()}"',
@@ -219,7 +229,7 @@ def snowflake_ds(context: EphemeralDataContext) -> SnowflakeDatasource:
 )
 class TestTableIdentifiers:
     @pytest.mark.trino
-    def test_trino(self, trino_ds: SQLDatasource, asset_name: str):
+    def test_trino(self, trino_ds: SQLDatasource, asset_name: TableNameCase):
         table_name = TABLE_NAME_MAPPING["trino"].get(asset_name)
         if not table_name:
             pytest.skip(f"no '{asset_name}' table_name for trino")
@@ -233,7 +243,7 @@ class TestTableIdentifiers:
     def test_postgres(
         self,
         postgres_ds: PostgresDatasource,
-        asset_name: str,
+        asset_name: TableNameCase,
         table_factory: TableFactory,
     ):
         table_name = TABLE_NAME_MAPPING["postgres"].get(asset_name)
@@ -251,10 +261,10 @@ class TestTableIdentifiers:
     def test_databricks_sql(
         self,
         databricks_sql_ds: DatabricksSQLDatasource,
-        asset_name: str,
+        asset_name: TableNameCase,
         # table_factory: TableFactory,
     ):
-        table_name = TABLE_NAME_MAPPING["databricks"].get(asset_name)
+        table_name = TABLE_NAME_MAPPING["databricks_sql"].get(asset_name)
         if not table_name:
             pytest.skip(f"no '{asset_name}' table_name for databricks")
 
@@ -269,7 +279,7 @@ class TestTableIdentifiers:
     def test_snowflake(
         self,
         snowflake_ds: SnowflakeDatasource,
-        asset_name: str,
+        asset_name: TableNameCase,
         table_factory: TableFactory,
     ):
         table_name = TABLE_NAME_MAPPING["snowflake"].get(asset_name)
@@ -307,8 +317,8 @@ class TestTableIdentifiers:
         request: pytest.FixtureRequest,
         context: EphemeralDataContext,
         table_factory: TableFactory,
-        asset_name: str,
-        datasource_type: str,
+        asset_name: TableNameCase,
+        datasource_type: DatabaseType,
         schema: str | None,
     ):
         datasource: SQLDatasource = request.getfixturevalue(f"{datasource_type}_ds")
