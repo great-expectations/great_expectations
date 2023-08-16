@@ -192,7 +192,7 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
 def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
     ds = context.sources.add_databricks_sql(
         "databricks_sql",
-        connection_string=r"databricks+connector://token:${DBS_TOKEN}@${DBS_HOST}:443/cloud_events?http_path=${DBS_HTTP_PATH}&catalog=catalog&schema=schema",
+        connection_string="databricks+connector://token:${DBS_TOKEN}@${DBS_HOST}:443/cloud_events?http_path=${DBS_HTTP_PATH}&catalog=catalog&schema=schema",
     )
     return ds
 
@@ -247,7 +247,6 @@ class TestTableIdentifiers:
 
         postgres_ds.add_table_asset(asset_name, table_name=table_name)
 
-    @pytest.mark.skip(reason="TODO: implement Databricks SQL integration service")
     @pytest.mark.databricks
     def test_databricks_sql(
         self,
@@ -295,6 +294,11 @@ class TestTableIdentifiers:
             param("postgres", None, marks=[pytest.mark.postgresql]),
             param(
                 "snowflake", get_random_identifier_name(), marks=[pytest.mark.snowflake]
+            ),
+            param(
+                "databricks_sql",
+                get_random_identifier_name(),
+                marks=[pytest.mark.databricks],
             ),
         ],
     )
