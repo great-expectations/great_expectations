@@ -198,12 +198,11 @@ def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
     return ds
 
 
-def snowflake_creds_populated():
-    if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") in [None, ""] or os.getenv(
+    if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") or os.getenv(
         "SNOWFLAKE_CI_ACCOUNT"
-    ) in [None, ""]:
-        return False
-    return True
+    ):
+        return True
+    return False
 
 
 @pytest.mark.skipif(
