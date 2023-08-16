@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+import os
+import uuid
 from pprint import pformat as pf
 from typing import Final, Generator, Literal, Protocol
 
@@ -96,6 +98,11 @@ class TableFactory(Protocol):
         ...
 
 
+def get_random_identifier_name() -> str:
+    guid = uuid.uuid4()
+    return f"i{guid.hex}"
+
+
 @pytest.fixture(scope="function")
 def capture_engine_logs(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFixture:
     """Capture SQLAlchemy engine logs and display them if the test fails."""
@@ -158,6 +165,8 @@ def table_factory(
                 schema = table["schema"]
                 qualified_table_name = f"{schema}.{name}" if schema else name
                 conn.execute(TextClause(f"DROP TABLE IF EXISTS {qualified_table_name}"))
+            if schema:
+                conn.execute(TextClause(f"DROP SCHEMA IF EXISTS {schema}"))
             if SQLA_VERSION >= Version("2.0"):
                 conn.commit()
 
@@ -190,7 +199,18 @@ def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
 
 
 @pytest.fixture
-def snowflake_ds(context: EphemeralDataContext) -> SnowflakeDatasource:
+def snowflake_creds_populated() -> bool:
+    if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") or os.getenv("SNOWFLAKE_CI_ACCOUNT"):
+        return True
+    return False
+
+
+@pytest.fixture
+def snowflake_ds(
+    context: EphemeralDataContext, snowflake_creds_populated: bool
+) -> SnowflakeDatasource:
+    if not snowflake_creds_populated:
+        pytest.skip("no snowflake credentials")
     ds = context.sources.add_snowflake(
         "snowflake",
         connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
@@ -232,9 +252,7 @@ class TestTableIdentifiers:
         if not table_name:
             pytest.skip(f"no '{asset_name}' table_name for databricks")
         # create table
-        table_factory(
-            engine=postgres_ds.get_engine(), table_names={table_name}, schema="public"
-        )
+        table_factory(engine=postgres_ds.get_engine(), table_names={table_name})
 
         table_names: list[str] = inspect(postgres_ds.get_engine()).get_table_names()
         print(f"postgres tables:\n{pf(table_names)}))")
@@ -270,8 +288,14 @@ class TestTableIdentifiers:
         table_name = TABLE_NAME_MAPPING["snowflake"].get(asset_name)
         if not table_name:
             pytest.skip(f"no '{asset_name}' table_name for databricks")
+        if not snowflake_ds:
+            pytest.skip("no snowflake datasource")
         # create table
-        table_factory(engine=snowflake_ds.get_engine(), table_names={table_name})
+        table_factory(
+            engine=snowflake_ds.get_engine(),
+            table_names={table_name},
+            schema=get_random_identifier_name(),
+        )
 
         table_names: list[str] = inspect(snowflake_ds.get_engine()).get_table_names()
         print(f"snowflake tables:\n{pf(table_names)}))")
@@ -279,11 +303,13 @@ class TestTableIdentifiers:
         snowflake_ds.add_table_asset(asset_name, table_name=table_name)
 
     @pytest.mark.parametrize(
-        "datasource_type",
+        "datasource_type,schema",
         [
-            param("trino", marks=[pytest.mark.trino]),
-            param("postgres", marks=[pytest.mark.postgresql]),
-            param("snowflake", marks=[pytest.mark.snowflake]),
+            param("trino", None, marks=[pytest.mark.trino]),
+            param("postgres", None, marks=[pytest.mark.postgresql]),
+            param(
+                "snowflake", get_random_identifier_name(), marks=[pytest.mark.snowflake]
+            ),
         ],
     )
     def test_checkpoint_run(
@@ -293,6 +319,7 @@ class TestTableIdentifiers:
         table_factory: TableFactory,
         asset_name: str,
         datasource_type: str,
+        schema: str | None,
     ):
         datasource: SQLDatasource = request.getfixturevalue(f"{datasource_type}_ds")
 
@@ -301,9 +328,13 @@ class TestTableIdentifiers:
             pytest.skip(f"no '{asset_name}' table_name for {datasource_type}")
 
         # create table
-        table_factory(engine=datasource.get_engine(), table_names={table_name})
+        table_factory(
+            engine=datasource.get_engine(), table_names={table_name}, schema=schema
+        )
 
-        asset = datasource.add_table_asset(asset_name, table_name=table_name)
+        asset = datasource.add_table_asset(
+            asset_name, table_name=table_name, schema_name=schema
+        )
 
         suite = context.add_expectation_suite(
             expectation_suite_name=f"{datasource.name}-{asset.name}"
