@@ -204,3 +204,16 @@ class TestPrependVersionInfoForMdAbsoluteLinks:
             contents, version
         )
         assert updated_contents == expected_contents
+
+    @pytest.mark.unit
+    def test__prepend_version_info_for_md_absoulte_links_updates_multiple_mixed_links(
+        self,
+    ):
+        """Links that are already versioned should not be updated, even when there are multiple links on the same line that should be updated."""
+        contents = """[Link Text 1](/docs/guides/link_1) text [Link Text 2](/docs/guides/link_2) text [Link Text 3](/docs/0.1.2/guides/link_3) text [Link Text 4](/docs/guides/link_4) text."""
+        version = "0.16.16"
+        expected_contents = """[Link Text 1](/docs/0.16.16/guides/link_1) text [Link Text 2](/docs/0.16.16/guides/link_2) text [Link Text 3](/docs/0.1.2/guides/link_3) text [Link Text 4](/docs/0.16.16/guides/link_4) text."""
+        updated_contents = _prepend_version_info_for_md_absolute_links(
+            contents, version
+        )
+        assert updated_contents == expected_contents
