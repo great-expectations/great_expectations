@@ -154,7 +154,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             case_conditions.append(
                 sa.func.sum(
                     sa.case((sa.column(column) < bins[idx + 1], 1), else_=0)
-                ).label(f"bin_{str(idx)}")
+                ).label(f"bin_{idx!s}")
             )
             idx += 1
 
@@ -177,7 +177,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
                         ),
                         else_=0,
                     )
-                ).label(f"bin_{str(idx)}")
+                ).label(f"bin_{idx!s}")
             )
 
         if (
@@ -195,7 +195,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             case_conditions.append(
                 sa.func.sum(
                     sa.case((negative_boundary <= sa.column(column), 1), else_=0)
-                ).label(f"bin_{str(len(bins) - 1)}")
+                ).label(f"bin_{len(bins) - 1!s}")
             )
         else:
             negative_boundary = float(bins[-2])
@@ -212,7 +212,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
                         ),
                         else_=0,
                     )
-                ).label(f"bin_{str(len(bins) - 1)}")
+                ).label(f"bin_{len(bins) - 1!s}")
             )
 
         query = (

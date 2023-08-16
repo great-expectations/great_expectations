@@ -188,7 +188,7 @@ def continuous_partition_data(data, bins="auto", n_bins=10, **kwargs):
         )
     except TypeError as e:
         raise TypeError(
-            f"Unable to compute histogram. numpy histogram raised error: {str(e)}"
+            f"Unable to compute histogram. numpy histogram raised error: {e!s}"
         )
 
     return {"bins": bin_edges, "weights": hist / len(data)}

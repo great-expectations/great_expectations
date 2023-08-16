@@ -200,7 +200,7 @@ def _get_column_quantiles_mssql(
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
-            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+            f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
         raise pe
@@ -222,7 +222,7 @@ def _get_column_quantiles_bigquery(
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
-            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+            f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
         raise pe
@@ -277,7 +277,7 @@ def _get_column_quantiles_mysql(
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
-            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+            f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
         raise pe
@@ -295,12 +295,12 @@ def _get_column_quantiles_trino(
 
     try:
         quantiles_results = execution_engine.execute_query(quantiles_query).fetchone()
-        return list(quantiles_results)[0]
+        return next(iter(quantiles_results))
     except (sqlalchemy.ProgrammingError, trino.trinoexceptions.TrinoUserError) as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
-            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+            f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
         raise pe
@@ -325,7 +325,7 @@ def _get_column_quantiles_clickhouse(
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
-            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+            f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
         raise pe
@@ -368,7 +368,7 @@ def _get_column_quantiles_sqlite(
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
-            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+            f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
         raise pe
@@ -396,7 +396,7 @@ def _get_column_quantiles_athena(
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
-            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+            f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
         raise pe
@@ -443,16 +443,16 @@ def _get_column_quantiles_generic_sqlalchemy(
                 except sqlalchemy.ProgrammingError as pe:
                     exception_message: str = "An SQL syntax Exception occurred."
                     exception_traceback: str = traceback.format_exc()
-                    exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+                    exception_message += f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
                     logger.error(exception_message)
                     raise pe
             else:
                 raise ValueError(
-                    f'The SQL engine dialect "{str(execution_engine.dialect)}" does not support computing quantiles '
+                    f'The SQL engine dialect "{execution_engine.dialect!s}" does not support computing quantiles '
                     "without approximation error; set allow_relative_error to True to allow approximate quantiles."
                 )
         else:
             raise ValueError(
-                f'The SQL engine dialect "{str(execution_engine.dialect)}" does not support computing quantiles with '
+                f'The SQL engine dialect "{execution_engine.dialect!s}" does not support computing quantiles with '
                 "approximation error; set allow_relative_error to False to disable approximate quantiles."
             )

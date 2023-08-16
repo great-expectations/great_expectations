@@ -543,7 +543,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
-                f"Unable to delete object in GX Cloud Store Backend: {repr(e)}"
+                f"Unable to delete object in GX Cloud Store Backend: {e!r}"
             )
 
     def _get_one_or_none_from_response_data(

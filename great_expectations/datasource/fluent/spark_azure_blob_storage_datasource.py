@@ -102,7 +102,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
                 except Exception as e:
                     # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
                     raise SparkAzureBlobStorageDatasourceError(
-                        f'Due to exception: "{str(e)}", "azure_client" could not be created.'
+                        f'Due to exception: "{e!s}", "azure_client" could not be created.'
                     ) from e
             else:
                 raise SparkAzureBlobStorageDatasourceError(
@@ -132,7 +132,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
         except Exception as e:
             raise TestConnectionError(
                 "Attempt to connect to datasource failed with the following error message: "
-                f"{str(e)}"
+                f"{e!s}"
             ) from e
 
         if self.assets and test_assets:

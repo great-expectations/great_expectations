@@ -216,7 +216,7 @@ class DictDot:
                         _ = self[f"_{name}"]
                     except AttributeError:
                         raise ValueError(
-                            f'Property "{name}", marked for {purpose} on object "{str(type(self))}", does not exist.'
+                            f'Property "{name}", marked for {purpose} on object "{type(self)!s}", does not exist.'
                         )
 
         if include_keys:

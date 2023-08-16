@@ -372,7 +372,7 @@ def get_sqlalchemy_column_metadata(
 
         return columns
     except AttributeError as e:
-        logger.debug(f"Error while introspecting columns: {str(e)}")
+        logger.debug(f"Error while introspecting columns: {e!s}")
         return None
 
 

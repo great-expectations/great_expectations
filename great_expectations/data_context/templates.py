@@ -70,7 +70,7 @@ CONFIG_VARIABLES_INTRO = """
 """
 
 CONFIG_VARIABLES_TEMPLATE = (
-    f"{CONFIG_VARIABLES_INTRO}instance_id: {str(uuid.uuid4())}{os.linesep}"
+    f"{CONFIG_VARIABLES_INTRO}instance_id: {uuid.uuid4()!s}{os.linesep}"
 )
 
 # Create yaml strings

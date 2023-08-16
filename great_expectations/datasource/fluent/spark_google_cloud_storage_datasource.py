@@ -99,7 +99,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
                 except Exception as e:
                     # Failure to create "gcs_client" is most likely due invalid "gcs_options" dictionary.
                     raise SparkGoogleCloudStorageDatasourceError(
-                        f'Due to exception: "{repr(e)}", "gcs_client" could not be created.'
+                        f'Due to exception: "{e!r}", "gcs_client" could not be created.'
                     ) from e
             else:
                 raise SparkGoogleCloudStorageDatasourceError(
@@ -124,7 +124,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         except Exception as e:
             raise TestConnectionError(
                 "Attempt to connect to datasource failed with the following error message: "
-                f"{str(e)}"
+                f"{e!s}"
             ) from e
 
         if self.assets and test_assets:

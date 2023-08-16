@@ -222,7 +222,7 @@ class GxConfig(FluentBaseModel):
                 for asset in datasource.assets:
                     asset._datasource = datasource
 
-        logger.debug(f"Loaded 'datasources' ->\n{repr(loaded_datasources)}")
+        logger.debug(f"Loaded 'datasources' ->\n{loaded_datasources!r}")
 
         if v and not loaded_datasources:
             logger.info(f"Of {len(v)} entries, no 'datasources' could be loaded")

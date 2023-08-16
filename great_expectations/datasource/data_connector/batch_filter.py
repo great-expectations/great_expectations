@@ -103,7 +103,7 @@ def build_batch_filter(
     if not data_connector_query_keys <= BatchFilter.RECOGNIZED_KEYS:
         raise gx_exceptions.BatchFilterError(
             f"""Unrecognized data_connector_query key(s):
-"{str(data_connector_query_keys - BatchFilter.RECOGNIZED_KEYS)}" detected.
+"{data_connector_query_keys - BatchFilter.RECOGNIZED_KEYS!s}" detected.
             """
         )
     custom_filter_function: Optional[Callable] = data_connector_query_dict.get(  # type: ignore[assignment]
@@ -112,7 +112,7 @@ def build_batch_filter(
     if custom_filter_function and not isinstance(custom_filter_function, Callable):  # type: ignore[arg-type]
         raise gx_exceptions.BatchFilterError(
             f"""The type of a custom_filter must be a function (Python "Callable").  The type given is
-"{str(type(custom_filter_function))}", which is illegal.
+"{type(custom_filter_function)!s}", which is illegal.
             """
         )
     batch_filter_parameters: Optional[
@@ -124,7 +124,7 @@ def build_batch_filter(
         if not isinstance(batch_filter_parameters, dict):
             raise gx_exceptions.BatchFilterError(
                 f"""The type of batch_filter_parameters must be a dictionary (Python "dict").  The type given is
-"{str(type(batch_filter_parameters))}", which is illegal.
+"{type(batch_filter_parameters)!s}", which is illegal.
                 """
             )
         if not all(isinstance(key, str) for key in batch_filter_parameters.keys()):
@@ -139,7 +139,7 @@ def build_batch_filter(
     if limit and (not isinstance(limit, int) or limit < 0):
         raise gx_exceptions.BatchFilterError(
             f"""The type of a limit must be an integer (Python "int") that is greater than or equal to 0.  The
-type and value given are "{str(type(limit))}" and "{limit}", respectively, which is illegal.
+type and value given are "{type(limit)!s}" and "{limit}", respectively, which is illegal.
             """
         )
     if index is not None and limit is not None:

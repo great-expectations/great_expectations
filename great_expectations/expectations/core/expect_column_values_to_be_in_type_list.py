@@ -247,9 +247,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
         if params["type_list"] is not None:
             for i, v in enumerate(params["type_list"]):
-                params[f"v__{str(i)}"] = v
+                params[f"v__{i!s}"] = v
             values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["type_list"])]
+                [f"$v__{i!s}" for i, v in enumerate(params["type_list"])]
             )
 
             if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004

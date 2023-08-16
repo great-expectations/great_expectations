@@ -140,7 +140,7 @@ class ConfigurationStore(Store):
             print(f"\t{len_keys} keys found")
             if report_object["len_keys"] > 0:
                 for key in report_object["keys"][:10]:
-                    print(f"		{str(key)}")
+                    print(f"		{key!s}")
             if len_keys > 10:  # noqa: PLR2004
                 print("\t\t...")
             print()

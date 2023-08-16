@@ -353,7 +353,7 @@ class RuntimeDataConnector(DataConnector):
         if not isinstance(runtime_parameters, dict):
             raise TypeError(
                 f"""The type of runtime_parameters must be a dict object. The type given is
-        "{str(type(runtime_parameters))}", which is illegal.
+        "{type(runtime_parameters)!s}", which is illegal.
                         """
             )
         keys_present: List[str] = [

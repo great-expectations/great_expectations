@@ -185,14 +185,14 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
         if mostly == 1 or mostly is None:
             if set_semantic_name is not None:
-                return f'Are all values in column "{column}" in {set_semantic_name}: {str(set_)}?'
+                return f'Are all values in column "{column}" in {set_semantic_name}: {set_!s}?'
             else:
-                return f'Are all values in column "{column}" in the set {str(set_)}?'
+                return f'Are all values in column "{column}" in the set {set_!s}?'
         else:  # noqa: PLR5501
             if set_semantic_name is not None:
-                return f'Are at least {mostly * 100}% of values in column "{column}" in {set_semantic_name}: {str(set_)}?'
+                return f'Are at least {mostly * 100}% of values in column "{column}" in {set_semantic_name}: {set_!s}?'
             else:
-                return f'Are at least {mostly * 100}% of values in column "{column}" in the set {str(set_)}?'
+                return f'Are at least {mostly * 100}% of values in column "{column}" in the set {set_!s}?'
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.ANSWER)
@@ -207,21 +207,21 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         if result.success:
             if mostly == 1 or mostly is None:
                 if set_semantic_name is not None:
-                    return f'All values in column "{column}" are in {set_semantic_name}: {str(set_)}.'
+                    return f'All values in column "{column}" are in {set_semantic_name}: {set_!s}.'
                 else:
                     return (
-                        f'All values in column "{column}" are in the set {str(set_)}.'
+                        f'All values in column "{column}" are in the set {set_!s}.'
                     )
             else:  # noqa: PLR5501
                 if set_semantic_name is not None:
-                    return f'At least {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {str(set_)}.'
+                    return f'At least {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {set_!s}.'
                 else:
-                    return f'At least {mostly * 100}% of values in column "{column}" are in the set {str(set)}.'
+                    return f'At least {mostly * 100}% of values in column "{column}" are in the set {set!s}.'
         else:  # noqa: PLR5501
             if set_semantic_name is not None:
-                return f' Less than {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {str(set_)}.'
+                return f' Less than {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {set_!s}.'
             else:
-                return f'Less than {mostly * 100}% of values in column "{column}" are in the set {str(set_)}.'
+                return f'Less than {mostly * 100}% of values in column "{column}" are in the set {set_!s}.'
 
     @classmethod
     def _prescriptive_template(

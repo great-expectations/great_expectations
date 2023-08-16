@@ -583,7 +583,7 @@ class Validator:
             except Exception as err:
                 if basic_runtime_configuration.get("catch_exceptions"):
                     exception_traceback = traceback.format_exc()
-                    exception_message = f"{type(err).__name__}: {str(err)}"
+                    exception_message = f"{type(err).__name__}: {err!s}"
                     exception_info = ExceptionInfo(
                         exception_traceback=exception_traceback,
                         exception_message=exception_message,

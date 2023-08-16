@@ -2546,7 +2546,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             keys = self.expectations_store.list_keys()
         except KeyError as e:
             raise gx_exceptions.InvalidConfigError(
-                f"Unable to find configured store: {str(e)}"
+                f"Unable to find configured store: {e!s}"
             )
         return keys  # type: ignore[return-value]
 

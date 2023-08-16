@@ -471,7 +471,7 @@ def load_data_context_with_error_handling(  # noqa: PLR0912
         cli_message(string=err.cli_colored_message)
         sys.exit(1)
     except gx_exceptions.InvalidConfigurationYamlError as err:
-        cli_message(string=f"<red>{str(err)}</red>")
+        cli_message(string=f"<red>{err!s}</red>")
         sys.exit(1)
 
 
@@ -900,8 +900,8 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
         filename: Optional[str]
         directory: Optional[str]
         if config_file_location_path.is_file():
-            filename = rf"{str(config_file_location_path.name)}"
-            directory = rf"{str(config_file_location_path.parent)}"
+            filename = rf"{config_file_location_path.name!s}"
+            directory = rf"{config_file_location_path.parent!s}"
         elif config_file_location_path.is_dir():
             filename = None
             directory = config_file_location

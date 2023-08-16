@@ -429,7 +429,7 @@ class Datasource(
         cls._update_asset_forward_refs(asset_type)
 
         asset_of_intended_type = asset_type(**kwargs)
-        logger.debug(f"{asset_type_name} - {repr(asset_of_intended_type)}")
+        logger.debug(f"{asset_type_name} - {asset_of_intended_type!r}")
         return asset_of_intended_type
 
     def _execution_engine_type(self) -> Type[_ExecutionEngineT]:

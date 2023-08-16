@@ -98,7 +98,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         except Exception as e:
             raise TestConnectionError(
                 "Attempt to connect to datasource failed with the following error message: "
-                f"{str(e)}"
+                f"{e!s}"
             ) from e
 
         if self.assets and test_assets:

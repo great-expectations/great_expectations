@@ -452,7 +452,7 @@ class SerializableDataContext(AbstractDataContext):
                 )
                 if os.path.isfile(potential_yml):  # noqa: PTH113
                     yml_path = potential_yml
-                    logger.debug(f"Found config file at {str(yml_path)}")
+                    logger.debug(f"Found config file at {yml_path!s}")
                     break
             # move up one directory
             search_start_dir = os.path.dirname(search_start_dir)  # noqa: PTH120

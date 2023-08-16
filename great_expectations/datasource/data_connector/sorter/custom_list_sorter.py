@@ -38,7 +38,7 @@ class CustomListSorter(Sorter):
         for item in reference_list:
             if not isinstance(item, str):
                 raise gx_exceptions.SorterError(
-                    f"Items in reference list for CustomListSorter must have string type (actual type is `{str(type(item))}`)."
+                    f"Items in reference list for CustomListSorter must have string type (actual type is `{type(item)!s}`)."
                 )
         return reference_list
 

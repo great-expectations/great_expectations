@@ -163,7 +163,7 @@ class BatchDefinition(SerializableDictDot):
         if datasource_name and not isinstance(datasource_name, str):
             raise TypeError(
                 f"""The type of an datasource name must be a string (Python "str").  The type given is
-"{str(type(datasource_name))}", which is illegal.
+"{type(datasource_name)!s}", which is illegal.
             """
             )
         if data_connector_name is None:
@@ -171,7 +171,7 @@ class BatchDefinition(SerializableDictDot):
         if data_connector_name and not isinstance(data_connector_name, str):
             raise TypeError(
                 f"""The type of a data_connector name must be a string (Python "str").  The type given is
-"{str(type(data_connector_name))}", which is illegal.
+"{type(data_connector_name)!s}", which is illegal.
                 """
             )
         if data_asset_name is None:
@@ -179,13 +179,13 @@ class BatchDefinition(SerializableDictDot):
         if data_asset_name and not isinstance(data_asset_name, str):
             raise TypeError(
                 f"""The type of a data_asset name must be a string (Python "str").  The type given is
-"{str(type(data_asset_name))}", which is illegal.
+"{type(data_asset_name)!s}", which is illegal.
                 """
             )
         if batch_identifiers and not isinstance(batch_identifiers, IDDict):
             raise TypeError(
                 f"""The type of batch_identifiers must be an IDDict object.  The type given is \
-"{str(type(batch_identifiers))}", which is illegal.
+"{type(batch_identifiers)!s}", which is illegal.
 """
             )
 
@@ -437,31 +437,31 @@ class BatchRequestBase(SerializableDictDot):
         if not (datasource_name and isinstance(datasource_name, str)):
             raise TypeError(
                 f"""The type of an datasource name must be a string (Python "str").  The type given is
-"{str(type(datasource_name))}", which is illegal.
+"{type(datasource_name)!s}", which is illegal.
             """
             )
         if not (data_connector_name and isinstance(data_connector_name, str)):
             raise TypeError(
                 f"""The type of data_connector name must be a string (Python "str").  The type given is
-"{str(type(data_connector_name))}", which is illegal.
+"{type(data_connector_name)!s}", which is illegal.
                 """
             )
         if not (data_asset_name and isinstance(data_asset_name, str)):
             raise TypeError(
                 f"""The type of data_asset name must be a string (Python "str").  The type given is
-        "{str(type(data_asset_name))}", which is illegal.
+        "{type(data_asset_name)!s}", which is illegal.
                         """
             )
         # TODO Abe 20201015: Switch this to DataConnectorQuery.
         if data_connector_query and not isinstance(data_connector_query, dict):
             raise TypeError(
                 f"""The type of data_connector_query must be a dict object.  The type given is
-"{str(type(data_connector_query))}", which is illegal.
+"{type(data_connector_query)!s}", which is illegal.
                 """
             )
         if limit and not isinstance(limit, int):
             raise TypeError(
-                f"""The type of limit must be an integer (Python "int").  The type given is "{str(type(limit))}", which
+                f"""The type of limit must be an integer (Python "int").  The type given is "{type(limit)!s}", which
 is illegal.
                 """
             )
@@ -642,20 +642,20 @@ class RuntimeBatchRequest(BatchRequestBase):
         if runtime_parameters and not (isinstance(runtime_parameters, dict)):
             raise TypeError(
                 f"""The runtime_parameters must be a non-empty dict object.
-                The type given is "{str(type(runtime_parameters))}", which is an illegal type or an empty dictionary."""
+                The type given is "{type(runtime_parameters)!s}", which is an illegal type or an empty dictionary."""
             )
 
         # if there is a value, make sure it is a dict
         if batch_identifiers and not isinstance(batch_identifiers, dict):
             raise TypeError(
                 f"""The type for batch_identifiers must be a dict object, with keys being identifiers defined in the
-                data connector configuration.  The type given is "{str(type(batch_identifiers))}", which is illegal."""
+                data connector configuration.  The type given is "{type(batch_identifiers)!s}", which is illegal."""
             )
 
         if batch_spec_passthrough and not (isinstance(batch_spec_passthrough, dict)):
             raise TypeError(
                 f"""The type for batch_spec_passthrough must be a dict object. The type given is \
-"{str(type(batch_spec_passthrough))}", which is illegal.
+"{type(batch_spec_passthrough)!s}", which is illegal.
 """
             )
 

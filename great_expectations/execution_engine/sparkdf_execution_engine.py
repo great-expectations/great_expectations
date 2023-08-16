@@ -521,7 +521,7 @@ illegal.  Please check your config."""
                 data = data.filter(parsed_condition)
             else:
                 raise GreatExpectationsError(
-                    f"unrecognized condition_parser {str(condition_parser)} for Spark execution engine"
+                    f"unrecognized condition_parser {condition_parser!s} for Spark execution engine"
                 )
 
         # Filtering by filter_conditions

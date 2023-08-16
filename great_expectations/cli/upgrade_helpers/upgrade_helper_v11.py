@@ -215,7 +215,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
         except Exception as e:
             exception_traceback = traceback.format_exc()
             exception_message = (
-                f'{type(e).__name__}: "{str(e)}".  '
+                f'{type(e).__name__}: "{e!s}".  '
                 f'Traceback: "{exception_traceback}".'
             )
             self._update_upgrade_log(
@@ -239,7 +239,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             except Exception as e:
                 exception_traceback = traceback.format_exc()
                 exception_message = (
-                    f'{type(e).__name__}: "{str(e)}".  '
+                    f'{type(e).__name__}: "{e!s}".  '
                     f'Traceback: "{exception_traceback}".'
                 )
                 self._update_upgrade_log(
@@ -271,7 +271,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             except Exception as e:
                 exception_traceback = traceback.format_exc()
                 exception_message = (
-                    f'{type(e).__name__}: "{str(e)}".  '
+                    f'{type(e).__name__}: "{e!s}".  '
                     f'Traceback: "{exception_traceback}".'
                 )
                 self._update_upgrade_log(

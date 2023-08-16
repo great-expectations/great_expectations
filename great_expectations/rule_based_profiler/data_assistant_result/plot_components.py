@@ -234,7 +234,7 @@ def determine_plot_title(
         contents = expectation_type
     elif len(metric_plot_component_titles) == 1:
         contents = (
-            f"{list(metric_plot_component_titles)[0]} per {batch_plot_component.title}"
+            f"{next(iter(metric_plot_component_titles))} per {batch_plot_component.title}"
         )
     else:
         contents = f"Column Values per {batch_plot_component.title}"

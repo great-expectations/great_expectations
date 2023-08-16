@@ -165,7 +165,7 @@ class ExecutionEngine(ABC):
         if not batch_spec_defaults_keys <= self.recognized_batch_spec_defaults:
             logger.warning(
                 f"""Unrecognized batch_spec_default(s): \
-{str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)}
+{batch_spec_defaults_keys - self.recognized_batch_spec_defaults!s}
 """
             )
 
@@ -453,7 +453,7 @@ class ExecutionEngine(ABC):
                     )
                 except KeyError as e:
                     raise gx_exceptions.MetricError(
-                        message=f'Missing metric dependency: {str(e)} for metric "{metric_to_resolve.metric_name}".'
+                        message=f'Missing metric dependency: {e!s} for metric "{metric_to_resolve.metric_name}".'
                     )
 
                 metric_fn_bundle_configurations.append(

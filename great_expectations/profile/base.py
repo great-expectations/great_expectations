@@ -251,7 +251,7 @@ class DatasetProfiler(DataAssetProfiler):
             expectation_suite, run_id=run_id, result_format="SUMMARY"
         )
         expectation_suite.add_citation(
-            comment=f"{str(cls.__name__)} added a citation based on the current batch.",
+            comment=f"{cls.__name__!s} added a citation based on the current batch.",
             batch_kwargs=data_asset.batch_kwargs,
             batch_markers=data_asset.batch_markers,
             batch_parameters=data_asset.batch_parameters,

@@ -812,7 +812,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                         "header": header,
                         "styling": {
                             "classes": [
-                                f"col-{str(chart_container_col_width)}",
+                                f"col-{chart_container_col_width!s}",
                                 "mt-2",
                                 "pl-1",
                                 "pr-1",
@@ -828,7 +828,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                         "graph": chart,
                         "styling": {
                             "classes": [
-                                f"col-{str(chart_container_col_width)}",
+                                f"col-{chart_container_col_width!s}",
                                 "mt-2",
                                 "pl-1",
                                 "pr-1",

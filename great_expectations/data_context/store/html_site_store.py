@@ -295,7 +295,7 @@ class HtmlSiteStore:
         else:
             # this method does not support getting the URL of static assets
             raise ValueError(
-                f"Cannot get URL for resource {str(resource_identifier):s}"
+                f"Cannot get URL for resource {resource_identifier!s:s}"
             )
 
         # <WILL> : this is a hack for Taylor. Change this back. 20200924

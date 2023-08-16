@@ -291,11 +291,11 @@ def find_evaluation_parameter_dependencies(parameter_expression):
         _ = parser.parseString(parameter_expression, parseAll=True)
     except ParseException as err:
         raise EvaluationParameterError(
-            f"Unable to parse evaluation parameter: {str(err)} at line {err.line}, column {err.column}"
+            f"Unable to parse evaluation parameter: {err!s} at line {err.line}, column {err.column}"
         )
     except AttributeError as err:
         raise EvaluationParameterError(
-            f"Unable to parse evaluation parameter: {str(err)}"
+            f"Unable to parse evaluation parameter: {err!s}"
         )
 
     for word in expr.exprStack:
@@ -378,19 +378,19 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
                     "Unrecognized urn_type in ge_urn: must be 'stores' to use a metric store."
                 )
                 raise EvaluationParameterError(
-                    f"No value found for $PARAMETER {str(parse_results[0])}"
+                    f"No value found for $PARAMETER {parse_results[0]!s}"
                 )
         except ParseException as e:
             logger.debug(
-                f"Parse exception while parsing evaluation parameter: {str(e)}"
+                f"Parse exception while parsing evaluation parameter: {e!s}"
             )
             raise EvaluationParameterError(
-                f"No value found for $PARAMETER {str(parse_results[0])}"
+                f"No value found for $PARAMETER {parse_results[0]!s}"
             ) from e
         except AttributeError as e:
             logger.warning("Unable to get store for store-type valuation parameter.")
             raise EvaluationParameterError(
-                f"No value found for $PARAMETER {str(parse_results[0])}"
+                f"No value found for $PARAMETER {parse_results[0]!s}"
             ) from e
 
     elif len(parse_results) == 1:
@@ -439,11 +439,11 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
     except Exception as e:
         exception_traceback = traceback.format_exc()
         exception_message = (
-            f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+            f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
         )
         logger.debug(exception_message, e, exc_info=True)
         raise EvaluationParameterError(
-            f"Error while evaluating evaluation parameter expression: {str(e)}"
+            f"Error while evaluating evaluation parameter expression: {e!s}"
         ) from e
 
     return result

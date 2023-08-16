@@ -246,7 +246,7 @@ class MetricsCalculator:
 
         if aborted_metrics_info:
             logger.warning(
-                f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
+                f"Exceptions\n{aborted_metrics_info!s}\noccurred while resolving metrics."
             )
 
         return (

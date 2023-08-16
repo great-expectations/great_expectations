@@ -82,7 +82,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
         except ValidationError as err:
             raise GreatExpectationsError(
                 f"Unable to load asset configuration in TableBatchKwargsGenerator '{name}': "
-                f"validation error: {str(err)}."
+                f"validation error: {err!s}."
             )
 
         if datasource is not None:

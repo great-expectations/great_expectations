@@ -197,7 +197,7 @@ class ExpectationExplorer:
         if column:
             data_asset_expectations[column][expectation_type][
                 "success"
-            ].value = f"<span><strong>Success: </strong>{str(new_success_value)}</span>"
+            ].value = f"<span><strong>Success: </strong>{new_success_value!s}</span>"
             data_asset_expectations[column][expectation_type][
                 "result_detail_widget"
             ].children = new_result_widgets
@@ -207,7 +207,7 @@ class ExpectationExplorer:
         else:
             data_asset_expectations["non_column_expectations"][expectation_type][
                 "success"
-            ].value = f"<span><strong>Success: </strong>{str(new_success_value)}</span>"
+            ].value = f"<span><strong>Success: </strong>{new_success_value!s}</span>"
             data_asset_expectations["non_column_expectations"][expectation_type][
                 "result_detail_widget"
             ].children = new_result_widgets
@@ -1744,7 +1744,7 @@ class ExpectationExplorer:
         # success_widget
         success = expectation_validation_result.success
         success_widget = widgets.HTML(
-            value=f"<span><strong>Success: </strong>{str(success)}</span>"
+            value=f"<span><strong>Success: </strong>{success!s}</span>"
         )
 
         # widget with result details
@@ -1947,7 +1947,7 @@ class ExpectationExplorer:
             column_accordion.selected_index = None
             column_accordions.append(column_accordion)
 
-        return [summary_widget] + column_accordions
+        return [summary_widget, *column_accordions]
 
     def edit_expectation_suite(self, data_asset):
         data_asset_name = data_asset.data_asset_name

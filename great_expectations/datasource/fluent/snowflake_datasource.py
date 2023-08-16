@@ -142,7 +142,7 @@ class SnowflakeDatasource(SQLDatasource):
                 raise SQLDatasourceError(
                     "Unable to create a SQLAlchemy engine from "
                     f"connection_string: {self.connection_string} due to the "
-                    f"following exception: {str(e)}"
+                    f"following exception: {e!s}"
                 ) from e
             # Since a connection string isn't strictly required for Snowflake, we conditionally cache
             if self.connection_string:

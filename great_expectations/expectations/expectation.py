@@ -1728,7 +1728,7 @@ class Expectation(metaclass=MetaExpectation):
                     else:
                         param_type = RendererValueType.STRING
                     renderer_configuration.add_param(
-                        name=f"{param_prefix}{str(idx)}",
+                        name=f"{param_prefix}{idx!s}",
                         param_type=param_type,
                         value=value,
                     )
@@ -1754,7 +1754,7 @@ class Expectation(metaclass=MetaExpectation):
             ).value
             if array:
                 array_string = " ".join(
-                    [f"${param_prefix}{str(idx)}" for idx in range(len(array))]
+                    [f"${param_prefix}{idx!s}" for idx in range(len(array))]
                 )
             else:
                 array_string = "[ ]"
@@ -1911,7 +1911,7 @@ class Expectation(metaclass=MetaExpectation):
                 test_passed = True
                 error_diagnostics = None
             else:
-                _error(f"{repr(error_message)} for {exp_combined_test_name}")
+                _error(f"{error_message!r} for {exp_combined_test_name}")
                 print(f"{stack_trace[0]}")
                 error_diagnostics = ExpectationErrorDiagnostics(
                     error_msg=error_message,
@@ -1972,7 +1972,7 @@ class Expectation(metaclass=MetaExpectation):
             result = rendered_result.__str__()
 
         elif isinstance(rendered_result, RenderedAtomicContent):
-            result = f"(RenderedAtomicContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(RenderedAtomicContent) {rendered_result.to_json_dict()!r}"
 
         elif isinstance(rendered_result, RenderedContentBlockContainer):
             result = "(RenderedContentBlockContainer) " + repr(
@@ -1980,16 +1980,16 @@ class Expectation(metaclass=MetaExpectation):
             )
 
         elif isinstance(rendered_result, RenderedTableContent):
-            result = f"(RenderedTableContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(RenderedTableContent) {rendered_result.to_json_dict()!r}"
 
         elif isinstance(rendered_result, RenderedGraphContent):
-            result = f"(RenderedGraphContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(RenderedGraphContent) {rendered_result.to_json_dict()!r}"
 
         elif isinstance(rendered_result, ValueListContent):
-            result = f"(ValueListContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(ValueListContent) {rendered_result.to_json_dict()!r}"
 
         elif isinstance(rendered_result, dict):
-            result = f"(dict) {repr(rendered_result)}"
+            result = f"(dict) {rendered_result!r}"
 
         elif isinstance(rendered_result, int):
             result = repr(rendered_result)
@@ -2448,7 +2448,7 @@ class BatchExpectation(Expectation, ABC):
                     min_value = parse(min_value)
                 except TypeError:
                     raise ValueError(
-                        f"""Could not parse "min_value" of {min_value} (of type "{str(type(min_value))}) into datetime \
+                        f"""Could not parse "min_value" of {min_value} (of type "{type(min_value)!s}) into datetime \
 representation."""
                     )
 
@@ -2457,7 +2457,7 @@ representation."""
                     max_value = parse(max_value)
                 except TypeError:
                     raise ValueError(
-                        f"""Could not parse "max_value" of {max_value} (of type "{str(type(max_value))}) into datetime \
+                        f"""Could not parse "max_value" of {max_value} (of type "{type(max_value)!s}) into datetime \
 representation."""
                     )
 
@@ -3697,7 +3697,7 @@ def add_values_with_json_schema_from_list_in_params(
     target_list = params.get(param_key_with_list)
     if target_list is not None and len(target_list) > 0:
         for i, v in enumerate(target_list):
-            params_with_json_schema[f"v__{str(i)}"] = {
+            params_with_json_schema[f"v__{i!s}"] = {
                 "schema": {"type": list_values_type},
                 "value": v,
             }

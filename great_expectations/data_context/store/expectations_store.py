@@ -246,7 +246,7 @@ class ExpectationsStore(Store):
             else:
                 print(f"\t{len_keys} keys found:")
                 for key in return_obj["keys"][:10]:
-                    print(f"		{str(key)}")
+                    print(f"		{key!s}")
             if len_keys > 10:  # noqa: PLR2004
                 print("\t\t...")
             print()

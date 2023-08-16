@@ -56,7 +56,7 @@ class LockingConnectionCheck:
                     conn.close()
                     self._is_valid = True
                 except (ImportError, self.sa.exc.SQLAlchemyError) as e:
-                    print(f"{str(e)}")
+                    print(f"{e!s}")
                     self._is_valid = False
 
             return self._is_valid

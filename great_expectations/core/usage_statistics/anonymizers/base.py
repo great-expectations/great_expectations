@@ -113,7 +113,7 @@ class BaseAnonymizer(ABC):
         if not isinstance(string_, str):
             raise TypeError(
                 f"""The type of the "string_" argument must be a string (Python "str").  The type given is
-"{str(type(string_))}", which is illegal.
+"{type(string_)!s}", which is illegal.
             """
             )
 

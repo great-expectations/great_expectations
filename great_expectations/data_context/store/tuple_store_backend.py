@@ -195,7 +195,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                 tuple_index = int(
                     re.search(r"\d+", indexed_string_substitutions[i]).group(0)
                 )
-                key_element = matches.group(f"tuple_index_{str(i)}")
+                key_element = matches.group(f"tuple_index_{i!s}")
                 new_key[tuple_index] = key_element
 
             new_key = tuple(new_key)
@@ -317,7 +317,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 contents: str = infile.read().rstrip("\n")
         except FileNotFoundError:
             raise InvalidKeyError(
-                f"Unable to retrieve object from TupleFilesystemStoreBackend with the following Key: {str(filepath)}"
+                f"Unable to retrieve object from TupleFilesystemStoreBackend with the following Key: {filepath!s}"
             )
 
         return contents
@@ -559,7 +559,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
         except (s3.exceptions.NoSuchKey, s3.exceptions.NoSuchBucket):
             raise InvalidKeyError(
-                f"Unable to retrieve object from TupleS3StoreBackend with the following Key: {str(s3_object_key)}"
+                f"Unable to retrieve object from TupleS3StoreBackend with the following Key: {s3_object_key!s}"
             )
 
         return (
@@ -844,7 +844,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         gcs_response_object = bucket.get_blob(gcs_object_key)
         if not gcs_response_object:
             raise InvalidKeyError(
-                f"Unable to retrieve object from TupleGCSStoreBackend with the following Key: {str(key)}"
+                f"Unable to retrieve object from TupleGCSStoreBackend with the following Key: {key!s}"
             )
         else:
             return gcs_response_object.download_as_bytes().decode("utf-8")
@@ -1043,7 +1043,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             except Exception as e:
                 # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
                 raise StoreBackendError(
-                    f'Due to exception: "{str(e)}", "azure_client" could not be created.'
+                    f'Due to exception: "{e!s}", "azure_client" could not be created.'
                 ) from e
         else:
             raise StoreBackendError(

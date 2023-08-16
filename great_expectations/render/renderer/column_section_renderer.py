@@ -114,7 +114,7 @@ not be rendered properly and/or may not appear altogether.  Please use the trace
 diagnose and repair the underlying issue.  Detailed information follows:
                 """
                 exception_traceback = traceback.format_exc()
-                exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                exception_message += f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                 logger.error(exception_message)
 
         # NOTE : Some render* functions return None so we filter them out

@@ -41,7 +41,7 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
                 strftime_format,
             )
         except ValueError as e:
-            raise ValueError(f"Unable to use provided strftime_format: {str(e)}")
+            raise ValueError(f"Unable to use provided strftime_format: {e!s}")
 
         def is_parseable_by_format(val):
             if val is None:

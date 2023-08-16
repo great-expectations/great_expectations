@@ -220,9 +220,9 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["regex_list"]):
-                params[f"v__{str(i)}"] = v
+                params[f"v__{i!s}"] = v
             values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["regex_list"])]
+                [f"$v__{i!s}" for i, v in enumerate(params["regex_list"])]
             )
 
         if params.get("match_on") == "all":

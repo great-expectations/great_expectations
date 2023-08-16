@@ -114,14 +114,14 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         if not isinstance(meta, dict):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{meta}" in "{self.__class__.__name__}" must be of type "dictionary" \
-(value of type "{str(type(meta))}" was encountered).
+(value of type "{type(meta)!s}" was encountered).
 """
             )
 
         if condition and (not isinstance(condition, str)):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{condition}" in "{self.__class__.__name__}" must be of type "string" \
-(value of type "{str(type(condition))}" was encountered).
+(value of type "{type(condition)!s}" was encountered).
 """
             )
 

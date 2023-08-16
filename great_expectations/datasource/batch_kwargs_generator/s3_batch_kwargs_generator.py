@@ -256,7 +256,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             )
 
         logger.debug(
-            f"Fetching objects from S3 with query options: {str(query_options)}"
+            f"Fetching objects from S3 with query options: {query_options!s}"
         )
         asset_options = self._s3.list_objects_v2(**query_options)
         if directory_assets:
