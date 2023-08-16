@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import logging
+import sys
 import uuid
 from pprint import pformat as pf
-from typing import Final, Generator, Literal, Protocol, TypeAlias
+from typing import TYPE_CHECKING, Final, Generator, Literal, Protocol
 
 import pytest
 from packaging.version import Version
@@ -29,6 +30,13 @@ from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
 )
 
+if TYPE_CHECKING:
+    from sqlalchemy.engine.reflection import Inspector
+    from typing_extensions import TypeAlias
+
+PYTHON_VERSION: Final[
+    Literal["py38", "py39", "py310", "py311"]
+] = f"py{sys.version_info.major}{sys.version_info.minor}"  # type: ignore[assignment] # str for each python version
 SQLA_VERSION: Final = Version(sqlalchemy_version or "0.0.0")
 LOGGER: Final = logging.getLogger("tests")
 
@@ -88,6 +96,14 @@ TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
         # "unquoted_mixed": TEST_TABLE_NAME.title(),
     },
 }
+
+
+def get_engine_inspector(datasource: SQLDatasource) -> Inspector:
+    """Ensure the type information of the inspector is preserved when calling `inspect()`"""
+    # TODO: make upstream change to sqlalchemny to add overload to `inspect`
+    # eg Mapper returns a Mapper but Engine returns Inspector.
+    # https://docs.sqlalchemy.org/en/20/core/inspection.html#sqlalchemy.inspect
+    return inspect(datasource.get_engine())
 
 
 @pytest.fixture
@@ -202,7 +218,8 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
 def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
     ds = context.sources.add_databricks_sql(
         "databricks_sql",
-        connection_string="databricks+connector://token:${DBS_TOKEN}@${DBS_HOST}:443/cloud_events?http_path=${DBS_HTTP_PATH}&catalog=catalog&schema=schema",
+        connection_string="databricks+connector://token:${DBS_TOKEN}@${DBS_HOST}:443/cloud_events?http_path=${DBS_HTTP_PATH}&catalog=catalog&schema="
+        + PYTHON_VERSION,
     )
     return ds
 
@@ -234,7 +251,7 @@ class TestTableIdentifiers:
         if not table_name:
             pytest.skip(f"no '{asset_name}' table_name for trino")
 
-        table_names: list[str] = inspect(trino_ds.get_engine()).get_table_names()
+        table_names: list[str] = get_engine_inspector(trino_ds).get_table_names()
         print(f"trino tables:\n{pf(table_names)}))")
 
         trino_ds.add_table_asset(asset_name, table_name=table_name)
@@ -252,7 +269,7 @@ class TestTableIdentifiers:
         # create table
         table_factory(engine=postgres_ds.get_engine(), table_names={table_name})
 
-        table_names: list[str] = inspect(postgres_ds.get_engine()).get_table_names()
+        table_names: list[str] = get_engine_inspector(postgres_ds).get_table_names()
         print(f"postgres tables:\n{pf(table_names)}))")
 
         postgres_ds.add_table_asset(asset_name, table_name=table_name)
@@ -262,15 +279,21 @@ class TestTableIdentifiers:
         self,
         databricks_sql_ds: DatabricksSQLDatasource,
         asset_name: TableNameCase,
-        # table_factory: TableFactory,
+        table_factory: TableFactory,
     ):
         table_name = TABLE_NAME_MAPPING["databricks_sql"].get(asset_name)
         if not table_name:
             pytest.skip(f"no '{asset_name}' table_name for databricks")
+        # create table
+        table_factory(
+            engine=databricks_sql_ds.get_engine(),
+            table_names={table_name},
+            schema=PYTHON_VERSION,
+        )
 
-        table_names: list[str] = inspect(
-            databricks_sql_ds.get_engine()
-        ).get_table_names()
+        table_names: list[str] = get_engine_inspector(
+            databricks_sql_ds
+        ).get_table_names(schema=PYTHON_VERSION)
         print(f"databricks tables:\n{pf(table_names)}))")
 
         databricks_sql_ds.add_table_asset(asset_name, table_name=table_name)
@@ -286,13 +309,16 @@ class TestTableIdentifiers:
         if not table_name:
             pytest.skip(f"no '{asset_name}' table_name for databricks")
         # create table
+        schema = get_random_identifier_name()
         table_factory(
             engine=snowflake_ds.get_engine(),
             table_names={table_name},
-            schema=get_random_identifier_name(),
+            schema=schema,
         )
 
-        table_names: list[str] = inspect(snowflake_ds.get_engine()).get_table_names()
+        table_names: list[str] = get_engine_inspector(snowflake_ds).get_table_names(
+            schema=schema
+        )
         print(f"snowflake tables:\n{pf(table_names)}))")
 
         snowflake_ds.add_table_asset(asset_name, table_name=table_name)
@@ -307,7 +333,7 @@ class TestTableIdentifiers:
             ),
             param(
                 "databricks_sql",
-                get_random_identifier_name(),
+                PYTHON_VERSION,
                 marks=[pytest.mark.databricks],
             ),
         ],
