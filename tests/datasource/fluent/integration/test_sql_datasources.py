@@ -218,7 +218,9 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
 def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
     ds = context.sources.add_databricks_sql(
         "databricks_sql",
-        connection_string="databricks+connector://token:${DBS_TOKEN}@${DBS_HOST}:443/cloud_events?http_path=${DBS_HTTP_PATH}&catalog=catalog&schema="
+        connection_string="databricks+connector://token:"
+        "${DATABRICKS_TOKEN}@${DATABRICKS_HOST}:443"
+        "/cloud_events?http_path=${DATABRICKS_HTTP_PATH}&catalog=catalog&schema="
         + PYTHON_VERSION,
     )
     return ds
