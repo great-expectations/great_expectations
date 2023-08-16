@@ -479,7 +479,7 @@ assert batch_identifiers == {
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py equivalent_using_checkpoint">
 equivalent_using_checkpoint = """
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py equivalent_using_checkpoint just the yaml">
+
 name: my_checkpoint
 config_version: 1
 class_name: Checkpoint
@@ -510,7 +510,7 @@ action_list:
       renderer:
         module_name: great_expectations.render.renderer.slack_renderer
         class_name: SlackRenderer
-# </snippet>
+
 """
 # </snippet>
 equivalent_using_checkpoint = equivalent_using_checkpoint.replace(
