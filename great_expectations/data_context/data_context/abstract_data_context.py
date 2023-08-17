@@ -1178,6 +1178,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             config = self._project_config
         return DataContextConfig(**self.config_provider.substitute_config(config))
 
+    # 2023-08-17 - Chetan - This method is only kept around to support profile_data_asset (a V2 method) and V2-specific tests
+    #                       We should delete this as soon as possible as it has been deprecated in v13.
     def _get_batch_v2(
         self,
         batch_kwargs: Union[dict, BatchKwargs],
