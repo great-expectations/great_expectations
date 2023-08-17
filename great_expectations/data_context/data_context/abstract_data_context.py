@@ -1178,7 +1178,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             config = self._project_config
         return DataContextConfig(**self.config_provider.substitute_config(config))
 
-    # Keeping around to allow dependent tests to keep working - public `get_batch` that uses this has been deleteg
     def _get_batch_v2(
         self,
         batch_kwargs: Union[dict, BatchKwargs],
