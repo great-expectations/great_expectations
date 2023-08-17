@@ -18,7 +18,7 @@ def is_valid_rhode_island_zip(zip: str):
     ]
     if len(zip) > 10:
         return False
-    elif type(zip) != str:
+    elif type(zip) != str:  # noqa: E721
         return False
     elif zip in list_of_rhode_island_zips:
         return True

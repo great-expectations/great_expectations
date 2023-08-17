@@ -343,7 +343,9 @@ def get_sqlalchemy_column_metadata(
                     columns = table_selectable.columns().columns
             else:
                 columns = inspector.get_columns(
-                    table_selectable,
+                    str(
+                        table_selectable
+                    ),  # TODO: remove cast to a string once [this](https://github.com/snowflakedb/snowflake-sqlalchemy/issues/157) issue is resovled
                     schema=schema_name,
                 )
         except (
@@ -760,7 +762,7 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
 
         for typed_column_name_cursor in batch_columns_list:
             if (
-                (type(typed_column_name_cursor) == str)
+                (type(typed_column_name_cursor) == str)  # noqa: E721
                 and (column_name.casefold() == typed_column_name_cursor.casefold())
             ) or (column_name == str(typed_column_name_cursor)):
                 return column_name, typed_column_name_cursor

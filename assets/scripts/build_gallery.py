@@ -434,7 +434,7 @@ def get_contrib_requirements(filepath: str) -> Dict:
                 if "library_metadata" in target_ids:
                     library_metadata = ast.literal_eval(node.value)
                     requirements = library_metadata.get("requirements", [])
-                    if type(requirements) == str:
+                    if type(requirements) == str:  # noqa: E721
                         requirements = [requirements]
                     requirements_info[current_class] = requirements
                     requirements_info["requirements"] += requirements

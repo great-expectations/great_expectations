@@ -19,7 +19,7 @@ def is_valid_state_abbreviation(state: str, dc_statehood: bool):
         pass
     if len(state) != 2:
         return False
-    elif type(state) != str:
+    elif type(state) != str:  # noqa: E721
         return False
     elif state in list_of_state_abbrs:
         return True

@@ -238,7 +238,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
             return values
 
-        def __eq__(self, other: Any) -> bool:
+        def __eq__(self, other: object) -> bool:
             if isinstance(other, BaseModel):
                 return self.dict() == other.dict()
             elif isinstance(other, dict):

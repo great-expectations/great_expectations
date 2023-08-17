@@ -1953,7 +1953,7 @@ class Expectation(metaclass=MetaExpectation):
 
         result: str = ""
 
-        if type(rendered_result) == str:
+        if type(rendered_result) == str:  # noqa: E721
             result = rendered_result
 
         elif type(rendered_result) == list:
