@@ -176,7 +176,7 @@ def test_pandas_datasource_custom_data_asset(
     data_context_parameterized_expectation_suite.add_expectation_suite(
         expectation_suite_name="test"
     )
-    batch = data_context_parameterized_expectation_suite.get_batch(
+    batch = data_context_parameterized_expectation_suite._get_batch_v2(
         expectation_suite_name="test",
         batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
             datasource=name,
