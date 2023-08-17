@@ -1178,55 +1178,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             config = self._project_config
         return DataContextConfig(**self.config_provider.substitute_config(config))
 
-    @public_api
-    def get_batch(
-        self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
-    ) -> Union[Batch, DataAsset]:
-        """Get exactly one batch, based on a variety of flexible input types.
-
-        The method `get_batch` is the main user-facing method for getting batches; it supports both the new (V3) and the
-        Legacy (V2) Datasource schemas.  The version-specific implementations are contained in "_get_batch_v2()" and
-        "_get_batch_v3()", respectively, both of which are in the present module.
-
-        For the V3 API parameters, please refer to the signature and parameter description of method "_get_batch_v3()".
-        For the Legacy usage, please refer to the signature and parameter description of the method "_get_batch_v2()".
-
-        Processing Steps:
-            1. Determine the version (possible values are "v3" or "v2").
-            2. Convert the positional arguments to the appropriate named arguments, based on the version.
-            3. Package the remaining arguments as variable keyword arguments (applies only to V3).
-            4. Call the version-specific method ("_get_batch_v3()" or "_get_batch_v2()") with the appropriate arguments.
-
-        Args:
-            arg1: the first positional argument (can take on various types)
-            arg2: the second positional argument (can take on various types)
-            arg3: the third positional argument (can take on various types)
-
-            **kwargs: variable arguments
-
-        Returns:
-            Batch (V3) or DataAsset (V2) -- the requested batch
-        """
-        if "batch_kwargs" in kwargs:
-            batch_kwargs = kwargs.get("batch_kwargs", None)
-        else:
-            batch_kwargs = arg1
-        if "expectation_suite_name" in kwargs:
-            expectation_suite_name = kwargs.get("expectation_suite_name", None)
-        else:
-            expectation_suite_name = arg2
-        if "data_asset_type" in kwargs:
-            data_asset_type = kwargs.get("data_asset_type", None)
-        else:
-            data_asset_type = arg3
-        batch_parameters = kwargs.get("batch_parameters")
-        return self._get_batch_v2(
-            batch_kwargs=batch_kwargs,
-            expectation_suite_name=expectation_suite_name,
-            data_asset_type=data_asset_type,
-            batch_parameters=batch_parameters,
-        )
-
+    # Keeping around to allow dependent tests to keep working - public `get_batch` that uses this has been deleteg
     def _get_batch_v2(
         self,
         batch_kwargs: Union[dict, BatchKwargs],
@@ -1292,102 +1244,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_engine=data_asset_type,
         )
         return validator.get_dataset()
-
-    def _get_batch_v3(  # noqa: PLR0913
-        self,
-        datasource_name: Optional[str] = None,
-        data_connector_name: Optional[str] = None,
-        data_asset_name: Optional[str] = None,
-        *,
-        batch_request: Optional[BatchRequestBase] = None,
-        batch_data: Optional[Any] = None,
-        data_connector_query: Optional[Union[IDDict, dict]] = None,
-        batch_identifiers: Optional[dict] = None,
-        limit: Optional[int] = None,
-        index: Optional[Union[int, list, tuple, slice, str]] = None,
-        custom_filter_function: Optional[Callable] = None,
-        batch_spec_passthrough: Optional[dict] = None,
-        sampling_method: Optional[str] = None,
-        sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
-        runtime_parameters: Optional[dict] = None,
-        query: Optional[str] = None,
-        path: Optional[str] = None,
-        batch_filter_parameters: Optional[dict] = None,
-        **kwargs,
-    ) -> Union[Batch, DataAsset]:
-        """Get exactly one batch, based on a variety of flexible input types.
-
-        Args:
-            datasource_name
-            data_connector_name
-            data_asset_name
-
-            batch_request
-            batch_data
-            data_connector_query
-            batch_identifiers
-            batch_filter_parameters
-
-            limit
-            index
-            custom_filter_function
-
-            batch_spec_passthrough
-
-            sampling_method
-            sampling_kwargs
-
-            splitter_method
-            splitter_kwargs
-
-            **kwargs
-
-        Returns:
-            (Batch) The requested batch
-
-        This method does not require typed or nested inputs.
-        Instead, it is intended to help the user pick the right parameters.
-
-        This method attempts to return exactly one batch.
-        If 0 or more than 1 batches would be returned, it raises an error.
-        """
-        batch_list: List[Batch] = self.get_batch_list(
-            datasource_name=datasource_name,
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-            batch_request=batch_request,
-            batch_data=batch_data,
-            data_connector_query=data_connector_query,
-            batch_identifiers=batch_identifiers,
-            limit=limit,
-            index=index,
-            custom_filter_function=custom_filter_function,
-            batch_spec_passthrough=batch_spec_passthrough,
-            sampling_method=sampling_method,
-            sampling_kwargs=sampling_kwargs,
-            splitter_method=splitter_method,
-            splitter_kwargs=splitter_kwargs,
-            runtime_parameters=runtime_parameters,
-            query=query,
-            path=path,
-            batch_filter_parameters=batch_filter_parameters,
-            **kwargs,
-        )
-        # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
-        # deprecated-v0.13.20
-        warnings.warn(
-            "get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16. Please use "
-            "get_batch_list instead.",
-            DeprecationWarning,
-        )
-        if len(batch_list) != 1:
-            raise ValueError(
-                f"Got {len(batch_list)} batches instead of a single batch. If you would like to use a BatchRequest to "
-                f"return multiple batches, please use get_batch_list directly instead of calling get_batch"
-            )
-        return batch_list[0]
 
     def list_stores(self) -> List[Store]:
         """List currently-configured Stores on this context"""
@@ -3955,7 +3811,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
         # TODO: Add batch_parameters
-        batch = self.get_batch(
+        batch = self._get_batch_v2(
             expectation_suite_name=expectation_suite_name,
             batch_kwargs=batch_kwargs,
         )

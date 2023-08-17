@@ -433,51 +433,6 @@ data_connectors:
 
 
 @pytest.mark.filesystem
-def test__get_data_context_version(empty_data_context, titanic_data_context):
-    context = empty_data_context
-
-    assert not context._get_data_context_version("some_datasource_name", **{})
-    assert not context._get_data_context_version(arg1="some_datasource_name", **{})
-
-    yaml_config = """
-class_name: Datasource
-
-execution_engine:
-    class_name: PandasExecutionEngine
-
-data_connectors:
-    general_runtime_data_connector:
-      module_name: great_expectations.datasource.data_connector
-      class_name: RuntimeDataConnector
-      batch_identifiers:
-      - airflow_run_id
-"""
-    # noinspection PyUnusedLocal
-    context.test_yaml_config(
-        name="some_datasource_name",
-        yaml_config=yaml_config,
-    )
-
-    assert context._get_data_context_version("some_datasource_name", **{}) == "v3"
-    assert context._get_data_context_version(arg1="some_datasource_name", **{}) == "v3"
-
-    context = titanic_data_context
-    root_dir = context.root_directory
-    batch_kwargs = {
-        "datasource": "mydatasource",
-        "path": f"{root_dir}/../data/Titanic.csv",
-    }
-    assert context._get_data_context_version(arg1=batch_kwargs) == "v2"
-    assert context._get_data_context_version(batch_kwargs) == "v2"
-    assert (
-        context._get_data_context_version(
-            "some_value", **{"batch_kwargs": batch_kwargs}
-        )
-        == "v2"
-    )
-
-
-@pytest.mark.filesystem
 @pytest.mark.slow  # 1.06s
 def test_in_memory_data_context_configuration(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
