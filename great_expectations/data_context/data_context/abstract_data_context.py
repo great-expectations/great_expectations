@@ -2759,9 +2759,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         ```python
         expectation_suite_name = "genres_movies.fkey"
         context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
-        batch = context.get_batch(
+        batch = context.get_batch_list(
             expectation_suite_name=expectation_suite_name
-        )
+        )[0]
         ```
 
         When run as part of get_validator():
@@ -2856,9 +2856,9 @@ class AbstractDataContext(ConfigPeer, ABC):
 
             expectation_suite_name = "genres_movies.fkey"
             context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
-            batch = context.get_batch(
+            batch = context.get_batch_list(
                 expectation_suite_name=expectation_suite_name
-            )
+            )[0]
 
 
         When run as part of get_validator()::
@@ -4738,7 +4738,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
                 # this error will happen if our configuration contains datasources that GX can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
-                # caught at the context.get_batch() step. So we just pass here.
+                # caught at the context.get_batch_list() step. So we just pass here.
                 pass
 
     def _instantiate_datasource_from_config(
