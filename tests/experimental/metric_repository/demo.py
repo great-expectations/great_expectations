@@ -34,15 +34,9 @@ from great_expectations.experimental.metric_repository.metric_repository import 
     MetricRepository,
 )
 from great_expectations.experimental.metric_repository.metrics import (
-    ColumnMetric,
     Metric,
     MetricException,
     MetricRun,
-    NumericListMetric,
-    NumericMetric,
-    NumericTableMetric,
-    StringListMetric,
-    StringListTableMetric,
     TableMetric,
 )
 
@@ -131,14 +125,14 @@ def test_demo_batch_inspector(
     assert metrics_stored == MetricRun(
         id=run_id,
         metrics=[
-            NumericTableMetric(
+            TableMetric[int](
                 id=metric_id,
                 batch=batch,
                 metric_name="table.row_count",
                 value=2,
                 exception=MetricException(),
             ),
-            StringListTableMetric(
+            TableMetric[list[str]](
                 id=metric_id,
                 batch=batch,
                 metric_name="table.columns",
@@ -162,11 +156,6 @@ def test_demo_batch_inspector(
     "metric_type",
     [
         Metric,
-        TableMetric,
-        ColumnMetric,
-        NumericMetric,
-        NumericListMetric,
-        StringListMetric,
     ],
 )
 def test_cannot_init_abstract_metric(
