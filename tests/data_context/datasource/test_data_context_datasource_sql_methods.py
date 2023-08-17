@@ -27,7 +27,7 @@ except ImportError:
 pytestmark = pytest.mark.filesystem
 
 
-def test_get_batch(data_context_with_simple_sql_datasource_for_testing_get_batch):
+def test_get_batch_list(data_context_with_simple_sql_datasource_for_testing_get_batch):
     context = data_context_with_simple_sql_datasource_for_testing_get_batch
 
     print(

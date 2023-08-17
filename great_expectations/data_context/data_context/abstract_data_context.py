@@ -106,7 +106,6 @@ from great_expectations.data_context.util import (
     parse_substitution_variable,
 )
 from great_expectations.dataset.dataset import Dataset
-from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
 )
@@ -170,6 +169,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
+    from great_expectations.datasource import LegacyDatasource
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequest as FluentBatchRequest,
     )
@@ -1179,7 +1179,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return DataContextConfig(**self.config_provider.substitute_config(config))
 
     @public_api
-    def get_batch(  # noqa: PLR0912
+    def get_batch(
         self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
     ) -> Union[Batch, DataAsset]:
         """Get exactly one batch, based on a variety of flexible input types.
@@ -1207,27 +1207,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             Batch (V3) or DataAsset (V2) -- the requested batch
         """
-
-        api_version: Optional[str] = self._get_data_context_version(arg1=arg1, **kwargs)
-        if api_version == "v3":
-            if "datasource_name" in kwargs:
-                datasource_name = kwargs.pop("datasource_name", None)
-            else:
-                datasource_name = arg1
-            if "data_connector_name" in kwargs:
-                data_connector_name = kwargs.pop("data_connector_name", None)
-            else:
-                data_connector_name = arg2
-            if "data_asset_name" in kwargs:
-                data_asset_name = kwargs.pop("data_asset_name", None)
-            else:
-                data_asset_name = arg3
-            return self._get_batch_v3(
-                datasource_name=datasource_name,
-                data_connector_name=data_connector_name,
-                data_asset_name=data_asset_name,
-                **kwargs,
-            )
         if "batch_kwargs" in kwargs:
             batch_kwargs = kwargs.get("batch_kwargs", None)
         else:
@@ -1247,65 +1226,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             data_asset_type=data_asset_type,
             batch_parameters=batch_parameters,
         )
-
-    def _get_data_context_version(  # noqa: PLR0912
-        self, arg1: Any, **kwargs
-    ) -> Optional[str]:
-        """
-        arg1: the first positional argument (can take on various types)
-
-        **kwargs: variable arguments
-
-        First check:
-        Returns "v3" if the "0.13" entities are specified in the **kwargs.
-
-        Otherwise:
-        Returns None if no datasources have been configured (or if there is an exception while getting the datasource).
-        Returns "v3" if the datasource is a subclass of the BaseDatasource class.
-        Returns "v2" if the datasource is an instance of the LegacyDatasource class.
-        """
-
-        if {
-            "datasource_name",
-            "data_connector_name",
-            "data_asset_name",
-            "batch_request",
-            "batch_data",
-        }.intersection(set(kwargs.keys())):
-            return "v3"
-
-        if not self.datasources:
-            return None
-
-        api_version: Optional[str] = None
-        datasource_name: Any
-        if "datasource_name" in kwargs:
-            datasource_name = kwargs.pop("datasource_name", None)
-        else:
-            datasource_name = arg1
-        try:
-            datasource: LegacyDatasource | BaseDatasource | FluentDatasource = (
-                self.get_datasource(datasource_name=datasource_name)
-            )
-            if issubclass(type(datasource), BaseDatasource):
-                api_version = "v3"
-        except (ValueError, TypeError):
-            if "batch_kwargs" in kwargs:
-                batch_kwargs = kwargs.get("batch_kwargs", None)
-            else:
-                batch_kwargs = arg1
-            if isinstance(batch_kwargs, dict):
-                datasource_name = batch_kwargs.get("datasource")
-                if datasource_name is not None:
-                    try:
-                        datasource: Union[  # type: ignore[no-redef]
-                            LegacyDatasource, BaseDatasource
-                        ] = self.get_datasource(datasource_name=datasource_name)
-                        if isinstance(datasource, LegacyDatasource):
-                            api_version = "v2"
-                    except (ValueError, TypeError):
-                        pass
-        return api_version
 
     def _get_batch_v2(
         self,
