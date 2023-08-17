@@ -166,7 +166,6 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             metric_computation_result.attributed_resolved_metrics[0]
         )
 
-        metric_values = attributed_resolved_metrics.conditioned_metric_values[:, 0]
         metric_values: MetricValues
 
         metric_values = attributed_resolved_metrics.conditioned_metric_values
