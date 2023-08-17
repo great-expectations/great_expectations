@@ -118,28 +118,6 @@ def test_get_domain_records_with_column_domain(
     ), "Data does not match after getting full access compute domain"
 
 
-def test_get_domain_records_with_column_domain_all_identifier_types(
-    spark_session, basic_spark_df_execution_engine, spark_df_from_pandas_df
-):
-    """What does this test and why?
-
-    Spark identifiers are less restrictive than ANSI SQL identifiers. This test ensures that we can use identifiers
-    compliant with: https://spark.apache.org/docs/latest/sql-ref-identifier.html
-    """
-    pd_df = pd.DataFrame(
-        {
-            "snake_case": [1, 2, 3, 4, 5],
-            "kebab-case": [2, 3, 4, 5, None],
-            "dot.case": [1, 2, 3, 4, None],
-        }
-    )
-    df = spark_df_from_pandas_df(spark_session, pd_df)
-    engine = basic_spark_df_execution_engine
-    engine.load_batch_data(batch_id="1234", batch_data=df)
-    engine.get_domain_records(domain_kwargs={"column": "snake_case"})
-    print("hello")
-
-
 def test_get_domain_records_with_column_domain_and_filter_conditions(
     spark_session, basic_spark_df_execution_engine, spark_df_from_pandas_df
 ):
