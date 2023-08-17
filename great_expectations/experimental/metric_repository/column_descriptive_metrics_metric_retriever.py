@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING, List, Sequence
 
 from great_expectations.datasource.fluent.interfaces import Batch
 from great_expectations.experimental.metric_repository.metric_retriever import (
@@ -68,7 +68,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         metric_name = "table.columns"
         metric_lookup_key = (metric_name, tuple(), tuple())
         metrics.append(
-            TableMetric[list[str]](
+            TableMetric[List[str]](
                 id=self._generate_metric_id(),
                 batch=validator.active_batch,
                 metric_name=metric_name,
