@@ -398,31 +398,20 @@ def test_onboarding_data_assistant_should_fail_forward(
         )
 
 
-# TODO: Make this a unit test
-# TODO: Where should this test live?
-@pytest.mark.unit
+@pytest.mark.big
 @pytest.mark.spark
-def test_onboarding_data_assistant_all_identifier_types_spark(
+def test_onboarding_data_assistant_numeric_column_containing_dot_spark(
     spark_session,
     ephemeral_context_with_defaults,
 ):
     """What does this test and why?
 
     Spark identifiers are less restrictive than ANSI SQL identifiers. This test ensures that we can use identifiers
-    compliant with: https://spark.apache.org/docs/latest/sql-ref-identifier.html
+    compliant with: https://spark.apache.org/docs/latest/sql-ref-identifier.html, specifically the dot case e.g. `a.b`.
     """
 
-    # These columns fail (the dot case one fails):
-    # columns = ["snake_case", "kebab-case", "`dot.case`"]
-    # values = [(1, 2, 1), (2, 3, 2), (3, 4, 3), (4, 5, 4), (5, None, None)]
-
-    # These columns fail (the dot case one fails):
     columns = ["snake_case", "kebab-case", "dot.case"]
     values = [(1, 1, 1), (2, 2, 2), (3, 3, 3), (4, 4, 4), (5, 5, 5)]
-
-    # Testing these columns:
-    # columns = ["snake_case", "kebab-case", "`space in column name`"]
-    # values = [(1, 2, 1), (2, 3, 2), (3, 4, 3), (4, 5, 4), (5, None, None)]
 
     df = spark_session.createDataFrame(data=values, schema=columns)
 
@@ -446,53 +435,6 @@ def test_onboarding_data_assistant_all_identifier_types_spark(
         ]
         == "Column names cannot contain '.' when computing the histogram metric."
     )
-
-
-# TODO: Make this a unit test
-# TODO: Where should this test live?
-@pytest.mark.unit
-@pytest.mark.spark
-def test_missingness_data_assistant_all_identifier_types_spark(
-    spark_session,
-    ephemeral_context_with_defaults,
-):
-    """What does this test and why?
-
-    Spark identifiers are less restrictive than ANSI SQL identifiers. This test ensures that we can use identifiers
-    compliant with: https://spark.apache.org/docs/latest/sql-ref-identifier.html
-    """
-
-    # These columns fail (the dot case one fails):
-    # columns = ["snake_case", "kebab-case", "`dot.case`"]
-    # values = [(1, 2, 1), (2, 3, 2), (3, 4, 3), (4, 5, 4), (5, None, None)]
-
-    # These columns pass:
-    # columns = ["snake_case", "kebab-case"]
-    # values = [(1, 2), (2, 3), (3, 4), (4, 5), (5, None)]
-
-    # These columns fail (the dot case one fails):
-    columns = ["snake_case", "kebab-case", "dot.case"]
-    values = [(1, 2, 1), (2, 3, 2), (3, 4, 3), (4, 5, 4), (5, None, None)]
-
-    # Testing these columns:
-    # columns = ["snake_case", "kebab-case", "`space in column name`"]
-    # values = [(1, 2, 1), (2, 3, 2), (3, 4, 3), (4, 5, 4), (5, None, None)]
-
-    df = spark_session.createDataFrame(data=values, schema=columns)
-
-    context = ephemeral_context_with_defaults
-    datasource = context.sources.add_or_update_spark("my_datasource")
-    asset = datasource.add_dataframe_asset("my_asset")
-    batch_request = asset.build_batch_request(dataframe=df)
-
-    # TODO: Should batch request be a multi-batch batch request?
-    data_assistant_result: DataAssistantResult = context.assistants.missingness.run(
-        batch_request=batch_request,
-    )
-    suite = data_assistant_result.get_expectation_suite()
-    assert len(suite.expectations) > 0
-
-    assert data_assistant_result.rule_exception_tracebacks == {}
 
 
 @pytest.mark.big
