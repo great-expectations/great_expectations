@@ -759,7 +759,6 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
         column_name: str,
     ) -> Tuple[str, str | sqlalchemy.quoted_name] | None:
         typed_column_name_cursor: str | sqlalchemy.quoted_name
-
         for typed_column_name_cursor in batch_columns_list:
             if (
                 (type(typed_column_name_cursor) == str)  # noqa: E721
