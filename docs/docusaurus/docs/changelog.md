@@ -10,7 +10,7 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
-### 0.17.10
+### 0.17.11
 * [FEATURE] Make SQLDatasource.assets field a `tagged-union` ([#8532](https://github.com/great-expectations/great_expectations/pull/8532))
 * [BUGFIX] DatabricksSQL TableAsset quoted identifiers ([#8523](https://github.com/great-expectations/great_expectations/pull/8523))
 * [BUGFIX] Fixed persist to be considered for spark fluent datasource ([#8512](https://github.com/great-expectations/great_expectations/pull/8512)) (thanks @jmcorreia)
