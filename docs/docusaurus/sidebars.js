@@ -152,6 +152,7 @@ module.exports = {
             'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
           ]
         },
+        'guides/validation/limit_validation_results',
       ]
     },
     {
