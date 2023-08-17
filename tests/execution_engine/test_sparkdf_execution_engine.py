@@ -1200,7 +1200,7 @@ def test_schema_properly_added(spark_session):
     assert df.schema == schema
 
 
-@pytest.mark.big
+@pytest.mark.spark
 def test_explicit_string_identifiers_should_work_with_validator(spark_session):
     """
     Integration test taken from: https://github.com/great-expectations/great_expectations/issues/7628
