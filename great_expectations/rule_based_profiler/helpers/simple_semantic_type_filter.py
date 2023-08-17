@@ -124,7 +124,6 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         column_name: str,
     ) -> InferredSemanticDomainType:
         # Note: As of Python 3.8, specifying argument type in Lambda functions is not supported by Lambda syntax.
-
         column_types_dict_list = list(
             filter(
                 lambda column_type_dict: column_name == column_type_dict["name"]

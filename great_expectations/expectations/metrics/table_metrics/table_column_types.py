@@ -120,6 +120,7 @@ def _get_spark_column_metadata(field, parent_name="", include_nested=True):
             )
     elif pyspark.types and isinstance(field, pyspark.types.StructField):
         if include_nested and "." in field.name:
+            # Only add backticks to escape dotted fields if they don't already exist
             if field.name.startswith("`") and field.name.endswith("`"):
                 name = f"{parent_name}{field.name}"
             else:

@@ -215,14 +215,6 @@ elements.
             parameters=parameters,
         )
 
-        # TODO: Failing here
-        # 'line 212, in '
-        # '_build_parameters\n'
-        # '    '
-        # 'column_values_nonnull_count_parameter_node[\n'
-        # 'TypeError: unsupported '
-        # 'operand type(s) for +: '
-        # "'NoneType' and 'float'\n",
         weights: np.ndarray = np.asarray(
             parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
         ) / (
