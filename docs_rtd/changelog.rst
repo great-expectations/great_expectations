@@ -4,7 +4,7 @@
 Changelog
 #########
 
-0.17.10
+0.17.11
 -----------------
 * [FEATURE] Make SQLDatasource.assets field a `tagged-union` ([#8532](https://github.com/great-expectations/great_expectations/pull/8532))
 * [BUGFIX] DatabricksSQL TableAsset quoted identifiers ([#8523](https://github.com/great-expectations/great_expectations/pull/8523))
