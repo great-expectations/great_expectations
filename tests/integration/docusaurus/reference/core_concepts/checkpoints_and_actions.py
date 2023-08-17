@@ -136,6 +136,7 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py no_nesting">
 no_nesting = f"""
 
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py no_nesting just the yaml">
 name: my_checkpoint
 config_version: 1
 class_name: Checkpoint
@@ -165,6 +166,7 @@ runtime_configuration:
   result_format:
     result_format: BASIC
     partial_unexpected_count: 20
+# </snippet>
     
 """
 # </snippet>
