@@ -126,7 +126,11 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         # Note: As of Python 3.8, specifying argument type in Lambda functions is not supported by Lambda syntax.
         column_types_dict_list = list(
             filter(
-                lambda column_type_dict: column_name == column_type_dict["name"],
+                lambda column_type_dict: column_name == column_type_dict["name"]
+                or column_name
+                == column_type_dict["name"].strip(
+                    "`"
+                ),  # Spark specific fix to compare column names without backticks
                 column_types_dict_list,
             )
         )
