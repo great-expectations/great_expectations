@@ -398,7 +398,6 @@ def test_onboarding_data_assistant_should_fail_forward(
         )
 
 
-@pytest.mark.big
 @pytest.mark.spark
 def test_onboarding_data_assistant_numeric_column_containing_dot_spark(
     spark_session,

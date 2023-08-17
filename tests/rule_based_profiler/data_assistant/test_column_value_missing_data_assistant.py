@@ -145,7 +145,6 @@ def test_column_value_missing_data_assistant_uses_single_batch_mode_for_single_b
         assert validation_parameter_builder_configs[0]["mode"] == "single_batch"
 
 
-@pytest.mark.big
 @pytest.mark.spark
 def test_missingness_data_assistant_numeric_column_containing_dot_spark(
     spark_session,
