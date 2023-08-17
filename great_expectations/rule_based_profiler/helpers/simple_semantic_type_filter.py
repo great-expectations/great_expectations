@@ -128,7 +128,9 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
             filter(
                 lambda column_type_dict: column_name == column_type_dict["name"]
                 or column_name
-                == column_type_dict["name"].strip("`"),  # Spark specific fix
+                == column_type_dict["name"].strip(
+                    "`"
+                ),  # Spark specific fix to compare column names without backticks
                 column_types_dict_list,
             )
         )
