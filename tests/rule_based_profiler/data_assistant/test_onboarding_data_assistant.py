@@ -1014,7 +1014,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
 
 @pytest.mark.trino
-def test_onboarding_data_assistant__trino_with_string_fields(empty_data_context):
+@pytest.mark.parameterize("use_fds",[True, False])
+def test_onboarding_data_assistant__trino_with_string_fields(empty_data_context, use_fds):
     CONNECTION_STRING = "trino://test@localhost:8088/memory/schema"
 
     # This utility is not for general use. It is only to support testing.
@@ -1029,26 +1030,29 @@ def test_onboarding_data_assistant__trino_with_string_fields(empty_data_context)
     )
 
     context = empty_data_context
-    datasource_config = {
-        "name": "my_trino_datasource",
-        "class_name": "Datasource",
-        "execution_engine": {
-            "class_name": "SqlAlchemyExecutionEngine",
-            "connection_string": CONNECTION_STRING,
-        },
-        "data_connectors": {
-            "default_runtime_data_connector_name": {
-                "class_name": "RuntimeDataConnector",
-                "batch_identifiers": ["default_identifier_name"],
+    if not use_fds:
+        datasource_config = {
+            "name": "my_trino_datasource",
+            "class_name": "Datasource",
+            "execution_engine": {
+                "class_name": "SqlAlchemyExecutionEngine",
+                "connection_string": CONNECTION_STRING,
             },
-            "default_inferred_data_connector_name": {
-                "class_name": "InferredAssetSqlDataConnector",
-                "include_schema_name": True,
+            "data_connectors": {
+                "default_runtime_data_connector_name": {
+                    "class_name": "RuntimeDataConnector",
+                    "batch_identifiers": ["default_identifier_name"],
+                },
+                "default_inferred_data_connector_name": {
+                    "class_name": "InferredAssetSqlDataConnector",
+                    "include_schema_name": True,
+                },
             },
-        },
-    }
-
-    context.add_datasource(**datasource_config)
+        }
+    
+        context.add_datasource(**datasource_config)
+    else:
+        context.sources.add_sql(name="my_trino_datasource", connection_string=CONNECTION_STRING)
 
     batch_request = RuntimeBatchRequest(
         datasource_name="my_trino_datasource",
