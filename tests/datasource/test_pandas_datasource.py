@@ -211,7 +211,7 @@ def test_pandas_source_read_csv(
     data_context_parameterized_expectation_suite.add_expectation_suite(
         expectation_suite_name="unicode"
     )
-    batch = data_context_parameterized_expectation_suite.get_batch(
+    batch = data_context_parameterized_expectation_suite._get_batch_v2(
         data_context_parameterized_expectation_suite.build_batch_kwargs(
             "mysource", "subdir_reader", "unicode"
         ),
@@ -232,7 +232,7 @@ def test_pandas_source_read_csv(
         },
     )
 
-    batch = data_context_parameterized_expectation_suite.get_batch(
+    batch = data_context_parameterized_expectation_suite._get_batch_v2(
         data_context_parameterized_expectation_suite.build_batch_kwargs(
             "mysource2", "subdir_reader", "unicode"
         ),
@@ -254,7 +254,7 @@ def test_pandas_source_read_csv(
     )
 
     with pytest.raises(UnicodeError, match="UTF-16 stream does not start with BOM"):
-        batch = data_context_parameterized_expectation_suite.get_batch(
+        batch = data_context_parameterized_expectation_suite._get_batch_v2(
             data_context_parameterized_expectation_suite.build_batch_kwargs(
                 "mysource3", "subdir_reader", "unicode"
             ),
@@ -266,12 +266,12 @@ def test_pandas_source_read_csv(
             "mysource3", "subdir_reader", "unicode"
         )
         batch_kwargs.update({"reader_options": {"encoding": "blarg"}})
-        batch = data_context_parameterized_expectation_suite.get_batch(
+        batch = data_context_parameterized_expectation_suite._get_batch_v2(
             batch_kwargs=batch_kwargs, expectation_suite_name="unicode"
         )
 
     with pytest.raises(LookupError, match="unknown encoding: blarg"):
-        batch = data_context_parameterized_expectation_suite.get_batch(
+        batch = data_context_parameterized_expectation_suite._get_batch_v2(
             expectation_suite_name="unicode",
             batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
                 "mysource",
@@ -281,7 +281,7 @@ def test_pandas_source_read_csv(
             ),
         )
 
-    batch = data_context_parameterized_expectation_suite.get_batch(
+    batch = data_context_parameterized_expectation_suite._get_batch_v2(
         batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
             "mysource2",
             "subdir_reader",
@@ -342,7 +342,7 @@ def test_s3_pandas_source_read_parquet(
         expectation_suite_name="test_parquet"
     )
     with pytest.deprecated_call():  # "Direct GX Support for the s3 BatchKwarg will be removed in v0.16.
-        batch = data_context_parameterized_expectation_suite.get_batch(
+        batch = data_context_parameterized_expectation_suite._get_batch_v2(
             data_context_parameterized_expectation_suite.build_batch_kwargs(
                 "parquet_source",
                 "s3_reader",
