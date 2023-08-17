@@ -28,7 +28,7 @@ class QueryTemplateValues(QueryMetricProvider):
     @classmethod
     def get_query(cls, query, template_dict, selectable):
         template_dict_reformatted = {
-            k: v.format(active_batch=selectable) for k, v in template_dict.items()
+            k: str(v).format(active_batch=selectable) for k, v in template_dict.items()
         }
         query_reformatted = query.format(
             **template_dict_reformatted, active_batch=selectable
