@@ -123,15 +123,13 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         column_types_dict_list: List[Dict[str, Any]],
         column_name: str,
     ) -> InferredSemanticDomainType:
-        if "." in column_name:
-            print(column_name)
         # Note: As of Python 3.8, specifying argument type in Lambda functions is not supported by Lambda syntax.
-        # TODO: remove only backticks in front or back before filtering
 
         column_types_dict_list = list(
             filter(
                 lambda column_type_dict: column_name == column_type_dict["name"]
-                or column_name == column_type_dict["name"].strip("`"),
+                or column_name
+                == column_type_dict["name"].strip("`"),  # Spark specific fix
                 column_types_dict_list,
             )
         )

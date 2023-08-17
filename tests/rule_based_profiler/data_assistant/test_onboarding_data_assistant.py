@@ -416,10 +416,6 @@ def test_onboarding_data_assistant_all_identifier_types_spark(
     # columns = ["snake_case", "kebab-case", "`dot.case`"]
     # values = [(1, 2, 1), (2, 3, 2), (3, 4, 3), (4, 5, 4), (5, None, None)]
 
-    # These columns pass:
-    # columns = ["snake_case", "kebab-case"]
-    # values = [(1, 2), (2, 3), (3, 4), (4, 5), (5, None)]
-
     # These columns fail (the dot case one fails):
     columns = ["snake_case", "kebab-case", "dot.case"]
     values = [(1, 1, 1), (2, 2, 2), (3, 3, 3), (4, 4, 4), (5, 5, 5)]
@@ -435,44 +431,21 @@ def test_onboarding_data_assistant_all_identifier_types_spark(
     asset = datasource.add_dataframe_asset("my_asset")
     batch_request = asset.build_batch_request(dataframe=df)
 
-    # bins = [
-    #     -float("inf"),
-    #     1.0,
-    #     1.4,
-    #     1.8,
-    #     2.2,
-    #     2.6,
-    #     3.0,
-    #     3.4000000000000004,
-    #     3.8000000000000003,
-    #     4.2,
-    #     4.6,
-    #     5.0,
-    #     float("inf"),
-    # ]
-
-    # This doesn't work in the bucketizer
-    # escaped_column_name = "`dot.case`"
-    # column_name = "dot.case"
-
-    # This does work
-    # escaped_column_name = "snake_case"
-    # column_name = "snake_case"
-
-    # temp_column = df.select(escaped_column_name)
-    # bucketizer = pyspark.Bucketizer(
-    #     splits=bins, inputCol=escaped_column_name, outputCol="buckets"
-    # )
-    # bucketed = bucketizer.setHandleInvalid("skip").transform(temp_column)
-    # hist_rows = bucketed.groupBy("buckets").count().collect()
-
     data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
         batch_request=batch_request, exclude_column_names=["snake_case", "kebab-case"]
     )
-    # suite = data_assistant_result.get_expectation_suite()
-    # assert len(suite.expectations) > 0
 
-    assert data_assistant_result.rule_exception_tracebacks == {}
+    # Histogram metric cannot be computed when using columns containing `.` with the current metric implementation.
+    # Other metrics should pass.
+    assert list(data_assistant_result.rule_exception_tracebacks.keys()) == [
+        "numeric_columns_rule"
+    ]
+    assert (
+        data_assistant_result.rule_exception_tracebacks["numeric_columns_rule"][
+            "exception_message"
+        ]
+        == "Column names cannot contain '.' when computing the histogram metric."
+    )
 
 
 # TODO: Make this a unit test
