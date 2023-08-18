@@ -1051,8 +1051,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     )
 
 
-@pytest.mark.trino
-@pytest.mark.parameterize("use_fds", [True, False])
+@pytest.mark.parametrize("use_fds", [True, False])
 def test_onboarding_data_assistant__trino_with_string_fields(
     empty_data_context, use_fds
 ):
@@ -1091,20 +1090,24 @@ def test_onboarding_data_assistant__trino_with_string_fields(
         }
 
         context.add_datasource(**datasource_config)
+        batch_request = RuntimeBatchRequest(
+            datasource_name="my_trino_datasource",
+            data_connector_name="default_runtime_data_connector_name",
+            data_asset_name="default_name",  # this can be anything that identifies this data
+            runtime_parameters={
+                "query": "SELECT pickup_datetime, dropoff_datetime, store_and_fwd_flag from taxi_data LIMIT 10"
+            },
+            batch_identifiers={"default_identifier_name": "default_identifier"},
+        )
     else:
-        context.sources.add_sql(
+        datasource = context.sources.add_sql(
             name="my_trino_datasource", connection_string=CONNECTION_STRING
         )
-
-    batch_request = RuntimeBatchRequest(
-        datasource_name="my_trino_datasource",
-        data_connector_name="default_runtime_data_connector_name",
-        data_asset_name="default_name",  # this can be anything that identifies this data
-        runtime_parameters={
-            "query": "SELECT pickup_datetime, dropoff_datetime, store_and_fwd_flag from taxi_data LIMIT 10"
-        },
-        batch_identifiers={"default_identifier_name": "default_identifier"},
-    )
+        asset = datasource.add_query_asset(
+            name="default_name",
+            query="SELECT pickup_datetime, dropoff_datetime, store_and_fwd_flag from taxi_data LIMIT 10",
+        )
+        batch_request = asset.build_batch_request()
 
     context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
     validator = context.get_validator(
@@ -1118,22 +1121,22 @@ def test_onboarding_data_assistant__trino_with_string_fields(
     )
     validator.execution_engine.resolve_metrics([desired_metric])
 
-    batch_ids = get_batch_ids(data_context=context, batch_request=batch_request)
-
-    # Ensure that the data types are read correctly
-    semantic_type_filter = SimpleSemanticTypeFilter(
-        validator=validator,
-        batch_ids=batch_ids,
-        column_names=["pickup_datetime", "dropoff_datetime", "store_and_fwd_flag"],
-    )
-    assert (
-        semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map
-        == {
-            "pickup_datetime": SemanticDomainTypes.DATETIME,
-            "dropoff_datetime": SemanticDomainTypes.TEXT,
-            "store_and_fwd_flag": SemanticDomainTypes.TEXT,
-        }
-    )
+    if not use_fds:
+        batch_ids = get_batch_ids(data_context=context, batch_request=batch_request)
+        # Ensure that the data types are read correctly
+        semantic_type_filter = SimpleSemanticTypeFilter(
+            validator=validator,
+            batch_ids=batch_ids,
+            column_names=["pickup_datetime", "dropoff_datetime", "store_and_fwd_flag"],
+        )
+        assert (
+            semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map
+            == {
+                "pickup_datetime": SemanticDomainTypes.DATETIME,
+                "dropoff_datetime": SemanticDomainTypes.TEXT,
+                "store_and_fwd_flag": SemanticDomainTypes.TEXT,
+            }
+        )
 
     # Attempt to run the onboarding assistant
     result = context.assistants.onboarding.run(
@@ -1148,6 +1151,7 @@ def test_onboarding_data_assistant__trino_with_string_fields(
 
     assert result
     assert len(result.expectation_configurations) > 0
+    assert len(result.rule_exception_tracebacks) == 0
     # Should have some expectations for all three columns
     assert any(
         x["kwargs"].get("column") == "pickup_datetime"
