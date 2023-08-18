@@ -4220,7 +4220,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         assert (conf_file_section and conf_file_option) or (
             not conf_file_section and not conf_file_option
         ), "Must pass both 'conf_file_section' and 'conf_file_option' or neither."
-        if environment_variable and os.environ.get(
+        if environment_variable and os.environ.get(  # noqa: TID251
             environment_variable, ""
         ):
             return os.environ.get(environment_variable)  # noqa: TID251

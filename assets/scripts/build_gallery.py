@@ -68,7 +68,7 @@ def execute_shell_command(command: str) -> int:
     cwd: str = os.getcwd()  # noqa: PTH109
 
     path_env_var: str = os.pathsep.join(
-        [os.environ.get("PATH", os.defpath), cwd]
+        [os.environ.get("PATH", os.defpath), cwd]  # noqa: TID251
     )
     env: dict = dict(os.environ, PATH=path_env_var)  # noqa: TID251
 

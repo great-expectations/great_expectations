@@ -1015,7 +1015,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         )
         self.prefix = prefix or ""
         self.container = container
-        self.account_url = account_url or os.environ.get(
+        self.account_url = account_url or os.environ.get(  # noqa: TID251
             "AZURE_STORAGE_ACCOUNT_URL"
         )
 
