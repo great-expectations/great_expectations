@@ -106,7 +106,6 @@ from great_expectations.data_context.util import (
     parse_substitution_variable,
 )
 from great_expectations.dataset.dataset import Dataset
-from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
 )
@@ -170,6 +169,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
+    from great_expectations.datasource import LegacyDatasource
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequest as FluentBatchRequest,
     )
@@ -1178,135 +1178,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             config = self._project_config
         return DataContextConfig(**self.config_provider.substitute_config(config))
 
-    @public_api
-    def get_batch(  # noqa: PLR0912
-        self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
-    ) -> Union[Batch, DataAsset]:
-        """Get exactly one batch, based on a variety of flexible input types.
-
-        The method `get_batch` is the main user-facing method for getting batches; it supports both the new (V3) and the
-        Legacy (V2) Datasource schemas.  The version-specific implementations are contained in "_get_batch_v2()" and
-        "_get_batch_v3()", respectively, both of which are in the present module.
-
-        For the V3 API parameters, please refer to the signature and parameter description of method "_get_batch_v3()".
-        For the Legacy usage, please refer to the signature and parameter description of the method "_get_batch_v2()".
-
-        Processing Steps:
-            1. Determine the version (possible values are "v3" or "v2").
-            2. Convert the positional arguments to the appropriate named arguments, based on the version.
-            3. Package the remaining arguments as variable keyword arguments (applies only to V3).
-            4. Call the version-specific method ("_get_batch_v3()" or "_get_batch_v2()") with the appropriate arguments.
-
-        Args:
-            arg1: the first positional argument (can take on various types)
-            arg2: the second positional argument (can take on various types)
-            arg3: the third positional argument (can take on various types)
-
-            **kwargs: variable arguments
-
-        Returns:
-            Batch (V3) or DataAsset (V2) -- the requested batch
-        """
-
-        api_version: Optional[str] = self._get_data_context_version(arg1=arg1, **kwargs)
-        if api_version == "v3":
-            if "datasource_name" in kwargs:
-                datasource_name = kwargs.pop("datasource_name", None)
-            else:
-                datasource_name = arg1
-            if "data_connector_name" in kwargs:
-                data_connector_name = kwargs.pop("data_connector_name", None)
-            else:
-                data_connector_name = arg2
-            if "data_asset_name" in kwargs:
-                data_asset_name = kwargs.pop("data_asset_name", None)
-            else:
-                data_asset_name = arg3
-            return self._get_batch_v3(
-                datasource_name=datasource_name,
-                data_connector_name=data_connector_name,
-                data_asset_name=data_asset_name,
-                **kwargs,
-            )
-        if "batch_kwargs" in kwargs:
-            batch_kwargs = kwargs.get("batch_kwargs", None)
-        else:
-            batch_kwargs = arg1
-        if "expectation_suite_name" in kwargs:
-            expectation_suite_name = kwargs.get("expectation_suite_name", None)
-        else:
-            expectation_suite_name = arg2
-        if "data_asset_type" in kwargs:
-            data_asset_type = kwargs.get("data_asset_type", None)
-        else:
-            data_asset_type = arg3
-        batch_parameters = kwargs.get("batch_parameters")
-        return self._get_batch_v2(
-            batch_kwargs=batch_kwargs,
-            expectation_suite_name=expectation_suite_name,
-            data_asset_type=data_asset_type,
-            batch_parameters=batch_parameters,
-        )
-
-    def _get_data_context_version(  # noqa: PLR0912
-        self, arg1: Any, **kwargs
-    ) -> Optional[str]:
-        """
-        arg1: the first positional argument (can take on various types)
-
-        **kwargs: variable arguments
-
-        First check:
-        Returns "v3" if the "0.13" entities are specified in the **kwargs.
-
-        Otherwise:
-        Returns None if no datasources have been configured (or if there is an exception while getting the datasource).
-        Returns "v3" if the datasource is a subclass of the BaseDatasource class.
-        Returns "v2" if the datasource is an instance of the LegacyDatasource class.
-        """
-
-        if {
-            "datasource_name",
-            "data_connector_name",
-            "data_asset_name",
-            "batch_request",
-            "batch_data",
-        }.intersection(set(kwargs.keys())):
-            return "v3"
-
-        if not self.datasources:
-            return None
-
-        api_version: Optional[str] = None
-        datasource_name: Any
-        if "datasource_name" in kwargs:
-            datasource_name = kwargs.pop("datasource_name", None)
-        else:
-            datasource_name = arg1
-        try:
-            datasource: LegacyDatasource | BaseDatasource | FluentDatasource = (
-                self.get_datasource(datasource_name=datasource_name)
-            )
-            if issubclass(type(datasource), BaseDatasource):
-                api_version = "v3"
-        except (ValueError, TypeError):
-            if "batch_kwargs" in kwargs:
-                batch_kwargs = kwargs.get("batch_kwargs", None)
-            else:
-                batch_kwargs = arg1
-            if isinstance(batch_kwargs, dict):
-                datasource_name = batch_kwargs.get("datasource")
-                if datasource_name is not None:
-                    try:
-                        datasource: Union[  # type: ignore[no-redef]
-                            LegacyDatasource, BaseDatasource
-                        ] = self.get_datasource(datasource_name=datasource_name)
-                        if isinstance(datasource, LegacyDatasource):
-                            api_version = "v2"
-                    except (ValueError, TypeError):
-                        pass
-        return api_version
-
+    # 2023-08-17 - Chetan - This method is only kept around to support profile_data_asset (a V2 method) and V2-specific tests
+    #                       We should delete this as soon as possible as it has been deprecated in v13.
     def _get_batch_v2(
         self,
         batch_kwargs: Union[dict, BatchKwargs],
@@ -1372,102 +1245,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_engine=data_asset_type,
         )
         return validator.get_dataset()
-
-    def _get_batch_v3(  # noqa: PLR0913
-        self,
-        datasource_name: Optional[str] = None,
-        data_connector_name: Optional[str] = None,
-        data_asset_name: Optional[str] = None,
-        *,
-        batch_request: Optional[BatchRequestBase] = None,
-        batch_data: Optional[Any] = None,
-        data_connector_query: Optional[Union[IDDict, dict]] = None,
-        batch_identifiers: Optional[dict] = None,
-        limit: Optional[int] = None,
-        index: Optional[Union[int, list, tuple, slice, str]] = None,
-        custom_filter_function: Optional[Callable] = None,
-        batch_spec_passthrough: Optional[dict] = None,
-        sampling_method: Optional[str] = None,
-        sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
-        runtime_parameters: Optional[dict] = None,
-        query: Optional[str] = None,
-        path: Optional[str] = None,
-        batch_filter_parameters: Optional[dict] = None,
-        **kwargs,
-    ) -> Union[Batch, DataAsset]:
-        """Get exactly one batch, based on a variety of flexible input types.
-
-        Args:
-            datasource_name
-            data_connector_name
-            data_asset_name
-
-            batch_request
-            batch_data
-            data_connector_query
-            batch_identifiers
-            batch_filter_parameters
-
-            limit
-            index
-            custom_filter_function
-
-            batch_spec_passthrough
-
-            sampling_method
-            sampling_kwargs
-
-            splitter_method
-            splitter_kwargs
-
-            **kwargs
-
-        Returns:
-            (Batch) The requested batch
-
-        This method does not require typed or nested inputs.
-        Instead, it is intended to help the user pick the right parameters.
-
-        This method attempts to return exactly one batch.
-        If 0 or more than 1 batches would be returned, it raises an error.
-        """
-        batch_list: List[Batch] = self.get_batch_list(
-            datasource_name=datasource_name,
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-            batch_request=batch_request,
-            batch_data=batch_data,
-            data_connector_query=data_connector_query,
-            batch_identifiers=batch_identifiers,
-            limit=limit,
-            index=index,
-            custom_filter_function=custom_filter_function,
-            batch_spec_passthrough=batch_spec_passthrough,
-            sampling_method=sampling_method,
-            sampling_kwargs=sampling_kwargs,
-            splitter_method=splitter_method,
-            splitter_kwargs=splitter_kwargs,
-            runtime_parameters=runtime_parameters,
-            query=query,
-            path=path,
-            batch_filter_parameters=batch_filter_parameters,
-            **kwargs,
-        )
-        # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
-        # deprecated-v0.13.20
-        warnings.warn(
-            "get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16. Please use "
-            "get_batch_list instead.",
-            DeprecationWarning,
-        )
-        if len(batch_list) != 1:
-            raise ValueError(
-                f"Got {len(batch_list)} batches instead of a single batch. If you would like to use a BatchRequest to "
-                f"return multiple batches, please use get_batch_list directly instead of calling get_batch"
-            )
-        return batch_list[0]
 
     def list_stores(self) -> List[Store]:
         """List currently-configured Stores on this context"""
@@ -2983,9 +2760,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         ```python
         expectation_suite_name = "genres_movies.fkey"
         context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
-        batch = context.get_batch(
+        batch = context.get_batch_list(
             expectation_suite_name=expectation_suite_name
-        )
+        )[0]
         ```
 
         When run as part of get_validator():
@@ -3080,9 +2857,9 @@ class AbstractDataContext(ConfigPeer, ABC):
 
             expectation_suite_name = "genres_movies.fkey"
             context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
-            batch = context.get_batch(
+            batch = context.get_batch_list(
                 expectation_suite_name=expectation_suite_name
-            )
+            )[0]
 
 
         When run as part of get_validator()::
@@ -4060,7 +3837,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
         # TODO: Add batch_parameters
-        batch = self.get_batch(
+        batch = self._get_batch_v2(
             expectation_suite_name=expectation_suite_name,
             batch_kwargs=batch_kwargs,
         )
@@ -4128,30 +3905,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         profiling_results["success"] = True
         return profiling_results
-
-    @deprecated_method_or_class(
-        version="0.14.0", message="Part of the deprecated v2 API"
-    )
-    def add_batch_kwargs_generator(
-        self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
-    ):
-        """Add a batch kwargs generator to the named datasource, using the provided
-        configuration.
-
-        Args:
-            datasource_name: name of datasource to which to add the new batch kwargs generator
-            batch_kwargs_generator_name: name of the generator to add
-            class_name: class of the batch kwargs generator to add
-            **kwargs: batch kwargs generator configuration, provided as kwargs
-
-        Returns:
-            The batch_kwargs_generator
-        """
-        datasource_obj = self.get_datasource(datasource_name)
-        generator = datasource_obj.add_batch_kwargs_generator(
-            name=batch_kwargs_generator_name, class_name=class_name, **kwargs
-        )
-        return generator
 
     BlockConfigDataAssetNames: TypeAlias = Dict[str, List[str]]
     FluentDataAssetNames: TypeAlias = List[str]
@@ -4998,7 +4751,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
                 # this error will happen if our configuration contains datasources that GX can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
-                # caught at the context.get_batch() step. So we just pass here.
+                # caught at the context.get_batch_list() step. So we just pass here.
                 pass
 
     def _instantiate_datasource_from_config(

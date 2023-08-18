@@ -763,7 +763,7 @@ def test_golden_path_sql_datasource_configuration(
         print(json.dumps(report_object, indent=2))
         print(context.datasources)
 
-        context.get_batch(
+        context.get_batch_list(
             "my_datasource",
             "whole_table_with_limits",
             "test_df",
@@ -771,7 +771,7 @@ def test_golden_path_sql_datasource_configuration(
         # assert len(my_batch.data.fetchall()) == 10
 
         with pytest.raises(KeyError):
-            context.get_batch(
+            context.get_batch_list(
                 "my_datasource",
                 "whole_table_with_limits",
                 "DOES_NOT_EXIST",
@@ -911,7 +911,7 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
         ]
         assert mock_emit.call_args_list == expected_call_args_list
 
-        my_batch = context.get_batch(
+        my_batch_list = context.get_batch_list(
             datasource_name="my_directory_datasource",
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="A",
@@ -927,9 +927,8 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
                 },
             },
         )
+        my_batch = my_batch_list[0]
         assert my_batch.batch_definition["data_asset_name"] == "A"
-
-        # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
         assert mock_emit.call_count == 2
 
         df_data = my_batch.data.dataframe
@@ -947,15 +946,13 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
             .equals(df_data.drop("timestamp", axis=1))
         )
 
-        with pytest.raises(ValueError):
-            # noinspection PyUnusedLocal
-            my_batch = context.get_batch(
-                datasource_name="my_directory_datasource",
-                data_connector_name="my_filesystem_data_connector",
-                data_asset_name="DOES_NOT_EXIST",
-            )
-
-        # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+        # Empty batch list won't error but still will emit usage stats
+        batch_list = context.get_batch_list(
+            datasource_name="my_directory_datasource",
+            data_connector_name="my_filesystem_data_connector",
+            data_asset_name="DOES_NOT_EXIST",
+        )
+        assert len(batch_list) == 0
         assert mock_emit.call_count == 3
 
         my_validator = context.get_validator(
@@ -975,8 +972,6 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
                 },
             },
         )
-
-        # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
         assert mock_emit.call_count == 4
 
         my_evr = my_validator.expect_column_values_to_be_between(
@@ -1130,7 +1125,7 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
         ]
         assert mock_emit.call_args_list == expected_call_args_list
 
-        my_batch = context.get_batch(
+        my_batch_list = context.get_batch_list(
             datasource_name="my_directory_datasource",
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="A",
@@ -1146,9 +1141,8 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
                 },
             },
         )
+        my_batch = my_batch_list[0]
         assert my_batch.batch_definition["data_asset_name"] == "A"
-
-        # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
         assert mock_emit.call_count == 2
 
         my_batch.head()
@@ -1168,15 +1162,13 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
             .equals(df_data.drop("timestamp", axis=1))
         )
 
-        with pytest.raises(ValueError):
-            # noinspection PyUnusedLocal
-            my_batch = context.get_batch(
-                datasource_name="my_directory_datasource",
-                data_connector_name="my_filesystem_data_connector",
-                data_asset_name="DOES_NOT_EXIST",
-            )
-
-        # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+        # Empty batch list won't error but still will emit usage stats
+        batch_list = context.get_batch_list(
+            datasource_name="my_directory_datasource",
+            data_connector_name="my_filesystem_data_connector",
+            data_asset_name="DOES_NOT_EXIST",
+        )
+        assert len(batch_list) == 0
         assert mock_emit.call_count == 3
 
         my_validator = context.get_validator(
@@ -1198,8 +1190,6 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
             column="d", min_value=1, max_value=31
         )
         assert my_evr.success
-
-        # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
         assert mock_emit.call_count == 4
 
         # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["x", "y", "z"])
