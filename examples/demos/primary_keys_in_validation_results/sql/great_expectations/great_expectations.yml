@@ -95,9 +95,9 @@ data_docs_sites:
       class_name: DefaultSiteIndexBuilder
 
 anonymous_usage_statistics:
+  usage_statistics_url: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
   data_context_id: 6e1c5254-2541-4cea-8d0d-d66b4d335619
   enabled: false
-  usage_statistics_url: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
 fluent_datasources:
   save_ds_test:
     type: sqlite
@@ -115,5 +115,5 @@ fluent_datasources:
 notebooks:
 include_rendered_content:
   globally: false
-  expectation_suite: false
   expectation_validation_result: false
+  expectation_suite: false
