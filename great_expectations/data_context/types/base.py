@@ -1135,11 +1135,6 @@ class DatasourceConfig(AbstractConfig):
                     "class_name": "SqlAlchemyDataset",
                     "module_name": "great_expectations.dataset",
                 }
-            elif class_name == "SparkDFDatasource":
-                data_asset_type = {
-                    "class_name": "SparkDFDataset",
-                    "module_name": "great_expectations.dataset",
-                }
         if data_asset_type is not None:
             self.data_asset_type = data_asset_type
         if batch_kwargs_generators is not None:

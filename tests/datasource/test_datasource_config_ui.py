@@ -68,15 +68,3 @@ def test_SqlAlchemyDatasource_config(default_sql_alchemy_datasource_config):
 
     datasource_config_schema = DatasourceConfigSchema()
     assert datasource_config_schema.dump(datasource_config) == desired_config
-
-
-def test_SparkDatasource_config(default_spark_datasource_config):  # noqa: F811
-    datasource_config = DatasourceConfig(
-        class_name="SparkDFDatasource",
-        batch_kwargs_generators={},
-    )
-
-    desired_config = default_spark_datasource_config["my_spark_datasource"]
-
-    datasource_config_schema = DatasourceConfigSchema()
-    assert datasource_config_schema.dump(datasource_config) == desired_config
