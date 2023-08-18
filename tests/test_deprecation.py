@@ -7,7 +7,7 @@ from packaging import version
 
 from great_expectations.data_context.util import file_relative_path
 
-UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD = 8
+UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD = 7
 
 # module level markers
 pytestmark = pytest.mark.unit
