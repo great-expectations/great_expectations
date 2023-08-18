@@ -41,7 +41,7 @@ warn_redundant_casts = true
 show_error_codes = true
 enable_error_code = [
     'ignore-without-code',
-    # 'explicit-override' # TODO: enable this & fix all 688 errors
+    'explicit-override'
 ]
 # The following list of codes are globally ignored, do not add to this list
 disable_error_code = [
