@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from datetime import date, datetime
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -17,6 +18,8 @@ from typing import (
 )
 
 import pydantic
+from pydantic import Field
+from typing_extensions import Annotated
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import (
@@ -584,6 +587,9 @@ class _SQLAsset(DataAsset):
         candidate: Dict, requested_options: BatchRequestOptions
     ) -> bool:
         for k, v in requested_options.items():
+            if isinstance(candidate[k], (datetime, date)):
+                candidate[k] = str(candidate[k])
+
             if v is not None and candidate[k] != v:
                 return False
         return True
@@ -925,6 +931,12 @@ class TableAsset(_SQLAsset):
         return False
 
 
+# This improves our error messages by providing a more specific type for pydantic to validate against
+# It also ensure the generated jsonschema has a oneOf instead of anyOf field for assets
+# https://docs.pydantic.dev/1.10/usage/types/#discriminated-unions-aka-tagged-unions
+AssetTypes = Annotated[Union[TableAsset, QueryAsset], Field(discriminator="type")]
+
+
 @public_api
 class SQLDatasource(Datasource):
     """Adds a generic SQL datasource to the data context.
@@ -955,7 +967,7 @@ class SQLDatasource(Datasource):
     )
     # We need to explicitly add each asset type to the Union due to how
     # deserialization is implemented in our pydantic base model.
-    assets: List[Union[TableAsset, QueryAsset]] = []
+    assets: List[AssetTypes] = []
 
     # private attrs
     _cached_connection_string: Union[str, ConfigStr] = pydantic.PrivateAttr("")

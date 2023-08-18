@@ -8,7 +8,7 @@ import json
 import logging
 import traceback
 import warnings
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from collections.abc import Hashable
 from dataclasses import dataclass, field
 from typing import (
@@ -17,6 +17,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    NamedTuple,
     Optional,
     Sequence,
     Set,
@@ -152,16 +153,12 @@ class ValidationDependencies:
         return list(self.metric_configurations.values())
 
 
-ValidationStatistics = namedtuple(
-    "ValidationStatistics",
-    [
-        "evaluated_expectations",
-        "successful_expectations",
-        "unsuccessful_expectations",
-        "success_percent",
-        "success",
-    ],
-)
+class ValidationStatistics(NamedTuple):
+    evaluated_expectations: int
+    successful_expectations: int
+    unsuccessful_expectations: int
+    success_percent: float | None
+    success: bool
 
 
 @public_api

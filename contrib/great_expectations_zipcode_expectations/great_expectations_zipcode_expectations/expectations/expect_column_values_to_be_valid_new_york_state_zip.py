@@ -18,7 +18,7 @@ def is_valid_new_york_state_zip(zip: str):
     ]
     if len(zip) > 10:
         return False
-    elif type(zip) != str:
+    elif type(zip) != str:  # noqa: E721
         return False
     elif zip in list_of_new_york_state_zips:
         return True

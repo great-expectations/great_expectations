@@ -6,6 +6,7 @@ import numpy as np
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
@@ -136,6 +137,14 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         bins: MetricValue | None = column_partition_parameter_node[
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
+
+        if (
+            domain.domain_type == MetricDomainTypes.COLUMN
+            and "." in domain.domain_kwargs["column"]
+        ):
+            raise gx_exceptions.ProfilerExecutionError(
+                "Column names cannot contain '.' when computing the histogram metric."
+            )
 
         if bins is None:
             raise gx_exceptions.ProfilerExecutionError(

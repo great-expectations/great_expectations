@@ -26,7 +26,14 @@
             "default": [],
             "type": "array",
             "items": {
-                "anyOf": [
+                "discriminator": {
+                    "propertyName": "type",
+                    "mapping": {
+                        "table": "#/definitions/TableAsset",
+                        "query": "#/definitions/QueryAsset"
+                    }
+                },
+                "oneOf": [
                     {
                         "$ref": "#/definitions/TableAsset"
                     },
