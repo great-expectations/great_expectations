@@ -4,3 +4,13 @@
 --requirement reqs/requirements-dev-contrib.txt
 --requirement reqs/requirements-dev-cloud.txt
 --requirement reqs/requirements-dev-sqlalchemy.txt
+# typing stubs
+types-decorator
+types-protobuf
+types-python-dateutil
+types-pytz
+types-requests
+types-six
+types-typed-ast
+types-tzlocal
+types-urllib3
