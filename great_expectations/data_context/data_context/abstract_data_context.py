@@ -3881,30 +3881,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         profiling_results["success"] = True
         return profiling_results
 
-    @deprecated_method_or_class(
-        version="0.14.0", message="Part of the deprecated v2 API"
-    )
-    def add_batch_kwargs_generator(
-        self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
-    ):
-        """Add a batch kwargs generator to the named datasource, using the provided
-        configuration.
-
-        Args:
-            datasource_name: name of datasource to which to add the new batch kwargs generator
-            batch_kwargs_generator_name: name of the generator to add
-            class_name: class of the batch kwargs generator to add
-            **kwargs: batch kwargs generator configuration, provided as kwargs
-
-        Returns:
-            The batch_kwargs_generator
-        """
-        datasource_obj = self.get_datasource(datasource_name)
-        generator = datasource_obj.add_batch_kwargs_generator(
-            name=batch_kwargs_generator_name, class_name=class_name, **kwargs
-        )
-        return generator
-
     BlockConfigDataAssetNames: TypeAlias = Dict[str, List[str]]
     FluentDataAssetNames: TypeAlias = List[str]
 
