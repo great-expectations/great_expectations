@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type
 
 from typing_extensions import TypedDict
 
@@ -55,7 +55,7 @@ class Store:
     All keys must have a to_tuple() method.
     """
 
-    _key_class = DataContextKey
+    _key_class: ClassVar[Type] = DataContextKey
 
     def __init__(
         self,
