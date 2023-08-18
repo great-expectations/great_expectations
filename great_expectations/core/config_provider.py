@@ -124,7 +124,7 @@ class _EnvironmentConfigurationProvider(_AbstractConfigurationProvider):
         super().__init__()
 
     def get_values(self) -> Dict[str, str]:
-        return dict(os.environ)
+        return dict(os.environ)  # noqa: TID251 # os.enrivon allowed in config files
 
 
 class _ConfigurationVariablesConfigurationProvider(_AbstractConfigurationProvider):
@@ -142,7 +142,7 @@ class _ConfigurationVariablesConfigurationProvider(_AbstractConfigurationProvide
         super().__init__()
 
     def get_values(self) -> Dict[str, str]:
-        env_vars = dict(os.environ)
+        env_vars = dict(os.environ)  # noqa: TID251 # os.enrivon allowed in config files
         try:
             # If the user specifies the config variable path with an environment variable, we want to substitute it
             defined_path: str = self._substitutor.substitute_config_variable(  # type: ignore[assignment]

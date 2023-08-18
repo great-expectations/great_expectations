@@ -1010,12 +1010,14 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             store_name=store_name,
         )
-        self.connection_string = connection_string or os.environ.get(
+        self.connection_string = connection_string or os.environ.get(  # noqa: TID251
             "AZURE_STORAGE_CONNECTION_STRING"
         )
         self.prefix = prefix or ""
         self.container = container
-        self.account_url = account_url or os.environ.get("AZURE_STORAGE_ACCOUNT_URL")
+        self.account_url = account_url or os.environ.get(
+            "AZURE_STORAGE_ACCOUNT_URL"
+        )
 
     @property
     @functools.lru_cache  # noqa: B019 # lru_cache on method

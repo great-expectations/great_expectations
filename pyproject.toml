@@ -319,6 +319,9 @@ convention = "google"
 
 [tool.ruff.flake8-tidy-imports]
 [tool.ruff.flake8-tidy-imports.banned-api]
+"os.environ".msg = """Please do not use os.environ outside of configuration files.
+If you are working in a configuration file you may use the inline comment \
+"# noqa: TID251 # os.enrivon allowed in config files" to ignore this error."""
 "sqlalchemy".msg = "Please do not import sqlalchemy directly, import from great_expectations.compatibility.sqlalchemy instead."
 "pyspark".msg = "Please do not import pyspark directly, import from great_expectations.compatibility.pyspark instead."
 "boto3".msg = "Please do not import boto3 directly, import from great_expectations.compatibility.aws instead."
