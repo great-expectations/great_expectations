@@ -1,1 +1,1 @@
---constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.2.0/constraints-3.7.txt
+--constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.2.0/constraints-3.8.txt
