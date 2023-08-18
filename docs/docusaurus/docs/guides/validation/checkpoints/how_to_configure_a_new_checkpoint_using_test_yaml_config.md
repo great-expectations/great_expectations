@@ -63,7 +63,7 @@ Run the following command to save your Checkpoint and add it to the Data Context
 
 ## Checkpoint configuration examples
 
- If you require more fine-grained configuration options, use the ``Checkpoint`` base class.
+ If you require more fine-grained configuration options, use the ``Checkpoint`` class.
 
  In this example, the Checkpoint configuration uses the nesting of `batch_request` sections inside the `validations` block to define the defaults at the top level.
 
