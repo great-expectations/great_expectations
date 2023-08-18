@@ -848,7 +848,8 @@ def empty_context(tmp_path_factory) -> FileDataContext:
     assert os.path.isfile(  # noqa: PTH113
         os.path.join(ge_dir, FileDataContext.GX_YML)  # noqa: PTH118
     )
-    context = DataContext(ge_dir)
+    with pytest.deprecated_call():
+        context = DataContext(ge_dir)
     assert isinstance(context, FileDataContext)
     return context
 
@@ -2114,7 +2115,8 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
     # Check that the datasource was written to disk as expected
     root_directory = context.root_directory
     del context
-    context = DataContext(root_directory)
+    with pytest.deprecated_call():
+        context = DataContext(root_directory)
 
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
@@ -2274,7 +2276,8 @@ def test_add_datasource_from_yaml_sql_datasource(  # noqa: PLR0915
     # Check that the datasource was written to disk as expected
     root_directory = context.root_directory
     del context
-    context = DataContext(root_directory)
+    with pytest.deprecated_call():
+        context = DataContext(root_directory)
 
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
@@ -2657,7 +2660,8 @@ def test_add_datasource_from_yaml_with_substitution_variables(
     # Check that the datasource was written to disk as expected
     root_directory = context.root_directory
     del context
-    context = DataContext(root_directory)
+    with pytest.deprecated_call():
+        context = DataContext(root_directory)
 
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources

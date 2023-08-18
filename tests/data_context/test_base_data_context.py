@@ -57,9 +57,11 @@ def basic_in_memory_data_context_config_just_stores():
 def basic_in_memory_data_context_just_stores(
     basic_in_memory_data_context_config_just_stores,
 ) -> AbstractDataContext:
-    return BaseDataContext(
-        project_config=basic_in_memory_data_context_config_just_stores
-    )
+    with pytest.deprecated_call():
+        context = BaseDataContext(
+            project_config=basic_in_memory_data_context_config_just_stores
+        )
+    return context
 
 
 @pytest.mark.unit

@@ -1,34 +1,32 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Mapping, Optional, Tuple, Union
+import warnings
+from typing import TYPE_CHECKING, Mapping
 
+from great_expectations.core._docs_decorators import deprecated_method_or_class
+from great_expectations.data_context.data_context.abstract_data_context import (
+    AbstractDataContext,
+)
 from great_expectations.util import get_context
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
+    from great_expectations.data_context.types.base import (
+        DataContextConfig,
+        GXCloudConfig,
+    )
 
-from great_expectations.core._docs_decorators import deprecated_argument
-from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,
+
+@deprecated_method_or_class(
+    version="0.17.10", message="Deprecated in favor of get_context"
 )
-from great_expectations.data_context.types.base import (
-    DataContextConfig,  # noqa: TCH001
-    GXCloudConfig,  # noqa: TCH001
-)
-
-
-@deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")
-@deprecated_argument(argument_name="ge_cloud_config", version="0.15.37")
-def BaseDataContext(  # noqa: PLR0913
-    project_config: Union[DataContextConfig, Mapping],
-    context_root_dir: Optional[PathStr] = None,
-    runtime_environment: Optional[dict] = None,
+def BaseDataContext(
+    project_config: DataContextConfig | Mapping,
+    context_root_dir: PathStr | None = None,
+    runtime_environment: dict | None = None,
     cloud_mode: bool = False,
-    cloud_config: Optional[GXCloudConfig] = None,
-    # Deprecated as of 0.15.37
-    ge_cloud_mode: bool = False,
-    ge_cloud_config: Optional[GXCloudConfig] = None,
+    cloud_config: GXCloudConfig | None = None,
 ) -> AbstractDataContext:
     """A lightweight wrapper around `get_context()`.
 
@@ -51,9 +49,6 @@ def BaseDataContext(  # noqa: PLR0913
             from environment variables.
         cloud_config: GX Cloud credentials (base URL, access token, and org id)
         cloud_mode: Whether to run GX in Cloud mode (default is None).
-            If None, cloud mode is assumed if Cloud credentials are set up. Set to False to override.
-        ge_cloud_config: GX Cloud credentials (base URL, access token, and org id)
-        ge_cloud_mode: Whether to run GX in Cloud mode (default is None).
             If None, cloud mode is assumed if Cloud credentials are set up. Set to False to override.
 
     Returns:
@@ -159,12 +154,11 @@ def BaseDataContext(  # noqa: PLR0913
 
     --ge-feature-maturity-info--
     """
-    # Chetan - 20221208 - not formally deprecating these values until a future date
-    cloud_mode, cloud_config = _resolve_cloud_args(
-        cloud_mode=cloud_mode,
-        cloud_config=cloud_config,
-        ge_cloud_mode=ge_cloud_mode,
-        ge_cloud_config=ge_cloud_config,
+    # deprecated-v0.17.10
+    warnings.warn(
+        "DataContext and BaseDataContext are deprecated as of v0.17.10 and will be removed in v0.20. "
+        "Please use gx.get_context instead.",
+        DeprecationWarning,
     )
 
     project_data_context_config: DataContextConfig = (
@@ -176,9 +170,9 @@ def BaseDataContext(  # noqa: PLR0913
     # initialize runtime_environment as empty dict if None
     runtime_environment = runtime_environment or {}
 
-    cloud_base_url: Optional[str] = None
-    cloud_access_token: Optional[str] = None
-    cloud_organization_id: Optional[str] = None
+    cloud_base_url: str | None = None
+    cloud_access_token: str | None = None
+    cloud_organization_id: str | None = None
     if cloud_config:
         cloud_base_url = cloud_config.base_url
         cloud_access_token = cloud_config.access_token
@@ -193,15 +187,3 @@ def BaseDataContext(  # noqa: PLR0913
         cloud_organization_id=cloud_organization_id,
         cloud_mode=cloud_mode,
     )
-
-
-def _resolve_cloud_args(
-    cloud_mode: bool = False,
-    cloud_config: Optional[GXCloudConfig] = None,
-    # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_mode: bool = False,
-    ge_cloud_config: Optional[GXCloudConfig] = None,
-) -> Tuple[bool, Optional[GXCloudConfig]]:
-    cloud_mode = True if cloud_mode or ge_cloud_mode else False
-    cloud_config = cloud_config if cloud_config is not None else ge_cloud_config
-    return cloud_mode, cloud_config
