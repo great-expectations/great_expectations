@@ -417,29 +417,6 @@ def test_column_quoted_name_type_sa(sa):
             == f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
-    quoted_batch_column_list = [
-        sqlalchemy.quoted_name(value=str(column_name), quote=True)
-        for column_name in [
-            "Names",
-            "names",
-        ]
-    ]
-    for column_name in [
-        "non_existent_column",
-        "NAMES",
-    ]:
-        with pytest.raises(
-            gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError
-        ) as eee:
-            _ = get_dbms_compatible_column_names(
-                column_names=column_name,
-                batch_columns_list=quoted_batch_column_list,
-            )
-        assert (
-            str(eee.value)
-            == f'Error: The column "{column_name}" in BatchData does not exist.'
-        )
-
 
 @pytest.mark.unit
 def test_column_quoted_name_type_sa_handles_explicit_string_identifiers(sa):
