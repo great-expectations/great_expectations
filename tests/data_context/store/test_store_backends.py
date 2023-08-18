@@ -122,7 +122,7 @@ def validation_operators_data_context(
     )
     data_context.add_expectation_suite("f1.foo")
 
-    df = data_context.get_batch(
+    df = data_context._get_batch_v2(
         batch_kwargs=data_context.build_batch_kwargs(
             "my_datasource", "subdir_reader", "f1"
         ),
