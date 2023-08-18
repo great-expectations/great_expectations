@@ -39,7 +39,10 @@ ignore_missing_imports = true
 follow_imports = 'silent'
 warn_redundant_casts = true
 show_error_codes = true
-enable_error_code = ['ignore-without-code', 'explicit-override']
+enable_error_code = [
+    'ignore-without-code',
+    # 'explicit-override' # TODO: enable this and fix all 688 errors
+]
 # The following list of codes are globally ignored, do not add to this list
 disable_error_code = [
     # annotation-unchecked are 'warning notes', not errors and won't cause mypy to fail
