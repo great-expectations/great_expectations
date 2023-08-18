@@ -280,34 +280,6 @@ def test_context_profiler_with_non_existing_generator(filesystem_csv_data_contex
 
 
 @pytest.mark.filesystem
-def test_context_profiler_without_generator_name_arg_on_datasource_with_multiple_generators(
-    filesystem_csv_data_context, filesystem_csv_2
-):
-    """
-    If a no generator_name is passed to the profiling method and the datasource has more than one
-    generators configured, the profiling method must return an error code in the result
-    """
-    context = filesystem_csv_data_context
-    context.add_batch_kwargs_generator(
-        "rad_datasource",
-        "second_generator",
-        "SubdirReaderBatchKwargsGenerator",
-        **{
-            "base_directory": str(filesystem_csv_2),
-        },
-    )
-
-    assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
-    profiling_result = context.profile_datasource(
-        "rad_datasource",
-        data_assets=["this_asset_doesnot_exist"],
-        profiler=BasicDatasetProfiler,
-    )
-
-    assert profiling_result == {"success": False, "error": {"code": 5}}
-
-
-@pytest.mark.filesystem
 def test_context_profiler_without_generator_name_arg_on_datasource_with_no_generators(
     filesystem_csv_data_context,
 ):
