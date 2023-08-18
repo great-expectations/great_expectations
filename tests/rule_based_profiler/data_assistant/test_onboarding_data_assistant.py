@@ -1052,8 +1052,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
 
 @pytest.mark.trino
-@pytest.mark.parameterize("use_fds",[True, False])
-def test_onboarding_data_assistant__trino_with_string_fields(empty_data_context, use_fds):
+@pytest.mark.parameterize("use_fds", [True, False])
+def test_onboarding_data_assistant__trino_with_string_fields(
+    empty_data_context, use_fds
+):
     CONNECTION_STRING = "trino://test@localhost:8088/memory/schema"
 
     # This utility is not for general use. It is only to support testing.
@@ -1087,10 +1089,12 @@ def test_onboarding_data_assistant__trino_with_string_fields(empty_data_context,
                 },
             },
         }
-    
+
         context.add_datasource(**datasource_config)
     else:
-        context.sources.add_sql(name="my_trino_datasource", connection_string=CONNECTION_STRING)
+        context.sources.add_sql(
+            name="my_trino_datasource", connection_string=CONNECTION_STRING
+        )
 
     batch_request = RuntimeBatchRequest(
         datasource_name="my_trino_datasource",
