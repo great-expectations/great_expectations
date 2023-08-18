@@ -398,6 +398,44 @@ def test_onboarding_data_assistant_should_fail_forward(
         )
 
 
+@pytest.mark.spark
+def test_onboarding_data_assistant_numeric_column_containing_dot_spark(
+    spark_session,
+    ephemeral_context_with_defaults,
+):
+    """What does this test and why?
+
+    Spark identifiers are less restrictive than ANSI SQL identifiers. This test ensures that we can use identifiers
+    compliant with: https://spark.apache.org/docs/latest/sql-ref-identifier.html, specifically the dot case e.g. `a.b`.
+    """
+
+    columns = ["snake_case", "kebab-case", "dot.case"]
+    values = [(1, 1, 1), (2, 2, 2), (3, 3, 3), (4, 4, 4), (5, 5, 5)]
+
+    df = spark_session.createDataFrame(data=values, schema=columns)
+
+    context = ephemeral_context_with_defaults
+    datasource = context.sources.add_or_update_spark("my_datasource")
+    asset = datasource.add_dataframe_asset("my_asset")
+    batch_request = asset.build_batch_request(dataframe=df)
+
+    data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+        batch_request=batch_request, exclude_column_names=["snake_case", "kebab-case"]
+    )
+
+    # Histogram metric cannot be computed when using columns containing `.` with the current metric implementation.
+    # Other metrics should pass.
+    assert list(data_assistant_result.rule_exception_tracebacks.keys()) == [
+        "numeric_columns_rule"
+    ]
+    assert (
+        data_assistant_result.rule_exception_tracebacks["numeric_columns_rule"][
+            "exception_message"
+        ]
+        == "Column names cannot contain '.' when computing the histogram metric."
+    )
+
+
 @pytest.mark.big
 @pytest.mark.slow  # 39.26s
 def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
