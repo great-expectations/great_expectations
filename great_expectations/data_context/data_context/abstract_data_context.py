@@ -3773,6 +3773,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             id=id,
         )
 
+    @deprecated_method_or_class(
+        version="0.17.10", message="Part of the deprecated v2 API"
+    )
     def add_validation_operator(
         self, validation_operator_name: str, validation_operator_config: dict
     ) -> ValidationOperator:
@@ -3908,8 +3911,19 @@ class AbstractDataContext(ConfigPeer, ABC):
                 **kwargs,
             )
 
+    @deprecated_method_or_class(
+        version="0.17.10", message="Part of the deprecated v2 API"
+    )
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
+
+        # deprecated-v0.17.10
+        warnings.warn(
+            "list_validation_operator is deprecated as of v0.17.10 and will be removed in v0.20. "
+            "Validation operators and their related methods are from our legacy V2 API and will not be supported moving forward; "
+            "please pin your version of GX or reference our documentation to migrate your project to the current API.",
+            DeprecationWarning,
+        )
 
         validation_operators = []
         for (
@@ -3920,8 +3934,19 @@ class AbstractDataContext(ConfigPeer, ABC):
             validation_operators.append(value)
         return validation_operators
 
+    @deprecated_method_or_class(
+        version="0.17.10", message="Part of the deprecated v2 API"
+    )
     def list_validation_operator_names(self):
         """List the names of currently-configured Validation Operators on this context"""
+        # deprecated-v0.17.10
+        warnings.warn(
+            "list_validation_operator_names is deprecated as of v0.17.10 and will be removed in v0.20. "
+            "Validation operators and their related methods are from our legacy V2 API and will not be supported moving forward; "
+            "please pin your version of GX or reference our documentation to migrate your project to the current API.",
+            DeprecationWarning,
+        )
+
         if not self.validation_operators:
             return []
 
@@ -4225,6 +4250,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         }
         return fluent_and_config_data_asset_names
 
+    @deprecated_method_or_class(
+        version="0.17.10", message="Part of the deprecated v2 API"
+    )
     def build_batch_kwargs(
         self,
         datasource,
@@ -4245,6 +4273,14 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             BatchKwargs
 
         """
+        # deprecated-v0.17.10
+        warnings.warn(
+            "build_batch_kwargs is deprecated as of v0.17.10 and will be removed in v0.20. "
+            "Batch kwargs and their related methods are from our legacy V2 API and will not be supported moving forward; "
+            "please pin your version of GX or reference our documentation to migrate your project to the current API.",
+            DeprecationWarning,
+        )
+
         datasource_obj = self.get_datasource(datasource)
         batch_kwargs = datasource_obj.build_batch_kwargs(
             batch_kwargs_generator=batch_kwargs_generator,

@@ -1234,31 +1234,35 @@ def test_scaffold_directories(tmp_path_factory):
 
 @pytest.mark.filesystem
 def test_build_batch_kwargs(titanic_multibatch_data_context):
-    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource",
-        "mygenerator",
-        data_asset_name="titanic",
-        partition_id="Titanic_1912",
-    )
+    with pytest.deprecated_call():
+        batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
+            "mydatasource",
+            "mygenerator",
+            data_asset_name="titanic",
+            partition_id="Titanic_1912",
+        )
     assert os.path.relpath("./data/titanic/Titanic_1912.csv") in batch_kwargs["path"]
 
-    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource",
-        "mygenerator",
-        data_asset_name="titanic",
-        partition_id="Titanic_1911",
-    )
+    with pytest.deprecated_call():
+        batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
+            "mydatasource",
+            "mygenerator",
+            data_asset_name="titanic",
+            partition_id="Titanic_1911",
+        )
     assert os.path.relpath("./data/titanic/Titanic_1911.csv") in batch_kwargs["path"]
 
     paths = []
-    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", data_asset_name="titanic"
-    )
+    with pytest.deprecated_call():
+        batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
+            "mydatasource", "mygenerator", data_asset_name="titanic"
+        )
     paths.append(os.path.basename(batch_kwargs["path"]))  # noqa: PTH119
 
-    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", data_asset_name="titanic"
-    )
+    with pytest.deprecated_call():
+        batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
+            "mydatasource", "mygenerator", data_asset_name="titanic"
+        )
     paths.append(os.path.basename(batch_kwargs["path"]))  # noqa: PTH119
 
     assert {"Titanic_1912.csv", "Titanic_1911.csv"} == set(paths)
@@ -1383,14 +1387,16 @@ def test_list_validation_operators_data_context_with_none_returns_empty_list(
     titanic_data_context,
 ):
     titanic_data_context.validation_operators = {}
-    assert titanic_data_context.list_validation_operator_names() == []
+    with pytest.deprecated_call():
+        assert titanic_data_context.list_validation_operator_names() == []
 
 
 @pytest.mark.unit
 def test_list_validation_operators_data_context_with_one(titanic_data_context):
-    assert titanic_data_context.list_validation_operator_names() == [
-        "action_list_operator"
-    ]
+    with pytest.deprecated_call():
+        assert titanic_data_context.list_validation_operator_names() == [
+            "action_list_operator"
+        ]
 
 
 @pytest.mark.unit
