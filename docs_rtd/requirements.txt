@@ -88,7 +88,7 @@ toml==0.10.1
 toolz==0.10.0
 tornado==6.3.3
 traitlets==5.9.0
-typed-ast==1.4.1
+typed-ast==1.5.1
 tzlocal==2.1
 Unidecode==1.1.1
 urllib3==1.26.5
