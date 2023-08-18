@@ -5,6 +5,7 @@ import warnings
 from typing import TYPE_CHECKING, Mapping
 
 from pydantic import SecretStr
+from typing_extensions import override
 
 from great_expectations.core.config_substitutor import TEMPLATE_STR_REGEX
 
@@ -45,9 +46,11 @@ class ConfigStr(SecretStr):
     def _display(self) -> str:
         return str(self)
 
+    @override
     def __str__(self) -> str:
         return self.template_str
 
+    @override
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self._display()!r})"
 

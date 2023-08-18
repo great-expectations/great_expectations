@@ -2,6 +2,8 @@ import re
 from logging import Logger
 from typing import Literal, Optional, Union
 
+from typing_extensions import override
+
 from great_expectations.compatibility.pyspark import (
     types as pyspark_types,
 )
@@ -28,6 +30,7 @@ logger: Logger
 class SparkDBFSDatasource(SparkFilesystemDatasource):
     type: Literal["spark_dbfs"]  # type: ignore[assignment]
 
+    @override
     def add_csv_asset(  # noqa: PLR0913
         self,
         name: str,

@@ -12,6 +12,8 @@ from typing import (
     Union,
 )
 
+from typing_extensions import override
+
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.datasource.fluent import Sorter, _PandasFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -54,6 +56,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     type: Literal["pandas_filesystem"]
     base_directory: pathlib.Path
     data_context_root_directory: Optional[pathlib.Path]
+    @override
     def test_connection(self, test_assets: bool = ...) -> None: ...
     def add_csv_asset(  # noqa: PLR0913
         self,

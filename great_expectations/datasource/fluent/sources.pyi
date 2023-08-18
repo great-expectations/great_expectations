@@ -15,7 +15,7 @@ from typing import (
 )
 
 import pydantic
-from typing_extensions import TypeAlias
+from typing_extensions import TypeAlias, override
 
 from great_expectations.data_context import (
     AbstractDataContext as GXDataContext,
@@ -78,6 +78,7 @@ class _SourceFactories:
     @property
     def factories(self) -> List[str]: ...
     def __getattr__(self, attr_name: str): ...
+    @override
     def __dir__(self) -> List[str]: ...
     def add_pandas(
         self,

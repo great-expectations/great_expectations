@@ -24,7 +24,7 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from typing_extensions import TypeAlias
+from typing_extensions import TypeAlias, override
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
@@ -64,15 +64,20 @@ class _PandasDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]]
 
     def _get_reader_method(self) -> str: ...
+    @override
     def test_connection(self) -> None: ...
     def batch_request_options_template(self) -> BatchRequestOptions: ...
+    @override
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> list[Batch]: ...
+    @override
     def build_batch_request(  # type: ignore[override]
         self, options: Optional[BatchRequestOptions] = ...
     ) -> BatchRequest: ...
+    @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None: ...
+    @override
     def json(  # noqa: PLR0913
         self,
         *,
@@ -118,9 +123,11 @@ class DataFrameAsset(_PandasDataAsset):
         message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
         version="0.16.15",
     )
+    @override
     def build_batch_request(
         self, dataframe: Optional[pd.DataFrame] = None
     ) -> BatchRequest: ...
+    @override
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> list[Batch]: ...
@@ -131,8 +138,11 @@ class _PandasDatasource(Datasource):
     asset_types: ClassVar[Sequence[Type[DataAsset]]]
     assets: MutableSequence[_PandasDataAssetT]  # type: ignore[valid-type]
     @property
+    @override
     def execution_engine_type(self) -> Type[PandasExecutionEngine]: ...
+    @override
     def test_connection(self, test_assets: bool = ...) -> None: ...
+    @override
     def json(  # noqa: PLR0913
         self,
         *,
@@ -154,6 +164,7 @@ class PandasDatasource(_PandasDatasource):
     asset_types: ClassVar[Sequence[Type[DataAsset]]]
     type: Literal["pandas"]
     assets: List[_PandasDataAsset]
+    @override
     def test_connection(self, test_assets: bool = ...) -> None: ...
     @deprecated_argument(
         argument_name="dataframe",

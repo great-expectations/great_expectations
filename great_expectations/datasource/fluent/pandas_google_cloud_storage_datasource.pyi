@@ -13,6 +13,8 @@ from typing import (
     Union,
 )
 
+from typing_extensions import override
+
 from great_expectations.compatibility import google
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.core.util import GCSUrl as GCSUrl
@@ -69,6 +71,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
 
     _gcs_client: Union[google.Client, None]
 
+    @override
     def test_connection(self, test_assets: bool = ...) -> None: ...
     def add_csv_asset(  # noqa: PLR0913
         self,

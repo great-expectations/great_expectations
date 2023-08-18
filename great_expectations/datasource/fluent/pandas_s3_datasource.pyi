@@ -14,6 +14,7 @@ from typing import (
 )
 
 from botocore.client import BaseClient as BaseClient
+from typing_extensions import override
 
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.core.util import S3Url as S3Url
@@ -67,6 +68,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
     type: Literal["pandas_s3"]
     bucket: str
     boto3_options: Dict[str, ConfigStr | Any]
+    @override
     def test_connection(self, test_assets: bool = ...) -> None: ...
     def add_csv_asset(  # noqa: PLR0913
         self,

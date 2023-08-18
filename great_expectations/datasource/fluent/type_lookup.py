@@ -17,6 +17,8 @@ from typing import (
     overload,
 )
 
+from typing_extensions import override
+
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
@@ -68,13 +70,16 @@ class TypeLookup(
     def __getitem__(self, key: Type) -> str:
         ...
 
+    @override
     def __getitem__(self, key: ValidTypes) -> ValidTypes:
         return super().__getitem__(key)
 
+    @override
     def __delitem__(self, key: ValidTypes):
         value = self.data.pop(key)
         super().pop(value, None)
 
+    @override
     def __setitem__(self, key: ValidTypes, value: ValidTypes):
         if key in self and value in self and self[key] == value and self[value] == key:
             # This key, value pair has already been registered so we return
@@ -90,9 +95,11 @@ class TypeLookup(
         super().__setitem__(key, value)
         super().__setitem__(value, key)
 
+    @override
     def __repr__(self) -> str:
         return f"{type(self).__name__}({super().__repr__()})"
 
+    @override
     def __str__(self) -> str:
         return str(self.data)
 
@@ -109,6 +116,7 @@ class TypeLookup(
         if intersection:
             raise TypeLookupError(f"Items are already present - {intersection}")
 
+    @override
     def clear(self) -> None:
         """Clear all data. Deletes all keys and values."""
         return self.data.clear()
