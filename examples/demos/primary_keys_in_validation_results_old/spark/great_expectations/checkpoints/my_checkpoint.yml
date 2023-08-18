@@ -4,7 +4,7 @@ template_name:
 module_name: great_expectations.checkpoint
 class_name: Checkpoint
 run_name_template: '%Y-%M-foo-bar-template'
-expectation_suite_name:
+expectation_suite_name: visitors_exp
 batch_request: {}
 action_list:
   - name: store_validation_result
@@ -20,11 +20,9 @@ evaluation_parameters: {}
 runtime_configuration: {}
 validations:
   - batch_request:
-      datasource_name: visits_datasource
-      data_asset_name: visits
-      options: {}
-      batch_slice:
-    expectation_suite_name: visitors_exp
+      datasource_name: my_datasource
+      data_connector_name: my_spark_data_connector
+      data_asset_name: visits.csv
 profilers: []
 ge_cloud_id:
 expectation_suite_ge_cloud_id:

@@ -13,25 +13,7 @@ config_version: 3.0
 # Datasources tell Great Expectations where your data lives and how to get it.
 # You can use the CLI command `great_expectations datasource new` to help you
 # add a new datasource. Read more at https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview
-datasources:
-  my_datasource:
-    execution_engine:
-      class_name: PandasExecutionEngine
-      module_name: great_expectations.execution_engine
-    module_name: great_expectations.datasource
-    class_name: Datasource
-    data_connectors:
-      my_pandas_data_connector:
-        base_directory: ../../../../data
-        module_name: great_expectations.datasource.data_connector
-        class_name: InferredAssetFilesystemDataConnector
-        batch_spec_passthrough:
-          reader_options:
-            delimiter: \t
-        default_regex:
-          group_names:
-            - data_asset_name
-          pattern: (.*)
+datasources: {}
 
 # This config file supports variable substitution which enables: 1) keeping
 # secrets out of source control & 2) environment-based configuration changes
@@ -113,11 +95,22 @@ data_docs_sites:
       class_name: DefaultSiteIndexBuilder
 
 anonymous_usage_statistics:
-  data_context_id: c4acce19-e717-400b-84cc-8d1f0cc37363
+  usage_statistics_url: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
+  data_context_id: f98647c3-0120-42ff-ae47-e48b8a6500cf
   enabled: false
-  usage_statistics_url: https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
+fluent_datasources:
+  visits_datasource:
+    type: pandas_filesystem
+    assets:
+      visits:
+        type: csv
+        batching_regex: visits.csv
+        connect_options:
+          glob_directive: '*.csv'
+        delimiter: "\t"
+    base_directory: ../../../data
 include_rendered_content:
-  expectation_validation_result: false
   globally: false
   expectation_suite: false
+  expectation_validation_result: false
 notebooks:
