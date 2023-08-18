@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import logging
 from string import Template
+from typing import ClassVar, Type
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -23,7 +26,7 @@ class SqlAlchemyQueryStore(Store):
     """SqlAlchemyQueryStore stores queries by name, and makes it possible to retrieve the resulting value by query
     name."""
 
-    _key_class = StringKey  # type: ignore[assignment] # StringKey is a DataContextKey??
+    _key_class: ClassVar[Type] = StringKey
 
     def __init__(  # noqa: PLR0913
         self,
