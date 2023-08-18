@@ -383,7 +383,7 @@ def seed_cloud(
     org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
 
     fake_db_data = create_fake_db_seed_data(fds_config=fluent_only_config)
-    _CLOUD_API_FAKE_DB.update(fake_db_data)  # type: ignore[typeddict-item]
+    _CLOUD_API_FAKE_DB.update(fake_db_data)
 
     seeded_datasources = _CLOUD_API_FAKE_DB["data-context-configuration"]["datasources"]
     logger.info(f"Seeded Datasources ->\n{pf(seeded_datasources, depth=2)}")

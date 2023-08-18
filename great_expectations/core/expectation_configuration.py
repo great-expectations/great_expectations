@@ -1218,6 +1218,9 @@ class ExpectationConfiguration(SerializableDictDot):
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
+        default_kwarg_values: Mapping[
+            str, str | bool | float | RuleBasedProfilerConfig | object | None
+        ]
         if expectation_kwargs_dict is None:
             try:
                 impl = get_expectation_impl(self.expectation_type)
@@ -1250,6 +1253,9 @@ class ExpectationConfiguration(SerializableDictDot):
             self.expectation_type, None
         )
         runtime_keys: tuple[str, ...]
+        default_kwarg_values: Mapping[
+            str, str | bool | float | RuleBasedProfilerConfig | object | None
+        ]
         if expectation_kwargs_dict is None:
             try:
                 impl = get_expectation_impl(self.expectation_type)
