@@ -61,17 +61,10 @@ def test_save_expectation_suite_with_datetime_objects(
         assert isinstance(reloaded_expectation_suite, ExpectationSuite)
 
         # Run validation via the action_list_operator
-        run_id = {
+        {
             "run_name": f"{dataset_name}_{datetime.datetime.now()}",
             "run_time": datetime.datetime.now(),
         }
-        results = context.run_validation_operator(
-            "default",
-            assets_to_validate=[batch],
-            run_id=run_id,
-            evaluation_parameters=evaluation_parameters,
-        )
-        assert results.success
 
         # Check that we can build Data Docs
         index_page_locator_infos = context.build_data_docs()
@@ -79,20 +72,3 @@ def test_save_expectation_suite_with_datetime_objects(
             index_page_locator_infos["local_site"]
             == f"file://{ge_path}/uncommitted/data_docs/local_site/index.html"
         )
-
-        # Check that we can reload the expectation suite and validate
-        reloaded_batch = context._get_batch_v2(
-            batch_kwargs=batch_kwargs, expectation_suite_name=reloaded_expectation_suite
-        )
-
-        run_id = {
-            "run_name": f"reloaded_{dataset_name}_{datetime.datetime.now()}",
-            "run_time": datetime.datetime.now(),
-        }
-        reloaded_results = context.run_validation_operator(
-            "default",
-            assets_to_validate=[reloaded_batch],
-            run_id=run_id,
-        )
-
-        assert reloaded_results.success

@@ -1330,21 +1330,6 @@ def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
 
 
 @pytest.mark.unit
-def test_list_validation_operators_data_context_with_none_returns_empty_list(
-    titanic_data_context,
-):
-    titanic_data_context.validation_operators = {}
-    assert titanic_data_context.list_validation_operator_names() == []
-
-
-@pytest.mark.unit
-def test_list_validation_operators_data_context_with_one(titanic_data_context):
-    assert titanic_data_context.list_validation_operator_names() == [
-        "action_list_operator"
-    ]
-
-
-@pytest.mark.unit
 def test_list_checkpoints_on_empty_context_returns_empty_list(empty_data_context):
     assert empty_data_context.list_checkpoints() == []
 
