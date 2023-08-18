@@ -178,9 +178,6 @@ if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
-    from great_expectations.validation_operators.validation_operators import (
-        ValidationOperator,
-    )
 
 logger = logging.getLogger(__name__)
 yaml = YAMLHandler()
@@ -3534,41 +3531,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             id=id,
         )
 
-    def add_validation_operator(
-        self, validation_operator_name: str, validation_operator_config: dict
-    ) -> ValidationOperator:
-        """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
-
-        Args:
-            validation_operator_name (str): a key for the new ValidationOperator in in self._validation_operators
-            validation_operator_config (dict): a config for the ValidationOperator to add
-
-        Returns:
-            validation_operator (ValidationOperator)
-        """
-
-        self.config.validation_operators[
-            validation_operator_name
-        ] = validation_operator_config
-        config = self.variables.validation_operators[validation_operator_name]  # type: ignore[index]
-        module_name = "great_expectations.validation_operators"
-        new_validation_operator = instantiate_class_from_config(
-            config=config,
-            runtime_environment={
-                "data_context": self,
-                "name": validation_operator_name,
-            },
-            config_defaults={"module_name": module_name},
-        )
-        if not new_validation_operator:
-            raise gx_exceptions.ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=config["class_name"],
-            )
-        self.validation_operators[validation_operator_name] = new_validation_operator
-        return new_validation_operator
-
     def profile_data_asset(  # noqa: PLR0912, PLR0913, PLR0915
         self,
         datasource_name,
@@ -3842,35 +3804,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             **fluent_data_asset_names,
         }
         return fluent_and_config_data_asset_names
-
-    def build_batch_kwargs(
-        self,
-        datasource,
-        batch_kwargs_generator,
-        data_asset_name=None,
-        partition_id=None,
-        **kwargs,
-    ):
-        """Builds batch kwargs using the provided datasource, batch kwargs generator, and batch_parameters.
-
-        Args:
-            datasource (str): the name of the datasource for which to build batch_kwargs
-            batch_kwargs_generator (str): the name of the batch kwargs generator to use to build batch_kwargs
-            data_asset_name (str): an optional name batch_parameter
-            **kwargs: additional batch_parameters
-
-        Returns:
-            BatchKwargs
-
-        """
-        datasource_obj = self.get_datasource(datasource)
-        batch_kwargs = datasource_obj.build_batch_kwargs(
-            batch_kwargs_generator=batch_kwargs_generator,
-            data_asset_name=data_asset_name,
-            partition_id=partition_id,
-            **kwargs,
-        )
-        return batch_kwargs
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS,

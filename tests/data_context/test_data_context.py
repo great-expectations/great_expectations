@@ -1232,38 +1232,6 @@ def test_scaffold_directories(tmp_path_factory):
 
 
 @pytest.mark.filesystem
-def test_build_batch_kwargs(titanic_multibatch_data_context):
-    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource",
-        "mygenerator",
-        data_asset_name="titanic",
-        partition_id="Titanic_1912",
-    )
-    assert os.path.relpath("./data/titanic/Titanic_1912.csv") in batch_kwargs["path"]
-
-    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource",
-        "mygenerator",
-        data_asset_name="titanic",
-        partition_id="Titanic_1911",
-    )
-    assert os.path.relpath("./data/titanic/Titanic_1911.csv") in batch_kwargs["path"]
-
-    paths = []
-    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", data_asset_name="titanic"
-    )
-    paths.append(os.path.basename(batch_kwargs["path"]))  # noqa: PTH119
-
-    batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", data_asset_name="titanic"
-    )
-    paths.append(os.path.basename(batch_kwargs["path"]))  # noqa: PTH119
-
-    assert {"Titanic_1912.csv", "Titanic_1911.csv"} == set(paths)
-
-
-@pytest.mark.filesystem
 def test_load_config_variables_property(
     basic_data_context_config, tmp_path_factory, monkeypatch
 ):
