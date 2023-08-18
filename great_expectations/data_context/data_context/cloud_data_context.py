@@ -631,6 +631,9 @@ class CloudDataContext(SerializableDataContext):
 
         Returns:
             An existing ExpectationSuite
+
+        Raises:
+            DataContextError: There is no expectation suite with the name provided
         """
         if ge_cloud_id is None and expectation_suite_name is None:
             raise ValueError(
@@ -648,7 +651,7 @@ class CloudDataContext(SerializableDataContext):
                 dict, self.expectations_store.get(key)
             )
         except StoreBackendError:
-            raise ValueError(
+            raise DataContextError(
                 f"Unable to load Expectation Suite {key.resource_name or key.id}"
             )
 
@@ -718,7 +721,7 @@ class CloudDataContext(SerializableDataContext):
     def add_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
-        config_version: int | float = 1.0,
+        config_version: int | float = 1.0,  # noqa: PYI041
         template_name: str | None = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: str = "Checkpoint",
