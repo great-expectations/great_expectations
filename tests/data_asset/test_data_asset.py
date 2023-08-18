@@ -85,7 +85,7 @@ def test_custom_expectation_default_arg_values_set(
         "datasource": "mycustomdatasource",
         "dataset": df,
     }
-    batch = context.get_batch(batch_kwargs, expectation_suite_name="default")
+    batch = context._get_batch_v2(batch_kwargs, expectation_suite_name="default")
     # this expectation has a declared default arg value `ignore_row_if="any_value_is_missing"`
     # which overrides an internal default of "all_values_are_missing"
     # can only pass if the declared default is set properly

@@ -43,7 +43,7 @@ def validation_operators_data_context(
     )
     data_context.add_expectation_suite("f1.foo")
 
-    df = data_context.get_batch(
+    df = data_context._get_batch_v2(
         batch_kwargs=data_context.build_batch_kwargs(
             "my_datasource", "subdir_reader", "f1"
         ),
@@ -163,7 +163,7 @@ def test_action_list_operator(validation_operators_data_context):
         "my_datasource", "subdir_reader", "f1"
     )
 
-    batch = data_context.get_batch(
+    batch = data_context._get_batch_v2(
         expectation_suite_name="f1.failure", batch_kwargs=validator_batch_kwargs
     )
 
@@ -267,7 +267,7 @@ def test_warning_and_failure_validation_operator(validation_operators_data_conte
         "my_datasource", "subdir_reader", "f1"
     )
 
-    batch = data_context.get_batch(
+    batch = data_context._get_batch_v2(
         expectation_suite_name="f1.warning", batch_kwargs=validator_batch_kwargs
     )
 
