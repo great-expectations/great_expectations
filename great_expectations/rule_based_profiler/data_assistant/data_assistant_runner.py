@@ -26,7 +26,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 from great_expectations.rule_based_profiler.rule import Rule  # noqa: TCH001
 from great_expectations.util import deep_filter_properties_iterable
-from great_expectations.validator.validator import Validator  # noqa: TCH001
+from great_expectations.validator.validator import Validator
 
 from great_expectations.rule_based_profiler.helpers.runtime_environment import (  # isort:skip
     RuntimeEnvironmentVariablesDirectives,
