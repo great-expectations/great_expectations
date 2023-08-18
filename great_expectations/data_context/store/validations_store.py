@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import random
 import uuid
-from typing import Dict
+from typing import ClassVar, Dict, Type
 
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -93,7 +95,7 @@ class ValidationsStore(Store):
     --ge-feature-maturity-info--
     """
 
-    _key_class: type = ValidationResultIdentifier
+    _key_class: ClassVar[Type] = ValidationResultIdentifier
 
     def __init__(
         self, store_backend=None, runtime_environment=None, store_name=None
