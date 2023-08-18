@@ -19,8 +19,8 @@ class DotDict(dict):
     def __getattr__(self, item):
         return self.get(item)
 
-    __setattr__ = dict.__setitem__  # type: ignore[assignment]
-    __delattr__ = dict.__delitem__  # type: ignore[assignment]
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
 
     def __dir__(self):
         return self.keys()
