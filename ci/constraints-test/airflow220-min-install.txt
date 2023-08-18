@@ -1,1 +1,3 @@
 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.2.0/constraints-3.8.txt
+# typing_extension 4.4 not added until airflow 2.5
+# https://raw.githubusercontent.com/apache/airflow/constraints-2.5.0/constraints-3.8.txt
