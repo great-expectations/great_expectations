@@ -24,11 +24,15 @@ class Result(NamedTuple):
         return f"({self.source}, {self.lineno}, {self.error_code})"
 
 
-def iterate_lines(stdout: str, limit: int = 15) -> Iterator[Result]:
+def iterate_lines(stdout: str, limit: int) -> Iterator[Result]:
     for i, line in enumerate(stdout.splitlines()):
         if i >= limit:
             break
-        source, lineno, _, full_message = line.split(":")
+        try:
+            source, lineno, _, full_message = line.split(":")
+        except ValueError:
+            print(f"skipping line:\n\t{line}")
+            continue
         message, error_code = full_message.split("  ")
         if error_code != "[explicit-override]":
             continue
@@ -51,6 +55,7 @@ def add_imports(sources: Iterable[pathlib.Path]):
     for source in sources:
         with open(source) as f_in:
             lines = f_in.readlines()
+        # ruff will take care of duplicates and sorting
         lines.insert(0, "from typing_extensions import override\n")
         with open(source, "w") as f_out:
             f_out.writelines(lines)
@@ -60,7 +65,7 @@ result = api.run(sys.argv[1:])
 
 stdout = result[0]
 
-for error in iterate_lines(stdout):
+for error in iterate_lines(stdout, limit=1000):
     print(error)
     insert_override(error.source, error.lineno)
 
