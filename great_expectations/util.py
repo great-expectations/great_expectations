@@ -1746,6 +1746,7 @@ def get_context(  # type: ignore[misc] # overlapping overload false positive?  #
     cloud_access_token: None = ...,
     cloud_organization_id: None = ...,
     cloud_mode: Literal[False] | None = ...,
+    mode: str | None = None,
     # <GX_RENAME> Deprecated as of 0.15.37
     ge_cloud_base_url: None = ...,
     ge_cloud_access_token: None = ...,
@@ -1764,6 +1765,7 @@ def get_context(  # noqa: PLR0913
     cloud_access_token: str | None = ...,
     cloud_organization_id: str | None = ...,
     cloud_mode: Literal[True] = ...,
+    mode: str | None = None,
     # <GX_RENAME> Deprecated as of 0.15.37
     ge_cloud_base_url: str | None = ...,
     ge_cloud_access_token: str | None = ...,
@@ -1782,6 +1784,7 @@ def get_context(  # noqa: PLR0913
     cloud_access_token: str | None = ...,
     cloud_organization_id: str | None = ...,
     cloud_mode: bool | None = ...,
+    mode: str | None = None,
     # <GX_RENAME> Deprecated as of 0.15.37
     ge_cloud_base_url: str | None = ...,
     ge_cloud_access_token: str | None = ...,
