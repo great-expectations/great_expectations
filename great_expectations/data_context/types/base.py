@@ -40,6 +40,7 @@ from marshmallow.warnings import RemovedInMarshmallow4Warning
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
+from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pyspark
@@ -165,6 +166,7 @@ class BaseYamlConfig(SerializableDictDot):
         return object_to_yaml_str(obj=self.commented_map)
 
     @public_api
+    @override
     def to_json_dict(self) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict containing this DataContextConfig.
 
@@ -368,6 +370,7 @@ class AssetConfig(SerializableDictDot):
         return self._module_name
 
     @public_api
+    @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this AssetConfig.
 
@@ -615,6 +618,7 @@ class DataConnectorConfig(AbstractConfig):
         return self._module_name
 
     @public_api
+    @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this DataConnectorConfig.
 
@@ -1178,6 +1182,7 @@ class DatasourceConfig(AbstractConfig):
         return self._module_name
 
     @public_api
+    @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this DatasourceConfig.
 
@@ -1694,6 +1699,7 @@ class DataContextConfigSchema(Schema):
                 data.pop(key)
         return data
 
+    @override
     def handle_error(self, exc, data, **kwargs) -> None:  # type: ignore[override]
         """Log and raise our custom exception when (de)serialization fails."""
         if (
@@ -2530,6 +2536,7 @@ class DataContextConfig(BaseYamlConfig):
         self._config_version = config_version
 
     @public_api
+    @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this DataContextConfig.
 
@@ -2559,6 +2566,7 @@ class DataContextConfig(BaseYamlConfig):
         for k, v in config.items():
             self[k] = v
 
+    @override
     def __repr__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -2580,6 +2588,7 @@ class DataContextConfig(BaseYamlConfig):
 
         return json.dumps(sorted_json_dict, indent=2)
 
+    @override
     def __str__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -2615,6 +2624,7 @@ class CheckpointValidationConfigSchema(AbstractConfigSchema):
 
     id = fields.String(required=False, allow_none=True)
 
+    @override
     def dump(self, obj: dict, *, many: Optional[bool] = None) -> dict:
         """
         Chetan - 20220803 - By design, Marshmallow accepts unknown fields through the
@@ -3036,6 +3046,7 @@ class CheckpointConfig(BaseYamlConfig):
         return result
 
     @public_api
+    @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this CheckpointConfig.
 
@@ -3051,6 +3062,7 @@ class CheckpointConfig(BaseYamlConfig):
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
 
+    @override
     def __repr__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -3072,6 +3084,7 @@ class CheckpointConfig(BaseYamlConfig):
 
         return json.dumps(sorted_json_dict, indent=2)
 
+    @override
     def __str__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>

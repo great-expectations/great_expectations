@@ -1,6 +1,8 @@
 from json import loads
 from typing import Dict
 
+from typing_extensions import override
+
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.util import load_class
 from great_expectations.render import RenderedDocumentContent
@@ -47,6 +49,7 @@ class JsonSiteStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
+    @override
     def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
@@ -64,11 +67,13 @@ class JsonSiteStore(Store):
     def deserialize(self, value):
         return RenderedDocumentContent(**loads(value))
 
+    @override
     def self_check(self, pretty_print) -> None:
         NotImplementedError(
             f"The test method is not implemented for Store class {self.__class__.__name__}."
         )
 
     @property
+    @override
     def config(self) -> dict:
         return self._config

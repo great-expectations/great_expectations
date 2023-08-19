@@ -2,6 +2,8 @@ import random
 import uuid
 from typing import Union
 
+from typing_extensions import override
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.configuration_store import ConfigurationStore
@@ -19,6 +21,7 @@ class ProfilerStore(ConfigurationStore):
 
     _configuration_class = RuleBasedProfilerConfig
 
+    @override
     def serialization_self_check(self, pretty_print: bool) -> None:
         """
         Fufills the abstract method defined by the parent class.
@@ -63,6 +66,7 @@ class ProfilerStore(ConfigurationStore):
                 f"\tTest key and value successfully removed from Profiler store: {test_value}\n"
             )
 
+    @override
     def ge_cloud_response_json_to_object_dict(self, response_json: dict) -> dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for

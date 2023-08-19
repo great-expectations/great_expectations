@@ -5,6 +5,8 @@ import uuid
 from pathlib import Path
 from typing import Dict, Tuple
 
+from typing_extensions import override
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
@@ -139,6 +141,7 @@ class DatabaseStoreBackend(StoreBackend):
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     @property
+    @override
     def store_backend_id(self) -> str:
         """
         Create a store_backend_id if one does not exist, and return it if it exists
@@ -253,6 +256,7 @@ class DatabaseStoreBackend(StoreBackend):
             logger.debug(f"Error fetching value: {str(e)}")
             raise gx_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
 
+    @override
     def _set(self, key, value, allow_update=True, **kwargs) -> None:
         cols = {k: v for (k, v) in zip(self.key_columns, key)}
         cols["value"] = value
@@ -280,6 +284,7 @@ class DatabaseStoreBackend(StoreBackend):
                     f"Integrity error {str(e)} while trying to store key"
                 )
 
+    @override
     def _move(self) -> None:  # type: ignore[override]
         raise NotImplementedError
 
@@ -358,5 +363,6 @@ class DatabaseStoreBackend(StoreBackend):
             )
 
     @property
+    @override
     def config(self) -> dict:
         return self._config

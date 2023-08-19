@@ -1,5 +1,7 @@
 from typing import Optional
 
+from typing_extensions import override
+
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
@@ -52,9 +54,11 @@ class InMemoryStoreBackend(StoreBackend):
         except KeyError as e:
             raise InvalidKeyError(f"{str(e)}")
 
+    @override
     def _set(self, key, value, **kwargs) -> None:
         self._store[key] = value
 
+    @override
     def _move(self, source_key, dest_key, **kwargs) -> None:
         self._store[dest_key] = self._store[source_key]
         self._store.pop(source_key)
@@ -65,15 +69,18 @@ class InMemoryStoreBackend(StoreBackend):
     def _has_key(self, key):
         return key in self._store
 
+    @override
     def remove_key(self, key) -> None:
         if isinstance(key, DataContextKey):
             key = key.to_tuple()
         del self._store[key]
 
     @property
+    @override
     def config(self) -> dict:
         return self._config
 
+    @override
     def build_key(  # type: ignore[override]
         self,
         resource_type: Optional[DataContextVariableSchema] = None,

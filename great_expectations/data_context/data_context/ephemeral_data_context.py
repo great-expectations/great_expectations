@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Dict, Mapping, Optional, Union, cast
 
+from typing_extensions import override
+
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.data_context.abstract_data_context import (
@@ -46,6 +48,7 @@ class EphemeralDataContext(AbstractDataContext):
         self._project_config = self._init_project_config(project_config)
         super().__init__(runtime_environment=runtime_environment)
 
+    @override
     def _init_project_config(
         self, project_config: Union[DataContextConfig, Mapping]
     ) -> DataContextConfig:
@@ -54,6 +57,7 @@ class EphemeralDataContext(AbstractDataContext):
         )
         return self._apply_global_config_overrides(project_config)
 
+    @override
     def _init_variables(self) -> EphemeralDataContextVariables:
         variables = EphemeralDataContextVariables(
             config=self._project_config,
@@ -61,6 +65,7 @@ class EphemeralDataContext(AbstractDataContext):
         )
         return variables
 
+    @override
     def _init_datasource_store(self) -> DatasourceStore:
         from great_expectations.data_context.store.datasource_store import (
             DatasourceStore,

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, 
 from urllib.parse import urljoin
 
 import requests
-from typing_extensions import TypedDict
+from typing_extensions import TypedDict, override
 
 from great_expectations.core.http import create_session
 from great_expectations.data_context.cloud_constants import (
@@ -222,6 +222,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
         filter_properties_dict(properties=self._config, inplace=True)
 
+    @override
     def _get(self, key: Tuple[GXCloudRESTResource, str | None, str | None]) -> ResponsePayload:  # type: ignore[override]
         ge_cloud_url = self.get_url_for_key(key=key)
         params: Optional[dict] = None
@@ -264,6 +265,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 "Unable to get object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
 
+    @override
     def _move(self) -> None:  # type: ignore[override]
         pass
 
@@ -339,6 +341,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             raise ValueError(f'Invalid kwargs: {(", ").join(extra_kwargs)}')
         return None
 
+    @override
     def _set(  # type: ignore[override]
         self,
         key: Tuple[GXCloudRESTResource, ...],
@@ -430,6 +433,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def ge_cloud_credentials(self) -> dict:
         return self._ge_cloud_credentials
 
+    @override
     def list_keys(self, prefix: Tuple = ()) -> List[Tuple[GXCloudRESTResource, str, str]]:  # type: ignore[override]
         url = construct_url(
             base_url=self.ge_cloud_base_url,
@@ -472,6 +476,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"Unable to list keys in GX Cloud Store Backend: {e}"
             )
 
+    @override
     def get_url_for_key(  # type: ignore[override]
         self,
         key: Tuple[GXCloudRESTResource, str | None, str | None],
@@ -567,6 +572,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"to more than one object."
         )
 
+    @override
     def _update(
         self,
         key: tuple[GXCloudRESTResource, str | None, str | None],
@@ -609,6 +615,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             return self.set(key=key, value=value, **kwargs)
         return self.add(key=key, value=value, **kwargs)
 
+    @override
     def _has_key(self, key: Tuple[GXCloudRESTResource, str | None, str | None]) -> bool:
         try:
             _ = self._get(key)
@@ -620,9 +627,11 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return True
 
     @property
+    @override
     def config(self) -> dict:
         return self._config
 
+    @override
     def build_key(
         self,
         id: Optional[str] = None,
@@ -635,6 +644,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             resource_name=name,
         )
 
+    @override
     def _validate_key(self, key) -> None:
         if not isinstance(key, tuple) or len(key) != 3:  # noqa: PLR2004
             raise TypeError(

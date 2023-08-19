@@ -7,6 +7,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
 
+from typing_extensions import override
+
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GXCloudIdentifier,
@@ -86,9 +88,11 @@ class DataContextVariables(ABC):
     config_provider: _ConfigurationProvider
     _store: Optional[DataContextStore] = None
 
+    @override
     def __str__(self) -> str:
         return str(self.config)
 
+    @override
     def __repr__(self) -> str:
         return repr(self.config)
 
@@ -298,6 +302,7 @@ class DataContextVariables(ABC):
 
 @dataclass(repr=False)
 class EphemeralDataContextVariables(DataContextVariables):
+    @override
     def _init_store(self) -> DataContextStore:
         from great_expectations.data_context.store.data_context_store import (
             DataContextStore,
@@ -328,6 +333,7 @@ class FileDataContextVariables(DataContextVariables):
                 f"A reference to a data context is required for {self.__class__.__name__}"
             )
 
+    @override
     def _init_store(self) -> DataContextStore:
         from great_expectations.data_context.store.data_context_store import (
             DataContextStore,
@@ -351,6 +357,7 @@ class FileDataContextVariables(DataContextVariables):
         store._store_backend = store_backend
         return store
 
+    @override
     def save_config(self) -> Any:
         """
         Persist any changes made to variables utilizing the configured Store.
@@ -424,6 +431,7 @@ class CloudDataContextVariables(DataContextVariables):
                 f"All of the following attributes are required for{ self.__class__.__name__}:\n  self.ge_cloud_base_url\n  self.ge_cloud_organization_id\n  self.ge_cloud_access_token"
             )
 
+    @override
     def _init_store(self) -> DataContextStore:
         from great_expectations.data_context.cloud_constants import GXCloudRESTResource
         from great_expectations.data_context.store.data_context_store import (
@@ -450,6 +458,7 @@ class CloudDataContextVariables(DataContextVariables):
         )
         return store
 
+    @override
     def get_key(self) -> GXCloudIdentifier:
         """
         Generates a GX Cloud-specific key for use with Stores. See parent "DataContextVariables.get_key" for more details.

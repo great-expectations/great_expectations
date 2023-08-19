@@ -11,6 +11,8 @@ import shutil
 from abc import ABCMeta
 from typing import Any, List, Tuple
 
+from typing_extensions import override
+
 from great_expectations.compatibility import aws
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError
@@ -77,6 +79,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             self.verify_that_key_to_filepath_operation_is_reversible()
             self._fixed_length_key = True
 
+    @override
     def _validate_key(self, key) -> None:
         super()._validate_key(key)
 
@@ -91,6 +94,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                         )
                     )
 
+    @override
     def _validate_value(self, value) -> None:
         if not isinstance(value, str) and not isinstance(value, bytes):
             raise TypeError(
@@ -223,6 +227,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     @property
+    @override
     def config(self) -> dict:
         return self._config  # type: ignore[attr-defined]
 
@@ -355,6 +360,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         return False
 
+    @override
     def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
         key_list = []
         for root, dirs, files in os.walk(
@@ -447,6 +453,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         )
 
     @property
+    @override
     def config(self) -> dict:
         return self._config
 
@@ -599,6 +606,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         return s3_object_key
 
+    @override
     def _move(self, source_key, dest_key, **kwargs) -> None:
         s3 = self._create_resource()
 
@@ -615,6 +623,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         s3.Object(self.bucket, source_filepath).delete()
 
+    @override
     def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
         # Note that the prefix arg is only included to maintain consistency with the parent class signature
         s3r = self._create_resource()
@@ -744,6 +753,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return aws.boto3.resource("s3", **self.boto3_options)
 
     @property
+    @override
     def config(self) -> dict:
         return self._config
 
@@ -874,6 +884,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             blob.upload_from_string(value, content_type=content_type)
         return gcs_object_key
 
+    @override
     def _move(self, source_key, dest_key, **kwargs) -> None:
         from great_expectations.compatibility import google
 
@@ -890,6 +901,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         blob = bucket.blob(source_filepath)
         _ = bucket.rename_blob(blob, dest_filepath)
 
+    @override
     def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
         # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
@@ -1090,6 +1102,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             )
         return az_blob_key
 
+    @override
     def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
         # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
@@ -1126,6 +1139,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         all_keys = self.list_keys()
         return key in all_keys
 
+    @override
     def _move(self, source_key, dest_key, **kwargs) -> None:
         source_blob_path = self._convert_key_to_filepath(source_key)
         if not source_blob_path.startswith(self.prefix):
@@ -1163,5 +1177,6 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         return True
 
     @property
+    @override
     def config(self) -> dict:
         return self._config  # type: ignore[attr-defined]

@@ -1,6 +1,8 @@
 import logging
 from typing import Set, Union
 
+from typing_extensions import override
+
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
@@ -28,6 +30,7 @@ class DataContextStore(ConfigurationStore):
         DataContextVariableSchema.VALIDATION_OPERATORS,
     }
 
+    @override
     def serialize(self, value: DataContextConfig) -> Union[dict, str]:
         """
         Please see `ConfigurationStore.serialize` for more information.
