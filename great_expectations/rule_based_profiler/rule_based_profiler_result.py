@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Optional
 
+from typing_extensions import override
+
 from great_expectations.core import (
     ExpectationConfiguration,  # noqa: TCH001
     ExpectationSuite,  # noqa: TCH001
@@ -65,6 +67,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
     # Reference to  "UsageStatisticsHandler" object for this "RuleBasedProfilerResult" object (if configured).
     _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
+    @override
     def to_dict(self) -> dict:
         """
         Returns:
@@ -106,6 +109,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
         }
 
     @public_api
+    @override
     def to_json_dict(self) -> dict[str, JSONValues]:
         """
         Returns the `RuleBasedProfilerResult` as a JSON-serializable dictionary.

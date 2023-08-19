@@ -2,6 +2,8 @@ import logging
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional
 
+from typing_extensions import override
+
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.helpers.util import (
@@ -19,12 +21,14 @@ class RuntimeEnvironmentVariablesDirectives(SerializableDictDot):
     rule_name: str
     variables: Optional[Dict[str, Any]] = None
 
+    @override
     def to_dict(self) -> dict:
         """
         Returns dictionary equivalent of this object.
         """
         return asdict(self)
 
+    @override
     def to_json_dict(self) -> dict:
         """
         Returns JSON dictionary equivalent of this object.
@@ -37,12 +41,14 @@ class RuntimeEnvironmentDomainTypeDirectives(SerializableDictDot):
     domain_type: MetricDomainTypes
     directives: Dict[str, Any]
 
+    @override
     def to_dict(self) -> dict:
         """
         Returns dictionary equivalent of this object.
         """
         return asdict(self)
 
+    @override
     def to_json_dict(self) -> dict:
         """
         Returns JSON dictionary equivalent of this object.

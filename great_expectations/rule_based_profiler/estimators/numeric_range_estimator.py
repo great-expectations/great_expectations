@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Optional
 
 import numpy as np
+from typing_extensions import override
 
 from great_expectations.core.domain import Domain
 from great_expectations.core.util import convert_to_json_serializable
@@ -90,6 +91,7 @@ class NumericRangeEstimator(ABC, SerializableDictDot):
         """
         pass
 
+    @override
     def to_dict(self) -> dict:
         """
         Returns dictionary equivalent of this object.
@@ -100,6 +102,7 @@ class NumericRangeEstimator(ABC, SerializableDictDot):
         dict_obj.update({"name": self._name})
         return dict_obj
 
+    @override
     def to_json_dict(self) -> dict:
         """
         Returns JSON dictionary equivalent of this object.

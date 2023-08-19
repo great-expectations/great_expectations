@@ -4,6 +4,7 @@ from typing import Dict, Iterator, List, Optional, Sized
 
 import numpy as np
 import pandas as pd
+from typing_extensions import override
 
 from great_expectations.compatibility import pyspark, sqlalchemy
 from great_expectations.core.util import convert_to_json_serializable
@@ -166,12 +167,14 @@ class AttributedResolvedMetrics(SerializableDictDot):
             attributed_metric_values=self.attributed_metric_values
         )
 
+    @override
     def to_dict(self) -> dict:
         """
         Returns dictionary equivalent of this object.
         """
         return asdict(self)
 
+    @override
     def to_json_dict(self) -> dict:
         """
         Returns JSON dictionary equivalent of this object.

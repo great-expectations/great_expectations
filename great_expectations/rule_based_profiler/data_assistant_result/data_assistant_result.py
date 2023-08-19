@@ -26,6 +26,7 @@ import ipywidgets as widgets
 import numpy as np
 import pandas as pd
 from IPython.display import HTML, display
+from typing_extensions import override
 
 from great_expectations import __version__ as ge_version
 from great_expectations import exceptions as gx_exceptions
@@ -112,12 +113,14 @@ class RuleStats(SerializableDictDot):
     rule_domain_builder_execution_time: Optional[float] = None
     rule_execution_time: Optional[float] = None
 
+    @override
     def to_dict(self) -> dict:
         """
         Returns dictionary equivalent of this object.
         """
         return asdict(self)
 
+    @override
     def to_json_dict(self) -> dict:
         """
         Returns JSON dictionary equivalent of this object.
@@ -256,6 +259,7 @@ class DataAssistantResult(SerializableDictDot):
             include_profiler_config=include_profiler_config,
         )
 
+    @override
     def to_dict(self) -> dict:
         """
         Returns: This DataAssistantResult as dictionary (JSON-serializable dictionary for DataAssistantResult objects).
@@ -304,6 +308,7 @@ class DataAssistantResult(SerializableDictDot):
         }
 
     @public_api
+    @override
     def to_json_dict(self) -> dict:
         """Returns JSON dictionary equivalent of this object.
 
@@ -312,6 +317,7 @@ class DataAssistantResult(SerializableDictDot):
         """
         return self.to_dict()
 
+    @override
     def __dir__(self) -> List[str]:
         """
         This custom magic method is used to enable tab completion on "DataAssistantResult" objects.
@@ -327,6 +333,7 @@ class DataAssistantResult(SerializableDictDot):
             }
         )
 
+    @override
     def __repr__(self) -> str:
         """
         # TODO: <Alex>6/23/2022</Alex>
@@ -358,6 +365,7 @@ class DataAssistantResult(SerializableDictDot):
 
         return json.dumps(json_dict, indent=2)
 
+    @override
     def __str__(self) -> str:
         """
         # TODO: <Alex>6/23/2022</Alex>

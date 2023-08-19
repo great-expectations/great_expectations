@@ -1,5 +1,7 @@
 from typing import Dict, Tuple, Union
 
+from typing_extensions import override
+
 from great_expectations.rule_based_profiler.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
@@ -8,6 +10,7 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
 
 class ColumnValueMissingDataAssistantResult(DataAssistantResult):
     @property
+    @override
     def metric_expectation_map(self) -> Dict[Union[str, Tuple[str, ...]], str]:
         """
         A mapping is defined for which metrics to plot and their associated expectations.
@@ -18,6 +21,7 @@ class ColumnValueMissingDataAssistantResult(DataAssistantResult):
         }
 
     @property
+    @override
     def metric_types(self) -> Dict[str, AltairDataTypes]:
         """
         A mapping is defined for the Altair data type associated with each metric.

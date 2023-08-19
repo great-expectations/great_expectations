@@ -14,6 +14,7 @@ from typing import (
 )
 
 import numpy as np
+from typing_extensions import override
 
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
@@ -111,6 +112,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             data_context=data_context,
         )
 
+    @override
     def _build_parameters(
         self,
         domain: Domain,

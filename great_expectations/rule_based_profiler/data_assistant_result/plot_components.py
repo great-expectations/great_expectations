@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import List, Optional, Sequence, Set, Union
 
 import altair as alt
+from typing_extensions import override
 
 
 @dataclass(frozen=True)
@@ -74,6 +75,7 @@ class PlotComponent:
 
 @dataclass(frozen=True)
 class MetricPlotComponent(PlotComponent):
+    @override
     def plot_on_axis(self) -> alt.Y:
         """
         Plots metric on Y axis - see parent `PlotComponent` for more details.
@@ -84,6 +86,7 @@ class MetricPlotComponent(PlotComponent):
             title=self.title,
         )
 
+    @override
     def generate_tooltip(self, format: str = "") -> alt.Tooltip:
         """Wrapper around alt.Tooltip creation.
 
@@ -113,6 +116,7 @@ class MetricPlotComponent(PlotComponent):
 class DomainPlotComponent(PlotComponent):
     subtitle: Optional[str] = None
 
+    @override
     def plot_on_axis(self) -> alt.X:
         """
         Plots domain on X axis - see parent `PlotComponent` for more details.
@@ -135,6 +139,7 @@ class BatchPlotComponent(PlotComponent):
             for batch_identifier in self.batch_identifiers
         ]
 
+    @override
     def plot_on_axis(self) -> alt.X:
         """
         Plots domain on X axis - see parent `PlotComponent` for more details.
@@ -145,6 +150,7 @@ class BatchPlotComponent(PlotComponent):
             title=self.title,
         )
 
+    @override
     def generate_tooltip(self, format: str = "") -> List[alt.Tooltip]:
         """Wrapper around alt.Tooltip creation.
 
@@ -169,6 +175,7 @@ class BatchPlotComponent(PlotComponent):
 
 @dataclass(frozen=True)
 class ExpectationKwargPlotComponent(PlotComponent):
+    @override
     def plot_on_axis(self) -> alt.Y:
         """
         Plots metric on Y axis - see parent `PlotComponent` for more details.
@@ -179,6 +186,7 @@ class ExpectationKwargPlotComponent(PlotComponent):
             title=self.title,
         )
 
+    @override
     def generate_tooltip(self, format: str = "") -> alt.Tooltip:
         """Wrapper around alt.Tooltip creation.
 

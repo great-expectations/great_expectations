@@ -13,6 +13,7 @@ from pyparsing import (
     alphas,
     nums,
 )
+from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain
@@ -164,6 +165,7 @@ class ParameterNode(SerializableDotDict):
     def to_dict(self) -> dict:
         return convert_parameter_node_to_dictionary(source=dict(self))  # type: ignore[return-value] # could be None
 
+    @override
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())
 
@@ -240,9 +242,11 @@ class ParameterContainer(SerializableDictDot):
 
         return self.parameter_nodes.get(parameter_name_root)
 
+    @override
     def to_dict(self) -> dict:
         return asdict(self)
 
+    @override
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())
 

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
+from typing_extensions import override
+
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,  # noqa: TCH001
@@ -82,6 +84,7 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             data_context=data_context,
         )
 
+    @override
     def _build_parameters(
         self,
         domain: Domain,
