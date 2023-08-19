@@ -39,7 +39,10 @@ ignore_missing_imports = true
 follow_imports = 'silent'
 warn_redundant_casts = true
 show_error_codes = true
-enable_error_code = ['ignore-without-code']
+enable_error_code = [
+    'ignore-without-code',
+    # 'explicit-override' # TODO: enable this & fix all 688 errors
+]
 # The following list of codes are globally ignored, do not add to this list
 disable_error_code = [
     # annotation-unchecked are 'warning notes', not errors and won't cause mypy to fail
@@ -513,7 +516,7 @@ markers = [
     "all_backends: mark tests that run against all execution engine backends",
     "athena: mark a test as AWS Athena-dependent.",
     "aws_creds: mark all tests that require aws credentials",
-    "aws_deps: mark tests that need aws dependencies like boto", 
+    "aws_deps: mark tests that need aws dependencies like boto",
     "big: mark tests that don't have external dependencies but aren't unit tests",
     "cli: mark all tests in the /cli directory.",
     "clickhouse: mark a test as Clickhouse-dependent.",
