@@ -3,6 +3,8 @@ import json
 import logging
 from typing import Any
 
+from typing_extensions import override
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.util import datetime_to_int, parse_string_to_datetime
@@ -26,6 +28,7 @@ class DateTimeSorter(Sorter):
 
         self._datetime_format = datetime_format
 
+    @override
     def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
         batch_identifiers: dict = batch_definition.batch_identifiers
         partition_value: Any = batch_identifiers[self.name]
@@ -35,6 +38,7 @@ class DateTimeSorter(Sorter):
         )
         return datetime_to_int(dt=dt)
 
+    @override
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
             "name": self.name,

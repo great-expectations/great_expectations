@@ -2,6 +2,8 @@ import json
 import logging
 from typing import Any
 
+from typing_extensions import override
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.datasource.data_connector.sorter import Sorter
@@ -11,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class NumericSorter(Sorter):
+    @override
     def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
         batch_identifiers: dict = batch_definition.batch_identifiers
         batch_value: Any = batch_identifiers[self.name]
@@ -26,6 +29,7 @@ class NumericSorter(Sorter):
         # The case of strings having floating point number format used as references to partitions should be rare.
         return round(float(batch_value))
 
+    @override
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
             "name": self.name,

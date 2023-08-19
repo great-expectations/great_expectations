@@ -1,3 +1,5 @@
+from typing_extensions import override
+
 """Serialize Datasource Configurations.
 
 Serializers determine how to write an object to disk, json, etc.
@@ -20,6 +22,7 @@ if TYPE_CHECKING:
 
 
 class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
+    @override
     def serialize(self, obj: "AbstractConfig") -> dict:
         """Serialize DatasourceConfig to dict appropriate for writing to yaml.
 
@@ -45,6 +48,7 @@ class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
 
 
 class NamedDatasourceSerializer(AbstractConfigSerializer):
+    @override
     def serialize(self, obj: "AbstractConfig") -> dict:
         """Serialize DatasourceConfig with datasource name but not data connector name to match existing context.list_datasources() functionality.
 
@@ -67,6 +71,7 @@ class NamedDatasourceSerializer(AbstractConfigSerializer):
 
 
 class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
+    @override
     def serialize(self, obj: "AbstractConfig") -> dict:
         """Serialize datasource config to json dict. Adds a load step to make sure
         load logic (e.g. add data connector names) is completed.
