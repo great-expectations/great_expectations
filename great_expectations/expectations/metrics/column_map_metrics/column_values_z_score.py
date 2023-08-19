@@ -1,6 +1,7 @@
 from typing import Optional
 
 import pandas as pd
+from typing_extensions import override
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
@@ -104,6 +105,7 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
         return z_score < threshold
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,

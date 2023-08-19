@@ -5,6 +5,8 @@ import logging
 import warnings
 from typing import TYPE_CHECKING
 
+from typing_extensions import override
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
@@ -555,6 +557,7 @@ class MapMetricProvider(MetricProvider):
                 )
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,

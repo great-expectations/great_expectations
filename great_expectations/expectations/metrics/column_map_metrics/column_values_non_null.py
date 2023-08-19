@@ -1,5 +1,7 @@
 from typing import Optional
 
+from typing_extensions import override
+
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
@@ -62,6 +64,7 @@ class ColumnValuesNonNullCount(MetricProvider):
         ]
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,

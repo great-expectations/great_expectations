@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING, Dict, List, Optional
 
+from typing_extensions import override
+
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -175,6 +177,7 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
     )
 
     @public_api
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -195,6 +198,7 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls, renderer_configuration: RendererConfiguration
     ) -> RendererConfiguration:
@@ -237,6 +241,7 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -282,6 +287,7 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
             )
         ]
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,
