@@ -5,6 +5,7 @@ import logging
 from typing import List, Optional
 
 import click
+from typing_extensions import override
 
 from great_expectations import __version__ as ge_version
 from great_expectations.cli import toolkit
@@ -56,11 +57,13 @@ class CLIState:
         ), "GX CLI interaction requires a FileDataContext"
         self._data_context = data_context
 
+    @override
     def __repr__(self) -> str:
         return f"CLIState(config_file_location={self.config_file_location})"
 
 
 class CLI(click.MultiCommand):
+    @override
     def list_commands(self, ctx: click.Context) -> List[str]:
         # note that if --help is called this method is invoked before any flags
         # are parsed or context set.
@@ -76,6 +79,7 @@ class CLI(click.MultiCommand):
 
         return commands
 
+    @override
     def get_command(self, ctx: click.Context, name: str) -> Optional[str]:  # type: ignore[override] # MultiCommand returns `Optional[Command]`
         module_name = name.replace("-", "_")
         legacy_module = ""
