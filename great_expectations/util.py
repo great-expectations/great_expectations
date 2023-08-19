@@ -55,6 +55,7 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from packaging import version
+from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -105,12 +106,14 @@ class bidict(dict):
         for key, value in self.items():
             self.inverse.setdefault(value, []).append(key)
 
+    @override
     def __setitem__(self, key: str, value: Any) -> None:
         if key in self:
             self.inverse[self[key]].remove(key)
         super().__setitem__(key, value)
         self.inverse.setdefault(value, []).append(key)
 
+    @override
     def __delitem__(self, key: str):
         self.inverse.setdefault(self[key], []).remove(key)
         if self[key] in self.inverse and not self.inverse[self[key]]:

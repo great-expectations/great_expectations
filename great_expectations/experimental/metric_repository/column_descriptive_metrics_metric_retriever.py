@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Sequence
 
+from typing_extensions import override
+
 from great_expectations.datasource.fluent.interfaces import Batch
 from great_expectations.experimental.metric_repository.metric_retriever import (
     MetricRetriever,
@@ -21,6 +23,7 @@ if TYPE_CHECKING:
 
 class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
     # TODO: Docstrings
+    @override
     def get_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
         table_metrics_list = self._get_table_metrics(batch_request)
 

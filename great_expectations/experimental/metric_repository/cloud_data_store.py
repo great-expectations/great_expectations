@@ -1,6 +1,6 @@
 from typing import TypeVar, Union
 
-from typing_extensions import TypeAlias
+from typing_extensions import TypeAlias, override
 
 from great_expectations.experimental.metric_repository.data_store import DataStore
 from great_expectations.experimental.metric_repository.metrics import MetricRun
@@ -11,6 +11,7 @@ T = TypeVar("T", bound=StorableTypes)
 
 
 class CloudDataStore(DataStore[StorableTypes]):
+    @override
     def add(self, value: T) -> T:
         # TODO: implementation
         # TODO: Serialize with organization_id from the context

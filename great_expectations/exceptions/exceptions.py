@@ -7,6 +7,7 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from marshmallow import ValidationError
+from typing_extensions import override
 
 if TYPE_CHECKING:
     import requests
@@ -25,6 +26,7 @@ class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
         if validation_error is not None:
             self.messages = validation_error.messages
 
+    @override
     def __str__(self) -> str:
         if self.message is None:
             return str(self.messages)
