@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
+from typing_extensions import override
+
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
@@ -110,6 +112,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
     def data_asset_name_suffix(self) -> str:
         return self._data_asset_name_suffix
 
+    @override
     def _refresh_data_references_cache(self) -> None:
         self._refresh_introspected_assets_cache()
         super()._refresh_data_references_cache()

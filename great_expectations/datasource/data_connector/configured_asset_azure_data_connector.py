@@ -2,6 +2,8 @@ import logging
 import re
 from typing import List, Optional
 
+from typing_extensions import override
+
 from great_expectations.compatibility import azure
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition
@@ -103,6 +105,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
                 Please ensure that you have provided the appropriate keys to `azure_options` for authentication."
             )
 
+    @override
     def build_batch_spec(self, batch_definition: BatchDefinition) -> AzureBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
@@ -118,6 +121,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         )
         return AzureBatchSpec(batch_spec)
 
+    @override
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
         query_options: dict = {
             "container": self._container,
@@ -139,6 +143,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         )
         return path_list
 
+    @override
     def _get_full_file_path_for_asset(
         self, path: str, asset: Optional[Asset] = None
     ) -> str:

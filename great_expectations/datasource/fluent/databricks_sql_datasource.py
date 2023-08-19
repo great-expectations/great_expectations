@@ -5,6 +5,7 @@ from urllib import parse
 
 import pydantic
 from pydantic import AnyUrl
+from typing_extensions import override
 
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
@@ -90,6 +91,7 @@ class DatabricksDsn(AnyUrl):
     query: str  # if query is not provided, validate_parts() will raise an error
 
     @classmethod
+    @override
     def validate_parts(cls, parts: Parts, validate_port: bool = True) -> Parts:
         """
         Overridden to validate additional fields outside of scheme (which is performed by AnyUrl).
@@ -139,6 +141,7 @@ class DatabricksDsn(AnyUrl):
 
 class DatabricksTableAsset(SqlTableAsset):
     @pydantic.validator("table_name")
+    @override
     def _resolve_quoted_name(cls, table_name: str) -> str | quoted_name:
         table_name_is_quoted: bool = cls._is_bracketed_by_quotes(table_name)
 
@@ -161,6 +164,7 @@ class DatabricksTableAsset(SqlTableAsset):
         return table_name
 
     @staticmethod
+    @override
     def _is_bracketed_by_quotes(target: str) -> bool:
         """Returns True if the target string is bracketed by quotes.
 
@@ -199,6 +203,7 @@ class DatabricksSQLDatasource(SQLDatasource):
     # https://peps.python.org/pep-0526/#class-and-instance-variable-annotations
     _TableAsset: Type[SqlTableAsset] = pydantic.PrivateAttr(DatabricksTableAsset)
 
+    @override
     def test_connection(self, test_assets: bool = True) -> None:
         try:
             super().test_connection(test_assets)
@@ -214,6 +219,7 @@ class DatabricksSQLDatasource(SQLDatasource):
                 ) from e
             raise e
 
+    @override
     def _create_engine(self) -> sqlalchemy.Engine:
         model_dict = self.dict(
             exclude=self._get_exec_engine_excludes(),

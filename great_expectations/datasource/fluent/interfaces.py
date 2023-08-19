@@ -37,6 +37,7 @@ from pydantic import (
     validate_arguments,
 )
 from pydantic import dataclasses as pydantic_dc
+from typing_extensions import override
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
@@ -673,6 +674,7 @@ class HeadData:
 
     data: pd.DataFrame
 
+    @override
     def __repr__(self) -> str:
         return self.data.__repr__()
 

@@ -4,6 +4,8 @@ import logging
 import pathlib
 from typing import TYPE_CHECKING, Callable
 
+from typing_extensions import override
+
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.fluent.constants import (
@@ -28,6 +30,7 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
 
     data_directory: pathlib.Path
 
+    @override
     def _get_batch_definition_list(
         self, batch_request: BatchRequest
     ) -> list[BatchDefinition]:
@@ -59,6 +62,7 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
             )
         return batch_definition_list
 
+    @override
     def get_unfiltered_batch_definition_list_fn(
         self,
     ) -> Callable[[FilePathDataConnector, BatchRequest], list[BatchDefinition]]:
@@ -67,12 +71,14 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
             self.data_directory
         )
 
+    @override
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
             """One needs to explicitly provide "reader_method" for File-Path style DataAsset extensions as temporary \
 work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""
         )
 
+    @override
     def _get_reader_options_include(self) -> set[str]:
         return {
             "data_directory",

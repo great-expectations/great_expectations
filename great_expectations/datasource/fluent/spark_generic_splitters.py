@@ -241,6 +241,7 @@ class SplitterModInteger(_SplitterOneColumnOneParam):
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name, "mod": self.mod}
 
+    @override
     def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
@@ -256,12 +257,15 @@ class SplitterColumnValue(_SplitterOneColumnOneParam):
     method_name: Literal["split_on_column_value"] = "split_on_column_value"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         return [self.column_name]
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name}
 
+    @override
     def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:

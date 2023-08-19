@@ -2,6 +2,8 @@ import copy
 import logging
 from typing import List, Optional
 
+from typing_extensions import override
+
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
@@ -52,6 +54,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
 
+    @override
     def _refresh_data_references_cache(self) -> None:
         """refreshes data_reference cache"""
         # Map data_references to batch_definitions
@@ -65,6 +68,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             )
             self._data_references_cache[data_reference] = mapped_batch_definition_list
 
+    @override
     def get_data_reference_count(self) -> int:
         """
         Returns the list of data_references known by this DataConnector by looping over all data_asset_names in
@@ -75,6 +79,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         """
         return len(self._data_references_cache)
 
+    @override
     def get_unmatched_data_references(self) -> List[str]:
         """
         Returns the list of data_references unmatched by configuration by looping through items in _data_references_cache
@@ -86,6 +91,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         return [k for k, v in self._data_references_cache.items() if v is None]
 
     @public_api
+    @override
     def get_available_data_asset_names(self) -> List[str]:
         """Return the list of asset names known by this DataConnector
 
@@ -113,6 +119,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
 
         return list(set(data_asset_names))
 
+    @override
     def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
@@ -129,6 +136,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
 
         return PathBatchSpec(batch_spec)
 
+    @override
     def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
         batch_definition_list: List[BatchDefinition] = [
             batch_definitions[0]
@@ -137,6 +145,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         ]
         return batch_definition_list
 
+    @override
     def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
         regex_config: dict = copy.deepcopy(self._default_regex)
         return regex_config

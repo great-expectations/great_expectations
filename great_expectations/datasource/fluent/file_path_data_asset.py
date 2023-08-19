@@ -19,6 +19,7 @@ from typing import (
 )
 
 import pydantic
+from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
@@ -139,6 +140,7 @@ class _FilePathDataAsset(DataAsset):
         self._all_group_names = self._regex_parser.get_all_group_names()
 
     @property
+    @override
     def batch_request_options(
         self,
     ) -> tuple[str, ...]:
@@ -165,6 +167,7 @@ class _FilePathDataAsset(DataAsset):
         )
 
     @public_api
+    @override
     def build_batch_request(
         self,
         options: Optional[BatchRequestOptions] = None,
@@ -216,6 +219,7 @@ class _FilePathDataAsset(DataAsset):
             batch_slice=batch_slice,
         )
 
+    @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.
 
@@ -240,6 +244,7 @@ class _FilePathDataAsset(DataAsset):
                 f"but actually has form:\n{pf(batch_request.dict())}\n"
             )
 
+    @override
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> List[Batch]:
@@ -372,6 +377,7 @@ class _FilePathDataAsset(DataAsset):
 
         return batch_spec_options
 
+    @override
     def test_connection(self) -> None:
         """Test the connection for the DataAsset.
 

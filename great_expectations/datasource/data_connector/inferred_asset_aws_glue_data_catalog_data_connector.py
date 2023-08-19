@@ -1,6 +1,8 @@
 import logging
 from typing import Iterator, List, Optional
 
+from typing_extensions import override
+
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.configured_asset_aws_glue_data_catalog_data_connector import (
     ConfiguredAssetAWSGlueDataCatalogDataConnector,
@@ -98,6 +100,7 @@ class InferredAssetAWSGlueDataCatalogDataConnector(
     def glue_introspection_directives(self) -> dict:
         return self._glue_introspection_directives
 
+    @override
     def _refresh_data_references_cache(self) -> None:
         self._refresh_introspected_assets_cache()
         super()._refresh_data_references_cache()

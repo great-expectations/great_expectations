@@ -6,6 +6,7 @@ import re
 from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
 
 import pydantic
+from typing_extensions import override
 
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
@@ -180,6 +181,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         )
 
     # Interface Method
+    @override
     def get_data_references(self) -> List[str]:
         base_directory: pathlib.Path = self.base_directory
         glob_directive: str = self._glob_directive
@@ -189,5 +191,6 @@ class FilesystemDataConnector(FilePathDataConnector):
         return sorted(path_list)
 
     # Interface Method
+    @override
     def _get_full_file_path(self, path: str) -> str:
         return str(self.base_directory.joinpath(path))

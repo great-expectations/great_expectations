@@ -1,6 +1,8 @@
 import logging
 import os
 
+from typing_extensions import override
+
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
@@ -154,6 +156,7 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
 
         return SqlAlchemyDatasourceQueryBatchKwargs(batch_kwargs)
 
+    @override
     def get_available_partition_ids(self, data_asset_name=None) -> None:
         raise BatchKwargsError(
             "QueryBatchKwargsGenerator cannot identify partitions.", {}

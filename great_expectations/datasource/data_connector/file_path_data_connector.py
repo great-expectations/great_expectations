@@ -2,6 +2,8 @@ import logging
 import re
 from typing import Callable, Dict, Iterator, List, Optional, Tuple, cast
 
+from typing_extensions import override
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
@@ -165,6 +167,7 @@ class FilePathDataConnector(DataConnector):
     def sorters(self) -> Optional[dict]:
         return self._sorters
 
+    @override
     def _get_data_reference_list_from_cache_by_data_asset_name(
         self, data_asset_name: str
     ) -> List[str]:
@@ -199,6 +202,7 @@ class FilePathDataConnector(DataConnector):
 
         return path_list
 
+    @override
     def get_batch_definition_list_from_batch_request(  # type: ignore[override] # BaseBatchRequest
         self,
         batch_request: BatchRequest,
@@ -301,6 +305,7 @@ class FilePathDataConnector(DataConnector):
 
         return batch_definition_list
 
+    @override
     def _map_data_reference_to_batch_definition_list(
         self, data_reference: str, data_asset_name: Optional[str] = None
     ) -> Optional[List[BatchDefinition]]:
@@ -316,6 +321,7 @@ class FilePathDataConnector(DataConnector):
             group_names=group_names,
         )
 
+    @override
     def _map_batch_definition_to_data_reference(
         self, batch_definition: BatchDefinition
     ) -> str:
@@ -329,6 +335,7 @@ class FilePathDataConnector(DataConnector):
             group_names=group_names,
         )
 
+    @override
     def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
@@ -352,6 +359,7 @@ class FilePathDataConnector(DataConnector):
             template_arguments=template_arguments,
         )
 
+    @override
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
     ) -> dict:
@@ -371,6 +379,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
         return {"path": path}
 
+    @override
     def _validate_batch_request(self, batch_request: BatchRequestBase) -> None:
         super()._validate_batch_request(batch_request=batch_request)
         self._validate_sorters_configuration(
