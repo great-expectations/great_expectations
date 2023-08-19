@@ -3,7 +3,6 @@ from great_expectations.experimental.metric_repository.metrics import MetricRun
 
 
 class MetricRepository:
-    pass
     # TODO: Add docstrings
 
     def __init__(self, data_store: DataStore):
