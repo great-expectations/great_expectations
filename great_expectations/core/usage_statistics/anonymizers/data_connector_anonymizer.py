@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Optional
 
+from typing_extensions import override
+
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 
 if TYPE_CHECKING:
@@ -20,6 +22,7 @@ class DataConnectorAnonymizer(BaseAnonymizer):
 
         self._aggregate_anonymizer = aggregate_anonymizer
 
+    @override
     def anonymize(  # type: ignore[override] # differs from parent class
         self, name: str, config: dict, obj: Optional[object] = None, **kwargs
     ) -> Any:
@@ -47,6 +50,7 @@ class DataConnectorAnonymizer(BaseAnonymizer):
 
         return anonymized_info_dict
 
+    @override
     def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
         from great_expectations.datasource.data_connector.data_connector import (
             DataConnector,

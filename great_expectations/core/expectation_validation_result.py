@@ -7,7 +7,7 @@ from copy import deepcopy
 from typing import TYPE_CHECKING, List, Optional
 
 from marshmallow import Schema, fields, post_dump, post_load, pre_dump
-from typing_extensions import TypedDict
+from typing_extensions import TypedDict, override
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
@@ -196,6 +196,7 @@ class ExpectationValidationResult(SerializableDictDot):
             # if invalid comparisons are attempted, the objects are not equal.
             return True
 
+    @override
     def __repr__(self) -> str:
         """
         # TODO: <Alex>5/9/2022</Alex>
@@ -223,6 +224,7 @@ class ExpectationValidationResult(SerializableDictDot):
 
         return json.dumps(json_dict, indent=2)
 
+    @override
     def __str__(self) -> str:
         """
         # TODO: <Alex>5/9/2022</Alex>
@@ -309,6 +311,7 @@ class ExpectationValidationResult(SerializableDictDot):
         return True
 
     @public_api
+    @override
     def to_json_dict(self) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this ExpectationValidationResult.
 

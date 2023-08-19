@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
+from typing_extensions import override
+
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.data_context.store.store_backend import StoreBackend
 
@@ -21,6 +23,7 @@ class StoreBackendAnonymizer(BaseAnonymizer):
 
         self._aggregate_anonymizer = aggregate_anonymizer
 
+    @override
     def anonymize(  # type: ignore[override] # different signature from parent class
         self,
         obj: Optional[object] = None,
@@ -51,6 +54,7 @@ class StoreBackendAnonymizer(BaseAnonymizer):
             )
         return anonymized_info_dict
 
+    @override
     def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
         return (obj is not None and isinstance(obj, StoreBackend)) or (
             "store_backend_object_config" in kwargs

@@ -5,6 +5,8 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import TYPE_CHECKING
 
+from typing_extensions import override
+
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
@@ -77,5 +79,6 @@ class ConfigPeer(ABC):
 
         return config_kwargs
 
+    @override
     def __repr__(self) -> str:
         return str(self.get_config())

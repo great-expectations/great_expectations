@@ -5,6 +5,8 @@ from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import Any, Dict, Optional, TypeVar, Union
 
+from typing_extensions import override
+
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
@@ -36,9 +38,11 @@ class InferredSemanticDomainType(SerializableDictDot):
     semantic_domain_type: Optional[Union[str, SemanticDomainTypes]] = None
     details: Optional[Dict[str, Any]] = None
 
+    @override
     def to_dict(self) -> dict:
         return asdict(self)
 
+    @override
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())
 
@@ -47,6 +51,7 @@ class DomainKwargs(SerializableDotDict):
     def to_dict(self) -> dict:
         return dict(self)
 
+    @override
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())
 
@@ -149,6 +154,7 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
     def __ne__(self, other):
         return not self.__eq__(other=other)
 
+    @override
     def __hash__(self) -> int:  # type: ignore[override]
         """Overrides the default implementation"""
         _result_hash: int = hash(self.id)
@@ -178,6 +184,7 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
     def id(self) -> str:
         return IDDict(self.to_json_dict()).to_id()
 
+    @override
     def to_json_dict(self) -> dict:
         details: dict = {}
 

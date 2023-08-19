@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from typing_extensions import override
+
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
@@ -26,6 +28,7 @@ class ProfilerAnonymizer(BaseAnonymizer):
 
         self._aggregate_anonymizer = aggregate_anonymizer
 
+    @override
     def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
         if obj and isinstance(obj, RuleBasedProfiler):
             return self._anonymize_profiler_info(**kwargs)
@@ -244,6 +247,7 @@ class ProfilerAnonymizer(BaseAnonymizer):
                 expectation_type
             )
 
+    @override
     def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
         return obj is not None and isinstance(
             obj, (RuleBasedProfilerConfig, RuleBasedProfiler)

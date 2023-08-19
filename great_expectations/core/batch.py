@@ -15,6 +15,7 @@ from typing import (
 )
 
 import pandas as pd
+from typing_extensions import override
 
 from great_expectations.compatibility import pyspark
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
@@ -125,6 +126,7 @@ class BatchDefinition(SerializableDictDot):
         self._batch_spec_passthrough = batch_spec_passthrough
 
     @public_api
+    @override
     def to_json_dict(self) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this BatchDefinition.
 
@@ -142,6 +144,7 @@ class BatchDefinition(SerializableDictDot):
 
         return convert_to_json_serializable(data=fields_dict)
 
+    @override
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
             "datasource_name": self._datasource_name,
@@ -226,6 +229,7 @@ class BatchDefinition(SerializableDictDot):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
+    @override
     def __hash__(self) -> int:
         """Overrides the default implementation"""
         _result_hash: int = hash(self.id)
@@ -341,6 +345,7 @@ class BatchRequestBase(SerializableDictDot):
     def id(self) -> str:
         return IDDict(self.to_json_dict()).to_id()
 
+    @override
     def to_dict(self) -> BlockConfigBatchRequestTypedDict:  # type: ignore[override] # TypedDict is more specific dict type
         return standardize_batch_request_display_ordering(
             batch_request=super().to_dict()  # type: ignore[arg-type] # TypedDict is more specific dict type
@@ -349,6 +354,7 @@ class BatchRequestBase(SerializableDictDot):
     # While this class is private, it is inherited from and this method is part
     # of the public api on the child.
     @public_api
+    @override
     def to_json_dict(self) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this BatchRequestBase.
 
@@ -400,6 +406,7 @@ class BatchRequestBase(SerializableDictDot):
 
         return self.id == other.id
 
+    @override
     def __repr__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -415,6 +422,7 @@ class BatchRequestBase(SerializableDictDot):
         )
         return json.dumps(json_dict, indent=2)
 
+    @override
     def __str__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -824,6 +832,7 @@ class Batch(SerializableDictDot):
     def batch_kwargs(self):
         return self._batch_kwargs
 
+    @override
     def to_dict(self) -> dict:
         dict_obj: dict = {
             "data": str(self.data),
@@ -837,6 +846,7 @@ class Batch(SerializableDictDot):
         return dict_obj
 
     @public_api
+    @override
     def to_json_dict(self) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this Batch.
 
