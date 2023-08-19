@@ -248,6 +248,12 @@ def test_get_context_with_no_arguments_returns_ephemeral_with_sensible_defaults(
     assert context.config.stores == defaults.stores
 
 
+@pytest.mark.unit
+def test_get_context_with_mode_equals_ephemeral_returns_ephemeral_data_context():
+    context = gx.get_context(mode="ephemeral")
+    assert isinstance(context, EphemeralDataContext)
+
+
 @pytest.mark.parametrize("ge_cloud_mode", [True, None])
 @pytest.mark.cloud
 def test_cloud_context_include_rendered_content(

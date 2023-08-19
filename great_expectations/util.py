@@ -1804,6 +1804,7 @@ def get_context(  # noqa: PLR0913
     cloud_access_token: str | None = None,
     cloud_organization_id: str | None = None,
     cloud_mode: bool | None = None,
+    mode: str | None = None,
     # <GX_RENAME> Deprecated as of 0.15.37
     ge_cloud_base_url: str | None = None,
     ge_cloud_access_token: str | None = None,
@@ -1880,6 +1881,8 @@ def get_context(  # noqa: PLR0913
         cloud_organization_id: org_id for GX Cloud account.
         cloud_mode: whether to run GX in Cloud mode (default is None).
             If None, cloud mode is assumed if cloud credentials are set up. Set to False to override.
+        mode: which mode to use. One of: ephemeral, file, cloud.
+            Note: if mode is specified, cloud_mode is ignored.
         ge_cloud_base_url: url for GX Cloud endpoint.
         ge_cloud_access_token: access_token for GX Cloud account.
         ge_cloud_organization_id: org_id for GX Cloud account.
@@ -1895,6 +1898,37 @@ def get_context(  # noqa: PLR0913
         GXCloudConfigurationError: Cloud mode enabled, but missing configuration.
     """
     project_config = _prepare_project_config(project_config)
+
+    if mode is not None:
+        if mode == "ephemeral":
+            return _get_ephemeral_context(
+                project_config=project_config,
+                runtime_environment=runtime_environment,
+            )
+        elif mode == "file":
+            return _get_file_context(
+                project_config=project_config,
+                context_root_dir=context_root_dir,
+                runtime_environment=runtime_environment,
+            )
+        elif mode == "cloud":
+            return _get_cloud_context(
+                project_config=project_config,
+                context_root_dir=context_root_dir,
+                runtime_environment=runtime_environment,
+                cloud_base_url=cloud_base_url,
+                cloud_access_token=cloud_access_token,
+                cloud_organization_id=cloud_organization_id,
+                cloud_mode=cloud_mode,
+                ge_cloud_base_url=ge_cloud_base_url,
+                ge_cloud_access_token=ge_cloud_access_token,
+                ge_cloud_organization_id=ge_cloud_organization_id,
+                ge_cloud_mode=ge_cloud_mode,
+            )
+        else:
+            raise ValueError(
+                f"Unknown mode {mode}. Please choose one of: ephemeral, file, cloud."
+            )
 
     # First, check for GX Cloud conditions
     cloud_context = _get_cloud_context(
