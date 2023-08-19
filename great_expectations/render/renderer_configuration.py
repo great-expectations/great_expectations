@@ -30,7 +30,7 @@ from pydantic import (
     validator,
 )
 from pydantic.generics import GenericModel
-from typing_extensions import TypeAlias, TypedDict
+from typing_extensions import TypeAlias, TypedDict, override
 
 from great_expectations.core import (
     ExpectationConfiguration,  # noqa: TCH001
@@ -71,6 +71,7 @@ class _RendererValueBase(BaseModel):
     def __len__(self) -> int:
         return len(self.__fields__)
 
+    @override
     def dict(  # noqa: PLR0913
         self,
         include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
@@ -238,6 +239,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
             return values
 
+        @override
         def __eq__(self, other: object) -> bool:
             if isinstance(other, BaseModel):
                 return self.dict() == other.dict()
