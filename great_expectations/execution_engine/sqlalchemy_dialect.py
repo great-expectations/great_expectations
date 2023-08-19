@@ -3,6 +3,8 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, List, Union
 
+from typing_extensions import override
+
 
 class GXSqlDialect(Enum):
     """Contains sql dialects that have some level of support in Great Expectations.
@@ -26,6 +28,7 @@ class GXSqlDialect(Enum):
     CLICKHOUSE = "clickhouse"
     OTHER = "other"
 
+    @override
     def __eq__(self, other: Union[str, bytes, GXSqlDialect]):  # type: ignore[override] # supertype uses `object`
         if isinstance(other, str):
             return self.value.lower() == other.lower()
@@ -34,10 +37,12 @@ class GXSqlDialect(Enum):
             return self.value.lower() == other.lower().decode("utf-8")
         return self.value.lower() == other.value.lower()
 
+    @override
     def __hash__(self: GXSqlDialect):
         return hash(self.value)
 
     @classmethod
+    @override
     def _missing_(cls, value: Any) -> Any:
         try:
             # Sometimes `value` is a byte string, e.g. `b"hive"`, it should be converted

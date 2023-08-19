@@ -8,6 +8,7 @@ from typing import Callable, ClassVar, List, Type
 import ruamel
 from dateutil.parser import parse
 from ruamel.yaml import yaml_object
+from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
 
@@ -26,11 +27,13 @@ class DatePart(enum.Enum):
     MINUTE = "minute"
     SECOND = "second"
 
+    @override
     def __eq__(self, other: str | DatePart):  # type: ignore[override] # expects `object`
         if isinstance(other, str):
             return self.value.lower() == other.lower()
         return self.value.lower() == other.value.lower()
 
+    @override
     def __hash__(self: DatePart):
         return hash(self.value)
 
@@ -59,11 +62,13 @@ class SplitterMethod(enum.Enum):
     SPLIT_ON_MULTI_COLUMN_VALUES = "split_on_multi_column_values"
     SPLIT_ON_HASHED_COLUMN = "split_on_hashed_column"
 
+    @override
     def __eq__(self, other: str | SplitterMethod):  # type: ignore[override] # expects `object`
         if isinstance(other, str):
             return self.value.lower() == other.lower()
         return self.value.lower() == other.value.lower()
 
+    @override
     def __hash__(self: SplitterMethod):
         return hash(self.value)
 
