@@ -30,10 +30,10 @@ def iterate_lines(stdout: str, limit: int) -> Iterator[Result]:
             break
         try:
             source, lineno, _, full_message = line.split(":")
+            message, error_code = full_message.split("  ")
         except ValueError:
             print(f"skipping line:\n\t{line}")
             continue
-        message, error_code = full_message.split("  ")
         if error_code != "[explicit-override]":
             continue
         yield Result(pathlib.Path(source), int(lineno), message.lstrip(), error_code)
