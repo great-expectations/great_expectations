@@ -766,6 +766,23 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
             ) or (column_name == str(typed_column_name_cursor)):
                 return column_name, typed_column_name_cursor
 
+            # use explicit identifier if passed in by user
+            if isinstance(typed_column_name_cursor, str) and (
+                (
+                    column_name.casefold().strip('"')
+                    == typed_column_name_cursor.casefold()
+                )
+                or (
+                    column_name.casefold().strip("[]")
+                    == typed_column_name_cursor.casefold()
+                )
+                or (
+                    column_name.casefold().strip("`")
+                    == typed_column_name_cursor.casefold()
+                )
+            ):
+                return column_name, column_name
+
         return None
 
     normalized_batch_columns_mappings: List[

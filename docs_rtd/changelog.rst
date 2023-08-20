@@ -4,6 +4,46 @@
 Changelog
 #########
 
+0.17.11
+-----------------
+* [FEATURE] Make SQLDatasource.assets field a `tagged-union` ([#8532](https://github.com/great-expectations/great_expectations/pull/8532))
+* [BUGFIX] DatabricksSQL TableAsset quoted identifiers ([#8523](https://github.com/great-expectations/great_expectations/pull/8523))
+* [BUGFIX] Fixed persist to be considered for spark fluent datasource ([#8512](https://github.com/great-expectations/great_expectations/pull/8512)) (thanks @jmcorreia)
+* [BUGFIX] Revert Docusaurus to `2.0.0-beta21` ([#8546](https://github.com/great-expectations/great_expectations/pull/8546))
+* [BUGFIX] add_splitter_on_column_value ([#8498](https://github.com/great-expectations/great_expectations/pull/8498))
+* [BUGFIX] Fix persist is not being reflected for Spark Legacy Datasource ([#8544](https://github.com/great-expectations/great_expectations/pull/8544)) (thanks @jmcorreia)
+* [BUGFIX] Snowflake column identifiers ([#8526](https://github.com/great-expectations/great_expectations/pull/8526))
+* [BUGFIX] Use a randomized schema name when running snowflake tests to support concurrency ([#8559](https://github.com/great-expectations/great_expectations/pull/8559))
+* [BUGFIX] Skip Snowflake FDS tests for User Forks ([#8567](https://github.com/great-expectations/great_expectations/pull/8567))
+* [BUGFIX] Fix Agent error types ([#8558](https://github.com/great-expectations/great_expectations/pull/8558))
+* [BUGFIX] Query Template not always String ([#8570](https://github.com/great-expectations/great_expectations/pull/8570))
+* [BUGFIX] Fix link update for versioned docs when there are multiple links on the same line ([#8568](https://github.com/great-expectations/great_expectations/pull/8568))
+* [DOCS] Update URL to blog post for anonymous stats ([#7014](https://github.com/great-expectations/great_expectations/pull/7014))
+* [DOCS] Updates Quickstart guide ([#8321](https://github.com/great-expectations/great_expectations/pull/8321))
+* [DOCS] Relocate Compare Two Tables with the Onboarding Data Assistant ([#8539](https://github.com/great-expectations/great_expectations/pull/8539))
+* [DOCS] Update to exact_match parameter: expect_table_columns_to_match_set ([#8521](https://github.com/great-expectations/great_expectations/pull/8521)) (thanks @calvingdu)
+* [DOCS] Update Spark Code Examples in Connect to In-memory Source Data ([#8520](https://github.com/great-expectations/great_expectations/pull/8520))
+* [DOCS] Update MetricProviders Conceptual Topic ([#8538](https://github.com/great-expectations/great_expectations/pull/8538))
+* [MAINTENANCE] Retire `docs-integration` tests that are already running in GitHub Actions ([#8525](https://github.com/great-expectations/great_expectations/pull/8525))
+* [MAINTENANCE] Remove Cross-Table comparison from Docs-Integration, which is already being run ([#8531](https://github.com/great-expectations/great_expectations/pull/8531))
+* [MAINTENANCE] Github Actions - Better handling of tests that cannot be run in Forks ([#8530](https://github.com/great-expectations/great_expectations/pull/8530))
+* [MAINTENANCE] Fix marker key ([#8541](https://github.com/great-expectations/great_expectations/pull/8541))
+* [MAINTENANCE] Fix conditional in CI ([#8542](https://github.com/great-expectations/great_expectations/pull/8542))
+* [MAINTENANCE] Ignore distutils warning ([#8543](https://github.com/great-expectations/great_expectations/pull/8543))
+* [MAINTENANCE] Bump gitpython from 3.1.30 to 3.1.32 in /docs_rtd ([#8540](https://github.com/great-expectations/great_expectations/pull/8540))
+* [MAINTENANCE] Fix docs-snippets ci job ([#8545](https://github.com/great-expectations/great_expectations/pull/8545))
+* [MAINTENANCE] Update Docusaurus to `2.4.1` ([#8508](https://github.com/great-expectations/great_expectations/pull/8508))
+* [MAINTENANCE] ruff `0.0.282` ([#8505](https://github.com/great-expectations/great_expectations/pull/8505))
+* [MAINTENANCE] Add concurrency criteria to Github Actions CI/CD ([#8550](https://github.com/great-expectations/great_expectations/pull/8550))
+* [MAINTENANCE] Update `docs snippets` stage in `ci.yml` for scheduled and triggered runs ([#8547](https://github.com/great-expectations/great_expectations/pull/8547))
+* [MAINTENANCE] Bump tornado from 6.3.2 to 6.3.3 in /docs_rtd ([#8551](https://github.com/great-expectations/great_expectations/pull/8551))
+* [MAINTENANCE] ruff 0.0.284 ([#8552](https://github.com/great-expectations/great_expectations/pull/8552))
+* [MAINTENANCE] Allow duplicate keys in checkpoint configuration with the same values ([#8555](https://github.com/great-expectations/great_expectations/pull/8555))
+* [MAINTENANCE] airflow220-min-versions ([#8557](https://github.com/great-expectations/great_expectations/pull/8557))
+* [CONTRIB] Updating Special Characters Expectation ([#8382](https://github.com/great-expectations/great_expectations/pull/8382)) (thanks @calvingdu)
+* [CONTRIB] expect_multicolumn_values_to_be_equal ([#8553](https://github.com/great-expectations/great_expectations/pull/8553)) (thanks @karthigaiselvanm)
+* [CONTRIB] fix query template values metric ([#8562](https://github.com/great-expectations/great_expectations/pull/8562)) (thanks @itaise)
+
 0.17.9
 -----------------
 * [BUGFIX] PR title checker's code should handle apostrophes ([#8513](https://github.com/great-expectations/great_expectations/pull/8513))
