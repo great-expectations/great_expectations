@@ -1807,7 +1807,7 @@ def get_context(  # noqa: PLR0913
     cloud_access_token: str | None = None,
     cloud_organization_id: str | None = None,
     cloud_mode: bool | None = None,
-    mode: str | None = None,
+    mode: Literal["ephemeral", "file", "cloud"] | None = None,
     # <GX_RENAME> Deprecated as of 0.15.37
     ge_cloud_base_url: str | None = None,
     ge_cloud_access_token: str | None = None,
