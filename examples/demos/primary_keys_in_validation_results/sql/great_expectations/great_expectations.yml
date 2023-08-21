@@ -114,6 +114,6 @@ fluent_datasources:
     connection_string: sqlite:///../../../data/visits.db
 notebooks:
 include_rendered_content:
-  globally: false
   expectation_validation_result: false
+  globally: false
   expectation_suite: false

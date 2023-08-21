@@ -96,8 +96,8 @@ data_docs_sites:
 
 anonymous_usage_statistics:
   usage_statistics_url: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
-  data_context_id: f98647c3-0120-42ff-ae47-e48b8a6500cf
   enabled: false
+  data_context_id: f98647c3-0120-42ff-ae47-e48b8a6500cf
 fluent_datasources:
   visits_datasource:
     type: pandas_filesystem
@@ -110,7 +110,7 @@ fluent_datasources:
         delimiter: "\t"
     base_directory: ../../../data
 include_rendered_content:
-  globally: false
-  expectation_suite: false
   expectation_validation_result: false
+  expectation_suite: false
+  globally: false
 notebooks:
