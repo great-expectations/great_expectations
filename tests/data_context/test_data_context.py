@@ -1,6 +1,7 @@
 import copy
 import json
 import os
+import pathlib
 import shutil
 from collections import OrderedDict
 from typing import Dict, List, Union
@@ -2999,3 +3000,45 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
         actual_rendered_content.extend(expectation_configuration.rendered_content)
 
     assert actual_rendered_content == legacy_rendered_content
+
+
+@pytest.mark.filesystem
+def test_file_backed_context_scaffolds_gitignore(tmp_path: pathlib.Path):
+    project_path = tmp_path / "my_project_root_dir"
+    context_path = project_path / FileDataContext.GX_DIR
+    uncommitted = context_path / FileDataContext.GX_UNCOMMITTED_DIR
+    gitignore = context_path / FileDataContext.GITIGNORE
+
+    assert not uncommitted.exists()
+    assert not gitignore.exists()
+
+    # Scaffold project directory
+    _ = get_context(context_root_dir=context_path)
+
+    assert uncommitted.exists()
+    assert gitignore.exists()
+    assert FileDataContext.GX_UNCOMMITTED_DIR in gitignore.read_text()
+
+
+@pytest.mark.filesystem
+def test_file_backed_context_updates_existing_gitignore(tmp_path: pathlib.Path):
+    project_path = tmp_path / "my_project_root_dir"
+    context_path = project_path / FileDataContext.GX_DIR
+    uncommitted = context_path / FileDataContext.GX_UNCOMMITTED_DIR
+    gitignore = context_path / FileDataContext.GITIGNORE
+
+    assert not uncommitted.exists()
+    assert not gitignore.exists()
+
+    # Scaffold necessary files so `get_context` updates rather than creates
+    uncommitted.mkdir(parents=True)
+    existing_value = "__pycache__/"
+    with gitignore.open("w") as f:
+        f.write(f"\n{existing_value}")
+
+    # Scaffold project directory
+    _ = get_context(context_root_dir=context_path)
+
+    contents = gitignore.read_text()
+    assert existing_value in contents
+    assert FileDataContext.GX_UNCOMMITTED_DIR in contents
