@@ -7,26 +7,26 @@ TRINO_NOT_IMPORTED = NotImported(
 )
 
 try:
-    import trino  # noqa TID251
+    import trino
 except ImportError:
     trino = TRINO_NOT_IMPORTED
 
 try:
-    from trino.sqlalchemy import datatype as trinotypes  # noqa TID251
+    from trino.sqlalchemy import datatype as trinotypes
 except (ImportError, AttributeError):
     trinotypes = TRINO_NOT_IMPORTED
 
 try:
-    from trino.sqlalchemy import dialect as trinodialect  # noqa TID251
+    from trino.sqlalchemy import dialect as trinodialect
 except (ImportError, AttributeError):
     trinodialect = TRINO_NOT_IMPORTED
 
 try:
-    import trino.drivers as trinodrivers  # noqa TID251
+    import trino.drivers as trinodrivers
 except (ImportError, AttributeError):
     trinodrivers = TRINO_NOT_IMPORTED
 
 try:
-    import trino.exceptions as trinoexceptions  # noqa TID251
+    import trino.exceptions as trinoexceptions
 except (ImportError, AttributeError):
     trinoexceptions = TRINO_NOT_IMPORTED
