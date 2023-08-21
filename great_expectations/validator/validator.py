@@ -27,6 +27,7 @@ from typing import (
 
 import pandas as pd
 from marshmallow import ValidationError
+from typing_extensions import override
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
@@ -411,6 +412,7 @@ class Validator:
             n_rows=n_rows, domain_kwargs=domain_kwargs, fetch_all=fetch_all
         )
 
+    @override
     def __dir__(self) -> List[str]:
         """
         This custom magic method is used to enable expectation tab completion on Validator objects.

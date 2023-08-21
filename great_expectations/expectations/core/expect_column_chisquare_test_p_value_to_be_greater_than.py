@@ -1,5 +1,7 @@
 from typing import Optional
 
+from typing_extensions import override
+
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -40,6 +42,7 @@ class ExpectColumnChiSquareTestPValueToBeGreaterThan(BatchExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -51,6 +54,7 @@ class ExpectColumnChiSquareTestPValueToBeGreaterThan(BatchExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
+    @override
     def _diagnostic_observed_value_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,

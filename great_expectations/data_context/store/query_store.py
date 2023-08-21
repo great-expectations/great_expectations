@@ -4,6 +4,8 @@ import logging
 from string import Template
 from typing import ClassVar, Type
 
+from typing_extensions import override
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.not_imported import is_version_greater_or_equal
@@ -129,5 +131,6 @@ class SqlAlchemyQueryStore(Store):
             return res
 
     @property
+    @override
     def config(self) -> dict:
         return self._config

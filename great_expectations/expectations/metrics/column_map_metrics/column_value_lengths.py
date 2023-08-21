@@ -1,5 +1,7 @@
 from typing import Optional
 
+from typing_extensions import override
+
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core import ExpectationConfiguration
@@ -47,6 +49,7 @@ class ColumnValuesValueLengthEquals(ColumnMapMetricProvider):
         return column_lengths == value
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
@@ -227,6 +230,7 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
             return column_lengths >= min_value
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,

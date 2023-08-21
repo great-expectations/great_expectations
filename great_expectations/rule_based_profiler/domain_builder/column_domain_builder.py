@@ -12,6 +12,8 @@ from typing import (
     cast,
 )
 
+from typing_extensions import override
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -101,6 +103,7 @@ class ColumnDomainBuilder(DomainBuilder):
         self._table_column_names: List[str] = []
 
     @property
+    @override
     def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.COLUMN
 
@@ -431,6 +434,7 @@ class ColumnDomainBuilder(DomainBuilder):
 
         return effective_column_names
 
+    @override
     def _get_domains(
         self,
         rule_name: str,

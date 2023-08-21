@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, List
 
 import pydantic
+from typing_extensions import override
 
 from great_expectations.agent.actions.agent_action import (
     ActionResult,
@@ -20,6 +21,7 @@ if TYPE_CHECKING:
 
 
 class ListTableNamesAction(AgentAction[ListTableNamesEvent]):
+    @override
     def run(self, event: ListTableNamesEvent, id: str) -> ActionResult:
         datasource_name: str = event.datasource_name
         datasource = self._context.get_datasource(datasource_name=datasource_name)

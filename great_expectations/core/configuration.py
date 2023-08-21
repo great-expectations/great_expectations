@@ -5,6 +5,7 @@ from typing import Optional
 
 from marshmallow.decorators import post_dump
 from marshmallow.schema import Schema
+from typing_extensions import override
 
 from great_expectations.types import SerializableDictDot
 
@@ -17,6 +18,7 @@ class AbstractConfig(ABC, SerializableDictDot):
         self.name = name
         super().__init__()
 
+    @override
     def __repr__(self) -> str:
         return pf(self.to_dict(), indent=2, sort_dicts=True)
 

@@ -1,3 +1,5 @@
+from typing_extensions import override
+
 from great_expectations.agent.actions.agent_action import ActionResult, AgentAction
 from great_expectations.agent.actions.data_assistants.utils import (
     build_action_result,
@@ -11,6 +13,7 @@ class RunMissingnessDataAssistantAction(AgentAction[RunMissingnessDataAssistantE
         super().__init__(context=context)
         self._data_assistant = self._context.assistants.missingness
 
+    @override
     def run(
         self,
         event: RunMissingnessDataAssistantEvent,

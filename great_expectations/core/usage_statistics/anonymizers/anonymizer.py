@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type
 
+from typing_extensions import override
+
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 
 if TYPE_CHECKING:
@@ -75,6 +77,7 @@ class Anonymizer(BaseAnonymizer):
             for strategy in self._strategies
         }
 
+    @override
     def anonymize(self, obj: Optional[object] = None, **kwargs: Optional[dict]) -> Any:
         anonymizer: Optional[BaseAnonymizer] = self._get_anonymizer(obj=obj, **kwargs)
 
@@ -89,6 +92,7 @@ class Anonymizer(BaseAnonymizer):
             f"The type {type(obj)} cannot be handled by the Anonymizer; no suitable strategy found."
         )
 
+    @override
     def can_handle(self, obj: object, **kwargs: Optional[dict]) -> bool:
         return self._get_anonymizer(obj=obj, **kwargs) is not None
 

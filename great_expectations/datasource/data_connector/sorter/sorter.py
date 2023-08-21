@@ -2,6 +2,8 @@ import json
 import logging
 from typing import Any, List, Union, ValuesView
 
+from typing_extensions import override
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition
 
@@ -70,6 +72,7 @@ class Sorter:
     def reverse(self) -> bool:
         return self._reverse
 
+    @override
     def __repr__(self) -> str:
         doc_fields_dict: dict = {"name": self.name, "reverse": self.reverse}
         return json.dumps(doc_fields_dict, indent=2)

@@ -1,3 +1,5 @@
+from typing_extensions import override
+
 """Serializer class interface definition.
 
 Serializers determine how to write an object to disk, json, etc.
@@ -51,6 +53,7 @@ class AbstractConfigSerializer(abc.ABC):
 
 
 class DictConfigSerializer(AbstractConfigSerializer):
+    @override
     def serialize(self, obj: "AbstractConfig") -> dict:
         """Serialize to Python dictionary.
 
@@ -66,6 +69,7 @@ class DictConfigSerializer(AbstractConfigSerializer):
 
 
 class JsonConfigSerializer(AbstractConfigSerializer):
+    @override
     def serialize(self, obj: "AbstractConfig") -> dict:
         """Serialize config to json dict.
 

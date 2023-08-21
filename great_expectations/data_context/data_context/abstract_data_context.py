@@ -33,6 +33,7 @@ from typing import (
 
 from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
+from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -508,6 +509,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._config_variables
 
     @property
+    @override
     def config(self) -> DataContextConfig:
         """
         Returns current DataContext's project_config

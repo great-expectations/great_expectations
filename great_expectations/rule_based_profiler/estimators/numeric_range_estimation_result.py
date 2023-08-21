@@ -2,6 +2,7 @@ from dataclasses import asdict, dataclass
 from typing import List, Union
 
 import numpy as np
+from typing_extensions import override
 
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import DictDot
@@ -23,6 +24,7 @@ class NumericRangeEstimationResult(DictDot):
     estimation_histogram: np.ndarray
     value_range: Union[np.ndarray, List[np.float64]]
 
+    @override
     def to_dict(self) -> dict:
         """Returns: this NumericRangeEstimationResult as a dictionary"""
         return asdict(self)

@@ -1,6 +1,8 @@
 import logging
 from typing import Optional
 
+from typing_extensions import override
+
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core import ExpectationConfiguration
@@ -61,6 +63,7 @@ class ColumnStandardDeviation(ColumnAggregateMetricProvider):
         return F.stddev_samp(column)
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,

@@ -18,6 +18,7 @@ from typing import (
 )
 
 from dateutil.parser import parse
+from typing_extensions import override
 
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import (
@@ -232,6 +233,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
         return cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
 
+    @override
     def load_batch_data(  # type: ignore[override]
         self, batch_id: str, batch_data: Union[SparkDFBatchData, pyspark.DataFrame]
     ) -> None:
@@ -247,6 +249,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
+    @override
     def get_batch_data_and_markers(  # noqa: PLR0912, PLR0915
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
@@ -468,6 +471,7 @@ illegal.  Please check your config."""
             )
 
     @public_api
+    @override
     def get_domain_records(  # noqa: C901, PLR0912, PLR0915
         self,
         domain_kwargs: dict,
@@ -617,6 +621,7 @@ illegal.  Please check your config."""
         )
 
     @public_api
+    @override
     def get_compute_domain(
         self,
         domain_kwargs: dict,
@@ -700,6 +705,7 @@ illegal.  Please check your config."""
 
         return new_domain_kwargs
 
+    @override
     def resolve_metric_bundle(
         self,
         metric_fn_bundle: Iterable[MetricComputationConfiguration],

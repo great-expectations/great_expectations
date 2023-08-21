@@ -4,6 +4,8 @@ import logging
 from abc import ABCMeta
 from typing import TYPE_CHECKING, Any, List
 
+from typing_extensions import override
+
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchSpecError
 from great_expectations.types.base import SerializableDotDict
@@ -44,6 +46,7 @@ class PandasBatchSpec(SerializableDotDict, BatchSpec, metaclass=ABCMeta):
     def reader_options(self) -> dict:
         return self.get("reader_options", {})
 
+    @override
     def to_json_dict(self) -> dict[str, JSONValues]:
         from great_expectations.datasource.fluent.pandas_datasource import (
             _EXCLUDE_TYPES_FROM_JSON,

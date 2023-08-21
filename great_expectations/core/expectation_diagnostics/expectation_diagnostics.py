@@ -6,6 +6,8 @@ from collections import defaultdict
 from dataclasses import asdict, dataclass
 from typing import List, Sequence, Tuple, Union
 
+from typing_extensions import override
+
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationTestDataCases,  # noqa: TCH001
@@ -63,6 +65,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     maturity_checklist: ExpectationDiagnosticMaturityMessages
     coverage_score: float
 
+    @override
     def to_json_dict(self) -> dict:
         result = convert_to_json_serializable(data=asdict(self))
         result["execution_engines_list"] = sorted(

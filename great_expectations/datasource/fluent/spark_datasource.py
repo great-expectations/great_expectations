@@ -17,6 +17,7 @@ from typing import (
 
 import pydantic
 from pydantic import StrictBool, StrictFloat, StrictInt, StrictStr
+from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.pyspark import DataFrame, pyspark
@@ -66,6 +67,7 @@ class _SparkDatasource(Datasource):
     persist: bool = True
 
     @staticmethod
+    @override
     def _update_asset_forward_refs(asset_type: Type[_DataAssetT]) -> None:
         # Only update forward refs if pyspark types are available.
         if pyspark:
@@ -73,6 +75,7 @@ class _SparkDatasource(Datasource):
 
     # Abstract Methods
     @property
+    @override
     def execution_engine_type(self) -> Type[SparkDFExecutionEngine]:
         """Return the SparkDFExecutionEngine unless the override is set"""
         from great_expectations.execution_engine.sparkdf_execution_engine import (
@@ -81,6 +84,7 @@ class _SparkDatasource(Datasource):
 
         return SparkDFExecutionEngine
 
+    @override
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the _SparkDatasource.
 
@@ -116,10 +120,12 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
 
         return dataframe
 
+    @override
     def test_connection(self) -> None:
         ...
 
     @property
+    @override
     def batch_request_options(self) -> tuple[str, ...]:
         return tuple()
 
@@ -140,6 +146,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
         version="0.16.15",
     )
+    @override
     def build_batch_request(
         self, dataframe: Optional[_SparkDataFrameT] = None
     ) -> BatchRequest:
@@ -170,6 +177,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             options={},
         )
 
+    @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.
 
@@ -193,6 +201,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
                 f"but actually has form:\n{pf(batch_request.dict())}\n"
             )
 
+    @override
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> list[Batch]:
@@ -254,6 +263,7 @@ class SparkDatasource(_SparkDatasource):
 
     assets: List[DataFrameAsset] = []  # type: ignore[assignment]
 
+    @override
     def test_connection(self, test_assets: bool = True) -> None:
         ...
 

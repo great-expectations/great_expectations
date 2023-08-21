@@ -23,6 +23,7 @@ from typing import (
 
 from pydantic import Extra, Field, validator
 from ruamel.yaml import YAML
+from typing_extensions import override
 
 from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.datasource.fluent.constants import (
@@ -31,9 +32,7 @@ from great_expectations.datasource.fluent.constants import (
     _FLUENT_DATASOURCES_KEY,
 )
 from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
-from great_expectations.datasource.fluent.interfaces import (
-    Datasource,
-)
+from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
     DEFAULT_PANDAS_DATASOURCE_NAME,
@@ -230,6 +229,7 @@ class GxConfig(FluentBaseModel):
         return loaded_datasources
 
     @classmethod
+    @override
     def parse_yaml(
         cls: Type[GxConfig], f: Union[pathlib.Path, str], _allow_empty: bool = False
     ) -> GxConfig:
@@ -286,6 +286,7 @@ class GxConfig(FluentBaseModel):
     ) -> pathlib.Path:
         ...
 
+    @override
     def yaml(  # noqa: PLR0913
         self,
         stream_or_path: Union[StringIO, pathlib.Path, None] = None,

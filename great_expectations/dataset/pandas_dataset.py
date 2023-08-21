@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
+from typing_extensions import override
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_asset import DataAsset
@@ -448,6 +449,7 @@ Notes:
     def get_column_count(self):
         return self.shape[1]
 
+    @override
     def get_table_columns(self) -> List[str]:
         return list(self.columns)
 

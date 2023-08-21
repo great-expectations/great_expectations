@@ -4,6 +4,7 @@ from pprint import pformat as pf
 
 import requests
 from requests.adapters import HTTPAdapter, Retry
+from typing_extensions import override
 
 from great_expectations import __version__
 
@@ -28,6 +29,7 @@ class _TimeoutHTTPAdapter(HTTPAdapter):
         self.timeout = kwargs.pop("timeout", DEFAULT_TIMEOUT)
         super().__init__(*args, **kwargs)
 
+    @override
     def send(self, request: requests.PreparedRequest, **kwargs) -> requests.Response:  # type: ignore[override]
         kwargs["timeout"] = kwargs.get("timeout", self.timeout)
         return super().send(request, **kwargs)

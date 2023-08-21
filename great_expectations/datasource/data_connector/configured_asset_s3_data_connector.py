@@ -1,6 +1,8 @@
 import logging
 from typing import List, Optional
 
+from typing_extensions import override
+
 from great_expectations.compatibility import aws
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition
@@ -84,6 +86,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
                 "Unable to load boto3 (it is required for ConfiguredAssetS3DataConnector)."
             )
 
+    @override
     def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
@@ -99,6 +102,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         )
         return S3BatchSpec(batch_spec)
 
+    @override
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
         query_options: dict = {
             "Bucket": self._bucket,
@@ -127,6 +131,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         ]
         return path_list
 
+    @override
     def _get_full_file_path_for_asset(
         self, path: str, asset: Optional[Asset] = None
     ) -> str:

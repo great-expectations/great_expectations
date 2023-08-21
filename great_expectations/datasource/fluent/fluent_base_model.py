@@ -21,6 +21,7 @@ from typing import (
 
 import pydantic
 from ruamel.yaml import YAML
+from typing_extensions import override
 
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.constants import (
@@ -150,6 +151,7 @@ class FluentBaseModel(pydantic.BaseModel):
             return stream_or_path
         return stream_or_path.getvalue()
 
+    @override
     def json(  # noqa: PLR0913
         self,
         *,
@@ -223,6 +225,7 @@ class FluentBaseModel(pydantic.BaseModel):
             )
         )
 
+    @override
     def dict(  # noqa: PLR0913
         self,
         *,

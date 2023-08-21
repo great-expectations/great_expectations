@@ -6,6 +6,8 @@ import re
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Union
 
+from typing_extensions import override
+
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
@@ -167,6 +169,7 @@ class FilePathDataConnector(DataConnector):
     # TODO: <Alex>ALEX</Alex>
 
     # Interface Method
+    @override
     def get_batch_definition_list(
         self, batch_request: BatchRequest
     ) -> List[BatchDefinition]:
@@ -222,6 +225,7 @@ class FilePathDataConnector(DataConnector):
 
         return batch_definition_list
 
+    @override
     def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
@@ -238,6 +242,7 @@ class FilePathDataConnector(DataConnector):
         return PathBatchSpec(batch_spec)
 
     # Interface Method
+    @override
     def get_data_reference_count(self) -> int:
         """
         Returns the list of data_references known by this DataConnector from its _data_references_cache
@@ -249,6 +254,7 @@ class FilePathDataConnector(DataConnector):
         return total_references
 
     # Interface Method
+    @override
     def get_matched_data_references(self) -> List[str]:
         """
         Returns the list of data_references matched by configuration by looping through items in
@@ -260,6 +266,7 @@ class FilePathDataConnector(DataConnector):
         return self._get_data_references(matched=True)
 
     # Interface Method
+    @override
     def get_matched_data_reference_count(self) -> int:
         """
         Returns the list of matched data_references known by this DataConnector from its _data_references_cache
@@ -270,6 +277,7 @@ class FilePathDataConnector(DataConnector):
         return len(self.get_matched_data_references())
 
     # Interface Method
+    @override
     def get_unmatched_data_references(self) -> List[str]:
         """
         Returns the list of data_references unmatched by configuration by looping through items in
@@ -281,6 +289,7 @@ class FilePathDataConnector(DataConnector):
         return self._get_data_references(matched=False)
 
     # Interface Method
+    @override
     def get_unmatched_data_reference_count(self) -> int:
         """
         Returns the list of unmatched data_references known by this DataConnector from its _data_references_cache
@@ -323,6 +332,7 @@ class FilePathDataConnector(DataConnector):
         return unmatched_data_references
 
     # Interface Method
+    @override
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
     ) -> dict:

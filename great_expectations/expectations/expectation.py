@@ -32,6 +32,7 @@ from typing import (
 
 import pandas as pd
 from dateutil.parser import parse
+from typing_extensions import override
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core._docs_decorators import public_api
@@ -2324,6 +2325,7 @@ class BatchExpectation(Expectation, ABC):
     domain_type = MetricDomainTypes.TABLE
     args_keys: Tuple[str, ...] = ()
 
+    @override
     def get_validation_dependencies(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -2558,6 +2560,7 @@ class QueryExpectation(BatchExpectation, ABC):
         "condition_parser",
     )
 
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -2645,6 +2648,7 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
 
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -2729,9 +2733,11 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     }
 
     @classmethod
+    @override
     def is_abstract(cls) -> bool:
         return not cls.map_metric or super().is_abstract()
 
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -2746,6 +2752,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    @override
     def get_validation_dependencies(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -2882,6 +2889,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
 
         return validation_dependencies
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -3008,9 +3016,11 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
     }
 
     @classmethod
+    @override
     def is_abstract(cls) -> bool:
         return cls.map_metric is None or super().is_abstract()
 
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -3028,6 +3038,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    @override
     def get_validation_dependencies(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -3161,6 +3172,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         )
         return validation_dependencies
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -3277,9 +3289,11 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
     }
 
     @classmethod
+    @override
     def is_abstract(cls) -> bool:
         return cls.map_metric is None or super().is_abstract()
 
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -3294,6 +3308,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    @override
     def get_validation_dependencies(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -3436,6 +3451,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
 
         return validation_dependencies
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,

@@ -17,6 +17,8 @@ from typing import (
     Union,
 )
 
+from typing_extensions import override
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_manager import BatchManager
@@ -75,6 +77,7 @@ class MetricComputationConfiguration(DictDot):
     accessor_domain_kwargs: Optional[dict] = None
 
     @public_api
+    @override
     def to_dict(self) -> dict:
         """Returns: this MetricComputationConfiguration as a Python dictionary
 

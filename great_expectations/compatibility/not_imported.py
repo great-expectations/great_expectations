@@ -12,6 +12,7 @@ from __future__ import annotations
 from typing import Any
 
 from packaging.version import Version
+from typing_extensions import override
 
 
 class NotImported:
@@ -21,12 +22,14 @@ class NotImported:
     def __getattr__(self, attr: str) -> Any:
         raise ModuleNotFoundError(self.__dict__["gx_error_message"])
 
+    @override
     def __setattr__(self, key: str, value: Any) -> None:
         raise ModuleNotFoundError(self.__dict__["gx_error_message"])
 
     def __call__(self, *args, **kwargs) -> Any:
         raise ModuleNotFoundError(self.__dict__["gx_error_message"])
 
+    @override
     def __str__(self) -> str:
         return self.__dict__["gx_error_message"]
 

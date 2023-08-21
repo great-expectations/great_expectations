@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import numpy as np
+from typing_extensions import override
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core import ExpectationConfiguration
@@ -122,6 +123,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         return np.mean(result)
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,

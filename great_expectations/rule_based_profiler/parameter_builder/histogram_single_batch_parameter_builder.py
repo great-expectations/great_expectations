@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set
 
 import numpy as np
+from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain  # noqa: TCH001
@@ -112,6 +113,7 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             data_context=data_context,
         )
 
+    @override
     def _build_parameters(
         self,
         domain: Domain,

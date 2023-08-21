@@ -12,6 +12,8 @@ from typing import (
     Union,
 )
 
+from typing_extensions import override
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import (
     InferredSemanticDomainType,
@@ -53,11 +55,13 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         )
 
     @property
+    @override
     def table_column_name_to_inferred_semantic_domain_type_map(
         self,
     ) -> Dict[str, SemanticDomainTypes]:
         return self._table_column_name_to_inferred_semantic_domain_type_map  # type: ignore[return-value] # could be None
 
+    @override
     def parse_semantic_domain_type_argument(
         self,
         semantic_types: Optional[

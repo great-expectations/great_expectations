@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, ClassVar, Type
 
+from typing_extensions import override
+
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
@@ -109,5 +111,6 @@ class EvaluationParameterStore(MetricStore):
         return params
 
     @property
+    @override
     def config(self) -> dict:
         return self._config

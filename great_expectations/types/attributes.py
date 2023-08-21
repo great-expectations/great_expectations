@@ -1,5 +1,7 @@
 import logging
 
+from typing_extensions import override
+
 from great_expectations.core import IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDotDict
@@ -15,5 +17,6 @@ class Attributes(SerializableDotDict, IDDict):
     def to_dict(self) -> dict:
         return dict(self)
 
+    @override
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())

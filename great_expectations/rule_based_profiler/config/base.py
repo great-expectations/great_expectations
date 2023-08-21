@@ -5,6 +5,7 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 from marshmallow import INCLUDE, Schema, ValidationError, fields, post_dump, post_load
+from typing_extensions import override
 
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.util import convert_to_json_serializable
@@ -121,6 +122,7 @@ class DomainBuilderConfig(SerializableDictDot):
                 f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".',
             )
 
+    @override
     def to_json_dict(self) -> dict:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -133,6 +135,7 @@ class DomainBuilderConfig(SerializableDictDot):
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
 
+    @override
     def __repr__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -154,6 +157,7 @@ class DomainBuilderConfig(SerializableDictDot):
 
         return json.dumps(sorted_json_dict, indent=2)
 
+    @override
     def __str__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -204,6 +208,7 @@ class ParameterBuilderConfig(SerializableDictDot):
                 f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{ self.__class__.__name__}".',
             )
 
+    @override
     def to_json_dict(self) -> dict:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -216,6 +221,7 @@ class ParameterBuilderConfig(SerializableDictDot):
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
 
+    @override
     def __repr__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -237,6 +243,7 @@ class ParameterBuilderConfig(SerializableDictDot):
 
         return json.dumps(sorted_json_dict, indent=2)
 
+    @override
     def __str__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -303,6 +310,7 @@ class ExpectationConfigurationBuilderConfig(SerializableDictDot):
                 f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".'
             )
 
+    @override
     def to_json_dict(self) -> dict:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -315,6 +323,7 @@ class ExpectationConfigurationBuilderConfig(SerializableDictDot):
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
 
+    @override
     def __repr__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -336,6 +345,7 @@ class ExpectationConfigurationBuilderConfig(SerializableDictDot):
 
         return json.dumps(sorted_json_dict, indent=2)
 
+    @override
     def __str__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -402,6 +412,7 @@ class RuleConfig(SerializableDictDot):
         self.parameter_builders = parameter_builders
         self.expectation_configuration_builders = expectation_configuration_builders
 
+    @override
     def to_json_dict(self) -> dict:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -414,6 +425,7 @@ class RuleConfig(SerializableDictDot):
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
 
+    @override
     def __repr__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -435,6 +447,7 @@ class RuleConfig(SerializableDictDot):
 
         return json.dumps(sorted_json_dict, indent=2)
 
+    @override
     def __str__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -507,6 +520,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         BaseYamlConfig.__init__(self, commented_map=commented_map)
 
     @classmethod
+    @override
     def from_commented_map(cls, commented_map: CommentedMap):  # type: ignore[override] # super type accepts Dict
         """Override parent implementation to pop unnecessary attrs from config.
 
@@ -528,13 +542,16 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
             raise
 
     @classmethod
+    @override
     def get_config_class(cls) -> Type[RuleBasedProfilerConfig]:
         return cls
 
     @classmethod
+    @override
     def get_schema_class(cls) -> Type[RuleBasedProfilerConfigSchema]:
         return RuleBasedProfilerConfigSchema
 
+    @override
     def to_json_dict(self) -> dict:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -547,6 +564,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
 
+    @override
     def __repr__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -568,6 +586,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
 
         return json.dumps(sorted_json_dict, indent=2)
 
+    @override
     def __str__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>

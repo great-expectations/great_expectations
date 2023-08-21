@@ -4,6 +4,8 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any
 
+from typing_extensions import override
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.datasource.data_connector.sorter import Sorter
 
@@ -48,6 +50,7 @@ class DictionarySorter(Sorter):
         self._reverse_keys = reverse_keys
         self._key_reference_list = key_reference_list
 
+    @override
     def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
         batch_identifiers: dict = batch_definition.batch_identifiers
         batch_keys: list[Any] | None
@@ -66,6 +69,7 @@ class DictionarySorter(Sorter):
         ]
         return batch_values
 
+    @override
     def __repr__(self) -> str:
         doc_fields_dict = {
             "name": self.name,

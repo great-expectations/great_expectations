@@ -5,6 +5,8 @@ import pathlib
 import re
 from typing import TYPE_CHECKING, Callable, Optional
 
+from typing_extensions import override
+
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
@@ -71,6 +73,7 @@ class DBFSDataConnector(FilesystemDataConnector):
         )
 
     @classmethod
+    @override
     def build_data_connector(  # noqa: PLR0913
         cls,
         datasource_name: str,
@@ -123,6 +126,7 @@ class DBFSDataConnector(FilesystemDataConnector):
         )
 
     # Interface Method
+    @override
     def _get_full_file_path(self, path: str) -> str:
         if self._file_path_template_map_fn is None:
             raise ValueError(

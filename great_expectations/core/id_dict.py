@@ -2,6 +2,8 @@ import hashlib
 import json
 from typing import Any, Set, TypeVar, Union
 
+from typing_extensions import override
+
 from great_expectations.core.util import convert_to_json_serializable
 
 T = TypeVar("T")
@@ -27,6 +29,7 @@ class IDDict(dict):
             json.dumps(_id_dict, sort_keys=True).encode("utf-8")
         ).hexdigest()
 
+    @override
     def __hash__(self) -> int:  # type: ignore[override]
         """Overrides the default implementation"""
         _result_hash: int = hash(self.to_id())

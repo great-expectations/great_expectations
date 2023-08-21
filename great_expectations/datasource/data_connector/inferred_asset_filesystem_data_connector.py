@@ -2,6 +2,8 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
+from typing_extensions import override
+
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
     InferredAssetFilePathDataConnector,
@@ -59,6 +61,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         self._base_directory = base_directory
         self._glob_directive = glob_directive
 
+    @override
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
     ) -> List[str]:
@@ -72,6 +75,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         )
         return sorted(path_list)
 
+    @override
     def _get_full_file_path(
         self, path: str, data_asset_name: Optional[str] = None
     ) -> str:

@@ -5,6 +5,8 @@ import logging
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Optional, Union, overload
 
+from typing_extensions import override
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import (
     DataContextKey,
@@ -81,6 +83,7 @@ class DatasourceStore(Store):
         """
         return self._store_backend.remove_key(key.to_tuple())
 
+    @override
     def serialize(
         self, value: DatasourceConfig | FluentDatasource
     ) -> Union[str, dict, DatasourceConfig]:
@@ -99,6 +102,7 @@ class DatasourceStore(Store):
     def deserialize(self, value: FluentDatasource) -> FluentDatasource:
         ...
 
+    @override
     def deserialize(
         self, value: dict | DatasourceConfig | FluentDatasource
     ) -> DatasourceConfig | FluentDatasource:
@@ -120,6 +124,7 @@ class DatasourceStore(Store):
         else:
             return self._schema.loads(value)
 
+    @override
     def ge_cloud_response_json_to_object_dict(
         self, response_json: CloudResponsePayloadTD  # type: ignore[override]
     ) -> dict:
@@ -175,6 +180,7 @@ class DatasourceStore(Store):
 
         self.remove_key(self._build_key_from_config(datasource_config))
 
+    @override
     def _build_key_from_config(  # type: ignore[override]
         self, datasource_config: DatasourceConfig | FluentDatasource
     ) -> Union[GXCloudIdentifier, DataContextVariableKey]:
@@ -201,6 +207,7 @@ class DatasourceStore(Store):
     ) -> DatasourceConfig:
         ...
 
+    @override
     def set(
         self,
         key: Union[DataContextKey, None],

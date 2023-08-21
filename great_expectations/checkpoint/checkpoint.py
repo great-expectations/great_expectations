@@ -15,6 +15,8 @@ from typing import (
     cast,
 )
 
+from typing_extensions import override
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.configurator import (
     ActionDicts,
@@ -626,6 +628,7 @@ is run), with each validation having its own defined "action_list" attribute.
         return report_object
 
     @property
+    @override
     def config(self) -> CheckpointConfig:
         return self._checkpoint_config
 
@@ -677,6 +680,7 @@ is run), with each validation having its own defined "action_list" attribute.
 
         return isinstance(self.data_context, CloudDataContext)
 
+    @override
     def __repr__(self) -> str:
         return str(self.get_config())
 
@@ -1186,6 +1190,7 @@ class SimpleCheckpoint(Checkpoint):
         version="0.13.33",
         message="Used in cloud deployments.",
     )
+    @override
     def run(  # noqa: PLR0913
         self,
         template_name: Optional[str] = None,

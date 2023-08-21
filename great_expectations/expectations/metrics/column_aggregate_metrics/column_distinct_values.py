@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Set
 
 import pandas as pd
+from typing_extensions import override
 
 from great_expectations.compatibility import pyspark, sqlalchemy
 from great_expectations.compatibility.pyspark import (
@@ -170,6 +171,7 @@ class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
         )
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,

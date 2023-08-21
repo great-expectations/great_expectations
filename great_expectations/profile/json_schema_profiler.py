@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
 import jsonschema
+from typing_extensions import override
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -53,6 +54,7 @@ class JsonSchemaProfiler(Profiler):
         super().__init__(configuration)
 
     @public_api
+    @override
     def validate(self, schema: dict) -> bool:  # type: ignore[override]
         """
         Check if `schema` can be profiled.
@@ -85,6 +87,7 @@ class JsonSchemaProfiler(Profiler):
         validator.check_schema(schema)
         return True
 
+    @override
     def _profile(
         self, schema: Dict, suite_name: Optional[str] = None
     ) -> ExpectationSuite:

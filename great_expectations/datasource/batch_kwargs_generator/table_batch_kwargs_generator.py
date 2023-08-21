@@ -2,6 +2,7 @@ import logging
 from string import Template
 
 from marshmallow import Schema, ValidationError, fields, post_load
+from typing_extensions import override
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
@@ -273,6 +274,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
             )
         )
 
+    @override
     def get_available_partition_ids(self, data_asset_name=None) -> None:
         raise BatchKwargsError(
             "TableBatchKwargsGenerator cannot identify partitions, however any existing table may"

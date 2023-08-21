@@ -1,5 +1,7 @@
 import json
 
+from typing_extensions import override
+
 from great_expectations.core import IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types.base import SerializableDotDict
@@ -18,6 +20,7 @@ class ExceptionInfo(SerializableDotDict):
             raised_exception=raised_exception,
         )
 
+    @override
     def to_json_dict(self) -> dict:
         fields_dict: dict = {
             "exception_traceback": self.exception_traceback,
@@ -38,6 +41,7 @@ class ExceptionInfo(SerializableDotDict):
     def raised_exception(self) -> bool:
         return self["raised_exception"]
 
+    @override
     def __repr__(self) -> str:
         fields_dict: dict = {
             "exception_traceback": self.exception_traceback,
@@ -62,6 +66,7 @@ class ExceptionInfo(SerializableDotDict):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
+    @override
     def __hash__(self) -> int:  # type: ignore[override] # standard Python dicts are unhashable because of mutability
         """Overrides the default implementation"""
         _result_hash: int = hash(self.id)

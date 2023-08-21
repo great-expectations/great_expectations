@@ -2,6 +2,8 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
+from typing_extensions import override
+
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
@@ -64,6 +66,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         self._base_directory = base_directory
         self._glob_directive = glob_directive
 
+    @override
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
         base_directory: str = self.base_directory
         glob_directive: str = self._glob_directive
@@ -86,6 +89,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
 
         return sorted(path_list)
 
+    @override
     def _get_full_file_path_for_asset(
         self, path: str, asset: Optional[Asset] = None
     ) -> str:

@@ -7,6 +7,7 @@ import sys
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 
 import click
+from typing_extensions import override
 
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_messages import (
@@ -344,6 +345,7 @@ class FilesYamlHelper(BaseDatasourceNewYamlHelper):
         self.base_path: str = ""
         self.context_root_dir: str = context_root_dir
 
+    @override
     def get_notebook_renderer(
         self, context: FileDataContext
     ) -> DatasourceNewNotebookRenderer:
@@ -354,6 +356,7 @@ class FilesYamlHelper(BaseDatasourceNewYamlHelper):
             datasource_name=self.datasource_name,  # type: ignore[arg-type] # could be None
         )
 
+    @override
     def yaml_snippet(self) -> str:
         """
         Note the InferredAssetFilesystemDataConnector was selected to get users
@@ -381,6 +384,7 @@ data_connectors:
           - runtime_batch_identifier_name
 """'''
 
+    @override
     def prompt(self) -> None:
         file_url_or_path: str = click.prompt(PROMPT_FILES_BASE_PATH, type=click.Path())
         if not toolkit.is_cloud_file_url(file_url_or_path):
@@ -407,6 +411,7 @@ class PandasYamlHelper(FilesYamlHelper):
             datasource_name=datasource_name,
         )
 
+    @override
     def verify_libraries_installed(self) -> bool:
         return True
 
@@ -428,6 +433,7 @@ class SparkYamlHelper(FilesYamlHelper):
             datasource_name=datasource_name,
         )
 
+    @override
     def verify_libraries_installed(self) -> bool:
         return verify_library_dependent_modules(
             python_import_name="pyspark", pip_library_name="pyspark"
@@ -476,6 +482,7 @@ schema_name = "{self.schema_name}"
 # A table that you would like to add initially as a Data Asset
 table_name = "{self.table_name}"'''
 
+    @override
     def yaml_snippet(self) -> str:
         yaml_str = '''f"""
 name: {datasource_name}
@@ -518,6 +525,7 @@ data_connectors:
     password: {password}
     database: {database}"""
 
+    @override
     def get_notebook_renderer(
         self, context: FileDataContext
     ) -> DatasourceNewNotebookRenderer:
@@ -546,6 +554,7 @@ class MySQLCredentialYamlHelper(SQLCredentialYamlHelper):
             port=3306,
         )
 
+    @override
     def verify_libraries_installed(self) -> bool:
         return verify_library_dependent_modules(
             python_import_name="pymysql",
@@ -567,6 +576,7 @@ class PostgresCredentialYamlHelper(SQLCredentialYamlHelper):
             port=5432,
         )
 
+    @override
     def verify_libraries_installed(self) -> bool:
         psycopg2_success: bool = verify_library_dependent_modules(
             python_import_name="psycopg2",
@@ -598,6 +608,7 @@ class RedshiftCredentialYamlHelper(SQLCredentialYamlHelper):
             port=5439,
         )
 
+    @override
     def verify_libraries_installed(self) -> bool:
         # noinspection SpellCheckingInspection
         psycopg2_success: bool = verify_library_dependent_modules(
@@ -619,6 +630,7 @@ class RedshiftCredentialYamlHelper(SQLCredentialYamlHelper):
         )
         return redshift_success or postgresql_success
 
+    @override
     def _yaml_innards(self) -> str:
         return (
             super()._yaml_innards()
@@ -647,6 +659,7 @@ class SnowflakeCredentialYamlHelper(SQLCredentialYamlHelper):
         )
         self.auth_method = SnowflakeAuthMethod.USER_AND_PASSWORD
 
+    @override
     def verify_libraries_installed(self) -> bool:
         return verify_library_dependent_modules(
             python_import_name="snowflake.sqlalchemy.snowdialect",
@@ -654,9 +667,11 @@ class SnowflakeCredentialYamlHelper(SQLCredentialYamlHelper):
             module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
         )
 
+    @override
     def prompt(self) -> None:
         self.auth_method = _prompt_for_snowflake_auth_method()
 
+    @override
     def credentials_snippet(self) -> str:
         snippet = f"""\
 host = "{self.host}"  # The account name (include region -- ex 'ABCD.us-east-1')
@@ -680,6 +695,7 @@ private_key_passphrase = ""   # Passphrase for the private key used for authenti
 
         return snippet
 
+    @override
     def _yaml_innards(self) -> str:
         snippet = """
   credentials:
@@ -715,6 +731,7 @@ class BigqueryCredentialYamlHelper(SQLCredentialYamlHelper):
             },
         )
 
+    @override
     def credentials_snippet(self) -> str:
         return '''\
 # The SQLAlchemy url/connection string for the BigQuery connection
@@ -724,6 +741,7 @@ connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"
 schema_name = ""  # or dataset name
 table_name = ""'''
 
+    @override
     def verify_libraries_installed(self) -> bool:
         sqlalchemy_bigquery_ok = verify_library_dependent_modules(
             python_import_name="sqlalchemy_bigquery",
@@ -732,6 +750,7 @@ table_name = ""'''
         )
         return sqlalchemy_bigquery_ok
 
+    @override
     def _yaml_innards(self) -> str:
         return "\n  connection_string: {connection_string}"
 
@@ -748,6 +767,7 @@ class ClickhouseCredentialYamlHelper(SQLCredentialYamlHelper):
             driver="clickhouse",
         )
 
+    @override
     def verify_libraries_installed(self) -> bool:
         return verify_library_dependent_modules(
             python_import_name="clickhouse_sqlalchemy.drivers.base",
@@ -769,6 +789,7 @@ class TrinoCredentialYamlHelper(SQLCredentialYamlHelper):
             driver="trino",
         )
 
+    @override
     def verify_libraries_installed(self) -> bool:
         return verify_library_dependent_modules(
             python_import_name="trino.sqlalchemy.dialect",
@@ -776,6 +797,7 @@ class TrinoCredentialYamlHelper(SQLCredentialYamlHelper):
             module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
         )
 
+    @override
     def credentials_snippet(self) -> str:
         return f'''\
 host = "{self.host}"
@@ -802,6 +824,7 @@ class AthenaCredentialYamlHelper(SQLCredentialYamlHelper):
             },
         )
 
+    @override
     def verify_libraries_installed(self) -> bool:
         # noinspection SpellCheckingInspection
         pyathena_success: bool = verify_library_dependent_modules(
@@ -811,6 +834,7 @@ class AthenaCredentialYamlHelper(SQLCredentialYamlHelper):
         )
         return pyathena_success
 
+    @override
     def credentials_snippet(self) -> str:
         return '''\
 # The SQLAlchemy url/connection string for the Athena connection
@@ -824,6 +848,7 @@ s3_path = "s3://YOUR_S3_BUCKET/path/to/"  # ignore partitioning
 connection_string = f"awsathena+rest://@athena.{region}.amazonaws.com/{schema_name}?s3_staging_dir={s3_path}"
             '''
 
+    @override
     def _yaml_innards(self) -> str:
         return "\n  connection_string: {connection_string}"
 
@@ -839,9 +864,11 @@ class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
             },
         )
 
+    @override
     def verify_libraries_installed(self) -> bool:
         return True
 
+    @override
     def credentials_snippet(self) -> str:
         return '''\
 # The url/connection string for the sqlalchemy connection
@@ -855,6 +882,7 @@ schema_name = "YOUR_SCHEMA"
 # A table that you would like to add initially as a Data Asset
 table_name = "YOUR_TABLE_NAME"'''
 
+    @override
     def _yaml_innards(self) -> str:
         return "\n  connection_string: {connection_string}"
 

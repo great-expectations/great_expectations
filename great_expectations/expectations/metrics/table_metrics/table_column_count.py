@@ -1,5 +1,7 @@
 from typing import Any, Dict, Optional
 
+from typing_extensions import override
+
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -54,6 +56,7 @@ class TableColumnCount(TableMetricProvider):
         return len(columns)  # type: ignore[arg-type]
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,

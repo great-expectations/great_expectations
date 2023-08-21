@@ -4,6 +4,7 @@ import logging
 from typing import TYPE_CHECKING, Dict, Optional
 
 import numpy as np
+from typing_extensions import override
 
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
@@ -43,6 +44,7 @@ class ExactNumericRangeEstimator(NumericRangeEstimator):
             configuration=None,
         )
 
+    @override
     def _get_numeric_range_estimate(
         self,
         metric_values: npt.NDArray,

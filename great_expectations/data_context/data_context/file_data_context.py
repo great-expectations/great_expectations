@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Mapping, Optional, Union
 
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
+from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
@@ -94,6 +95,7 @@ class FileDataContext(SerializableDataContext):
             project_root_dir=project_root_dir,
         )
 
+    @override
     def _init_project_config(
         self, project_config: Optional[Union[DataContextConfig, Mapping]]
     ) -> DataContextConfig:
@@ -107,6 +109,7 @@ class FileDataContext(SerializableDataContext):
             )
         return self._apply_global_config_overrides(config=project_config)
 
+    @override
     def _init_datasource_store(self) -> DatasourceStore:
         from great_expectations.data_context.store.datasource_store import (
             DatasourceStore,
@@ -135,6 +138,7 @@ class FileDataContext(SerializableDataContext):
         )
         return datasource_store
 
+    @override
     def _init_variables(self) -> FileDataContextVariables:
         variables = FileDataContextVariables(
             config=self._project_config,
@@ -143,6 +147,7 @@ class FileDataContext(SerializableDataContext):
         )
         return variables
 
+    @override
     def _save_project_config(self, _fds_datasource=None) -> None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
@@ -210,6 +215,7 @@ class FileDataContext(SerializableDataContext):
             # Just to be explicit about what we intended to catch
             raise
 
+    @override
     def _load_fluent_config(self, config_provider: _ConfigurationProvider) -> GxConfig:
         logger.info(f"{type(self).__name__} loading fluent config")
         if not self.root_directory:

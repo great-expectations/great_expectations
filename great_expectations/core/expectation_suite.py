@@ -20,6 +20,7 @@ from typing import (
 )
 
 from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
+from typing_extensions import override
 
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
@@ -251,6 +252,7 @@ class ExpectationSuite(SerializableDictDot):
         return result
 
     @public_api
+    @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this ExpectationSuite.
 

@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Dict, Final, Optional
 
+from typing_extensions import override
+
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
     NumericRangeEstimationResult,  # noqa: TCH001
@@ -49,6 +51,7 @@ class QuantilesNumericRangeEstimator(NumericRangeEstimator):
             configuration=configuration,
         )
 
+    @override
     def _get_numeric_range_estimate(
         self,
         metric_values: np.ndarray,

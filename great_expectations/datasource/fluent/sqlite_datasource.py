@@ -14,6 +14,7 @@ from typing import (
 )
 
 import pydantic
+from typing_extensions import override
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.config_str import ConfigStr
@@ -62,12 +63,15 @@ class SplitterHashedColumn(_SplitterOneColumnOneParam):
     method_name: Literal["split_on_hashed_column"] = "split_on_hashed_column"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         return ["hash"]
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name, "hash_digits": self.hash_digits}
 
+    @override
     def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
@@ -94,17 +98,20 @@ class SplitterConvertedDateTime(_SplitterOneColumnOneParam):
     method_name: Literal["split_on_converted_datetime"] = "split_on_converted_datetime"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         # The datetime parameter will be a string representing a datetime in the format
         # given by self.date_format_string.
         return ["datetime"]
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {
             "column_name": self.column_name,
             "date_format_string": self.date_format_string,
         }
 
+    @override
     def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
@@ -204,6 +211,7 @@ class SqliteDatasource(SQLDatasource):
     _QueryAsset: Type[SqlQueryAsset] = pydantic.PrivateAttr(SqliteQueryAsset)
 
     @public_api
+    @override
     def add_table_asset(  # noqa: PLR0913
         self,
         name: str,
@@ -226,6 +234,7 @@ class SqliteDatasource(SQLDatasource):
     add_table_asset.__doc__ = SQLDatasource.add_table_asset.__doc__
 
     @public_api
+    @override
     def add_query_asset(
         self,
         name: str,

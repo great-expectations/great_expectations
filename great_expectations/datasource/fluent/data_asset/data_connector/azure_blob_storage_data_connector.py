@@ -5,6 +5,7 @@ import re
 from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
 
 import pydantic
+from typing_extensions import override
 
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.util import (
@@ -194,6 +195,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
             }
         )
 
+    @override
     def build_batch_spec(self, batch_definition: BatchDefinition) -> AzureBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
@@ -210,6 +212,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         return AzureBatchSpec(batch_spec)
 
     # Interface Method
+    @override
     def get_data_references(self) -> List[str]:
         query_options: dict = {
             "container": self._container,
@@ -224,6 +227,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         return path_list
 
     # Interface Method
+    @override
     def _get_full_file_path(self, path: str) -> str:
         if self._file_path_template_map_fn is None:
             raise ValueError(

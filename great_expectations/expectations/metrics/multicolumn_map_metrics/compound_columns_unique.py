@@ -1,5 +1,7 @@
 from typing import Optional
 
+from typing_extensions import override
+
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
@@ -165,6 +167,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         return row_wise_cond
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,

@@ -3,6 +3,8 @@ from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 from typing import Optional, Tuple, Union
 
+from typing_extensions import override
+
 
 class DataContextKey(metaclass=ABCMeta):
     """DataContextKey objects are used to uniquely identify resources used by the DataContext.
@@ -90,12 +92,14 @@ class DataContextVariableKey(DataContextKey):
     def resource_name(self) -> Union[str, None]:
         return self._resource_name
 
+    @override
     def to_tuple(self) -> Tuple[str]:
         """
         See parent `DataContextKey.to_tuple` for more information.
         """
         return (self._resource_name or "",)
 
+    @override
     def to_fixed_length_tuple(self) -> Tuple[str]:
         """
         See parent `DataContextKey.to_fixed_length_tuple` for more information.
@@ -103,6 +107,7 @@ class DataContextVariableKey(DataContextKey):
         return self.to_tuple()
 
     @classmethod
+    @override
     def from_fixed_length_tuple(cls, tuple_: tuple) -> DataContextVariableKey:
         """
         See parent `DataContextKey.from_fixed_length_tuple` for more information.

@@ -27,6 +27,8 @@ from typing import (
     cast,
 )
 
+from typing_extensions import override
+
 from great_expectations._version import get_versions  # isort:skip
 
 
@@ -530,6 +532,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return self._url
 
     @property
+    @override
     def dialect(self) -> sqlalchemy.Dialect:
         return self.engine.dialect
 
@@ -631,6 +634,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         )
 
     @public_api
+    @override
     def get_domain_records(  # noqa: C901, PLR0912, PLR0915
         self,
         domain_kwargs: dict,
@@ -856,6 +860,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return selectable
 
     @public_api
+    @override
     def get_compute_domain(
         self,
         domain_kwargs: dict,
@@ -886,6 +891,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return selectable, split_domain_kwargs.compute, split_domain_kwargs.accessor
 
+    @override
     def _split_column_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
         self,
         domain_kwargs: dict,
@@ -926,6 +932,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
+    @override
     def _split_column_pair_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
         self,
         domain_kwargs: dict,
@@ -972,6 +979,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
+    @override
     def _split_multi_column_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
         self,
         domain_kwargs: dict,
@@ -1016,6 +1024,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
+    @override
     def resolve_metric_bundle(
         self,
         metric_fn_bundle: Iterable[MetricComputationConfiguration],
@@ -1303,6 +1312,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return selectable
 
+    @override
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:

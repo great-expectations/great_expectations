@@ -2,6 +2,8 @@ import logging
 from copy import deepcopy
 from typing import Any, Dict, List, Optional, cast
 
+from typing_extensions import override
+
 from great_expectations.compatibility import aws
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
@@ -107,6 +109,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
     def partitions(self) -> Optional[List[str]]:
         return self._partitions
 
+    @override
     def build_batch_spec(
         self, batch_definition: BatchDefinition
     ) -> GlueDataCatalogBatchSpec:
@@ -146,6 +149,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         return GlueDataCatalogBatchSpec(batch_spec)
 
     @public_api
+    @override
     def get_available_data_asset_names(self) -> List[str]:
         """Return the list of asset names known by this DataConnector.
 
@@ -154,6 +158,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         """
         return list(self.assets.keys())
 
+    @override
     def get_unmatched_data_references(self) -> List[str]:
         """
         Returns the list of data_references unmatched by configuration by looping through items in _data_references_cache
@@ -164,6 +169,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         """
         return []
 
+    @override
     def get_batch_definition_list_from_batch_request(
         self, batch_request: BatchRequestBase
     ):
@@ -314,6 +320,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
 
         return batch_identifiers_list or [{}]
 
+    @override
     def _refresh_data_references_cache(self) -> None:
         self._data_references_cache = {}
 
@@ -326,6 +333,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             )
             self._data_references_cache[data_asset_name] = batch_identifiers_list
 
+    @override
     def _get_data_reference_list_from_cache_by_data_asset_name(
         self, data_asset_name: str
     ) -> List[dict]:
@@ -347,6 +355,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         )
         return data_asset_name
 
+    @override
     def _map_data_reference_to_batch_definition_list(
         self, data_reference, data_asset_name: Optional[str] = None
     ) -> Optional[List[BatchDefinition]]:
@@ -360,6 +369,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             )
         ]
 
+    @override
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
     ) -> dict:

@@ -4,6 +4,8 @@ import logging
 import pathlib
 from typing import TYPE_CHECKING, Any
 
+from typing_extensions import override
+
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context_variables import (
@@ -75,9 +77,11 @@ class InlineStoreBackend(StoreBackend):
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     @property
+    @override
     def config(self) -> dict:
         return self._config
 
+    @override
     def _get(self, key: tuple[str, ...]) -> Any:
         resource_name = InlineStoreBackend._determine_resource_name(key)
         project_config: DataContextConfig = self._data_context.config
@@ -93,6 +97,7 @@ class InlineStoreBackend(StoreBackend):
 
         return variable_config
 
+    @override
     def _set(self, key: tuple[str, ...], value: Any, **kwargs: dict) -> None:
         resource_name = InlineStoreBackend._determine_resource_name(key)
         project_config: DataContextConfig = self._data_context.config
@@ -115,6 +120,7 @@ class InlineStoreBackend(StoreBackend):
 
         self._save_changes()
 
+    @override
     def _move(
         self, source_key: tuple[str, ...], dest_key: tuple[str, ...], **kwargs: dict
     ) -> None:
@@ -122,6 +128,7 @@ class InlineStoreBackend(StoreBackend):
             "InlineStoreBackend does not support moving of keys; the DataContext's config variables schema is immutable"
         )
 
+    @override
     def list_keys(self, prefix: tuple[str, ...] = ()) -> list[tuple]:
         """
         See `StoreBackend.list_keys` for more information.
@@ -153,6 +160,7 @@ class InlineStoreBackend(StoreBackend):
 
         return keys
 
+    @override
     def remove_key(self, key: tuple[str, ...]) -> None:
         """
         See `StoreBackend.remove_key` for more information.
@@ -177,6 +185,7 @@ class InlineStoreBackend(StoreBackend):
 
         self._save_changes()
 
+    @override
     def build_key(
         self,
         id: str | None = None,
@@ -187,6 +196,7 @@ class InlineStoreBackend(StoreBackend):
             resource_name=name,
         )
 
+    @override
     def _has_key(self, key: tuple[str, ...]) -> bool:
         resource_name = InlineStoreBackend._determine_resource_name(key)
         resource_type = self._resource_type

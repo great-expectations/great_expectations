@@ -7,6 +7,8 @@ from typing import (
     Tuple,
 )
 
+from typing_extensions import override
+
 from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
 
@@ -50,6 +52,7 @@ class ColumnPairMapMetricProvider(MapMetricProvider):
     function_value_keys = tuple()
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
