@@ -5,6 +5,7 @@ import enum
 from dataclasses import dataclass
 from typing import Union, cast
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import ProfilerConfigurationError
 from great_expectations.types import SerializableDictDot
@@ -20,6 +21,7 @@ class RelativeCardinalityLimit(CardinalityLimit):
     max_proportion_unique: float
     metric_name_defining_limit: str = "column.unique_proportion"
 
+    @override
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(
             {
@@ -35,6 +37,7 @@ class AbsoluteCardinalityLimit(CardinalityLimit):
     max_unique_values: int
     metric_name_defining_limit: str = "column.distinct_values.count"
 
+    @override
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(
             {

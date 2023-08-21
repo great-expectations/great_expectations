@@ -6,9 +6,11 @@ from great_expectations.agent.models import (
     CreatedResource,
     RunCheckpointEvent,
 )
+from great_expectations.compatibility.typing_extensions import override
 
 
 class RunCheckpointAction(AgentAction[RunCheckpointEvent]):
+    @override
     def run(self, event: RunCheckpointEvent, id: str) -> ActionResult:
         checkpoint_run_result = self._context.run_checkpoint(
             ge_cloud_id=event.checkpoint_id

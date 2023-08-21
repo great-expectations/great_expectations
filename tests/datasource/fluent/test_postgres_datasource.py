@@ -123,7 +123,7 @@ def mock_test_connection(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(PostgresDatasource, "test_connection", _mock_test_connection)
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_construct_postgres_datasource(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
@@ -154,7 +154,7 @@ def assert_batch_request(
     assert batch_request.options == options
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
@@ -191,7 +191,7 @@ def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixtur
         )
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_add_table_asset_with_no_splitter(mocker, create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
@@ -224,7 +224,7 @@ def test_add_table_asset_with_no_splitter(mocker, create_source: CreateSourceFix
         )
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_construct_table_asset_directly_with_no_splitter(create_source):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
@@ -260,7 +260,7 @@ def year_month_splitter(column_name: str) -> SplitterYearAndMonth:
     )
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_construct_table_asset_directly_with_splitter(create_source):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
@@ -290,7 +290,7 @@ def test_construct_table_asset_directly_with_splitter(create_source):
         )
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_datasource_gets_batch_list_no_splitter(empty_data_context, create_source):
     def validate_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
         assert spec == {
@@ -343,7 +343,7 @@ def assert_batches_correct_with_year_month_splitter_defaults(batches):
             assert {"year": year, "month": month} in metadatas
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_datasource_gets_batch_list_splitter_with_unspecified_batch_request_options(
     empty_data_context,
     create_source: CreateSourceFixture,
@@ -372,7 +372,7 @@ def test_datasource_gets_batch_list_splitter_with_unspecified_batch_request_opti
         assert_batches_correct_with_year_month_splitter_defaults(batches)
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_none(
     empty_data_context,
     create_source: CreateSourceFixture,
@@ -405,7 +405,7 @@ def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_n
         assert_batches_correct_with_year_month_splitter_defaults(batches)
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_request_options(
     empty_data_context,
     create_source: CreateSourceFixture,
@@ -454,7 +454,7 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
             assert expected_metadata in metadatas
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
     empty_data_context,
     create_source: CreateSourceFixture,
@@ -493,7 +493,7 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
         assert batches[0].metadata == {"month": month, "year": year}
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_datasource_gets_nonexistent_asset(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
@@ -502,7 +502,7 @@ def test_datasource_gets_nonexistent_asset(create_source: CreateSourceFixture):
             source.get_asset("my_asset")
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 @pytest.mark.parametrize(
     [
         "add_splitter",
@@ -575,7 +575,7 @@ def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
             source.get_batch_list_from_batch_request(batch_request)
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 @pytest.mark.parametrize(
     "batch_request_options",
     [{}, {"year": 2021}, {"year": 2021, "month": 10}, {"year": None, "month": 10}],
@@ -606,7 +606,7 @@ def test_get_batch_list_from_batch_request_with_good_batch_request(
         asset.get_batch_list_from_batch_request(batch_request)
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 @pytest.mark.parametrize(
     "batch_request_args",
     [
@@ -639,7 +639,7 @@ def test_get_batch_list_from_batch_request_with_malformed_batch_request(
             asset.get_batch_list_from_batch_request(batch_request)
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_get_bad_batch_request(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
@@ -655,7 +655,7 @@ def test_get_bad_batch_request(create_source: CreateSourceFixture):
             asset.build_batch_request({"invalid_key": None})
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 @pytest.mark.parametrize(
     "sort_info",
     # Sort info is a list where the first element is the sort keys with an optional prefix and
@@ -747,7 +747,7 @@ def test_sort_batch_list_by_metadata(
             assert batch.metadata["month"] == expected_order[i]["month"]
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_sort_batch_list_by_unknown_key(
     empty_data_context, create_source: CreateSourceFixture
 ):
@@ -773,7 +773,7 @@ def test_sort_batch_list_by_unknown_key(
             source.get_batch_list_from_batch_request(batch_request)
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 @pytest.mark.parametrize(
     "order_by",
     [
@@ -797,7 +797,7 @@ def test_table_asset_sorter_parsing(order_by: list):
     assert table_asset.order_by == expected_sorters
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 @pytest.mark.parametrize(
     "batch_slice,expected_batch_count",
     [
@@ -841,7 +841,7 @@ def test_postgres_slice_batch_count(
         assert len(batches) == expected_batch_count
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_data_source_json_has_properties(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
@@ -861,7 +861,7 @@ def test_data_source_json_has_properties(create_source: CreateSourceFixture):
         assert f'"type": "{asset.type}"'  # noqa: PLW0129
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_data_source_yaml_has_properties(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
@@ -880,7 +880,7 @@ def test_data_source_yaml_has_properties(create_source: CreateSourceFixture):
         assert f"type: {asset.type}" in source_str
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_datasource_dict_has_properties(create_source):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
@@ -916,7 +916,7 @@ def test_datasource_dict_has_properties(create_source):
         )
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 @pytest.mark.parametrize(
     "connection_string",
     [
@@ -942,7 +942,7 @@ def test_validate_valid_postgres_connection_string(
         pass
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 @pytest.mark.parametrize(
     "connection_string",
     [
@@ -1026,7 +1026,7 @@ def bad_configuration_datasource(
     )
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_test_connection_failures(
     mocker,
     bad_configuration_datasource: PostgresDatasource,
@@ -1076,7 +1076,7 @@ def test_query_data_asset(empty_data_context, create_source):
         source.get_batch_list_from_batch_request(asset.build_batch_request())
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_non_select_query_data_asset(create_source):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
@@ -1111,7 +1111,7 @@ def test_adding_splitter_persists_results(
     assert final_yaml["my_datasource"]["assets"]["my_asset"]["splitter"]
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_splitter_year(
     empty_data_context,
     create_source: CreateSourceFixture,
@@ -1146,7 +1146,7 @@ def test_splitter_year(
             assert spec["splitter_method"] == "split_on_year"
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_splitter_year_and_month(
     empty_data_context,
     create_source: CreateSourceFixture,
@@ -1188,7 +1188,7 @@ def test_splitter_year_and_month(
             assert spec["splitter_method"] == "split_on_year_and_month"
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_splitter_year_and_month_and_day(
     empty_data_context,
     create_source: CreateSourceFixture,
@@ -1239,7 +1239,7 @@ def test_splitter_year_and_month_and_day(
             assert spec["splitter_method"] == "split_on_year_and_month_and_day"
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 @pytest.mark.parametrize(
     [
         "add_splitter_method",
@@ -1387,7 +1387,7 @@ def test_splitter(
         assert specified_batches[-1].metadata == last_specified_batch_metadata
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_sorting_none_in_metadata(
     empty_data_context,
     create_source: CreateSourceFixture,
@@ -1411,7 +1411,7 @@ def test_sorting_none_in_metadata(
         assert batches[-1].metadata["year"] is None
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_create_temp_table(empty_data_context, create_source):
     with create_source(
         validate_batch_spec=lambda _: None,
@@ -1425,7 +1425,7 @@ def test_create_temp_table(empty_data_context, create_source):
         assert source._execution_engine._create_temp_table is False
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_add_postgres_query_asset_with_batch_metadata(
     empty_data_context,
     create_source: CreateSourceFixture,
@@ -1470,7 +1470,7 @@ def test_add_postgres_query_asset_with_batch_metadata(
             assert batches[i].metadata == substituted_batch_metadata
 
 
-@pytest.mark.unit
+@pytest.mark.postgresql
 def test_add_postgres_table_asset_with_batch_metadata(
     empty_data_context, create_source: CreateSourceFixture, monkeypatch
 ):
