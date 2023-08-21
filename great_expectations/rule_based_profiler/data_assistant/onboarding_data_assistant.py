@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import SemanticDomainTypes
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
@@ -76,6 +77,7 @@ class OnboardingDataAssistant(DataAssistant):
             validator=validator,
         )
 
+    @override
     def get_variables(self) -> Optional[Dict[str, Any]]:
         """
         Returns:
@@ -83,6 +85,7 @@ class OnboardingDataAssistant(DataAssistant):
         """
         return None
 
+    @override
     def get_rules(self) -> Optional[List[Rule]]:
         """
         Returns:
@@ -164,6 +167,7 @@ class OnboardingDataAssistant(DataAssistant):
             categorical_columns_rule,
         ]
 
+    @override
     def _build_data_assistant_result(
         self, data_assistant_result: DataAssistantResult
     ) -> DataAssistantResult:

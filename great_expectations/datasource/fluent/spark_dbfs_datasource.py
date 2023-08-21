@@ -3,11 +3,10 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, ClassVar, Literal, Type
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import DBFSPath
-from great_expectations.datasource.fluent import (
-    SparkFilesystemDatasource,
-)
+from great_expectations.datasource.fluent import SparkFilesystemDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     DBFSDataConnector,
 )
@@ -31,6 +30,7 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
     # overridden from base `Literal['spark_filesystem']`
     type: Literal["spark_dbfs"] = "spark_dbfs"  # type: ignore[assignment] # base class has different type
 
+    @override
     def _build_data_connector(
         self,
         data_asset: _SPARK_FILE_PATH_ASSET_TYPES_UNION,
