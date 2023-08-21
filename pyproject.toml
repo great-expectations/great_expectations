@@ -284,6 +284,9 @@ extend-exclude = [
     "F403", # star imports
     "PTH207", # use glob - __all__ needs to be list of str, not Path
 ]
+"*.pyi" = [
+    "TID251", # flake8-banned-api - type stubs are not executed
+]
 "great_expectations/_version.py" = [
     "PLR", # pylint - versioneer code
 ]
