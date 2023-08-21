@@ -253,7 +253,8 @@ module.exports = {
             },
             'terms/expectation_suite',
             'terms/metric',
-            'terms/plugin',
+            'conceptual_guides/metricproviders',
+            'terms/metric',
             'terms/profiler',
             {
               type: 'category',

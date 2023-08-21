@@ -402,8 +402,8 @@ def test_column_quoted_name_type_sa(sa):
 
     for column_name in [
         "non_existent_column",
-        '"NAMES"',
-        '"Names"',
+        "?NAMES?",
+        "*Names*",
     ]:
         with pytest.raises(
             gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError
@@ -417,28 +417,66 @@ def test_column_quoted_name_type_sa(sa):
             == f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
-    quoted_batch_column_list = [
-        sqlalchemy.quoted_name(value=str(column_name), quote=True)
-        for column_name in [
-            "Names",
-            "names",
-        ]
-    ]
+
+@pytest.mark.unit
+def test_column_quoted_name_type_sa_handles_explicit_string_identifiers(sa):
+    """
+    Within SQLite, identifiers can be quoted using one of the following mechanisms:
+    'keyword'		A keyword in single quotes is a string literal.
+    "keyword"		A keyword in double-quotes is an identifier.
+    [keyword]		A keyword enclosed in square brackets is an identifier. This is not standard SQL.
+                    This quoting mechanism is used by MS Access and SQL Server and is included in SQLite for compatibility.
+    `keyword`		A keyword enclosed in grave accents (ASCII code 96) is an identifier. This is not standard SQL.
+                    This quoting mechanism is used by MySQL and is included in SQLite for compatibility.
+
+    When explicit quoted identifiers are passed in, we should use them as-is.
+    Explicit identifiers are used when the column contains a space or reserved word.
+    """
+    engine = build_sa_execution_engine(
+        pd.DataFrame(
+            {
+                "More Names": [
+                    "Ada Lovelace",
+                    "Alan Kay",
+                    "Donald Knuth",
+                    "Edsger Dijkstra",
+                    "Guido van Rossum",
+                    "John McCarthy",
+                    "Marvin Minsky",
+                    "Ray Ozzie",
+                ]
+            }
+        ),
+        sa,
+    )
+
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+
+    table_columns_metric: MetricConfiguration
+    results: Dict[Tuple[str, str, str], MetricValue]
+
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
+    metrics.update(results)
+
+    table_columns_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="table.columns",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+    table_columns_metric_id: Tuple[str, str, str] = table_columns_metric.id
+    batch_column_list = metrics[table_columns_metric_id]
+
     for column_name in [
-        "non_existent_column",
-        "NAMES",
+        '"More Names"',
+        "[More Names]",
+        "`More Names`",
     ]:
-        with pytest.raises(
-            gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError
-        ) as eee:
-            _ = get_dbms_compatible_column_names(
-                column_names=column_name,
-                batch_columns_list=quoted_batch_column_list,
-            )
-        assert (
-            str(eee.value)
-            == f'Error: The column "{column_name}" in BatchData does not exist.'
+        str_column_name = get_dbms_compatible_column_names(
+            column_names=column_name,
+            batch_columns_list=batch_column_list,
         )
+        assert isinstance(str_column_name, str)
+        assert str_column_name == column_name
 
 
 @pytest.mark.sqlite

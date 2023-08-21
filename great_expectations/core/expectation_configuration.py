@@ -21,6 +21,7 @@ from marshmallow import Schema, ValidationError, fields, post_dump, post_load
 from typing_extensions import TypedDict
 
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import new_argument, public_api
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
@@ -1218,6 +1219,9 @@ class ExpectationConfiguration(SerializableDictDot):
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
+        default_kwarg_values: Mapping[
+            str, str | bool | float | RuleBasedProfilerConfig | object | None
+        ]
         if expectation_kwargs_dict is None:
             try:
                 impl = get_expectation_impl(self.expectation_type)
@@ -1250,6 +1254,9 @@ class ExpectationConfiguration(SerializableDictDot):
             self.expectation_type, None
         )
         runtime_keys: tuple[str, ...]
+        default_kwarg_values: Mapping[
+            str, str | bool | float | RuleBasedProfilerConfig | object | None
+        ]
         if expectation_kwargs_dict is None:
             try:
                 impl = get_expectation_impl(self.expectation_type)
@@ -1373,6 +1380,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return json.dumps(self.to_json_dict(), indent=2)
 
     @public_api
+    @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this ExpectationConfiguration.
 

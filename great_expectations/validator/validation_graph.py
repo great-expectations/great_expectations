@@ -17,6 +17,7 @@ from typing import (
 from tqdm.auto import tqdm
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -86,6 +87,7 @@ class ValidationGraph:
 
         self._edge_ids = {edge.id for edge in self._edges}
 
+    @override
     def __eq__(self, other) -> bool:
         """Supports comparing two "ValidationGraph" objects."""
         return self.edge_ids == other.edge_ids

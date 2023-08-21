@@ -76,7 +76,7 @@ def warning_failure_validation_operator_data_context(
     )
 
     data_context.add_expectation_suite(expectation_suite_name="f1.failure")
-    df = data_context.get_batch(
+    df = data_context._get_batch_v2(
         expectation_suite_name="f1.failure",
         batch_kwargs=data_context.build_batch_kwargs(
             "my_datasource", "subdir_reader", "f1"
@@ -89,7 +89,7 @@ def warning_failure_validation_operator_data_context(
     data_context.update_expectation_suite(expectation_suite=failure_expectations)
 
     data_context.add_expectation_suite(expectation_suite_name="f1.warning")
-    df = data_context.get_batch(
+    df = data_context._get_batch_v2(
         expectation_suite_name="f1.warning",
         batch_kwargs=data_context.build_batch_kwargs(
             "my_datasource", "subdir_reader", "f1"
