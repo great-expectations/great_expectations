@@ -14,6 +14,7 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
@@ -160,6 +161,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         self._cardinality_checker: Optional[CardinalityChecker] = None
 
     @property
+    @override
     def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.COLUMN
 
@@ -204,6 +206,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
     def cardinality_checker(self) -> Optional[CardinalityChecker]:
         return self._cardinality_checker
 
+    @override
     def _get_domains(
         self,
         rule_name: str,
