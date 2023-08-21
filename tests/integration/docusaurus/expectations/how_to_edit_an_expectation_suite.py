@@ -27,14 +27,10 @@ validator = context.sources.pandas_default.read_csv(
 # </snippet>
 
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite add_2_expectations">
 validator.expect_column_values_to_not_be_null("pickup_datetime")
 validator.expect_column_values_to_be_between("passenger_count", auto=True)
-# </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite get_suite">
 my_suite = validator.get_expectation_suite()
-# </snippet>
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite show_suite">
 my_suite.show_expectations_by_expectation_type()
