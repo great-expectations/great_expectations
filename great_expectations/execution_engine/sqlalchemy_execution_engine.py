@@ -306,7 +306,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         batch_data_dict: Optional[dict] = None,
         create_temp_table: bool = True,
         concurrency: Optional[ConcurrencyConfig] = None,
-        **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
+        # kwargs will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
+        **kwargs,
     ) -> None:
         super().__init__(name=name, batch_data_dict=batch_data_dict)
         self._name = name
