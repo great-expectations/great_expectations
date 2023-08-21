@@ -1,7 +1,8 @@
 from typing import TypeVar, Union
 
-from typing_extensions import TypeAlias, override
+from typing_extensions import TypeAlias
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.experimental.metric_repository.data_store import DataStore
 from great_expectations.experimental.metric_repository.metrics import MetricRun
 

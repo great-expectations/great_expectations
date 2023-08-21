@@ -18,9 +18,10 @@ from typing import (
 
 import jsonpatch
 from marshmallow import Schema, ValidationError, fields, post_dump, post_load
-from typing_extensions import TypedDict, override
+from typing_extensions import TypedDict
 
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import new_argument, public_api
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,

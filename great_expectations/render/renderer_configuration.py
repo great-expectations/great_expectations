@@ -30,8 +30,9 @@ from pydantic import (
     validator,
 )
 from pydantic.generics import GenericModel
-from typing_extensions import TypeAlias, TypedDict, override
+from typing_extensions import TypeAlias, TypedDict
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
     ExpectationConfiguration,  # noqa: TCH001
     ExpectationValidationResult,  # noqa: TCH001

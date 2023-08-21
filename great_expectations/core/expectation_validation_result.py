@@ -7,11 +7,12 @@ from copy import deepcopy
 from typing import TYPE_CHECKING, List, Optional
 
 from marshmallow import Schema, fields, post_dump, post_load, pre_dump
-from typing_extensions import TypedDict, override
+from typing_extensions import TypedDict
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition, BatchMarkers  # noqa: TCH001
 from great_expectations.core.expectation_configuration import (

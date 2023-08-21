@@ -19,12 +19,11 @@ from typing import (
 
 import pydantic
 from pydantic import Field
-from typing_extensions import Annotated, override
+from typing_extensions import Annotated
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility.sqlalchemy import (
-    sqlalchemy as sa,
-)
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.datasource.fluent.batch_request import (
@@ -33,9 +32,7 @@ from great_expectations.datasource.fluent.batch_request import (
 )
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
-from great_expectations.datasource.fluent.fluent_base_model import (
-    FluentBaseModel,
-)
+from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,

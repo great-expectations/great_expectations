@@ -24,12 +24,11 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from typing_extensions import TypeAlias, override
+from typing_extensions import TypeAlias
 
 from great_expectations.compatibility import sqlalchemy
-from great_expectations.compatibility.sqlalchemy import (
-    sqlalchemy as sa,
-)
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import deprecated_argument, new_argument
 from great_expectations.datasource.fluent.dynamic_pandas import (
     CompressionOptions,
@@ -46,9 +45,7 @@ from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
 )
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.validator.validator import Validator
 
 _EXCLUDE_TYPES_FROM_JSON: list[Type]
