@@ -60,12 +60,6 @@ def test_save_expectation_suite_with_datetime_objects(
         reloaded_expectation_suite = context.get_expectation_suite("test_suite")
         assert isinstance(reloaded_expectation_suite, ExpectationSuite)
 
-        # Run validation via the action_list_operator
-        {
-            "run_name": f"{dataset_name}_{datetime.datetime.now()}",
-            "run_time": datetime.datetime.now(),
-        }
-
         # Check that we can build Data Docs
         index_page_locator_infos = context.build_data_docs()
         assert (
