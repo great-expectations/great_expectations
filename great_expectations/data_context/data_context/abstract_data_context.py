@@ -36,6 +36,7 @@ from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
@@ -502,6 +503,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._config_variables
 
     @property
+    @override
     def config(self) -> DataContextConfig:
         """
         Returns current DataContext's project_config
@@ -1366,15 +1368,17 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "Must provide a datasource_name to retrieve an existing Datasource"
             )
 
+        datasource: BaseDatasource | LegacyDatasource | FluentDatasource
         if datasource_name in self.datasources:
-            self.datasources[datasource_name]._data_context = self
+            datasource = self.datasources[datasource_name]
+            if not isinstance(datasource, BaseDatasource):
+                datasource._data_context = self
             return self.datasources[datasource_name]
 
         datasource_config: DatasourceConfig | FluentDatasource = (
             self._datasource_store.retrieve_by_name(datasource_name=datasource_name)
         )
 
-        datasource: BaseDatasource | LegacyDatasource | FluentDatasource
         if isinstance(datasource_config, FluentDatasource):
             datasource = datasource_config
             datasource_config._data_context = self
@@ -4859,6 +4863,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 datasource = self._instantiate_datasource_from_config(
                     raw_config=config, substituted_config=substituted_config
                 )
+                name = datasource.name
                 self.datasources[name] = datasource
             except gx_exceptions.DatasourceInitializationError as e:
                 if save_changes:

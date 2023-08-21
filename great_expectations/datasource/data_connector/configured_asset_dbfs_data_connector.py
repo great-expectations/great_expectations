@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetFilesystemDataConnector,
@@ -59,6 +60,7 @@ class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilesystemDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
 
+    @override
     def _get_full_file_path_for_asset(
         self, path: str, asset: Optional[Asset] = None
     ) -> str:
