@@ -4,8 +4,7 @@ import logging
 import pathlib
 from typing import TYPE_CHECKING, Callable
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.fluent.constants import (

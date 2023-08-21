@@ -1,8 +1,7 @@
 import logging
 from typing import Set, Union
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )

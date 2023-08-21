@@ -1,7 +1,6 @@
 from typing import Any, Dict, Optional
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,

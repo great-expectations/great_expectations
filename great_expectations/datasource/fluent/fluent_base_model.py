@@ -21,8 +21,8 @@ from typing import (
 
 import pydantic
 from ruamel.yaml import YAML
-from typing_extensions import override
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,

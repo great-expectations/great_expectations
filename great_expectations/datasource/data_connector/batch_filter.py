@@ -5,9 +5,9 @@ import logging
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Sequence, Union
 
 from pydantic import StrictInt, StrictStr
-from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.id_dict import IDDict
 
 if TYPE_CHECKING:

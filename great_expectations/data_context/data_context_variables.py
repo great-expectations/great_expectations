@@ -7,8 +7,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GXCloudIdentifier,

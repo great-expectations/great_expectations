@@ -6,8 +6,7 @@ from abc import ABC, abstractmethod
 from collections import OrderedDict
 from typing import Any, Dict, Optional, Type, cast
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import GXCloudConfig  # noqa: TCH001

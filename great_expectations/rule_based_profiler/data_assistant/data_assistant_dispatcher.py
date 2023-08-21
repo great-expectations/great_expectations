@@ -3,8 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Dict, List, Set, Type
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,  # noqa: TCH001
 )

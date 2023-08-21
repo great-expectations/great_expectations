@@ -1,4 +1,4 @@
-from typing_extensions import override
+from great_expectations.compatibility.typing_extensions import override
 
 """Serialize Datasource Configurations.
 

@@ -15,9 +15,9 @@ from typing import (
 )
 
 from tqdm.auto import tqdm
-from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration

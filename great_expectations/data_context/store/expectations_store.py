@@ -4,9 +4,8 @@ import random
 import uuid
 from typing import Dict
 
-from typing_extensions import override
-
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_suite import ExpectationSuiteSchema
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource

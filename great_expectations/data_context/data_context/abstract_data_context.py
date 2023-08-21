@@ -33,10 +33,10 @@ from typing import (
 
 from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
-from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import (
     deprecated_argument,

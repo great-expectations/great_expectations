@@ -4,9 +4,9 @@ from typing import Dict, Iterator, List, Optional, Sized
 
 import numpy as np
 import pandas as pd
-from typing_extensions import override
 
 from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.metric_computation_result import (
     MetricValues,

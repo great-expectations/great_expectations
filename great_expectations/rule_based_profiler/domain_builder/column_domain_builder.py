@@ -12,9 +12,8 @@ from typing import (
     cast,
 )
 
-from typing_extensions import override
-
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import instantiate_class_from_config

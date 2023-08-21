@@ -13,9 +13,9 @@ from pyparsing import (
     alphas,
     nums,
 )
-from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import Domain
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot, SerializableDotDict

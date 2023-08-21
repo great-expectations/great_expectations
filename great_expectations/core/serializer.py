@@ -1,4 +1,4 @@
-from typing_extensions import override
+from great_expectations.compatibility.typing_extensions import override
 
 """Serializer class interface definition.
 

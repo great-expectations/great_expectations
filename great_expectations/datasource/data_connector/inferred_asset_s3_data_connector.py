@@ -1,10 +1,9 @@
 import logging
 from typing import List, Optional
 
-from typing_extensions import override
-
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import aws
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec

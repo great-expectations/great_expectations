@@ -2,8 +2,7 @@ import copy
 import json
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.domain import Domain
 from great_expectations.core.util import (

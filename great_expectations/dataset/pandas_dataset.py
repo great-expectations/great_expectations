@@ -11,8 +11,8 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
-from typing_extensions import override
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format

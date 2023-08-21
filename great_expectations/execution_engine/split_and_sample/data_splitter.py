@@ -8,9 +8,9 @@ from typing import Callable, ClassVar, List, Type
 import ruamel
 from dateutil.parser import parse
 from ruamel.yaml import yaml_object
-from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 
 yaml = ruamel.yaml.YAML()
 

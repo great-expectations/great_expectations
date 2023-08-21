@@ -14,8 +14,8 @@ from typing import (
 )
 
 from botocore.client import BaseClient as BaseClient
-from typing_extensions import override
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.core.util import S3Url as S3Url
 from great_expectations.datasource.fluent import _PandasFilePathDatasource

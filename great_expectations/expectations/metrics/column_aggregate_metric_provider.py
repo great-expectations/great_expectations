@@ -2,9 +2,8 @@ import logging
 from functools import wraps
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Type, Union
 
-from typing_extensions import override
-
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes

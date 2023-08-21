@@ -15,8 +15,6 @@ from typing import (
     cast,
 )
 
-from typing_extensions import override
-
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.configurator import (
     ActionDicts,
@@ -32,6 +30,7 @@ from great_expectations.checkpoint.util import (
     substitute_template_config,
     validate_validation_dict,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import RunIdentifier
 from great_expectations.core._docs_decorators import (
     deprecated_argument,

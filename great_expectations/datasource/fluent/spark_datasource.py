@@ -17,10 +17,10 @@ from typing import (
 
 import pydantic
 from pydantic import StrictBool, StrictFloat, StrictInt, StrictStr
-from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.pyspark import DataFrame, pyspark
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
     new_argument,

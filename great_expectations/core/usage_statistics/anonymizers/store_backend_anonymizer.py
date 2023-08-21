@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.data_context.store.store_backend import StoreBackend
 

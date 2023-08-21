@@ -4,12 +4,11 @@ import logging
 from string import Template
 from typing import ClassVar, Type
 
-from typing_extensions import override
-
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.data_context_key import StringKey
 from great_expectations.data_context.store.store import Store
 from great_expectations.util import filter_properties_dict

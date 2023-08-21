@@ -10,7 +10,8 @@ import logging
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import requests
-from typing_extensions import override
+
+from great_expectations.compatibility.typing_extensions import override
 
 try:
     import pypd

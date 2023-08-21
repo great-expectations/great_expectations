@@ -26,10 +26,10 @@ import ipywidgets as widgets
 import numpy as np
 import pandas as pd
 from IPython.display import HTML, display
-from typing_extensions import override
 
 from great_expectations import __version__ as ge_version
 from great_expectations import exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes

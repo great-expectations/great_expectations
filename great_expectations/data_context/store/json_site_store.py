@@ -1,8 +1,7 @@
 from json import loads
 from typing import Dict
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.util import load_class
 from great_expectations.render import RenderedDocumentContent

@@ -9,9 +9,9 @@ from contextlib import AbstractContextManager
 from typing import Generic, Optional, TypeVar
 
 import requests
-from typing_extensions import override
 
 from great_expectations.compatibility.google import python_bigquery
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.types.base import ConcurrencyConfig
 
 T = TypeVar("T")

@@ -2,8 +2,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
     InferredAssetFilePathDataConnector,

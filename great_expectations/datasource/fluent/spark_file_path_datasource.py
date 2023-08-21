@@ -14,8 +14,8 @@ from typing import (
 
 import pydantic
 from pydantic import Field
-from typing_extensions import override
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent import _SparkDatasource
 from great_expectations.datasource.fluent.directory_data_asset import (
     _DirectoryDataAssetMixin,

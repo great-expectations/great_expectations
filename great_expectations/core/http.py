@@ -4,9 +4,9 @@ from pprint import pformat as pf
 
 import requests
 from requests.adapters import HTTPAdapter, Retry
-from typing_extensions import override
 
 from great_expectations import __version__
+from great_expectations.compatibility.typing_extensions import override
 
 DEFAULT_TIMEOUT = 20
 

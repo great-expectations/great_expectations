@@ -1,7 +1,6 @@
 from typing import Optional
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (

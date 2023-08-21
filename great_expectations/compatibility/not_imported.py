@@ -12,7 +12,8 @@ from __future__ import annotations
 from typing import Any
 
 from packaging.version import Version
-from typing_extensions import override
+
+from great_expectations.compatibility.typing_extensions import override
 
 
 class NotImported:

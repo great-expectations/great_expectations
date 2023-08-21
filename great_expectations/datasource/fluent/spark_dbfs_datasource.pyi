@@ -2,11 +2,10 @@ import re
 from logging import Logger
 from typing import Literal, Optional, Union
 
-from typing_extensions import override
-
 from great_expectations.compatibility.pyspark import (
     types as pyspark_types,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.datasource.fluent import SparkFilesystemDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (

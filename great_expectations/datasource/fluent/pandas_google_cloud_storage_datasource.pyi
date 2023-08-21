@@ -13,9 +13,8 @@ from typing import (
     Union,
 )
 
-from typing_extensions import override
-
 from great_expectations.compatibility import google
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.core.util import GCSUrl as GCSUrl
 from great_expectations.datasource.fluent import _PandasFilePathDatasource

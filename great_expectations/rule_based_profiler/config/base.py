@@ -5,8 +5,8 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 from marshmallow import INCLUDE, Schema, ValidationError, fields, post_dump, post_load
-from typing_extensions import override
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import BaseYamlConfig

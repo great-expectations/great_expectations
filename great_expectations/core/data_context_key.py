@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 from typing import Optional, Tuple, Union
 
-from typing_extensions import override
+from great_expectations.compatibility.typing_extensions import override
 
 
 class DataContextKey(metaclass=ABCMeta):

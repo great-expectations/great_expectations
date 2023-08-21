@@ -4,8 +4,7 @@ import logging
 import pathlib
 from typing import TYPE_CHECKING, Any
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context_variables import (

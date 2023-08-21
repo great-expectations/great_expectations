@@ -37,8 +37,8 @@ from pydantic import (
     validate_arguments,
 )
 from pydantic import dataclasses as pydantic_dc
-from typing_extensions import override
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.id_dict import BatchSpec

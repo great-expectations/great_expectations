@@ -1,10 +1,9 @@
-from typing_extensions import override
-
 from great_expectations.agent.actions import ActionResult, AgentAction
 from great_expectations.agent.models import (
     CreatedResource,
     RunColumnDescriptiveMetricsEvent,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context import CloudDataContext
 from great_expectations.experimental.metric_repository.batch_inspector import (
     BatchInspector,

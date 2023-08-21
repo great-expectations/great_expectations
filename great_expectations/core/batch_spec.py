@@ -4,8 +4,7 @@ import logging
 from abc import ABCMeta
 from typing import TYPE_CHECKING, Any, List
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchSpecError
 from great_expectations.types.base import SerializableDotDict

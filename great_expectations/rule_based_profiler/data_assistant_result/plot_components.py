@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from typing import List, Optional, Sequence, Set, Union
 
 import altair as alt
-from typing_extensions import override
+
+from great_expectations.compatibility.typing_extensions import override
 
 
 @dataclass(frozen=True)

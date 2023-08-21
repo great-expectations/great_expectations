@@ -2,8 +2,7 @@ import hashlib
 import json
 from typing import Any, Set, TypeVar, Union
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
 
 T = TypeVar("T")

@@ -3,8 +3,7 @@ import traceback
 import warnings
 from copy import deepcopy
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,
 )

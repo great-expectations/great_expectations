@@ -4,8 +4,7 @@ import random
 import uuid
 from typing import ClassVar, Dict, Type
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationSuiteValidationResultSchema,

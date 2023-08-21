@@ -23,9 +23,9 @@ from typing import (
 
 from pydantic import Extra, Field, validator
 from ruamel.yaml import YAML
-from typing_extensions import override
 
 from great_expectations.compatibility.sqlalchemy import TextClause
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.constants import (
     _DATA_ASSET_NAME_KEY,
     _DATASOURCE_NAME_KEY,

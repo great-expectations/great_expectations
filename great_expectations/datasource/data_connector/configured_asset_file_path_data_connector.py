@@ -2,8 +2,7 @@ import logging
 from copy import deepcopy
 from typing import Dict, List, Optional, Union
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec

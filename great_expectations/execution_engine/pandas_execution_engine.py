@@ -20,13 +20,13 @@ from typing import (
 )
 
 import pandas as pd
-from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import aws, azure, google
 from great_expectations.compatibility.sqlalchemy_and_pandas import (
     execute_pandas_reader_fn,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (

@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Union
 
 import pydantic
 from pydantic import AnyUrl, errors
-from typing_extensions import override
 
 from great_expectations.compatibility.snowflake import URL
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import (

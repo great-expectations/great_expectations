@@ -3,8 +3,7 @@ import typing
 from logging import Logger
 from typing import Hashable, Iterable, Literal, Optional, Sequence, Union
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.datasource.fluent import PandasFilesystemDatasource, Sorter
 from great_expectations.datasource.fluent.data_asset.data_connector import (

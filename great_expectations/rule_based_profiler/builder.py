@@ -3,9 +3,8 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Set, Union
 
-from typing_extensions import override
-
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,

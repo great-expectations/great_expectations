@@ -6,8 +6,7 @@ from collections import defaultdict
 from dataclasses import asdict, dataclass
 from typing import List, Sequence, Tuple, Union
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationTestDataCases,  # noqa: TCH001

@@ -6,8 +6,7 @@ import re
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Union
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec

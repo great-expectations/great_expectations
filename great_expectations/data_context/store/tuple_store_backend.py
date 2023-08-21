@@ -11,9 +11,8 @@ import shutil
 from abc import ABCMeta
 from typing import Any, List, Tuple
 
-from typing_extensions import override
-
 from great_expectations.compatibility import aws
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError
 from great_expectations.util import filter_properties_dict

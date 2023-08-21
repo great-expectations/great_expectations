@@ -32,9 +32,9 @@ from typing import (
 
 import pandas as pd
 from dateutil.parser import parse
-from typing_extensions import override
 
 from great_expectations import __version__ as ge_version
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,

@@ -1,7 +1,7 @@
 from typing import Any, Callable, TypeVar
 
 try:
-    from typing_extensions import override
+    from great_expectations.compatibility.typing_extensions import override
 except ImportError:
     F = TypeVar("F", bound=Callable[..., Any])
 

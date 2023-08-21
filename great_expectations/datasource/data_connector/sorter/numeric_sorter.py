@@ -2,9 +2,8 @@ import json
 import logging
 from typing import Any
 
-from typing_extensions import override
-
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.datasource.data_connector.sorter import Sorter
 from great_expectations.util import is_int, is_numeric

@@ -2,9 +2,8 @@ import logging
 from copy import deepcopy
 from typing import Any, Dict, List, Optional, cast
 
-from typing_extensions import override
-
 from great_expectations.compatibility import aws
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     BatchDefinition,

@@ -5,8 +5,8 @@ import warnings
 from typing import TYPE_CHECKING, Mapping
 
 from pydantic import SecretStr
-from typing_extensions import override
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.config_substitutor import TEMPLATE_STR_REGEX
 
 if TYPE_CHECKING:

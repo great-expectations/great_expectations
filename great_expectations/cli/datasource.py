@@ -7,7 +7,6 @@ import sys
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 
 import click
-from typing_extensions import override
 
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_messages import (
@@ -20,6 +19,7 @@ from great_expectations.cli.pretty_printing import (
     cli_message_dict,
 )
 from great_expectations.cli.util import verify_library_dependent_modules
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.templates import YAMLToString

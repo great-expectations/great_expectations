@@ -18,12 +18,12 @@ from typing import (
 )
 
 from dateutil.parser import parse
-from typing_extensions import override
 
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import (
     functions as F,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (

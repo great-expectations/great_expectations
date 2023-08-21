@@ -7,7 +7,8 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from marshmallow import ValidationError
-from typing_extensions import override
+
+from great_expectations.compatibility.typing_extensions import override
 
 if TYPE_CHECKING:
     import requests

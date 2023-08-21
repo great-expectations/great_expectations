@@ -7,9 +7,9 @@ from string import Template as pTemplate
 from typing import TYPE_CHECKING, Final, List, Optional, Union
 
 from marshmallow import Schema, fields, post_dump, post_load
-from typing_extensions import override
 
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot

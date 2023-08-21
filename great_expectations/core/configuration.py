@@ -5,8 +5,8 @@ from typing import Optional
 
 from marshmallow.decorators import post_dump
 from marshmallow.schema import Schema
-from typing_extensions import override
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.types import SerializableDictDot
 
 

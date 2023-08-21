@@ -3,8 +3,8 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
 import jsonschema
-from typing_extensions import override
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite

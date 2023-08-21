@@ -1,5 +1,3 @@
-from typing_extensions import override
-
 from great_expectations.agent.actions.agent_action import (
     ActionResult,
     AgentAction,
@@ -8,6 +6,7 @@ from great_expectations.agent.models import (
     CreatedResource,
     RunCheckpointEvent,
 )
+from great_expectations.compatibility.typing_extensions import override
 
 
 class RunCheckpointAction(AgentAction[RunCheckpointEvent]):

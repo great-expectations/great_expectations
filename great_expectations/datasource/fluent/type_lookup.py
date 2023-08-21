@@ -17,7 +17,7 @@ from typing import (
     overload,
 )
 
-from typing_extensions import override
+from great_expectations.compatibility.typing_extensions import override
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias

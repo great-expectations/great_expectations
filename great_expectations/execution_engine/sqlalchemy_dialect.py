@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, List, Union
 
-from typing_extensions import override
+from great_expectations.compatibility.typing_extensions import override
 
 
 class GXSqlDialect(Enum):

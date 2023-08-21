@@ -5,12 +5,12 @@ import logging
 from typing import List, Optional
 
 import click
-from typing_extensions import override
 
 from great_expectations import __version__ as ge_version
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_logging import _set_up_logger
 from great_expectations.cli.pretty_printing import cli_message
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )

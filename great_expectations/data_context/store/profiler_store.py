@@ -2,9 +2,8 @@ import random
 import uuid
 from typing import Union
 
-from typing_extensions import override
-
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.configuration_store import ConfigurationStore
 from great_expectations.data_context.types.resource_identifiers import (

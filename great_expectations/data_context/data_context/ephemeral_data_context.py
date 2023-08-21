@@ -3,8 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Dict, Mapping, Optional, Union, cast
 
-from typing_extensions import override
-
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.data_context.abstract_data_context import (

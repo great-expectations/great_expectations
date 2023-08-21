@@ -15,9 +15,9 @@ from typing import (
 )
 
 import pandas as pd
-from typing_extensions import override
 
 from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
