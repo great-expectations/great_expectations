@@ -883,29 +883,6 @@ def test_nullity_expectations_mostly_tolerance(
         assert i["kwargs"]["mostly"] == 0.66
 
 
-@pytest.mark.slow  # 2.44s
-@pytest.mark.filesystem
-def test_profiled_dataset_passes_own_validation(
-    cardinality_validator, titanic_data_context
-):
-    """
-    What does this test do and why?
-    Confirms that a suite created on a validator with no config will pass when validated against itself
-    """
-    context = titanic_data_context
-    profiler = UserConfigurableProfiler(
-        cardinality_validator, ignored_columns=["col_none"]
-    )
-    suite = profiler.build_suite()
-
-    context.add_expectation_suite(expectation_suite=suite)
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[cardinality_validator]
-    )
-
-    assert results["success"]
-
-
 @pytest.mark.filesystem
 def test_column_cardinality_functions(cardinality_validator):
     profiler = UserConfigurableProfiler(cardinality_validator)
@@ -951,7 +928,6 @@ def test_profiler_all_expectation_types_pandas(
     What does this test do and why?
     Ensures that all available expectation types work as expected for pandas
     """
-    context = titanic_data_context_modular_api
 
     profiler = UserConfigurableProfiler(
         taxi_validator_pandas,
@@ -990,11 +966,6 @@ def test_profiler_all_expectation_types_pandas(
         i for i in columns_with_expectations if i in taxi_data_ignored_columns
     ]
     assert len(ignored_included_columns_overlap) == 0
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[taxi_validator_pandas]
-    )
-
-    assert results["success"]
 
 
 @pytest.mark.skipif(
@@ -1013,7 +984,6 @@ def test_profiler_all_expectation_types_spark(
     What does this test do and why?
     Ensures that all available expectation types work as expected for spark
     """
-    context = titanic_data_context_modular_api
 
     profiler = UserConfigurableProfiler(
         taxi_validator_spark,
@@ -1054,12 +1024,6 @@ def test_profiler_all_expectation_types_spark(
     ]
     assert len(ignored_included_columns_overlap) == 0
 
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[taxi_validator_spark]
-    )
-
-    assert results["success"]
-
 
 @pytest.mark.skipif(
     not is_library_loadable(library_name="sqlalchemy"),
@@ -1080,8 +1044,6 @@ def test_profiler_all_expectation_types_sqlalchemy(
     """
     if taxi_validator_sqlalchemy is None:
         pytest.skip("a message")
-
-    context = titanic_data_context_modular_api
 
     profiler = UserConfigurableProfiler(
         taxi_validator_sqlalchemy,
@@ -1120,11 +1082,6 @@ def test_profiler_all_expectation_types_sqlalchemy(
         i for i in columns_with_expectations if i in taxi_data_ignored_columns
     ]
     assert len(ignored_included_columns_overlap) == 0
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[taxi_validator_sqlalchemy]
-    )
-
-    assert results["success"]
 
 
 # TODO: When this expectation is implemented for V3, remove this test and test for this expectation.

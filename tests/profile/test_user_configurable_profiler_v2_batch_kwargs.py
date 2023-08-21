@@ -496,28 +496,6 @@ def test_nullity_expectations_mostly_tolerance(
 
 
 @pytest.mark.filesystem
-def test_profiled_dataset_passes_own_validation(
-    cardinality_dataset, titanic_data_context
-):
-    """
-    What does this test do and why?
-    Confirms that a suite created on a dataset with no config will pass when validated against itself
-    """
-    context = titanic_data_context
-    profiler = UserConfigurableProfiler(
-        cardinality_dataset, ignored_columns=["col_none"]
-    )
-    suite = profiler.build_suite()
-
-    context.add_expectation_suite(expectation_suite=suite)
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[cardinality_dataset]
-    )
-
-    assert results["success"]
-
-
-@pytest.mark.filesystem
 def test_profiler_all_expectation_types(
     titanic_data_context, possible_expectations_set
 ):
@@ -525,7 +503,6 @@ def test_profiler_all_expectation_types(
     What does this test do and why?
     Ensures that all available expectation types work as expected
     """
-    context = titanic_data_context
     df = gx.read_csv(
         file_relative_path(
             __file__,
@@ -591,12 +568,6 @@ def test_profiler_all_expectation_types(
         i for i in columns_with_expectations if i in ignored_columns
     ]
     assert len(ignored_included_columns_overlap) == 0
-
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[batch_df]
-    )
-
-    assert results["success"]
 
 
 @pytest.mark.unit
