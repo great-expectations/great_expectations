@@ -310,12 +310,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             self.project_config_with_variables_substituted.anonymous_usage_statistics
         )
 
-        # Store cached datasources but don't init them
-        self._cached_datasources: dict = {}
-
-        # Build the datasources we know about and have access to
-        self._init_datasources()
-
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies: dict = {}
 
@@ -1372,9 +1366,9 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "Must provide a datasource_name to retrieve an existing Datasource"
             )
 
-        if datasource_name in self._cached_datasources:
-            self._cached_datasources[datasource_name]._data_context = self
-            return self._cached_datasources[datasource_name]
+        if datasource_name in self.datasources:
+            self.datasources[datasource_name]._data_context = self
+            return self.datasources[datasource_name]
 
         datasource_config: DatasourceConfig | FluentDatasource = (
             self._datasource_store.retrieve_by_name(datasource_name=datasource_name)
@@ -1396,7 +1390,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 raw_config=raw_config, substituted_config=substituted_config
             )
 
-        self._cached_datasources[datasource_name] = datasource
+        self.datasources[datasource_name] = datasource
         return datasource
 
     def _serialize_substitute_and_sanitize_datasource_config(
@@ -1607,7 +1601,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         elif save_changes:
             datasource_config = datasourceConfigSchema.load(datasource.config)
             self._datasource_store.delete(datasource_config)
-        self._cached_datasources.pop(datasource_name, None)
+        self.datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
         if save_changes:
@@ -4545,7 +4539,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         self,
     ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, FluentDatasource]]:
         """A single holder for all Datasources in this context"""
-        return self._cached_datasources
+        return self._init_datasources()
 
     @property
     def fluent_datasources(self) -> Dict[str, FluentDatasource]:
@@ -4681,11 +4675,17 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
+        ret = {}
+
         config: DataContextConfig = self.config
 
         if self._datasource_store.cloud_mode:
             for fds in config.fluent_datasources.values():
-                self._add_fluent_datasource(**fds)._rebuild_asset_data_connectors()
+                datasource_name = fds["name"]
+                datasource = self._add_fluent_datasource(
+                    **fds
+                )._rebuild_asset_data_connectors()
+                ret[datasource_name] = datasource
 
         datasources: Dict[str, DatasourceConfig] = cast(
             Dict[str, DatasourceConfig], config.datasources
@@ -4710,13 +4710,15 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                     raw_config=raw_datasource_config,
                     substituted_config=substituted_datasource_config,
                 )
-                self._cached_datasources[datasource_name] = datasource
+                ret[datasource_name] = datasource
             except gx_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
                 # this error will happen if our configuration contains datasources that GX can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch_list() step. So we just pass here.
                 pass
+
+        return ret
 
     def _instantiate_datasource_from_config(
         self,
@@ -4837,8 +4839,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         # If attempting to override an existing value, ensure that the id persists
         name = config.name
-        if not config.id and name in self._cached_datasources:
-            existing_datasource = self._cached_datasources[name]
+        if not config.id and name in self.datasources:
+            existing_datasource = self.datasources[name]
             if isinstance(existing_datasource, BaseDatasource):
                 config.id = existing_datasource.id
 
@@ -4857,7 +4859,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 datasource = self._instantiate_datasource_from_config(
                     raw_config=config, substituted_config=substituted_config
                 )
-                self._cached_datasources[name] = datasource
+                self.datasources[name] = datasource
             except gx_exceptions.DatasourceInitializationError as e:
                 if save_changes:
                     self._datasource_store.delete(config)
