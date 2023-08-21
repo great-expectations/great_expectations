@@ -16,6 +16,7 @@ from pydantic import StrictStr
 from pydantic.json import pydantic_encoder
 from pydantic.schema import default_ref_template
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchSlice,
@@ -131,6 +132,7 @@ class BatchRequest(pydantic.BaseModel):
         return options
 
     @public_api
+    @override
     def json(  # noqa: PLR0913
         self,
         *,
@@ -163,6 +165,7 @@ class BatchRequest(pydantic.BaseModel):
         )
 
     @public_api
+    @override
     def dict(  # noqa: PLR0913
         self,
         *,
@@ -207,6 +210,7 @@ class BatchRequest(pydantic.BaseModel):
         return result
 
     @classmethod
+    @override
     def schema_json(
         cls,
         *,
