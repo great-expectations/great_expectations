@@ -3027,9 +3027,6 @@ def test_file_backed_context_updates_existing_gitignore(tmp_path: pathlib.Path):
     uncommitted = context_path / FileDataContext.GX_UNCOMMITTED_DIR
     gitignore = context_path / FileDataContext.GITIGNORE
 
-    assert not uncommitted.exists()
-    assert not gitignore.exists()
-
     # Scaffold necessary files so `get_context` updates rather than creates
     uncommitted.mkdir(parents=True)
     existing_value = "__pycache__/"
