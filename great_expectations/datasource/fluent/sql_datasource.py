@@ -1034,6 +1034,7 @@ class SQLDatasource(Datasource):
         kwargs = model_dict.pop("kwargs", {})
         return sa.create_engine(connection_string, **kwargs)
 
+    @override
     def get_execution_engine(self) -> SqlAlchemyExecutionEngine:
         # Overrides get_execution_engine in Datasource
         # because we need to pass the kwargs as keyvalue args to the execution engine
