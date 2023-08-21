@@ -96,10 +96,10 @@ def test_save_datasource_empty_store(datasource_config_with_names: DatasourceCon
     )
 
     # Make sure the datasource got into the cache
-    assert len(context._cached_datasources) == 1
+    assert len(context.datasources) == 1
 
     # Make sure the stored and returned datasource is the same one as the cached datasource
-    cached_datasource = context._cached_datasources[datasource_to_save.name]
+    cached_datasource = context.datasources[datasource_to_save.name]
     assert saved_datasource == cached_datasource
 
 
@@ -124,14 +124,14 @@ def test_save_datasource_overwrites_on_name_collision(
         context.save_datasource(datasource_to_save)
 
         assert len(context.list_datasources()) == 1
-        assert len(context._cached_datasources) == 1
+        assert len(context.datasources) == 1
 
         # Let's re-save
         context.save_datasource(datasource_to_save)
 
         # Make sure we still only have 1 datasource
         assert len(context.list_datasources()) == 1
-        assert len(context._cached_datasources) == 1
+        assert len(context.datasources) == 1
 
     assert mock_set.call_count == 2
 
