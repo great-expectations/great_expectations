@@ -800,7 +800,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             if set_datasource.id:
                 logger.debug(f"Assigning `id` to '{datasource_name}'")
                 datasource.id = set_datasource.id
-        self.datasources[datasource_name] = datasource
+
         return datasource
 
     def _update_fluent_datasource(
@@ -829,7 +829,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         updated_datasource.test_connection()
         self._save_project_config(_fds_datasource=updated_datasource)
 
-        self.datasources[datasource_name] = updated_datasource
+        return updated_datasource
 
     def _delete_fluent_datasource(
         self, datasource_name: str, _call_store: bool = True
@@ -846,7 +846,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             # Raise key error instead?
             logger.info(f"No Datasource '{datasource_name}' to delete")
-        self.datasources.pop(datasource_name, None)
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
@@ -1135,16 +1134,16 @@ class AbstractDataContext(ConfigPeer, ABC):
             assert name, 'Fluent Datasource kwargs must include the keyword "name"'
             kwargs["name"] = name
             if name in self.datasources:
-                self._update_fluent_datasource(**kwargs)
+                return_datasource = self._update_fluent_datasource(**kwargs)
             else:
-                self._add_fluent_datasource(**kwargs)
-            return_datasource = self.datasources[name]
+                return_datasource = self._add_fluent_datasource(**kwargs)
         elif isinstance(datasource, FluentDatasource):
             if datasource.name in self.datasources:
-                self._update_fluent_datasource(datasource=datasource)
+                return_datasource = self._update_fluent_datasource(
+                    datasource=datasource
+                )
             else:
-                self._add_fluent_datasource(datasource=datasource)
-            return_datasource = self.datasources[datasource.name]
+                return_datasource = self._add_fluent_datasource(datasource=datasource)
         else:
             block_config_datasource = self._add_block_config_datasource(
                 name=name,
@@ -1368,17 +1367,11 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "Must provide a datasource_name to retrieve an existing Datasource"
             )
 
-        datasource: BaseDatasource | LegacyDatasource | FluentDatasource
-        if datasource_name in self.datasources:
-            datasource = self.datasources[datasource_name]
-            if not isinstance(datasource, BaseDatasource):
-                datasource._data_context = self
-            return self.datasources[datasource_name]
-
         datasource_config: DatasourceConfig | FluentDatasource = (
             self._datasource_store.retrieve_by_name(datasource_name=datasource_name)
         )
 
+        datasource: BaseDatasource | LegacyDatasource | FluentDatasource
         if isinstance(datasource_config, FluentDatasource):
             datasource = datasource_config
             datasource_config._data_context = self
@@ -1394,7 +1387,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 raw_config=raw_config, substituted_config=substituted_config
             )
 
-        self.datasources[datasource_name] = datasource
         return datasource
 
     def _serialize_substitute_and_sanitize_datasource_config(
@@ -1605,7 +1597,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         elif save_changes:
             datasource_config = datasourceConfigSchema.load(datasource.config)
             self._datasource_store.delete(datasource_config)
-        self.datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
         if save_changes:
@@ -2727,16 +2718,14 @@ class AbstractDataContext(ConfigPeer, ABC):
             **kwargs,
         )
         datasource_name = result.datasource_name
-        if datasource_name not in self.datasources:
+        datasource = self.datasources.get(datasource_name)
+        if not datasource:
             raise gx_exceptions.DatasourceError(
                 datasource_name,
                 "The given datasource could not be retrieved from the DataContext; "
                 "please confirm that your configuration is accurate.",
             )
 
-        datasource = self.datasources[
-            datasource_name
-        ]  # this can return one of three datasource types, including Fluent datasource types
         return datasource.get_batch_list_from_batch_request(batch_request=result)  # type: ignore[union-attr, return-value, arg-type]
 
     @public_api
@@ -4686,9 +4675,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         if self._datasource_store.cloud_mode:
             for fds in config.fluent_datasources.values():
                 datasource_name = fds["name"]
-                datasource = self._add_fluent_datasource(
-                    **fds
-                )._rebuild_asset_data_connectors()
+                datasource = self._add_fluent_datasource(**fds)
+                datasource._rebuild_asset_data_connectors()
                 ret[datasource_name] = datasource
 
         datasources: Dict[str, DatasourceConfig] = cast(
@@ -4843,8 +4831,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         # If attempting to override an existing value, ensure that the id persists
         name = config.name
-        if not config.id and name in self.datasources:
-            existing_datasource = self.datasources[name]
+        existing_datasource = self.datasources.get(name)
+        if not config.id and existing_datasource:
             if isinstance(existing_datasource, BaseDatasource):
                 config.id = existing_datasource.id
 
@@ -4864,7 +4852,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                     raw_config=config, substituted_config=substituted_config
                 )
                 name = datasource.name
-                self.datasources[name] = datasource
             except gx_exceptions.DatasourceInitializationError as e:
                 if save_changes:
                     self._datasource_store.delete(config)
