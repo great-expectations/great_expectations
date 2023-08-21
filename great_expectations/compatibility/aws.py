@@ -13,7 +13,7 @@ ATHENA_NOT_IMPORTED = NotImported(
 )
 
 try:
-    import boto3  # noqa TID251
+    import boto3
 except ImportError:
     boto3 = BOTO_NOT_IMPORTED
 

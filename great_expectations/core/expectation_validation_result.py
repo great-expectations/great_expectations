@@ -12,6 +12,7 @@ from typing_extensions import TypedDict
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition, BatchMarkers  # noqa: TCH001
 from great_expectations.core.expectation_configuration import (
@@ -196,6 +197,7 @@ class ExpectationValidationResult(SerializableDictDot):
             # if invalid comparisons are attempted, the objects are not equal.
             return True
 
+    @override
     def __repr__(self) -> str:
         """
         # TODO: <Alex>5/9/2022</Alex>
@@ -223,6 +225,7 @@ class ExpectationValidationResult(SerializableDictDot):
 
         return json.dumps(json_dict, indent=2)
 
+    @override
     def __str__(self) -> str:
         """
         # TODO: <Alex>5/9/2022</Alex>
@@ -309,6 +312,7 @@ class ExpectationValidationResult(SerializableDictDot):
         return True
 
     @public_api
+    @override
     def to_json_dict(self) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this ExpectationValidationResult.
 

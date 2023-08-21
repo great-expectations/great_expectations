@@ -36,6 +36,7 @@ from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
@@ -508,6 +509,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._config_variables
 
     @property
+    @override
     def config(self) -> DataContextConfig:
         """
         Returns current DataContext's project_config

@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from collections import OrderedDict
 from typing import Any, Dict, Optional, Type, cast
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import GXCloudConfig  # noqa: TCH001
@@ -89,6 +90,7 @@ class _ConfigurationProvider(_AbstractConfigurationProvider):
         """
         return self._providers.get(type_)
 
+    @override
     def get_values(self) -> Dict[str, str]:
         """
         Iterates through all registered providers to aggregate a list of configuration values.
@@ -111,6 +113,7 @@ class _RuntimeEnvironmentConfigurationProvider(_AbstractConfigurationProvider):
         self._runtime_environment = runtime_environment
         super().__init__()
 
+    @override
     def get_values(self) -> Dict[str, str]:
         return self._runtime_environment
 
@@ -123,6 +126,7 @@ class _EnvironmentConfigurationProvider(_AbstractConfigurationProvider):
     def __init__(self) -> None:
         super().__init__()
 
+    @override
     def get_values(self) -> Dict[str, str]:
         return dict(os.environ)  # noqa: TID251 # os.environ allowed in config files
 
@@ -141,6 +145,7 @@ class _ConfigurationVariablesConfigurationProvider(_AbstractConfigurationProvide
         self._root_directory = root_directory
         super().__init__()
 
+    @override
     def get_values(self) -> Dict[str, str]:
         env_vars = dict(os.environ)  # noqa: TID251 # os.environ allowed in config files
         try:
@@ -180,6 +185,7 @@ class _CloudConfigurationProvider(_AbstractConfigurationProvider):
     def __init__(self, cloud_config: GXCloudConfig) -> None:
         self._cloud_config = cloud_config
 
+    @override
     def get_values(self) -> Dict[str, str]:
         from great_expectations.data_context.cloud_constants import (
             GXCloudEnvironmentVariable,
