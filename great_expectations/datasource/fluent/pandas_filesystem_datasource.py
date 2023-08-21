@@ -4,14 +4,13 @@ import logging
 import pathlib
 from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Type
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import (
-    TestConnectionError,
-)
+from great_expectations.datasource.fluent.interfaces import TestConnectionError
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.file_path_data_asset import (
@@ -42,6 +41,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     base_directory: pathlib.Path
     data_context_root_directory: Optional[pathlib.Path] = None
 
+    @override
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the PandasFilesystemDatasource.
 
@@ -60,6 +60,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             for asset in self.assets:
                 asset.test_connection()
 
+    @override
     def _build_data_connector(
         self, data_asset: _FilePathDataAsset, glob_directive: str = "**/*", **kwargs
     ) -> None:

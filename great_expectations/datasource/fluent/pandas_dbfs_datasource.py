@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, ClassVar, Literal, Type
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import DBFSPath
 from great_expectations.datasource.fluent import PandasFilesystemDatasource
@@ -29,6 +30,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
     # overridden from base `Literal['pandas_filesystem']`
     type: Literal["pandas_dbfs"] = "pandas_dbfs"  # type: ignore[assignment] # base class has different type
 
+    @override
     def _build_data_connector(
         self, data_asset: _FilePathDataAsset, glob_directive: str = "**/*", **kwargs
     ) -> None:

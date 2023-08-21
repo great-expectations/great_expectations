@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, Literal, Type, Union
 import pydantic
 
 from great_expectations.compatibility import google
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import GCSUrl
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
@@ -17,9 +18,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
-from great_expectations.datasource.fluent.pandas_datasource import (
-    PandasDatasourceError,
-)
+from great_expectations.datasource.fluent.pandas_datasource import PandasDatasourceError
 
 if TYPE_CHECKING:
     from great_expectations.compatibility.google import Client
@@ -105,6 +104,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
 
         return gcs_client
 
+    @override
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the PandasGoogleCloudStorageDatasource.
 
@@ -126,6 +126,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             for asset in self.assets:
                 asset.test_connection()
 
+    @override
     def _build_data_connector(  # noqa: PLR0913
         self,
         data_asset: _FilePathDataAsset,
