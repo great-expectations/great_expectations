@@ -46,6 +46,7 @@ class SerializableDataContext(AbstractDataContext):
 
     UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
     GX_UNCOMMITTED_DIR = "uncommitted"
+    GITIGNORE = ".gitignore"
     BASE_DIRECTORIES = [
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value,
@@ -321,15 +322,16 @@ class SerializableDataContext(AbstractDataContext):
     @classmethod
     def _scaffold_gitignore(cls, base_dir: PathStr) -> None:
         """Make sure .gitignore exists and contains uncommitted/"""
-        gitignore = pathlib.Path(base_dir) / ".gitignore"
+        gitignore = pathlib.Path(base_dir) / cls.GITIGNORE
 
+        uncommitted_dir = f"{cls.GX_UNCOMMITTED_DIR}/"
         if gitignore.is_file():
-            lines = gitignore.read_text().splitlines()
-            if "uncommited/" in lines:
+            contents = gitignore.read_text()
+            if uncommitted_dir in contents:
                 return
 
-        with open(gitignore, "a") as f:
-            f.write("\nuncommitted/")
+        with gitignore.open("a") as f:
+            f.write(f"\n{uncommitted_dir}")
 
     @classmethod
     def _scaffold_custom_data_docs(cls, plugins_dir: PathStr) -> None:
