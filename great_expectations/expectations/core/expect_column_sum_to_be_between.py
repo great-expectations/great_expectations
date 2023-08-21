@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, Dict, List, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -193,6 +194,7 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
     """ A Column Map Metric Decorator for the Sum"""
 
     @public_api
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -210,6 +212,7 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls, renderer_configuration: RendererConfiguration
     ) -> RendererConfiguration:
@@ -256,6 +259,7 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -317,6 +321,7 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
             )
         ]
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,

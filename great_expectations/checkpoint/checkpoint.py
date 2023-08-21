@@ -30,6 +30,7 @@ from great_expectations.checkpoint.util import (
     substitute_template_config,
     validate_validation_dict,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import RunIdentifier
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
@@ -626,6 +627,7 @@ is run), with each validation having its own defined "action_list" attribute.
         return report_object
 
     @property
+    @override
     def config(self) -> CheckpointConfig:
         return self._checkpoint_config
 
@@ -677,6 +679,7 @@ is run), with each validation having its own defined "action_list" attribute.
 
         return isinstance(self.data_context, CloudDataContext)
 
+    @override
     def __repr__(self) -> str:
         return str(self.get_config())
 
@@ -1186,6 +1189,7 @@ class SimpleCheckpoint(Checkpoint):
         version="0.13.33",
         message="Used in cloud deployments.",
     )
+    @override
     def run(  # noqa: PLR0913
         self,
         template_name: Optional[str] = None,
