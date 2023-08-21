@@ -3805,6 +3805,32 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         }
         return fluent_and_config_data_asset_names
 
+    def build_batch_kwargs(
+        self,
+        datasource,
+        batch_kwargs_generator,
+        data_asset_name=None,
+        partition_id=None,
+        **kwargs,
+    ):
+        """Builds batch kwargs using the provided datasource, batch kwargs generator, and batch_parameters.
+        Args:
+            datasource (str): the name of the datasource for which to build batch_kwargs
+            batch_kwargs_generator (str): the name of the batch kwargs generator to use to build batch_kwargs
+            data_asset_name (str): an optional name batch_parameter
+            **kwargs: additional batch_parameters
+        Returns:
+            BatchKwargs
+        """
+        datasource_obj = self.get_datasource(datasource)
+        batch_kwargs = datasource_obj.build_batch_kwargs(
+            batch_kwargs_generator=batch_kwargs_generator,
+            data_asset_name=data_asset_name,
+            partition_id=partition_id,
+            **kwargs,
+        )
+        return batch_kwargs
+
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS,
     )
