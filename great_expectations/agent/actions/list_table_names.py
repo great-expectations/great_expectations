@@ -11,6 +11,7 @@ from great_expectations.agent.models import (
     ListTableNamesEvent,
 )
 from great_expectations.compatibility.sqlalchemy import inspect
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.http import create_session
 from great_expectations.datasource.fluent import SQLDatasource
 from great_expectations.exceptions import GXCloudError
@@ -20,6 +21,7 @@ if TYPE_CHECKING:
 
 
 class ListTableNamesAction(AgentAction[ListTableNamesEvent]):
+    @override
     def run(self, event: ListTableNamesEvent, id: str) -> ActionResult:
         datasource_name: str = event.datasource_name
         datasource = self._context.get_datasource(datasource_name=datasource_name)
