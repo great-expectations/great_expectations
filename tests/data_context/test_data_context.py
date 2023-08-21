@@ -34,7 +34,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.dataset import Dataset
 from great_expectations.datasource import (
     Datasource,
     LegacyDatasource,
@@ -1331,54 +1330,6 @@ def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
 
 
 @pytest.mark.unit
-def test_get_batch_raises_error_when_passed_a_non_string_type_for_suite_parameter(
-    titanic_data_context,
-):
-    with pytest.raises(gx_exceptions.DataContextError):
-        titanic_data_context.get_batch({}, 99)
-
-
-@pytest.mark.unit
-def test_get_batch_raises_error_when_passed_a_non_dict_or_batch_kwarg_type_for_batch_kwarg_parameter(
-    titanic_data_context,
-):
-    with pytest.raises(gx_exceptions.BatchKwargsError):
-        titanic_data_context.get_batch(99, "foo")
-
-
-@pytest.mark.filesystem
-def test_get_batch_when_passed_a_suite_name(titanic_data_context):
-    context = titanic_data_context
-    root_dir = context.root_directory
-    batch_kwargs = {
-        "datasource": "mydatasource",
-        "path": os.path.join(root_dir, "..", "data", "Titanic.csv"),  # noqa: PTH118
-    }
-    context.add_expectation_suite("foo")
-    assert context.list_expectation_suite_names() == ["foo"]
-    batch = context.get_batch(batch_kwargs, "foo")
-    assert isinstance(batch, Dataset)
-    assert isinstance(batch.get_expectation_suite(), ExpectationSuite)
-
-
-@pytest.mark.filesystem
-def test_get_batch_when_passed_a_suite(titanic_data_context):
-    context = titanic_data_context
-    root_dir = context.root_directory
-    batch_kwargs = {
-        "datasource": "mydatasource",
-        "path": os.path.join(root_dir, "..", "data", "Titanic.csv"),  # noqa: PTH118
-    }
-    context.add_expectation_suite("foo")
-    assert context.list_expectation_suite_names() == ["foo"]
-    suite = context.get_expectation_suite("foo")
-
-    batch = context.get_batch(batch_kwargs, suite)
-    assert isinstance(batch, Dataset)
-    assert isinstance(batch.get_expectation_suite(), ExpectationSuite)
-
-
-@pytest.mark.unit
 def test_list_validation_operators_data_context_with_none_returns_empty_list(
     titanic_data_context,
 ):
@@ -1754,38 +1705,6 @@ def test_get_validator_with_batch_list(in_memory_runtime_context):
         create_expectation_suite_with_name="A_expectation_suite",
     )
     assert len(my_validator.batches) == 2
-
-
-@pytest.mark.filesystem
-def test_get_batch_multiple_datasources_do_not_scan_all(
-    data_context_with_bad_datasource,
-):
-    """
-    What does this test and why?
-
-    A DataContext can have "stale" datasources in its configuration (ie. connections to DBs that are now offline).
-    If we configure a new datasource and are only using it (like the PandasDatasource below), then we don't
-    want to be dependent on all the "stale" datasources working too.
-
-    data_context_with_bad_datasource is a fixture that contains a configuration for an invalid datasource
-    (with "fake_port" and "fake_host")
-
-    In the test we configure a new expectation_suite, a local pandas_datasource and retrieve a single batch.
-
-    This tests a fix for the following issue:
-    https://github.com/great-expectations/great_expectations/issues/2241
-    """
-
-    context = data_context_with_bad_datasource
-    context.add_expectation_suite(expectation_suite_name="local_test.default")
-    expectation_suite = context.get_expectation_suite("local_test.default")
-    context.add_datasource("pandas_datasource", class_name="PandasDatasource")
-    df = pd.DataFrame({"a": [1, 2, 3]})
-    batch = context.get_batch(
-        batch_kwargs={"datasource": "pandas_datasource", "dataset": df},
-        expectation_suite_name=expectation_suite,
-    )
-    assert len(batch) == 3
 
 
 @pytest.mark.filesystem

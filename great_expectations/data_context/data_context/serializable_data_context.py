@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, ClassVar, Optional, Union
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -75,6 +76,7 @@ class SerializableDataContext(AbstractDataContext):
         raise NotImplementedError  # Required by parent ABC but this class is never instantiated
 
     @property
+    @override
     def root_directory(self) -> str:
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located.
@@ -82,6 +84,7 @@ class SerializableDataContext(AbstractDataContext):
         return self._context_root_directory
 
     @abc.abstractmethod
+    @override
     def _save_project_config(self, _fds_datasource=None) -> None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.

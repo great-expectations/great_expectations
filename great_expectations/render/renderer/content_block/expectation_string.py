@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -13,6 +14,7 @@ from great_expectations.render.renderer_configuration import RendererConfigurati
 
 class ExpectationStringRenderer(ContentBlockRenderer):
     @classmethod
+    @override
     def _missing_content_block_fn(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,

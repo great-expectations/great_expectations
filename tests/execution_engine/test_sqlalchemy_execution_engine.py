@@ -1,6 +1,7 @@
 import logging
 import os
 from typing import Dict, Tuple, cast
+from unittest import mock
 
 import pandas as pd
 import pytest
@@ -45,6 +46,7 @@ from tests.test_utils import (
     get_sqlite_table_names,
     get_sqlite_temp_table_names,
     get_sqlite_temp_table_names_from_engine,
+    load_data_into_test_database,
 )
 
 try:
@@ -98,6 +100,138 @@ def test_instantiation_via_url(sa):
             sampling_kwargs={"n": 5},
         )
     )
+
+
+@pytest.mark.sqlite
+def test_instantiation_via_url_with_invalid_kwargs(sa):
+    db_file = file_relative_path(
+        __file__,
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
+    )
+    with pytest.raises(TypeError):
+        _ = SqlAlchemyExecutionEngine(
+            url="sqlite:///" + db_file,
+            connect_args={"invalid_keyword_argument": ""},
+        )
+
+
+@pytest.mark.sqlite
+def test_instantiation_via_url_with_kwargs(sa):
+    db_file = file_relative_path(
+        __file__,
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
+    )
+    my_execution_engine = SqlAlchemyExecutionEngine(
+        url="sqlite:///" + db_file, connect_args={"timeout": 10}
+    )
+    assert my_execution_engine.connection_string is None
+    assert my_execution_engine.credentials is None
+    assert my_execution_engine.url[-36:] == "test_cases_for_sql_data_connector.db"
+
+    my_execution_engine.get_batch_data_and_markers(
+        batch_spec=SqlAlchemyDatasourceBatchSpec(
+            table_name="table_partitioned_by_date_column__A",
+            sampling_method="_sample_using_limit",
+            sampling_kwargs={"n": 5},
+        )
+    )
+
+
+@pytest.mark.sqlite
+def test_instantiation_via_fluent_data_sources_with_kwargs(sa, empty_data_context):
+    db_file = file_relative_path(
+        __file__,
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
+    )
+    connection_string = "sqlite:///" + db_file
+    context = empty_data_context
+
+    datasource = context.sources.add_sql(
+        name="test_datasource",
+        connection_string=connection_string,
+        kwargs={"connect_args": {"check_same_thread": False}},
+    )
+
+    engine = datasource.get_engine()
+    assert engine
+    assert engine.dialect.name == "sqlite"
+
+    execution_engine = datasource.get_execution_engine()
+    assert execution_engine.connection_string == connection_string
+    # kwargs should be passed through as keyword arguments to create_engine
+    assert execution_engine.config["connect_args"] == {"check_same_thread": False}
+    assert execution_engine.config["class_name"] == "SqlAlchemyExecutionEngine"
+    assert execution_engine.config["connection_string"] == connection_string
+    assert execution_engine.engine
+
+
+@pytest.mark.trino
+def test_instantiation_via_fluent_data_source__trino_add_sql(sa, empty_data_context):
+    context = empty_data_context
+
+    CONNECTION_STRING = "trino://test@localhost:8088/memory/schema"
+
+    # This utility is not for general use. It is only to support testing.
+    load_data_into_test_database(
+        table_name="taxi_data",
+        csv_path=file_relative_path(
+            __file__,
+            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
+        ),
+        connection_string=CONNECTION_STRING,
+        convert_colnames_to_datetime=["pickup_datetime"],
+    )
+
+    with mock.patch(
+        "great_expectations.datasource.fluent.sql_datasource.sa.create_engine",
+        wraps=sa.create_engine,
+    ) as mock_create_engine:
+        datasource = context.sources.add_sql(
+            name="test_datasource",
+            connection_string=CONNECTION_STRING,
+            kwargs={"connect_args": {"http_scheme": "http"}},
+        )
+        assert mock_create_engine.call_args.args == (CONNECTION_STRING,)
+        assert mock_create_engine.call_args.kwargs == {
+            "connect_args": {"http_scheme": "http"}
+        }
+
+    datasource.add_table_asset("taxi_data")
+
+    # use a validator to create an expectation suite
+    validator = context.get_validator(
+        datasource_name="test_datasource", data_asset_name="taxi_data"
+    )
+    validator.expect_column_values_to_not_be_null("pickup_datetime")
+    context.add_expectation_suite("yellow_tripdata_suite")
+
+    # create a checkpoint
+    checkpoint = context.add_or_update_checkpoint(
+        name="my_checkpoint",
+        expectation_suite_name="yellow_tripdata_suite",
+    )
+
+    # add (save) the checkpoint to the data context
+    context.add_checkpoint(checkpoint=checkpoint)
+    cp = context.get_checkpoint(name="my_checkpoint")
+    assert cp.name == "my_checkpoint"
+
+    result = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        batch_request={
+            "datasource_name": "test_datasource",
+            "data_asset_name": "taxi_data",
+        },
+        run_name=None,
+    )
+
+    assert result["success"]
 
 
 @pytest.mark.sqlite

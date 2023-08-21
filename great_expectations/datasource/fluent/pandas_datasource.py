@@ -28,9 +28,8 @@ import pydantic
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
-from great_expectations.compatibility.sqlalchemy import (
-    sqlalchemy as sa,
-)
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
     new_argument,
@@ -52,9 +51,7 @@ from great_expectations.datasource.fluent.interfaces import (
     _DataAssetT,
 )
 from great_expectations.datasource.fluent.signatures import _merge_signatures
-from great_expectations.datasource.fluent.sources import (
-    DEFAULT_PANDAS_DATA_ASSET_NAME,
-)
+from great_expectations.datasource.fluent.sources import DEFAULT_PANDAS_DATA_ASSET_NAME
 
 _EXCLUDE_TYPES_FROM_JSON: list[Type] = [sqlite3.Connection]
 
@@ -70,9 +67,7 @@ if TYPE_CHECKING:
     MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
     AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 
-    from great_expectations.datasource.fluent.interfaces import (
-        BatchMetadata,
-    )
+    from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import PandasExecutionEngine
     from great_expectations.validator.validator import Validator
 
@@ -112,13 +107,16 @@ class _PandasDataAsset(DataAsset):
 work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""
         )
 
+    @override
     def test_connection(self) -> None:
         ...
 
     @property
+    @override
     def batch_request_options(self) -> tuple[str, ...]:
         return tuple()
 
+    @override
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> list[Batch]:
@@ -177,6 +175,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         return batch_list
 
     @public_api
+    @override
     def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -190,6 +189,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             options={},
         )
 
+    @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.
 
@@ -213,6 +213,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 f"but actually has form:\n{pf(batch_request.dict())}\n"
             )
 
+    @override
     def json(  # noqa: PLR0913
         self,
         *,
@@ -358,6 +359,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             raise ValueError("dataframe must be of type pandas.DataFrame")
         return dataframe
 
+    @override
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
             """Pandas DataFrameAsset does not implement "_get_reader_method()" method, because DataFrame is already available."""
@@ -375,6 +377,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
         version="0.16.15",
     )
+    @override
     def build_batch_request(
         self, dataframe: Optional[pd.DataFrame] = None
     ) -> BatchRequest:
@@ -401,6 +404,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
 
         return super().build_batch_request()
 
+    @override
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> list[Batch]:
@@ -459,6 +463,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
     # Abstract Methods
     @property
+    @override
     def execution_engine_type(self) -> Type[PandasExecutionEngine]:
         """Return the PandasExecutionEngine unless the override is set"""
         from great_expectations.execution_engine.pandas_execution_engine import (
@@ -467,6 +472,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
         return PandasExecutionEngine
 
+    @override
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the _PandasDatasource.
 
@@ -483,6 +489,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
     # End Abstract Methods
 
+    @override
     def json(  # noqa: PLR0913
         self,
         *,
@@ -540,6 +547,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
             **dumps_kwargs,
         )
 
+    @override
     def _add_asset(
         self, asset: _DataAssetT, connect_options: dict | None = None
     ) -> _DataAssetT:
@@ -594,6 +602,7 @@ class PandasDatasource(_PandasDatasource):
     type: Literal["pandas"] = "pandas"
     assets: List[_PandasDataAsset] = []
 
+    @override
     def dict(self, _exclude_default_asset_names: bool = True, **kwargs):
         """Overriding `.dict()` so that `DEFAULT_PANDAS_DATA_ASSET_NAME` is always excluded on serialization."""
         # Overriding `.dict()` instead of `.json()` because `.json()`is only called from the outermost model,
@@ -609,6 +618,7 @@ class PandasDatasource(_PandasDatasource):
                     ds_dict["assets"] = assets
         return ds_dict
 
+    @override
     def test_connection(self, test_assets: bool = True) -> None:
         ...
 

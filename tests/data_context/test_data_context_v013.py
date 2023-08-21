@@ -300,7 +300,7 @@ data_connectors:
     # print(json.dumps(report_object, indent=2))
     # print(context.datasources)
 
-    my_batch = context.get_batch(
+    my_batch_list = context.get_batch_list(
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
@@ -313,6 +313,7 @@ data_connectors:
             },
         },
     )
+    my_batch = my_batch_list[0]
     assert my_batch.batch_definition["data_asset_name"] == "A"
 
     df_data = my_batch.data.dataframe
@@ -329,7 +330,7 @@ data_connectors:
         .equals(df_data.drop("timestamp", axis=1))
     )
 
-    my_batch = context.get_batch(
+    my_batch_list = context.get_batch_list(
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
@@ -341,6 +342,8 @@ data_connectors:
             },
         },
     )
+    my_batch = my_batch_list[0]
+
     df_data = my_batch.data.dataframe
     assert df_data.shape == (4, 10)
     df_data["date"] = df_data.apply(
@@ -418,59 +421,15 @@ data_connectors:
         == f"{context.root_directory}/test_dir_0/A/B/C/bigfile_1.csv"
     )
 
-    my_batch = context.get_batch(
+    my_batch_list = context.get_batch_list(
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
     )
+    my_batch = my_batch_list[0]
 
     df_data = my_batch.data.dataframe
     assert df_data.shape == (120, 10)
-
-
-@pytest.mark.filesystem
-def test__get_data_context_version(empty_data_context, titanic_data_context):
-    context = empty_data_context
-
-    assert not context._get_data_context_version("some_datasource_name", **{})
-    assert not context._get_data_context_version(arg1="some_datasource_name", **{})
-
-    yaml_config = """
-class_name: Datasource
-
-execution_engine:
-    class_name: PandasExecutionEngine
-
-data_connectors:
-    general_runtime_data_connector:
-      module_name: great_expectations.datasource.data_connector
-      class_name: RuntimeDataConnector
-      batch_identifiers:
-      - airflow_run_id
-"""
-    # noinspection PyUnusedLocal
-    context.test_yaml_config(
-        name="some_datasource_name",
-        yaml_config=yaml_config,
-    )
-
-    assert context._get_data_context_version("some_datasource_name", **{}) == "v3"
-    assert context._get_data_context_version(arg1="some_datasource_name", **{}) == "v3"
-
-    context = titanic_data_context
-    root_dir = context.root_directory
-    batch_kwargs = {
-        "datasource": "mydatasource",
-        "path": f"{root_dir}/../data/Titanic.csv",
-    }
-    assert context._get_data_context_version(arg1=batch_kwargs) == "v2"
-    assert context._get_data_context_version(batch_kwargs) == "v2"
-    assert (
-        context._get_data_context_version(
-            "some_value", **{"batch_kwargs": batch_kwargs}
-        )
-        == "v2"
-    )
 
 
 @pytest.mark.filesystem
@@ -536,9 +495,7 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
         data_context_with_runtime_sql_datasource_for_testing_get_batch
     )
 
-    batch: Batch
-
-    batch = context.get_batch(
+    batch_list = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
             datasource_name="my_runtime_sql_datasource",
             data_connector_name="my_runtime_data_connector",
@@ -552,6 +509,7 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
             },
         ),
     )
+    batch = batch_list[0]
 
     assert batch.batch_spec is not None
     assert batch.batch_definition["data_asset_name"] == "IN_MEMORY_DATA_ASSET"
@@ -570,7 +528,7 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
     assert len(get_sqlite_temp_table_names(batch.data.execution_engine)) == 1
 
     # if create_temp_table in batch_spec_passthrough is set to False, no new temp tables should be created
-    batch = context.get_batch(
+    batch_list = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
             datasource_name="my_runtime_sql_datasource",
             data_connector_name="my_runtime_data_connector",
@@ -585,6 +543,7 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
             batch_spec_passthrough={"create_temp_table": False},
         ),
     )
+    batch = batch_list[0]
     assert len(get_sqlite_temp_table_names(batch.data.execution_engine)) == 1
 
 
@@ -636,7 +595,7 @@ def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
 
     batch: Batch
 
-    batch = context.get_batch(
+    batch_list = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
             datasource_name="my_datasource",
             data_connector_name="my_runtime_data_connector",
@@ -648,6 +607,7 @@ def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
             },
         ),
     )
+    batch = batch_list[0]
 
     assert batch.batch_spec is not None
     assert batch.batch_definition["data_asset_name"] == "IN_MEMORY_DATA_ASSET"
@@ -662,7 +622,7 @@ def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
 
     # with no reader_method in batch_spec_passthrough
     with pytest.raises(ExecutionEngineError):
-        context.get_batch(
+        context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="my_runtime_data_connector",
@@ -676,7 +636,7 @@ def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
         )
 
     # with reader_method in batch_spec_passthrough
-    batch = context.get_batch(
+    batch_list = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
             datasource_name="my_datasource",
             data_connector_name="my_runtime_data_connector",
@@ -689,6 +649,7 @@ def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
             batch_spec_passthrough={"reader_method": "read_csv"},
         ),
     )
+    batch = batch_list[0]
 
     assert batch.batch_spec is not None
     assert batch.batch_definition["data_asset_name"] == "IN_MEMORY_DATA_ASSET"

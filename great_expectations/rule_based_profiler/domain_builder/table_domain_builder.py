@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
@@ -31,6 +32,7 @@ class TableDomainBuilder(DomainBuilder):
         super().__init__(data_context=data_context)
 
     @property
+    @override
     def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.TABLE
 
@@ -41,6 +43,7 @@ class TableDomainBuilder(DomainBuilder):
     separate Domain object is emitted for each individual Batch (using its respective batch_id).  (This is future work.)
     """
 
+    @override
     def _get_domains(
         self,
         rule_name: str,

@@ -6,6 +6,7 @@ from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
     ConfiguredAssetSqlDataConnector,
@@ -110,6 +111,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
     def data_asset_name_suffix(self) -> str:
         return self._data_asset_name_suffix
 
+    @override
     def _refresh_data_references_cache(self) -> None:
         self._refresh_introspected_assets_cache()
         super()._refresh_data_references_cache()
