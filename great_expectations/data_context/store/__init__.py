@@ -29,3 +29,4 @@ from .html_site_store import HtmlSiteStore  # isort:skip
 from .datasource_store import DatasourceStore  # isort:skip
 from .profiler_store import ProfilerStore  # isort:skip
 from .data_context_store import DataContextStore  # isort:skip
+from .data_asset_store import DataAssetStore  # isort:skip
