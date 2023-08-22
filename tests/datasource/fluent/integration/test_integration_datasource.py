@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from unittest import mock
 
 import pandas as pd
-import pydantic
+from great_expectations.compatibility import pydantic
 import pytest
 
 import great_expectations as gx

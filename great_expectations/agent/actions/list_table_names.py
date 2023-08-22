@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, List
 
-import pydantic
+from great_expectations.compatibility import pydantic
 
 from great_expectations.agent.actions.agent_action import (
     ActionResult,

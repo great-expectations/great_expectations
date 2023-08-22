@@ -5,7 +5,7 @@ from contextlib import _GeneratorContextManager, contextmanager
 from typing import TYPE_CHECKING, Any, Callable, Generator, Optional
 
 import pytest
-from pydantic import ValidationError
+from great_expectations.compatibility.pydantic import ValidationError
 
 from great_expectations.datasource.fluent import SqliteDatasource
 from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls

@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Optional, Type
 
-import pydantic
+from great_expectations.compatibility import pydantic
 import pytest
 from pytest import MonkeyPatch, param
 

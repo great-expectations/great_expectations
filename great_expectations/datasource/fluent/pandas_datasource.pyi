@@ -23,7 +23,7 @@ from typing import (
 )
 
 import pandas as pd
-import pydantic
+from great_expectations.compatibility import pydantic
 from typing_extensions import TypeAlias
 
 from great_expectations.compatibility import sqlalchemy

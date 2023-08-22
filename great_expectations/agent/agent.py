@@ -6,8 +6,8 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from functools import partial
 from typing import TYPE_CHECKING, Dict, Optional
 
-import pydantic
-from pydantic import AmqpDsn, AnyUrl
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import AmqpDsn, AnyUrl
 
 from great_expectations import get_context
 from great_expectations.agent.actions.agent_action import ActionResult

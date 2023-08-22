@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Literal, Type, Union
 
-import pydantic
+from great_expectations.compatibility import pydantic
 
 from great_expectations.compatibility import aws
 from great_expectations.compatibility.typing_extensions import override

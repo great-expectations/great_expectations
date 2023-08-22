@@ -11,10 +11,10 @@ from typing import (
     Union,
 )
 
-import pydantic
-from pydantic import StrictStr
-from pydantic.json import pydantic_encoder
-from pydantic.schema import default_ref_template
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import StrictStr
+from great_expectations.compatibility.pydantic import json as pydantic_json
+from great_expectations.compatibility.pydantic.schema import default_ref_template
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
@@ -230,7 +230,7 @@ class BatchRequest(pydantic.BaseModel):
         )
         result = cls.__config__.json_dumps(
             cls.schema(by_alias=by_alias, ref_template=ref_template),
-            default=pydantic_encoder,
+            default=pydantic_json.pydantic_encoder,
             **dumps_kwargs,
         )
         # revert model changes

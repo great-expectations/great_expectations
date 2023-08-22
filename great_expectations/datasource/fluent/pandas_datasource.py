@@ -24,7 +24,7 @@ from typing import (
 )
 
 import pandas as pd
-import pydantic
+from great_expectations.compatibility import pydantic
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy

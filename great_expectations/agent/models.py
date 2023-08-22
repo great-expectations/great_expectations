@@ -2,7 +2,7 @@ import uuid
 from typing import Literal, Sequence, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Extra, Field
+from great_expectations.compatibility.pydantic import BaseModel, Extra, Field
 from typing_extensions import Annotated
 
 

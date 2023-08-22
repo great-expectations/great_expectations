@@ -19,7 +19,7 @@ from typing import (
     overload,
 )
 
-import pydantic
+from great_expectations.compatibility import pydantic
 from ruamel.yaml import YAML
 
 from great_expectations.compatibility.typing_extensions import override

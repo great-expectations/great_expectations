@@ -4,7 +4,7 @@ import logging
 from typing import TYPE_CHECKING, Dict, Tuple
 
 import pytest
-from pydantic import ValidationError
+from great_expectations.compatibility.pydantic import ValidationError
 
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult

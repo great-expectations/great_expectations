@@ -5,7 +5,7 @@ from functools import partial
 from json import JSONDecodeError
 from typing import Callable, Coroutine, Union
 
-import pydantic
+from great_expectations.compatibility import pydantic
 from pika.exceptions import AMQPError, ChannelError
 
 from great_expectations.agent.message_service.asyncio_rabbit_mq_client import (

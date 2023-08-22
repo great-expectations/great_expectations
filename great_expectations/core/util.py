@@ -30,7 +30,7 @@ from urllib.parse import urlparse
 import dateutil.parser
 import numpy as np
 import pandas as pd
-import pydantic
+from great_expectations.compatibility import pydantic
 from IPython import get_ipython
 
 from great_expectations import exceptions as gx_exceptions

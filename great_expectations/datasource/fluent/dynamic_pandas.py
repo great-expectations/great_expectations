@@ -30,11 +30,11 @@ from typing import (
 )
 
 import pandas as pd
-import pydantic
+from great_expectations.compatibility import pydantic
 from packaging.version import Version
-from pydantic import AnyUrl, Field, FilePath
+from great_expectations.compatibility.pydantic import AnyUrl, Field, FilePath
 
-# from pydantic.typing import resolve_annotations
+# from great_expectations.compatibility.pydantic.typing import resolve_annotations
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.interfaces import (
     DataAsset,

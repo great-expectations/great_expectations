@@ -7,7 +7,7 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, List, cast
 
 import pandas as pd
-import pydantic
+from great_expectations.compatibility import pydantic
 import pytest
 from moto import mock_s3
 from pytest import param

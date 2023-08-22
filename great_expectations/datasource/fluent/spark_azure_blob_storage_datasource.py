@@ -4,7 +4,7 @@ import logging
 import re
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Final, Literal, Type, Union
 
-import pydantic
+from great_expectations.compatibility import pydantic
 
 from great_expectations.compatibility import azure
 from great_expectations.compatibility.typing_extensions import override

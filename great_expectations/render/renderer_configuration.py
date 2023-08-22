@@ -21,7 +21,7 @@ from typing import (
 
 import dateutil
 from dateutil.parser import ParserError
-from pydantic import (
+from great_expectations.compatibility.pydantic import (
     BaseModel,
     Field,
     ValidationError,
@@ -29,7 +29,7 @@ from pydantic import (
     root_validator,
     validator,
 )
-from pydantic.generics import GenericModel
+from great_expectations.compatibility.pydantic.generics import GenericModel
 from typing_extensions import TypeAlias, TypedDict
 
 from great_expectations.compatibility.typing_extensions import override
@@ -40,7 +40,7 @@ from great_expectations.core import (
 from great_expectations.render.exceptions import RendererConfigurationError
 
 if TYPE_CHECKING:
-    from pydantic.typing import AbstractSetIntStr, DictStrAny, MappingIntStrAny
+    from great_expectations.compatibility.pydantic.typing import AbstractSetIntStr, DictStrAny, MappingIntStrAny
 
 
 class RendererValueType(str, Enum):

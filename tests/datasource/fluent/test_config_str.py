@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Callable, List, Union
 
-import pydantic
+from great_expectations.compatibility import pydantic
 import pytest
 from pytest import MonkeyPatch
 

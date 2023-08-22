@@ -1,7 +1,7 @@
 from typing import Any, Dict, Optional
 
-import pydantic
-from pydantic import StrictStr
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import StrictStr
 from typing_extensions import TypeAlias
 
 from great_expectations.datasource.data_connector.batch_filter import BatchSlice
