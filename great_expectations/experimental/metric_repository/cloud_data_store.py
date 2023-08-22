@@ -17,11 +17,11 @@ class CloudDataStore(DataStore[StorableTypes]):
         super().__init__(context=context)
         config = context.ge_cloud_config
         self._session = create_session(access_token=config.access_token)
-        self._url = (
-            f"{config.base_url}/organizations/{config.organization_id}/metric-runs"
+        self._org_url = (
+            f"{config.base_url}/organizations/{config.organization_id}"
         )
 
-    def _construct_json_payload(self, metric_run: MetricRun):
+    def _construct_metric_run_json_payload(self, metric_run: MetricRun):
         result = {
             "id": str(metric_run.id),
             "metrics": [],
@@ -48,6 +48,13 @@ class CloudDataStore(DataStore[StorableTypes]):
         print(f" in {self.__class__.__name__}")
         print("  sending a POST request to the cloud.")
         print(value)
-        data = self._construct_json_payload(value)
-        self._session.post(self._url, data)
+        value_type = type(value)
+        url = ""
+        data = None
+        if value_type == MetricRun:
+            data = self._construct_metric_run_json_payload(value)
+            url = self._org_url + "/metric-runs"
+
+        if data:
+            self._session.post(url, data)
         return value
