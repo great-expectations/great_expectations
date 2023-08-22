@@ -58,7 +58,7 @@ jobs:
     needs: docs-changes
     # run on every PR that is not a draft that has docs changes, and on tagged push events (ie. releases)
     if: |
-      needs.docs-changes.outputs.docs == 'true' ||
+      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
       (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     steps:
@@ -126,7 +126,7 @@ jobs:
     needs: docs-changes
     # run on every PR that is not a draft that has docs changes, and on tagged push events (ie. releases)
     if: |
-      needs.docs-changes.outputs.docs == 'true' ||
+      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
       (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     env:
