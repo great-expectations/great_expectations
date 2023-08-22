@@ -1,22 +1,15 @@
 from typing import Any, Dict, List
 
 import pandas as pd
-
+import great_expectations as gx
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuiteValidationResult,
     IDDict,
 )
+from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.batch import Batch, BatchDefinition
-from great_expectations.data_context.data_context.base_data_context import (
-    BaseDataContext,
-)
-from great_expectations.data_context.types.base import (
-    CheckpointConfig,
-    DataContextConfig,
-    InMemoryStoreBackendDefaults,
-)
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.util import filter_properties_dict
 from great_expectations.validator.validator import Validator
@@ -34,51 +27,14 @@ dataframe = pd.DataFrame(
 
 
 # NOTE: The following code is only for testing and can be ignored by users.
-data_context_config: DataContextConfig = DataContextConfig(
-    datasources={  # type: ignore[arg-type]
-        "pandas_datasource": {
-            "execution_engine": {
-                "class_name": "PandasExecutionEngine",
-                "module_name": "great_expectations.execution_engine",
-            },
-            "class_name": "Datasource",
-            "module_name": "great_expectations.datasource",
-            "data_connectors": {
-                "runtime_data_connector": {
-                    "class_name": "RuntimeDataConnector",
-                    "batch_identifiers": [
-                        "id_key_0",
-                        "id_key_1",
-                    ],
-                }
-            },
-        },
-    },
-    expectations_store_name="expectations_store",
-    validations_store_name="validations_store",
-    evaluation_parameter_store_name="evaluation_parameter_store",
-    checkpoint_store_name="checkpoint_store",
-    store_backend_defaults=InMemoryStoreBackendDefaults(),
-)
-context = BaseDataContext(project_config=data_context_config)
-batch_definition = BatchDefinition(
-    datasource_name="pandas_datasource",
-    data_connector_name="runtime_data_connector",
-    data_asset_name="my_asset",
-    batch_identifiers=IDDict({}),
-    batch_spec_passthrough=None,
-)
-batch = Batch(
-    data=dataframe,
-    batch_definition=batch_definition,
-)
-engine = PandasExecutionEngine()
-my_validator: Validator = Validator(
-    execution_engine=engine,
-    data_context=context,
-    batches=[
-        batch,
-    ],
+context = gx.get_context(cloud_mode=False)
+datasource = context.sources.add_pandas(name="my_pandas_datasource")
+data_asset = datasource.add_dataframe_asset(name="my_df")
+my_batch_request = data_asset.build_batch_request(dataframe=dataframe)
+context.add_or_update_expectation_suite("my_expectation_suite")
+my_validator = context.get_validator(
+    batch_request=my_batch_request,
+    expectation_suite_name="my_expectation_suite",
 )
 
 # Expectation-level Configuration
@@ -261,18 +217,15 @@ context.add_or_update_expectation_suite(
     expectation_suite=test_suite,
 )
 
+
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_checkpoint_example">
-checkpoint_dict: dict = {
-    "name": "my_checkpoint",
-    "config_version": 1.0,
-    "class_name": "Checkpoint",  # or SimpleCheckpoint
-    "module_name": "great_expectations.checkpoint",
-    "template_name": None,
-    "run_name_template": "%Y-%M-foo-bar-template-test",
-    "expectation_suite_name": None,
-    "batch_request": None,
-    "profilers": [],
-    "action_list": [
+checkpoint: Checkpoint = Checkpoint(
+    name="my_checkpoint",
+    run_name_template="%Y%m%d-%H%M%S-my-run-name-template",
+    data_context=context,
+    batch_request=my_batch_request,
+    expectation_suite_name="test_suite",
+    action_list=[
         {
             "name": "store_validation_result",
             "action": {"class_name": "StoreValidationResultAction"},
@@ -281,48 +234,22 @@ checkpoint_dict: dict = {
             "name": "store_evaluation_params",
             "action": {"class_name": "StoreEvaluationParametersAction"},
         },
-        {
-            "name": "update_data_docs",
-            "action": {"class_name": "UpdateDataDocsAction"},
-        },
+        {"name": "update_data_docs", "action": {"class_name": "UpdateDataDocsAction"}},
     ],
-    "validations": [],
-    "runtime_configuration": {
+    runtime_configuration={
         "result_format": {
             "result_format": "COMPLETE",
             "unexpected_index_column_names": ["pk_column"],
             "return_unexpected_index_query": True,
         },
     },
-}
+)
 # </snippet>
-batch_request = {
-    "datasource_name": "pandas_datasource",
-    "data_connector_name": "runtime_data_connector",
-    "data_asset_name": "IN_MEMORY_DATA_ASSET",
-    "runtime_parameters": {
-        "batch_data": dataframe,
-    },
-    "batch_identifiers": {
-        "id_key_0": 1234567890,
-    },
-}
 
-checkpoint_config = CheckpointConfig(**checkpoint_dict)
-context.add_or_update_checkpoint(
-    **filter_properties_dict(
-        properties=checkpoint_config.to_json_dict(),
-        clean_falsy=True,
-    ),
-)
-context._save_project_config()
+context.add_or_update_checkpoint(checkpoint=checkpoint)
 
-result: CheckpointResult = context.run_checkpoint(
-    checkpoint_name="my_checkpoint",
-    expectation_suite_name="test_suite",
-    batch_request=batch_request,
-)
-evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+results: CheckpointResult = checkpoint.run()
+evrs: List[ExpectationSuiteValidationResult] = results.list_validation_results()
 
 result_index_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
     "unexpected_index_list"
