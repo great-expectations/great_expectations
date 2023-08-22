@@ -470,7 +470,7 @@ class CloudDataContext(SerializableDataContext):
         )
         return data_asset_store
 
-    def _delete_data_asset(self, id: str) -> bool:
+    def _delete_asset(self, id: str) -> bool:
         """Delete a DataAsset. Cloud will also update the corresponding DatasourceConfig."""
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.DATA_ASSET,
