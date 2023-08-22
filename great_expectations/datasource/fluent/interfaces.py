@@ -67,9 +67,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context import (
         AbstractDataContext as GXDataContext,
     )
-    from great_expectations.data_context import (
-        CloudDataContext,
-    )
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent import (
         BatchRequest,
@@ -520,6 +517,8 @@ class Datasource(
         Args:
             asset_name: name of DataAsset to be deleted.
         """
+        from great_expectations.data_context import CloudDataContext
+
         asset: _DataAssetT
         asset = self.get_asset(asset_name=asset_name)
         self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
