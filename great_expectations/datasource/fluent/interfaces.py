@@ -66,6 +66,9 @@ if TYPE_CHECKING:
     from great_expectations.data_context import (
         AbstractDataContext as GXDataContext,
     )
+    from great_expectations.data_context import (
+        CloudDataContext,
+    )
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent import (
         BatchRequest,
@@ -517,9 +520,13 @@ class Datasource(
             asset_name: name of DataAsset to be deleted.
         """
         asset: _DataAssetT
+        asset = self.get_asset(asset_name=asset_name)
         self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
 
-        self._save_context_project_config()
+        if self._data_context and isinstance(self._data_context, CloudDataContext):
+            self._data_context._delete_asset(id=asset.id)
+        else:
+            self._save_context_project_config()
 
     def _add_asset(
         self, asset: _DataAssetT, connect_options: dict | None = None
