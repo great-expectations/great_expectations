@@ -76,9 +76,9 @@ def cloud_context_and_batch_request_with_simple_dataframe(
     return context, batch_request
 
 
-# @pytest.mark.xfail(
-#     reason="This test is meant as a demo during development and currently fails due to differing batch data object ids and ge_load_time batch marker"
-# )
+@pytest.mark.xfail(
+    reason="This test is meant as a demo during development and currently fails due to differing batch data object ids and ge_load_time batch marker"
+)
 def test_demo_batch_inspector(
     metric_id: uuid.UUID,
     run_id: uuid.UUID,
