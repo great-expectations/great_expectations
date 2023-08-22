@@ -15,7 +15,7 @@ T = TypeVar("T", bound=StorableTypes)
 class CloudDataStore(DataStore[StorableTypes]):
     def __init__(self, context: AbstractDataContext):
         super().__init__(context=context)
-        config = self._context._cloud_config
+        config = context.ge_cloud_config
         self._session = create_session(access_token=config.access_token)
         self._url = (
             f"{config.base_url}/organizations/{config.organization_id}/metric-runs"
