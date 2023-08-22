@@ -6,6 +6,7 @@ import pydantic
 from typing_extensions import Annotated, TypeAlias
 
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.batch_spec import FabricBatchSpec
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
@@ -43,9 +44,62 @@ class _PowerBIAsset(DataAsset):
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> list[Batch]:
-        raise NotImplementedError(
-            "get_batch_list_from_batch_request is not implemented"
+        self._validate_batch_request(batch_request)
+        batch_list: List[Batch] = []
+
+        batch_spec = FabricBatchSpec(
+            reader_method=self._reader_method,
+            reader_options=self.dict(
+                # exclude=self._EXCLUDE_FROM_READER_OPTIONS,
+                exclude_unset=True,
+                by_alias=True,
+                config_provider=self._datasource._config_provider,
+            ),
         )
+        # TODO: update get_batch_data_and_markers types
+        execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
+        data, markers = execution_engine.get_batch_data_and_markers(
+            batch_spec=batch_spec
+        )
+
+        # batch_definition (along with batch_spec and markers) is only here to satisfy a
+        # legacy constraint when computing usage statistics in a validator. We hope to remove
+        # it in the future.
+        # imports are done inline to prevent a circular dependency with core/batch.py
+        from great_expectations.core import IDDict
+        from great_expectations.core.batch import BatchDefinition
+
+        batch_definition = BatchDefinition(
+            datasource_name=self.datasource.name,
+            # TODO: what to do about data_connector_name?
+            data_connector_name="FABRIC_DATA_CONNECTOR_DOES_NOT_EXIST",
+            data_asset_name=self.name,
+            batch_identifiers=IDDict(batch_request.options),
+            batch_spec_passthrough=None,
+        )
+
+        batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
+            batch_request=batch_request
+        )
+
+        # Some pydantic annotations are postponed due to circular imports.
+        # Batch.update_forward_refs() will set the annotations before we
+        # instantiate the Batch class since we can import them in this scope.
+        # TODO: update Batch legacy_batch_spec types
+        Batch.update_forward_refs()
+        batch_list.append(
+            Batch(
+                datasource=self.datasource,
+                data_asset=self,
+                batch_request=batch_request,
+                data=data,
+                metadata=batch_metadata,
+                legacy_batch_markers=markers,
+                legacy_batch_spec=batch_spec,
+                legacy_batch_definition=batch_definition,
+            )
+        )
+        return batch_list
 
     @override
     def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
