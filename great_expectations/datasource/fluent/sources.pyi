@@ -22,6 +22,7 @@ from great_expectations.data_context import (
 )
 from great_expectations.datasource.fluent import (
     DatabricksSQLDatasource,
+    FabricDatasource,
     PandasAzureBlobStorageDatasource,
     PandasDatasource,
     PandasDBFSDatasource,
@@ -714,6 +715,12 @@ class _SourceFactories:
         self,
         name: str,
     ) -> None: ...
+    def add_fabric(
+        self,
+        name: Optional[str] = None,
+        datasource: Optional[FabricDatasource] = None,
+        # TODO: add fabric-specific parameters (must be keyword only)
+    ) -> FabricDatasource: ...
 
 def _iter_all_registered_types(
     include_datasource: bool = True, include_data_asset: bool = True
