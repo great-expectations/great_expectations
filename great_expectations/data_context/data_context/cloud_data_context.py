@@ -47,6 +47,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
     GXCloudConfig,
+    assetConfigSchema,
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
@@ -60,6 +61,7 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+    from great_expectations.data_context.store import DataAssetStore
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.types.base import (
         AnonymizedUsageStatisticsConfig,
@@ -140,6 +142,10 @@ class CloudDataContext(SerializableDataContext):
             context_root_dir
         )
         self._project_config = self._init_project_config(project_config)
+
+        # The DataAssetStore is relevant only for CloudDataContexts and is not an explicit part of the project config.
+        # As such, it must be instantiated separately.
+        self._data_asset_store = self._init_data_asset_store()
 
         super().__init__(
             context_root_dir=self._context_root_directory,
@@ -433,6 +439,40 @@ class CloudDataContext(SerializableDataContext):
             serializer=JsonConfigSerializer(schema=datasourceConfigSchema),
         )
         return datasource_store
+
+    def _init_data_asset_store(self) -> DataAssetStore:
+        from great_expectations.data_context.store import DataAssetStore
+        from great_expectations.data_context.store.gx_cloud_store_backend import (
+            GXCloudStoreBackend,
+        )
+
+        # Never explicitly referenced but adheres
+        # to the convention set by other internal Stores
+        store_name = DataContextConfigDefaults.DEFAULT_DATA_ASSET_STORE_NAME.value
+        store_backend: dict = {"class_name": GXCloudStoreBackend.__name__}
+        runtime_environment: dict = {
+            "root_directory": self.root_directory,
+            "ge_cloud_credentials": self.ge_cloud_config.to_dict(),  # type: ignore[union-attr]
+            "ge_cloud_resource_type": GXCloudRESTResource.DATA_ASSET,
+            "ge_cloud_base_url": self.ge_cloud_config.base_url,  # type: ignore[union-attr]
+        }
+
+        data_asset_store = DataAssetStore(
+            store_name=store_name,
+            store_backend=store_backend,
+            runtime_environment=runtime_environment,
+            serializer=JsonConfigSerializer(schema=assetConfigSchema),
+        )
+        return data_asset_store
+
+    def _delete_data_asset(self, id: str) -> bool:
+        """Delete a DataAsset. Cloud will also update the corresponding DatasourceConfig."""
+        key = GXCloudIdentifier(
+            resource_type=GXCloudRESTResource.DATA_ASSET,
+            id=id,
+        )
+
+        return self._data_asset_store.remove_key(key)
 
     def list_expectation_suite_names(self) -> List[str]:
         """
