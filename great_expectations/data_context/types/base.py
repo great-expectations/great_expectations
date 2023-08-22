@@ -1812,6 +1812,9 @@ class DataContextConfigDefaults(enum.Enum):
     # Datasource
     DEFAULT_DATASOURCE_STORE_NAME = "datasource_store"
 
+    # DataAsset
+    DEFAULT_DATA_ASSET_STORE_NAME = "data_asset_store"
+
     # Checkpoints
     DEFAULT_CHECKPOINT_STORE_NAME = "checkpoint_store"
     CHECKPOINTS_BASE_DIRECTORY = "checkpoints"
