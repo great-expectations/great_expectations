@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Generic, List, Optional, Sequence, TypeVar, Union
 
 import pydantic
 from pydantic import BaseModel, Field
@@ -26,7 +26,10 @@ class MetricException(MetricRepositoryBaseModel):
     )
 
 
-class Metric(MetricRepositoryBaseModel):
+_ValueType = TypeVar("_ValueType")
+
+
+class Metric(MetricRepositoryBaseModel, Generic[_ValueType]):
     """Abstract computed metric. Domain, value and parameters are metric dependent.
 
     Note: This implementation does not currently take into account
@@ -42,6 +45,7 @@ class Metric(MetricRepositoryBaseModel):
     id: uuid.UUID = Field(description="Metric id")
     batch: Batch = Field(description="Batch")
     metric_name: str = Field(description="Metric name")
+    value: _ValueType = Field(description="Metric value")
     exception: MetricException = Field(description="Exception info if thrown")
 
     @classmethod
@@ -56,86 +60,26 @@ class Metric(MetricRepositoryBaseModel):
 # Metric domain types
 
 
-class TableMetric(Metric):
-    def __new__(cls, *args, **kwargs):
-        if cls is TableMetric:
-            raise NotImplementedError("TableMetric is an abstract class.")
-        instance = super().__new__(cls)
-        return instance
+class TableMetric(Metric, Generic[_ValueType]):
+    pass
 
 
-class ColumnMetric(Metric):
-    def __new__(cls, *args, **kwargs):
-        if cls is ColumnMetric:
-            raise NotImplementedError("ColumnMetric is an abstract class.")
-        instance = super().__new__(cls)
-        return instance
-
+class ColumnMetric(Metric, Generic[_ValueType]):
     column: str = Field(description="Column name")
 
 
 # TODO: Add ColumnPairMetric, MultiColumnMetric
 
 
-# Metric value types
-
-# TODO: Use generics to determine `value` type
-# https://docs.pydantic.dev/1.10/usage/models/#generic-models
-# print(Response[int](data=1))
-# #> data=1 error=None
-# print(Response[str](data='value'))
-# #> data='value' error=None
-# print(Response[str](data='value').dict())
-# #> {'data': 'value', 'error': None}
-# print(Response[DataModel](data=data).dict())
-
-
-class NumericMetric(Metric):
-    def __new__(cls, *args, **kwargs):
-        if cls is NumericMetric:
-            raise NotImplementedError("NumericMetric is an abstract class.")
-        instance = super().__new__(cls)
-        return instance
-
-    value: Union[int, float] = Field(description="Metric value")
-
-
-class NumericListMetric(Metric):
-    def __new__(cls, *args, **kwargs):
-        if cls is NumericListMetric:
-            raise NotImplementedError("NumericListMetric is an abstract class.")
-        instance = super().__new__(cls)
-        return instance
-
-    value: List[float] = Field(description="Metric value")
-
-
-class StringListMetric(Metric):
-    def __new__(cls, *args, **kwargs):
-        if cls is StringListMetric:
-            raise NotImplementedError("StringListMetric is an abstract class.")
-        instance = super().__new__(cls)
-        return instance
-
-    value: List[str] = Field(description="Metric value")
-
-
-# Concrete Metrics
+# Metrics with parameters (aka metric_value_kwargs)
 # This is where the concrete metric types are defined that
 # bring together a domain type, value type and any parameters (aka metric_value_kwargs)
 
 # TODO: Add metrics here for all Column Descriptive Metrics
+#  QuantileValuesColumnMetric is an example of a metric that has parameters
 
 
-class NumericTableMetric(TableMetric, NumericMetric):
-    pass
-
-
-class StringListTableMetric(TableMetric, StringListMetric):
-    pass
-
-
-class QuantileValuesColumnMetric(ColumnMetric, NumericListMetric):
+class QuantileValuesColumnMetric(ColumnMetric[List[float]]):
     quantiles: List[float] = Field(description="Quantiles to compute")
     allow_relative_error: Union[str, float] = Field(
         description="Relative error interpolation type (pandas) or limit (e.g. spark) depending on data source"
