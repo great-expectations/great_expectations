@@ -75,7 +75,7 @@ class DataAssetStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def remove_key(self, key: Union[DataContextVariableKey, GXCloudIdentifier]) -> None:
+    def remove_key(self, key: Union[DataContextVariableKey, GXCloudIdentifier]) -> bool:
         """
         See parent `Store.remove_key()` for more information
         """
