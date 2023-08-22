@@ -12,6 +12,7 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/core/util.py Name: convert_to_json_serializable",
     "File: great_expectations/core/util.py Name: get_or_create_spark_application",
     "File: great_expectations/data_asset/data_asset.py Name: DataAsset",
+    "File: great_expectations/compatibility/not_imported.py Name: is_version_greater_or_equal",
     "File: great_expectations/data_context/data_context/abstract_data_context.py Name: add_checkpoint",
     "File: great_expectations/data_context/data_context/abstract_data_context.py Name: add_datasource",
     "File: great_expectations/data_context/data_context/abstract_data_context.py Name: add_expectation_suite",

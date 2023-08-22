@@ -3,6 +3,7 @@ import re
 from typing import List, Optional
 
 from great_expectations.compatibility import azure
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
@@ -34,7 +35,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         assets (dict): dict of asset configuration (required for ``ConfiguredAssetDataConnector``)
         execution_engine (ExecutionEngine): optional reference to ExecutionEngine
         default_regex (dict): optional regex configuration for filtering data_references
-        sorters (list): optional list of sorters for sorting data_references
+        sorters (list): optional list of sorters for sorting ``data_references``
         name_starts_with (str): Azure prefix
         delimiter (str): Azure delimiter
         azure_options (dict): wrapper object for ``**kwargs``
@@ -103,6 +104,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
                 Please ensure that you have provided the appropriate keys to `azure_options` for authentication."
             )
 
+    @override
     def build_batch_spec(self, batch_definition: BatchDefinition) -> AzureBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
@@ -118,6 +120,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         )
         return AzureBatchSpec(batch_spec)
 
+    @override
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
         query_options: dict = {
             "container": self._container,
@@ -139,6 +142,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         )
         return path_list
 
+    @override
     def _get_full_file_path_for_asset(
         self, path: str, asset: Optional[Asset] = None
     ) -> str:

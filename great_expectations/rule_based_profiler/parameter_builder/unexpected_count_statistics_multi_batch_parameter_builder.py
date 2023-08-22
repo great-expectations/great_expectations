@@ -7,6 +7,7 @@ import scipy
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,  # noqa: TCH001
 )
@@ -127,6 +128,15 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
         """
+
+        if (
+            domain.domain_type == MetricDomainTypes.COLUMN
+            and "." in domain.domain_kwargs["column"]
+        ):
+            raise gx_exceptions.ProfilerExecutionError(
+                "Column names cannot contain '.' when computing parameters for unexpected count statistics."
+            )
+
         # Obtain unexpected_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         unexpected_count_parameter_builder_name: Optional[
             str

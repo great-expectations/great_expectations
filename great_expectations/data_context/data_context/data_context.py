@@ -1,12 +1,9 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Literal, Optional, Tuple, overload
+from typing import TYPE_CHECKING, Literal, overload
 
-from great_expectations.core._docs_decorators import deprecated_argument
-from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,  # noqa: TCH001
-)
+from great_expectations.core._docs_decorators import deprecated_method_or_class
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
@@ -19,25 +16,23 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.data_context.serializable_data_context import (
     SerializableDataContext,
 )
-from great_expectations.data_context.types.base import GXCloudConfig  # noqa: TCH001
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+    from great_expectations.data_context.types.base import GXCloudConfig
 
 
 @overload
 def DataContext(  # noqa: PLR0913
     context_root_dir: PathStr = ...,
-    runtime_environment: Optional[dict] = ...,
+    runtime_environment: dict | None = ...,
     cloud_mode: Literal[False] = ...,
     cloud_base_url: None = ...,
     cloud_access_token: None = ...,
     cloud_organization_id: None = ...,
-    # Deprecated as of 0.15.37
-    ge_cloud_mode: Literal[False] = ...,
-    ge_cloud_base_url: None = ...,
-    ge_cloud_access_token: None = ...,
-    ge_cloud_organization_id: None = ...,
 ) -> FileDataContext:
     # If `context_root_dir` is provided and `cloud_mode`/`ge_cloud_mode` are `False` a `FileDataContext` will always be returned.
     ...
@@ -45,17 +40,12 @@ def DataContext(  # noqa: PLR0913
 
 @overload
 def DataContext(  # noqa: PLR0913
-    context_root_dir: Optional[PathStr] = ...,
-    runtime_environment: Optional[dict] = ...,
+    context_root_dir: PathStr | None = ...,
+    runtime_environment: dict | None = ...,
     cloud_mode: bool = ...,
-    cloud_base_url: Optional[str] = ...,
-    cloud_access_token: Optional[str] = ...,
-    cloud_organization_id: Optional[str] = ...,
-    # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_mode: bool = ...,
-    ge_cloud_base_url: Optional[str] = ...,
-    ge_cloud_access_token: Optional[str] = ...,
-    ge_cloud_organization_id: Optional[str] = ...,
+    cloud_base_url: str | None = ...,
+    cloud_access_token: str | None = ...,
+    cloud_organization_id: str | None = ...,
 ) -> AbstractDataContext:
     ...
 
@@ -63,22 +53,16 @@ def DataContext(  # noqa: PLR0913
 # TODO: add additional overloads
 
 
-@deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")
-@deprecated_argument(argument_name="ge_cloud_base_url", version="0.15.37")
-@deprecated_argument(argument_name="ge_cloud_access_token", version="0.15.37")
-@deprecated_argument(argument_name="ge_cloud_organization_id", version="0.15.37")
+@deprecated_method_or_class(
+    version="0.17.10", message="Deprecated in favor of get_context"
+)
 def DataContext(  # noqa: PLR0913
-    context_root_dir: Optional[PathStr] = None,
-    runtime_environment: Optional[dict] = None,
+    context_root_dir: PathStr | None = None,
+    runtime_environment: dict | None = None,
     cloud_mode: bool = False,
-    cloud_base_url: Optional[str] = None,
-    cloud_access_token: Optional[str] = None,
-    cloud_organization_id: Optional[str] = None,
-    # Deprecated as of 0.15.37
-    ge_cloud_mode: bool = False,
-    ge_cloud_base_url: Optional[str] = None,
-    ge_cloud_access_token: Optional[str] = None,
-    ge_cloud_organization_id: Optional[str] = None,
+    cloud_base_url: str | None = None,
+    cloud_access_token: str | None = None,
+    cloud_organization_id: str | None = None,
 ) -> AbstractDataContext:
     """A DataContext represents a Great Expectations project.
 
@@ -121,31 +105,10 @@ def DataContext(  # noqa: PLR0913
                 via environment variable GX_CLOUD_ACCESS_TOKEN or within a config file.
         cloud_organization_id: Your cloud organization ID. Optional, you may provide this alternatively
                 via environment variable GX_CLOUD_ORGANIZATION_ID or within a config file.
-        ge_cloud_mode: The deprecated cloud mode
-        ge_cloud_base_url: Your deprecated cloud base url
-        ge_cloud_access_token: Your deprecated cloud access token
-        ge_cloud_organization_id: Your deprecated cloud organization ID
 
     Returns:
         context
     """
-    # Chetan - 20221208 - not formally deprecating these values until a future date
-    (
-        cloud_base_url,
-        cloud_access_token,
-        cloud_organization_id,
-        cloud_mode,
-    ) = _resolve_cloud_args(
-        cloud_mode=cloud_mode,
-        cloud_base_url=cloud_base_url,
-        cloud_access_token=cloud_access_token,
-        cloud_organization_id=cloud_organization_id,
-        ge_cloud_mode=ge_cloud_mode,
-        ge_cloud_base_url=ge_cloud_base_url,
-        ge_cloud_access_token=ge_cloud_access_token,
-        ge_cloud_organization_id=ge_cloud_organization_id,
-    )
-
     cloud_config = _init_cloud_config(
         cloud_mode=cloud_mode,
         cloud_base_url=cloud_base_url,
@@ -184,36 +147,12 @@ def DataContext(  # noqa: PLR0913
     return context
 
 
-def _resolve_cloud_args(  # noqa: PLR0913
-    cloud_mode: bool = False,
-    cloud_base_url: Optional[str] = None,
-    cloud_access_token: Optional[str] = None,
-    cloud_organization_id: Optional[str] = None,
-    # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_mode: bool = False,
-    ge_cloud_base_url: Optional[str] = None,
-    ge_cloud_access_token: Optional[str] = None,
-    ge_cloud_organization_id: Optional[str] = None,
-) -> Tuple[Optional[str], Optional[str], Optional[str], bool]:
-    cloud_base_url = cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
-    cloud_access_token = (
-        cloud_access_token if cloud_access_token is not None else ge_cloud_access_token
-    )
-    cloud_organization_id = (
-        cloud_organization_id
-        if cloud_organization_id is not None
-        else ge_cloud_organization_id
-    )
-    cloud_mode = True if cloud_mode or ge_cloud_mode else False
-    return cloud_base_url, cloud_access_token, cloud_organization_id, cloud_mode
-
-
 def _init_cloud_config(
     cloud_mode: bool,
-    cloud_base_url: Optional[str],
-    cloud_access_token: Optional[str],
-    cloud_organization_id: Optional[str],
-) -> Optional[GXCloudConfig]:
+    cloud_base_url: str | None,
+    cloud_access_token: str | None,
+    cloud_organization_id: str | None,
+) -> GXCloudConfig | None:
     if not cloud_mode:
         return None
 
@@ -226,7 +165,7 @@ def _init_cloud_config(
 
 
 def _init_context_root_directory(
-    cloud_mode: bool, context_root_dir: Optional[PathStr]
+    cloud_mode: bool, context_root_dir: PathStr | None
 ) -> str:
     if cloud_mode and context_root_dir is None:
         context_root_dir = CloudDataContext.determine_context_root_directory(

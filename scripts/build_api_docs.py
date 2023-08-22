@@ -9,14 +9,13 @@
      API documentation category under Reference, replacing the existing content of this list.
         3a. Correct the format of sidebars.js as needed (running pyCharm's 'format file' context will do).
 """
-import glob
 import importlib
 import inspect
 import pydoc
 import re
 import shutil
 from pathlib import Path
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, Iterable, List, Set, Tuple
 from typing import Generator as typeGenerator
 
 WHITELISTED_TAG = "--Public API--"
@@ -710,19 +709,19 @@ def remove_existing_api_reference_files(directory_path: Path) -> List[Path]:
     return output_paths
 
 
-def _gather_source_files(directory_path: str) -> List[Path]:
+def _gather_source_files(directory_path: Path) -> Iterable[Path]:
     """Returns a list of all python files in the tree starting from the provided directory_path
 
     Args:
         directory_path: the root directory of a python project.
 
     Returns:
-        A list of python file paths.
+        An iterable of python file paths.
     """
-    return [Path(_) for _ in glob.glob(f"{directory_path}/**/*.py", recursive=True)]
+    return directory_path.rglob("*.py")
 
 
-def _filter_source_files(file_paths: List[Path]) -> List[Path]:
+def _filter_source_files(file_paths: Iterable[Path]) -> List[Path]:
     """Filters out paths to files starting with an underscore from a list of paths.
 
     Args:
@@ -735,7 +734,7 @@ def _filter_source_files(file_paths: List[Path]) -> List[Path]:
     return [_ for _ in file_paths if not _.name.startswith("_")]
 
 
-def get_relevant_source_files(directory_path: str) -> List[Path]:
+def get_relevant_source_files(directory_path: Path) -> List[Path]:
     """Retrieves filepaths to all public python files in a directory tree.
 
     Args:
@@ -820,7 +819,9 @@ if __name__ == "__main__":
         removed_cross_link_files = remove_existing_api_reference_files(Path("../docs"))
 
         # Generate the new documentation.
-        for source_file_path in get_relevant_source_files("../great_expectations"):
+        for source_file_path in get_relevant_source_files(
+            Path("..", "great_expectations")
+        ):
             github_path = (
                 f"https://github.com/great-expectations/great_expectations/blob/develop"
                 f"{str(source_file_path).replace('..', '')}"

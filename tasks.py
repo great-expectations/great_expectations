@@ -233,7 +233,8 @@ def marker_coverage(
         " stub files in `great_expectations`."
         " By default `mypy` will not check implementation files if a `.pyi` stub file exists."
         " This should be run in CI in addition to the normal type-checking step.",
-        "python-version": "Type check as if running a specific python version. Default 3.8",
+        "python-version": "Type check as if running a specific python version."
+        " Default to version set in pyproject.toml",
     },
 )
 def type_check(  # noqa: PLR0913, PLR0912
@@ -247,7 +248,7 @@ def type_check(  # noqa: PLR0913, PLR0912
     report: bool = False,
     check_stub_sources: bool = False,
     ci: bool = False,
-    python_version: str = "3.8",
+    python_version: str = "",
 ):
     """Run mypy static type-checking on select packages."""
     mypy_cache = pathlib.Path(".mypy_cache")
@@ -851,7 +852,7 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
             "reqs/requirements-dev-spark.txt",
         ),
         services=("spark",),
-        extra_pytest_args=("--spark",),
+        extra_pytest_args=("--spark", "--docs-tests"),
     ),
     "mssql": TestDependencies(
         ("reqs/requirements-dev-mssql.txt",),
@@ -868,6 +869,9 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         ("reqs/requirements-dev-postgresql.txt",),
         services=("postgresql",),
         extra_pytest_args=("--postgresql",),
+    ),
+    "snowflake": TestDependencies(
+        requirement_files=("reqs/requirements-dev-snowflake.txt",),
     ),
     "spark": TestDependencies(
         requirement_files=("reqs/requirements-dev-spark.txt",),

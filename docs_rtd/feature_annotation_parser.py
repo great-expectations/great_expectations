@@ -1,6 +1,5 @@
 import logging
 import re
-from collections import namedtuple
 from typing import List, Union
 
 logger = logging.getLogger(__name__)
@@ -33,8 +32,6 @@ maturity_details_keys = [
     "bug_risk",
     "expectation_completeness",
 ]
-
-AnnotatedNode = namedtuple("AnnotatedNode", ["name", "path", "annotation", "type_"])
 
 
 def parse_feature_annotation(docstring: Union[str, List[str], None]):

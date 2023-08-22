@@ -10,6 +10,21 @@ A Metric is a computed attribute of data such as the mean of a column.
 
 Metrics are values derived from one or more <TechnicalTag relative="../" tag="batch" text="Batches" /> that can be used to evaluate <TechnicalTag relative="../" tag="expectation" text="Expectations" /> or to summarize the result of <TechnicalTag relative="../" tag="validation" text="Validation" />. It can be helpful to think of a Metric as the answer to a question.  A Metric could be a statistic, such as the minimum value of the column, or a more complex object, such as a histogram. Metrics are a core part of Validating data.
 
+## When Metrics are required
+
+A minimum of one supporting Metric is required by every Expectation. For example, `expect_column_mean_to_be_between` relies on a Metric that calculates the mean of a column. Often, an Expectation requires multiple Metrics. For example, the following Metrics are required in the `expect_column_values_to_be_in_set` Expectation:
+
+- `column_values.in_set.unexpected_count`
+- `column_values.in_set.unexpected_rows`
+- `column_values.in_set.unexpected_values`
+- `column_values.in_set.unexpected_value_counts`
+
+To allow Expectations to work with multiple backends, methods for calculating Metrics need to be implemented for each ExecutionEngine. For example, pandas is implemented by calling the built-in pandas `.mean()` method on the column, Spark is implemented with a built-in Spark `mean` function, and SQLAlchemy is implemented with a SQLAlchemy generic function.
+
+Metrics can help you incorporate conditional statements in Expectations that support conditional evaluations. For example, `column_values.in_set.condition`.
+
+Metrics such as `column_values.in_set.unexpected_index_list` and `column_values.in_set.unexpected_index_query` can help you calculate the truthiness of your data.
+
 ## Relationship to other objects
 
 Metrics are generated as part of running Expectations against a Batch (and can be referenced as such). For example, if you have an Expectation that the mean of a column falls within a certain range, the mean of the column must first be computed to see if its value is as expected.  The generation of Metrics involves <TechnicalTag relative="../" tag="execution_engine" text="Execution Engine" /> specific logic.  These Metrics can be included in <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, based on the `result_format` configured for them.  In memory Validation Results can in turn be accessed by Actions, including the `StoreValidationResultAction` which will store them in the <TechnicalTag relative="../" tag="validation_result_store" text="Validation Results Store" />.  Therefore, Metrics from previously run Expectation Suites can also be referenced by accessing stored Validation Results that contain them.

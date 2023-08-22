@@ -192,3 +192,28 @@ class TestPrependVersionInfoForMdAbsoluteLinks:
             contents, version
         )
         assert updated_contents == expected_contents
+
+    @pytest.mark.unit
+    def test__prepend_version_info_for_md_absoulte_links_updates_two_links_on_the_same_line(
+        self,
+    ):
+        contents = """[Run a Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results Store on S3 then visualize the results by [re-building Data Docs](/docs/terms/data_docs)."""
+        version = "0.16.16"
+        expected_contents = """[Run a Checkpoint](/docs/0.16.16/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results Store on S3 then visualize the results by [re-building Data Docs](/docs/0.16.16/terms/data_docs)."""
+        updated_contents = _prepend_version_info_for_md_absolute_links(
+            contents, version
+        )
+        assert updated_contents == expected_contents
+
+    @pytest.mark.unit
+    def test__prepend_version_info_for_md_absoulte_links_updates_multiple_mixed_links(
+        self,
+    ):
+        """Links that are already versioned should not be updated, even when there are multiple links on the same line that should be updated."""
+        contents = """[Link Text 1](/docs/guides/link_1) text [Link Text 2](/docs/guides/link_2) text [Link Text 3](/docs/0.1.2/guides/link_3) text [Link Text 4](/docs/guides/link_4) text."""
+        version = "0.16.16"
+        expected_contents = """[Link Text 1](/docs/0.16.16/guides/link_1) text [Link Text 2](/docs/0.16.16/guides/link_2) text [Link Text 3](/docs/0.1.2/guides/link_3) text [Link Text 4](/docs/0.16.16/guides/link_4) text."""
+        updated_contents = _prepend_version_info_for_md_absolute_links(
+            contents, version
+        )
+        assert updated_contents == expected_contents
