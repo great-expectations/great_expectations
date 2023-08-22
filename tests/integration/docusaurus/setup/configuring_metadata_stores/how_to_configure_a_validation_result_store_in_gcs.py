@@ -3,6 +3,9 @@ import os
 import subprocess
 
 import great_expectations as gx
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.core.yaml_handler import YAMLHandler
 
 yaml = YAMLHandler()
@@ -59,7 +62,7 @@ context.run_checkpoint(checkpoint_name=checkpoint_name)
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(
-    context.root_directory, "great_expectations.yml"
+    context.root_directory, FileDataContext.GX_YML
 )
 with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.load(f)

@@ -65,7 +65,7 @@ class MulticolumnValuesSumValuesToBeBetweenMaxAndMin(MulticolumnMapMetricProvide
 
 # This class defines the Expectation itself
 class ExpectMulticolumnSumValuesToBeBetween(MulticolumnMapExpectation):
-    """Expect a sum of values over the columns to be between max and min values
+    """Expect a sum of values over the columns to be between max and min values.
 
     min_value <= SUM(col_a, cob_b, cob_c, ...) <= max_value
 

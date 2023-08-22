@@ -38,7 +38,6 @@ def test_profiler_store_set_adds_valid_key(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_profiler_store_integration(
     empty_data_context: DataContext,
     profiler_store_name: str,
@@ -105,7 +104,6 @@ def test_profiler_store_integration(
     }
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_ge_cloud_response_json_to_object_dict(
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,

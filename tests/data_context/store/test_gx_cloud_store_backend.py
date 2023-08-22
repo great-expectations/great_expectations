@@ -28,7 +28,7 @@ from great_expectations.data_context.store.gx_cloud_store_backend import (
 from great_expectations.data_context.types.base import CheckpointConfig
 
 # module level markers
-pytestmark = [pytest.mark.cloud]
+pytestmark = pytest.mark.cloud
 
 
 @pytest.fixture

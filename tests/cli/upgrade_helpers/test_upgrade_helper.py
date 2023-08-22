@@ -20,8 +20,7 @@ from tests.cli.utils import (
     escape_ansi,
 )
 
-
-pytestmark = [pytest.mark.cli]
+pytestmark = pytest.mark.cli
 
 
 @pytest.fixture
@@ -30,7 +29,9 @@ def v20_project_directory_with_v30_configuration_and_v20_checkpoints(tmp_path_fa
     GX config_version: 3 project for testing upgrade helper
     """
     project_path = str(tmp_path_factory.mktemp("v30_project"))
-    context_root_dir = os.path.join(project_path, "great_expectations")
+    context_root_dir = os.path.join(  # noqa: PTH118
+        project_path, FileDataContext.GX_DIR
+    )
     shutil.copytree(
         file_relative_path(
             __file__,
@@ -43,7 +44,7 @@ def v20_project_directory_with_v30_configuration_and_v20_checkpoints(tmp_path_fa
             __file__,
             "../../test_fixtures/upgrade_helper/great_expectations_v2_with_v3_configuration_without_checkpoint_store.yml",
         ),
-        os.path.join(context_root_dir, "great_expectations.yml"),
+        os.path.join(context_root_dir, FileDataContext.GX_YML),  # noqa: PTH118
     )
     return context_root_dir
 
@@ -54,7 +55,9 @@ def v20_project_directory_with_v30_configuration_and_no_checkpoints(tmp_path_fac
     GX config_version: 3 project for testing upgrade helper
     """
     project_path = str(tmp_path_factory.mktemp("v30_project"))
-    context_root_dir = os.path.join(project_path, "great_expectations")
+    context_root_dir = os.path.join(  # noqa: PTH118
+        project_path, FileDataContext.GX_DIR
+    )
     shutil.copytree(
         file_relative_path(
             __file__,
@@ -67,7 +70,7 @@ def v20_project_directory_with_v30_configuration_and_no_checkpoints(tmp_path_fac
             __file__,
             "../../test_fixtures/upgrade_helper/great_expectations_v2_with_v3_configuration_without_checkpoint_store.yml",
         ),
-        os.path.join(context_root_dir, "great_expectations.yml"),
+        os.path.join(context_root_dir, FileDataContext.GX_YML),  # noqa: PTH118
     )
     return context_root_dir
 
@@ -80,16 +83,18 @@ def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
         file_relative_path(
             __file__, "../../test_fixtures/upgrade_helper/great_expectations_v2.yml"
         ),
-        os.path.join(v10_project_directory, "great_expectations.yml"),
+        os.path.join(v10_project_directory, FileDataContext.GX_YML),  # noqa: PTH118
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    result: Result = runner.invoke(
-        cli,
-        ["-c", v10_project_directory, "project", "upgrade"],
-        input="\n",
-        catch_exceptions=False,
-    )
+
+    with pytest.deprecated_call():
+        result: Result = runner.invoke(
+            cli,
+            ["-c", v10_project_directory, "project", "upgrade"],
+            input="\n",
+            catch_exceptions=False,
+        )
     stdout: str = result.stdout
 
     assert "Checking project..." in stdout
@@ -114,7 +119,7 @@ def test_upgrade_helper_intervention_on_cli_command(
     # test if cli detects out of date project and asks to run upgrade helper
     # decline upgrade and ensure config version was not modified
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(v10_project_directory))
+    monkeypatch.chdir(os.path.dirname(v10_project_directory))  # noqa: PTH120
     result: Result = runner.invoke(
         cli,
         [
@@ -197,12 +202,14 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
     # test project upgrade that requires no manual steps
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    result: Result = runner.invoke(
-        cli,
-        ["-c", v10_project_directory, "project", "upgrade"],
-        input="\n",
-        catch_exceptions=False,
-    )
+
+    with pytest.deprecated_call():
+        result: Result = runner.invoke(
+            cli,
+            ["-c", v10_project_directory, "project", "upgrade"],
+            input="\n",
+            catch_exceptions=False,
+        )
     stdout: str = escape_ansi(result.stdout).strip()
 
     with open(
@@ -300,7 +307,7 @@ def test_project_upgrade_with_manual_steps(
             __file__,
             "../../test_fixtures/upgrade_helper/great_expectations_v1_needs_manual_upgrade.yml",
         ),
-        os.path.join(v10_project_directory, "great_expectations.yml"),
+        os.path.join(v10_project_directory, FileDataContext.GX_YML),  # noqa: PTH118
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
@@ -324,7 +331,7 @@ def test_project_upgrade_with_manual_steps(
         )
         assert stdout == expected_stdout
 
-    pycache_dir_path: str = os.path.join(
+    pycache_dir_path: str = os.path.join(  # noqa: PTH118
         v10_project_directory, "plugins", "custom_store_backends", "__pycache__"
     )
     try:
@@ -412,16 +419,18 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
             __file__,
             "../../test_fixtures/upgrade_helper/great_expectations_v1_basic_with_exception.yml",
         ),
-        os.path.join(v10_project_directory, "great_expectations.yml"),
+        os.path.join(v10_project_directory, FileDataContext.GX_YML),  # noqa: PTH118
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    result: Result = runner.invoke(
-        cli,
-        ["-c", v10_project_directory, "project", "upgrade"],
-        input="\n",
-        catch_exceptions=False,
-    )
+
+    with pytest.deprecated_call():
+        result: Result = runner.invoke(
+            cli,
+            ["-c", v10_project_directory, "project", "upgrade"],
+            input="\n",
+            catch_exceptions=False,
+        )
     stdout: str = escape_ansi(result.stdout).strip()
 
     with open(
@@ -514,17 +523,19 @@ def test_v2_to_v3_project_upgrade_without_manual_steps(
     v20_project_directory_with_v30_configuration_and_no_checkpoints, caplog
 ):
     runner: CliRunner = CliRunner(mix_stderr=False)
-    result: Result = runner.invoke(
-        cli,
-        [
-            "-c",
-            v20_project_directory_with_v30_configuration_and_no_checkpoints,
-            "project",
-            "upgrade",
-        ],
-        input="\n",
-        catch_exceptions=False,
-    )
+
+    with pytest.deprecated_call():
+        result: Result = runner.invoke(
+            cli,
+            [
+                "-c",
+                v20_project_directory_with_v30_configuration_and_no_checkpoints,
+                "project",
+                "upgrade",
+            ],
+            input="\n",
+            catch_exceptions=False,
+        )
     stdout: str = escape_ansi(result.stdout).strip()
 
     with open(

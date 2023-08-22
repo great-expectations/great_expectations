@@ -19,6 +19,7 @@ from typing import (
 
 import pytest
 from pytest import MonkeyPatch
+from typing_extensions import override
 
 import great_expectations as gx
 from great_expectations.core.batch import BatchData
@@ -90,6 +91,7 @@ def sqlachemy_execution_engine_mock_cls(
             self.engine = MockSaEngine(dialect=Dialect(dialect))
             self._create_temp_table = create_temp_table
 
+        @override
         def get_batch_data_and_markers(  # type: ignore[override]
             self, batch_spec: SqlAlchemyDatasourceBatchSpec
         ) -> tuple[BatchData, BatchMarkers]:
@@ -118,6 +120,7 @@ class ExecutionEngineDouble(ExecutionEngine):
     def __init__(self, *args, **kwargs):
         pass
 
+    @override
     def get_batch_data_and_markers(self, batch_spec) -> tuple[BatchData, BatchMarkers]:  # type: ignore[override]
         return BatchData(self), BatchMarkers(ge_load_time=None)
 
@@ -235,7 +238,11 @@ def empty_file_context(file_dc_config_dir_init) -> FileDataContext:
 
 
 @pytest.fixture(
-    params=["empty_cloud_context_fluent", "empty_file_context"], ids=["cloud", "file"]
+    params=[
+        pytest.param("empty_cloud_context_fluent", marks=pytest.mark.cloud),
+        pytest.param("empty_file_context", marks=pytest.mark.filesystem),
+    ],
+    ids=["cloud", "file"],
 )
 def empty_contexts(
     request: FixtureRequest,
@@ -379,7 +386,7 @@ def seed_cloud(
     org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
 
     fake_db_data = create_fake_db_seed_data(fds_config=fluent_only_config)
-    _CLOUD_API_FAKE_DB.update(fake_db_data)  # type: ignore[typeddict-item]
+    _CLOUD_API_FAKE_DB.update(fake_db_data)
 
     seeded_datasources = _CLOUD_API_FAKE_DB["data-context-configuration"]["datasources"]
     logger.info(f"Seeded Datasources ->\n{pf(seeded_datasources, depth=2)}")
@@ -398,7 +405,12 @@ def seeded_cloud_context(
     return empty_cloud_context_fluent
 
 
-@pytest.fixture(params=["seeded_file_context", "seeded_cloud_context"])
+@pytest.fixture(
+    params=[
+        pytest.param("seeded_file_context", marks=pytest.mark.filesystem),
+        pytest.param("seeded_cloud_context", marks=pytest.mark.cloud),
+    ]
+)
 def seeded_contexts(
     request: FixtureRequest,
 ):

@@ -451,7 +451,7 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
 
 def _get_parse_results(
     parameter_expression: str,
-) -> Union[ParseResults, Union[ParseResults, list]]:
+) -> Union[ParseResults, list]:
     # Calling get_parser clears the stack
     parser = EXPR.get_parser()
     try:
@@ -504,7 +504,7 @@ def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:
     return deduplicated
 
 
-EvaluationParameterIdentifier = namedtuple(
+EvaluationParameterIdentifier = namedtuple(  # noqa: PYI024 # this class is not used
     "EvaluationParameterIdentifier",
     ["expectation_suite_name", "metric_name", "metric_kwargs_id"],
 )

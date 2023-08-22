@@ -10,8 +10,7 @@ from great_expectations.cli.batch_request import (
     _print_configured_asset_sql_data_connector_message,
 )
 
-
-pytestmark = [pytest.mark.cli]
+pytestmark = pytest.mark.cli
 
 
 @mock.patch("great_expectations.cli.batch_request.BaseDatasource")
@@ -80,7 +79,6 @@ class NotDummyDataConnector:
     pass
 
 
-@pytest.mark.unit
 @pytest.mark.parametrize(
     ["data_connector_type", "expected_message"],
     [
@@ -122,7 +120,6 @@ def test__print_configured_asset_sql_data_connector_message_prints_message(
     assert output == expected_message
 
 
-@pytest.mark.unit
 @pytest.mark.parametrize(
     ["data_connector_type", "_is_data_connector_of_type_expected"],
     [

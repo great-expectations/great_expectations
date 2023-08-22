@@ -48,7 +48,7 @@ class ColumnValuesToBeValidDogeAddress(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidDogeAddress(ColumnMapExpectation):
-    """Expect column values to be valid Dogecoin addresses"""
+    """Expect column values to be valid Dogecoin addresses."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

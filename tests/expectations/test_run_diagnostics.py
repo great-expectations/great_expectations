@@ -171,7 +171,7 @@ def test_expectation_self_check():
                 },
                 {
                     "doc_url": None,
-                    "message": "Has a docstring, including a one-line short description",
+                    "message": 'Has a docstring, including a one-line short description that begins with "Expect" and ends with a period',
                     "passed": False,
                     "sub_messages": [],
                 },
@@ -341,7 +341,7 @@ def test_self_check_on_an_existing_expectation():
 @pytest.mark.skip(
     reason="Timeout of 30 seconds reached trying to connect to localhost:8088 (trino port)"
 )
-@pytest.mark.external_sqldialect
+@pytest.mark.all_backends
 def test_expectation__get_renderers():
     expectation_name = "expect_column_values_to_match_regex"
     my_expectation = _registered_expectations[expectation_name]()

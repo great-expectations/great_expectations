@@ -23,6 +23,7 @@ from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import (
     functions as F,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
@@ -232,6 +233,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
         return cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
 
+    @override
     def load_batch_data(  # type: ignore[override]
         self, batch_id: str, batch_data: Union[SparkDFBatchData, pyspark.DataFrame]
     ) -> None:
@@ -247,6 +249,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
+    @override
     def get_batch_data_and_markers(  # noqa: PLR0912, PLR0915
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
@@ -468,6 +471,7 @@ illegal.  Please check your config."""
             )
 
     @public_api
+    @override
     def get_domain_records(  # noqa: C901, PLR0912, PLR0915
         self,
         domain_kwargs: dict,
@@ -502,8 +506,8 @@ illegal.  Please check your config."""
                 raise ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
-        else:
-            if batch_id in self.batch_manager.batch_data_cache:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if batch_id in self.batch_manager.batch_data_cache:
                 data = cast(
                     SparkDFBatchData, self.batch_manager.batch_data_cache[batch_id]
                 ).dataframe
@@ -557,8 +561,8 @@ illegal.  Please check your config."""
                     F.col(column_A_name).isNull() | F.col(column_B_name).isNull()
                 )
                 data = data.filter(~ignore_condition)
-            else:
-                if ignore_row_if != "neither":  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -580,8 +584,8 @@ illegal.  Please check your config."""
                 ]
                 ignore_condition = reduce(lambda a, b: a | b, conditions)
                 data = data.filter(~ignore_condition)
-            else:
-                if ignore_row_if != "never":  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if ignore_row_if != "never":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -617,6 +621,7 @@ illegal.  Please check your config."""
         )
 
     @public_api
+    @override
     def get_compute_domain(
         self,
         domain_kwargs: dict,
@@ -700,6 +705,7 @@ illegal.  Please check your config."""
 
         return new_domain_kwargs
 
+    @override
     def resolve_metric_bundle(
         self,
         metric_fn_bundle: Iterable[MetricComputationConfiguration],

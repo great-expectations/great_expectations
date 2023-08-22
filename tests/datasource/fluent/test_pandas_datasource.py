@@ -367,6 +367,7 @@ class TestDynamicPandasAssets:
             assert getattr(asset, positional_arg_name) == positional_arg
 
 
+@pytest.mark.filesystem
 def test_default_pandas_datasource_get_and_set(
     empty_data_context: AbstractDataContext, valid_file_path: pathlib.Path
 ):
@@ -417,6 +418,7 @@ def test_default_pandas_datasource_get_and_set(
             assert asset["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME
 
 
+@pytest.mark.filesystem
 def test_default_pandas_datasource_name_conflict(
     empty_data_context: AbstractDataContext,
 ):
@@ -434,6 +436,7 @@ def test_default_pandas_datasource_name_conflict(
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
 
 
+@pytest.mark.filesystem
 def test_dataframe_asset(
     empty_data_context: AbstractDataContext, test_df_pandas: pd.DataFrame
 ):
@@ -473,6 +476,7 @@ def test_dataframe_asset(
     )
 
 
+@pytest.mark.filesystem
 def test_pandas_data_asset_batch_metadata(
     empty_data_context: AbstractDataContext, valid_file_path: pathlib.Path
 ):
@@ -513,6 +517,7 @@ def test_pandas_data_asset_batch_metadata(
     assert batch_list[0].metadata == substituted_batch_metadata
 
 
+@pytest.mark.filesystem
 def test_build_batch_request_raises_if_missing_dataframe(
     empty_data_context: AbstractDataContext,
 ):

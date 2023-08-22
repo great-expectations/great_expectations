@@ -19,13 +19,13 @@ import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
 
-A Data Asset is a collection of records within a Datasource that define how Great Expectations (GX) organizes data into Batches. Use the information provided here to connect GX to SQL tables and data returned by SQL database queries and learn how to organize Batches in a SQL Data Asset.
+A Data Asset is a collection of records within a Data Source that define how Great Expectations (GX) organizes data into Batches. Use the information provided here to connect GX to SQL tables and data returned by SQL database queries and learn how to organize Batches in a SQL Data Asset.
 
- Great Expectations (GX) uses SQLAlchemy to connect to SQL Source Data, and most of the SQL dialects supported by SQLAlchemy are also supported by GX. For more information about the SQL dialects supported by SQLAlchemy, see [Dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
+ Great Expectations (GX) uses SQLAlchemy to connect to SQL source data, and most of the SQL dialects supported by SQLAlchemy are also supported by GX. For more information about the SQL dialects supported by SQLAlchemy, see [Dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
 :::caution Datasources defined with the block-config method
 
-If you're using a Datasource created with the block-config method, see [How to configure a SQL Datasource with the block-config method](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource).
+If you're using a Data Source created with the block-config method, see [How to configure a SQL Data Source with the block-config method](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource).
 
 :::
 
@@ -42,9 +42,9 @@ If you're using a Datasource created with the block-config method, see [How to c
 
 ## Connect to a SQL table
 
-Connect GX to a SQL table to access Source Data.
+Connect GX to a SQL table to access source data.
 
-The following code examples use a previously defined Datasource named `"my_datasource"` to connect to a SQL database.
+The following code examples use a previously defined Data Source named `"my_datasource"` to connect to a SQL database.
 
 ### Prerequisites
 
@@ -52,7 +52,7 @@ The following code examples use a previously defined Datasource named `"my_datas
 
 - An installation of GX set up to work with SQL
 - Source data stored in a SQL database
-- A SQL-based Datasource
+- A SQL-based Data Source
 
 </Prerequisites>
 
@@ -60,14 +60,14 @@ The following code examples use a previously defined Datasource named `"my_datas
 
 <ImportGxAndInstantiateADataContext />
 
-### Retrieve a SQL Datasource
+### Retrieve a SQL Data Source
 
-Run the following Python code to retrieve the Datasource:
+Run the following Python code to retrieve the Data Source:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py datasource
 ```
 
-### Add a table to the Datasource as a Data Asset
+### Add a table to the Data Source as a Data Asset
 
 You create a Data Asset to identify the table to connect to. 
 
@@ -94,7 +94,7 @@ To connect to additional tables in the same SQL Database, repeat the previous st
 
 Connect GX to the data returned by a query in a SQL database.
 
-The following code examples use a previously defined Datasource named `"my_datasource"` to connect to a SQL database.
+The following code examples use a previously defined Data Source named `"my_datasource"` to connect to a SQL database.
 
 ### Prerequisites
 
@@ -109,14 +109,14 @@ The following code examples use a previously defined Datasource named `"my_datas
 
 <ImportGxAndInstantiateADataContext />
 
-### Retrieve a SQL Datasource
+### Retrieve a SQL Data Source
 
-Run the following Python code to retrieve the Datasource:
+Run the following Python code to retrieve the Data Source:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data_using_a_query.py datasource"
 ```
 
-### Add a query to the Datasource as a Data Asset
+### Add a query to the Data Source as a Data Asset
 
 Run the following Python code to define a Data Asset and the `name` and `query` variables:
 
@@ -141,14 +141,14 @@ To connect to the contents of additional queries in the same SQL Database, repea
 
 Organize Batches in a SQL-based Data Asset. This includes using Splitters to divide the data in a table or query based on the contents of a provided field and adding Batch Sorters to a Data Asset to specify the order in which Batches are returned.
 
-The following code examples use a previously defined Datasource named `"my_datasource"` to connect to a SQL database.
+The following code examples use a previously defined Data Source named `"my_datasource"` to connect to a SQL database.
 
 ### Prerequisites
 
 <Prerequisites>
 
 - A working installation of Great Expectations
-- A Data Asset in a SQL-based Datasource
+- A Data Asset in a SQL-based Data Source
 
 </Prerequisites>
 
@@ -157,9 +157,9 @@ The following code examples use a previously defined Datasource named `"my_datas
 
 <ImportGxAndInstantiateADataContext />
 
-### Retrieve a SQL Datasource and Data Asset
+### Retrieve a SQL Data Source and Data Asset
 
-Run the following Python code to retrieve the Datasource:
+Run the following Python code to retrieve the Data Source:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_sqlite_datasource.py my_datasource"
 ```

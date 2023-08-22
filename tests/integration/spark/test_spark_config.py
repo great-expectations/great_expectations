@@ -21,7 +21,7 @@ except ImportError:
     )
 
 # module level markers
-pytestmark = [pytest.mark.spark]
+pytestmark = pytest.mark.spark
 
 
 def test_current_pyspark_version_installed(spark_session):
@@ -38,7 +38,9 @@ def test_spark_config_datasource(spark_session_v012):
         "spark.executor.memory": "768m",
         # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
     }
-    source: SparkDFDatasource = SparkDFDatasource(spark_config=spark_config)
+    source: SparkDFDatasource = SparkDFDatasource(
+        spark_config=spark_config, force_reuse_spark_context=False
+    )
     spark_session: pyspark.SparkSession = source.spark
     # noinspection PyProtectedMember
     sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()

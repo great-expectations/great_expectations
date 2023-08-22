@@ -27,6 +27,8 @@ from typing import (
     cast,
 )
 
+from great_expectations.compatibility.typing_extensions import override
+
 from great_expectations._version import get_versions  # isort:skip
 
 
@@ -34,6 +36,7 @@ __version__ = get_versions()["version"]  # isort:skip
 
 from great_expectations.compatibility import aws, snowflake, sqlalchemy, trino
 from great_expectations.compatibility.not_imported import is_version_greater_or_equal
+from great_expectations.compatibility.sqlalchemy import Subquery
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -206,7 +209,11 @@ def _get_dialect_type_module(dialect):
     return dialect
 
 
-_PERSISTED_CONNECTION_DIALECTS = (GXSqlDialect.SQLITE, GXSqlDialect.MSSQL)
+_PERSISTED_CONNECTION_DIALECTS = (
+    GXSqlDialect.SQLITE,
+    GXSqlDialect.MSSQL,
+    GXSqlDialect.BIGQUERY,
+)
 
 
 def _dialect_requires_persisted_connection(
@@ -299,7 +306,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         batch_data_dict: Optional[dict] = None,
         create_temp_table: bool = True,
         concurrency: Optional[ConcurrencyConfig] = None,
-        **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
+        # kwargs will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
+        **kwargs,
     ) -> None:
         super().__init__(name=name, batch_data_dict=batch_data_dict)
         self._name = name
@@ -525,6 +533,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return self._url
 
     @property
+    @override
     def dialect(self) -> sqlalchemy.Dialect:
         return self.engine.dialect
 
@@ -626,6 +635,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         )
 
     @public_api
+    @override
     def get_domain_records(  # noqa: C901, PLR0912, PLR0915
         self,
         domain_kwargs: dict,
@@ -651,8 +661,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 raise GreatExpectationsError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
-        else:
-            if batch_id in self.batch_manager.batch_data_cache:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if batch_id in self.batch_manager.batch_data_cache:
                 data_object = cast(
                     SqlAlchemyBatchData, self.batch_manager.batch_data_cache[batch_id]
                 )
@@ -722,7 +732,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
             # SQLAlchemy 2.0 deprecated select_from() from a non-Table asset without a subquery.
             # Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated.
-            if not isinstance(selectable, sa.Table):
+            if not isinstance(selectable, (sa.Table, Subquery)):
                 selectable = selectable.subquery()
 
             selectable = (
@@ -789,8 +799,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         )
                     )
                 )
-            else:
-                if ignore_row_if != "neither":  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -840,8 +850,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         )
                     )
                 )
-            else:
-                if ignore_row_if != "never":  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if ignore_row_if != "never":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -851,6 +861,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return selectable
 
     @public_api
+    @override
     def get_compute_domain(
         self,
         domain_kwargs: dict,
@@ -881,6 +892,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return selectable, split_domain_kwargs.compute, split_domain_kwargs.accessor
 
+    @override
     def _split_column_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
         self,
         domain_kwargs: dict,
@@ -921,6 +933,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
+    @override
     def _split_column_pair_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
         self,
         domain_kwargs: dict,
@@ -967,6 +980,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
+    @override
     def _split_multi_column_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
         self,
         domain_kwargs: dict,
@@ -1011,6 +1025,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
+    @override
     def resolve_metric_bundle(
         self,
         metric_fn_bundle: Iterable[MetricComputationConfiguration],
@@ -1246,8 +1261,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 **batch_spec["splitter_kwargs"],
             )
 
-        else:
-            if self.dialect_name == GXSqlDialect.SQLITE:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if self.dialect_name == GXSqlDialect.SQLITE:
                 split_clause = sa.text("1 = 1")
             else:
                 split_clause = sa.true()
@@ -1298,6 +1313,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return selectable
 
+    @override
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:

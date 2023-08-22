@@ -7,7 +7,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.render.renderer import OpsgenieRenderer
 
 # module level markers
-pytestmark = [pytest.mark.big]
+pytestmark = pytest.mark.big
 
 
 def test_OpsgenieRenderer_validation_results_success():

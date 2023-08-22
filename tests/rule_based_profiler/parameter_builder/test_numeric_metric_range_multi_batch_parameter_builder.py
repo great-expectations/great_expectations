@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 
 import numpy as np
 import pytest
-import scipy.stats as stats
+from scipy import stats
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain
@@ -23,7 +23,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 # module level markers
-pytestmark = [pytest.mark.integration]
+pytestmark = pytest.mark.big
 
 
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(

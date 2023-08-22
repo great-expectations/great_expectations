@@ -160,7 +160,7 @@ assert len(suite.expectations) == 2
 
 # 6. Validate your data (Dataframe)
 # CODE vvvvv vvvvv
-# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py checkpoint config">
+
 my_checkpoint_name = "insert_your_checkpoint_name_here"
 my_checkpoint_config = f"""
 name: {my_checkpoint_name}
@@ -168,7 +168,6 @@ config_version: 1.0
 class_name: SimpleCheckpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 """
-# </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py test checkpoint config">
 my_checkpoint = context.test_yaml_config(my_checkpoint_config)

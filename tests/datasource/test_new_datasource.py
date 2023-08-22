@@ -187,6 +187,7 @@ data_connectors:
     return sample_datasource
 
 
+@pytest.mark.filesystem
 def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
     report = basic_pandas_datasource_v013.self_check()
     assert report == {
@@ -227,6 +228,7 @@ def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
     }
 
 
+@pytest.mark.spark
 def test_basic_spark_datasource_self_check_spark_config(basic_spark_datasource):
     """What does this test do and why?
 
@@ -251,6 +253,7 @@ def test_basic_spark_datasource_self_check_spark_config(basic_spark_datasource):
     )
 
 
+@pytest.mark.spark
 def test_basic_spark_datasource_self_check(basic_spark_datasource):
     report: dict = basic_spark_datasource.self_check()
 
@@ -288,6 +291,7 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
     }
 
 
+@pytest.mark.filesystem
 def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013):
     my_data_connector: ConfiguredAssetFilesystemDataConnector = (
         basic_pandas_datasource_v013.data_connectors["my_filesystem_data_connector"]
@@ -388,6 +392,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
     assert batch.batch_request == {}
 
 
+@pytest.mark.filesystem
 def test_get_batch_list_from_batch_request(basic_pandas_datasource_v013):
     datasource_name: str = "my_datasource"
     data_connector_name: str = "my_filesystem_data_connector"
@@ -437,6 +442,7 @@ def test_get_batch_list_from_batch_request(basic_pandas_datasource_v013):
     )
 
 
+@pytest.mark.filesystem
 def test_get_batch_with_pipeline_style_batch_request(basic_pandas_datasource_v013):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
@@ -476,6 +482,7 @@ def test_get_batch_with_pipeline_style_batch_request(basic_pandas_datasource_v01
     )
 
 
+@pytest.mark.filesystem
 def test_get_batch_with_pipeline_style_batch_request_missing_data_connector_query_error(
     basic_pandas_datasource_v013,
 ):
@@ -504,6 +511,7 @@ def test_get_batch_with_pipeline_style_batch_request_missing_data_connector_quer
         )
 
 
+@pytest.mark.filesystem
 def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and_pandas_execution_engine_error(
     basic_pandas_datasource_v013,
 ):
@@ -534,6 +542,7 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
         )
 
 
+@pytest.mark.spark
 def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and_spark_df_execution_engine_error(
     basic_spark_datasource,
 ):
@@ -564,6 +573,7 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
         )
 
 
+@pytest.mark.filesystem
 def test_get_available_data_asset_names_with_configured_asset_filesystem_data_connector(
     basic_pandas_datasource_v013,
 ):
@@ -680,6 +690,7 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
 
+@pytest.mark.filesystem
 def test_get_available_data_asset_names_with_single_partition_file_data_connector(
     sample_datasource_v013_with_single_partition_file_data_connector,
 ):
@@ -793,11 +804,7 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
 
-# TODO
-def test_get_available_data_asset_names_with_caching():
-    pass
-
-
+@pytest.mark.filesystem
 def test__data_source_batch_spec_passthrough(tmp_path_factory):
     base_directory = str(
         tmp_path_factory.mktemp("test__data_source_v013_batch_spec_passthrough")
@@ -888,6 +895,7 @@ data_connectors:
     # )
 
 
+@pytest.mark.spark
 def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
     base_directory: str = str(
         tmp_path_factory.mktemp("basic_spark_datasource_v013_filesystem_data_connector")
@@ -945,7 +953,7 @@ def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
     assert batch[0].data.dataframe.head() == pyspark.Row(x="1", y="2")
 
 
-@pytest.mark.integration
+@pytest.mark.spark
 def test_spark_with_batch_spec_passthrough_and_schema_in_batch_request(
     tmp_path_factory, spark_session, spark_df_taxi_data_schema
 ):
@@ -1010,7 +1018,7 @@ def test_spark_with_batch_spec_passthrough_and_schema_in_batch_request(
     assert batch_list[0].data.dataframe.schema == spark_df_taxi_data_schema
 
 
-@pytest.mark.integration
+@pytest.mark.spark
 def test_spark_with_batch_spec_passthrough_and_schema_in_datasource_config(
     tmp_path_factory, spark_session, spark_df_taxi_data_schema
 ):
@@ -1075,8 +1083,8 @@ def test_spark_with_batch_spec_passthrough_and_schema_in_datasource_config(
     assert batch_list[0].data.dataframe.schema == spark_df_taxi_data_schema
 
 
-@pytest.mark.unit
 class TestAttrAccess:
+    @pytest.mark.unit
     @pytest.mark.parametrize(
         "attr_name",
         ["get_asset", "read_csv", "add_table_asset", "add_json_asset", "read_sql"],
@@ -1087,6 +1095,7 @@ class TestAttrAccess:
         with pytest.raises(NotImplementedError):
             getattr(basic_pandas_datasource_v013, attr_name)
 
+    @pytest.mark.unit
     def test_other_attrs_raise_attribute_error(
         self, basic_pandas_datasource_v013: Datasource
     ):
@@ -1096,6 +1105,7 @@ class TestAttrAccess:
         with pytest.raises(AttributeError):
             _ = basic_pandas_datasource_v013.add_not_a_real_asset_type
 
+    @pytest.mark.filesystem
     def test_standard_attrs(self, basic_pandas_datasource_v013: Datasource):
         _ = basic_pandas_datasource_v013.name
         _ = basic_pandas_datasource_v013.execution_engine

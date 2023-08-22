@@ -471,7 +471,7 @@ def test_get_batch_data(test_df):
     not aws.boto3,
     reason="Unable to load AWS connection object. Please install boto3 and botocore.",
 )
-@pytest.mark.external_cloud_client
+@pytest.mark.big
 def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
     bucket, keys = test_s3_files_compressed
     path = keys[0]
@@ -490,7 +490,7 @@ def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
     ),
     reason="pyarrow and fastparquet are not installed",
 )
-@pytest.mark.external_cloud_client
+@pytest.mark.big
 def test_get_batch_s3_parquet(test_s3_files_parquet, test_df_small):
     bucket, keys = test_s3_files_parquet
     path = [key for key in keys if key.endswith(".parquet")][0]
@@ -505,7 +505,7 @@ def test_get_batch_s3_parquet(test_s3_files_parquet, test_df_small):
     not aws.boto3,
     reason="Unable to load AWS connection object. Please install boto3 and botocore.",
 )
-@pytest.mark.external_cloud_client
+@pytest.mark.big
 def test_get_batch_with_no_s3_configured():
     batch_spec = S3BatchSpec(
         path="s3a://i_dont_exist",
@@ -551,7 +551,7 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
 @mock.patch(
     "great_expectations.execution_engine.pandas_execution_engine.azure.BlobServiceClient",
 )
-@pytest.mark.external_cloud_client
+@pytest.mark.big
 def test_constructor_with_azure_options(mock_azure_conn):
     # default instantiation
     PandasExecutionEngine()
@@ -573,7 +573,7 @@ def test_constructor_with_azure_options(mock_azure_conn):
 @mock.patch(
     "great_expectations.execution_engine.pandas_execution_engine.azure.BlobServiceClient",
 )
-@pytest.mark.external_cloud_client
+@pytest.mark.big
 def test_get_batch_data_with_azure_batch_spec(
     mock_azure_conn,
     azure_batch_spec,
@@ -594,7 +594,7 @@ def test_get_batch_data_with_azure_batch_spec(
     assert df.dataframe.shape == (3, 3)
 
 
-@pytest.mark.external_cloud_client
+@pytest.mark.big
 def test_get_batch_with_no_azure_configured(azure_batch_spec):
     # if Azure BlobServiceClient was not configured
     execution_engine_no_azure = PandasExecutionEngine()
@@ -615,7 +615,7 @@ def test_get_batch_with_no_azure_configured(azure_batch_spec):
 @mock.patch(
     "great_expectations.execution_engine.pandas_execution_engine.google.storage.Client",
 )
-@pytest.mark.external_cloud_client
+@pytest.mark.big
 def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
     # default instantiation
     PandasExecutionEngine()
@@ -637,7 +637,7 @@ def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
 @mock.patch(
     "great_expectations.execution_engine.pandas_execution_engine.google.storage.Client",
 )
-@pytest.mark.external_cloud_client
+@pytest.mark.big
 def test_get_batch_data_with_gcs_batch_spec(
     mock_gcs_conn,
     gcs_batch_spec,
@@ -663,7 +663,7 @@ def test_get_batch_data_with_gcs_batch_spec(
     not google.storage,
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
-@pytest.mark.external_cloud_client
+@pytest.mark.big
 def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monkeypatch):
     # If PandasExecutionEngine contains no credentials for GCS, we will still instantiate _gcs engine,
     # but will raise Exception when trying get_batch_data(). The only situation where it would work is if we are running in a Google Cloud container.
@@ -678,7 +678,7 @@ def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monke
     not google.storage,
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
-@pytest.mark.external_cloud_client
+@pytest.mark.big
 def test_get_batch_with_gcs_misconfigured(gcs_batch_spec):
     # gcs_batchspec point to data that the ExecutionEngine does not have access to
     execution_engine_no_gcs = PandasExecutionEngine()

@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 yaml = YAMLHandler()
 
 # module level markers
-pytestmark = [pytest.mark.filesystem]
+pytestmark = pytest.mark.filesystem
 
 
 @pytest.fixture

@@ -1,3 +1,5 @@
+import pytest
+
 from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
     ExpectationDiagnostics,
 )
@@ -15,10 +17,9 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationTestDiagnostics,
     RendererTestDiagnostics,
 )
-import pytest
 
 # module level markers
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 
 expectation_test_data_case = ExpectationTestDataCases(
     dataset_name="expectation_diagnostics_test_data",

@@ -9,7 +9,7 @@ from great_expectations.core.usage_statistics.anonymizers.profiler_anonymizer im
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 
 # module level markers
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 
 
 @pytest.fixture

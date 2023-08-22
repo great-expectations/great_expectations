@@ -12,6 +12,10 @@ from great_expectations.datasource import Datasource
 if TYPE_CHECKING:
     from ruamel.yaml.comments import CommentedMap
 
+
+pytestmark = pytest.mark.unit
+
+
 yaml = YAMLHandler()
 
 

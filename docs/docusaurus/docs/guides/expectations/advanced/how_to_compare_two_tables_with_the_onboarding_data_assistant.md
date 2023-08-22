@@ -41,17 +41,17 @@ context = gx.get_context(
 
 In order to profile our first table and validate our second table, we need to set up our Batch Requests pointing to each set of data.
 
-In this guide, we will use a MySQL <TechnicalTag tag="datasource" text= "Datasource" /> as our source data -- the data we trust to be correct.
+In this guide, we will use a MySQL <TechnicalTag tag="datasource" text= "Data Source" /> as our source data -- the data we trust to be correct.
 
 ```python name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py mysql_batch_request"
 ```
 
-From this data, we will create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> and use that suite to validate our second table, pulled from a PostgreSQL Datasource.
+From this data, we will create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> and use that suite to validate our second table, pulled from a PostgreSQL Data Source.
 
 ```python name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py pg_batch_request"
 ```
 
-## Profile Source Data
+## Profile source data
 
 We can now use the `OnboardingDataAssistant` to profile our MySQL data defined in the `mysql_batch_request` above.
 
@@ -65,10 +65,13 @@ And use the results from the Data Assistant to build and save an Expectation Sui
 
 <details>
 <summary><code>exclude_column_names</code>?</summary>
-Above, we excluded <code>"VendorID",</code>, so Expectations won't be set against this column.
+In the previous example, specific columns were excluded to prevent Expectations from being set against them.
 
-This is one example of the ways in which we can customize the Suite built by our Data Assistant.
+Some SQL dialects handle data types in different ways, and this can cause precision mismatches on some numbers.
 
+In our hypothetical use case these inconsistencies are tolerated, and therefore Expectations are not set against the columns likely to generate the errors.
+
+This is an example of how an Expectation Suite created by the Data Assistant can be customized.
 For more on these configurations, see our [guide on the `OnboardingDataAssistant](../../../guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md).
 </details>
 

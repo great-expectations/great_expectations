@@ -122,7 +122,7 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     return regex, test_connection_error_message
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_construct_spark_abs_datasource_with_account_url_and_credential():
     spark_abs_datasource = SparkAzureBlobStorageDatasource(
         name="spark_abs_datasource",
@@ -137,7 +137,7 @@ def test_construct_spark_abs_datasource_with_account_url_and_credential():
     assert spark_abs_datasource.name == "spark_abs_datasource"
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_construct_spark_abs_datasource_with_conn_str_and_credential():
     spark_abs_datasource = SparkAzureBlobStorageDatasource(
         name="spark_abs_datasource",
@@ -152,7 +152,7 @@ def test_construct_spark_abs_datasource_with_conn_str_and_credential():
     assert spark_abs_datasource.name == "spark_abs_datasource"
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_construct_spark_abs_datasource_with_valid_account_url_assigns_account_name():
     spark_abs_datasource = SparkAzureBlobStorageDatasource(
         name="spark_abs_datasource",
@@ -167,7 +167,7 @@ def test_construct_spark_abs_datasource_with_valid_account_url_assigns_account_n
     assert spark_abs_datasource.name == "spark_abs_datasource"
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_construct_spark_abs_datasource_with_valid_conn_str_assigns_account_name():
     spark_abs_datasource = SparkAzureBlobStorageDatasource(
         name="spark_abs_datasource",
@@ -182,7 +182,7 @@ def test_construct_spark_abs_datasource_with_valid_conn_str_assigns_account_name
     assert spark_abs_datasource.name == "spark_abs_datasource"
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_construct_spark_abs_datasource_with_multiple_auth_methods_raises_error():
     # Raises error in DataContext's schema validation due to having both `account_url` and `conn_str`
     with pytest.raises(SparkAzureBlobStorageDatasourceError):
@@ -199,7 +199,7 @@ def test_construct_spark_abs_datasource_with_multiple_auth_methods_raises_error(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -227,7 +227,7 @@ def test_add_csv_asset_to_datasource(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -248,7 +248,7 @@ def test_construct_csv_asset_directly(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -275,7 +275,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -302,7 +302,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -329,7 +329,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -353,7 +353,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
         )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.xfail(
     reason="Accessing objects on azure.storage.blob using Spark is not working, due to local credentials issues (this test is conducted using Jupyter notebook manually)."
 )
@@ -413,7 +413,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert len(batches) == 2
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_test_connection_failures(
     spark_abs_datasource: SparkAzureBlobStorageDatasource,
     bad_regex_config: tuple[re.Pattern, str],
@@ -445,7 +445,7 @@ def test_test_connection_failures(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )

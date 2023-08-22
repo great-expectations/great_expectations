@@ -471,7 +471,7 @@ class FileDataAsset(MetaFileDataAsset):
         """
 
         try:
-            size = os.path.getsize(self._path)
+            size = os.path.getsize(self._path)  # noqa: PTH202
         except OSError:
             raise
 

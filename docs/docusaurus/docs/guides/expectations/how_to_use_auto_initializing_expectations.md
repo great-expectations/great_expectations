@@ -20,7 +20,7 @@ The following scripts are used in this topic and are available in GitHub:
 
 - Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md)
 - [A configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
-- [A configured Datasource](/docs/guides/connecting_to_your_data/connect_to_data_overview)
+- [A configured Data Source](/docs/guides/connecting_to_your_data/connect_to_data_lp)
 - [An understanding of how to configure a BatchRequest](/docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource)
 - [An understanding of how to create and edit Expectations with instant feedback from a sample batch of data](./how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
 
@@ -59,7 +59,7 @@ For the purposes of this guide, we will be using `expect_column_mean_to_be_betwe
 
 ## Run the expectation with `auto=True`
 
-Say you are interested in constructing an Expectation that captures the average distance of taxi trips across all of 2018.  You have a <TechnicalTag tag="datasource" text="Datasource" /> that provides 12 Batches (one for each month of the year) and you know that `expect_colum_mean_to_be_between` is the Expectation you want to implement.
+Say you are interested in constructing an Expectation that captures the average distance of taxi trips across all of 2018.  You have a <TechnicalTag tag="datasource" text="Data Source" /> that provides 12 Batches (one for each month of the year) and you know that `expect_colum_mean_to_be_between` is the Expectation you want to implement.
 
 ### Run the expectation manually
 

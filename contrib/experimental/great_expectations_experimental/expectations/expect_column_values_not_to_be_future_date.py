@@ -57,7 +57,7 @@ class ColumnValuesNotToBeFutureDate(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesNotToBeFutureDate(ColumnMapExpectation):
-    """Expect column values not to be the future date"""
+    """Expect column values not to be the future date."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

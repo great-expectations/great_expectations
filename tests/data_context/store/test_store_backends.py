@@ -122,7 +122,7 @@ def validation_operators_data_context(
     )
     data_context.add_expectation_suite("f1.foo")
 
-    df = data_context.get_batch(
+    df = data_context._get_batch_v2(
         batch_kwargs=data_context.build_batch_kwargs(
             "my_datasource", "subdir_reader", "f1"
         ),
@@ -206,11 +206,9 @@ def check_store_backend_store_backend_id_functionality(
     assert test_utils.validate_uuid4(parsed_store_backend_id[1])
 
 
-@pytest.mark.filesystem
-@pytest.mark.external_cloud_client
-@pytest.mark.integration
+@pytest.mark.aws_deps
 @mock_s3
-def test_StoreBackend_id_initialization(tmp_path_factory):
+def test_StoreBackend_id_initialization(tmp_path_factory, aws_credentials):
     """
     What does this test and why?
 
@@ -352,9 +350,8 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
 
 
 @mock_s3
-@pytest.mark.integration
-@pytest.mark.external_cloud_client
-def test_TupleS3StoreBackend_store_backend_id():
+@pytest.mark.aws_deps
+def test_TupleS3StoreBackend_store_backend_id(aws_credentials):
     # TupleS3StoreBackend
     # Initialize without store_backend_id and check that it is generated correctly
     bucket = "leakybucket2"
@@ -412,7 +409,6 @@ def test_InMemoryStoreBackend():
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_tuple_filesystem_store_filepath_prefix_error(tmp_path_factory):
     path = str(
         tmp_path_factory.mktemp("test_tuple_filesystem_store_filepath_prefix_error")
@@ -437,7 +433,6 @@ def test_tuple_filesystem_store_filepath_prefix_error(tmp_path_factory):
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
     path = str(
         tmp_path_factory.mktemp(
@@ -467,7 +462,6 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_TupleFilesystemStoreBackend(tmp_path_factory):
     path = "dummy_str"
     full_test_dir = tmp_path_factory.mktemp("test_TupleFilesystemStoreBackend__dir")
@@ -503,7 +497,7 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
     )
     my_store.remove_key(("BBB",))
     with pytest.raises(InvalidKeyError):
-        assert my_store.get(("BBB",)) == ""  # noqa: PLC1901
+        assert my_store.get(("BBB",)) == ""
 
     my_store_with_base_public_path = TupleFilesystemStoreBackend(
         root_directory=project_path,
@@ -517,7 +511,6 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
     tmp_path_factory,
 ):
@@ -556,9 +549,8 @@ def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
 
 
 @mock_s3
-@pytest.mark.integration
-@pytest.mark.external_cloud_client
-def test_TupleS3StoreBackend_with_prefix():
+@pytest.mark.aws_deps
+def test_TupleS3StoreBackend_with_prefix(aws_credentials):
     """
     What does this test test and why?
 
@@ -758,9 +750,8 @@ def test_TupleS3StoreBackend_with_prefix():
 
 
 @mock_s3
-@pytest.mark.integration
-@pytest.mark.external_cloud_client
-def test_tuple_s3_store_backend_slash_conditions():  # noqa: PLR0915
+@pytest.mark.aws_deps
+def test_tuple_s3_store_backend_slash_conditions(aws_credentials):  # noqa: PLR0915
     bucket = "my_bucket"
     prefix = None
     conn = boto3.resource("s3", region_name="us-east-1")
@@ -948,9 +939,8 @@ def test_tuple_s3_store_backend_slash_conditions():  # noqa: PLR0915
 
 
 @mock_s3
-@pytest.mark.external_cloud_client
-@pytest.mark.integration
-def test_TupleS3StoreBackend_with_empty_prefixes():
+@pytest.mark.aws_deps
+def test_TupleS3StoreBackend_with_empty_prefixes(aws_credentials):
     """
     What does this test test and why?
 
@@ -1007,9 +997,8 @@ def test_TupleS3StoreBackend_with_empty_prefixes():
 
 
 @mock_s3
-@pytest.mark.external_cloud_client
-@pytest.mark.integration
-def test_TupleS3StoreBackend_with_s3_put_options():
+@pytest.mark.aws_deps
+def test_TupleS3StoreBackend_with_s3_put_options(aws_credentials):
     bucket = "leakybucket"
     conn = boto3.client("s3", region_name="us-east-1")
     conn.create_bucket(Bucket=bucket)
@@ -1048,8 +1037,7 @@ def test_TupleS3StoreBackend_with_s3_put_options():
     not is_library_loadable(library_name="google"),
     reason="google is not installed",
 )
-@pytest.mark.external_cloud_client
-@pytest.mark.integration
+@pytest.mark.big
 def test_TupleGCSStoreBackend_base_public_path():
     """
     What does this test and why?
@@ -1102,8 +1090,7 @@ def test_TupleGCSStoreBackend_base_public_path():
     reason="google is not installed",
 )
 @pytest.mark.slow  # 1.35s
-@pytest.mark.external_cloud_client
-@pytest.mark.integration
+@pytest.mark.big
 def test_TupleGCSStoreBackend():  # noqa: PLR0915
     # pytest.importorskip("google-cloud-storage")
     """
@@ -1217,8 +1204,7 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
     )
 
 
-@pytest.mark.external_cloud_client
-@pytest.mark.integration
+@pytest.mark.big
 def test_TupleAzureBlobStoreBackend_connection_string():
     pytest.importorskip("azure.storage.blob")
     pytest.importorskip("azure.identity")
@@ -1260,8 +1246,7 @@ def test_TupleAzureBlobStoreBackend_connection_string():
         )
 
 
-@pytest.mark.external_cloud_client
-@pytest.mark.integration
+@pytest.mark.big
 def test_TupleAzureBlobStoreBackend_account_url():
     pytest.importorskip("azure.storage.blob")
     pytest.importorskip("azure.identity")
@@ -1297,10 +1282,8 @@ def test_TupleAzureBlobStoreBackend_account_url():
 
 @mock_s3
 @pytest.mark.slow  # 14.36s
-@pytest.mark.big
-@pytest.mark.external_cloud_client
-@pytest.mark.integration
-def test_TupleS3StoreBackend_list_over_1000_keys():
+@pytest.mark.aws_deps
+def test_TupleS3StoreBackend_list_over_1000_keys(aws_credentials):
     """
     What does this test test and why?
 
@@ -1365,7 +1348,6 @@ def test_TupleS3StoreBackend_list_over_1000_keys():
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     inline_store_backend: InlineStoreBackend = InlineStoreBackend(
         data_context=empty_data_context,
@@ -1475,7 +1457,6 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> None:
     path_to_great_expectations_yml: str = os.path.join(  # noqa: PTH118
         empty_data_context.root_directory, empty_data_context.GX_YML

@@ -18,7 +18,7 @@ Expectation Stores can be used to store and retrieve Expectation Suites.  This m
 
 When you initialize your Data Context for the first time, a configuration for a local Expectation Store will automatically be added to `great_expectations.yml`. You may change this configuration to work with different environments. 
 
-- For more information on configuring an Expectation Store for a specific environment, please refer to our [in-depth guides on Expectation Store configurations.](../guides/setup/index.md#expectation-stores)
+- For more information on configuring an Expectation Store for a specific environment, see [Configure Expectation Stores](../guides/setup/configuring_metadata_stores/configure_expectation_stores.md).
 
 Most workflows for creating Expectations automatically bundle them into an Expectation Suite.  When you save the resultant Expectation Suite, your Data Context will use an Expectation Store to do so.  Likewise, to edit an existing Expectation Suite, you will use your Data Context to retrieve it through an Expectation Store.  This process is available through a convenience method in the Data Context, so you will not have to directly instantiate and interact with the Expectation Store.
 

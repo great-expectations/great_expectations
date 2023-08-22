@@ -9,6 +9,8 @@ from tests.data_context.test_data_context_config_ui import (
     default_spark_datasource_config,  # noqa: F401
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture()
 def default_sql_alchemy_datasource_config():

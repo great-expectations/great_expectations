@@ -98,7 +98,6 @@ def batch_with_split_on_whole_table_s3(test_s3_files) -> S3BatchSpec:
 
 
 @pytest.mark.big
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "splitter_kwargs_year,num_values_in_df",
     [
@@ -128,7 +127,6 @@ def test_get_batch_with_split_on_year(
 
 
 @pytest.mark.big
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "column_batch_identifier,num_values_in_df",
     [
@@ -329,7 +327,7 @@ def test_get_batch_with_split_on_whole_table_filesystem(
     assert test_df.dataframe.shape == (5, 2)
 
 
-@pytest.mark.external_cloud_client
+@pytest.mark.big
 def test_get_batch_with_split_on_whole_table_s3(
     batch_with_split_on_whole_table_s3, test_df_small
 ):
@@ -339,7 +337,7 @@ def test_get_batch_with_split_on_whole_table_s3(
     assert df.dataframe.shape == test_df_small.shape
 
 
-@pytest.mark.external_cloud_client
+@pytest.mark.big
 def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_connector(
     test_s3_files, test_df_small
 ):

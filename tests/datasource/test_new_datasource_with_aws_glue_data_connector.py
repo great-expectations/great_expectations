@@ -8,6 +8,9 @@ from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import BaseDatasource, LegacyDatasource
 
+pytestmark = pytest.mark.filesystem
+
+
 yaml = YAMLHandler()
 
 
@@ -48,7 +51,6 @@ def data_source_config_with_aws_glue_catalog_data_connectors():
     return yaml.load(config)
 
 
-@pytest.mark.integration
 @pytest.mark.skipif(
     not pyspark.pyspark,
     reason='Could not import "pyspark"',
@@ -134,7 +136,6 @@ def test_instantiation_from_config(
     }
 
 
-@pytest.mark.integration
 @pytest.mark.skipif(
     not pyspark.pyspark,
     reason='Could not import "pyspark"',

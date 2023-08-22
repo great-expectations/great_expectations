@@ -24,6 +24,7 @@ from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
     new_argument,
@@ -251,6 +252,7 @@ class ExpectationSuite(SerializableDictDot):
         return result
 
     @public_api
+    @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this ExpectationSuite.
 
@@ -453,8 +455,8 @@ class ExpectationSuite(SerializableDictDot):
             if ge_cloud_id is not None:
                 if expectation.ge_cloud_id == ge_cloud_id:
                     match_indexes.append(idx)
-            else:
-                if expectation.isEquivalentTo(  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if expectation.isEquivalentTo(
                     other=expectation_configuration, match_type=match_type  # type: ignore[arg-type]
                 ):
                     match_indexes.append(idx)

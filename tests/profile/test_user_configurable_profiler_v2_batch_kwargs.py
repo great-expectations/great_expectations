@@ -367,6 +367,7 @@ def test_build_suite_with_semantic_types_dict(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.unit
 def test_build_suite_when_suite_already_exists(mock_emit, cardinality_dataset):
     """
     What does this test do and why?
@@ -494,7 +495,7 @@ def test_nullity_expectations_mostly_tolerance(
         assert i["kwargs"]["mostly"] == 0.66
 
 
-@pytest.mark.unit
+@pytest.mark.filesystem
 def test_profiled_dataset_passes_own_validation(
     cardinality_dataset, titanic_data_context
 ):
@@ -516,7 +517,7 @@ def test_profiled_dataset_passes_own_validation(
     assert results["success"]
 
 
-@pytest.mark.unit
+@pytest.mark.filesystem
 def test_profiler_all_expectation_types(
     titanic_data_context, possible_expectations_set
 ):

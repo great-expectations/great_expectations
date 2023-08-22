@@ -26,9 +26,9 @@ This guide demonstrates how to organize Batches in a file-based Data Asset. This
 
 :::caution Datasources defined with the block-config method
 
-If you are using a Datasource that was created with the advanced block-config method, see the following resources:
-- [How to configure a Spark Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
-- [How to configure a Pandas Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
+If you are using a Data Source that was created with the advanced block-config method, see the following resources:
+- [How to configure a Spark Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
+- [How to configure a Pandas Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
 
 :::
 
@@ -38,7 +38,7 @@ If you are using a Datasource that was created with the advanced block-config me
 <Prerequisites>
 
 - A working installation of Great Expectations
-- A Datasource that connects to a location with source data files
+- A Data Source that connects to a location with source data files
 
 </Prerequisites>
 
@@ -46,11 +46,11 @@ If you are using a Datasource that was created with the advanced block-config me
 
 <ImportGxAndInstantiateADataContext />
 
-## Retrieve a file-based Datasource
+## Retrieve a file-based Data Source
 
-For this guide, we will use a previously defined Datasource named `"my_datasource"`.  For purposes of our demonstration, this Datasource is a Pandas Filesystem Datasource that uses a folder named "data" as its `base_folder`.
+For this guide, we will use a previously defined Data Source named `"my_datasource"`.  For purposes of our demonstration, this Data Source is a Pandas Filesystem Data Source that uses a folder named "data" as its `base_folder`.
 
-To retrieve this Datasource, we will supply the `get_datasource(...)` method of our Data Context with the name of the Datasource we wish to retrieve:
+To retrieve this Data Source, we will supply the `get_datasource(...)` method of our Data Context with the name of the Data Source we wish to retrieve:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py my_datasource"
 ```
@@ -59,7 +59,7 @@ To retrieve this Datasource, we will supply the `get_datasource(...)` method of 
 
 In a file-based Data Asset, any file that matches a provided regular expression (the `batching_regex` parameter) will be included as a Batch in the Data Asset.  Therefore, to organize multiple files into Batches in a single Data Asset we must define a regular expression that will match one or more of our source data files.
 
-For this example, our Datasource points to a folder that contains the following files:
+For this example, our Data Source points to a folder that contains the following files:
 - "yellow_tripdata_sample_2019-03.csv"
 - "yellow_tripdata_sample_2020-07.csv"
 - "yellow_tripdata_sample_2021-02.csv"
@@ -85,7 +85,7 @@ For more information on how to format regular expressions, we recommend referenc
 
 ## Add a Data Asset using the `batching_regex`
 
-Now that we have put together a regular expression that will match one or more of the files in our Datasource's `base_folder`, we can use it to create our Data Asset.  Since the files in this particular Datasource's `base_folder` are csv files, we will use the `add_pandas_csv(...)` method of our Datasource to create the new Data Asset:
+Now that we have put together a regular expression that will match one or more of the files in our Data Source's `base_folder`, we can use it to create our Data Asset.  Since the files in this particular Data Source's `base_folder` are csv files, we will use the `add_pandas_csv(...)` method of our Data Source to create the new Data Asset:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py my_asset"
 ```

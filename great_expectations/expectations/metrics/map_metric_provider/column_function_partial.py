@@ -27,7 +27,7 @@ from great_expectations.expectations.metrics.metric_provider import (
     metric_partial,
 )
 from great_expectations.expectations.metrics.util import (
-    get_dbms_compatible_column_names,
+    get_dbms_compatible_metric_domain_kwargs,
 )
 
 logger = logging.getLogger(__name__)
@@ -83,6 +83,11 @@ def column_function_partial(  # noqa: C901, PLR0915
                 metrics: Dict[str, Any],
                 runtime_configuration: dict,
             ):
+                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    batch_columns_list=metrics["table.columns"],
+                )
+
                 (
                     df,
                     compute_domain_kwargs,
@@ -94,11 +99,6 @@ def column_function_partial(  # noqa: C901, PLR0915
                 column_name: Union[
                     str, sqlalchemy.quoted_name
                 ] = accessor_domain_kwargs["column"]
-
-                column_name = get_dbms_compatible_column_names(
-                    column_names=column_name,
-                    batch_columns_list=metrics["table.columns"],
-                )
 
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
@@ -148,6 +148,12 @@ def column_function_partial(  # noqa: C901, PLR0915
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
                 )
+
+                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    batch_columns_list=metrics["table.columns"],
+                )
+
                 if filter_column_isnull:
                     compute_domain_kwargs = execution_engine.add_column_row_condition(
                         metric_domain_kwargs
@@ -167,11 +173,6 @@ def column_function_partial(  # noqa: C901, PLR0915
                 column_name: Union[
                     str, sqlalchemy.quoted_name
                 ] = accessor_domain_kwargs["column"]
-
-                column_name = get_dbms_compatible_column_names(
-                    column_names=column_name,
-                    batch_columns_list=metrics["table.columns"],
-                )
 
                 dialect = execution_engine.dialect_module
                 column_function = metric_fn(
@@ -221,6 +222,12 @@ def column_function_partial(  # noqa: C901, PLR0915
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
                 )
+
+                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    batch_columns_list=metrics["table.columns"],
+                )
+
                 if filter_column_isnull:
                     compute_domain_kwargs = execution_engine.add_column_row_condition(
                         metric_domain_kwargs
@@ -240,11 +247,6 @@ def column_function_partial(  # noqa: C901, PLR0915
                 column_name: Union[
                     str, sqlalchemy.quoted_name
                 ] = accessor_domain_kwargs["column"]
-
-                column_name = get_dbms_compatible_column_names(
-                    column_names=column_name,
-                    batch_columns_list=metrics["table.columns"],
-                )
 
                 column = data[column_name]
                 column_function = metric_fn(

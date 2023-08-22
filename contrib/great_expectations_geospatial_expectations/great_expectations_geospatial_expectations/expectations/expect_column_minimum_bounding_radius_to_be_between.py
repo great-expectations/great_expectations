@@ -56,8 +56,7 @@ class ColumnAggregateGeometryBoundingRadius(ColumnAggregateMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnMinimumBoundingRadiusToBeBetween(ColumnAggregateExpectation):
-    """
-    Expect that column values as geometry points to be contained within a bounding circle with a given radius (or diameter).
+    """Expect that column values as geometry points to be contained within a bounding circle with a given radius (or diameter).
 
     expect_column_values_minimum_bounding_radius_to_be_between is a :func:`column_expectation <great_expectations.dataset.dataset.MetaDataset.column_expectation>`.
 

@@ -1,5 +1,7 @@
 import os
 
+import pytest
+
 from great_expectations.datasource.batch_kwargs_generator import (
     DatabricksTableBatchKwargsGenerator,
     GlobReaderBatchKwargsGenerator,
@@ -12,6 +14,7 @@ except ImportError:
     from unittest import mock  # noqa: F401
 
 
+@pytest.mark.big
 def test_file_kwargs_generator(
     data_context_parameterized_expectation_suite, filesystem_csv
 ):
@@ -61,6 +64,7 @@ def test_file_kwargs_generator(
         assert batch["path"] in f3_batches
 
 
+@pytest.mark.big
 def test_glob_reader_generator(basic_pandas_datasource, tmp_path_factory):
     """Provides an example of how glob generator works: we specify our own
     names for data_assets, and an associated glob; the generator
@@ -114,6 +118,7 @@ def test_glob_reader_generator(basic_pandas_datasource, tmp_path_factory):
     assert len(blargs_kwargs) == len(real_blargs)
 
 
+@pytest.mark.big
 def test_file_kwargs_generator_extensions(tmp_path_factory):
     """csv, xls, parquet, json should be recognized file extensions"""
     basedir = str(tmp_path_factory.mktemp("test_file_kwargs_generator_extensions"))
@@ -171,6 +176,7 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
     }
 
 
+@pytest.mark.big
 def test_databricks_generator(basic_sparkdf_datasource):
     generator = DatabricksTableBatchKwargsGenerator(datasource=basic_sparkdf_datasource)
     available_assets = generator.get_available_data_asset_names()

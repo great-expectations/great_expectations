@@ -11,7 +11,7 @@ from great_expectations.self_check.util import (
 )
 
 # module level markers
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 
 
 @pytest.mark.parametrize(

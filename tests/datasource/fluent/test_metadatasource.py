@@ -335,6 +335,7 @@ class TestMisconfiguredMetaDatasource:
             MissingTestConnectionDatasource(name="name").test_connection()
 
 
+@pytest.mark.big
 def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     # 1. Define Datasource & Assets
 

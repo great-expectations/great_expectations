@@ -11,7 +11,7 @@ This guide will explain how to use an <TechnicalTag tag="action" text="Action" /
 
 <Prerequisites>
 
- - [A minimum of one Expectation Suite](../../expectations/index.md#core-skills)
+ - [A minimum of one Expectation Suite](../../expectations/expectations_lp.md)
  - [A minimum of one Checkpoint](../checkpoints/how_to_create_a_new_checkpoint.md).
 
 </Prerequisites>

@@ -25,7 +25,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
     """Expect the columns to exactly match a specified list.
 
     expect_table_columns_to_match_ordered_list is a \
-    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
+    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     Args:
         column_list (list of str): \

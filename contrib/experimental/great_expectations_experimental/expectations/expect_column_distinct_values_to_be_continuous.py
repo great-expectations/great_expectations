@@ -20,6 +20,8 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
+    """Expect the set of distinct column values to be continuous."""
+
     examples = [
         {
             "data": {

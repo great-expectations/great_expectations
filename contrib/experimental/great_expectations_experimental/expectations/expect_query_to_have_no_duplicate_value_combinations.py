@@ -16,7 +16,7 @@ from great_expectations.expectations.expectation import (
 
 
 class ExpectQueryToHaveNoDuplicateValueCombinations(QueryExpectation):
-    """Expect the data points given primary keys via columns to be unique"""
+    """Expect the data points given primary keys via columns to be unique."""
 
     metric_dependencies = ("query.multiple_columns",)
 
@@ -53,7 +53,7 @@ class ExpectQueryToHaveNoDuplicateValueCombinations(QueryExpectation):
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
         query_result = metrics.get("query.multiple_columns")
-        query_result = dict([element.values() for element in query_result])
+        query_result = [tuple(element.values()) for element in query_result]
 
         columns = configuration["kwargs"].get("columns")
         duplicates = [

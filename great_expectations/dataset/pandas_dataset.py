@@ -12,6 +12,7 @@ import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
@@ -448,6 +449,7 @@ Notes:
     def get_column_count(self):
         return self.shape[1]
 
+    @override
     def get_table_columns(self) -> List[str]:
         return list(self.columns)
 
@@ -566,7 +568,7 @@ Notes:
         series_B = self.get_binned_values(self[column_B], bins_B, n_bins_B)
         return pd.crosstab(series_A, columns=series_B)
 
-    def get_binned_values(self, series, bins, n_bins):
+    def get_binned_values(self, series, bins, n_bins):  # noqa: PLR0912
         """
         Get binned values of series.
 
@@ -1499,7 +1501,7 @@ Notes:
     ):
         def is_parseable(val):
             try:
-                if type(val) != str:
+                if type(val) != str:  # noqa: E721
                     raise TypeError(
                         "Values passed to expect_column_values_to_be_dateutil_parseable must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format."
                     )

@@ -54,8 +54,7 @@ class ColumnValuesBicBelongToCountry(ColumnMapMetricProvider):
 
 
 class ExpectColumnValuesBicBelongToCountry(ColumnMapExpectation):
-    """Expect the provided BIC (Business Identifier Code)
-    in the country which code (alpha-2) passed in the parameters."""
+    """Expect the provided BIC (Business Identifier Code) in the country which code (alpha-2) passed in the parameters."""
 
     map_metric = "column_values.bic_belong_to_country"
 

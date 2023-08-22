@@ -6,7 +6,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 
 # module level markers
-pytestmark = [pytest.mark.spark]
+pytestmark = pytest.mark.spark
 
 
 @pytest.mark.parametrize(

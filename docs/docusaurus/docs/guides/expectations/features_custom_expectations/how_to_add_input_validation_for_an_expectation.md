@@ -9,7 +9,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <Prerequisites>
 
- - [Created a Custom Expectation](../creating_custom_expectations/overview.md)
+ - [Created a Custom Expectation](../custom_expectations_lp.md)
 
 </Prerequisites>
 

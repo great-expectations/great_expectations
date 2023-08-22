@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from copy import deepcopy
-from typing import Dict, Iterator, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Dict, Iterator, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
@@ -26,15 +28,16 @@ from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
     build_sorters_from_config,
 )
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
 from great_expectations.execution_engine.split_and_sample.data_splitter import (
     DatePart,
     SplitterMethod,
 )
 from great_expectations.util import deep_filter_properties_iterable
+
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import (
+        SqlAlchemyExecutionEngine,
+    )
 
 
 @public_api
@@ -59,7 +62,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
     """
 
-    SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING: Dict[str, Optional[Sorter]] = {
+    SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING: Dict[
+        SplitterMethod, type[Sorter] | None
+    ] = {
         SplitterMethod.SPLIT_ON_YEAR: DictionarySorter,
         SplitterMethod.SPLIT_ON_YEAR_AND_MONTH: DictionarySorter,
         SplitterMethod.SPLIT_ON_YEAR_AND_MONTH_AND_DAY: DictionarySorter,
@@ -77,7 +82,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self,
         name: str,
         datasource_name: str,
-        execution_engine: Optional[ExecutionEngine] = None,
+        execution_engine: SqlAlchemyExecutionEngine,
         include_schema_name: bool = False,
         splitter_method: Optional[str] = None,
         splitter_kwargs: Optional[dict] = None,
@@ -88,9 +93,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-        if execution_engine:
-            execution_engine = cast(SqlAlchemyExecutionEngine, execution_engine)
-
         super().__init__(
             name=name,
             id=id,
@@ -118,7 +120,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
     @property
     def execution_engine(self) -> SqlAlchemyExecutionEngine:
-        return cast(SqlAlchemyExecutionEngine, self._execution_engine)
+        return self._execution_engine
 
     @property
     def include_schema_name(self) -> bool:

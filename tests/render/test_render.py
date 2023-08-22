@@ -28,7 +28,7 @@ from great_expectations.self_check.util import (
 )
 
 # module level markers
-pytestmark = [pytest.mark.big]
+pytestmark = pytest.mark.big
 
 
 @pytest.fixture(scope="module")

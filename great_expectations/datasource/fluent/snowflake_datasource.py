@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Union
 
 import pydantic
 from pydantic import AnyUrl, errors
 
 from great_expectations.compatibility.snowflake import URL
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import (
@@ -44,6 +45,7 @@ class SnowflakeDsn(AnyUrl):
     }
 
     @classmethod
+    @override
     def validate_parts(cls, parts: Parts, validate_port: bool = True) -> Parts:
         """
         Overridden to validate additional fields outside of scheme (which is performed by AnyUrl).
@@ -89,6 +91,17 @@ class SnowflakeDatasource(SQLDatasource):
     role: Optional[str] = None
     numpy: bool = False
 
+    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
+        "role",
+        "account",
+        "schema_",
+        "database",
+        "user",
+        "password",
+        "numpy",
+        "warehouse",
+    }
+
     @pydantic.root_validator
     def _check_xor_input_args(cls, values: dict) -> dict:
         # Method 1 - connection string
@@ -104,17 +117,12 @@ class SnowflakeDatasource(SQLDatasource):
             )
         return values
 
-    @classmethod
-    def _get_exec_engine_excludes(cls) -> set[str]:
-        sql_datasource_fields: set[str] = set(SQLDatasource.__fields__.keys())
-        snowflake_fields: set[str] = set(SnowflakeDatasource.__fields__.keys())
-        return snowflake_fields.difference(sql_datasource_fields)
-
     def _get_connect_args(self) -> dict[str, str | bool]:
         excluded_fields: set[str] = set(SQLDatasource.__fields__.keys())
         # dump as json dict to force serialization of things like AnyUrl
         return self._json_dict(exclude=excluded_fields, exclude_none=True)
 
+    @override
     def get_engine(self) -> sqlalchemy.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:

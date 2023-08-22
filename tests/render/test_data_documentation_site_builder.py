@@ -6,6 +6,9 @@ import pytest
 from freezegun import freeze_time
 
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.store import ExpectationsStore, ValidationsStore
 from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
 from great_expectations.data_context.types.resource_identifiers import (
@@ -20,7 +23,7 @@ from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import get_context
 
 # module level markers
-pytestmark = [pytest.mark.filesystem]
+pytestmark = pytest.mark.filesystem
 
 
 def assert_how_to_buttons(
@@ -149,7 +152,7 @@ def test_configuration_driven_site_builder(  # noqa: PLR0915
         datasource_name, generator_name, data_asset_name, profiler_name
     )
 
-    batch = context.get_batch(
+    batch = context._get_batch_v2(
         batch_kwargs=batch_kwargs,
         expectation_suite_name=expectation_suite_name,
     )
@@ -277,7 +280,7 @@ def test_configuration_driven_site_builder(  # noqa: PLR0915
         batch.batch_id + ".html",
     )
 
-    ts_last_mod_0 = os.path.getmtime(validation_result_page_path)
+    ts_last_mod_0 = os.path.getmtime(validation_result_page_path)  # noqa: PTH204
 
     run_id = RunIdentifier(run_name="test_run_id_12346")
     operator_result = context.run_validation_operator(
@@ -299,7 +302,7 @@ def test_configuration_driven_site_builder(  # noqa: PLR0915
     ].full_base_directory
 
     # verify that the validation result HTML file rendered in the previous run was NOT updated
-    ts_last_mod_1 = os.path.getmtime(validation_result_page_path)
+    ts_last_mod_1 = os.path.getmtime(validation_result_page_path)  # noqa: PTH204
 
     assert ts_last_mod_0 == ts_last_mod_1
 
@@ -420,7 +423,7 @@ def test_configuration_driven_site_builder_skip_and_clean_missing(
         datasource_name, generator_name, data_asset_name, profiler_name
     )
 
-    batch = context.get_batch(
+    batch = context._get_batch_v2(
         batch_kwargs=batch_kwargs,
         expectation_suite_name=expectation_suite_name,
     )
@@ -558,7 +561,7 @@ def test_configuration_driven_site_builder_without_how_to_buttons(
         datasource_name, generator_name, data_asset_name, profiler_name
     )
 
-    batch = context.get_batch(
+    batch = context._get_batch_v2(
         batch_kwargs=batch_kwargs,
         expectation_suite_name=expectation_suite_name,
     )
@@ -601,7 +604,7 @@ def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory)
         file_relative_path(
             __file__, "../test_fixtures/great_expectations_custom_local_site_config.yml"
         ),
-        str(os.path.join(project_dir, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(project_dir, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     context = get_context(context_root_dir=project_dir)
     local_site_config = context._project_config.data_docs_sites.get("local_site")

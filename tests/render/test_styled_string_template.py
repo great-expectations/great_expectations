@@ -3,7 +3,7 @@ import pytest
 from great_expectations.render.view import DefaultJinjaPageView
 
 # module level markers
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 
 
 def test_render_template():

@@ -47,6 +47,7 @@ def mocked_glob_kwargs(basic_pandas_datasource):
     return kwargs
 
 
+@pytest.mark.unit
 def test_glob_reader_generator_returns_typed_kwargs(mocked_glob_kwargs):
     # Returned Kwargs should be PathKwargs.
     assert all(isinstance(kwargs, PathBatchKwargs) for kwargs in mocked_glob_kwargs)
@@ -55,6 +56,7 @@ def test_glob_reader_generator_returns_typed_kwargs(mocked_glob_kwargs):
     assert issubclass(PathBatchKwargs, SparkDFDatasourceBatchKwargs)
 
 
+@pytest.mark.unit
 def test_glob_reader_path_partitioning(mocked_glob_kwargs):
     kwargs = mocked_glob_kwargs
     # GlobReaderBatchKwargsGenerator uses partition_regex to extract partitions from filenames
@@ -63,6 +65,7 @@ def test_glob_reader_path_partitioning(mocked_glob_kwargs):
     assert len(kwargs[0].keys()) == 2
 
 
+@pytest.mark.unit
 def test_glob_reader_generator_relative_path(basic_pandas_datasource):
     glob_generator = GlobReaderBatchKwargsGenerator(
         "test_generator",
@@ -115,6 +118,7 @@ def test_glob_reader_generator_relative_path(basic_pandas_datasource):
         }
 
 
+@pytest.mark.big
 def test_glob_reader_generator_partitioning(basic_pandas_datasource):  # noqa: PLR0915
     glob_generator = GlobReaderBatchKwargsGenerator(
         "test_generator",
@@ -268,6 +272,7 @@ def test_glob_reader_generator_partitioning(basic_pandas_datasource):  # noqa: P
         assert batch_kwargs["reader_method"] == "parquet"
 
 
+@pytest.mark.unit
 def test_glob_reader_generator_customize_partitioning(basic_pandas_datasource):
     from dateutil.parser import parse
 

@@ -31,6 +31,7 @@ def get_extras_require():
         "postgresql",  # https://github.com/psycopg/psycopg2/blob/master/setup.py
         "trino",  # https://github.com/trinodb/trino-python-client/blob/master/setup.py
         "vertica",  # https://github.com/bluelabsio/sqlalchemy-vertica-python/blob/master/setup.py
+        "databricks",  # https://github.com/databricks/databricks-sql-python/blob/main/pyproject.toml
     )
     ignore_keys = (
         "sqlalchemy",

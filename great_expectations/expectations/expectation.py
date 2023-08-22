@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import datetime
 import functools
-import glob
 import json
 import logging
-import os
+import pathlib
 import re
 import sys
 import time
@@ -21,6 +20,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Final,
     List,
     Optional,
     Sequence,
@@ -34,6 +34,7 @@ import pandas as pd
 from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,
@@ -134,14 +135,9 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-
-_TEST_DEFS_DIR = os.path.join(  # noqa: PTH118
-    os.path.dirname(__file__),  # noqa: PTH120
-    "..",
-    "..",
-    "tests",
-    "test_definitions",
-)
+_TEST_DEFS_DIR: Final = pathlib.Path(
+    __file__, "..", "..", "..", "tests", "test_definitions"
+).resolve()
 
 
 @public_api
@@ -246,8 +242,8 @@ def param_method(param_name: str) -> Callable:
                     return_obj = param_func(
                         renderer_configuration=renderer_configuration
                     )
-                else:
-                    if return_type is RendererConfiguration:  # noqa: PLR5501
+                else:  # noqa: PLR5501
+                    if return_type is RendererConfiguration:
                         return_obj = renderer_configuration
                     else:
                         return_obj = None
@@ -872,7 +868,7 @@ class Expectation(metaclass=MetaExpectation):
                 for unexpected_value in partial_unexpected_list:
                     if unexpected_value:
                         string_unexpected_value = str(unexpected_value)
-                    elif unexpected_value == "":  # noqa: PLC1901
+                    elif unexpected_value == "":
                         string_unexpected_value = "EMPTY"
                     else:
                         string_unexpected_value = "null"
@@ -1546,14 +1542,9 @@ class Expectation(metaclass=MetaExpectation):
     def _get_examples_from_json(self):
         """Only meant to be called by self._get_examples"""
         results = []
-        found = glob.glob(
-            os.path.join(  # noqa: PTH118
-                _TEST_DEFS_DIR, "**", f"{self.expectation_type}.json"
-            ),
-            recursive=True,
-        )
+        found = next(_TEST_DEFS_DIR.rglob(f"**/{self.expectation_type}.json"), None)
         if found:
-            with open(found[0]) as fp:
+            with open(found) as fp:
                 data = json.load(fp)
             results = data["datasets"]
         return results
@@ -1963,7 +1954,7 @@ class Expectation(metaclass=MetaExpectation):
 
         result: str = ""
 
-        if type(rendered_result) == str:
+        if type(rendered_result) == str:  # noqa: E721
             result = rendered_result
 
         elif type(rendered_result) == list:
@@ -2334,6 +2325,7 @@ class BatchExpectation(Expectation, ABC):
     domain_type = MetricDomainTypes.TABLE
     args_keys: Tuple[str, ...] = ()
 
+    @override
     def get_validation_dependencies(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -2568,6 +2560,7 @@ class QueryExpectation(BatchExpectation, ABC):
         "condition_parser",
     )
 
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -2655,6 +2648,7 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
 
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -2739,9 +2733,11 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     }
 
     @classmethod
+    @override
     def is_abstract(cls) -> bool:
         return not cls.map_metric or super().is_abstract()
 
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -2756,6 +2752,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    @override
     def get_validation_dependencies(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -2892,6 +2889,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
 
         return validation_dependencies
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -3018,9 +3016,11 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
     }
 
     @classmethod
+    @override
     def is_abstract(cls) -> bool:
         return cls.map_metric is None or super().is_abstract()
 
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -3038,6 +3038,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    @override
     def get_validation_dependencies(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -3171,6 +3172,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         )
         return validation_dependencies
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -3287,9 +3289,11 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
     }
 
     @classmethod
+    @override
     def is_abstract(cls) -> bool:
         return cls.map_metric is None or super().is_abstract()
 
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -3304,6 +3308,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    @override
     def get_validation_dependencies(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -3446,6 +3451,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
 
         return validation_dependencies
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,

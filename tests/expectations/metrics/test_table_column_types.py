@@ -1,3 +1,5 @@
+import pytest
+
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -6,6 +8,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.util import get_sqlalchemy_inspector
 
 
+@pytest.mark.sqlite
 def test_table_column_introspection(sa):
     db_file = file_relative_path(
         __file__,

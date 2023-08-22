@@ -12,11 +12,17 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.util import get_context
 
+import warnings
+
 yaml = YAMLHandler()
 
-sc = SparkContext.getOrCreate()
-glueContext = GlueContext(sc)
-spark = glueContext.spark_session
+# needed because GlueContext(sc) function emits the following FutureWarning: Deprecated in 3.0.0. Use SparkSession.builder.getOrCreate() instead.
+with warnings.catch_warnings():
+    warnings.simplefilter(action="ignore", category=FutureWarning)
+    sc = SparkContext.getOrCreate()
+    glueContext = GlueContext(sc)
+    spark = glueContext.spark_session
+
 s3_client = boto3.client("s3")
 response = s3_client.get_object(
     Bucket="bucket", Key="bucket/great_expectations/great_expectations.yml"

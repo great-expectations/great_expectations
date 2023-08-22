@@ -298,7 +298,10 @@ class ValidationResultsPageRenderer(Renderer):
             run_time_datetime = None
 
         include_run_name: bool = False
-        if run_name_as_time != run_time_datetime and run_name_as_time != "__none__":
+        if (
+            run_name_as_time != run_time_datetime  # noqa: PLR1714
+            and run_name_as_time != "__none__"
+        ):
             include_run_name = True
 
         page_title = f"Validations / {expectation_suite_name}"
@@ -982,7 +985,10 @@ class ProfilingResultsPageRenderer(Renderer):
             run_time_datetime = None
 
         include_run_name: bool = False
-        if run_name_as_time != run_time_datetime and run_name_as_time != "__none__":
+        if (
+            run_name_as_time != run_time_datetime  # noqa: PLR1714
+            and run_name_as_time != "__none__"
+        ):
             include_run_name = True
 
         page_title = f"Profiling Results / {str(expectation_suite_name)}"

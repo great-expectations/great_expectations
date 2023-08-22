@@ -15,6 +15,9 @@ from great_expectations.core.serializer import (
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.data_context import DataContext
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
@@ -171,7 +174,6 @@ def test__assert_serialized_datasource_configs_are_equal(
 
 
 @pytest.mark.unit
-@pytest.mark.integration
 def test_datasource_store_retrieval(
     empty_datasource_store: DatasourceStore,
     block_config_datasource_config: DatasourceConfig,
@@ -196,7 +198,6 @@ def test_datasource_store_retrieval(
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
 def test_datasource_store_set_cloud_mode(
     block_config_datasource_config: DatasourceConfig,
     datasource_config_with_names_and_ids: DatasourceConfig,
@@ -263,7 +264,6 @@ def test_datasource_store_set_cloud_mode(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_datasource_store_with_inline_store_backend(
     block_config_datasource_config: DatasourceConfig, empty_data_context: DataContext
 ) -> None:
@@ -339,7 +339,6 @@ def test_datasource_store_set(
 
 
 @pytest.mark.unit
-@pytest.mark.integration
 def test_datasource_store_retrieve_by_name(
     fake_datasource_name,
     block_config_datasource_config: DatasourceConfig,
@@ -379,7 +378,6 @@ def test_datasource_store_delete(
 
 
 @pytest.mark.unit
-@pytest.mark.integration
 def test_datasource_store_update_by_name(
     fake_datasource_name,
     block_config_datasource_config: DatasourceConfig,
@@ -433,7 +431,6 @@ def test_datasource_store_update_raises_error_if_datasource_doesnt_exist(
 
 
 @pytest.mark.unit
-@pytest.mark.integration
 def test_datasource_store_with_inline_store_backend_config_with_names_does_not_store_datasource_name(
     datasource_config_with_names: DatasourceConfig,
     block_config_datasource_config: DatasourceConfig,
@@ -472,7 +469,7 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     )
 
     with open(
-        pathlib.Path(empty_data_context.root_directory) / "great_expectations.yml"
+        pathlib.Path(empty_data_context.root_directory) / FileDataContext.GX_YML
     ) as f:
         context_config_from_disk: dict = yaml.load(f)
 
@@ -480,7 +477,6 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_datasource_store_with_inline_store_backend_config_with_names_does_not_store_dataconnector_name(
     datasource_config_with_names: DatasourceConfig,
     block_config_datasource_config: DatasourceConfig,
@@ -519,7 +515,7 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     )
 
     with open(
-        pathlib.Path(empty_data_context.root_directory) / "great_expectations.yml"
+        pathlib.Path(empty_data_context.root_directory) / FileDataContext.GX_YML
     ) as f:
         context_config_from_disk: dict = yaml.load(f)
 

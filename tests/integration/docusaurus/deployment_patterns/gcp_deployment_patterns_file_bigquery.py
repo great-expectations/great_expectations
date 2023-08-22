@@ -2,6 +2,9 @@ import os
 import tempfile
 import pathlib
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
 temp_dir = tempfile.TemporaryDirectory()
 full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
@@ -107,7 +110,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(
-    context.root_directory, "great_expectations.yml"
+    context.root_directory, FileDataContext.GX_YML
 )
 with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.load(f)
@@ -210,7 +213,7 @@ data_docs_site_yaml = data_docs_site_yaml.replace(
     "<YOUR GCS BUCKET NAME>", "test_datadocs_store"
 )
 great_expectations_yaml_file_path = os.path.join(
-    context.root_directory, "great_expectations.yml"
+    context.root_directory, FileDataContext.GX_YML
 )
 with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.load(f)

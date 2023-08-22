@@ -129,8 +129,8 @@ class _YamlConfigValidator:
         class_name: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         pretty_print: bool = True,
-        return_mode: Union[
-            Literal["instantiated_class"], Literal["report_object"]
+        return_mode: Literal[
+            "instantiated_class", "report_object"
         ] = "instantiated_class",
         shorten_tracebacks: bool = False,
     ):

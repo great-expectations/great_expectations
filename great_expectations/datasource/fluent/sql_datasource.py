@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from datetime import date, datetime
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -17,11 +18,12 @@ from typing import (
 )
 
 import pydantic
+from pydantic import Field
+from typing_extensions import Annotated
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility.sqlalchemy import (
-    sqlalchemy as sa,
-)
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.datasource.fluent.batch_request import (
@@ -30,9 +32,7 @@ from great_expectations.datasource.fluent.batch_request import (
 )
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
-from great_expectations.datasource.fluent.fluent_base_model import (
-    FluentBaseModel,
-)
+from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
@@ -48,6 +48,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
 )
 
 if TYPE_CHECKING:
+    from sqlalchemy.sql import quoted_name  # noqa: TID251 # type-checking only
     from typing_extensions import Self
 
     from great_expectations.compatibility import sqlalchemy
@@ -192,9 +193,11 @@ class SplitterYear(_SplitterDatetime):
     method_name: Literal["split_on_year"] = "split_on_year"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         return ["year"]
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name}
 
@@ -204,9 +207,11 @@ class SplitterYearAndMonth(_SplitterDatetime):
     method_name: Literal["split_on_year_and_month"] = "split_on_year_and_month"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         return ["year", "month"]
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name}
 
@@ -218,9 +223,11 @@ class SplitterYearAndMonthAndDay(_SplitterDatetime):
     ] = "split_on_year_and_month_and_day"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         return ["year", "month", "day"]
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name}
 
@@ -231,9 +238,11 @@ class SplitterDatetimePart(_SplitterDatetime):
     method_name: Literal["split_on_date_parts"] = "split_on_date_parts"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         return self.datetime_parts
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name, "date_parts": self.param_names}
 
@@ -282,12 +291,15 @@ class SplitterDividedInteger(_SplitterOneColumnOneParam):
     method_name: Literal["split_on_divided_integer"] = "split_on_divided_integer"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         return ["quotient"]
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name, "divisor": self.divisor}
 
+    @override
     def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
@@ -304,12 +316,15 @@ class SplitterModInteger(_SplitterOneColumnOneParam):
     method_name: Literal["split_on_mod_integer"] = "split_on_mod_integer"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         return ["remainder"]
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name, "mod": self.mod}
 
+    @override
     def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
@@ -325,12 +340,15 @@ class SplitterColumnValue(_SplitterOneColumnOneParam):
     method_name: Literal["split_on_column_value"] = "split_on_column_value"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         return [self.column_name]
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name}
 
+    @override
     def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
@@ -340,6 +358,7 @@ class SplitterColumnValue(_SplitterOneColumnOneParam):
             )
         return {self.column_name: options[self.column_name]}
 
+    @override
     def param_defaults(self, sql_asset: _SQLAsset) -> list[dict]:
         # The superclass version of param_defaults is correct, but here we leverage that
         # the parameter name is the same as the column name to make this much faster.
@@ -396,12 +415,22 @@ Splitter = Union[
 
 
 class _SQLAsset(DataAsset):
+    """A _SQLAsset Mixin
+
+    This is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality
+    that can be used by different SQL datasource subclasses.
+
+    For example see TableAsset defined in this module and SqliteTableAsset defined in
+    sqlite_datasource.py
+    """
+
     # Instance fields
     type: str = pydantic.Field("_sql_asset")
     splitter: Optional[Splitter] = None
     name: str
 
     @property
+    @override
     def batch_request_options(self) -> tuple[str, ...]:
         """The potential keys for BatchRequestOptions.
 
@@ -563,6 +592,7 @@ class _SQLAsset(DataAsset):
             )
         )
 
+    @override
     def test_connection(self) -> None:
         pass
 
@@ -574,6 +604,9 @@ class _SQLAsset(DataAsset):
         candidate: Dict, requested_options: BatchRequestOptions
     ) -> bool:
         for k, v in requested_options.items():
+            if isinstance(candidate[k], (datetime, date)):
+                candidate[k] = str(candidate[k])
+
             if v is not None and candidate[k] != v:
                 return False
         return True
@@ -609,6 +642,7 @@ class _SQLAsset(DataAsset):
             )
         return batch_requests
 
+    @override
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> List[Batch]:
@@ -685,6 +719,7 @@ class _SQLAsset(DataAsset):
         return batch_list[batch_request.batch_slice]
 
     @public_api
+    @override
     def build_batch_request(
         self,
         options: Optional[BatchRequestOptions] = None,
@@ -719,6 +754,7 @@ class _SQLAsset(DataAsset):
             batch_slice=batch_slice,
         )
 
+    @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.
 
@@ -762,6 +798,7 @@ class _SQLAsset(DataAsset):
         raise NotImplementedError
 
 
+@public_api
 class QueryAsset(_SQLAsset):
     # Instance fields
     type: Literal["query"] = "query"
@@ -774,6 +811,7 @@ class QueryAsset(_SQLAsset):
             raise ValueError("query must start with 'SELECT' followed by a whitespace.")
         return v
 
+    @override
     def as_selectable(self) -> sqlalchemy.Selectable:
         """Returns the Selectable that is used to retrieve the data.
 
@@ -781,6 +819,7 @@ class QueryAsset(_SQLAsset):
         """
         return sa.select(sa.text(self.query.lstrip()[6:])).subquery()
 
+    @override
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
         return {
             "data_asset_name": self.name,
@@ -790,18 +829,11 @@ class QueryAsset(_SQLAsset):
         }
 
 
+@public_api
 class TableAsset(_SQLAsset):
-    """A _SQLAsset Mixin
-
-    This is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality
-    that can be used by different SQL datasource subclasses.
-
-    For example see TableAsset defined in this module and SqliteTableAsset defined in
-    sqlite_datasource.py
-    """
-
     # Instance fields
     type: Literal["table"] = "table"
+    # TODO: quoted_name or str
     table_name: str = pydantic.Field(
         "",
         description="Name of the SQL table. Will default to the value of `name` if not provided.",
@@ -825,6 +857,30 @@ class TableAsset(_SQLAsset):
 
         return validated_table_name
 
+    @pydantic.validator("table_name")
+    def _resolve_quoted_name(cls, table_name: str) -> str | quoted_name:
+        table_name_is_quoted: bool = cls._is_bracketed_by_quotes(table_name)
+
+        from great_expectations.compatibility import sqlalchemy
+
+        if sqlalchemy.quoted_name:
+            if isinstance(table_name, sqlalchemy.quoted_name):
+                return table_name
+
+            if table_name_is_quoted:
+                # https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.quoted_name.quote
+                # Remove the quotes and add them back using the sqlalchemy.quoted_name function
+                # TODO: We need to handle nested quotes
+                table_name = table_name.strip("'").strip('"')
+
+            return sqlalchemy.quoted_name(
+                value=table_name,
+                quote=table_name_is_quoted,
+            )
+
+        return table_name
+
+    @override
     def test_connection(self) -> None:
         """Test the connection for the TableAsset.
 
@@ -841,16 +897,16 @@ class TableAsset(_SQLAsset):
                 f'"{self.schema_name}" does not exist.'
             )
 
-        table_exists = sa.inspect(engine).has_table(
+        if not inspector.has_table(
             table_name=self.table_name,
             schema=self.schema_name,
-        )
-        if not table_exists:
+        ):
             raise TestConnectionError(
-                f'Attempt to connect to table: "{self.qualified_name}" failed because the table '
-                f'"{self.table_name}" does not exist.'
+                f"Attempt to connect to table: {self.qualified_name} failed because the table"
+                f" {self.table_name} does not exist."
             )
 
+    @override
     def test_splitter_connection(self) -> None:
         if self.splitter:
             datasource: SQLDatasource = self.datasource
@@ -867,6 +923,7 @@ class TableAsset(_SQLAsset):
                         f'The column "{splitter_column_name}" was not found in table "{self.qualified_name}"'
                     )
 
+    @override
     def as_selectable(self) -> sqlalchemy.Selectable:
         """Returns the table as a sqlalchemy Selectable.
 
@@ -874,6 +931,7 @@ class TableAsset(_SQLAsset):
         """
         return sa.text(self.qualified_name)
 
+    @override
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
         return {
             "type": "table",
@@ -882,6 +940,27 @@ class TableAsset(_SQLAsset):
             "schema_name": self.schema_name,
             "batch_identifiers": {},
         }
+
+    @staticmethod
+    def _is_bracketed_by_quotes(target: str) -> bool:
+        """Returns True if the target string is bracketed by quotes.
+
+        Arguments:
+            target: A string to check if it is bracketed by quotes.
+
+        Returns:
+            True if the target string is bracketed by quotes.
+        """
+        for quote in ["'", '"']:
+            if target.startswith(quote) and target.endswith(quote):
+                return True
+        return False
+
+
+# This improves our error messages by providing a more specific type for pydantic to validate against
+# It also ensure the generated jsonschema has a oneOf instead of anyOf field for assets
+# https://docs.pydantic.dev/1.10/usage/types/#discriminated-unions-aka-tagged-unions
+AssetTypes = Annotated[Union[TableAsset, QueryAsset], Field(discriminator="type")]
 
 
 @public_api
@@ -914,7 +993,7 @@ class SQLDatasource(Datasource):
     )
     # We need to explicitly add each asset type to the Union due to how
     # deserialization is implemented in our pydantic base model.
-    assets: List[Union[TableAsset, QueryAsset]] = []
+    assets: List[AssetTypes] = []
 
     # private attrs
     _cached_connection_string: Union[str, ConfigStr] = pydantic.PrivateAttr("")
@@ -926,6 +1005,7 @@ class SQLDatasource(Datasource):
     _QueryAsset: Type[QueryAsset] = pydantic.PrivateAttr(QueryAsset)
 
     @property
+    @override
     def execution_engine_type(self) -> Type[SqlAlchemyExecutionEngine]:
         """Returns the default execution engine type."""
         return SqlAlchemyExecutionEngine
@@ -954,6 +1034,28 @@ class SQLDatasource(Datasource):
         kwargs = model_dict.pop("kwargs", {})
         return sa.create_engine(connection_string, **kwargs)
 
+    @override
+    def get_execution_engine(self) -> SqlAlchemyExecutionEngine:
+        # Overrides get_execution_engine in Datasource
+        # because we need to pass the kwargs as keyvalue args to the execution engine
+        # when then passes them to the engine.
+        current_execution_engine_kwargs = self.dict(
+            exclude=self._get_exec_engine_excludes(),
+            config_provider=self._config_provider,
+        )
+        if (
+            current_execution_engine_kwargs != self._cached_execution_engine_kwargs
+            or not self._execution_engine
+        ):
+            self._cached_execution_engine_kwargs = current_execution_engine_kwargs
+            engine_kwargs = current_execution_engine_kwargs.pop("kwargs", {})
+            self._execution_engine = self._execution_engine_type()(
+                **current_execution_engine_kwargs,
+                **engine_kwargs,
+            )
+        return self._execution_engine
+
+    @override
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the SQLDatasource.
 

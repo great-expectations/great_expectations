@@ -122,7 +122,7 @@ def test_regex_pattern_string_parameter_builder_instantiation_override_defaults(
 
 
 @pytest.mark.slow  # 1.34s
-@pytest.mark.integration
+@pytest.mark.big
 def test_regex_pattern_string_parameter_builder_alice(
     alice_columnar_table_single_batch_context,
 ):
@@ -193,7 +193,7 @@ def test_regex_pattern_string_parameter_builder_alice(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -275,7 +275,7 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
     assert results["details"] == expected_parameter_node_as_dict["details"]
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_regex_pattern_string_parameter_builder_bobby_no_match(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -374,7 +374,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
-@pytest.mark.integration
+@pytest.mark.big
 def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Batch):
     batch: Batch = batch_fixture
     mock_data_context.get_batch_list.return_value = [batch]
@@ -422,7 +422,7 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
-@pytest.mark.integration
+@pytest.mark.big
 def test_regex_single_candidate(
     mock_data_context: mock.MagicMock,
     batch_fixture: Batch,
@@ -496,7 +496,7 @@ def test_regex_single_candidate(
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
-@pytest.mark.integration
+@pytest.mark.big
 def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: Batch):
     batch: Batch = batch_fixture
 

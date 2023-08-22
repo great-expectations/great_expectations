@@ -13,7 +13,7 @@ from great_expectations.expectations.expectation import (
 
 
 class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
-    """Expect the values of a pair of columns to be either both filled or empty simultaneously
+    """Expect the values of a pair of columns to be either both filled or empty simultaneously.
 
      It checks if 2 columns are aligned - the values of each row need to either be both empty or filled.
      The expectation will fail if there's at least one row where one column is filled and the other isn't.

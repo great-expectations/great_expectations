@@ -27,7 +27,7 @@ class ExpectColumnToExist(BatchExpectation):
     """Expect the specified column to exist.
 
     expect_column_to_exist is a \
-    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
+    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     Args:
         column (str): \

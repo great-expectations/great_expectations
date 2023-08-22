@@ -5,7 +5,7 @@ title: Result format
 
 The `result_format` parameter may be either a string or a dictionary which specifies the fields to return in `result`.
   * The following string values are supported:
-    * `"BOOLEAN_ONLY"`, `"BASIC"`, `"SUMMARY"`, or `"COMPLETE"`. The default is `"BASIC"`. The behavior of each setting is described in the [examples](#examples) below.
+    * `"BOOLEAN_ONLY"`, `"BASIC"`, `"SUMMARY"`, or `"COMPLETE"`. The default is `"SUMMARY"`. The behavior of each setting is described in the [examples](#examples) below.
   * For dictionary usage, `result_format` may include the following keys:
     * `result_format`: Sets the fields to return in result.
     * `unexpected_index_column_names`: Defines columns that can be used to identify unexpected results, for example primary key (PK) column(s) or other columns with unique identifiers. Supports multiple column names as a list.

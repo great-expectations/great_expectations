@@ -15,9 +15,9 @@ let DocSearchModal = null
 const aa = require('search-insights')
 
 aa('init', {
-  appId: 'B4HD9FJQCB',
-  apiKey: '4f0951c44b2d9b26c88bcac0b14ebdfd',
-  useCookie: true,  
+  appId: 'PFK639M3JK',
+  apiKey: 'fc3e3b1588b46d8d476aca9c1cadd53f',
+  useCookie: true,
 })
 function Hit ({ hit, children }) {
   return <Link to={hit.url}>{children}</Link>

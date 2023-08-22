@@ -71,7 +71,6 @@ validator.expect_column_values_to_be_between(
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py checkpoint config">
 my_checkpoint_name = "my_databricks_checkpoint"
 
 checkpoint = Checkpoint(
@@ -88,7 +87,6 @@ checkpoint = Checkpoint(
         {"name": "update_data_docs", "action": {"class_name": "UpdateDataDocsAction"}},
     ],
 )
-# </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add checkpoint config">
 context.add_or_update_checkpoint(checkpoint=checkpoint)

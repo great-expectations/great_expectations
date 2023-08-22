@@ -26,6 +26,7 @@ from great_expectations.compatibility import aws, azure, google
 from great_expectations.compatibility.sqlalchemy_and_pandas import (
     execute_pandas_reader_fn,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
@@ -185,10 +186,12 @@ class PandasExecutionEngine(ExecutionEngine):
         except (TypeError, AttributeError, google.DefaultCredentialsError):
             self._gcs = None
 
+    @override
     def configure_validator(self, validator) -> None:
         super().configure_validator(validator)
         validator.expose_dataframe_methods = True
 
+    @override
     def load_batch_data(
         self, batch_id: str, batch_data: Union[PandasBatchData, pd.DataFrame]
     ) -> None:
@@ -201,6 +204,7 @@ class PandasExecutionEngine(ExecutionEngine):
 
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
+    @override
     def get_batch_data_and_markers(  # noqa: C901, PLR0912, PLR0915
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
@@ -483,6 +487,7 @@ not {batch_spec.__class__.__name__}"""
                 f'Unable to find reader_method "{reader_method}" in pandas.'
             )
 
+    @override
     def resolve_metric_bundle(
         self, metric_fn_bundle
     ) -> Dict[Tuple[str, str, str], Any]:
@@ -492,6 +497,7 @@ not {batch_spec.__class__.__name__}"""
         )  # This is NO-OP for "PandasExecutionEngine" (no bundling for direct execution computational backend).
 
     @public_api
+    @override
     def get_domain_records(  # noqa: C901, PLR0912
         self,
         domain_kwargs: dict,
@@ -521,8 +527,8 @@ not {batch_spec.__class__.__name__}"""
                 raise gx_exceptions.ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
-        else:
-            if batch_id in self.batch_manager.batch_data_cache:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if batch_id in self.batch_manager.batch_data_cache:
                 data = cast(
                     PandasBatchData, self.batch_manager.batch_data_cache[batch_id]
                 ).dataframe
@@ -572,8 +578,8 @@ not {batch_spec.__class__.__name__}"""
                     how="any",
                     subset=[column_A_name, column_B_name],
                 )
-            else:
-                if ignore_row_if != "neither":  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -596,8 +602,8 @@ not {batch_spec.__class__.__name__}"""
                     how="any",
                     subset=column_list,
                 )
-            else:
-                if ignore_row_if != "never":  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if ignore_row_if != "never":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -607,6 +613,7 @@ not {batch_spec.__class__.__name__}"""
         return data
 
     @public_api
+    @override
     def get_compute_domain(
         self,
         domain_kwargs: dict,

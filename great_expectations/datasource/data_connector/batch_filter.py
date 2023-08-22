@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Sequence, Unio
 from pydantic import StrictInt, StrictStr
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.id_dict import IDDict
 
 if TYPE_CHECKING:
@@ -288,6 +289,7 @@ class BatchFilter:
     def limit(self) -> int:
         return self._limit  # type: ignore[return-value]
 
+    @override
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
             "custom_filter_function": self._custom_filter_function,
@@ -321,8 +323,8 @@ class BatchFilter:
 
         if self.index is None:
             selected_batch_definitions = selected_batch_definitions[: self.limit]
-        else:
-            if isinstance(self.index, int):  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if isinstance(self.index, int):
                 selected_batch_definitions = [selected_batch_definitions[self.index]]
             else:
                 selected_batch_definitions = list(

@@ -7,10 +7,11 @@ from functools import partial
 from typing import TYPE_CHECKING, Dict, Optional
 
 import pydantic
-from pydantic import AmqpDsn
+from pydantic import AmqpDsn, AnyUrl
 
 from great_expectations import get_context
 from great_expectations.agent.actions.agent_action import ActionResult
+from great_expectations.agent.config import GxAgentEnvVars
 from great_expectations.agent.event_handler import (
     EventHandler,
 )
@@ -32,6 +33,7 @@ from great_expectations.agent.models import (
     UnknownEvent,
 )
 from great_expectations.core.http import create_session
+from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
 
 if TYPE_CHECKING:
     from great_expectations.data_context import CloudDataContext
@@ -48,7 +50,8 @@ class GXAgentConfig(AgentBaseModel):
 
     queue: str
     connection_string: AmqpDsn
-    gx_cloud_base_url: str = "https://api.greatexpectations.io"
+    # pydantic will coerce this string to AnyUrl type
+    gx_cloud_base_url: AnyUrl = CLOUD_DEFAULT_BASE_URL  # type: ignore[assignment]
     gx_cloud_organization_id: str
     gx_cloud_access_token: str
 
@@ -218,13 +221,8 @@ class GXAgent:
 
         # ensure we have all required env variables, and provide a useful error if not
 
-        class GxAgentConfigSettings(pydantic.BaseSettings):
-            gx_cloud_base_url: str = "https://api.greatexpectations.io"
-            gx_cloud_organization_id: str
-            gx_cloud_access_token: str
-
         try:
-            config = GxAgentConfigSettings()
+            env_vars = GxAgentEnvVars()
         except pydantic.ValidationError as validation_err:
             raise GXAgentError(
                 f"Missing or badly formed environment variable\n{validation_err.errors()}"
@@ -232,9 +230,9 @@ class GXAgent:
 
         # obtain the broker url and queue name from Cloud
 
-        agent_sessions_url = f"{config.gx_cloud_base_url}/organizations/{config.gx_cloud_organization_id}/agent-sessions"
+        agent_sessions_url = f"{env_vars.gx_cloud_base_url}/organizations/{env_vars.gx_cloud_organization_id}/agent-sessions"
 
-        session = create_session(access_token=config.gx_cloud_access_token)
+        session = create_session(access_token=env_vars.gx_cloud_access_token)
 
         response = session.post(agent_sessions_url)
         if response.ok is not True:
@@ -249,9 +247,9 @@ class GXAgent:
             return GXAgentConfig(
                 queue=queue,
                 connection_string=connection_string,
-                gx_cloud_base_url=config.gx_cloud_base_url,
-                gx_cloud_organization_id=config.gx_cloud_organization_id,
-                gx_cloud_access_token=config.gx_cloud_access_token,
+                gx_cloud_base_url=env_vars.gx_cloud_base_url,
+                gx_cloud_organization_id=env_vars.gx_cloud_organization_id,
+                gx_cloud_access_token=env_vars.gx_cloud_access_token,
             )
         except pydantic.ValidationError as validation_err:
             raise GXAgentError(

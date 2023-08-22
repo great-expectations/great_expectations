@@ -82,7 +82,6 @@ class SampleConfigurationStore(ConfigurationStore):
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_v3_configuration_store(tmp_path_factory):
     root_directory_path: str = "test_v3_configuration_store"
     root_directory: str = str(tmp_path_factory.mktemp(root_directory_path))

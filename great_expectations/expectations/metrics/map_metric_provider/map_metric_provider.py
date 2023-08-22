@@ -3,15 +3,10 @@ from __future__ import annotations
 import inspect
 import logging
 import warnings
-from typing import (
-    TYPE_CHECKING,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-)
+from typing import TYPE_CHECKING
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -91,20 +86,20 @@ class MapMetricProvider(MetricProvider):
     `column_values.null` (which is implemented as a `ColumnMapMetricProvider`, a subclass of `MapMetricProvider`).
     """
 
-    condition_domain_keys: Tuple[str, ...] = (
+    condition_domain_keys: tuple[str, ...] = (
         "batch_id",
         "table",
         "row_condition",
         "condition_parser",
     )
-    function_domain_keys: Tuple[str, ...] = (
+    function_domain_keys: tuple[str, ...] = (
         "batch_id",
         "table",
         "row_condition",
         "condition_parser",
     )
-    condition_value_keys = tuple()
-    function_value_keys = tuple()
+    condition_value_keys: tuple[str, ...] = tuple()
+    function_value_keys: tuple[str, ...] = tuple()
     filter_column_isnull = True
 
     @classmethod
@@ -120,7 +115,7 @@ class MapMetricProvider(MetricProvider):
                 # This is not a metric.
                 continue
 
-            metric_fn_type = getattr(candidate_metric_fn, "metric_fn_type")
+            metric_fn_type = getattr(candidate_metric_fn, "metric_fn_type", None)
             if not metric_fn_type:
                 # This is not a metric (valid metrics possess exectly one metric function).
                 return
@@ -561,14 +556,15 @@ class MapMetricProvider(MetricProvider):
                 )
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
-        configuration: Optional[ExpectationConfiguration] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: Optional[dict] = None,
+        configuration: ExpectationConfiguration | None = None,
+        execution_engine: ExecutionEngine | None = None,
+        runtime_configuration: dict | None = None,
     ):
-        dependencies: Dict[str, MetricConfiguration] = {}
+        dependencies: dict[str, MetricConfiguration] = {}
 
         base_metric_value_kwargs = {
             k: v for k, v in metric.metric_value_kwargs.items() if k != "result_format"
@@ -608,7 +604,7 @@ class MapMetricProvider(MetricProvider):
                 )
 
         # MapMetric uses "condition" metric to build "unexpected_count.aggregate_fn" and other listed metrics as well.
-        unexpected_condition_dependent_metric_name_suffixes: List[str] = list(
+        unexpected_condition_dependent_metric_name_suffixes: list[str] = list(
             filter(
                 lambda element: metric_name.endswith(element),
                 [

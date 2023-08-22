@@ -1,7 +1,7 @@
-You can verify that the AWS CLI has been installed by running the command:
+Run the following code to verify that the AWS CLI is installed:
 
 ```bash title="Terminal command"
 aws --version
 ```
 
-If this command does not respond by informing you of the version information of the AWS CLI, you may need to install the AWS CLI or otherwise troubleshoot your current installation.  For detailed guidance on how to do this, please refer to [Amazon's documentation on how to install the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html))
+If this code does not return the AWS CLI version information, you may need to install the AWS CLI or troubleshoot your current installation. See [Install or update the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)

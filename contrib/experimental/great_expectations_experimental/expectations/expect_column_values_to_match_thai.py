@@ -12,7 +12,7 @@ from great_expectations.expectations.regex_based_column_map_expectation import (
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToMatchThai(RegexBasedColumnMapExpectation):
-    """Expect a value of column to contain Thai Language
+    """Expect column values to contain Thai Language.
 
     Args:
         column (str): \

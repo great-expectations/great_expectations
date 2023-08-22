@@ -102,7 +102,7 @@ class ExpectTableBinaryLabelModelBias(BatchExpectation):
     go to https://dssg.github.io/aequitas/examples/compas_demo.html
 
     expect_table_binary_label_model_bias is a \
-    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
+    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     Args:
         y_true (str): \

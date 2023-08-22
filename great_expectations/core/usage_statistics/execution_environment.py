@@ -12,22 +12,14 @@ access to features of new package versions.
 from __future__ import annotations
 
 import enum
-import sys
 from dataclasses import dataclass
+from importlib import metadata
 from typing import Iterable, List, Optional, cast
 
 from marshmallow import Schema, fields
 from packaging import version
 
 from great_expectations.core.usage_statistics.package_dependencies import GXDependencies
-
-if sys.version_info < (3, 8):
-    # Note: importlib_metadata is included in the python standard library as importlib
-    # starting with v3.8. At the time we remove support for python v3.7
-    # this conditional can be removed.
-    import importlib_metadata as metadata
-else:
-    from importlib import metadata
 
 
 class InstallEnvironment(enum.Enum):

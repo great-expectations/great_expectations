@@ -715,7 +715,21 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         reason="Run is not included in the public API.",
         name="run",
         filepath=pathlib.Path(
-            "great_expectations/agent/actions/run_onboarding_data_assistant.py"
+            "great_expectations/agent/actions/data_assistants/run_onboarding_data_assistant.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="Run is not included in the public API.",
+        name="run",
+        filepath=pathlib.Path(
+            "great_expectations/agent/actions/data_assistants/run_missingness_data_assistant.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="Run is not included in the public API.",
+        name="build_batch_request",
+        filepath=pathlib.Path(
+            "great_expectations/agent/actions/data_assistants/utils.py"
         ),
     ),
     IncludeExcludeDefinition(
@@ -733,6 +747,51 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         name="columns",
         filepath=pathlib.Path(
             "great_expectations/datasource/fluent/spark_generic_splitters.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="The run method shares a name with a public API method",
+        name="run",
+        filepath=pathlib.Path(
+            "great_expectations/agent/actions/run_column_descriptive_metrics_action.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="The run method shares a name with a public API method",
+        name="run",
+        filepath=pathlib.Path("great_expectations/agent/actions/list_table_names.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason="The agent is not part of the public API",
+        name="run",
+        filepath=pathlib.Path("great_expectations/agent/actions/run_checkpoint.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason="The add method shares a name with a public API method",
+        name="add",
+        filepath=pathlib.Path(
+            "great_expectations/experimental/metric_repository/metric_repository.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="The add method shares a name with a public API method",
+        name="add",
+        filepath=pathlib.Path(
+            "great_expectations/experimental/metric_repository/data_store.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="The add method shares a name with a public API method",
+        name="add",
+        filepath=pathlib.Path(
+            "great_expectations/experimental/metric_repository/cloud_data_store.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="Run is not included in the public API.",
+        name="run",
+        filepath=pathlib.Path(
+            "great_expectations/agent/actions/draft_datasource_config_action.py"
         ),
     ),
 ]

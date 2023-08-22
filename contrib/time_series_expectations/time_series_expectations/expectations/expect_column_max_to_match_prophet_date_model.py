@@ -5,7 +5,7 @@ from time_series_expectations.expectations.column_aggregate_time_series_expectat
 
 
 class ExpectColumnMaxToMatchProphetDateModel(ColumnAggregateTimeSeriesExpectation):
-    """This Expectation checks to see if the max of a column matches the predictions of a prophet model for a given date.
+    """Expect the column maximum to match the predictions of a prophet model for a given date.
 
     expect_column_max_to_match_prophet_date_model is a ColumnAggregateTimeSeriesExpectation.
 

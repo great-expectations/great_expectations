@@ -24,7 +24,8 @@ def generate_data_sample(n_appearances: dict):
 
 
 class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
-    """
+    """Expect the daily sums of the given column to be close to the average sums calculated 4 weeks back.
+
     This metric expects daily sums of the given column, to be close to the average sums calculated 4 weeks back,
     respective to the specific day of the week.
     The expectation fails if the difference in percentage ((current_sum - average_sum) / average_sum) is more than the
