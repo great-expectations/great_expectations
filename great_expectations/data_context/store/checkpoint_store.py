@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 from marshmallow import ValidationError
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.data_context_key import DataContextKey  # noqa: TCH001
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
@@ -38,6 +39,7 @@ class CheckpointStore(ConfigurationStore):
 
     _configuration_class = CheckpointConfig
 
+    @override
     def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
@@ -57,6 +59,7 @@ class CheckpointStore(ConfigurationStore):
 
         return checkpoint_config_dict
 
+    @override
     def serialization_self_check(self, pretty_print: bool) -> None:
         test_checkpoint_name: str = "test-name-" + "".join(
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]

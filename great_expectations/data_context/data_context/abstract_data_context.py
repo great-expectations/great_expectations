@@ -36,6 +36,7 @@ from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
@@ -508,6 +509,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._config_variables
 
     @property
+    @override
     def config(self) -> DataContextConfig:
         """
         Returns current DataContext's project_config
@@ -1372,15 +1374,17 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "Must provide a datasource_name to retrieve an existing Datasource"
             )
 
-        if datasource_name in self._cached_datasources:
-            self._cached_datasources[datasource_name]._data_context = self
-            return self._cached_datasources[datasource_name]
+        datasource: BaseDatasource | LegacyDatasource | FluentDatasource
+        if datasource_name in self.datasources:
+            datasource = self.datasources[datasource_name]
+            if not isinstance(datasource, BaseDatasource):
+                datasource._data_context = self
+            return self.datasources[datasource_name]
 
         datasource_config: DatasourceConfig | FluentDatasource = (
             self._datasource_store.retrieve_by_name(datasource_name=datasource_name)
         )
 
-        datasource: BaseDatasource | LegacyDatasource | FluentDatasource
         if isinstance(datasource_config, FluentDatasource):
             datasource = datasource_config
             datasource_config._data_context = self
@@ -1396,7 +1400,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 raw_config=raw_config, substituted_config=substituted_config
             )
 
-        self._cached_datasources[datasource_name] = datasource
+        self.datasources[datasource_name] = datasource
         return datasource
 
     def _serialize_substitute_and_sanitize_datasource_config(
@@ -1607,7 +1611,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         elif save_changes:
             datasource_config = datasourceConfigSchema.load(datasource.config)
             self._datasource_store.delete(datasource_config)
-        self._cached_datasources.pop(datasource_name, None)
+        self.datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
         if save_changes:
@@ -4710,7 +4714,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                     raw_config=raw_datasource_config,
                     substituted_config=substituted_datasource_config,
                 )
-                self._cached_datasources[datasource_name] = datasource
+                self.datasources[datasource_name] = datasource
             except gx_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
                 # this error will happen if our configuration contains datasources that GX can no longer connect to.
@@ -4837,8 +4841,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         # If attempting to override an existing value, ensure that the id persists
         name = config.name
-        if not config.id and name in self._cached_datasources:
-            existing_datasource = self._cached_datasources[name]
+        if not config.id and name in self.datasources:
+            existing_datasource = self.datasources[name]
             if isinstance(existing_datasource, BaseDatasource):
                 config.id = existing_datasource.id
 
@@ -4857,7 +4861,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 datasource = self._instantiate_datasource_from_config(
                     raw_config=config, substituted_config=substituted_config
                 )
-                self._cached_datasources[name] = datasource
+                name = datasource.name
+                self.datasources[name] = datasource
             except gx_exceptions.DatasourceInitializationError as e:
                 if save_changes:
                     self._datasource_store.delete(config)

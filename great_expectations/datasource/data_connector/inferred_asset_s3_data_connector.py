@@ -3,6 +3,7 @@ from typing import List, Optional
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import aws
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
@@ -89,6 +90,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
                 "Unable to load boto3 (it is required for InferredAssetS3DataConnector)."
             )
 
+    @override
     def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
@@ -104,6 +106,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         )
         return S3BatchSpec(batch_spec)
 
+    @override
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
     ) -> List[str]:
@@ -130,6 +133,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         ]
         return path_list
 
+    @override
     def _get_full_file_path(
         self,
         path: str,
