@@ -25,7 +25,7 @@ function Hit ({ hit, children }) {
 function ResultsFooter ({ state, onClose }) {
   const makeLink = useSearchLinkCreator(state.query)
   return (
-     <Link to={makeLink()} onClick={onClose}>
+     <Link to={makeLink(state.query)} onClick={onClose}>
        <Translate
          id='theme.SearchBar.seeAll'
          values={{ count: state.context.nbHits }}
