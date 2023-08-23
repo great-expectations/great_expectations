@@ -197,7 +197,6 @@ class PowerBITable(_PowerBIAsset):
 
     type: Literal["powerbi_table"] = "powerbi_table"
     table: str
-
     fully_qualified_columns: bool = False
     num_rows: Optional[int] = None
     multiindex_hierarchies: bool = False
@@ -273,13 +272,13 @@ class FabricPowerBIDatasource(Datasource):
                 asset._datasource = self
                 asset.test_connection()
 
-    # TODO: add remaining args
-    def add_powerbi_dax_asset(
+    def add_powerbi_dax_asset(  # noqa: PLR0913
         self,
         name: str,
         dax_string: str,
         order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
+        pandas_convert_dtypes: bool = True,
     ) -> PowerBIDax:
         """Adds a PowerBIDax asset to this datasource.
 
@@ -298,6 +297,7 @@ class FabricPowerBIDatasource(Datasource):
             order_by=order_by_sorters,
             batch_metadata=batch_metadata or {},
             dax_string=dax_string,
+            pandas_convert_dtypes=pandas_convert_dtypes,
         )
         return self._add_asset(asset)
 
@@ -338,13 +338,16 @@ class FabricPowerBIDatasource(Datasource):
         )
         return self._add_asset(asset)
 
-    # TODO: add remaining args
-    def add_powerbi_table_asset(
+    def add_powerbi_table_asset(  # noqa: PLR0913
         self,
         name: str,
         table: str,
         order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
+        fully_qualified_columns: bool = False,
+        num_rows: Optional[int] = None,
+        multiindex_hierarchies: bool = False,
+        pandas_convert_dtypes: bool = True,
     ) -> PowerBITable:
         """Adds a PowerBITable asset to this datasource.
 
@@ -364,5 +367,9 @@ class FabricPowerBIDatasource(Datasource):
             order_by=order_by_sorters,
             batch_metadata=batch_metadata or {},
             table=table,
+            fully_qualified_columns=fully_qualified_columns,
+            num_rows=num_rows,
+            multiindex_hierarchies=multiindex_hierarchies,
+            pandas_convert_dtypes=pandas_convert_dtypes,
         )
         return self._add_asset(asset)
