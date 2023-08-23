@@ -98,8 +98,7 @@ class DataAssetStore(Store):
             if not data_asset_model:
                 raise LookupError(f"Unknown DataAsset 'type': '{type_}'")
             return data_asset_model(**value)
-        else:
-            return self._schema.loads(value)
+       return data_asset_model.parse_raw(value)
 
     @override
     def ge_cloud_response_json_to_object_dict(
