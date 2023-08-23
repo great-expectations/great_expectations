@@ -32,19 +32,33 @@
             "title": "Batch Metadata",
             "type": "object"
         },
-        "schema": {
-            "title": "Schema",
+        "table": {
+            "title": "Table",
             "type": "string"
         },
-        "table_name": {
-            "title": "Table Name",
-            "type": "string"
+        "fully_qualified_columns": {
+            "title": "Fully Qualified Columns",
+            "default": false,
+            "type": "boolean"
+        },
+        "num_rows": {
+            "title": "Num Rows",
+            "type": "integer"
+        },
+        "multiindex_hierarchies": {
+            "title": "Multiindex Hierarchies",
+            "default": false,
+            "type": "boolean"
+        },
+        "pandas_convert_dtypes": {
+            "title": "Pandas Convert Dtypes",
+            "default": true,
+            "type": "boolean"
         }
     },
     "required": [
         "name",
-        "schema",
-        "table_name"
+        "table"
     ],
     "additionalProperties": false,
     "definitions": {

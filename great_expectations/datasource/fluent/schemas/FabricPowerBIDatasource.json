@@ -1,13 +1,13 @@
 {
     "title": "FabricPowerBIDatasource",
-    "description": "Microsoft Fabric Datasource.",
+    "description": "Microsoft Fabric Datasource.\n\nhttps://pypi.org/project/semantic-link/",
     "type": "object",
     "properties": {
         "type": {
             "title": "Type",
-            "default": "fabric",
+            "default": "fabric_powerbi",
             "enum": [
-                "fabric"
+                "fabric_powerbi"
             ],
             "type": "string"
         },
@@ -46,10 +46,35 @@
                     }
                 ]
             }
+        },
+        "workspace": {
+            "title": "Workspace",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "dataset": {
+            "title": "Dataset",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                {
+                    "type": "string"
+                }
+            ]
         }
     },
     "required": [
-        "name"
+        "name",
+        "dataset"
     ],
     "additionalProperties": false,
     "definitions": {
@@ -105,19 +130,33 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
-                "schema": {
-                    "title": "Schema",
+                "table": {
+                    "title": "Table",
                     "type": "string"
                 },
-                "table_name": {
-                    "title": "Table Name",
-                    "type": "string"
+                "fully_qualified_columns": {
+                    "title": "Fully Qualified Columns",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "num_rows": {
+                    "title": "Num Rows",
+                    "type": "integer"
+                },
+                "multiindex_hierarchies": {
+                    "title": "Multiindex Hierarchies",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "pandas_convert_dtypes": {
+                    "title": "Pandas Convert Dtypes",
+                    "default": true,
+                    "type": "boolean"
                 }
             },
             "required": [
                 "name",
-                "schema",
-                "table_name"
+                "table"
             ],
             "additionalProperties": false
         },
@@ -154,6 +193,51 @@
                 "batch_metadata": {
                     "title": "Batch Metadata",
                     "type": "object"
+                },
+                "groupby_columns": {
+                    "title": "Groupby Columns",
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "items": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    }
+                },
+                "filters": {
+                    "title": "Filters",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "fully_qualified_columns": {
+                    "title": "Fully Qualified Columns",
+                    "type": "boolean"
+                },
+                "num_rows": {
+                    "title": "Num Rows",
+                    "type": "integer"
+                },
+                "pandas_convert_dtypes": {
+                    "title": "Pandas Convert Dtypes",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "use_xmla": {
+                    "title": "Use Xmla",
+                    "default": false,
+                    "type": "boolean"
                 }
             },
             "required": [
@@ -195,24 +279,19 @@
                     "title": "Batch Metadata",
                     "type": "object"
                 },
-                "query": {
-                    "title": "Query",
+                "dax_string": {
+                    "title": "Dax String",
                     "type": "string"
                 },
-                "dataset": {
-                    "title": "Dataset",
-                    "type": "string"
-                },
-                "workspace": {
-                    "title": "Workspace",
-                    "type": "string"
+                "pandas_convert_dtypes": {
+                    "title": "Pandas Convert Dtypes",
+                    "default": true,
+                    "type": "boolean"
                 }
             },
             "required": [
                 "name",
-                "query",
-                "dataset",
-                "workspace"
+                "dax_string"
             ],
             "additionalProperties": false
         }

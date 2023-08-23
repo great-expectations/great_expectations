@@ -31,6 +31,51 @@
         "batch_metadata": {
             "title": "Batch Metadata",
             "type": "object"
+        },
+        "groupby_columns": {
+            "title": "Groupby Columns",
+            "type": "array",
+            "items": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "filters": {
+            "title": "Filters",
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "fully_qualified_columns": {
+            "title": "Fully Qualified Columns",
+            "type": "boolean"
+        },
+        "num_rows": {
+            "title": "Num Rows",
+            "type": "integer"
+        },
+        "pandas_convert_dtypes": {
+            "title": "Pandas Convert Dtypes",
+            "default": true,
+            "type": "boolean"
+        },
+        "use_xmla": {
+            "title": "Use Xmla",
+            "default": false,
+            "type": "boolean"
         }
     },
     "required": [
