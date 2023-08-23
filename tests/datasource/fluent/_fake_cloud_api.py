@@ -282,6 +282,40 @@ def delete_datasources_cb(
     return result
 
 
+def delete_data_assets_cb(
+    request: PreparedRequest,
+) -> CallbackResult:
+    url = request.url
+    LOGGER.debug(f"{request.method} {url}")
+
+    parsed_url = urllib.parse.urlparse(url)
+    data_asset_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
+
+    datasources: dict[str, dict] = _CLOUD_API_FAKE_DB["datasources"]
+    deleted_asset_idx = None
+    deleted_asset = None
+
+    for datasource in datasources.values():
+        for idx, asset in enumerate(datasource.get("assets", {})):
+            if asset.get("id") == data_asset_id:
+                deleted_asset_idx = idx
+                break
+        if deleted_asset_idx is not None:
+            deleted_asset = datasource["assets"].pop(deleted_asset_idx)
+            break
+
+    if deleted_asset:
+        asset_name = deleted_asset["name"]
+        LOGGER.debug(f"Deleted asset '{asset_name}'")
+        result = CallbackResult(204, headers={}, body="")
+    else:
+        errors = ErrorPayloadSchema(
+            errors=[{"code": "mock 404", "detail": None, "source": None}]
+        )
+        result = CallbackResult(404, headers=DEFAULT_HEADERS, body=errors.json())
+    return result
+
+
 def post_datasources_cb(
     request: PreparedRequest,
 ) -> CallbackResult:
@@ -665,6 +699,11 @@ def gx_cloud_api_fake_ctx(
             responses.PUT,
             re.compile(f"{org_url_base}/datasources/{UUID_REGEX}"),
             put_datasource_cb,
+        )
+        resp_mocker.add_callback(
+            responses.DELETE,
+            re.compile(f"{org_url_base}/data-assets/{UUID_REGEX}"),
+            delete_data_assets_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
