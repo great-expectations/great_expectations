@@ -1,0 +1,153 @@
+<test-run id="2" testcasecount="1" result="Passed" start-time="2023-08-23 00:41:34.897144" end-time="2023-08-23 00:42:02.414665" duration="27" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0" clr-version="3.8.16 (default, Dec  7 2022, 01:27:54) &#10;[Clang 14.0.0 (clang-1400.0.29.202)]" engine-version="3.6.2"><command-line>/Applications/PyCharm.app/Contents/plugins/python/helpers/pycharm/_jb_pytest_runner.py -v --docs-tests --spark -k failed_rows_spark /Users/work/Development/great_expectations/tests/integration/test_script_runner.py</command-line><filter><test re="0">/Users/work/Development/great_expectations/tests/integration/test_script_runner.py</test><name re="0">failed_rows_spark</name></filter><test-suite id="tests/integration/test_script_runner.py" name="tests/integration/test_script_runner.py" fullname="tests/integration/test_script_runner.py" methodname="" classname="" runstate="Runnable" type="Assembly" testcasecount="1" result="Passed" label="Run integration and docs tests.&#10;&#10;Individual tests can be run by setting the '-k' flag and referencing the name of test, like the following example:&#10;    pytest -v --docs-tests -k &quot;test_docs[quickstart]&quot; tests/integration/test_script_runner.py" start-time="2023-08-23 00:42:01.714669" end-time="2023-08-23 00:42:02.413537" duration="0.698868" asserts="0" total="1" passed="0" failed="1" warnings="0" inconclusive="0" skipped="0"><properties><property name="python_version" value="3.8.16 (default, Dec  7 2022, 01:27:54) &#10;[Clang 14.0.0 (clang-1400.0.29.202)]" /></properties><test-case id="102" name="tests/integration/test_script_runner.py::test_docs[failed_rows_spark]" fullname="tests/integration/test_script_runner.py::test_docs[failed_rows_spark]" methodname="test_docs[failed_rows_spark]" classname="tests/integration/test_script_runner.py" runstate="Runnable" seed="1" result="Failed" label="" start-time="2023-08-23 00:42:01.714669" end-time="2023-08-23 00:42:02.413537" duration="0.698868" asserts="0"><properties><property name="python-version" value="3.8.16 (default, Dec  7 2022, 01:27:54) &#10;[Clang 14.0.0 (clang-1400.0.29.202)]" /><property name="fspath" value="tests/integration/test_script_runner.py" /></properties><environment framework-version="3.6.2" clr-version="3.8.16 (default, Dec  7 2022, 01:27:54) &#10;[Clang 14.0.0 (clang-1400.0.29.202)]" os-version="22.5.0" platform="Darwin" cwd="/Users/work/Development/great_expectations/tests/integration" machine-name="arm64" user="" user-domain="" culture="en_US" uiculture="en_US" os-architecture="64bit" /><failure><message><![CDATA[integration_test_fixture = IntegrationTestFixture(name='failed_rows_spark', user_flow_script='tests/integration/docusaurus/expectations/advanced/...ration/fixtures/failed_rows/great_expectations', data_dir='tests/test_sets/visits', other_files=None, util_script=None)
+tmp_path = PosixPath('/private/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/pytest-of-work/pytest-47/test_docs_failed_rows_spark_2')
+pytest_parsed_arguments = Namespace(assertmode='rewrite', athena=False, aws=False, aws_integration=False, azure=False, azure_run_title='Pytest r...False, tx=[], usepdb=False, usepdb_cls=None, verbose=2, verify_marker_coverage_and_exit=False, version=0, xmlpath=None)
+
+    @flaky(rerun_filter=delay_rerun, max_runs=3, min_passes=1)
+    @pytest.mark.parametrize("integration_test_fixture", docs_test_matrix, ids=idfn)
+    @pytest.mark.skipif(sys.version_info &lt; (3, 7), reason="requires Python3.7")
+    def test_docs(integration_test_fixture, tmp_path, pytest_parsed_arguments):
+        _check_for_skipped_tests(pytest_parsed_arguments, integration_test_fixture)
+&gt;       _execute_integration_test(integration_test_fixture, tmp_path)
+
+test_script_runner.py:553:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+test_script_runner.py:647: in _execute_integration_test
+    loader.exec_module(test_script_module)
+&lt;frozen importlib._bootstrap_external&gt;:843: in exec_module
+    ???
+&lt;frozen importlib._bootstrap&gt;:219: in _call_with_frames_removed
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    import great_expectations as gx
+
+    context = gx.get_context(context_root_dir="./great_expectations", cloud_mode=False)
+    data_asset = context.sources.add_spark_filesystem(
+        name="visits_datasource",
+        base_directory="./data"
+    ).add_csv_asset(
+        name="visits",
+        glob_directive="*.csv",
+        header=True,
+        sep="\t",
+        infer_schema=True,
+    )
+
+    # get checkpoint
+    my_checkpoint = context.get_checkpoint("my_checkpoint")
+
+
+    # Example 1
+    results = my_checkpoint.run()
+    evrs = results.list_validation_results()
+    print(evrs[0]["results"][0]["result"])
+&gt;   assert (evrs[0]["results"][0]["result"]) == {'element_count': 6, 'unexpected_count': 3, 'unexpected_percent': 50.0, 'partial_unexpected_list': ['user_signup', 'purchase', 'download'], 'missing_count': 0, 'missing_percent': 0.0, 'unexpected_percent_total': 50.0, 'unexpected_percent_nonmissing': 50.0, 'partial_unexpected_index_list': [3, 4, 5], 'partial_unexpected_counts': [{'value': 'download', 'count': 1}, {'value': 'purchase', 'count': 1}, {'value': 'user_signup', 'count': 1}]}
+E   AssertionError
+
+/private/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/pytest-of-work/pytest-47/test_docs_failed_rows_spark_2/test_script.py:23: AssertionError]]></message><stack-trace><![CDATA[/private/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/pytest-of-work/pytest-47/test_docs_failed_rows_spark_2/test_script.py:23: AssertionError]]></stack-trace></failure><reason><message><![CDATA[INFO     tests.conftest:conftest.py:495 Seeding _VersionChecker._LATEST_GX_VERSION_CACHE with 0.17.11+19.g81902a232.dirty
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4360 Usage statistics is disabled globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4391 usage_statistics_url is defined globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.file_data_context:file_data_context.py:220 FileDataContext loading fluent config
+INFO     great_expectations.datasource.fluent.config:config.py:184 Loading 'datasources' -&gt;
+[]
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4601 Usage statistics is disabled; skipping initialization.
+INFO     great_expectations.data_context.data_context.file_data_context:file_data_context.py:170 Saving 1 Fluent Datasources to /private/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/pytest-of-work/pytest-47/test_docs_failed_rows_spark_0/great_expectations/great_expectations.yml
+INFO     great_expectations.datasource.fluent.sources:sources.py:282 'visits_datasource' SparkFilesystemDatasource uses FilesystemDataConnector
+INFO     great_expectations.datasource.fluent.sources:sources.py:291 FilesystemDataConnector connect_options provided -&gt; ['glob_directive']
+INFO     great_expectations.data_context.data_context.file_data_context:file_data_context.py:170 Saving 1 Fluent Datasources to /private/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/pytest-of-work/pytest-47/test_docs_failed_rows_spark_0/great_expectations/great_expectations.yml
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 SparkFilesystemDatasource.dict() - substituting config values
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:252 batch_slice: None was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:252 batch_slice: slice(0, None, None) was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.validator.validator:validator.py:1474 	1 expectation(s) included in expectation_suite.
+ERROR    tests.integration.test_script_runner:test_script_runner.py:649
+INFO     tests.conftest:conftest.py:501 Clearing _VersionChecker._LATEST_GX_VERSION_CACHE
+INFO     tests.conftest:conftest.py:495 Seeding _VersionChecker._LATEST_GX_VERSION_CACHE with 0.17.11+19.g81902a232.dirty
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4360 Usage statistics is disabled globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4391 usage_statistics_url is defined globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.file_data_context:file_data_context.py:220 FileDataContext loading fluent config
+INFO     great_expectations.datasource.fluent.config:config.py:184 Loading 'datasources' -&gt;
+[]
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4601 Usage statistics is disabled; skipping initialization.
+INFO     great_expectations.data_context.data_context.file_data_context:file_data_context.py:170 Saving 1 Fluent Datasources to /private/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/pytest-of-work/pytest-47/test_docs_failed_rows_spark_1/great_expectations/great_expectations.yml
+INFO     great_expectations.datasource.fluent.sources:sources.py:282 'visits_datasource' SparkFilesystemDatasource uses FilesystemDataConnector
+INFO     great_expectations.datasource.fluent.sources:sources.py:291 FilesystemDataConnector connect_options provided -&gt; ['glob_directive']
+INFO     great_expectations.data_context.data_context.file_data_context:file_data_context.py:170 Saving 1 Fluent Datasources to /private/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/pytest-of-work/pytest-47/test_docs_failed_rows_spark_1/great_expectations/great_expectations.yml
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 SparkFilesystemDatasource.dict() - substituting config values
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:252 batch_slice: None was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:252 batch_slice: slice(0, None, None) was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.validator.validator:validator.py:1474 	1 expectation(s) included in expectation_suite.
+ERROR    tests.integration.test_script_runner:test_script_runner.py:649
+INFO     tests.conftest:conftest.py:501 Clearing _VersionChecker._LATEST_GX_VERSION_CACHE
+INFO     tests.conftest:conftest.py:495 Seeding _VersionChecker._LATEST_GX_VERSION_CACHE with 0.17.11+19.g81902a232.dirty
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4360 Usage statistics is disabled globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4391 usage_statistics_url is defined globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.file_data_context:file_data_context.py:220 FileDataContext loading fluent config
+INFO     great_expectations.datasource.fluent.config:config.py:184 Loading 'datasources' -&gt;
+[]
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4601 Usage statistics is disabled; skipping initialization.
+INFO     great_expectations.data_context.data_context.file_data_context:file_data_context.py:170 Saving 1 Fluent Datasources to /private/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/pytest-of-work/pytest-47/test_docs_failed_rows_spark_2/great_expectations/great_expectations.yml
+INFO     great_expectations.datasource.fluent.sources:sources.py:282 'visits_datasource' SparkFilesystemDatasource uses FilesystemDataConnector
+INFO     great_expectations.datasource.fluent.sources:sources.py:291 FilesystemDataConnector connect_options provided -&gt; ['glob_directive']
+INFO     great_expectations.data_context.data_context.file_data_context:file_data_context.py:170 Saving 1 Fluent Datasources to /private/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/pytest-of-work/pytest-47/test_docs_failed_rows_spark_2/great_expectations/great_expectations.yml
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 SparkFilesystemDatasource.dict() - substituting config values
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:252 batch_slice: None was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:252 batch_slice: slice(0, None, None) was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.validator.validator:validator.py:1474 	1 expectation(s) included in expectation_suite.
+ERROR    tests.integration.test_script_runner:test_script_runner.py:649
+INFO     tests.conftest:conftest.py:501 Clearing _VersionChecker._LATEST_GX_VERSION_CACHE]]></message></reason><output><![CDATA[INFO     tests.conftest:conftest.py:495 Seeding _VersionChecker._LATEST_GX_VERSION_CACHE with 0.17.11+19.g81902a232.dirty
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4360 Usage statistics is disabled globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4391 usage_statistics_url is defined globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.file_data_context:file_data_context.py:220 FileDataContext loading fluent config
+INFO     great_expectations.datasource.fluent.config:config.py:184 Loading 'datasources' -&gt;
+[]
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4601 Usage statistics is disabled; skipping initialization.
+INFO     great_expectations.data_context.data_context.file_data_context:file_data_context.py:170 Saving 1 Fluent Datasources to /private/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/pytest-of-work/pytest-47/test_docs_failed_rows_spark_0/great_expectations/great_expectations.yml
+INFO     great_expectations.datasource.fluent.sources:sources.py:282 'visits_datasource' SparkFilesystemDatasource uses FilesystemDataConnector
+INFO     great_expectations.datasource.fluent.sources:sources.py:291 FilesystemDataConnector connect_options provided -&gt; ['glob_directive']
+INFO     great_expectations.data_context.data_context.file_data_context:file_data_context.py:170 Saving 1 Fluent Datasources to /private/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/pytest-of-work/pytest-47/test_docs_failed_rows_spark_0/great_expectations/great_expectations.yml
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 SparkFilesystemDatasource.dict() - substituting config values
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:252 batch_slice: None was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:252 batch_slice: slice(0, None, None) was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.validator.validator:validator.py:1474 	1 expectation(s) included in expectation_suite.
+ERROR    tests.integration.test_script_runner:test_script_runner.py:649
+INFO     tests.conftest:conftest.py:501 Clearing _VersionChecker._LATEST_GX_VERSION_CACHE
+INFO     tests.conftest:conftest.py:495 Seeding _VersionChecker._LATEST_GX_VERSION_CACHE with 0.17.11+19.g81902a232.dirty
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4360 Usage statistics is disabled globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4391 usage_statistics_url is defined globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.file_data_context:file_data_context.py:220 FileDataContext loading fluent config
+INFO     great_expectations.datasource.fluent.config:config.py:184 Loading 'datasources' -&gt;
+[]
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4601 Usage statistics is disabled; skipping initialization.
+INFO     great_expectations.data_context.data_context.file_data_context:file_data_context.py:170 Saving 1 Fluent Datasources to /private/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/pytest-of-work/pytest-47/test_docs_failed_rows_spark_1/great_expectations/great_expectations.yml
+INFO     great_expectations.datasource.fluent.sources:sources.py:282 'visits_datasource' SparkFilesystemDatasource uses FilesystemDataConnector
+INFO     great_expectations.datasource.fluent.sources:sources.py:291 FilesystemDataConnector connect_options provided -&gt; ['glob_directive']
+INFO     great_expectations.data_context.data_context.file_data_context:file_data_context.py:170 Saving 1 Fluent Datasources to /private/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/pytest-of-work/pytest-47/test_docs_failed_rows_spark_1/great_expectations/great_expectations.yml
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 SparkFilesystemDatasource.dict() - substituting config values
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:252 batch_slice: None was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:252 batch_slice: slice(0, None, None) was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.validator.validator:validator.py:1474 	1 expectation(s) included in expectation_suite.
+ERROR    tests.integration.test_script_runner:test_script_runner.py:649
+INFO     tests.conftest:conftest.py:501 Clearing _VersionChecker._LATEST_GX_VERSION_CACHE
+INFO     tests.conftest:conftest.py:495 Seeding _VersionChecker._LATEST_GX_VERSION_CACHE with 0.17.11+19.g81902a232.dirty
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4360 Usage statistics is disabled globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4391 usage_statistics_url is defined globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.file_data_context:file_data_context.py:220 FileDataContext loading fluent config
+INFO     great_expectations.datasource.fluent.config:config.py:184 Loading 'datasources' -&gt;
+[]
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4601 Usage statistics is disabled; skipping initialization.
+INFO     great_expectations.data_context.data_context.file_data_context:file_data_context.py:170 Saving 1 Fluent Datasources to /private/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/pytest-of-work/pytest-47/test_docs_failed_rows_spark_2/great_expectations/great_expectations.yml
+INFO     great_expectations.datasource.fluent.sources:sources.py:282 'visits_datasource' SparkFilesystemDatasource uses FilesystemDataConnector
+INFO     great_expectations.datasource.fluent.sources:sources.py:291 FilesystemDataConnector connect_options provided -&gt; ['glob_directive']
+INFO     great_expectations.data_context.data_context.file_data_context:file_data_context.py:170 Saving 1 Fluent Datasources to /private/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/pytest-of-work/pytest-47/test_docs_failed_rows_spark_2/great_expectations/great_expectations.yml
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 SparkFilesystemDatasource.dict() - substituting config values
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:252 batch_slice: None was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:252 batch_slice: slice(0, None, None) was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.validator.validator:validator.py:1474 	1 expectation(s) included in expectation_suite.
+ERROR    tests.integration.test_script_runner:test_script_runner.py:649
+INFO     tests.conftest:conftest.py:501 Clearing _VersionChecker._LATEST_GX_VERSION_CACHE]]></output></test-case><environment framework-version="3.6.2" clr-version="3.8.16 (default, Dec  7 2022, 01:27:54) &#10;[Clang 14.0.0 (clang-1400.0.29.202)]" os-version="22.5.0" platform="Darwin" cwd="/Users/work/Development/great_expectations/tests/integration" machine-name="arm64" user="" user-domain="" culture="en_US" uiculture="en_US" os-architecture="64bit" /></test-suite></test-run>
