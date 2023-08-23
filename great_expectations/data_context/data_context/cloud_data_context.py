@@ -41,6 +41,13 @@ from great_expectations.data_context.data_context.serializable_data_context impo
 from great_expectations.data_context.data_context_variables import (
     CloudDataContextVariables,
 )
+from great_expectations.data_context.store import DataAssetStore
+from great_expectations.data_context.store.datasource_store import (
+    DatasourceStore,
+)
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
+)
 from great_expectations.data_context.types.base import (
     DEFAULT_USAGE_STATISTICS_URL,
     CheckpointConfig,
@@ -62,8 +69,6 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-    from great_expectations.data_context.store import DataAssetStore
-    from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.types.base import (
         AnonymizedUsageStatisticsConfig,
     )
@@ -419,13 +424,6 @@ class CloudDataContext(SerializableDataContext):
 
     @override
     def _init_datasource_store(self) -> DatasourceStore:
-        from great_expectations.data_context.store.datasource_store import (
-            DatasourceStore,
-        )
-        from great_expectations.data_context.store.gx_cloud_store_backend import (
-            GXCloudStoreBackend,
-        )
-
         # Never explicitly referenced but adheres
         # to the convention set by other internal Stores
         store_name = DataContextConfigDefaults.DEFAULT_DATASOURCE_STORE_NAME.value
@@ -446,11 +444,6 @@ class CloudDataContext(SerializableDataContext):
         return datasource_store
 
     def _init_data_asset_store(self) -> DataAssetStore:
-        from great_expectations.data_context.store import DataAssetStore
-        from great_expectations.data_context.store.gx_cloud_store_backend import (
-            GXCloudStoreBackend,
-        )
-
         # Never explicitly referenced but adheres
         # to the convention set by other internal Stores
         store_name = DataContextConfigDefaults.DEFAULT_DATA_ASSET_STORE_NAME.value
