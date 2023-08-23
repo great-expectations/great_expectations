@@ -19,6 +19,7 @@ from typing_extensions import Annotated, TypeAlias
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import FabricBatchSpec
 from great_expectations.datasource.fluent import BatchRequest
+from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
@@ -86,8 +87,7 @@ class _PowerBIAsset(DataAsset):
 
         batch_definition = BatchDefinition(
             datasource_name=self.datasource.name,
-            # TODO: what to do about data_connector_name?
-            data_connector_name="FABRIC_DATA_CONNECTOR_DOES_NOT_EXIST",
+            data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self.name,
             batch_identifiers=IDDict(batch_request.options),
             batch_spec_passthrough=None,
