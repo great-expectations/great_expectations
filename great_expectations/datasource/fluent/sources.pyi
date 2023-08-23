@@ -1,4 +1,5 @@
 import pathlib
+import uuid
 from logging import Logger
 from typing import (
     Any,
@@ -715,11 +716,13 @@ class _SourceFactories:
         self,
         name: str,
     ) -> None: ...
-    def add_fabric(
+    def add_fabric_powerbi(
         self,
         name: Optional[str] = None,
         datasource: Optional[FabricPowerBIDatasource] = None,
-        # TODO: add fabric-specific parameters (must be keyword only)
+        *,
+        workspace: Optional[Union[uuid.UUID, str]] = None,
+        dataset: Union[uuid.UUID, str] = ...,
     ) -> FabricPowerBIDatasource: ...
 
 def _iter_all_registered_types(
