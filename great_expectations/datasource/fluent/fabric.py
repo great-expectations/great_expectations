@@ -238,6 +238,7 @@ class FabricPowerBIDatasource(Datasource):
                 asset._datasource = self
                 asset.test_connection()
 
+    # TODO: add remaining args
     def add_powerbi_dax_asset(
         self,
         name: str,
@@ -265,6 +266,7 @@ class FabricPowerBIDatasource(Datasource):
         )
         return self._add_asset(asset)
 
+    # TODO: add remaining args
     def add_powerbi_measure_asset(
         self,
         name: str,
@@ -289,6 +291,7 @@ class FabricPowerBIDatasource(Datasource):
         )
         return self._add_asset(asset)
 
+    # TODO: add remaining args
     def add_powerbi_table_asset(
         self,
         name: str,
