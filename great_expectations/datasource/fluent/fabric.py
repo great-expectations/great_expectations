@@ -110,7 +110,7 @@ class _PowerBIAsset(DataAsset):
                 data=data,
                 metadata=batch_metadata,
                 legacy_batch_markers=markers,
-                legacy_batch_spec=batch_spec,
+                legacy_batch_spec=batch_spec,  # type: ignore[arg-type] # will be coerced to BatchSpec
                 legacy_batch_definition=batch_definition,
             )
         )
@@ -241,6 +241,7 @@ class FabricPowerBIDatasource(Datasource):
     def add_powerbi_dax_asset(
         self,
         name: str,
+        dax_string: str,
         order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> PowerBIDax:
@@ -260,6 +261,7 @@ class FabricPowerBIDatasource(Datasource):
             name=name,
             order_by=order_by_sorters,
             batch_metadata=batch_metadata or {},
+            dax_string=dax_string,
         )
         return self._add_asset(asset)
 
@@ -290,6 +292,7 @@ class FabricPowerBIDatasource(Datasource):
     def add_powerbi_table_asset(
         self,
         name: str,
+        table: str,
         order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> PowerBITable:
@@ -310,5 +313,6 @@ class FabricPowerBIDatasource(Datasource):
             name=name,
             order_by=order_by_sorters,
             batch_metadata=batch_metadata or {},
+            table=table,
         )
         return self._add_asset(asset)
