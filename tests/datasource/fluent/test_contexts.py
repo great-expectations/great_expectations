@@ -161,7 +161,7 @@ def test_delete_asset_with_cloud_data_context(
     remove_key_spy = mocker.spy(context._data_asset_store, "remove_key")
 
     datasource_name = "my_pg_ds"
-    datasource = context.get_datasource(datasource_name=datasource_name)
+    datasource = context.fluent_datasources[datasource_name]
     asset_name = "my_table_asset_wo_splitters"
     asset = [asset for asset in datasource.assets if asset.name == asset_name][0]
     datasource.delete_asset(asset_name=asset_name)
