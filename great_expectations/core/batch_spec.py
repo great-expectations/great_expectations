@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABCMeta
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any, Callable, List, Literal, Protocol
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.id_dict import BatchSpec
@@ -10,6 +10,9 @@ from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchSpecE
 from great_expectations.types.base import SerializableDotDict
 
 if TYPE_CHECKING:
+    import pandas as pd
+    from typing_extensions import TypeAlias
+
     from great_expectations.alias_types import JSONValues, PathStr
 
 logger = logging.getLogger(__name__)
@@ -36,12 +39,27 @@ class BatchMarkers(BatchSpec):
         return self.get("ge_load_time")
 
 
-class PandasBatchSpec(SerializableDotDict, BatchSpec, metaclass=ABCMeta):
+class PandasBatchSpecProtocol(Protocol):
     @property
+    def reader_method(self) -> str:
+        ...
+
+    @property
+    def reader_options(self) -> dict:
+        ...
+
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        ...
+
+
+class PandasBatchSpec(SerializableDotDict, BatchSpec, PandasBatchSpecProtocol):
+    @property
+    @override
     def reader_method(self) -> str:
         return self["reader_method"]
 
     @property
+    @override
     def reader_options(self) -> dict:
         return self.get("reader_options", {})
 
@@ -88,6 +106,43 @@ class PathBatchSpec(BatchSpec, metaclass=ABCMeta):
     @property
     def reader_options(self) -> dict:
         return self.get("reader_options") or {}
+
+
+FabricReaderMethods: TypeAlias = Literal[
+    "read_table", "evaluate_measure", "evaluate_dax"
+]
+
+
+class FabricBatchSpec(PandasBatchSpecProtocol):
+    # TODO: use slots
+
+    def __init__(
+        self,
+        reader_method: FabricReaderMethods,
+        **reader_kwargs: Any,
+    ) -> None:
+        self._reader_method = reader_method
+        self._reader_kwargs = reader_kwargs
+
+    @property
+    @override
+    def reader_method(self) -> str:
+        return self._reader_method
+
+    @property
+    @override
+    def reader_options(self) -> dict[str, Any]:
+        return self._reader_kwargs
+
+    @override
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        raise NotImplementedError
+
+    def get_reader_function(self) -> Callable[..., pd.DataFrame]:
+        # lazy import of fabric module which cotains the reader functions
+        from sempy import fabric
+
+        return getattr(fabric, self.reader_method)
 
 
 class S3BatchSpec(PathBatchSpec):

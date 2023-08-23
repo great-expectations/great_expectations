@@ -1,0 +1,75 @@
+{
+    "title": "PowerBIDax",
+    "description": "Microsoft PowerBI DAX.",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "powerbi_dax",
+            "enum": [
+                "powerbi_dax"
+            ],
+            "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Sorter"
+            }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
+        "query": {
+            "title": "Query",
+            "type": "string"
+        },
+        "dataset": {
+            "title": "Dataset",
+            "type": "string"
+        },
+        "workspace": {
+            "title": "Workspace",
+            "type": "string"
+        }
+    },
+    "required": [
+        "name",
+        "query",
+        "dataset",
+        "workspace"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        }
+    }
+}

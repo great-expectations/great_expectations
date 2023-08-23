@@ -32,6 +32,7 @@ from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     BatchSpec,
+    FabricBatchSpec,
     GCSBatchSpec,
     PandasBatchSpec,
     PathBatchSpec,
@@ -352,6 +353,10 @@ Bucket: {error}"""
                     df = reader_fn_result[0]
             else:
                 df = reader_fn_result
+
+        elif isinstance(batch_spec, FabricBatchSpec):
+            reader_fn = batch_spec.get_reader_function()
+            df = reader_fn(**batch_spec.reader_options)
 
         else:
             raise gx_exceptions.BatchSpecError(

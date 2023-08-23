@@ -1,0 +1,220 @@
+{
+    "title": "FabricDatasource",
+    "description": "Microsoft Fabric Datasource.",
+    "type": "object",
+    "properties": {
+        "type": {
+            "title": "Type",
+            "default": "fabric",
+            "enum": [
+                "fabric"
+            ],
+            "type": "string"
+        },
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "Datasource id",
+            "type": "string",
+            "format": "uuid"
+        },
+        "assets": {
+            "title": "Assets",
+            "default": [],
+            "type": "array",
+            "items": {
+                "discriminator": {
+                    "propertyName": "type",
+                    "mapping": {
+                        "powerbi_table": "#/definitions/PowerBITable",
+                        "powerbi_measure": "#/definitions/PowerBIMeasure",
+                        "powerbi_dax": "#/definitions/PowerBIDax"
+                    }
+                },
+                "oneOf": [
+                    {
+                        "$ref": "#/definitions/PowerBITable"
+                    },
+                    {
+                        "$ref": "#/definitions/PowerBIMeasure"
+                    },
+                    {
+                        "$ref": "#/definitions/PowerBIDax"
+                    }
+                ]
+            }
+        }
+    },
+    "required": [
+        "name"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        },
+        "PowerBITable": {
+            "title": "PowerBITable",
+            "description": "Microsoft PowerBI Table.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "powerbi_table",
+                    "enum": [
+                        "powerbi_table"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "schema": {
+                    "title": "Schema",
+                    "type": "string"
+                },
+                "table_name": {
+                    "title": "Table Name",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name",
+                "schema",
+                "table_name"
+            ],
+            "additionalProperties": false
+        },
+        "PowerBIMeasure": {
+            "title": "PowerBIMeasure",
+            "description": "Microsoft PowerBI Measure.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "powerbi_measure",
+                    "enum": [
+                        "powerbi_measure"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "additionalProperties": false
+        },
+        "PowerBIDax": {
+            "title": "PowerBIDax",
+            "description": "Microsoft PowerBI DAX.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "powerbi_dax",
+                    "enum": [
+                        "powerbi_dax"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "query": {
+                    "title": "Query",
+                    "type": "string"
+                },
+                "dataset": {
+                    "title": "Dataset",
+                    "type": "string"
+                },
+                "workspace": {
+                    "title": "Workspace",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name",
+                "query",
+                "dataset",
+                "workspace"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
