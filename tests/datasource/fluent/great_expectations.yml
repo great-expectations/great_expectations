@@ -200,3 +200,20 @@ fluent_datasources:
       my_table_asset_wo_splitters:
         type: table
         table_name: my_table
+  my_fabric_ds:
+    type: fabric_powerbi
+    # dummy dataset
+    dataset: 0993ddd1-f01d-4c8f-a64e-9c4e5b8905e8
+    assets:
+      my_dax_asset:
+        type: powerbi_dax
+        dax_string: "foo bar"
+      my_measure_asset:
+        type: powerbi_measure
+        groupby_columns:
+          - [foo, bar]
+          - [fizz, buzz]
+      my_pwr_bi_table_asset:
+        type: powerbi_table
+        table: my_table
+        num_rows: 100
