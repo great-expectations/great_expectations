@@ -105,6 +105,13 @@ class DatasourceDict(UserDict):
 
 
 class CacheEnabledDatasourceDict(DatasourceDict):
+    """
+    Extends the capabilites of the DatasourceDict by placing a caching layer in front of the underlying store.
+
+    Any retrievals will firstly check an in-memory dictionary before requesting from the store. Other CRUD methods will ensure that
+    both cache and store are kept in sync.
+    """
+
     def __init__(
         self,
         context: AbstractDataContext,
@@ -130,10 +137,8 @@ class CacheEnabledDatasourceDict(DatasourceDict):
 
     @override
     def __delitem__(self, name: str) -> None:
-        if name in self.data:
-            del self.data[name]
-        else:
-            super().__delitem__(name)
+        self.data.pop(name, None)
+        super().__delitem__(name)
 
     @override
     def __getitem__(self, name: str) -> FluentDatasource | BaseDatasource:
