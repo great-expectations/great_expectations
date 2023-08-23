@@ -307,7 +307,7 @@ class SorterConfigSchema(Schema):
         return SorterConfig(**data)
 
 
-class AssetConfig(SerializableDictDot):
+class AssetConfig(AbstractConfig):
     def __init__(  # noqa: C901, PLR0912, PLR0913
         self,
         name: Optional[str] = None,
@@ -329,6 +329,8 @@ class AssetConfig(SerializableDictDot):
         id: Optional[str] = None,
         **kwargs: Optional[dict],
     ) -> None:
+        super().__init__(id=id, name=name)
+
         if name is not None:
             self.name = name
         if id is not None:
