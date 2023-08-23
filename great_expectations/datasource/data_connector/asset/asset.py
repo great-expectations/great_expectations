@@ -71,7 +71,7 @@ class Asset:
         return self._name
 
     @property
-    def id(self) -> str:
+    def id(self) -> uuid.UUID:
         return self._id
 
     @property
