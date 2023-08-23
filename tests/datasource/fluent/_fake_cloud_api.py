@@ -295,6 +295,7 @@ def delete_data_assets_cb(
     deleted_asset_idx = None
     deleted_asset = None
 
+    # find and remove asset from datasource config
     for datasource in datasources.values():
         for idx, asset in enumerate(datasource.get("assets", {})):
             if asset.get("id") == data_asset_id:
