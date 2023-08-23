@@ -307,7 +307,7 @@ class SorterConfigSchema(Schema):
         return SorterConfig(**data)
 
 
-class AssetConfig(AbstractConfig):
+class AssetConfig(SerializableDictDot):
     def __init__(  # noqa: C901, PLR0912, PLR0913
         self,
         name: Optional[str] = None,
@@ -326,15 +326,10 @@ class AssetConfig(AbstractConfig):
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[Dict[str, str]] = None,
         reader_options: Optional[Dict[str, Any]] = None,
-        id: Optional[str] = None,
         **kwargs: Optional[dict],
     ) -> None:
-        super().__init__(id=id, name=name)
-
         if name is not None:
             self.name = name
-        if id is not None:
-            self.id = id
         self._class_name = class_name
         self._module_name = module_name
         if bucket is not None:
@@ -397,11 +392,6 @@ class AssetConfigSchema(Schema):
         unknown = INCLUDE
 
     name = fields.String(required=False, allow_none=True)
-    id = fields.String(
-        required=False,
-        allow_none=True,
-    )
-
     class_name = fields.String(
         required=False,
         allow_none=True,
