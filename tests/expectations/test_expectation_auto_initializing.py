@@ -7,12 +7,12 @@ from great_expectations.expectations.expectation import Expectation
 pytestmark = pytest.mark.unit
 
 
-def test_expectation_is_expectation_self_initializing(capsys):
+def test_expectation_is_expectation_auto_initializing(capsys):
     with pytest.raises(gx_exceptions.ExpectationNotFoundError):
-        Expectation.is_expectation_self_initializing(name="I_dont_exist")
+        Expectation.is_expectation_auto_initializing(name="I_dont_exist")
 
     assert (
-        Expectation.is_expectation_self_initializing(
+        Expectation.is_expectation_auto_initializing(
             name="expect_column_distinct_values_to_be_in_set"
         )
         is False
@@ -24,7 +24,7 @@ def test_expectation_is_expectation_self_initializing(capsys):
     )
 
     assert (
-        Expectation.is_expectation_self_initializing(
+        Expectation.is_expectation_auto_initializing(
             name="expect_column_mean_to_be_between"
         )
         is True
