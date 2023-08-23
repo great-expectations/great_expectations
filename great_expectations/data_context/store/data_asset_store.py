@@ -130,25 +130,3 @@ class DataAssetStore(Store):
         data_asset_config_dict["id"] = data_asset_ge_cloud_id
 
         return data_asset_config_dict
-
-    def delete(self, data_asset_config: AssetConfig | FluentDataAsset) -> None:
-        """Deletes an AssetConfig persisted in the store using its config.
-
-        Args:
-            data_asset_config: The config of the DataAsset to delete.
-        """
-
-        self.remove_key(self._build_key_from_config(data_asset_config))
-
-    @override
-    def _build_key_from_config(  # type: ignore[override]
-        self, data_asset_config: AssetConfig | FluentDataAsset
-    ) -> Union[GXCloudIdentifier, DataContextVariableKey]:
-        id_: str | None = (
-            str(data_asset_config.id)
-            if data_asset_config.id
-            else data_asset_config.id  # type: ignore[assignment] #
-            # uuid
-            # will be converted to str
-        )
-        return self.store_backend.build_key(name=data_asset_config.name, id=id_)
