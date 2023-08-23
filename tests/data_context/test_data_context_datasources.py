@@ -100,35 +100,16 @@ def test_data_context_instantiates_inline_store_backend_with_filesystem_config(
     assert isinstance(context._datasource_store.store_backend, InlineStoreBackend)
 
 
-@pytest.mark.parametrize(
-    "data_context_fixture_name",
-    [
-        # In order to leverage existing fixtures in parametrization, we provide
-        # their string names and dynamically retrieve them using pytest's built-in
-        # `request` fixture.
-        # Source: https://stackoverflow.com/a/64348247
-        pytest.param(
-            "in_memory_runtime_context",
-            id="BaseDataContext",
-        ),
-        pytest.param(
-            "cloud_data_context_in_cloud_mode_with_datasource_pandas_engine",
-            id="DataContext",
-        ),
-    ],
-)
 @pytest.mark.unit
 def test_get_datasource_retrieves_from_cache(
-    data_context_fixture_name: str,
-    request,
+    in_memory_runtime_context,
 ) -> None:
     """
     What does this test and why?
 
-    For both persistence-enabled and disabled contexts, we should always be looking at the
-    cache for object retrieval.
+    For non-Cloud contexts, we should always be looking at the cache for object retrieval.
     """
-    context = request.getfixturevalue(data_context_fixture_name)
+    context = in_memory_runtime_context
 
     name = context.list_datasources()[0]["name"]
 
@@ -141,35 +122,15 @@ def test_get_datasource_retrieves_from_cache(
     assert not mock_get.called
 
 
-@pytest.mark.parametrize(
-    "data_context_fixture_name",
-    [
-        # In order to leverage existing fixtures in parametrization, we provide
-        # their string names and dynamically retrieve them using pytest's built-in
-        # `request` fixture.
-        # Source: https://stackoverflow.com/a/64348247
-        pytest.param(
-            "in_memory_runtime_context",
-            id="BaseDataContext",
-        ),
-        pytest.param(
-            "cloud_data_context_in_cloud_mode_with_datasource_pandas_engine",
-            id="DataContext",
-        ),
-    ],
-)
 @pytest.mark.unit
-def test_get_datasource_cache_miss(
-    data_context_fixture_name: str,
-    request,
-) -> None:
+def test_get_datasource_cache_miss(in_memory_runtime_context) -> None:
     """
     What does this test and why?
 
-    For all contexts, we should leverage the underlying store in the case
+    For all non-Cloud contexts, we should leverage the underlying store in the case
     of a cache miss.
     """
-    context = request.getfixturevalue(data_context_fixture_name)
+    context = in_memory_runtime_context
 
     name = "my_fake_datasource_name"
 

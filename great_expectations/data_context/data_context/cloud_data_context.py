@@ -27,6 +27,7 @@ from great_expectations.core.config_provider import (
     _CloudConfigurationProvider,
     _ConfigurationProvider,
 )
+from great_expectations.core.datasource_dict import DatasourceDict
 from great_expectations.core.http import create_session
 from great_expectations.core.serializer import JsonConfigSerializer
 from great_expectations.data_context._version_checker import _VersionChecker
@@ -410,6 +411,10 @@ class CloudDataContext(SerializableDataContext):
             conf_file_section=conf_file_section,
             conf_file_option=conf_file_option,
         )
+
+    @override
+    def _init_datasources(self) -> None:
+        self._datasources = DatasourceDict(context=self)
 
     @override
     def _init_datasource_store(self) -> DatasourceStore:

@@ -298,9 +298,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         # Init stores
         self._stores: dict = {}
         self._init_primary_stores(self.project_config_with_variables_substituted.stores)
+
         # The DatasourceStore is inherent to all DataContexts but is not an explicit part of the project config.
         # As such, it must be instantiated separately.
         self._datasource_store = self._init_datasource_store()
+        self._init_datasources()
 
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
@@ -310,12 +312,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._initialize_usage_statistics(
             self.project_config_with_variables_substituted.anonymous_usage_statistics
         )
-
-        # Store cached datasources but don't init them
-        self._cached_datasources: dict = {}
-
-        # Build the datasources we know about and have access to
-        self._init_datasources()
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies: dict = {}
@@ -4549,7 +4545,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         self,
     ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, FluentDatasource]]:
         """A single holder for all Datasources in this context"""
-        return self._cached_datasources
+        return self._datasources
 
     @property
     def fluent_datasources(self) -> Dict[str, FluentDatasource]:
@@ -4685,11 +4681,14 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
+        self._datasources = {}
+
         config: DataContextConfig = self.config
 
         if self._datasource_store.cloud_mode:
             for fds in config.fluent_datasources.values():
-                self._add_fluent_datasource(**fds)._rebuild_asset_data_connectors()
+                datasource = self._add_fluent_datasource(**fds)
+                datasource._rebuild_asset_data_connectors()
 
         datasources: Dict[str, DatasourceConfig] = cast(
             Dict[str, DatasourceConfig], config.datasources
