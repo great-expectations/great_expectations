@@ -81,11 +81,17 @@ class DatasourceDict(UserDict):
 
     @override
     def __delitem__(self, name: str) -> None:
+        if not self.__contains__(name):
+            raise KeyError(f"Could not find a datasource named '{name}'")
+
         ds = self._datasource_store.retrieve_by_name(name)
         self._datasource_store.delete(ds)
 
     @override
     def __getitem__(self, name: str) -> FluentDatasource | BaseDatasource:
+        if not self.__contains__(name):
+            raise KeyError(f"Could not find a datasource named '{name}'")
+
         ds = self._datasource_store.retrieve_by_name(name)
         if isinstance(ds, FluentDatasource):
             return self._init_fluent_datasource(ds)
@@ -118,22 +124,17 @@ class CacheEnabledDatasourceDict(DatasourceDict):
         datasource_store: DatasourceStore,
         config_provider: _ConfigurationProvider,
     ):
-        self._cache = {}
         super().__init__(
             context=context,
             datasource_store=datasource_store,
             config_provider=config_provider,
         )
-
-    @override
-    @property
-    def data(self):
-        return self._cache
+        self.data: dict[str, FluentDatasource | BaseDatasource] = {}
 
     @override
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
         self.data[name] = ds
-        super().__setitem__(name=name, ds=ds)
+        super().__setitem__(name, ds)
 
     @override
     def __delitem__(self, name: str) -> None:

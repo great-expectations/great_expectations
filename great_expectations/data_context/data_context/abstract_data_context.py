@@ -21,7 +21,6 @@ from typing import (
     List,
     Literal,
     Mapping,
-    MutableMapping,
     Optional,
     Sequence,
     Tuple,
@@ -150,6 +149,7 @@ if TYPE_CHECKING:
 
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+    from great_expectations.core.datasource_dict import DatasourceDict
     from great_expectations.core.expectation_configuration import (
         ExpectationConfiguration,
     )
@@ -379,9 +379,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _init_variables(self) -> DataContextVariables:
         raise NotImplementedError
 
-    def _save_project_config(
-        self, _fds_datasource: FluentDatasource | None = None
-    ) -> None:
+    def _save_project_config(self) -> None:
         """
         Each DataContext will define how its project_config will be saved through its internal 'variables'.
             - FileDataContext : Filesystem.
@@ -768,10 +766,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         self, datasource: Optional[FluentDatasource] = None, **kwargs
     ) -> FluentDatasource:
         if datasource:
-            from_config: bool = False
             datasource_name = datasource.name
         else:
-            from_config = True
             datasource_name = kwargs.get("name", "")
 
         if not datasource_name:
@@ -796,16 +792,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         datasource._data_context._save_project_config()
 
-        # temporary workaround while we update stores to work better with Fluent Datasources for all contexts
-        # Without this we end up with duplicate entries for datasources in both
-        # "fluent_datasources" and "datasources" config/yaml entries.
-        if self._datasource_store.cloud_mode and not from_config:
-            set_datasource = self._datasource_store.set(key=None, value=datasource)
-            if set_datasource.id:
-                logger.debug(f"Assigning `id` to '{datasource_name}'")
-                datasource.id = set_datasource.id
+        # Round trip to ensure id is part of return obj
         self.datasources[datasource_name] = datasource
-        return datasource
+        ds = self.datasources[datasource_name]
+
+        assert isinstance(ds, FluentDatasource)
+        return ds
 
     def _update_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
@@ -831,7 +823,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         updated_datasource._rebuild_asset_data_connectors()
 
         updated_datasource.test_connection()
-        self._save_project_config(_fds_datasource=updated_datasource)
+        self._save_project_config()
 
         self.datasources[datasource_name] = updated_datasource
 
@@ -1372,33 +1364,15 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "Must provide a datasource_name to retrieve an existing Datasource"
             )
 
-        datasource: BaseDatasource | LegacyDatasource | FluentDatasource
-        if datasource_name in self.datasources:
-            datasource = self.datasources[datasource_name]
-            if not isinstance(datasource, BaseDatasource):
-                datasource._data_context = self
-            return self.datasources[datasource_name]
-
-        datasource_config: DatasourceConfig | FluentDatasource = (
-            self._datasource_store.retrieve_by_name(datasource_name=datasource_name)
-        )
-
-        if isinstance(datasource_config, FluentDatasource):
-            datasource = datasource_config
-            datasource_config._data_context = self
-            # Fluent Datasource has already been hydrated into runtime model and uses lazy config substitution
-        else:
-            raw_config_dict: dict = dict(datasourceConfigSchema.dump(datasource_config))
-            raw_config = datasourceConfigSchema.load(raw_config_dict)
-
-            substituted_config = self.config_provider.substitute_config(raw_config_dict)
-
-            # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
-            datasource = self._instantiate_datasource_from_config(
-                raw_config=raw_config, substituted_config=substituted_config
+        try:
+            datasource: BaseDatasource | LegacyDatasource | FluentDatasource = (
+                self.datasources[datasource_name]
             )
+        except KeyError as e:
+            raise ValueError(str(e)) from e
 
-        self.datasources[datasource_name] = datasource
+        if not isinstance(datasource, BaseDatasource):
+            datasource._data_context = self
         return datasource
 
     def _serialize_substitute_and_sanitize_datasource_config(
@@ -2731,16 +2705,15 @@ class AbstractDataContext(ConfigPeer, ABC):
             **kwargs,
         )
         datasource_name = result.datasource_name
-        if datasource_name not in self.datasources:
+
+        datasource = self.datasources.get(datasource_name)
+        if not datasource:
             raise gx_exceptions.DatasourceError(
                 datasource_name,
                 "The given datasource could not be retrieved from the DataContext; "
                 "please confirm that your configuration is accurate.",
             )
 
-        datasource = self.datasources[
-            datasource_name
-        ]  # this can return one of three datasource types, including Fluent datasource types
         return datasource.get_batch_list_from_batch_request(batch_request=result)  # type: ignore[union-attr, return-value, arg-type]
 
     @public_api
@@ -4543,9 +4516,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return self.variables.notebooks  # type: ignore[return-value]
 
     @property
-    def datasources(
-        self,
-    ) -> MutableMapping[str, LegacyDatasource | BaseDatasource | FluentDatasource]:
+    def datasources(self) -> DatasourceDict:
         """A single holder for all Datasources in this context"""
         return self._datasources
 
@@ -4683,9 +4654,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
-        self._datasources: MutableMapping[
-            str, LegacyDatasource | BaseDatasource | FluentDatasource
-        ] = CacheEnabledDatasourceDict(
+        self._datasources: DatasourceDict = CacheEnabledDatasourceDict(
             context=self,
             datasource_store=self._datasource_store,
             config_provider=self.config_provider,
