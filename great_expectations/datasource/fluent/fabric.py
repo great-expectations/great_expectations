@@ -1,6 +1,17 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, List, Literal, Optional, Type, Union
+import uuid
+from typing import (
+    TYPE_CHECKING,
+    ClassVar,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
 import pydantic
 from typing_extensions import Annotated, TypeAlias
@@ -46,14 +57,19 @@ class _PowerBIAsset(DataAsset):
         self._validate_batch_request(batch_request)
         batch_list: List[Batch] = []
 
-        batch_spec = FabricBatchSpec(
-            reader_method=self._reader_method,
-            reader_options=self.dict(
+        reader_options = {
+            "workspace": self._datasource.workspace,
+            "dataset": self._datasource.dataset,
+            **self.dict(
                 # exclude=self._EXCLUDE_FROM_READER_OPTIONS,
                 exclude_unset=True,
                 by_alias=True,
                 config_provider=self._datasource._config_provider,
             ),
+        }
+
+        batch_spec = FabricBatchSpec(
+            reader_method=self._reader_method, reader_options=reader_options
         )
         # TODO: update get_batch_data_and_markers types
         execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
@@ -118,24 +134,39 @@ class _PowerBIAsset(DataAsset):
 class PowerBIDax(_PowerBIAsset):
     """Microsoft PowerBI DAX."""
 
+    _reader_method: ClassVar[FabricReaderMethods] = "evaluate_dax"
+
     type: Literal["powerbi_dax"] = "powerbi_dax"
-    query: str
-    dataset: str
-    workspace: str
+    dax_string: str
+    pandas_convert_dtypes: bool = True
 
 
 class PowerBIMeasure(_PowerBIAsset):
     """Microsoft PowerBI Measure."""
 
+    _reader_method: ClassVar[FabricReaderMethods] = "evaluate_measure"
+
     type: Literal["powerbi_measure"] = "powerbi_measure"
+    groupby_columns: Optional[List[Tuple[str, str]]] = None
+    filters: Optional[Dict[Tuple[str, str], List[str]]] = None
+    fully_qualified_columns: Optional[bool] = None
+    num_rows: Optional[int] = None
+    pandas_convert_dtypes: bool = True
+    use_xmla: bool = False
 
 
 class PowerBITable(_PowerBIAsset):
     """Microsoft PowerBI Table."""
 
+    _reader_method: ClassVar[FabricReaderMethods] = "read_table"
+
     type: Literal["powerbi_table"] = "powerbi_table"
-    schema_: Optional[str] = pydantic.Field(None, alias="schema")
-    table_name: str
+    table: str
+
+    fully_qualified_columns: bool = False
+    num_rows: Optional[int] = None
+    multiindex_hierarchies: bool = False
+    pandas_convert_dtypes: bool = True
 
 
 # This improves our error messages by providing a more specific type for pydantic to validate against
@@ -148,7 +179,11 @@ AssetTypes = Annotated[
 
 
 class FabricDatasource(Datasource):
-    """Microsoft Fabric Datasource."""
+    """
+    Microsoft Fabric Datasource.
+
+    https://pypi.org/project/semantic-link/
+    """
 
     # class var definitions
     asset_types: ClassVar[List[Type[DataAsset]]] = [
@@ -158,7 +193,7 @@ class FabricDatasource(Datasource):
     ]
     # any fabric datsource specific fields should be added to this set
     # example a connection_string field or a data directory field
-    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {"extra_field_1"}
+    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {"workspace", "dataset"}
 
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
@@ -166,7 +201,8 @@ class FabricDatasource(Datasource):
     assets: List[AssetTypes] = []
 
     # fabric datasource specific fields
-    extra_field_1: Optional[str] = None
+    workspace: Optional[Union[uuid.UUID, str]] = None
+    dataset: Union[uuid.UUID, str]
 
     @property
     @override
@@ -202,12 +238,9 @@ class FabricDatasource(Datasource):
                 asset._datasource = self
                 asset.test_connection()
 
-    def add_powerbi_dax_asset(  # noqa: PLR0913
+    def add_powerbi_dax_asset(
         self,
         name: str,
-        query: str,
-        dataset: str,
-        workspace: str,
         order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> PowerBIDax:
@@ -225,9 +258,6 @@ class FabricDatasource(Datasource):
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = PowerBIDax(
             name=name,
-            query=query,
-            dataset=dataset,
-            workspace=workspace,
             order_by=order_by_sorters,
             batch_metadata=batch_metadata or {},
         )
@@ -257,11 +287,9 @@ class FabricDatasource(Datasource):
         )
         return self._add_asset(asset)
 
-    def add_powerbi_table_asset(  # noqa: PLR0913
+    def add_powerbi_table_asset(
         self,
         name: str,
-        table_name: str = "",
-        schema: Optional[str] = None,
         order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> PowerBITable:
@@ -280,8 +308,6 @@ class FabricDatasource(Datasource):
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = PowerBITable(
             name=name,
-            table_name=table_name,
-            schema=schema,
             order_by=order_by_sorters,
             batch_metadata=batch_metadata or {},
         )
