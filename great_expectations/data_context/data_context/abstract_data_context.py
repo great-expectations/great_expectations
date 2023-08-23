@@ -4696,22 +4696,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         for datasource_name, datasource_config in datasources.items():
             try:
-                config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
-
-                raw_config_dict = dict(datasourceConfigSchema.dump(config))
-                substituted_config_dict: dict = self.config_provider.substitute_config(
-                    raw_config_dict
-                )
-
-                raw_datasource_config = datasourceConfigSchema.load(raw_config_dict)
-                substituted_datasource_config = datasourceConfigSchema.load(
-                    substituted_config_dict
-                )
-                substituted_datasource_config.name = datasource_name
-
-                datasource = self._instantiate_datasource_from_config(
-                    raw_config=raw_datasource_config,
-                    substituted_config=substituted_datasource_config,
+                datasource = self._init_block_style_datasource(
+                    datasource_name=datasource_name, datasource_config=datasource_config
                 )
                 self.datasources[datasource_name] = datasource
             except gx_exceptions.DatasourceInitializationError as e:
@@ -4720,6 +4706,27 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch_list() step. So we just pass here.
                 pass
+
+    def _init_block_style_datasource(
+        self, datasource_name: str, datasource_config: dict
+    ) -> None:
+        config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
+
+        raw_config_dict = dict(datasourceConfigSchema.dump(config))
+        substituted_config_dict: dict = self.config_provider.substitute_config(
+            raw_config_dict
+        )
+
+        raw_datasource_config = datasourceConfigSchema.load(raw_config_dict)
+        substituted_datasource_config = datasourceConfigSchema.load(
+            substituted_config_dict
+        )
+        substituted_datasource_config.name = datasource_name
+
+        return self._instantiate_datasource_from_config(
+            raw_config=raw_datasource_config,
+            substituted_config=substituted_datasource_config,
+        )
 
     def _instantiate_datasource_from_config(
         self,

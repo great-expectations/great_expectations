@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import logging
 from collections import UserDict
 from typing import TYPE_CHECKING
@@ -79,29 +78,14 @@ class DatasourceDict(UserDict):
         ds = self._datasource_store.retrieve_by_name(name)
         if isinstance(ds, FluentDatasource):
             return self._init_fluent_datasource(ds)
-        return self._init_block_datasource(name=name, config=ds)
+        return self._init_block_style_datasource(name=name, config=ds)
 
     def _init_fluent_datasource(self, ds: FluentDatasource) -> FluentDatasource:
         ds._rebuild_asset_data_connectors()
         return ds
 
-    def _init_block_datasource(self, name: str, config: dict) -> BaseDatasource:
-        # To be removed once block-style is fully removed
-        # Deprecated as of v0.17.2
-        config = copy.deepcopy(config)
-
-        raw_config_dict = dict(datasourceConfigSchema.dump(config))
-        substituted_config_dict: dict = self._config_provider.substitute_config(
-            raw_config_dict
-        )
-
-        raw_datasource_config = datasourceConfigSchema.load(raw_config_dict)
-        substituted_datasource_config = datasourceConfigSchema.load(
-            substituted_config_dict
-        )
-        substituted_datasource_config.name = name
-
-        return self._context._instantiate_datasource_from_config(
-            raw_config=raw_datasource_config,
-            substituted_config=substituted_datasource_config,
+    # To be removed once block-style is fully removed (deprecated as of v0.17.2)
+    def _init_block_style_datasource(self, name: str, config: dict) -> BaseDatasource:
+        return self._context._init_block_style_datasource(
+            datasource_name=name, datasource_config=config
         )
