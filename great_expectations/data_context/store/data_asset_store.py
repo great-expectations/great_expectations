@@ -10,7 +10,6 @@ from great_expectations.core.data_context_key import (
 )
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.base import (
-    AssetConfig,
     assetConfigSchema,
 )
 from great_expectations.datasource.fluent.sources import _SourceFactories
@@ -81,30 +80,24 @@ class DataAssetStore(Store):
         return self._store_backend.remove_key(key.to_tuple())
 
     @override
-    def serialize(
-        self, value: AssetConfig | FluentDataAsset
-    ) -> Union[str, dict, AssetConfig]:
+    def serialize(self, value: FluentDataAsset) -> Union[str, dict]:
         """
         See parent 'Store.serialize()' for more information
         """
-        if isinstance(value, FluentDataAsset):
-            return value._json_dict()
-        return self._serializer.serialize(value)
+        return value._json_dict()
 
     @override
-    def deserialize(self, value: Union[dict, str]) -> AssetConfig | FluentDataAsset:
+    def deserialize(self, value: Union[dict, str]) -> FluentDataAsset:
         """
         See parent 'Store.deserialize()' for more information
         """
         if isinstance(value, dict):
             # presence of a 'type' field means it's a fluent DataAsset
             type_ = value.get("type")
-            if type_:
-                data_asset_model = _SourceFactories.type_lookup.get(type_)
-                if not data_asset_model:
-                    raise LookupError(f"Unknown DataAsset 'type': '{type_}'")
-                return data_asset_model(**value)
-            return self._schema.load(value)
+            data_asset_model = _SourceFactories.type_lookup.get(type_)
+            if not data_asset_model:
+                raise LookupError(f"Unknown DataAsset 'type': '{type_}'")
+            return data_asset_model(**value)
         else:
             return self._schema.loads(value)
 
