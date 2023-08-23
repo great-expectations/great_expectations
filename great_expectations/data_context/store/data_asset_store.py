@@ -91,14 +91,13 @@ class DataAssetStore(Store):
         """
         See parent 'Store.deserialize()' for more information
         """
+        type_ = value.get("type")
+        data_asset_model = _SourceFactories.type_lookup.get(type_)
         if isinstance(value, dict):
-            # presence of a 'type' field means it's a fluent DataAsset
-            type_ = value.get("type")
-            data_asset_model = _SourceFactories.type_lookup.get(type_)
             if not data_asset_model:
                 raise LookupError(f"Unknown DataAsset 'type': '{type_}'")
             return data_asset_model(**value)
-       return data_asset_model.parse_raw(value)
+        return data_asset_model.parse_raw(value)
 
     @override
     def ge_cloud_response_json_to_object_dict(
