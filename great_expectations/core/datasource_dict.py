@@ -10,7 +10,7 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
 )
-from great_expectations.datasource.new_datasource import BaseDatasource
+from great_expectations.datasource.fluent import Datasource as FluentDatasource
 
 if TYPE_CHECKING:
     from great_expectations.core.config_provider import _ConfigurationProvider
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
         AbstractDataContext,
     )
     from great_expectations.data_context.store.datasource_store import DatasourceStore
-    from great_expectations.datasource.fluent import Datasource as FluentDatasource
+    from great_expectations.datasource.new_datasource import BaseDatasource
 
 logger = logging.getLogger(__name__)
 
@@ -71,13 +71,18 @@ class DatasourceDict(UserDict):
         return name in self._names
 
     @override
-    def __setitem__(self, _: str, ds: FluentDatasource | BaseDatasource) -> None:
-        if isinstance(ds, BaseDatasource):
-            config = datasourceConfigSchema.load(ds.config)
-        else:
+    def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
+        if isinstance(ds, FluentDatasource):
             config = ds
+        else:
+            config = datasourceConfigSchema.load(ds.config)
 
         self._datasource_store.set(key=None, value=config)
+
+    @override
+    def __delitem__(self, name: str) -> None:
+        ds = self._datasource_store.retrieve_by_name(name)
+        self._datasource_store.delete(ds)
 
     @override
     def __getitem__(self, name: str) -> FluentDatasource | BaseDatasource:
@@ -97,3 +102,41 @@ class DatasourceDict(UserDict):
         return self._context._init_block_style_datasource(
             datasource_name=name, datasource_config=config
         )
+
+
+class CacheEnabledDatasourceDict(DatasourceDict):
+    def __init__(
+        self,
+        context: AbstractDataContext,
+        datasource_store: DatasourceStore,
+        config_provider: _ConfigurationProvider,
+    ):
+        self._cache = {}
+        super().__init__(
+            context=context,
+            datasource_store=datasource_store,
+            config_provider=config_provider,
+        )
+
+    @override
+    @property
+    def data(self):
+        return self._cache
+
+    @override
+    def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
+        self.data[name] = ds
+        super().__setitem__(name=name, ds=ds)
+
+    @override
+    def __delitem__(self, name: str) -> None:
+        if name in self.data:
+            del self.data[name]
+        else:
+            super().__delitem__(name)
+
+    @override
+    def __getitem__(self, name: str) -> FluentDatasource | BaseDatasource:
+        if name in self.data:
+            return self.data[name]
+        return super().__getitem__(name)

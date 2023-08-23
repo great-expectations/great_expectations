@@ -59,6 +59,7 @@ from great_expectations.core.config_provider import (
     _EnvironmentConfigurationProvider,
     _RuntimeEnvironmentConfigurationProvider,
 )
+from great_expectations.core.datasource_dict import CacheEnabledDatasourceDict
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
@@ -4684,7 +4685,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """Initialize the datasources in store"""
         self._datasources: MutableMapping[
             str, LegacyDatasource | BaseDatasource | FluentDatasource
-        ] = {}
+        ] = CacheEnabledDatasourceDict(
+            context=self,
+            datasource_store=self._datasource_store,
+            config_provider=self.config_provider,
+        )
 
         config: DataContextConfig = self.config
 
