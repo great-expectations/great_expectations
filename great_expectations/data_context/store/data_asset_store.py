@@ -4,6 +4,7 @@ import logging
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Optional, Union, overload
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.data_context_key import (
     DataContextVariableKey,
 )
@@ -20,7 +21,6 @@ if TYPE_CHECKING:
 
     from typing_extensions import TypedDict
 
-    from great_expectations.compatibility.typing_extensions import override
     from great_expectations.core.serializer import AbstractConfigSerializer
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
