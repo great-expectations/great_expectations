@@ -13,6 +13,7 @@ from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
     Sorter,
+    TestConnectionError,
 )
 
 if TYPE_CHECKING:
@@ -36,9 +37,7 @@ class _PowerBIAsset(DataAsset):
         Whatever is needed to test the connection to and/or validatitly of the asset.
         This could be a noop.
         """
-        raise NotImplementedError(
-            f"test_connection is not implemented for {type(self).__name__}."
-        )
+        pass
 
     @override
     def get_batch_list_from_batch_request(
@@ -179,6 +178,30 @@ class FabricDatasource(Datasource):
 
         return PandasExecutionEngine
 
+    @override
+    def test_connection(self, test_assets: bool = True) -> None:
+        """Test the connection for the FabricDatasource.
+
+        Args:
+            test_assets: If assets have been passed to the Datasource, whether to test them as well.
+
+        Raises:
+            TestConnectionError: If the connection test fails.
+        """
+        try:
+            from sempy import fabric  # noqa: F401 # test if fabric is installed
+        except Exception as import_err:
+            raise TestConnectionError(
+                "Could not import `sempy.fabric`\npip install semantic-link"
+            ) from import_err
+
+        # TODO: check if we are running from within fabric?
+
+        if self.assets and test_assets:
+            for asset in self.assets:
+                asset._datasource = self
+                asset.test_connection()
+
     def add_powerbi_dax_asset(  # noqa: PLR0913
         self,
         name: str,
@@ -263,25 +286,3 @@ class FabricDatasource(Datasource):
             batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset)
-
-    @override
-    def test_connection(self, test_assets: bool = True) -> None:
-        """Test the connection for the FabricDatasource.
-
-        Args:
-            test_assets: If assets have been passed to the Datasource, whether to test them as well.
-
-        Raises:
-            TestConnectionError: If the connection test fails.
-        """
-        # TODO: first ensure we are connected to fabric.
-        # Catch any errors and raise TestConnectionError if not.
-
-        if self.assets and test_assets:
-            for asset in self.assets:
-                asset._datasource = self
-                asset.test_connection()
-
-        raise NotImplementedError(
-            f"test_connection is not implemented for {type(self).__name__}."
-        )
