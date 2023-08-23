@@ -1,4 +1,5 @@
 import logging
+import uuid
 from typing import List, Optional
 
 logger = logging.getLogger(__name__)
@@ -33,8 +34,10 @@ class Asset:
         # Both S3/Azure
         delimiter: Optional[str] = None,
         reader_options: Optional[dict] = None,
+        id: Optional[uuid.UUID] = None,
     ) -> None:
         self._name = name
+        self._id = id
         self._base_directory = base_directory
         self._glob_directive = glob_directive
         self._pattern = pattern
@@ -66,6 +69,10 @@ class Asset:
     @property
     def name(self) -> str:
         return self._name
+
+    @property
+    def id(self) -> str:
+        return self._id
 
     @property
     def base_directory(self) -> Optional[str]:
