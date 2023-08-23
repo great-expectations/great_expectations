@@ -4713,7 +4713,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _init_block_style_datasource(
         self, datasource_name: str, datasource_config: DatasourceConfig
     ) -> BaseDatasource:
-        config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
+        config = copy.deepcopy(datasource_config)
 
         raw_config_dict = dict(datasourceConfigSchema.dump(config))
         substituted_config_dict: dict = self.config_provider.substitute_config(
