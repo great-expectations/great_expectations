@@ -178,7 +178,7 @@ AssetTypes = Annotated[
 ]
 
 
-class FabricDatasource(Datasource):
+class FabricPowerBIDatasource(Datasource):
     """
     Microsoft Fabric Datasource.
 
@@ -197,7 +197,7 @@ class FabricDatasource(Datasource):
 
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
-    type: Literal["fabric"] = "fabric"
+    type: Literal["fabric_powerbi"] = "fabric_powerbi"
     assets: List[AssetTypes] = []
 
     # fabric datasource specific fields
@@ -216,7 +216,7 @@ class FabricDatasource(Datasource):
 
     @override
     def test_connection(self, test_assets: bool = True) -> None:
-        """Test the connection for the FabricDatasource.
+        """Test the connection for the FabricPowerBIDatasource.
 
         Args:
             test_assets: If assets have been passed to the Datasource, whether to test them as well.

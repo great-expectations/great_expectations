@@ -1,5 +1,5 @@
 {
-    "title": "FabricDatasource",
+    "title": "FabricPowerBIDatasource",
     "description": "Microsoft Fabric Datasource.",
     "type": "object",
     "properties": {
