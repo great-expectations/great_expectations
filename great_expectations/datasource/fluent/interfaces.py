@@ -524,7 +524,7 @@ class Datasource(
         self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
 
         if self._data_context and isinstance(self._data_context, CloudDataContext):
-            self._data_context._delete_asset(id=asset.id)
+            self._data_context._delete_asset(id=str(asset.id))
         else:
             self._save_context_project_config()
 
