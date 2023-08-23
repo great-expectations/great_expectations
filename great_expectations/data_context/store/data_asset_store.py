@@ -87,17 +87,15 @@ class DataAssetStore(Store):
         return value._json_dict()
 
     @override
-    def deserialize(self, value: Union[dict, str]) -> FluentDataAsset:
+    def deserialize(self, value: dict) -> FluentDataAsset:
         """
         See parent 'Store.deserialize()' for more information
         """
         type_ = value.get("type")
         data_asset_model = _SourceFactories.type_lookup.get(type_)
-        if isinstance(value, dict):
-            if not data_asset_model:
-                raise LookupError(f"Unknown DataAsset 'type': '{type_}'")
-            return data_asset_model(**value)
-        return data_asset_model.parse_raw(value)
+        if not data_asset_model:
+            raise LookupError(f"Unknown DataAsset 'type': '{type_}'")
+        return data_asset_model(**value)
 
     @override
     def ge_cloud_response_json_to_object_dict(
