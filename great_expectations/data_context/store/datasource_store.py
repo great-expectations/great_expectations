@@ -146,7 +146,9 @@ class DatasourceStore(Store):
 
         return datasource_config_dict
 
-    def retrieve_by_name(self, datasource_name: str) -> DatasourceConfig:
+    def retrieve_by_name(
+        self, datasource_name: str
+    ) -> DatasourceConfig | FluentDatasource:
         """Retrieves a DatasourceConfig persisted in the store by it's given name.
 
         Args:
