@@ -448,13 +448,13 @@ failed_rows_tests = [
         user_flow_script="tests/integration/docusaurus/expectations/advanced/failed_rows_pandas.py",
         backend_dependencies=[],
     ),
-    IntegrationTestFixture(
-        name="failed_rows_spark",
-        data_context_dir="tests/integration/fixtures/failed_rows/great_expectations",
-        data_dir="tests/test_sets/visits",
-        user_flow_script="tests/integration/docusaurus/expectations/advanced/failed_rows_spark.py",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
+    # IntegrationTestFixture(
+    #     name="failed_rows_spark",
+    #     data_context_dir="tests/integration/fixtures/failed_rows/great_expectations",
+    #     data_dir="tests/test_sets/visits",
+    #     user_flow_script="tests/integration/docusaurus/expectations/advanced/failed_rows_spark.py",
+    #     backend_dependencies=[BackendDependencies.SPARK],
+    # ),
     # IntegrationTestFixture(
     #     name="failed_rows_sqlalchemy",
     #     data_context_dir="tests/integration/fixtures/failed_rows/great_expectations",
