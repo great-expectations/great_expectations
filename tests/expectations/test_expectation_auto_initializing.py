@@ -19,7 +19,7 @@ def test_expectation_is_expectation_auto_initializing(capsys):
     )
     captured = capsys.readouterr()
     assert (
-        "The Expectation expect_column_distinct_values_to_be_in_set is not able to be self-initialized."
+        "The Expectation expect_column_distinct_values_to_be_in_set is not able to be auto-initialized."
         in captured.out
     )
 
@@ -31,6 +31,6 @@ def test_expectation_is_expectation_auto_initializing(capsys):
     )
     captured = capsys.readouterr()
     assert (
-        "The Expectation expect_column_mean_to_be_between is able to be self-initialized. Please run by using the auto=True parameter."
+        "The Expectation expect_column_mean_to_be_between is able to be auto-initialized. Please run by using the auto=True parameter."
         in captured.out
     )

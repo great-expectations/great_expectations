@@ -1716,11 +1716,11 @@ class Expectation(metaclass=MetaExpectation):
             )
         if "auto" in expectation_impl.default_kwarg_values:
             print(
-                f"The Expectation {name} is able to be self-initialized. Please run by using the auto=True parameter."
+                f"The Expectation {name} is able to be auto-initialized. Please run by using the auto=True parameter."
             )
             return True
         else:
-            print(f"The Expectation {name} is not able to be self-initialized.")
+            print(f"The Expectation {name} is not able to be auto-initialized.")
             return False
 
     @staticmethod
