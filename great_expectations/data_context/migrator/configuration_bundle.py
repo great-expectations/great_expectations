@@ -44,17 +44,13 @@ class ConfigurationBundle:
 
         self._data_context_variables: DataContextVariables = context.variables
 
-        self._datasources: List[DatasourceConfig] = self._get_all_datasources()
-        self._expectation_suites: List[
-            ExpectationSuite
-        ] = self._get_all_expectation_suites()
-        self._checkpoints: List[CheckpointConfig] = self._get_all_checkpoints()
-        self._profilers: List[RuleBasedProfilerConfig] = self._get_all_profilers()
+        self._datasources = self._get_all_datasources()
+        self._expectation_suites = self._get_all_expectation_suites()
+        self._checkpoints = self._get_all_checkpoints()
+        self._profilers = self._get_all_profilers()
 
         # Treated slightly differently as we require the keys downstream when printing migration status.
-        self._validation_results: Dict[
-            str, ExpectationSuiteValidationResult
-        ] = self._get_all_validation_results()
+        self._validation_results = self._get_all_validation_results()
 
     @property
     def data_context_id(self) -> str:
@@ -78,7 +74,7 @@ class ConfigurationBundle:
         return self._data_context_variables
 
     @property
-    def datasources(self) -> List[DatasourceConfig]:
+    def datasources(self) -> List[DatasourceConfig | FluentDatasource]:
         return self._datasources
 
     @property
