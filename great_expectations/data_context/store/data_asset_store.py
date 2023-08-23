@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import TypedDict
 
+    from great_expectations.compatibility.typing_extensions import override
     from great_expectations.core.serializer import AbstractConfigSerializer
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
@@ -81,6 +82,7 @@ class DataAssetStore(Store):
         """
         return self._store_backend.remove_key(key.to_tuple())
 
+    @override
     def serialize(
         self, value: AssetConfig | FluentDataAsset
     ) -> Union[str, dict, AssetConfig]:
