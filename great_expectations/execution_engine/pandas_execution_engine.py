@@ -35,6 +35,7 @@ from great_expectations.core.batch_spec import (
     FabricBatchSpec,
     GCSBatchSpec,
     PandasBatchSpec,
+    PandasBatchSpecProtocol,
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
@@ -207,8 +208,8 @@ class PandasExecutionEngine(ExecutionEngine):
 
     @override
     def get_batch_data_and_markers(  # noqa: C901, PLR0912, PLR0915
-        self, batch_spec: BatchSpec
-    ) -> Tuple[Any, BatchMarkers]:  # batch_data
+        self, batch_spec: BatchSpec | PandasBatchSpecProtocol
+    ) -> Tuple[PandasBatchData, BatchMarkers]:  # batch_data
         # We need to build a batch_markers to be used in the dataframe
         batch_markers = BatchMarkers(
             {
@@ -372,21 +373,26 @@ not {batch_spec.__class__.__name__}"""
 
         return typed_batch_data, batch_markers
 
-    def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
-        splitter_method_name: Optional[str] = batch_spec.get("splitter_method")
-        if splitter_method_name:
-            splitter_fn: Callable = self._data_splitter.get_splitter_method(
-                splitter_method_name
-            )
-            splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
-            batch_data = splitter_fn(batch_data, **splitter_kwargs)
+    def _apply_splitting_and_sampling_methods(
+        self,
+        batch_spec: BatchSpec | PandasBatchSpecProtocol,
+        batch_data: PandasBatchData,
+    ):
+        if isinstance(batch_spec, BatchSpec):
+            splitter_method_name: Optional[str] = batch_spec.get("splitter_method")
+            if splitter_method_name:
+                splitter_fn: Callable = self._data_splitter.get_splitter_method(
+                    splitter_method_name
+                )
+                splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
+                batch_data = splitter_fn(batch_data, **splitter_kwargs)
 
-        sampler_method_name: Optional[str] = batch_spec.get("sampling_method")
-        if sampler_method_name:
-            sampling_fn: Callable = self._data_sampler.get_sampler_method(
-                sampler_method_name
-            )
-            batch_data = sampling_fn(batch_data, batch_spec)
+            sampler_method_name: Optional[str] = batch_spec.get("sampling_method")
+            if sampler_method_name:
+                sampling_fn: Callable = self._data_sampler.get_sampler_method(
+                    sampler_method_name
+                )
+                batch_data = sampling_fn(batch_data, batch_spec)
 
         return batch_data
 
