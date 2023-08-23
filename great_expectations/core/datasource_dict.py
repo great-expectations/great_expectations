@@ -24,7 +24,8 @@ logger = logging.getLogger(__name__)
 
 class DatasourceDict(UserDict):
     """
-    An abstraction around the DatasourceStore to enable easy retrieval and storage of Datasource objects.
+    An abstraction around the DatasourceStore to enable easy retrieval and storage of Datasource objects
+    using dictionary syntactic sugar.
     """
 
     def __init__(
@@ -33,7 +34,7 @@ class DatasourceDict(UserDict):
         datasource_store: DatasourceStore,
         config_provider: _ConfigurationProvider,
     ):
-        self._context = context  # If possible, we should avoid passing the context through - let's only inject essential dependencies
+        self._context = context  # If possible, we should avoid passing the context through - once block-style is removed, we can extract this
         self._datasource_store = datasource_store
         self._config_provider = config_provider
 
@@ -54,7 +55,6 @@ class DatasourceDict(UserDict):
 
         As a reasonable middle ground, we override certain dunder methods to be more performant (ex: see __contains__)
         """
-        # May potentially be expensive - only
         datasources = {}
         for name in self._names:
             try:
@@ -65,7 +65,6 @@ class DatasourceDict(UserDict):
         return datasources
 
     def __contains__(self, name: str) -> bool:
-        # Performance optimization over parent's `name in self.data`
         return name in self._names
 
     def __setitem__(self, _: str, ds: FluentDatasource | BaseDatasource) -> None:
