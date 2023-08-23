@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Optional, Union, overload
+from typing import TYPE_CHECKING, Optional, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.data_context_key import (
@@ -87,16 +87,11 @@ class DataAssetStore(Store):
         """
         See parent 'Store.serialize()' for more information
         """
+        if isinstance(value, FluentDataAsset):
+            return value._json_dict()
         return self._serializer.serialize(value)
 
-    @overload
-    def deserialize(self, value: AssetConfig) -> AssetConfig:
-        ...
-
-    @overload
-    def deserialize(self, value: FluentDataAsset) -> FluentDataAsset:
-        ...
-
+    @override
     def deserialize(self, value: Union[dict, str]) -> AssetConfig | FluentDataAsset:
         """
         See parent 'Store.deserialize()' for more information
@@ -113,6 +108,7 @@ class DataAssetStore(Store):
         else:
             return self._schema.loads(value)
 
+    @override
     def ge_cloud_response_json_to_object_dict(
         self, response_json: CloudResponsePayloadTD  # type: ignore[override]
     ) -> dict:
@@ -144,6 +140,7 @@ class DataAssetStore(Store):
 
         self.remove_key(self._build_key_from_config(data_asset_config))
 
+    @override
     def _build_key_from_config(  # type: ignore[override]
         self, data_asset_config: AssetConfig | FluentDataAsset
     ) -> Union[GXCloudIdentifier, DataContextVariableKey]:
