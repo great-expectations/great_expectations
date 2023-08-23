@@ -12,7 +12,7 @@ import uuid
 import warnings
 import webbrowser
 from abc import ABC, abstractmethod
-from collections import OrderedDict, UserDict
+from collections import OrderedDict
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -191,62 +191,6 @@ yaml = YAMLHandler()
 T = TypeVar("T", dict, list, str)
 
 
-class DatasourceDict(UserDict):
-    def __init__(self, context: AbstractDataContext):
-        self._context = context
-        self._datasource_store = context._datasource_store
-        self._config_provider = context.config_provider
-        self._fluent_config = context.fluent_config
-
-    @property
-    def data(self):
-        keys = self._datasource_store.list_keys()
-        names = [key.resource_name for key in keys]
-        return {name: self.__getitem__(name) for name in names}
-
-    def __setitem__(self, key: Any, item: Any) -> None:
-        pass
-
-    def __getitem__(self, name: str) -> Any:
-        config = self._datasource_store.retrieve_by_name(name)
-        if "type" in config:
-            return self._init_fluent_datasource(name=name, config=config)
-        return self._init_block_datasource(name=name, config=config)
-
-    def _init_fluent_datasource(self, name: str, config: dict) -> FluentDatasource:
-        if self._datasource_store.cloud_mode:
-            datasource = self._add_fluent_datasource(**config)
-            datasource._rebuild_asset_data_connectors()
-            return datasource
-        return self._fluent_config.get_datasource(name)
-
-    def _init_block_datasource(self, name: str, config: dict) -> Datasource:
-        config = copy.deepcopy(config)  # type: ignore[assignment]
-
-        raw_config_dict = dict(datasourceConfigSchema.dump(config))
-        substituted_config_dict: dict = self._config_provider.substitute_config(
-            raw_config_dict
-        )
-
-        raw_datasource_config = datasourceConfigSchema.load(raw_config_dict)
-        substituted_datasource_config = datasourceConfigSchema.load(
-            substituted_config_dict
-        )
-        substituted_datasource_config.name = name
-
-        return self._context._instantiate_datasource_from_config(
-            raw_config=raw_datasource_config,
-            substituted_config=substituted_datasource_config,
-        )
-
-    def __contains__(self, name: str) -> bool:
-        try:
-            _ = self.__getitem__(name)
-            return True
-        except:
-            return False
-
-
 @public_api
 class AbstractDataContext(ConfigPeer, ABC):
     """Base class for all Data Contexts that contains shared functionality.
@@ -367,11 +311,11 @@ class AbstractDataContext(ConfigPeer, ABC):
             self.project_config_with_variables_substituted.anonymous_usage_statistics
         )
 
-        # # Store cached datasources but don't init them
-        # self._cached_datasources: dict = {}
+        # Store cached datasources but don't init them
+        self._cached_datasources: dict = {}
 
-        # # Build the datasources we know about and have access to
-        # self._init_datasources()
+        # Build the datasources we know about and have access to
+        self._init_datasources()
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies: dict = {}
@@ -398,8 +342,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._attach_fluent_config_datasources_and_build_data_connectors(
             self.fluent_config
         )
-
-        self._datasource_dict = DatasourceDict(self)
 
     def _init_config_provider(self) -> _ConfigurationProvider:
         config_provider = _ConfigurationProvider()
@@ -864,7 +806,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             if set_datasource.id:
                 logger.debug(f"Assigning `id` to '{datasource_name}'")
                 datasource.id = set_datasource.id
-
+        self.datasources[datasource_name] = datasource
         return datasource
 
     def _update_fluent_datasource(
@@ -893,7 +835,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         updated_datasource.test_connection()
         self._save_project_config(_fds_datasource=updated_datasource)
 
-        return updated_datasource
+        self.datasources[datasource_name] = updated_datasource
 
     def _delete_fluent_datasource(
         self, datasource_name: str, _call_store: bool = True
@@ -910,6 +852,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             # Raise key error instead?
             logger.info(f"No Datasource '{datasource_name}' to delete")
+        self.datasources.pop(datasource_name, None)
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
@@ -1198,16 +1141,16 @@ class AbstractDataContext(ConfigPeer, ABC):
             assert name, 'Fluent Datasource kwargs must include the keyword "name"'
             kwargs["name"] = name
             if name in self.datasources:
-                return_datasource = self._update_fluent_datasource(**kwargs)
+                self._update_fluent_datasource(**kwargs)
             else:
-                return_datasource = self._add_fluent_datasource(**kwargs)
+                self._add_fluent_datasource(**kwargs)
+            return_datasource = self.datasources[name]
         elif isinstance(datasource, FluentDatasource):
             if datasource.name in self.datasources:
-                return_datasource = self._update_fluent_datasource(
-                    datasource=datasource
-                )
+                self._update_fluent_datasource(datasource=datasource)
             else:
-                return_datasource = self._add_fluent_datasource(datasource=datasource)
+                self._add_fluent_datasource(datasource=datasource)
+            return_datasource = self.datasources[datasource.name]
         else:
             block_config_datasource = self._add_block_config_datasource(
                 name=name,
@@ -4606,7 +4549,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         self,
     ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, FluentDatasource]]:
         """A single holder for all Datasources in this context"""
-        return self._datasource_dict
+        return self._cached_datasources
 
     @property
     def fluent_datasources(self) -> Dict[str, FluentDatasource]:
