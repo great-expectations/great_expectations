@@ -5,7 +5,9 @@ from collections import UserDict
 from typing import TYPE_CHECKING
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.types.base import (
+    DatasourceConfig,
     datasourceConfigSchema,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource
@@ -41,10 +43,11 @@ class DatasourceDict(UserDict):
     def _names(self) -> set[str]:
         # The contents of the store may change between uses so we constantly refresh when requested
         keys = self._datasource_store.list_keys()
-        return {key.resource_name for key in keys}
+        return {key.resource_name for key in keys}  # type: ignore[attr-defined] # list_keys() is annotated with generic DataContextKey instead of subclass
 
+    @override
     @property
-    def data(self) -> dict[str, FluentDatasource | BaseDatasource]:
+    def data(self) -> dict[str, FluentDatasource | BaseDatasource]:  # type: ignore[override] # `data` is meant to be a writeable attr (not a read-only property)
         """
         `data` is referenced by the parent `UserDict` and enables the class to fulfill its various dunder methods
         (__contains__, __setitem__, __getitem__, etc)
@@ -63,9 +66,11 @@ class DatasourceDict(UserDict):
 
         return datasources
 
-    def __contains__(self, name: str) -> bool:
+    @override
+    def __contains__(self, name: object) -> bool:
         return name in self._names
 
+    @override
     def __setitem__(self, _: str, ds: FluentDatasource | BaseDatasource) -> None:
         if isinstance(ds, BaseDatasource):
             config = datasourceConfigSchema.load(ds.config)
@@ -74,6 +79,7 @@ class DatasourceDict(UserDict):
 
         self._datasource_store.set(key=None, value=config)
 
+    @override
     def __getitem__(self, name: str) -> FluentDatasource | BaseDatasource:
         ds = self._datasource_store.retrieve_by_name(name)
         if isinstance(ds, FluentDatasource):
@@ -85,7 +91,9 @@ class DatasourceDict(UserDict):
         return ds
 
     # To be removed once block-style is fully removed (deprecated as of v0.17.2)
-    def _init_block_style_datasource(self, name: str, config: dict) -> BaseDatasource:
+    def _init_block_style_datasource(
+        self, name: str, config: DatasourceConfig
+    ) -> BaseDatasource:
         return self._context._init_block_style_datasource(
             datasource_name=name, datasource_config=config
         )

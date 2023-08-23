@@ -21,6 +21,7 @@ from typing import (
     List,
     Literal,
     Mapping,
+    MutableMapping,
     Optional,
     Sequence,
     Tuple,
@@ -4543,7 +4544,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @property
     def datasources(
         self,
-    ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, FluentDatasource]]:
+    ) -> MutableMapping[str, LegacyDatasource | BaseDatasource | FluentDatasource]:
         """A single holder for all Datasources in this context"""
         return self._datasources
 
@@ -4681,7 +4682,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
-        self._datasources = {}
+        self._datasources: MutableMapping[
+            str, LegacyDatasource | BaseDatasource | FluentDatasource
+        ] = {}
 
         config: DataContextConfig = self.config
 
@@ -4696,10 +4699,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         for datasource_name, datasource_config in datasources.items():
             try:
-                datasource = self._init_block_style_datasource(
+                ds = self._init_block_style_datasource(
                     datasource_name=datasource_name, datasource_config=datasource_config
                 )
-                self.datasources[datasource_name] = datasource
+                self.datasources[datasource_name] = ds
             except gx_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
                 # this error will happen if our configuration contains datasources that GX can no longer connect to.
@@ -4708,7 +4711,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 pass
 
     def _init_block_style_datasource(
-        self, datasource_name: str, datasource_config: dict
+        self, datasource_name: str, datasource_config: DatasourceConfig
     ) -> BaseDatasource:
         config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
 
@@ -4847,7 +4850,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         # If attempting to override an existing value, ensure that the id persists
         name = config.name
-        if not config.id and name in self.datasources:
+        if not config.id and name and name in self.datasources:
             existing_datasource = self.datasources[name]
             if isinstance(existing_datasource, BaseDatasource):
                 config.id = existing_datasource.id
