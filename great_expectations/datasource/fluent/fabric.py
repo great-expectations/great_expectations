@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     ClassVar,
@@ -8,6 +9,7 @@ from typing import (
     List,
     Literal,
     Optional,
+    Set,
     Tuple,
     Type,
     Union,
@@ -16,6 +18,7 @@ from typing import (
 import pydantic
 from typing_extensions import Annotated, TypeAlias
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import FabricBatchSpec
 from great_expectations.datasource.fluent import BatchRequest
@@ -42,6 +45,13 @@ class _PowerBIAsset(DataAsset):
     """Microsoft PowerBI Asset base class."""
 
     _reader_method: ClassVar[FabricReaderMethods]
+    _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
+        "batch_metadata",
+        "name",
+        "order_by",
+        "type",
+        "id",
+    }
 
     @override
     def test_connection(self) -> None:
@@ -62,7 +72,7 @@ class _PowerBIAsset(DataAsset):
             "workspace": self._datasource.workspace,
             "dataset": self._datasource.dataset,
             **self.dict(
-                # exclude=self._EXCLUDE_FROM_READER_OPTIONS,
+                exclude=self._EXCLUDE_FROM_READER_OPTIONS,
                 exclude_unset=True,
                 by_alias=True,
                 config_provider=self._datasource._config_provider,
@@ -110,7 +120,7 @@ class _PowerBIAsset(DataAsset):
                 data=data,
                 metadata=batch_metadata,
                 legacy_batch_markers=markers,
-                legacy_batch_spec=batch_spec,  # type: ignore[arg-type] # will be coerced to BatchSpec
+                legacy_batch_spec=batch_spec.to_json_dict(),  # type: ignore[arg-type] # will be coerced to BatchSpec
                 legacy_batch_definition=batch_definition,
             )
         )
@@ -129,6 +139,30 @@ class _PowerBIAsset(DataAsset):
             data_asset_name=self.name,
             options={},
         )
+
+    @override
+    def _validate_batch_request(self, batch_request: BatchRequest) -> None:
+        """Validates the batch_request has the correct form.
+
+        Args:
+            batch_request: A batch request object to be validated.
+        """
+        if not (
+            batch_request.datasource_name == self.datasource.name
+            and batch_request.data_asset_name == self.name
+            and not batch_request.options
+        ):
+            expect_batch_request_form = BatchRequest(
+                datasource_name=self.datasource.name,
+                data_asset_name=self.name,
+                options={},
+                batch_slice=batch_request._batch_slice_input,
+            )
+            raise gx_exceptions.InvalidBatchRequestError(
+                "BatchRequest should have form:\n"
+                f"{pf(expect_batch_request_form.dict())}\n"
+                f"but actually has form:\n{pf(batch_request.dict())}\n"
+            )
 
 
 class PowerBIDax(_PowerBIAsset):
@@ -266,12 +300,17 @@ class FabricPowerBIDatasource(Datasource):
         )
         return self._add_asset(asset)
 
-    # TODO: add remaining args
-    def add_powerbi_measure_asset(
+    def add_powerbi_measure_asset(  # noqa: PLR0913
         self,
         name: str,
         order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
+        groupby_columns: Optional[List[Tuple[str, str]]] = None,
+        filters: Optional[Dict[Tuple[str, str], List[str]]] = None,
+        fully_qualified_columns: Optional[bool] = None,
+        num_rows: Optional[int] = None,
+        pandas_convert_dtypes: bool = True,
+        use_xmla: bool = False,
     ) -> PowerBIMeasure:
         """Adds a PowerBIMeasure asset to this datasource.
 
@@ -288,6 +327,13 @@ class FabricPowerBIDatasource(Datasource):
             name=name,
             order_by=order_by_sorters,
             batch_metadata=batch_metadata or {},
+            groupby_columns=groupby_columns,
+            # TODO: require custom serde for keys that are tuples
+            filters=filters,
+            fully_qualified_columns=fully_qualified_columns,
+            num_rows=num_rows,
+            pandas_convert_dtypes=pandas_convert_dtypes,
+            use_xmla=use_xmla,
         )
         return self._add_asset(asset)
 

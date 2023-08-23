@@ -136,7 +136,10 @@ class FabricBatchSpec(PandasBatchSpecProtocol):
 
     @override
     def to_json_dict(self) -> dict[str, JSONValues]:
-        raise NotImplementedError
+        return {
+            "reader_method": self.reader_method,
+            "reader_options": self.reader_options,
+        }
 
     def get_reader_function(self) -> Callable[..., pd.DataFrame]:
         # lazy import of fabric module which cotains the reader functions
