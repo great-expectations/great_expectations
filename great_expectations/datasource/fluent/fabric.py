@@ -73,6 +73,7 @@ class _PowerBIAsset(DataAsset):
             "dataset": self._datasource.dataset,
             **self.dict(
                 exclude=self._EXCLUDE_FROM_READER_OPTIONS,
+                exclude_none=True,
                 exclude_unset=True,
                 by_alias=True,
                 config_provider=self._datasource._config_provider,

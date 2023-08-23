@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import sys
+from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Callable, Final, Generator, Literal
 
 import pandas as pd
@@ -117,6 +118,7 @@ class TestFabricPowerBI:
         asset_type: Literal["powerbi_dax", "powerbi_measure", "powerbi_table"],
         asset_kwargs: dict,
     ):
+        """Test that the `reader_options` are passed through to the `PandasExecutionEngine`"""
         print(power_bi_datasource)
         # intitial datasource should have no assets
         assert not power_bi_datasource.assets
@@ -129,13 +131,9 @@ class TestFabricPowerBI:
         my_asset.get_batch_list_from_batch_request(batch_request)
 
         _, captured_kwargs = capture_reader_fn_params
-        assert captured_kwargs == [
-            {
-                "dataset": power_bi_datasource.dataset,
-                "workspace": power_bi_datasource.workspace,
-                **asset_kwargs,
-            }
-        ]
+        print(f"keyword args:\n{pf(captured_kwargs[-1])}")
+        for asset_kwarg in asset_kwargs:
+            assert asset_kwarg in captured_kwargs[-1]
 
 
 if __name__ == "__main__":

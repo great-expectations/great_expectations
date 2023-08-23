@@ -119,10 +119,10 @@ class FabricBatchSpec(PandasBatchSpecProtocol):
     def __init__(
         self,
         reader_method: FabricReaderMethods,
-        **reader_kwargs: Any,
+        reader_options: dict[str, Any],
     ) -> None:
         self._reader_method = reader_method
-        self._reader_kwargs = reader_kwargs
+        self._reader_options = reader_options
 
     @property
     @override
@@ -132,7 +132,7 @@ class FabricBatchSpec(PandasBatchSpecProtocol):
     @property
     @override
     def reader_options(self) -> dict[str, Any]:
-        return self._reader_kwargs
+        return self._reader_options
 
     @override
     def to_json_dict(self) -> dict[str, JSONValues]:
