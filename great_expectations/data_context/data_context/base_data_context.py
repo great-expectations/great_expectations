@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import warnings
 from typing import TYPE_CHECKING, Mapping
 
 from great_expectations.core._docs_decorators import deprecated_method_or_class
@@ -153,6 +154,13 @@ def BaseDataContext(
 
     --ge-feature-maturity-info--
     """
+    # deprecated-v0.17.10
+    warnings.warn(
+        "DataContext and BaseDataContext are deprecated as of v0.17.10 and will be removed in v0.20. "
+        "Please use gx.get_context instead.",
+        DeprecationWarning,
+    )
+
     project_data_context_config: DataContextConfig = (
         AbstractDataContext.get_or_create_data_context_config(project_config)
     )
