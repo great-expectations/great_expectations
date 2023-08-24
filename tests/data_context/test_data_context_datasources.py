@@ -339,7 +339,7 @@ def test_BaseDataContext_update_datasource_creates_new_value_in_cache(
 
 
 @pytest.mark.unit
-def test_BaseDataContext_delete_datasource_updates_cache(
+def test_delete_datasource(
     in_memory_runtime_context: EphemeralDataContext,
 ) -> None:
     """
@@ -351,14 +351,8 @@ def test_BaseDataContext_delete_datasource_updates_cache(
     context = in_memory_runtime_context
 
     name = context.list_datasources()[0]["name"]
+    context.delete_datasource(name)
 
-    # If the value is in the cache, no store methods should be invoked
-    with mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.remove_key"
-    ) as mock_delete, pytest.deprecated_call():
-        context.delete_datasource(name, save_changes=False)
-
-    assert not mock_delete.called
     assert name not in context.datasources
 
 

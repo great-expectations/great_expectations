@@ -915,9 +915,7 @@ class CloudDataContext(SerializableDataContext):
 
         Explicitly override base class implementation to retain legacy behavior.
         """
-        logger.debug(
-            "CloudDataContext._save_project_config() has no `fds_datasource` to update"
-        )
+        pass
 
     @override
     def _view_validation_result(self, result: CheckpointResult) -> None:

@@ -790,8 +790,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         datasource._data_context = self
 
-        datasource._data_context._save_project_config()
-
         # Round trip to ensure id is part of return obj
         self.datasources[datasource_name] = datasource
         ds = self.datasources[datasource_name]
@@ -823,7 +821,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         updated_datasource._rebuild_asset_data_connectors()
 
         updated_datasource.test_connection()
-        self._save_project_config()
 
         self.datasources[datasource_name] = updated_datasource
 
@@ -1584,9 +1581,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             datasourceConfigSchema.load(datasource.config)
             self.datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
-
-        if save_changes:
-            self._save_project_config()
 
     @overload
     def add_checkpoint(  # noqa: PLR0913
