@@ -28,8 +28,8 @@ class QueryTemplateValues(QueryMetricProvider):
     @classmethod
     def get_query(cls, query, template_dict, selectable):
         template_dict_reformatted = {
-            k: sa.text(v).format(active_batch=selectable)
-            if isinstance(v, int)
+            k: str(v).format(active_batch=selectable)
+            if isinstance(v, (float, int))
             else v.format(active_batch=selectable)
             for k, v in template_dict.items()
         }
