@@ -62,7 +62,7 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/expectations/core/expect_column_values_to_not_match_regex_list.py Name: validate_configuration",
     "File: great_expectations/expectations/core/expect_compound_columns_to_be_unique.py Name: validate_configuration",
     "File: great_expectations/expectations/core/expect_select_column_values_to_be_unique_within_record.py Name: validate_configuration",
-    "File: great_expectations/expectations/expectation.py Name: is_expectation_self_initializing",
+    "File: great_expectations/expectations/expectation.py Name: is_expectation_auto_initializing",
     "File: great_expectations/expectations/expectation.py Name: validate_configuration",
     "File: great_expectations/expectations/metrics/map_metric_provider/column_pair_condition_partial.py Name: column_pair_condition_partial",
     "File: great_expectations/expectations/metrics/map_metric_provider/multicolumn_condition_partial.py Name: multicolumn_condition_partial",

@@ -35,7 +35,10 @@ from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core._docs_decorators import (
+    deprecated_method_or_class,
+    public_api,
+)
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,
     parse_result_format,
@@ -1682,7 +1685,23 @@ class Expectation(metaclass=MetaExpectation):
         return None
 
     @staticmethod
+    @deprecated_method_or_class(
+        version="0.17.11", message="Please use is_expectation_auto_initializing instead"
+    )
     def is_expectation_self_initializing(name: str) -> bool:
+        """
+        Given the name of an Expectation, returns a boolean that represents whether an Expectation can be auto-intialized.
+
+        Args:
+            name (str): name of Expectation
+
+        Returns:
+            boolean that represents whether an Expectation can be auto-initialized. Information also outputted to logger.
+        """
+        return Expectation.is_expectation_auto_initializing(name=name)
+
+    @staticmethod
+    def is_expectation_auto_initializing(name: str) -> bool:
         """
         Given the name of an Expectation, returns a boolean that represents whether an Expectation can be auto-intialized.
 
@@ -1701,11 +1720,11 @@ class Expectation(metaclass=MetaExpectation):
             )
         if "auto" in expectation_impl.default_kwarg_values:
             print(
-                f"The Expectation {name} is able to be self-initialized. Please run by using the auto=True parameter."
+                f"The Expectation {name} is able to be auto-initialized. Please run by using the auto=True parameter."
             )
             return True
         else:
-            print(f"The Expectation {name} is not able to be self-initialized.")
+            print(f"The Expectation {name} is not able to be auto-initialized.")
             return False
 
     @staticmethod
