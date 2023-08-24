@@ -4683,7 +4683,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 ds = self._init_block_style_datasource(
                     datasource_name=datasource_name, datasource_config=datasource_config
                 )
-                self.datasources[datasource_name] = ds
+                self.datasources.data[datasource_name] = ds
             except gx_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
                 # this error will happen if our configuration contains datasources that GX can no longer connect to.
