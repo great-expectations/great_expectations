@@ -64,6 +64,7 @@ class DatasourceDict(UserDict):
 
     @override
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
+        config: FluentDatasource | DatasourceConfig
         if isinstance(ds, FluentDatasource):
             config = ds
         else:
