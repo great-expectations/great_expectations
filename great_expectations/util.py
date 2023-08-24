@@ -1929,6 +1929,7 @@ def get_context(  # noqa: PLR0913
         )
 
     from great_expectations.data_context.data_context import (
+        AbstractDataContext,
         CloudDataContext,
         EphemeralDataContext,
         FileDataContext,
