@@ -1896,12 +1896,14 @@ def get_context(  # noqa: PLR0913
         "file": dict(
             project_config=project_config,
             context_root_dir=context_root_dir,
+            project_root_dir=project_root_dir,
             runtime_environment=runtime_environment,
             cloud_mode=False,
         ),
         "cloud": dict(
             project_config=project_config,
             context_root_dir=context_root_dir,
+            project_root_dir=project_root_dir,
             runtime_environment=runtime_environment,
             cloud_base_url=cloud_base_url,
             cloud_access_token=cloud_access_token,
@@ -1911,6 +1913,7 @@ def get_context(  # noqa: PLR0913
         None: dict(
             project_config=project_config,
             context_root_dir=context_root_dir,
+            project_root_dir=project_root_dir,
             runtime_environment=runtime_environment,
             cloud_base_url=cloud_base_url,
             cloud_access_token=cloud_access_token,
@@ -1959,6 +1962,7 @@ def get_context(  # noqa: PLR0913
 def _get_context(  # noqa: PLR0913
     project_config: DataContextConfig | None = None,
     context_root_dir: PathStr | None = None,
+    project_root_dir: PathStr | None = None,
     runtime_environment: dict | None = None,
     cloud_base_url: str | None = None,
     cloud_access_token: str | None = None,
