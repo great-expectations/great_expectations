@@ -909,13 +909,27 @@ class CloudDataContext(SerializableDataContext):
         return expectation_suite
 
     @override
-    def _save_project_config(self) -> None:
+    def _save_project_config(
+        self, _fds_datasource: FluentDatasource | None = None
+    ) -> None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
 
         Explicitly override base class implementation to retain legacy behavior.
         """
-        pass
+        # 042723 kilo59
+        # Currently CloudDataContext and FileDataContext diverge in how FDS are persisted.
+        # FileDataContexts don't use the DatasourceStore at all to save or hydrate FDS configs.
+        # CloudDataContext does use DatasourceStore in order to make use of the Cloud http clients.
+        # The intended future state is for a new FluentDatasourceStore that can fully encapsulate
+        # the different requirements for FDS vs BDS.
+        # At which time `_save_project_config` will revert to being a no-op operation on the CloudDataContext.
+        if _fds_datasource:
+            self._datasource_store.set(key=None, value=_fds_datasource)
+        else:
+            logger.debug(
+                "CloudDataContext._save_project_config() has no `fds_datasource` to update"
+            )
 
     @override
     def _view_validation_result(self, result: CheckpointResult) -> None:

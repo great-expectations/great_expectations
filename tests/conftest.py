@@ -3604,7 +3604,6 @@ def empty_base_data_context_in_cloud_mode(
             cloud_mode=True,
             cloud_config=ge_cloud_config,
         )
-    context._datasources = {}  # Mock datasource dict
     assert context.list_datasources() == []
     return context
 
@@ -3641,7 +3640,6 @@ def empty_data_context_in_cloud_mode(
             context_root_dir=project_path_name,
         )
 
-    context._datasources = {}  # Mock datasource dict
     return context
 
 
@@ -3662,7 +3660,6 @@ def empty_cloud_data_context(
         cloud_access_token=ge_cloud_config.access_token,
         cloud_organization_id=ge_cloud_config.organization_id,
     )
-    context._datasources = {}  # Mock datasource dict
     return context
 
 
