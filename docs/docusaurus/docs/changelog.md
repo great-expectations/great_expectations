@@ -10,6 +10,28 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.17.12
+* [FEATURE] Use the explicit column delimiters if passed in by user. ([#8459](https://github.com/great-expectations/great_expectations/pull/8459))
+* [FEATURE] ID/PK - Update Jupyter Notebooks for FDS ([#8580](https://github.com/great-expectations/great_expectations/pull/8580))
+* [BUGFIX] Fix incorrect type of SqlAlchemyExecutionEngine constructor's arg ([#8487](https://github.com/great-expectations/great_expectations/pull/8487)) (thanks @YoitoFes)
+* [BUGFIX] Fix faulty logic around writing to .gitignore in context root dir ([#8597](https://github.com/great-expectations/great_expectations/pull/8597))
+* [BUGFIX] Update Docs test after DataContext Deprecation ([#8599](https://github.com/great-expectations/great_expectations/pull/8599))
+* [BUGFIX] Fix DraftDatasourceConfigAction connection string substitution ([#8613](https://github.com/great-expectations/great_expectations/pull/8613))
+* [DOCS] Update Data Assistant and Edit an Expectation Suite Topics ([#8564](https://github.com/great-expectations/great_expectations/pull/8564))
+* [MAINTENANCE] Delete deprecated `get_batch` ([#8574](https://github.com/great-expectations/great_expectations/pull/8574))
+* [MAINTENANCE] Delete deprecated `add_batch_kwargs_generator` ([#8573](https://github.com/great-expectations/great_expectations/pull/8573))
+* [MAINTENANCE] Add typing stubs to `requirements-types.txt` ([#8501](https://github.com/great-expectations/great_expectations/pull/8501))
+* [MAINTENANCE] mypy 1.5 ([#8586](https://github.com/great-expectations/great_expectations/pull/8586))
+* [MAINTENANCE] Enable explicit-override mypy rule ([#8589](https://github.com/great-expectations/great_expectations/pull/8589))
+* [MAINTENANCE] Consistently use `datasources` property on context ([#8596](https://github.com/great-expectations/great_expectations/pull/8596))
+* [MAINTENANCE] Deprecate `BaseDataContext` and `DataContext` ([#8584](https://github.com/great-expectations/great_expectations/pull/8584))
+* [MAINTENANCE] Update metrics data model to use generic value type ([#8575](https://github.com/great-expectations/great_expectations/pull/8575))
+* [MAINTENANCE] Update the CTA in the Data Docs footer ([#8603](https://github.com/great-expectations/great_expectations/pull/8603))
+* [MAINTENANCE] Clean-up: Renaming "self-initializing" to "auto-initializing" ([#8609](https://github.com/great-expectations/great_expectations/pull/8609))
+* [MAINTENANCE] Adding support for project_root_dir to get_context ([#8388](https://github.com/great-expectations/great_expectations/pull/8388))
+* [MAINTENANCE] Simplify CI YAML conditional for 0.17.12 release ([#8612](https://github.com/great-expectations/great_expectations/pull/8612))
+* [MAINTENANCE] Add mode param to get_context ([#8593](https://github.com/great-expectations/great_expectations/pull/8593))
+
 ### 0.17.11
 * [FEATURE] Make SQLDatasource.assets field a `tagged-union` ([#8532](https://github.com/great-expectations/great_expectations/pull/8532))
 * [BUGFIX] DatabricksSQL TableAsset quoted identifiers ([#8523](https://github.com/great-expectations/great_expectations/pull/8523))
