@@ -1,9 +1,23 @@
 import great_expectations as gx
+import pathlib
+
+folder_path = str(
+    pathlib.Path(
+        gx.__file__,
+        "..",
+        "..",
+        "tests",
+        "test_sets",
+        "visits",
+    ).resolve(strict=True)
+)
+
+connection_string: str = f"sqlite:///{folder_path}/visits.db"
 
 context = gx.get_context(context_root_dir="./great_expectations", cloud_mode=False)
 datasource = context.sources.add_sqlite(
     name="visits_datasource",
-    connection_string=f"sqlite:///data/visits.db",
+    connection_string=connection_string,
 )
 asset = datasource.add_table_asset(
     name="visits",

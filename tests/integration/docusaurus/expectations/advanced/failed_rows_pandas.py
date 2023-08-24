@@ -1,8 +1,22 @@
 import great_expectations as gx
+import pathlib
+
+folder_path = str(
+    pathlib.Path(
+        gx.__file__,
+        "..",
+        "..",
+        "tests",
+        "test_sets",
+        "visits",
+    ).resolve(strict=True)
+)
+
+file_path: str = folder_path + "/visits.csv"
 
 context = gx.get_context(context_root_dir="./great_expectations", cloud_mode=False)
 data_asset = context.sources.add_pandas(name="visits_datasource").add_csv_asset(
-    name="visits", filepath_or_buffer="./data/visits.csv", sep="\t"
+    name="visits", filepath_or_buffer=file_path, sep="\t"
 )
 
 # get checkpoint
