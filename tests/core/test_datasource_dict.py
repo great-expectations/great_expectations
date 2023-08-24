@@ -136,6 +136,7 @@ def pandas_block_datasource_config(
     return datasourceConfigSchema.load(config)
 
 
+@pytest.mark.unit
 def test_datasource_dict_data_property_requests_store_just_in_time(
     empty_datasource_dict: DatasourceDict,
 ):
@@ -146,6 +147,7 @@ def test_datasource_dict_data_property_requests_store_just_in_time(
     store.list_keys_count = 1
 
 
+@pytest.mark.unit
 def test_datasource_dict___contains___requests_store_just_in_time(
     empty_datasource_dict: DatasourceDict,
 ):
@@ -156,6 +158,7 @@ def test_datasource_dict___contains___requests_store_just_in_time(
     store.list_keys_count = 1
 
 
+@pytest.mark.unit
 def test_datasource_dict___setitem___with_fds(
     empty_datasource_dict: DatasourceDict, pandas_fds: PandasDatasource
 ):
@@ -166,6 +169,7 @@ def test_datasource_dict___setitem___with_fds(
     assert store.set_count == 1
 
 
+@pytest.mark.unit
 def test_datasource_dict___setitem___with_block_datasource(
     empty_datasource_dict: DatasourceDict, pandas_block_datasource: Datasource
 ):
@@ -176,6 +180,7 @@ def test_datasource_dict___setitem___with_block_datasource(
     assert store.set_count == 1
 
 
+@pytest.mark.unit
 def test_datasource_dict___delitem__raises_key_error_on_store_miss(
     empty_datasource_dict: DatasourceDict,
 ):
@@ -186,6 +191,7 @@ def test_datasource_dict___delitem__raises_key_error_on_store_miss(
         empty_datasource_dict.pop("my_nonexistent_ds")
 
 
+@pytest.mark.unit
 def test_datasource_dict___getitem__raises_key_error_on_store_miss(
     empty_datasource_dict: DatasourceDict,
 ):
@@ -193,6 +199,7 @@ def test_datasource_dict___getitem__raises_key_error_on_store_miss(
         empty_datasource_dict["my_nonexistent_ds"]
 
 
+@pytest.mark.unit
 def test_datasource_dict___getitem___with_fds(
     build_datasource_dict_with_store_spy: Callable, pandas_fds: PandasDatasource
 ):
@@ -207,6 +214,7 @@ def test_datasource_dict___getitem___with_fds(
     assert retrieved_fds.dict() == pandas_fds.dict()
 
 
+@pytest.mark.unit
 def test_datasource_dict___getitem___with_block_datasource(
     build_datasource_dict_with_store_spy: Callable, pandas_block_datasource_config: dict
 ):
@@ -226,54 +234,63 @@ def test_datasource_dict___getitem___with_block_datasource(
     )
 
 
+@pytest.mark.unit
 def test_cacheable_datasource_dict___contains___uses_cache(
     empty_cacheable_datasource_dict: CacheableDatasourceDict,
 ):
     pass
 
 
+@pytest.mark.unit
 def test_cacheable_datasource_dict___contains___requests_store_upon_cache_miss(
     empty_cacheable_datasource_dict: CacheableDatasourceDict,
 ):
     pass
 
 
+@pytest.mark.unit
 def test_cacheable_datasource_dict___setitem___with_fds(
     empty_cacheable_datasource_dict: CacheableDatasourceDict,
 ):
     pass
 
 
+@pytest.mark.unit
 def test_cacheable_datasource_dict___setitem___with_block_datasource(
     empty_cacheable_datasource_dict: CacheableDatasourceDict,
 ):
     pass
 
 
+@pytest.mark.unit
 def test_cacheable_datasource_dict___delitem__updates_both_cache_and_store(
     empty_cacheable_datasource_dict: CacheableDatasourceDict,
 ):
     pass
 
 
+@pytest.mark.unit
 def test_cacheable_datasource_dict___delitem__raises_key_error_on_store_miss(
     empty_cacheable_datasource_dict: CacheableDatasourceDict,
 ):
     pass
 
 
+@pytest.mark.unit
 def test_cacheable_datasource_dict___getitem__raises_key_error_on_store_miss(
     empty_cacheable_datasource_dict: CacheableDatasourceDict,
 ):
     pass
 
 
+@pytest.mark.unit
 def test_cacheable_datasource_dict___getitem___with_fds(
     empty_cacheable_datasource_dict: CacheableDatasourceDict,
 ):
     pass
 
 
+@pytest.mark.unit
 def test_cacheable_datasource_dict___getitem___with_block_datasource(
     empty_cacheable_datasource_dict: CacheableDatasourceDict,
 ):
