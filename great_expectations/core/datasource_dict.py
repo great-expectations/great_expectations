@@ -102,7 +102,7 @@ class DatasourceDict(UserDict):
         )
 
 
-class CacheEnabledDatasourceDict(DatasourceDict):
+class CacheableDatasourceDict(DatasourceDict):
     """
     Extends the capabilites of the DatasourceDict by placing a caching layer in front of the underlying store.
 
@@ -128,7 +128,12 @@ class CacheEnabledDatasourceDict(DatasourceDict):
 
     @override
     def __contains__(self, name: object) -> bool:
-        return name in self.data or super().__contains__(name)
+        if name in self.data:
+            return True
+        try:
+            return super().__contains__(name)
+        except KeyError:
+            return False
 
     @override
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:

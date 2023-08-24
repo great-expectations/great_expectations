@@ -170,6 +170,7 @@ class DatasourceStore(Store):
             )
 
         datasource_config: DatasourceConfig = copy.deepcopy(self.get(datasource_key))  # type: ignore[assignment]
+        datasource_config["name"] = datasource_name
         return datasource_config
 
     def delete(self, datasource_config: DatasourceConfig | FluentDatasource) -> None:
