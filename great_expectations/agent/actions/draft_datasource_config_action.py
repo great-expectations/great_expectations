@@ -23,6 +23,7 @@ class DraftDatasourceConfigAction(AgentAction[DraftDatasourceConfigEvent]):
                 "DraftDatasourceConfigAction received an unknown datasource type."
             ) from exc
         datasource = datasource_cls(**draft_config)
+        datasource._data_context = self._context
         datasource.test_connection(
             test_assets=True
         )  # raises `TestConnectionError` on failure
