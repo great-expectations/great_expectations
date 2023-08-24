@@ -50,4 +50,3 @@ class DraftDatasourceConfigAction(AgentAction[DraftDatasourceConfigEvent]):
             return data["data"]["attributes"]["draft_config"]
         except KeyError:
             raise RuntimeError("Malformed response received from GX-Cloud")
-
