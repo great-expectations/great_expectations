@@ -156,6 +156,7 @@ class CloudDataContext(SerializableDataContext):
         # Usage statistics are always disabled within Cloud-backed environments.
         self._usage_statistics_handler = None
 
+    @override
     def _register_providers(self, config_provider: _ConfigurationProvider) -> None:
         """
         To ensure that Cloud credentials are accessible downstream, we want to ensure that
