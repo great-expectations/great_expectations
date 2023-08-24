@@ -71,7 +71,9 @@ class DatasourceDict(UserDict):
 
         self._datasource_store.set(key=None, value=config)
 
-    def _prep_legacy_datasource_config(self, name: str, ds: BaseDatasource) -> dict:
+    def _prep_legacy_datasource_config(
+        self, name: str, ds: BaseDatasource
+    ) -> DatasourceConfig:
         config = ds.config
         # 20230824 - Chetan - Kind of gross but this ensures that we have what we need for instantiate_class_from_config
         # There's probably a better way to do this with Marshmallow but this works
