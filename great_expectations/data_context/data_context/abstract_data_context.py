@@ -4665,7 +4665,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         self._datasources: DatasourceDict = CacheEnabledDatasourceDict(
             context=self,
             datasource_store=self._datasource_store,
-            config_provider=self.config_provider,
         )
 
         config: DataContextConfig = self.config

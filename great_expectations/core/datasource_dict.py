@@ -13,7 +13,6 @@ from great_expectations.data_context.types.base import (
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
 
 if TYPE_CHECKING:
-    from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
@@ -33,11 +32,9 @@ class DatasourceDict(UserDict):
         self,
         context: AbstractDataContext,
         datasource_store: DatasourceStore,
-        config_provider: _ConfigurationProvider,
     ):
         self._context = context  # If possible, we should avoid passing the context through - once block-style is removed, we can extract this
         self._datasource_store = datasource_store
-        self._config_provider = config_provider
 
     @property
     def _names(self) -> set[str]:
@@ -50,12 +47,7 @@ class DatasourceDict(UserDict):
     def data(self) -> dict[str, FluentDatasource | BaseDatasource]:  # type: ignore[override] # `data` is meant to be a writeable attr (not a read-only property)
         """
         `data` is referenced by the parent `UserDict` and enables the class to fulfill its various dunder methods
-        (__contains__, __setitem__, __getitem__, etc)
-
-        While simply fulfilling this property would be sufficient to get the `DatasourceDict` to work, it is an
-        expensive operation (requires requesting ALL datasources and constructing them in memory).
-
-        As a reasonable middle ground, we override certain dunder methods to be more performant (ex: see __contains__)
+        (__setitem__, __getitem__, etc)
         """
         datasources = {}
         for name in self._names:
@@ -122,12 +114,10 @@ class CacheEnabledDatasourceDict(DatasourceDict):
         self,
         context: AbstractDataContext,
         datasource_store: DatasourceStore,
-        config_provider: _ConfigurationProvider,
     ):
         super().__init__(
             context=context,
             datasource_store=datasource_store,
-            config_provider=config_provider,
         )
         self._cache: dict[str, FluentDatasource | BaseDatasource] = {}
 
@@ -143,12 +133,16 @@ class CacheEnabledDatasourceDict(DatasourceDict):
     @override
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
         self.data[name] = ds
-        super().__setitem__(name, ds)
+
+        if not isinstance(ds, FluentDatasource):
+            super().__setitem__(name, ds)
 
     @override
     def __delitem__(self, name: str) -> None:
-        self.data.pop(name, None)
-        super().__delitem__(name)
+        ds = self.data.pop(name, None)
+
+        if not isinstance(ds, FluentDatasource):
+            super().__delitem__(name)
 
     @override
     def __getitem__(self, name: str) -> FluentDatasource | BaseDatasource:

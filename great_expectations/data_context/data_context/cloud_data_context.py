@@ -382,7 +382,6 @@ class CloudDataContext(SerializableDataContext):
         self._datasources = DatasourceDict(
             context=self,
             datasource_store=self._datasource_store,
-            config_provider=self.config_provider,
         )
 
     @override
