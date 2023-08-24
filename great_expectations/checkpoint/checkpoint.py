@@ -30,6 +30,7 @@ from great_expectations.checkpoint.util import (
     substitute_template_config,
     validate_validation_dict,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import RunIdentifier
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
@@ -626,6 +627,7 @@ is run), with each validation having its own defined "action_list" attribute.
         return report_object
 
     @property
+    @override
     def config(self) -> CheckpointConfig:
         return self._checkpoint_config
 
@@ -677,6 +679,7 @@ is run), with each validation having its own defined "action_list" attribute.
 
         return isinstance(self.data_context, CloudDataContext)
 
+    @override
     def __repr__(self) -> str:
         return str(self.get_config())
 
@@ -752,7 +755,7 @@ class Checkpoint(BaseCheckpoint):
         self,
         name: str,
         data_context: AbstractDataContext,
-        config_version: int | float = 1.0,
+        config_version: int | float = 1.0,  # noqa: PYI041
         template_name: str | None = None,
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
@@ -845,7 +848,7 @@ constructor arguments.
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
         profilers: list[dict] | None = None,
-        run_id: str | int | float | None = None,
+        run_id: str | int | float | None = None,  # noqa: PYI041
         run_name: str | None = None,
         run_time: datetime.datetime | None = None,
         result_format: str | dict | None = None,  # TODO: type-dict?
@@ -1121,7 +1124,7 @@ class SimpleCheckpoint(Checkpoint):
         self,
         name: str,
         data_context,
-        config_version: int | float | None = 1.0,
+        config_version: int | float | None = 1.0,  # noqa: PYI041
         template_name: str | None = None,
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
@@ -1186,6 +1189,7 @@ class SimpleCheckpoint(Checkpoint):
         version="0.13.33",
         message="Used in cloud deployments.",
     )
+    @override
     def run(  # noqa: PLR0913
         self,
         template_name: Optional[str] = None,

@@ -1703,7 +1703,7 @@ class ExpectationExplorer:
                     value="<span><strong>{}: </strong>{:.2f}</span>".format(
                         result_title, result_value
                     )
-                    if type(result_value) is float
+                    if type(result_value) is float  # noqa: E721
                     else f"<span><strong>{result_title}: </strong>{result_value}</span>"
                 )
             )

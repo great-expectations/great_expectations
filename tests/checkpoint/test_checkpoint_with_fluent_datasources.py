@@ -1545,7 +1545,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
 
     result = checkpoint.run(batch_request=batch_request)
 
-    assert type(repr(result)) == str
+    assert type(repr(result)) == str  # noqa: E721
 
 
 @pytest.mark.filesystem
@@ -1575,7 +1575,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
 
     result = checkpoint.run(batch_request=batch_request)
 
-    assert type(repr(result)) == str
+    assert type(repr(result)) == str  # noqa: E721
 
 
 @pytest.mark.slow  # 1.75s

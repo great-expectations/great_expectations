@@ -251,9 +251,13 @@ def get_substituted_batch_request(
 
     for key, value in validation_batch_request.items():
         substituted_value = substituted_runtime_batch_request.get(key)
-        if value is not None and substituted_value is not None:
+        if (
+            value is not None
+            and substituted_value is not None
+            and value != substituted_value
+        ):
             raise gx_exceptions.CheckpointError(
-                f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
+                f'BatchRequest attribute "{key}" was provided with different values'
             )
 
     effective_batch_request: dict = dict(
