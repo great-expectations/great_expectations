@@ -554,14 +554,20 @@ class Datasource(
 
         self.assets.append(asset)
 
-        self._save_context_project_config()
+        # if asset was added to a cloud FDS, _save_context_project_config will return FDS fetched from cloud,
+        # which will contain the new asset populated with an id
+        cloud_fds = self._save_context_project_config()
+        if cloud_fds:
+            # update self.assets to populate id field of new asset
+            self.assets = cloud_fds.assets
+            return self.get_asset(asset_name=asset.name)
         return asset
 
-    def _save_context_project_config(self):
+    def _save_context_project_config(self) -> Union[Datasource, None]:
         """Check if a DataContext is available and save the project config."""
         if self._data_context:
             try:
-                self._data_context._save_project_config(self)
+                return self._data_context._save_project_config(self)
             except TypeError as type_err:
                 warnings.warn(str(type_err), GxSerializationWarning)
 
