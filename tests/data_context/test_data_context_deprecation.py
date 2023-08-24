@@ -8,6 +8,25 @@ from great_expectations.data_context.data_context import (
     AbstractDataContext,
     EphemeralDataContext,
 )
+from great_expectations.data_context.types.base import GXCloudConfig
+
+# Globally scoped so we can reuse across test parameterization
+cloud_base_url = "my_cloud_url"
+cloud_access_token = "my_cloud_access_token"
+cloud_organization_id = "my_cloud_organization_id"
+cloud_config = GXCloudConfig(
+    base_url=cloud_base_url,
+    access_token=cloud_access_token,
+    organization_id=cloud_organization_id,
+)
+ge_cloud_base_url = "my_ge_cloud_url"
+ge_cloud_access_token = "my_ge_cloud_access_token"
+ge_cloud_organization_id = "my_ge_cloud_organization_id"
+ge_cloud_config = GXCloudConfig(
+    base_url=ge_cloud_base_url,
+    access_token=ge_cloud_access_token,
+    organization_id=ge_cloud_organization_id,
+)
 
 
 @pytest.mark.cloud

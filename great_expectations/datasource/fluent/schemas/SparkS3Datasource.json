@@ -91,6 +91,11 @@
             "default": true,
             "type": "boolean"
         },
+        "persist": {
+            "title": "Persist",
+            "default": true,
+            "type": "boolean"
+        },
         "bucket": {
             "title": "Bucket",
             "type": "string"

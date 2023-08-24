@@ -13,6 +13,7 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import (
     InferredSemanticDomainType,
     SemanticDomainTypes,
@@ -53,11 +54,13 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         )
 
     @property
+    @override
     def table_column_name_to_inferred_semantic_domain_type_map(
         self,
     ) -> Dict[str, SemanticDomainTypes]:
         return self._table_column_name_to_inferred_semantic_domain_type_map  # type: ignore[return-value] # could be None
 
+    @override
     def parse_semantic_domain_type_argument(
         self,
         semantic_types: Optional[
@@ -126,7 +129,11 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         # Note: As of Python 3.8, specifying argument type in Lambda functions is not supported by Lambda syntax.
         column_types_dict_list = list(
             filter(
-                lambda column_type_dict: column_name == column_type_dict["name"],
+                lambda column_type_dict: column_name == column_type_dict["name"]
+                or column_name
+                == column_type_dict["name"].strip(
+                    "`"
+                ),  # Spark specific fix to compare column names without backticks
                 column_types_dict_list,
             )
         )

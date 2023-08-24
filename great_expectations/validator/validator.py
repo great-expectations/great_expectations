@@ -8,7 +8,7 @@ import json
 import logging
 import traceback
 import warnings
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from collections.abc import Hashable
 from dataclasses import dataclass, field
 from typing import (
@@ -17,6 +17,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    NamedTuple,
     Optional,
     Sequence,
     Set,
@@ -28,6 +29,7 @@ import pandas as pd
 from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
@@ -152,16 +154,12 @@ class ValidationDependencies:
         return list(self.metric_configurations.values())
 
 
-ValidationStatistics = namedtuple(
-    "ValidationStatistics",
-    [
-        "evaluated_expectations",
-        "successful_expectations",
-        "unsuccessful_expectations",
-        "success_percent",
-        "success",
-    ],
-)
+class ValidationStatistics(NamedTuple):
+    evaluated_expectations: int
+    successful_expectations: int
+    unsuccessful_expectations: int
+    success_percent: float | None
+    success: bool
 
 
 @public_api
@@ -414,6 +412,7 @@ class Validator:
             n_rows=n_rows, domain_kwargs=domain_kwargs, fetch_all=fetch_all
         )
 
+    @override
     def __dir__(self) -> List[str]:
         """
         This custom magic method is used to enable expectation tab completion on Validator objects.

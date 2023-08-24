@@ -234,15 +234,15 @@ class MetaSparkDFDataset(Dataset):
             if ignore_row_if == "both_values_are_missing":
                 boolean_mapped_null_values = cols_df.selectExpr(
                     "`__row`",
-                    "`{0}` AS `A_{0}`".format(eval_col_A),
-                    "`{0}` AS `B_{0}`".format(eval_col_B),
+                    f"`{eval_col_A}` AS `A_{eval_col_A}`",
+                    f"`{eval_col_B}` AS `B_{eval_col_B}`",
                     f"ISNULL(`{eval_col_A}`) AND ISNULL(`{eval_col_B}`) AS `__null_val`",
                 )
             elif ignore_row_if == "either_value_is_missing":
                 boolean_mapped_null_values = cols_df.selectExpr(
                     "`__row`",
-                    "`{0}` AS `A_{0}`".format(eval_col_A),
-                    "`{0}` AS `B_{0}`".format(eval_col_B),
+                    f"`{eval_col_A}` AS `A_{eval_col_A}`",
+                    f"`{eval_col_B}` AS `B_{eval_col_B}`",
                     f"ISNULL(`{eval_col_A}`) OR ISNULL(`{eval_col_B}`) AS `__null_val`",
                 )
             # elif ignore_row_if == "neither":
@@ -255,8 +255,8 @@ class MetaSparkDFDataset(Dataset):
                 """
                 boolean_mapped_null_values = cols_df.selectExpr(
                     "`__row`",
-                    "`{0}` AS `A_{0}`".format(eval_col_A),
-                    "`{0}` AS `B_{0}`".format(eval_col_B),
+                    f"`{eval_col_A}` AS `A_{eval_col_A}`",
+                    f"`{eval_col_B}` AS `B_{eval_col_B}`",
                     F.lit(False).alias("__null_val"),
                 )
             else:

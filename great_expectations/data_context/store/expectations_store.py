@@ -5,6 +5,7 @@ import uuid
 from typing import Dict
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_suite import ExpectationSuiteSchema
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
@@ -164,6 +165,7 @@ class ExpectationsStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
+    @override
     def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
@@ -202,9 +204,11 @@ class ExpectationsStore(Store):
                 f"Could not find an existing ExpectationSuite named {value.expectation_suite_name}."
             )
 
+    @override
     def get(self, key) -> ExpectationSuite:
         return super().get(key)  # type: ignore[return-value]
 
+    @override
     def _validate_key(  # type: ignore[override]
         self, key: ExpectationSuiteIdentifier | GXCloudIdentifier
     ) -> None:

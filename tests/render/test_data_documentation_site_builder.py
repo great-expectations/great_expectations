@@ -152,7 +152,7 @@ def test_configuration_driven_site_builder(  # noqa: PLR0915
         datasource_name, generator_name, data_asset_name, profiler_name
     )
 
-    batch = context.get_batch(
+    batch = context._get_batch_v2(
         batch_kwargs=batch_kwargs,
         expectation_suite_name=expectation_suite_name,
     )
@@ -423,7 +423,7 @@ def test_configuration_driven_site_builder_skip_and_clean_missing(
         datasource_name, generator_name, data_asset_name, profiler_name
     )
 
-    batch = context.get_batch(
+    batch = context._get_batch_v2(
         batch_kwargs=batch_kwargs,
         expectation_suite_name=expectation_suite_name,
     )
@@ -561,7 +561,7 @@ def test_configuration_driven_site_builder_without_how_to_buttons(
         datasource_name, generator_name, data_asset_name, profiler_name
     )
 
-    batch = context.get_batch(
+    batch = context._get_batch_v2(
         batch_kwargs=batch_kwargs,
         expectation_suite_name=expectation_suite_name,
     )

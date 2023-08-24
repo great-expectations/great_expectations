@@ -13,6 +13,8 @@ from typing import Any
 
 from packaging.version import Version
 
+from great_expectations.compatibility.typing_extensions import override
+
 
 class NotImported:
     def __init__(self, message: str):
@@ -21,12 +23,14 @@ class NotImported:
     def __getattr__(self, attr: str) -> Any:
         raise ModuleNotFoundError(self.__dict__["gx_error_message"])
 
+    @override
     def __setattr__(self, key: str, value: Any) -> None:
         raise ModuleNotFoundError(self.__dict__["gx_error_message"])
 
     def __call__(self, *args, **kwargs) -> Any:
         raise ModuleNotFoundError(self.__dict__["gx_error_message"])
 
+    @override
     def __str__(self) -> str:
         return self.__dict__["gx_error_message"]
 

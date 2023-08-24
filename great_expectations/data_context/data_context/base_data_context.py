@@ -1,28 +1,31 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Mapping, Optional, Union
+from typing import TYPE_CHECKING, Mapping
 
+from great_expectations.core._docs_decorators import deprecated_method_or_class
+from great_expectations.data_context.data_context.abstract_data_context import (
+    AbstractDataContext,
+)
 from great_expectations.util import get_context
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
+    from great_expectations.data_context.types.base import (
+        DataContextConfig,
+        GXCloudConfig,
+    )
 
-from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,
+
+@deprecated_method_or_class(
+    version="0.17.10", message="Deprecated in favor of get_context"
 )
-from great_expectations.data_context.types.base import (
-    DataContextConfig,  # noqa: TCH001
-    GXCloudConfig,  # noqa: TCH001
-)
-
-
 def BaseDataContext(
-    project_config: Union[DataContextConfig, Mapping],
-    context_root_dir: Optional[PathStr] = None,
-    runtime_environment: Optional[dict] = None,
+    project_config: DataContextConfig | Mapping,
+    context_root_dir: PathStr | None = None,
+    runtime_environment: dict | None = None,
     cloud_mode: bool = False,
-    cloud_config: Optional[GXCloudConfig] = None,
+    cloud_config: GXCloudConfig | None = None,
 ) -> AbstractDataContext:
     """A lightweight wrapper around `get_context()`.
 
@@ -159,9 +162,9 @@ def BaseDataContext(
     # initialize runtime_environment as empty dict if None
     runtime_environment = runtime_environment or {}
 
-    cloud_base_url: Optional[str] = None
-    cloud_access_token: Optional[str] = None
-    cloud_organization_id: Optional[str] = None
+    cloud_base_url: str | None = None
+    cloud_access_token: str | None = None
+    cloud_organization_id: str | None = None
     if cloud_config:
         cloud_base_url = cloud_config.base_url
         cloud_access_token = cloud_config.access_token

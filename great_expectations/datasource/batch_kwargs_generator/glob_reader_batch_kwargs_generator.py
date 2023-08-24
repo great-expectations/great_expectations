@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import glob
 import logging
@@ -177,7 +179,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             paths (list)
         """
         glob_config = self._get_data_asset_config(data_asset_name)
-        return glob.glob(
+        return glob.glob(  # noqa: PTH207
             os.path.join(self.base_directory, glob_config["glob"])  # noqa: PTH118
         )
 
@@ -196,7 +198,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         self, data_asset_name, reader_method=None, reader_options=None, limit=None
     ):
         glob_config = self._get_data_asset_config(data_asset_name)
-        paths = glob.glob(
+        paths = glob.glob(  # noqa: PTH207
             os.path.join(self.base_directory, glob_config["glob"])  # noqa: PTH118
         )
         return self._build_batch_kwargs_path_iter(

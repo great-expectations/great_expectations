@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Literal, Optional, overload
+from typing import TYPE_CHECKING, Literal, overload
 
-from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,  # noqa: TCH001
-)
+from great_expectations.core._docs_decorators import deprecated_method_or_class
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
@@ -18,16 +16,19 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.data_context.serializable_data_context import (
     SerializableDataContext,
 )
-from great_expectations.data_context.types.base import GXCloudConfig  # noqa: TCH001
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+    from great_expectations.data_context.types.base import GXCloudConfig
 
 
 @overload
 def DataContext(  # noqa: PLR0913
     context_root_dir: PathStr = ...,
-    runtime_environment: Optional[dict] = ...,
+    runtime_environment: dict | None = ...,
     cloud_mode: Literal[False] = ...,
     cloud_base_url: None = ...,
     cloud_access_token: None = ...,
@@ -39,12 +40,12 @@ def DataContext(  # noqa: PLR0913
 
 @overload
 def DataContext(  # noqa: PLR0913
-    context_root_dir: Optional[PathStr] = ...,
-    runtime_environment: Optional[dict] = ...,
+    context_root_dir: PathStr | None = ...,
+    runtime_environment: dict | None = ...,
     cloud_mode: bool = ...,
-    cloud_base_url: Optional[str] = ...,
-    cloud_access_token: Optional[str] = ...,
-    cloud_organization_id: Optional[str] = ...,
+    cloud_base_url: str | None = ...,
+    cloud_access_token: str | None = ...,
+    cloud_organization_id: str | None = ...,
 ) -> AbstractDataContext:
     ...
 
@@ -52,13 +53,16 @@ def DataContext(  # noqa: PLR0913
 # TODO: add additional overloads
 
 
+@deprecated_method_or_class(
+    version="0.17.10", message="Deprecated in favor of get_context"
+)
 def DataContext(  # noqa: PLR0913
-    context_root_dir: Optional[PathStr] = None,
-    runtime_environment: Optional[dict] = None,
+    context_root_dir: PathStr | None = None,
+    runtime_environment: dict | None = None,
     cloud_mode: bool = False,
-    cloud_base_url: Optional[str] = None,
-    cloud_access_token: Optional[str] = None,
-    cloud_organization_id: Optional[str] = None,
+    cloud_base_url: str | None = None,
+    cloud_access_token: str | None = None,
+    cloud_organization_id: str | None = None,
 ) -> AbstractDataContext:
     """A DataContext represents a Great Expectations project.
 
@@ -145,10 +149,10 @@ def DataContext(  # noqa: PLR0913
 
 def _init_cloud_config(
     cloud_mode: bool,
-    cloud_base_url: Optional[str],
-    cloud_access_token: Optional[str],
-    cloud_organization_id: Optional[str],
-) -> Optional[GXCloudConfig]:
+    cloud_base_url: str | None,
+    cloud_access_token: str | None,
+    cloud_organization_id: str | None,
+) -> GXCloudConfig | None:
     if not cloud_mode:
         return None
 
@@ -161,7 +165,7 @@ def _init_cloud_config(
 
 
 def _init_context_root_directory(
-    cloud_mode: bool, context_root_dir: Optional[PathStr]
+    cloud_mode: bool, context_root_dir: PathStr | None
 ) -> str:
     if cloud_mode and context_root_dir is None:
         context_root_dir = CloudDataContext.determine_context_root_directory(

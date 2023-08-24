@@ -25,21 +25,6 @@ To get the most out of the information provided here, you should have an underst
 - The Metric registry
 - ExecutionEngines
 
-## When MetricProviders are required
-
-A minimum of one supporting Metric is required by every Expectation. For example, `expect_column_mean_to_be_between` relies on a Metric that calculates the mean of a column. Often, an Expectation requires multiple Metrics. For example, the following Metrics are required in the `expect_column_values_to_be_in_set` Expectation:
-
-- `column_values.in_set.unexpected_count`
-- `column_values.in_set.unexpected_rows`
-- `column_values.in_set.unexpected_values`
-- `column_values.in_set.unexpected_value_counts`
-
-To allow Expectations to work with multiple backends, methods for calculating Metrics need to be implemented for each ExecutionEngine. For example, pandas is implemented by calling the built-in pandas `.mean()` method on the column, Spark is implemented with a built-in Spark `mean` function, and SQLAlchemy is implemented with a SQLAlchemy generic function.
-
-Metrics can help you incorporate conditional statements in Expectations that support conditional evaluations. For example, `column_values.in_set.condition`.
-
-Metrics such as `column_values.in_set.unexpected_index_list` and `column_values.in_set.unexpected_index_query` can help you calculate the truthiness of your data.
-
 ## Class hierarchy
 
 Although the class hierarchy for MetricProviders and Expectations is different, they use the same naming conventions. The following is the MetricProviders class hierarchy:
@@ -96,10 +81,11 @@ The following table lists the MetricProvider subclasses and their associated Met
 | ColumnPairMapMetricProvider       | @column_pair_condition_partial                                 |
 | MulticolumnMapMetricProvider      | @multicolumn_condition_partial, @multicolumn_function_partial  |
 
-## Metric decorator naming conventions
+<!-- ## Metric decorator naming conventions
 
 The following Metric decorators differ in terms of the types of inputs and outputs they accept:
 
 - A metric_value returns
 - A metric_partials
 - condition_partials versus function_partials
+--->

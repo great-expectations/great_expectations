@@ -88,7 +88,7 @@ To complete this how-to, you'll complete the following tasks:
 
 <!-- List the secondary resources that can help the user get a better understanding of the subject matter discussed in this how-to. Don't add an introductory statement for the list. What follows is an example provided for your reference. If there aren't any related documents, remove this section.-->
 
-- [How to install Great Expectations locally](../guides/setup/installation/local.md)
+- [How to install Great Expectations locally](../guides/setup/installation/install_gx.md)
 - [How to set up GX to work with data on AWS S3](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3.md)
 - [How to set up GX to work with data in Azure Blob Storage](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs.md)
 - [How to set up GX to work with data on GCS](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)

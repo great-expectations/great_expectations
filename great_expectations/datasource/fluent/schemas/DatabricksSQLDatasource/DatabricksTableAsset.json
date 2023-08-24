@@ -1,5 +1,5 @@
 {
-    "title": "TableAsset",
+    "title": "DatabricksTableAsset",
     "description": "--Public API--",
     "type": "object",
     "properties": {

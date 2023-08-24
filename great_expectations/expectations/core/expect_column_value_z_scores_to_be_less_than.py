@@ -1,5 +1,6 @@
 from typing import Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
@@ -80,6 +81,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     args_keys = ("column", "threshold")
 
     @public_api
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:

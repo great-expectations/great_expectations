@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import SemanticDomainTypes
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
@@ -76,6 +77,7 @@ class OnboardingDataAssistant(DataAssistant):
             validator=validator,
         )
 
+    @override
     def get_variables(self) -> Optional[Dict[str, Any]]:
         """
         Returns:
@@ -83,6 +85,7 @@ class OnboardingDataAssistant(DataAssistant):
         """
         return None
 
+    @override
     def get_rules(self) -> Optional[List[Rule]]:
         """
         Returns:
@@ -164,6 +167,7 @@ class OnboardingDataAssistant(DataAssistant):
             categorical_columns_rule,
         ]
 
+    @override
     def _build_data_assistant_result(
         self, data_assistant_result: DataAssistantResult
     ) -> DataAssistantResult:
@@ -303,7 +307,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting numeric columns (but not "ID-type" columns).
 
-        numeric_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
+        numeric_column_type_domain_builder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,

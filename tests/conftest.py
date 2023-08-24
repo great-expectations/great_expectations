@@ -10,7 +10,7 @@ import random
 import shutil
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Final, List, Optional
 from unittest import mock
 
 import numpy as np
@@ -125,14 +125,16 @@ locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
 logger = logging.getLogger(__name__)
 
-REQUIRED_MARKERS = {
+REQUIRED_MARKERS: Final[set[str]] = {
     "all_backends",
     "athena",
     "aws_creds",
+    "aws_deps",
     "big",
     "cli",
     "clickhouse",
     "cloud",
+    "databricks",
     "docs",
     "filesystem",
     "mssql",
@@ -142,6 +144,7 @@ REQUIRED_MARKERS = {
     "postgresql",
     "project",
     "pyarrow",
+    "snowflake",
     "spark",
     "sqlite",
     "trino",
@@ -3594,12 +3597,13 @@ def empty_base_data_context_in_cloud_mode(
     project_path.mkdir(exist_ok=True)
     project_path = str(project_path)
 
-    context = gx.data_context.BaseDataContext(
-        project_config=empty_ge_cloud_data_context_config,
-        context_root_dir=project_path,
-        cloud_mode=True,
-        cloud_config=ge_cloud_config,
-    )
+    with pytest.deprecated_call():
+        context = gx.data_context.BaseDataContext(
+            project_config=empty_ge_cloud_data_context_config,
+            context_root_dir=project_path,
+            cloud_mode=True,
+            cloud_config=ge_cloud_config,
+        )
     assert context.list_datasources() == []
     return context
 
@@ -3677,12 +3681,13 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
     custom_ge_cloud_config = copy.deepcopy(ge_cloud_config)
     custom_ge_cloud_config.base_url = custom_base_url
 
-    context = gx.data_context.BaseDataContext(
-        project_config=empty_ge_cloud_data_context_config,
-        context_root_dir=project_path,
-        cloud_mode=True,
-        cloud_config=custom_ge_cloud_config,
-    )
+    with pytest.deprecated_call():
+        context = gx.data_context.BaseDataContext(
+            project_config=empty_ge_cloud_data_context_config,
+            context_root_dir=project_path,
+            cloud_mode=True,
+            cloud_config=custom_ge_cloud_config,
+        )
     assert context.list_datasources() == []
     assert context.ge_cloud_config.base_url != ge_cloud_config.base_url
     assert context.ge_cloud_config.base_url == custom_base_url
@@ -8386,3 +8391,13 @@ def csv_path() -> pathlib.Path:
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
     return abs_csv_path
+
+
+@pytest.fixture(scope="function")
+def aws_credentials():
+    """Mocked AWS Credentials for moto."""
+    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
+    os.environ["AWS_SECURITY_TOKEN"] = "testing"
+    os.environ["AWS_SESSION_TOKEN"] = "testing"
+    os.environ["AWS_DEFAULT_REGION"] = "testing"

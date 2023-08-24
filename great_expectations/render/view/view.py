@@ -260,7 +260,7 @@ class DefaultJinjaView:
         if class_list is None:
             class_str = ""
         else:
-            if type(class_list) == str:
+            if type(class_list) == str:  # noqa: E721
                 raise TypeError("classes must be a list, not a string.")
             class_str = f"class=\"{' '.join(class_list)}\" "
 
@@ -347,24 +347,20 @@ class DefaultJinjaView:
             tooltip_content = template["tooltip"]["content"]
             tooltip_content.replace("\n", "<br>")
             placement = template["tooltip"].get("placement", "top")
-            base_template_string = """
+            base_template_string = f"""
                 <{tag} $styling>
                     $template
                     <span class={placement}>
                         {tooltip_content}
                     </span>
                 </{tag}>
-            """.format(
-                placement=placement, tooltip_content=tooltip_content, tag=tag
-            )
+            """
         else:
-            base_template_string = """
+            base_template_string = f"""
                 <{tag} $styling>
                     $template
                 </{tag}>
-            """.format(
-                tag=tag
-            )
+            """
 
         if "styling" in template:
             params = template.get("params", {})
@@ -374,9 +370,7 @@ class DefaultJinjaView:
                 default_parameter_styling = template["styling"]["default"]
                 default_param_tag = default_parameter_styling.get("tag", "span")
                 base_param_template_string = (
-                    "<{param_tag} $styling>$content</{param_tag}>".format(
-                        param_tag=default_param_tag
-                    )
+                    f"<{default_param_tag} $styling>$content</{default_param_tag}>"
                 )
 
                 for parameter in template["params"].keys():
@@ -404,9 +398,7 @@ class DefaultJinjaView:
                         continue
                     param_tag = parameter_styling.get("tag", "span")
                     param_template_string = (
-                        "<{param_tag} $styling>$content</{param_tag}>".format(
-                            param_tag=param_tag
-                        )
+                        f"<{param_tag} $styling>$content</{param_tag}>"
                     )
                     params[parameter] = pTemplate(
                         param_template_string
