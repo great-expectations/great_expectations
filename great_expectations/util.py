@@ -46,6 +46,7 @@ from typing import (
     Set,
     SupportsFloat,
     Tuple,
+    Type,
     Union,
     cast,
     overload,
@@ -79,7 +80,7 @@ logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
-    from typing_extensions import TypeGuard
+    from typing_extensions import TypeAlias, TypeGuard
 
     from great_expectations.alias_types import PathStr
     from great_expectations.data_context import (
@@ -1740,6 +1741,9 @@ def convert_pandas_series_decimal_to_float_dtype(
     return data
 
 
+ContextModes: TypeAlias = Literal["file", "cloud", "ephemeral"]
+
+
 @overload
 def get_context(  # type: ignore[misc] # overlapping overload false positive?  # noqa: PLR0913
     project_config: DataContextConfig | Mapping | None = ...,
@@ -1810,7 +1814,7 @@ def get_context(  # noqa: PLR0913
     cloud_access_token: str | None = None,
     cloud_organization_id: str | None = None,
     cloud_mode: bool | None = None,
-    mode: Literal["ephemeral", "file", "cloud"] | None = None,
+    mode: ContextModes | None = None,
     # <GX_RENAME> Deprecated as of 0.15.37
     ge_cloud_base_url: str | None = None,
     ge_cloud_access_token: str | None = None,
@@ -1905,37 +1909,84 @@ def get_context(  # noqa: PLR0913
     """
     project_config = _prepare_project_config(project_config)
 
-    if mode is not None:
-        if mode == "ephemeral":
-            return _get_ephemeral_context(
-                project_config=project_config,
-                runtime_environment=runtime_environment,
-            )
-        elif mode == "file":
-            return _get_file_context(
-                project_config=project_config,
-                context_root_dir=context_root_dir,
-                runtime_environment=runtime_environment,
-            )
-        elif mode == "cloud":
-            return _get_cloud_context(
-                project_config=project_config,
-                context_root_dir=context_root_dir,
-                runtime_environment=runtime_environment,
-                cloud_base_url=cloud_base_url,
-                cloud_access_token=cloud_access_token,
-                cloud_organization_id=cloud_organization_id,
-                cloud_mode=cloud_mode,
-                ge_cloud_base_url=ge_cloud_base_url,
-                ge_cloud_access_token=ge_cloud_access_token,
-                ge_cloud_organization_id=ge_cloud_organization_id,
-                ge_cloud_mode=ge_cloud_mode,
-            )
-        else:
-            raise ValueError(
-                f"Unknown mode {mode}. Please choose one of: ephemeral, file, cloud."
-            )
+    param_lookup: dict[ContextModes | None, dict] = {
+        "ephemeral": dict(
+            project_config=project_config,
+            runtime_environment=runtime_environment,
+            cloud_mode=False,
+        ),
+        "file": dict(
+            project_config=project_config,
+            context_root_dir=context_root_dir,
+            runtime_environment=runtime_environment,
+            cloud_mode=False,
+        ),
+        "cloud": dict(
+            project_config=project_config,
+            context_root_dir=context_root_dir,
+            runtime_environment=runtime_environment,
+            cloud_base_url=cloud_base_url,
+            cloud_access_token=cloud_access_token,
+            cloud_organization_id=cloud_organization_id,
+            cloud_mode=True,
+        ),
+        None: dict(
+            project_config=project_config,
+            context_root_dir=context_root_dir,
+            runtime_environment=runtime_environment,
+            cloud_base_url=cloud_base_url,
+            cloud_access_token=cloud_access_token,
+            cloud_organization_id=cloud_organization_id,
+            cloud_mode=cloud_mode,
+        ),
+    }
+    try:
+        kwargs = param_lookup[mode]
+    except KeyError:
+        raise ValueError(
+            f"Unknown mode {mode}. Please choose one of: ephemeral, file, cloud."
+        )
 
+    from great_expectations.data_context.data_context import (
+        CloudDataContext,
+        EphemeralDataContext,
+        FileDataContext,
+    )
+
+    expected_ctx_types: dict[
+        ContextModes | None,
+        Type[CloudDataContext]
+        | Type[EphemeralDataContext]
+        | Type[FileDataContext]
+        | Type[AbstractDataContext],
+    ] = {
+        "ephemeral": EphemeralDataContext,
+        "file": FileDataContext,
+        "cloud": CloudDataContext,
+        None: AbstractDataContext,
+    }
+    context = _get_context(**kwargs)
+
+    expected_type = expected_ctx_types[mode]
+    if not isinstance(context, expected_type):
+        # example I want an emphemeral context but the presence of a GX_CLOUD env var gives me a cloud context
+        # this kind of thing should not be possbile but there may be some edge cases
+        raise ValueError(
+            f"Provided mode {mode} returned context of type {type(context)} instead of {expected_type}; please check your input arguments."
+        )
+
+    return context
+
+
+def _get_context(  # noqa: PLR0913
+    project_config: DataContextConfig | None = None,
+    context_root_dir: PathStr | None = None,
+    runtime_environment: dict | None = None,
+    cloud_base_url: str | None = None,
+    cloud_access_token: str | None = None,
+    cloud_organization_id: str | None = None,
+    cloud_mode: bool | None = None,
+) -> AbstractDataContext:
     # First, check for GX Cloud conditions
     cloud_context = _get_cloud_context(
         project_config=project_config,
@@ -1945,11 +1996,8 @@ def get_context(  # noqa: PLR0913
         cloud_base_url=cloud_base_url,
         cloud_access_token=cloud_access_token,
         cloud_organization_id=cloud_organization_id,
-        ge_cloud_mode=ge_cloud_mode,
-        ge_cloud_base_url=ge_cloud_base_url,
-        ge_cloud_access_token=ge_cloud_access_token,
-        ge_cloud_organization_id=ge_cloud_organization_id,
     )
+
     if cloud_context:
         return cloud_context
 
