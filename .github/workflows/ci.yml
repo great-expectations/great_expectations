@@ -241,7 +241,9 @@ jobs:
         run: invoke ci-tests -m "unit" --xdist --timeout=1.5 --slowest=8
 
   cloud-tests:
-    if: github.event.pull_request.draft == false && (github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' )
+    # Simplifying conditional for purposes of 0.17.12 release due to issues with prior release not passing this condition
+    # if: github.event.pull_request.draft == false && (github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' )
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
