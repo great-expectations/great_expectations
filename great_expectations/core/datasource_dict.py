@@ -67,11 +67,17 @@ class DatasourceDict(UserDict):
         if isinstance(ds, FluentDatasource):
             config = ds
         else:
-            ds_config = ds.config
-            ds_config["name"] = name
-            config = datasourceConfigSchema.load(ds_config)
+            config = self._prep_legacy_datasource_config(name=name, ds=ds)
 
         self._datasource_store.set(key=None, value=config)
+
+    def _prep_legacy_datasource_config(self, name: str, ds: BaseDatasource) -> dict:
+        config = ds.config
+        # 20230824 - Chetan - Kind of gross but this ensures that we have what we need for instantiate_class_from_config
+        # There's probably a better way to do this with Marshmallow but this works
+        config["name"] = name
+        config["class_name"] = ds.__class__.__name__
+        return datasourceConfigSchema.load(config)
 
     @override
     def __delitem__(self, name: str) -> None:
