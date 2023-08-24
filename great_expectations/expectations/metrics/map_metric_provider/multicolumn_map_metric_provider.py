@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Optional, Tuple
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.metrics.map_metric_provider import (
@@ -44,6 +45,7 @@ class MulticolumnMapMetricProvider(MapMetricProvider):
     function_value_keys = tuple()
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,

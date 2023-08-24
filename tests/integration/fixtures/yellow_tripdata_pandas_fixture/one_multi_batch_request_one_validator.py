@@ -1,14 +1,14 @@
 import numpy as np
 
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
-from great_expectations.data_context.data_context import DataContext
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-context = DataContext()
+context = gx.get_context()
 suite = context.get_expectation_suite("yellow_tripdata_validations")
 
 # This BatchRequest will retrieve all twelve batches from 2019
