@@ -254,6 +254,30 @@ def test_get_context_with_mode_equals_ephemeral_returns_ephemeral_data_context()
     assert isinstance(context, EphemeralDataContext)
 
 
+@pytest.mark.unit
+def test_get_context_with_mode_equals_file_returns_file_data_context(
+    tmp_path: pathlib.Path,
+):
+    with working_directory(tmp_path):
+        context = gx.get_context(mode="file")
+    assert isinstance(context, FileDataContext)
+
+
+@pytest.mark.cloud
+def test_get_context_with_mode_equals_cloud_returns_cloud_data_context(
+    empty_ge_cloud_data_context_config: DataContextConfig, set_up_cloud_envs
+):
+    with mock.patch.object(
+        CloudDataContext,
+        "retrieve_data_context_config_from_cloud",
+        return_value=empty_ge_cloud_data_context_config,
+    ) as mock_retrieve_config:
+        context = gx.get_context(mode="cloud")
+
+    mock_retrieve_config.assert_called_once()
+    assert isinstance(context, CloudDataContext)
+
+
 @pytest.mark.parametrize("ge_cloud_mode", [True, None])
 @pytest.mark.cloud
 def test_cloud_context_include_rendered_content(

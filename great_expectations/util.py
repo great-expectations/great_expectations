@@ -1896,7 +1896,7 @@ def get_context(  # noqa: PLR0913
         "file": dict(
             project_config=project_config,
             context_root_dir=context_root_dir,
-            project_root_dir=project_root_dir,
+            project_root_dir=project_root_dir or Path.cwd(),
             runtime_environment=runtime_environment,
             cloud_mode=False,
         ),
@@ -1954,7 +1954,7 @@ def get_context(  # noqa: PLR0913
         # example I want an emphemeral context but the presence of a GX_CLOUD env var gives me a cloud context
         # this kind of thing should not be possbile but there may be some edge cases
         raise ValueError(
-            f"Provided mode {mode} returned context of type {type(context)} instead of {expected_type}; please check your input arguments."
+            f"Provided mode {mode} returned context of type {type(context).__name__} instead of {expected_type.__name__}; please check your input arguments."
         )
 
     return context
