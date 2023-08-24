@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import uuid
 from pprint import pformat as pf
 from typing import Final, Generator, Literal, Protocol
@@ -198,7 +199,18 @@ def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
 
 
 @pytest.fixture
-def snowflake_ds(context: EphemeralDataContext) -> SnowflakeDatasource:
+def snowflake_creds_populated() -> bool:
+    if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") or os.getenv("SNOWFLAKE_CI_ACCOUNT"):
+        return True
+    return False
+
+
+@pytest.fixture
+def snowflake_ds(
+    context: EphemeralDataContext, snowflake_creds_populated: bool
+) -> SnowflakeDatasource:
+    if not snowflake_creds_populated:
+        pytest.skip("no snowflake credentials")
     ds = context.sources.add_snowflake(
         "snowflake",
         connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
@@ -276,6 +288,8 @@ class TestTableIdentifiers:
         table_name = TABLE_NAME_MAPPING["snowflake"].get(asset_name)
         if not table_name:
             pytest.skip(f"no '{asset_name}' table_name for databricks")
+        if not snowflake_ds:
+            pytest.skip("no snowflake datasource")
         # create table
         table_factory(
             engine=snowflake_ds.get_engine(),

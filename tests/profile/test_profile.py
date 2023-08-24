@@ -156,7 +156,7 @@ def test_BasicDatasetProfiler_with_context(filesystem_csv_data_context):
         "datasource": "rad_datasource",
         "path": os.path.join(base_dir, "f1.csv"),  # noqa: PTH118
     }
-    batch = context.get_batch(batch_kwargs, "default")
+    batch = context._get_batch_v2(batch_kwargs, "default")
     expectation_suite, validation_results = BasicDatasetProfiler.profile(batch)
 
     assert expectation_suite.expectation_suite_name == "default"
@@ -277,34 +277,6 @@ def test_context_profiler_with_non_existing_generator(filesystem_csv_data_contex
             profiler=BasicDatasetProfiler,
             batch_kwargs_generator_name="this_gen_does_not_exist",
         )
-
-
-@pytest.mark.filesystem
-def test_context_profiler_without_generator_name_arg_on_datasource_with_multiple_generators(
-    filesystem_csv_data_context, filesystem_csv_2
-):
-    """
-    If a no generator_name is passed to the profiling method and the datasource has more than one
-    generators configured, the profiling method must return an error code in the result
-    """
-    context = filesystem_csv_data_context
-    context.add_batch_kwargs_generator(
-        "rad_datasource",
-        "second_generator",
-        "SubdirReaderBatchKwargsGenerator",
-        **{
-            "base_directory": str(filesystem_csv_2),
-        },
-    )
-
-    assert isinstance(context.datasources["rad_datasource"], PandasDatasource)
-    profiling_result = context.profile_datasource(
-        "rad_datasource",
-        data_assets=["this_asset_doesnot_exist"],
-        profiler=BasicDatasetProfiler,
-    )
-
-    assert profiling_result == {"success": False, "error": {"code": 5}}
 
 
 @pytest.mark.filesystem

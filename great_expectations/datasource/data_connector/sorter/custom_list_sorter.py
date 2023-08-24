@@ -3,6 +3,7 @@ import logging
 from typing import Any, List, Optional
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.datasource.data_connector.sorter import Sorter
 
@@ -42,6 +43,7 @@ class CustomListSorter(Sorter):
                 )
         return reference_list
 
+    @override
     def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
         batch_identifiers: dict = batch_definition.batch_identifiers
         batch_value: Any = batch_identifiers[self.name]
@@ -52,6 +54,7 @@ class CustomListSorter(Sorter):
                 f"Source {batch_value} was not found in Reference list.  Try again..."
             )
 
+    @override
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
             "name": self.name,

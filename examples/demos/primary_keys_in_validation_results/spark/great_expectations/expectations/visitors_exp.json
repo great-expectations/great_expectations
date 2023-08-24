@@ -4,16 +4,18 @@
   "expectations": [
     {
       "expectation_type": "expect_column_values_to_be_in_set",
-      "ge_cloud_id": null,
       "kwargs": {
         "column": "event_type",
-        "value_set": ["page_load", "page_view"]
+        "value_set": [
+          "page_load",
+          "page_view"
+        ]
       },
       "meta": {}
     }
   ],
   "ge_cloud_id": null,
   "meta": {
-    "great_expectations_version": "0.15.43+20.g970f654601"
+    "great_expectations_version": "0.17.11+21.g2d827cb4d"
   }
 }
