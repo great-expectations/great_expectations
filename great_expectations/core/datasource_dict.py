@@ -67,7 +67,9 @@ class DatasourceDict(UserDict):
         if isinstance(ds, FluentDatasource):
             config = ds
         else:
-            config = datasourceConfigSchema.load(ds.config)
+            ds_config = ds.config
+            ds_config["name"] = name
+            config = datasourceConfigSchema.load(ds_config)
 
         self._datasource_store.set(key=None, value=config)
 
