@@ -1,8 +1,20 @@
 import great_expectations as gx
+import pathlib
+
+folder_path = str(
+    pathlib.Path(
+        gx.__file__,
+        "..",
+        "..",
+        "tests",
+        "test_sets",
+        "visits",
+    ).resolve(strict=True)
+)
 
 context = gx.get_context(context_root_dir="./great_expectations", cloud_mode=False)
 data_asset = context.sources.add_spark_filesystem(
-    name="visits_datasource", base_directory="./data"
+    name="visits_datasource", base_directory=folder_path
 ).add_csv_asset(
     name="visits",
     glob_directive="*.csv",
