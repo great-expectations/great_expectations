@@ -28,8 +28,8 @@ from typing import (
 )
 
 from packaging import version
-from great_expectations.compatibility.typing_extensions import override
 
+from great_expectations.compatibility.typing_extensions import override
 
 from great_expectations._version import get_versions  # isort:skip
 
