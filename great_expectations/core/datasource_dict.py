@@ -137,6 +137,10 @@ class CacheEnabledDatasourceDict(DatasourceDict):
         return self._cache
 
     @override
+    def __contains__(self, name: object) -> bool:
+        return name in self.data
+
+    @override
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
         self.data[name] = ds
         super().__setitem__(name, ds)
