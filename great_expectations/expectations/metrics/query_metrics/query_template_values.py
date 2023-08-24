@@ -26,7 +26,7 @@ class QueryTemplateValues(QueryMetricProvider):
     )
 
     @classmethod
-    def get_query(cls, query, template_dict, selectable):
+    def get_query(cls, query, template_dict, selectable) -> str:
         template_dict_reformatted = {
             k: str(v).format(active_batch=selectable)
             if isinstance(v, (float, int))
