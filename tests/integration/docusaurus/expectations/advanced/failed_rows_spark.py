@@ -12,7 +12,10 @@ folder_path = str(
     ).resolve(strict=True)
 )
 
+# get context
 context = gx.get_context(context_root_dir="./great_expectations", cloud_mode=False)
+
+# add datasource and assset
 data_asset = context.sources.add_spark_filesystem(
     name="visits_datasource", base_directory=folder_path
 ).add_csv_asset(
@@ -22,10 +25,12 @@ data_asset = context.sources.add_spark_filesystem(
     sep="\t",
     infer_schema=True,
 )
+
+# get checkpoint
 my_checkpoint = context.get_checkpoint("my_checkpoint")
 
 
-# Example 1
+# Example 1 - No unexpected_index_column_names. This is the default.
 results = my_checkpoint.run()
 evrs = results.list_validation_results()
 assert (evrs[0]["results"][0]["result"]) == {
@@ -45,7 +50,7 @@ assert (evrs[0]["results"][0]["result"]) == {
 }
 
 
-# Example 2
+# Example 2 - 1 unexpected_index_column_names defined. Output will contain unexpected_index_list and unexpected_index_query.
 result_format: dict = {
     "result_format": "COMPLETE",
     "unexpected_index_column_names": ["event_id"],
@@ -81,7 +86,7 @@ assert (evrs[0]["results"][0]["result"]) == {
     "unexpected_index_query": "df.filter(F.expr((event_type IS NOT NULL) AND (NOT (event_type IN (page_load, page_view)))))",
 }
 
-# Example 3
+# Example 3 - 2 unexpected_index_column_names defined. Output will contain unexpected_index_list and unexpected_index_query.
 result_format: dict = {
     "result_format": "COMPLETE",
     "unexpected_index_column_names": ["event_id", "visit_id"],

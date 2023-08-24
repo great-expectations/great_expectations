@@ -11,10 +11,12 @@ folder_path = str(
         "visits",
     ).resolve(strict=True)
 )
-
 connection_string: str = f"sqlite:///{folder_path}/visits.db"
 
+# get context
 context = gx.get_context(context_root_dir="./great_expectations", cloud_mode=False)
+
+# add datasource and asset
 datasource = context.sources.add_sqlite(
     name="visits_datasource",
     connection_string=connection_string,
@@ -28,7 +30,7 @@ asset = datasource.add_table_asset(
 my_checkpoint = context.get_checkpoint("my_checkpoint")
 
 
-# Example 1
+# Example 1 - No unexpected_index_column_names. This is the default.
 results = my_checkpoint.run()
 evrs = results.list_validation_results()
 assert (evrs[0]["results"][0]["result"]) == {
@@ -48,7 +50,7 @@ assert (evrs[0]["results"][0]["result"]) == {
 }
 
 
-# Example 2
+# Example 2 - 1 unexpected_index_column_names defined. Output will contain unexpected_index_list and unexpected_index_query.
 result_format: dict = {
     "result_format": "COMPLETE",
     "unexpected_index_column_names": ["event_id"],
@@ -84,7 +86,7 @@ assert (evrs[0]["results"][0]["result"]) == {
     "unexpected_index_query": "SELECT event_id, event_type \nFROM event_names \nWHERE event_type IS NOT NULL AND (event_type NOT IN ('page_load', 'page_view'));",
 }
 
-# Example 3
+# Example 3 -  2 unexpected_index_column_names defined. Output will contain unexpected_index_list and unexpected_index_query.
 result_format: dict = {
     "result_format": "COMPLETE",
     "unexpected_index_column_names": ["event_id", "visit_id"],
