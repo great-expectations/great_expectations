@@ -6,6 +6,7 @@ import pytest
 
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.datasource_dict import (
+    CacheableDatasourceDict,
     DatasourceDict,
 )
 from great_expectations.core.serializer import DictConfigSerializer
@@ -68,6 +69,28 @@ def empty_datasource_dict(
     build_datasource_dict_with_store_spy: Callable,
 ) -> DatasourceDict:
     return build_datasource_dict_with_store_spy()
+
+
+@pytest.fixture
+def build_cacheable_datasource_dict_with_store_spy(
+    in_memory_runtime_context: EphemeralDataContext,
+) -> Callable:
+    def _build_cacheable_datasource_dict_with_store_spy(
+        datasource_configs: list[dict] | None = None,
+    ) -> CacheableDatasourceDict:
+        return CacheableDatasourceDict(
+            context=in_memory_runtime_context,
+            datasource_store=DatasourceStoreSpy(datasource_configs=datasource_configs),
+        )
+
+    return _build_cacheable_datasource_dict_with_store_spy
+
+
+@pytest.fixture
+def empty_cacheable_datasource_dict(
+    build_cacheable_datasource_dict_with_store_spy: Callable,
+) -> CacheableDatasourceDict:
+    return build_cacheable_datasource_dict_with_store_spy()
 
 
 @pytest.fixture
@@ -201,3 +224,57 @@ def test_datasource_dict___getitem___with_block_datasource(
         retrieved_ds.config["data_connectors"].keys()
         == pandas_block_datasource_config["data_connectors"].keys()
     )
+
+
+def test_cacheable_datasource_dict___contains___uses_cache(
+    empty_cacheable_datasource_dict: CacheableDatasourceDict,
+):
+    pass
+
+
+def test_cacheable_datasource_dict___contains___requests_store_upon_cache_miss(
+    empty_cacheable_datasource_dict: CacheableDatasourceDict,
+):
+    pass
+
+
+def test_cacheable_datasource_dict___setitem___with_fds(
+    empty_cacheable_datasource_dict: CacheableDatasourceDict,
+):
+    pass
+
+
+def test_cacheable_datasource_dict___setitem___with_block_datasource(
+    empty_cacheable_datasource_dict: CacheableDatasourceDict,
+):
+    pass
+
+
+def test_cacheable_datasource_dict___delitem__updates_both_cache_and_store(
+    empty_cacheable_datasource_dict: CacheableDatasourceDict,
+):
+    pass
+
+
+def test_cacheable_datasource_dict___delitem__raises_key_error_on_store_miss(
+    empty_cacheable_datasource_dict: CacheableDatasourceDict,
+):
+    pass
+
+
+def test_cacheable_datasource_dict___getitem__raises_key_error_on_store_miss(
+    empty_cacheable_datasource_dict: CacheableDatasourceDict,
+):
+    pass
+
+
+def test_cacheable_datasource_dict___getitem___with_fds(
+    empty_cacheable_datasource_dict: CacheableDatasourceDict,
+):
+    pass
+
+
+def test_cacheable_datasource_dict___getitem___with_block_datasource(
+    empty_cacheable_datasource_dict: CacheableDatasourceDict,
+):
+    pass
