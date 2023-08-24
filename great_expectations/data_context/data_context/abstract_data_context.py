@@ -793,7 +793,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         assert isinstance(datasource, FluentDatasource)
 
         datasource._data_context = self
-        datasource._data_context._save_project_config(datasource)
+        datasource._data_context._save_project_config()
 
         # temporary workaround while we update stores to work better with Fluent Datasources for all contexts
         # Without this we end up with duplicate entries for datasources in both
