@@ -15,7 +15,7 @@ folder_path = str(
 # get context
 context = gx.get_context(context_root_dir="./great_expectations", cloud_mode=False)
 
-# add datasource and assset
+# add datasource and asset
 data_asset = context.sources.add_spark_filesystem(
     name="visits_datasource", base_directory=folder_path
 ).add_csv_asset(
