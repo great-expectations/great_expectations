@@ -3658,9 +3658,9 @@ def empty_cloud_data_context(
     context = CloudDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path_name,
-        ge_cloud_base_url=ge_cloud_config.base_url,
-        ge_cloud_access_token=ge_cloud_config.access_token,
-        ge_cloud_organization_id=ge_cloud_config.organization_id,
+        cloud_base_url=ge_cloud_config.base_url,
+        cloud_access_token=ge_cloud_config.access_token,
+        cloud_organization_id=ge_cloud_config.organization_id,
     )
     context._datasources = {}  # Mock datasource dict
     return context

@@ -45,6 +45,7 @@ class FileDataContext(SerializableDataContext):
         self,
         project_config: Optional[DataContextConfig] = None,
         context_root_dir: Optional[PathStr] = None,
+        project_root_dir: Optional[PathStr] = None,
         runtime_environment: Optional[dict] = None,
     ) -> None:
         """FileDataContext constructor
@@ -57,7 +58,8 @@ class FileDataContext(SerializableDataContext):
                 config_variables.yml and the environment
         """
         self._context_root_directory = self._init_context_root_directory(
-            context_root_dir
+            context_root_dir=context_root_dir,
+            project_root_dir=project_root_dir,
         )
         self._scaffold_project()
 
@@ -67,16 +69,18 @@ class FileDataContext(SerializableDataContext):
             runtime_environment=runtime_environment,
         )
 
-    def _init_context_root_directory(self, context_root_dir: Optional[PathStr]) -> str:
+    def _init_context_root_directory(
+        self, context_root_dir: Optional[PathStr], project_root_dir: Optional[PathStr]
+    ) -> str:
+        context_root_dir = self._resolve_context_root_dir_and_project_root_dir(
+            context_root_dir=context_root_dir, project_root_dir=project_root_dir
+        )
+
         if isinstance(context_root_dir, pathlib.Path):
             context_root_dir = str(context_root_dir)
 
         if not context_root_dir:
-            context_root_dir = FileDataContext.find_context_root_dir()
-            if not context_root_dir:
-                raise ValueError(
-                    "A FileDataContext relies on the presence of a local great_expectations.yml project config"
-                )
+            context_root_dir = self.find_context_root_dir()
 
         return context_root_dir
 
