@@ -838,7 +838,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource = self.datasources.get(datasource_name)
         if datasource:
             if self._datasource_store.cloud_mode and _call_store:
-                self._datasource_store.delete(datasource)  # type: ignore[arg-type] # Could be a LegacyDatasource
+                self._datasource_store.delete(datasource)
         else:
             # Raise key error instead?
             logger.info(f"No Datasource '{datasource_name}' to delete")
@@ -1581,9 +1581,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             # Note: this results in some unnecessary dict lookups
             self._delete_fluent_datasource(datasource_name)
         elif save_changes:
-            datasource_config = datasourceConfigSchema.load(datasource.config)
-            self._datasource_store.delete(datasource_config)
-        self.datasources.pop(datasource_name, None)
+            datasourceConfigSchema.load(datasource.config)
+            self.datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
         if save_changes:
@@ -2714,7 +2713,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "please confirm that your configuration is accurate.",
             )
 
-        return datasource.get_batch_list_from_batch_request(batch_request=result)  # type: ignore[union-attr, return-value, arg-type]
+        return datasource.get_batch_list_from_batch_request(batch_request=result)
 
     @public_api
     @deprecated_method_or_class(

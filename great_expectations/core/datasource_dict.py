@@ -129,7 +129,12 @@ class CacheEnabledDatasourceDict(DatasourceDict):
             datasource_store=datasource_store,
             config_provider=config_provider,
         )
-        self.data: dict[str, FluentDatasource | BaseDatasource] = {}
+        self._cache: dict[str, FluentDatasource | BaseDatasource] = {}
+
+    @override
+    @property
+    def data(self) -> dict[str, FluentDatasource | BaseDatasource]:  # type: ignore[override] # `data` is meant to be a writeable attr (not a read-only property)
+        return self._cache
 
     @override
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
@@ -145,4 +150,8 @@ class CacheEnabledDatasourceDict(DatasourceDict):
     def __getitem__(self, name: str) -> FluentDatasource | BaseDatasource:
         if name in self.data:
             return self.data[name]
-        return super().__getitem__(name)
+
+        # Upon cache miss, retrieve from store and add to cache
+        ds = super().__getitem__(name)
+        self.data[name] = ds
+        return ds

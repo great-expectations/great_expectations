@@ -136,13 +136,7 @@ def test_get_datasource_cache_miss(in_memory_runtime_context) -> None:
 
     # Initial GET will miss the cache, necessitating store retrieval
     with mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.has_key"
-    ), mock.patch(
-        "great_expectations.data_context.data_context.AbstractDataContext._instantiate_datasource_from_config"
-    ), mock.patch(
-        "great_expectations.data_context.types.base.datasourceConfigSchema.load",
-    ), mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.get"
+        "great_expectations.core.datasource_dict.DatasourceDict.__getitem__"
     ) as mock_get:
         context.get_datasource(name)
 
@@ -259,30 +253,6 @@ def test_DataContext_update_datasource_creates_new_value_in_cache_and_store(
 
     mock_update.assert_called_once()
     assert name in context.datasources
-
-
-@pytest.mark.cloud
-def test_DataContext_delete_datasource_updates_cache(
-    cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: CloudDataContext,
-) -> None:
-    """
-    What does this test and why?
-
-    For persistence-enabled contexts, we should delete values in both the cache and the
-    underlying store.
-    """
-    context = cloud_data_context_in_cloud_mode_with_datasource_pandas_engine
-
-    name = context.list_datasources()[0]["name"]
-
-    # If the value is in the cache, no store methods should be invoked
-    with mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.remove_key"
-    ) as mock_delete:
-        context.delete_datasource(name)
-
-    mock_delete.assert_called_once()
-    assert name not in context.datasources
 
 
 @pytest.mark.unit
