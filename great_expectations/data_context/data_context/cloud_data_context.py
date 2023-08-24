@@ -11,7 +11,6 @@ from typing import (
     Mapping,
     Optional,
     Sequence,
-    Tuple,
     Union,
     cast,
     overload,
@@ -99,14 +98,11 @@ class CloudDataContext(SerializableDataContext):
         self,
         project_config: Optional[Union[DataContextConfig, Mapping]] = None,
         context_root_dir: Optional[PathStr] = None,
+        project_root_dir: Optional[PathStr] = None,
         runtime_environment: Optional[dict] = None,
         cloud_base_url: Optional[str] = None,
         cloud_access_token: Optional[str] = None,
         cloud_organization_id: Optional[str] = None,
-        # <GX_RENAME> Deprecated as of 0.15.37
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
         """
         CloudDataContext constructor
@@ -117,20 +113,6 @@ class CloudDataContext(SerializableDataContext):
                 config_variables.yml and the environment
             cloud_config (GXCloudConfig): GXCloudConfig corresponding to current CloudDataContext
         """
-        # Chetan - 20221208 - not formally deprecating these values until a future date
-        (
-            cloud_base_url,
-            cloud_access_token,
-            cloud_organization_id,
-        ) = CloudDataContext._resolve_cloud_args(
-            cloud_base_url=cloud_base_url,
-            cloud_access_token=cloud_access_token,
-            cloud_organization_id=cloud_organization_id,
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_access_token=ge_cloud_access_token,
-            ge_cloud_organization_id=ge_cloud_organization_id,
-        )
-
         self._check_if_latest_version()
         self._cloud_config = self.get_cloud_config(
             cloud_base_url=cloud_base_url,
@@ -138,7 +120,8 @@ class CloudDataContext(SerializableDataContext):
             cloud_organization_id=cloud_organization_id,
         )
         self._context_root_directory = self.determine_context_root_directory(
-            context_root_dir
+            context_root_dir=context_root_dir,
+            project_root_dir=project_root_dir,
         )
         self._project_config = self._init_project_config(project_config)
 
@@ -172,31 +155,6 @@ class CloudDataContext(SerializableDataContext):
     ) -> None:
         # Usage statistics are always disabled within Cloud-backed environments.
         self._usage_statistics_handler = None
-
-    @staticmethod
-    def _resolve_cloud_args(  # noqa: PLR0913
-        cloud_base_url: Optional[str] = None,
-        cloud_access_token: Optional[str] = None,
-        cloud_organization_id: Optional[str] = None,
-        # <GX_RENAME> Deprecated as of 0.15.37
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None,
-    ) -> Tuple[Optional[str], Optional[str], Optional[str]]:
-        cloud_base_url = (
-            cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
-        )
-        cloud_access_token = (
-            cloud_access_token
-            if cloud_access_token is not None
-            else ge_cloud_access_token
-        )
-        cloud_organization_id = (
-            cloud_organization_id
-            if cloud_organization_id is not None
-            else ge_cloud_organization_id
-        )
-        return cloud_base_url, cloud_access_token, cloud_organization_id
 
     @override
     def _register_providers(self, config_provider: _ConfigurationProvider) -> None:
@@ -247,8 +205,13 @@ class CloudDataContext(SerializableDataContext):
 
     @classmethod
     def determine_context_root_directory(
-        cls, context_root_dir: Optional[PathStr]
+        cls,
+        context_root_dir: Optional[PathStr],
+        project_root_dir: Optional[PathStr],
     ) -> str:
+        context_root_dir = cls._resolve_context_root_dir_and_project_root_dir(
+            context_root_dir=context_root_dir, project_root_dir=project_root_dir
+        )
         if context_root_dir is None:
             context_root_dir = os.getcwd()  # noqa: PTH109
             logger.info(
