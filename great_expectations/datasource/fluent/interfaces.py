@@ -552,9 +552,10 @@ class Datasource(
         # which will contain the new asset populated with an id
         cloud_fds = self._save_context_project_config()
         if cloud_fds:
-            # update self.assets to populate id field of new asset
-            self.assets = cloud_fds.assets
-            return self.get_asset(asset_name=asset.name)
+            # update asset with new id
+            asset_with_id = cloud_fds.get_asset(asset_name=asset.name)
+            asset.id = asset_with_id.id
+
         return asset
 
     def _save_context_project_config(self) -> Union[Datasource, None]:
