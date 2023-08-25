@@ -20,6 +20,7 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
+from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -28,7 +29,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
 from great_expectations.datasource import BaseDatasource
-from great_expectations.util import get_context
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint

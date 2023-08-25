@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.data_context import get_context
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -14,7 +15,6 @@ from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
-from great_expectations.util import get_context
 from tests.data_context.conftest import MockResponse
 
 
