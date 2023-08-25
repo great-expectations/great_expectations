@@ -7,12 +7,12 @@ import pytest
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.fluent import BatchRequest as FluentBatchRequest
-from great_expectations.util import get_context
 
 
 @pytest.fixture
