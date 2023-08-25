@@ -112,7 +112,14 @@ def test_cloud_backed_data_context_expectation_validation_result_include_rendere
             "id": "6ca2ab40-bb82-49f4-bba2-33484c8ada80",
             "attributes": {
                 "datasource_config": {
-                    "assets": [],
+                    "assets": [
+                        {
+                            "batch_metadata": {},
+                            "id": "e1fe603d-0dd4-44d1-8737-5914d8bd6244",
+                            "name": "my_dataframe_asset",
+                            "type": "dataframe",
+                        }
+                    ],
                     "id": "6ca2ab40-bb82-49f4-bba2-33484c8ada80",
                     "name": "default_pandas_datasource",
                     "type": "pandas",
