@@ -210,7 +210,7 @@ class SerializableDataContext(AbstractDataContext):
         cls,
         project_root_dir: Optional[PathStr] = None,
         usage_statistics_enabled: bool = True,
-    ) -> str:
+    ) -> pathlib.Path:
         if not project_root_dir:
             project_root_dir = pathlib.Path.cwd()
         else:
@@ -267,10 +267,10 @@ class SerializableDataContext(AbstractDataContext):
         return config_var_path.is_file()
 
     @classmethod
-    def _write_config_variables_template_to_disk(cls, uncommitted_dir: str) -> None:
-        path = pathlib.Path(uncommitted_dir)
+    def _write_config_variables_template_to_disk(cls, uncommitted_dir: PathStr) -> None:
+        uncommitted_dir = pathlib.Path(uncommitted_dir)
 
-        path.mkdir(exist_ok=True)
+        uncommitted_dir.mkdir(exist_ok=True)
         config_var_file = uncommitted_dir / "config_variables.yml"
         with config_var_file.open("w") as template:
             template.write(CONFIG_VARIABLES_TEMPLATE)
