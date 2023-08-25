@@ -41,7 +41,7 @@ warn_redundant_casts = true
 show_error_codes = true
 enable_error_code = [
     'ignore-without-code',
-    # 'explicit-override' # TODO: enable this & fix all 688 errors
+    'explicit-override'
 ]
 # The following list of codes are globally ignored, do not add to this list
 disable_error_code = [
@@ -284,22 +284,13 @@ extend-exclude = [
     "F403", # star imports
     "PTH207", # use glob - __all__ needs to be list of str, not Path
 ]
+"*.pyi" = [
+    "TID251", # flake8-banned-api - type stubs are not executed
+]
 "great_expectations/_version.py" = [
     "PLR", # pylint - versioneer code
 ]
-"great_expectations/compatibility/sqlalchemy.py" = [
-    "TID251", # flake8-banned-api
-]
-"great_expectations/compatibility/pyspark.py" = [
-    "TID251", # flake8-banned-api
-]
-"great_expectations/compatibility/google.py" = [
-    "TID251", # flake8-banned-api
-]
-"great_expectations/compatibility/azure.py" = [
-    "TID251", # flake8-banned-api
-]
-"great_expectations/compatibility/pyarrow.py" = [
+"great_expectations/compatibility/*.py" = [
     "TID251", # flake8-banned-api
 ]
 
@@ -329,6 +320,8 @@ convention = "google"
 "azure".msg = "Please do not import azure directly, import from great_expectations.compatibility.azure instead."
 "trino".msg = "Please do not import trino directly, import from great_expectations.compatibility.trino instead."
 "pyarrow".msg = "Please do not import pyarrow directly, import from great_expectations.compatibility.pyarrow instead."
+"typing_extensions.override".msg = "Do not import typing_extensions.override directly, import `override` from great_expectations.compatibility.typing_extensions instead."
+
 
 # -----------------------------------------------------------------
 

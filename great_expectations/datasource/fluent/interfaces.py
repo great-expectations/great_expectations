@@ -38,6 +38,7 @@ from pydantic import (
 )
 from pydantic import dataclasses as pydantic_dc
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.id_dict import BatchSpec
@@ -673,6 +674,7 @@ class HeadData:
 
     data: pd.DataFrame
 
+    @override
     def __repr__(self) -> str:
         return self.data.__repr__()
 

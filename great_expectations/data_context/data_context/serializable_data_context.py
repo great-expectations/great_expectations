@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, ClassVar, Optional, Union
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -45,6 +46,7 @@ class SerializableDataContext(AbstractDataContext):
 
     UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
     GX_UNCOMMITTED_DIR = "uncommitted"
+    GITIGNORE = ".gitignore"
     BASE_DIRECTORIES = [
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value,
@@ -75,6 +77,7 @@ class SerializableDataContext(AbstractDataContext):
         raise NotImplementedError  # Required by parent ABC but this class is never instantiated
 
     @property
+    @override
     def root_directory(self) -> str:
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located.
@@ -82,12 +85,30 @@ class SerializableDataContext(AbstractDataContext):
         return self._context_root_directory
 
     @abc.abstractmethod
+    @override
     def _save_project_config(self, _fds_datasource=None) -> None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
         Explicitly override base class implementation to retain legacy behavior.
         """
         raise NotImplementedError
+
+    @classmethod
+    def _resolve_context_root_dir_and_project_root_dir(
+        cls, context_root_dir: PathStr | None, project_root_dir: PathStr | None
+    ) -> PathStr | None:
+        if project_root_dir and context_root_dir:
+            raise TypeError(
+                "'project_root_dir' and 'context_root_dir' are conflicting args; please only provide one"
+            )
+
+        if project_root_dir:
+            project_root_dir = pathlib.Path(project_root_dir).absolute()
+            context_root_dir = pathlib.Path(project_root_dir) / cls.GX_DIR
+        elif context_root_dir:
+            context_root_dir = pathlib.Path(context_root_dir).absolute()
+
+        return context_root_dir
 
     def _check_for_usage_stats_sync(  # noqa: PLR0911
         self, project_config: DataContextConfig
@@ -318,15 +339,16 @@ class SerializableDataContext(AbstractDataContext):
     @classmethod
     def _scaffold_gitignore(cls, base_dir: PathStr) -> None:
         """Make sure .gitignore exists and contains uncommitted/"""
-        gitignore = pathlib.Path(base_dir) / ".gitignore"
+        gitignore = pathlib.Path(base_dir) / cls.GITIGNORE
 
+        uncommitted_dir = f"{cls.GX_UNCOMMITTED_DIR}/"
         if gitignore.is_file():
-            lines = gitignore.read_text().splitlines()
-            if "uncommited/" in lines:
+            contents = gitignore.read_text()
+            if uncommitted_dir in contents:
                 return
 
-        with open(gitignore, "a") as f:
-            f.write("\nuncommitted/")
+        with gitignore.open("a") as f:
+            f.write(f"\n{uncommitted_dir}")
 
     @classmethod
     def _scaffold_custom_data_docs(cls, plugins_dir: PathStr) -> None:

@@ -2,6 +2,7 @@ import logging
 from typing import List, Optional
 
 from great_expectations.compatibility import google
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
@@ -105,6 +106,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
                 "Unable to load GCS Client (it is required for InferredAssetGCSDataConnector)."
             )
 
+    @override
     def build_batch_spec(self, batch_definition: BatchDefinition) -> GCSBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
@@ -120,6 +122,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
         )
         return GCSBatchSpec(batch_spec)
 
+    @override
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
     ) -> List[str]:
@@ -140,6 +143,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
         ]
         return path_list
 
+    @override
     def _get_full_file_path(
         self, path: str, data_asset_name: Optional[str] = None
     ) -> str:

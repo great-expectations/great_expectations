@@ -10,7 +10,6 @@ import io
 import json
 import logging
 import os
-import pathlib
 import pstats
 import re
 import sys
@@ -46,6 +45,7 @@ from typing import (
     Set,
     SupportsFloat,
     Tuple,
+    Type,
     Union,
     cast,
     overload,
@@ -59,7 +59,8 @@ from packaging import version
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core._docs_decorators import deprecated_argument, public_api
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
     PluginClassNotFoundError,
@@ -78,7 +79,7 @@ logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
-    from typing_extensions import TypeGuard
+    from typing_extensions import TypeAlias, TypeGuard
 
     from great_expectations.alias_types import PathStr
     from great_expectations.data_context import (
@@ -105,12 +106,14 @@ class bidict(dict):
         for key, value in self.items():
             self.inverse.setdefault(value, []).append(key)
 
+    @override
     def __setitem__(self, key: str, value: Any) -> None:
         if key in self:
             self.inverse[self[key]].remove(key)
         super().__setitem__(key, value)
         self.inverse.setdefault(value, []).append(key)
 
+    @override
     def __delitem__(self, key: str):
         self.inverse.setdefault(self[key], []).remove(key)
         if self[key] in self.inverse and not self.inverse[self[key]]:
@@ -1737,20 +1740,34 @@ def convert_pandas_series_decimal_to_float_dtype(
     return data
 
 
+ContextModes: TypeAlias = Literal["file", "cloud", "ephemeral"]
+
+
 @overload
-def get_context(  # type: ignore[misc] # overlapping overload false positive?  # noqa: PLR0913
+def get_context(  # type: ignore[misc] # noqa: PLR0913
     project_config: DataContextConfig | Mapping | None = ...,
-    context_root_dir: PathStr = ...,
+    context_root_dir: PathStr = ...,  # If context_root_dir is provided, project_root_dir shouldn't be
+    project_root_dir: None = ...,
     runtime_environment: dict | None = ...,
     cloud_base_url: None = ...,
     cloud_access_token: None = ...,
     cloud_organization_id: None = ...,
     cloud_mode: Literal[False] | None = ...,
-    # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_base_url: None = ...,
-    ge_cloud_access_token: None = ...,
-    ge_cloud_organization_id: None = ...,
-    ge_cloud_mode: Literal[False] | None = ...,
+) -> FileDataContext:
+    ...
+
+
+@overload
+def get_context(  # type: ignore[misc] # noqa: PLR0913
+    project_config: DataContextConfig | Mapping | None = ...,
+    context_root_dir: None = ...,
+    project_root_dir: PathStr = ...,  # If project_root_dir is provided, context_root_dir shouldn't be
+    runtime_environment: dict | None = ...,
+    cloud_base_url: None = ...,
+    cloud_access_token: None = ...,
+    cloud_organization_id: None = ...,
+    cloud_mode: Literal[False] | None = ...,
+    mode: Literal["file"] | None = ...,
 ) -> FileDataContext:
     ...
 
@@ -1759,16 +1776,13 @@ def get_context(  # type: ignore[misc] # overlapping overload false positive?  #
 def get_context(  # noqa: PLR0913
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: None = ...,
+    project_root_dir: None = ...,
     runtime_environment: dict | None = ...,
     cloud_base_url: str | None = ...,
     cloud_access_token: str | None = ...,
     cloud_organization_id: str | None = ...,
     cloud_mode: Literal[True] = ...,
-    # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_base_url: str | None = ...,
-    ge_cloud_access_token: str | None = ...,
-    ge_cloud_organization_id: str | None = ...,
-    ge_cloud_mode: bool | None = ...,
+    mode: Literal["cloud"] | None = ...,
 ) -> CloudDataContext:
     ...
 
@@ -1777,38 +1791,28 @@ def get_context(  # noqa: PLR0913
 def get_context(  # noqa: PLR0913
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: PathStr | None = ...,
+    project_root_dir: PathStr | None = ...,
     runtime_environment: dict | None = ...,
     cloud_base_url: str | None = ...,
     cloud_access_token: str | None = ...,
     cloud_organization_id: str | None = ...,
     cloud_mode: bool | None = ...,
-    # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_base_url: str | None = ...,
-    ge_cloud_access_token: str | None = ...,
-    ge_cloud_organization_id: str | None = ...,
-    ge_cloud_mode: bool | None = ...,
+    mode: None = ...,
 ) -> AbstractDataContext:
     ...
 
 
 @public_api
-@deprecated_argument(argument_name="ge_cloud_base_url", version="0.15.37")
-@deprecated_argument(argument_name="ge_cloud_access_token", version="0.15.37")
-@deprecated_argument(argument_name="ge_cloud_organization_id", version="0.15.37")
-@deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")
 def get_context(  # noqa: PLR0913
     project_config: DataContextConfig | Mapping | None = None,
     context_root_dir: PathStr | None = None,
+    project_root_dir: PathStr | None = None,
     runtime_environment: dict | None = None,
     cloud_base_url: str | None = None,
     cloud_access_token: str | None = None,
     cloud_organization_id: str | None = None,
     cloud_mode: bool | None = None,
-    # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_base_url: str | None = None,
-    ge_cloud_access_token: str | None = None,
-    ge_cloud_organization_id: str | None = None,
-    ge_cloud_mode: bool | None = None,
+    mode: ContextModes | None = None,
 ) -> AbstractDataContext:
     """Method to return the appropriate Data Context depending on parameters and environment.
 
@@ -1820,9 +1824,7 @@ def get_context(  # noqa: PLR0913
     This method returns the appropriate Data Context based on which parameters you've passed and / or your environment configuration:
 
     - FileDataContext: Configuration stored in a file.
-
     - EphemeralDataContext: Configuration passed in at runtime.
-
     - CloudDataContext: Configuration stored in Great Expectations Cloud.
 
     Read on for more details about each of the Data Context types:
@@ -1830,17 +1832,14 @@ def get_context(  # noqa: PLR0913
     **FileDataContext:** A Data Context configured via a yaml file. Returned by default if you have no cloud configuration set up and pass no parameters. If you pass context_root_dir, we will look for a great_expectations.yml configuration there. If not we will look at the following locations:
 
     - Path defined in a GX_HOME environment variable.
-
     - The current directory.
-
     - Parent directories of the current directory (e.g. in case you invoke the CLI in a sub folder of your Great Expectations directory).
 
     Relevant parameters
 
+    - project_root_dir: Provide the project root where a GX project exists or will be scaffolded (contains the context root).
     - context_root_dir: Provide an alternative directory to look for GX config.
-
     - project_config: Optionally override the configuration on disk - only if `context_root_dir` is also provided.
-
     - runtime_environment: Optionally override specific configuration values.
 
     **EphemeralDataContext:** A temporary, in-memory Data Context typically used in a pipeline. The default if you pass in only a project_config and have no cloud configuration set up.
@@ -1848,7 +1847,6 @@ def get_context(  # noqa: PLR0913
     Relevant parameters
 
     - project_config: Used to configure the Data Context.
-
     - runtime_environment: Optionally override specific configuration values.
 
     **CloudDataContext:** A Data Context whose configuration comes from Great Expectations Cloud. The default if you have a cloud configuration set up. Pass `cloud_mode=False` if you have a cloud configuration set up and you do not wish to create a CloudDataContext.
@@ -1858,20 +1856,16 @@ def get_context(  # noqa: PLR0913
     Relevant parameters
 
     - cloud_base_url: Override env var or great_expectations.conf file.
-
     - cloud_access_token: Override env var or great_expectations.conf file.
-
     - cloud_organization_id: Override env var or great_expectations.conf file.
-
     - cloud_mode: Set to True or False to explicitly enable/disable cloud mode.
-
     - project_config: Optionally override the cloud configuration.
-
     - runtime_environment: Optionally override specific configuration values.
 
     Args:
         project_config: In-memory configuration for Data Context.
         context_root_dir (str or pathlib.Path): Path to directory that contains great_expectations.yml file
+        project_root_dir (str or pathlib.Path): Path to project root (contains context root with GX config)
         runtime_environment: A dictionary of values can be passed to a DataContext when it is instantiated.
             These values will override both values from the config variables file and
             from environment variables.
@@ -1880,11 +1874,8 @@ def get_context(  # noqa: PLR0913
         cloud_organization_id: org_id for GX Cloud account.
         cloud_mode: whether to run GX in Cloud mode (default is None).
             If None, cloud mode is assumed if cloud credentials are set up. Set to False to override.
-        ge_cloud_base_url: url for GX Cloud endpoint.
-        ge_cloud_access_token: access_token for GX Cloud account.
-        ge_cloud_organization_id: org_id for GX Cloud account.
-        ge_cloud_mode: whether to run GX in Cloud mode (default is None).
-            If None, cloud mode is assumed if cloud credentials are set up. Set to False to override.
+        mode: which mode to use. One of: ephemeral, file, cloud.
+            Note: if mode is specified, cloud_mode is ignored.
 
     Returns:
         A Data Context. Either a FileDataContext, EphemeralDataContext, or
@@ -1896,20 +1887,101 @@ def get_context(  # noqa: PLR0913
     """
     project_config = _prepare_project_config(project_config)
 
+    param_lookup: dict[ContextModes | None, dict] = {
+        "ephemeral": dict(
+            project_config=project_config,
+            runtime_environment=runtime_environment,
+            cloud_mode=False,
+        ),
+        "file": dict(
+            project_config=project_config,
+            context_root_dir=context_root_dir,
+            project_root_dir=project_root_dir or Path.cwd(),
+            runtime_environment=runtime_environment,
+            cloud_mode=False,
+        ),
+        "cloud": dict(
+            project_config=project_config,
+            context_root_dir=context_root_dir,
+            project_root_dir=project_root_dir,
+            runtime_environment=runtime_environment,
+            cloud_base_url=cloud_base_url,
+            cloud_access_token=cloud_access_token,
+            cloud_organization_id=cloud_organization_id,
+            cloud_mode=True,
+        ),
+        None: dict(
+            project_config=project_config,
+            context_root_dir=context_root_dir,
+            project_root_dir=project_root_dir,
+            runtime_environment=runtime_environment,
+            cloud_base_url=cloud_base_url,
+            cloud_access_token=cloud_access_token,
+            cloud_organization_id=cloud_organization_id,
+            cloud_mode=cloud_mode,
+        ),
+    }
+    try:
+        kwargs = param_lookup[mode]
+    except KeyError:
+        raise ValueError(
+            f"Unknown mode {mode}. Please choose one of: ephemeral, file, cloud."
+        )
+
+    from great_expectations.data_context.data_context import (
+        AbstractDataContext,
+        CloudDataContext,
+        EphemeralDataContext,
+        FileDataContext,
+    )
+
+    expected_ctx_types: dict[
+        ContextModes | None,
+        Type[CloudDataContext]
+        | Type[EphemeralDataContext]
+        | Type[FileDataContext]
+        | Type[AbstractDataContext],
+    ] = {
+        "ephemeral": EphemeralDataContext,
+        "file": FileDataContext,
+        "cloud": CloudDataContext,
+        None: AbstractDataContext,
+    }
+    context = _get_context(**kwargs)
+
+    expected_type = expected_ctx_types[mode]
+    if not isinstance(context, expected_type):
+        # example I want an emphemeral context but the presence of a GX_CLOUD env var gives me a cloud context
+        # this kind of thing should not be possbile but there may be some edge cases
+        raise ValueError(
+            f"Provided mode {mode} returned context of type {type(context).__name__} instead of {expected_type.__name__}; please check your input arguments."
+        )
+
+    return context
+
+
+def _get_context(  # noqa: PLR0913
+    project_config: DataContextConfig | None = None,
+    context_root_dir: PathStr | None = None,
+    project_root_dir: PathStr | None = None,
+    runtime_environment: dict | None = None,
+    cloud_base_url: str | None = None,
+    cloud_access_token: str | None = None,
+    cloud_organization_id: str | None = None,
+    cloud_mode: bool | None = None,
+) -> AbstractDataContext:
     # First, check for GX Cloud conditions
     cloud_context = _get_cloud_context(
         project_config=project_config,
         context_root_dir=context_root_dir,
+        project_root_dir=project_root_dir,
         runtime_environment=runtime_environment,
         cloud_mode=cloud_mode,
         cloud_base_url=cloud_base_url,
         cloud_access_token=cloud_access_token,
         cloud_organization_id=cloud_organization_id,
-        ge_cloud_mode=ge_cloud_mode,
-        ge_cloud_base_url=ge_cloud_base_url,
-        ge_cloud_access_token=ge_cloud_access_token,
-        ge_cloud_organization_id=ge_cloud_organization_id,
     )
+
     if cloud_context:
         return cloud_context
 
@@ -1917,6 +1989,7 @@ def get_context(  # noqa: PLR0913
     file_context = _get_file_context(
         project_config=project_config,
         context_root_dir=context_root_dir,
+        project_root_dir=project_root_dir,
         runtime_environment=runtime_environment,
     )
     if file_context:
@@ -1950,35 +2023,14 @@ def _prepare_project_config(
 def _get_cloud_context(  # noqa: PLR0913
     project_config: DataContextConfig | Mapping | None = None,
     context_root_dir: PathStr | None = None,
+    project_root_dir: PathStr | None = None,
     runtime_environment: dict | None = None,
     cloud_base_url: str | None = None,
     cloud_access_token: str | None = None,
     cloud_organization_id: str | None = None,
     cloud_mode: bool | None = None,
-    # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_base_url: str | None = None,
-    ge_cloud_access_token: str | None = None,
-    ge_cloud_organization_id: str | None = None,
-    ge_cloud_mode: bool | None = None,
 ) -> CloudDataContext | None:
     from great_expectations.data_context.data_context import CloudDataContext
-
-    # Chetan - 20221208 - not formally deprecating these values until a future date
-    (
-        cloud_base_url,
-        cloud_access_token,
-        cloud_organization_id,
-        cloud_mode,
-    ) = _resolve_cloud_args(
-        cloud_mode=cloud_mode,
-        cloud_base_url=cloud_base_url,
-        cloud_access_token=cloud_access_token,
-        cloud_organization_id=cloud_organization_id,
-        ge_cloud_mode=ge_cloud_mode,
-        ge_cloud_base_url=ge_cloud_base_url,
-        ge_cloud_access_token=ge_cloud_access_token,
-        ge_cloud_organization_id=ge_cloud_organization_id,
-    )
 
     config_available = CloudDataContext.is_cloud_config_available(
         cloud_base_url=cloud_base_url,
@@ -1992,6 +2044,7 @@ def _get_cloud_context(  # noqa: PLR0913
             project_config=project_config,
             runtime_environment=runtime_environment,
             context_root_dir=context_root_dir,
+            project_root_dir=project_root_dir,
             cloud_base_url=cloud_base_url,
             cloud_access_token=cloud_access_token,
             cloud_organization_id=cloud_organization_id,
@@ -2005,52 +2058,24 @@ def _get_cloud_context(  # noqa: PLR0913
     return None
 
 
-def _resolve_cloud_args(  # noqa: PLR0913
-    cloud_base_url: str | None = None,
-    cloud_access_token: str | None = None,
-    cloud_organization_id: str | None = None,
-    cloud_mode: bool | None = None,
-    # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_base_url: str | None = None,
-    ge_cloud_access_token: str | None = None,
-    ge_cloud_organization_id: str | None = None,
-    ge_cloud_mode: bool | None = None,
-) -> tuple[str | None, str | None, str | None, bool | None]:
-    cloud_base_url = cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
-    cloud_access_token = (
-        cloud_access_token if cloud_access_token is not None else ge_cloud_access_token
-    )
-    cloud_organization_id = (
-        cloud_organization_id
-        if cloud_organization_id is not None
-        else ge_cloud_organization_id
-    )
-    cloud_mode = cloud_mode if cloud_mode is not None else ge_cloud_mode
-    return cloud_base_url, cloud_access_token, cloud_organization_id, cloud_mode
-
-
 def _get_file_context(
     project_config: DataContextConfig | None = None,
     context_root_dir: PathStr | None = None,
+    project_root_dir: PathStr | None = None,
     runtime_environment: dict | None = None,
 ) -> FileDataContext | None:
     from great_expectations.data_context.data_context import FileDataContext
 
-    if not context_root_dir:
-        try:
-            context_root_dir = FileDataContext.find_context_root_dir()
-        except gx_exceptions.ConfigNotFoundError:
-            logger.info("Could not find local context root directory")
-
-    if context_root_dir:
-        context_root_dir = pathlib.Path(context_root_dir).absolute()
+    try:
         return FileDataContext(
             project_config=project_config,
             context_root_dir=context_root_dir,
+            project_root_dir=project_root_dir,
             runtime_environment=runtime_environment,
         )
-
-    return None
+    except gx_exceptions.ConfigNotFoundError:
+        logger.info("Could not find local file-backed GX project")
+        return None
 
 
 def _get_ephemeral_context(

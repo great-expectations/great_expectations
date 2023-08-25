@@ -34,7 +34,11 @@ import pandas as pd
 from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core._docs_decorators import (
+    deprecated_method_or_class,
+    public_api,
+)
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,
     parse_result_format,
@@ -1677,7 +1681,23 @@ class Expectation(metaclass=MetaExpectation):
         return None
 
     @staticmethod
+    @deprecated_method_or_class(
+        version="0.17.11", message="Please use is_expectation_auto_initializing instead"
+    )
     def is_expectation_self_initializing(name: str) -> bool:
+        """
+        Given the name of an Expectation, returns a boolean that represents whether an Expectation can be auto-intialized.
+
+        Args:
+            name (str): name of Expectation
+
+        Returns:
+            boolean that represents whether an Expectation can be auto-initialized. Information also outputted to logger.
+        """
+        return Expectation.is_expectation_auto_initializing(name=name)
+
+    @staticmethod
+    def is_expectation_auto_initializing(name: str) -> bool:
         """
         Given the name of an Expectation, returns a boolean that represents whether an Expectation can be auto-intialized.
 
@@ -1696,11 +1716,11 @@ class Expectation(metaclass=MetaExpectation):
             )
         if "auto" in expectation_impl.default_kwarg_values:
             print(
-                f"The Expectation {name} is able to be self-initialized. Please run by using the auto=True parameter."
+                f"The Expectation {name} is able to be auto-initialized. Please run by using the auto=True parameter."
             )
             return True
         else:
-            print(f"The Expectation {name} is not able to be self-initialized.")
+            print(f"The Expectation {name} is not able to be auto-initialized.")
             return False
 
     @staticmethod
@@ -2324,6 +2344,7 @@ class BatchExpectation(Expectation, ABC):
     domain_type = MetricDomainTypes.TABLE
     args_keys: Tuple[str, ...] = ()
 
+    @override
     def get_validation_dependencies(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -2558,6 +2579,7 @@ class QueryExpectation(BatchExpectation, ABC):
         "condition_parser",
     )
 
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -2645,6 +2667,7 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
 
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -2729,9 +2752,11 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     }
 
     @classmethod
+    @override
     def is_abstract(cls) -> bool:
         return not cls.map_metric or super().is_abstract()
 
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -2746,6 +2771,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    @override
     def get_validation_dependencies(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -2882,6 +2908,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
 
         return validation_dependencies
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -3008,9 +3035,11 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
     }
 
     @classmethod
+    @override
     def is_abstract(cls) -> bool:
         return cls.map_metric is None or super().is_abstract()
 
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -3028,6 +3057,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    @override
     def get_validation_dependencies(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -3161,6 +3191,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         )
         return validation_dependencies
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -3277,9 +3308,11 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
     }
 
     @classmethod
+    @override
     def is_abstract(cls) -> bool:
         return cls.map_metric is None or super().is_abstract()
 
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -3294,6 +3327,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    @override
     def get_validation_dependencies(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -3436,6 +3470,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
 
         return validation_dependencies
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,

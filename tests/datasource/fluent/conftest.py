@@ -19,6 +19,7 @@ from typing import (
 
 import pytest
 from pytest import MonkeyPatch
+from typing_extensions import override
 
 import great_expectations as gx
 from great_expectations.core.batch import BatchData
@@ -90,6 +91,7 @@ def sqlachemy_execution_engine_mock_cls(
             self.engine = MockSaEngine(dialect=Dialect(dialect))
             self._create_temp_table = create_temp_table
 
+        @override
         def get_batch_data_and_markers(  # type: ignore[override]
             self, batch_spec: SqlAlchemyDatasourceBatchSpec
         ) -> tuple[BatchData, BatchMarkers]:
@@ -118,6 +120,7 @@ class ExecutionEngineDouble(ExecutionEngine):
     def __init__(self, *args, **kwargs):
         pass
 
+    @override
     def get_batch_data_and_markers(self, batch_spec) -> tuple[BatchData, BatchMarkers]:  # type: ignore[override]
         return BatchData(self), BatchMarkers(ge_load_time=None)
 
