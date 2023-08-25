@@ -146,7 +146,9 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
             sys.stderr.flush()
             exception_message: str = "A Sub-Process call Exception occurred.\n"
             exception_traceback: str = traceback.format_exc()
-            exception_message += f'{type(cpe).__name__}: "{cpe!s}".  Traceback: "{exception_traceback}".'
+            exception_message += (
+                f'{type(cpe).__name__}: "{cpe!s}".  Traceback: "{exception_traceback}".'
+            )
             logger.error(exception_message)
 
     return status_code

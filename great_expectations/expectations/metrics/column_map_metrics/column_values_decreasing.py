@@ -90,7 +90,9 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         # check if column is any type that could have na (numeric types)
         column_name = metric_domain_kwargs["column"]
         table_columns = metrics["table.column_types"]
-        column_metadata = next(col for col in table_columns if col["name"] == column_name)
+        column_metadata = next(
+            col for col in table_columns if col["name"] == column_name
+        )
         if isinstance(
             column_metadata["type"],
             (

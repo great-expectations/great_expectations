@@ -294,9 +294,7 @@ def find_evaluation_parameter_dependencies(parameter_expression):
             f"Unable to parse evaluation parameter: {err!s} at line {err.line}, column {err.column}"
         )
     except AttributeError as err:
-        raise EvaluationParameterError(
-            f"Unable to parse evaluation parameter: {err!s}"
-        )
+        raise EvaluationParameterError(f"Unable to parse evaluation parameter: {err!s}")
 
     for word in expr.exprStack:
         if isinstance(word, (int, float)):
@@ -381,9 +379,7 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
                     f"No value found for $PARAMETER {parse_results[0]!s}"
                 )
         except ParseException as e:
-            logger.debug(
-                f"Parse exception while parsing evaluation parameter: {e!s}"
-            )
+            logger.debug(f"Parse exception while parsing evaluation parameter: {e!s}")
             raise EvaluationParameterError(
                 f"No value found for $PARAMETER {parse_results[0]!s}"
             ) from e

@@ -501,7 +501,9 @@ class Datasource(
         # This default implementation will be used if protocol is inherited
         try:
             asset: _DataAssetT
-            found_asset: _DataAssetT = next(iter(filter(lambda asset: asset.name == asset_name, self.assets)))
+            found_asset: _DataAssetT = next(
+                iter(filter(lambda asset: asset.name == asset_name, self.assets))
+            )
             found_asset._datasource = self
             return found_asset
         except IndexError as exc:
