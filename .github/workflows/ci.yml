@@ -238,7 +238,7 @@ jobs:
         run: pip install -c constraints-dev.txt ".[test, snowflake]"
 
       - name: Run the unit tests
-        run: invoke ci-tests -m "unit" --xdist --timeout=1.5 --slowest=8
+        run: invoke ci-tests -m "unit" --xdist --timeout=1.5 --slowest=10
 
   cloud-tests:
     # Simplifying conditional for purposes of 0.17.12 release due to issues with prior release not passing this condition
@@ -348,7 +348,7 @@ jobs:
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py38-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
-        run: invoke ci-tests -m unit --xdist
+        run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
   py39-min-versions:
     needs: [unit-tests, static-analysis]
@@ -366,7 +366,7 @@ jobs:
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py39-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
-        run: invoke ci-tests -m unit --xdist
+        run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
   py310-min-versions:
     needs: [unit-tests, static-analysis]
@@ -384,7 +384,7 @@ jobs:
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py310-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
-        run: invoke ci-tests -m unit --xdist
+        run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
   py311-min-versions:
     needs: [unit-tests, static-analysis]
@@ -402,7 +402,7 @@ jobs:
       - name: Install dependencies
         run: pip install . -c ci/constraints-test/py311-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
-        run: invoke ci-tests -m unit --xdist
+        run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
   airflow220-min-versions:
     needs: [unit-tests, static-analysis]
