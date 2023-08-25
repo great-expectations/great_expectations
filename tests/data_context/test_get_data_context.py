@@ -368,7 +368,7 @@ def test_get_context_scaffolds_gx_dir(tmp_path: pathlib.Path):
 
 
 @pytest.mark.filesystem
-def test_get_data_context_finds_legacy_great_expectations_dir(
+def test_get_context_finds_legacy_great_expectations_dir(
     tmp_path: pathlib.Path,
 ):
     # Scaffold great_expectations
