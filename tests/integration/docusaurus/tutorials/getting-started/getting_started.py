@@ -153,10 +153,8 @@ my_checkpoint_config = my_checkpoint_config.replace(
 my_checkpoint_config = yaml.load(my_checkpoint_config)
 
 # NOTE: The following code (up to and including the assert) is only for testing and can be ignored by users.
-# In the current test, site_names are set to None because we do not want to update and build data_docs
-# If you would like to build data_docs then either remove `site_names=None` or pass in a list of site_names you would like to build the docs on.
-checkpoint = context.add_or_update_checkpoint(**my_checkpoint_config, site_names=None)
-checkpoint_result = checkpoint.run(site_names=None)
+checkpoint = context.add_or_update_checkpoint(**my_checkpoint_config)
+checkpoint_result = checkpoint.run()
 assert checkpoint_result.run_results
 
 
@@ -193,10 +191,6 @@ yaml_config = yaml_config.replace(
 my_new_checkpoint_config = yaml.load(yaml_config)
 
 # NOTE: The following code (up to and including the assert) is only for testing and can be ignored by users.
-# In the current test, site_names are set to None because we do not want to update and build data_docs
-# If you would like to build data_docs then either remove `site_names=None` or pass in a list of site_names you would like to build the docs on.
-new_checkpoint = context.add_or_update_checkpoint(
-    **my_new_checkpoint_config, site_names=None
-)
-new_checkpoint_result = new_checkpoint.run(site_names=None)
+new_checkpoint = context.add_or_update_checkpoint(**my_new_checkpoint_config)
+new_checkpoint_result = new_checkpoint.run()
 assert new_checkpoint_result.run_results
