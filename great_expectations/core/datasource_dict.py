@@ -56,6 +56,8 @@ class DatasourceDict(UserDict):
         """
         `data` is referenced by the parent `UserDict` and enables the class to fulfill its various dunder methods
         (__setitem__, __getitem__, etc)
+
+        This is generated just-in-time as the contents of the store may have changed.
         """
         datasources = {}
         for name in self._names:
@@ -68,6 +70,7 @@ class DatasourceDict(UserDict):
 
     @override
     def __contains__(self, name: object) -> bool:
+        # Minor optimization - only pulls names instead of building all datasources in self.data
         return name in self._names
 
     @override
@@ -158,6 +161,7 @@ class CacheableDatasourceDict(DatasourceDict):
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
         self.data[name] = ds
 
+        # FDS do not use stores
         if not isinstance(ds, FluentDatasource):
             super().__setitem__(name, ds)
 
@@ -165,6 +169,7 @@ class CacheableDatasourceDict(DatasourceDict):
     def __delitem__(self, name: str) -> None:
         ds = self.data.pop(name, None)
 
+        # FDS do not use stores
         if not isinstance(ds, FluentDatasource):
             super().__delitem__(name)
 
