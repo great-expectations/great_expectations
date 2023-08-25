@@ -257,7 +257,8 @@ ignore = [
     "B904", # raise-without-from-inside-except
     "B028", # no-explicit-stacklevel - https://beta.ruff.rs/docs/rules/no-explicit-stacklevel/
     "B007", # unused-loop-control-variable
-    # TODO: enable remaining ruf rules
+    # TODO: enable remaining ruf rules in followup PRs
+    "RUF005", # collection-literal-concatenation
     "RUF012", # mutable-class-default - too many violations
     "RUF013", # implicit-optional - mypy corrects for this. Wait for full type coverage before enabling
 ]
