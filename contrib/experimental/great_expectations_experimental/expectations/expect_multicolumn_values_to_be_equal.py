@@ -282,9 +282,7 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
             if include_column_name:
                 template_str = "$column_list values must be equal at least $mostly_pct % of the time."
             else:
-                template_str = (
-                    "$column_list values must be equal, at least $mostly_pct % of the time."
-                )
+                template_str = "$column_list values must be equal, at least $mostly_pct % of the time."
         else:
             if include_column_name:
                 template_str = "$column_list values must be equal."
@@ -352,9 +350,7 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "Missing (n)",
-                        "tooltip": {
-                            "content": "expect_multicolumn_values_to_be_equal"
-                        },
+                        "tooltip": {"content": "expect_multicolumn_values_to_be_equal"},
                     },
                 }
             ),
@@ -382,9 +378,7 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "Missing (%)",
-                        "tooltip": {
-                            "content": "expect_multicolumn_values_to_be_equal"
-                        },
+                        "tooltip": {"content": "expect_multicolumn_values_to_be_equal"},
                     },
                 }
             ),
@@ -441,9 +435,7 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
 
     library_metadata = {
         "maturity": "experimental",
-        "tags": [
-            "multicolumn-map-expectation", "experimental"
-        ],
+        "tags": ["multicolumn-map-expectation", "experimental"],
         "contributors": [
             "@karthigaiselvanm",
             "@jayamnatraj",
