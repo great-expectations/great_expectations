@@ -443,7 +443,7 @@ class SerializableDataContext(AbstractDataContext):
             search_start_dir = pathlib.Path(search_start_dir)
 
         # Ensure backwards compatibility if user is using "great_expectations/" over "gx/"
-        # Starting v0.17.7, "gx/" will be the default
+        # Starting v0.17.12, "gx/" will be the default
         return cls._search_gx_dir_for_context_yml(
             search_start_dir=search_start_dir, gx_dir=cls.GX_DIR
         ) or cls._search_gx_dir_for_context_yml(
