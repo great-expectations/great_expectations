@@ -56,7 +56,6 @@ class SerializableDataContext(AbstractDataContext):
     _LEGACY_GX_DIR: ClassVar[str] = "great_expectations"
     GX_YML: ClassVar[str] = "great_expectations.yml"
     GX_EDIT_NOTEBOOK_DIR: ClassVar[str] = GX_UNCOMMITTED_DIR
-    DOLLAR_SIGN_ESCAPE_STRING: ClassVar[str] = r"\$"
 
     def __init__(
         self,
