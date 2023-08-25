@@ -15,6 +15,7 @@ import re
 import sys
 import time
 import uuid
+import warnings
 from collections import OrderedDict
 from functools import wraps
 from gc import get_referrers
@@ -56,7 +57,9 @@ from packaging import version
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.data_context.data_context.context_factory import get_context
+from great_expectations.data_context.data_context.context_factory import (
+    get_context as context_factory,
+)
 from great_expectations.exceptions import (
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
@@ -111,6 +114,16 @@ class bidict(dict):
         if self[key] in self.inverse and not self.inverse[self[key]]:
             del self.inverse[self[key]]
         super().__delitem__(key)
+
+
+def get_context(*args, **kwargs) -> AbstractDataContext:
+    # deprecated-v0.17.12
+    warnings.warn(
+        "Importing `get_context` from `great_expectations.util` is deprecated as of v0.17.12 and will be removed in v0.20. Please import from the top-level `great_expectations` module.",
+        DeprecationWarning,
+    )
+
+    return context_factory(*args, **kwargs)
 
 
 def camel_to_snake(name: str) -> str:
@@ -920,7 +933,7 @@ def build_in_memory_runtime_context(
         store_backend_defaults=InMemoryStoreBackendDefaults(),
     )
 
-    context = get_context(project_config=data_context_config)
+    context = context_factory(project_config=data_context_config)
 
     return context
 
@@ -966,7 +979,7 @@ def validate(  # noqa: PLR0913, PLR0912
         logger.info("Using expectation suite from DataContext.")
         # Allow data_context to be a string, and try loading it from path in that case
         if isinstance(data_context, str):
-            data_context = get_context(context_root_dir=data_context)
+            data_context = context_factory(context_root_dir=data_context)
 
         expectation_suite = data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name
