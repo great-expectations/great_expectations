@@ -238,7 +238,7 @@ jobs:
         run: pip install -c constraints-dev.txt ".[test, snowflake]"
 
       - name: Run the unit tests
-        run: invoke ci-tests -m "unit" --xdist --timeout=1.5 --slowest=10
+        run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5
 
   cloud-tests:
     # Simplifying conditional for purposes of 0.17.12 release due to issues with prior release not passing this condition
