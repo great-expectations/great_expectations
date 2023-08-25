@@ -242,13 +242,13 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
                 renderer_configuration=renderer_configuration
             )
             template_str = (
-                f"$column_list values must be equal, at least $mostly_pct % of the time."
+                "$column_list values must be equal, at least $mostly_pct % of the time."
             )
         else:
-            template_str = f"$column_list values must be equal."
+            template_str = "$column_list values must be equal."
 
         if renderer_configuration.include_column_name:
-            template_str = f"$column {template_str}"
+            template_str = f"$column_list {template_str}"
 
         renderer_configuration.template_str = template_str
 
@@ -280,16 +280,16 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             if include_column_name:
-                template_str = f"$column_list values must be equal at least $mostly_pct % of the time."
+                template_str = "$column_list values must be equal at least $mostly_pct % of the time."
             else:
                 template_str = (
-                    f"$column_list values must be equal, at least $mostly_pct % of the time."
+                    "$column_list values must be equal, at least $mostly_pct % of the time."
                 )
         else:
             if include_column_name:
-                template_str = f"$column_list values must be equal."
+                template_str = "$column_list values must be equal."
             else:
-                template_str = f"$column_list values must be equal."
+                template_str = "$column_list values must be equal."
 
         if params["row_condition"] is not None:
             (
@@ -443,9 +443,9 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
         "maturity": "experimental",
         "tags": [
             "multicolumn-map-expectation", "experimental"
-        ],  
-        "contributors": [  
-            "@karthigaiselvanm",  
+        ],
+        "contributors": [
+            "@karthigaiselvanm",
             "@jayamnatraj",
         ],
         "requirements": [],
