@@ -464,7 +464,7 @@ class SerializableDataContext(AbstractDataContext):
             potential_ge_dir = search_start_dir / gx_dir
 
             if potential_ge_dir.is_dir():
-                potential_yml = potential_ge_dir / gx_dir
+                potential_yml = potential_ge_dir / cls.GX_YML
                 if potential_yml.is_file():
                     yml_path = str(potential_yml)
                     logger.debug(f"Found config file at {yml_path}")

@@ -306,40 +306,46 @@ def test_get_context_with_context_root_dir_scaffolds_filesystem(tmp_path: pathli
 
     assert isinstance(context, FileDataContext)
     assert context_root_dir.exists()
-    assert (context_root_dir / ".gitignore").read_text() == "\nuncommitted/"
+    assert (
+        context_root_dir / FileDataContext.GITIGNORE
+    ).read_text() == "\nuncommitted/"
 
 
 @pytest.mark.filesystem
 def test_get_context_with_context_root_dir_scaffolds_existing_gitignore(
     clear_env_vars, tmp_path
 ):
-    context_root_dir = tmp_path / "great_expectations"
+    context_root_dir = tmp_path / FileDataContext.GX_DIR
     context_root_dir.mkdir()
-    with open(context_root_dir / ".gitignore", "w") as f:
+    with open(context_root_dir / FileDataContext.GITIGNORE, "w") as f:
         f.write("asdf")
 
     context = gx.get_context(context_root_dir=context_root_dir)
 
     assert isinstance(context, FileDataContext)
-    assert (context_root_dir / ".gitignore").read_text() == "asdf\nuncommitted/"
+    assert (
+        context_root_dir / FileDataContext.GITIGNORE
+    ).read_text() == "asdf\nuncommitted/"
 
 
 @pytest.mark.filesystem
 def test_get_context_with_context_root_dir_scaffolds_new_gitignore(
     clear_env_vars, tmp_path
 ):
-    context_root_dir = tmp_path / "great_expectations"
+    context_root_dir = tmp_path / FileDataContext.GX_DIR
     context_root_dir.mkdir()
 
     context = gx.get_context(context_root_dir=context_root_dir)
 
     assert isinstance(context, FileDataContext)
-    assert (context_root_dir / ".gitignore").read_text() == "\nuncommitted/"
+    assert (
+        context_root_dir / FileDataContext.GITIGNORE
+    ).read_text() == "\nuncommitted/"
 
 
 @pytest.mark.filesystem
 def test_get_context_with_context_root_dir_gitignore_error(clear_env_vars, tmp_path):
-    context_root_dir = tmp_path / "great_expectations"
+    context_root_dir = tmp_path / FileDataContext.GX_DIR
     context_root_dir.mkdir()
 
     with mock.patch(
