@@ -26,6 +26,14 @@ class DatasourceDict(UserDict):
     """
     An abstraction around the DatasourceStore to enable easy retrieval and storage of Datasource objects
     using dictionary syntactic sugar.
+
+    Example:
+    ```
+    d = DatasourceDict(...)
+
+    d["my_fds"] = pandas_fds # Underlying DatasourceStore makes a `set()` call
+    pandas_fds = d["my_fds"] # Underlying DatasourceStore makes a `get()` call
+    ```
     """
 
     def __init__(
