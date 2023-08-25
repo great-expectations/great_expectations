@@ -381,14 +381,14 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _save_project_config(
         self, _fds_datasource: FluentDatasource | None = None
-    ) -> None:
+    ) -> FluentDatasource | None:
         """
         Each DataContext will define how its project_config will be saved through its internal 'variables'.
             - FileDataContext : Filesystem.
             - CloudDataContext : Cloud endpoint
             - Ephemeral : not saved, and logging message outputted
         """
-        self.variables.save_config()
+        return self.variables.save_config()
 
     @public_api
     def update_project_config(
