@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
-import urllib
+import urllib.parse
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
@@ -305,8 +305,8 @@ def verify_asset_names_mock(
 ):
     def verify_asset_name_cb(request: PreparedRequest) -> CallbackResult:
         if request.body:
-            parsed_url = urllib.parse.urlparse(request.url)
-            datasource_id = parsed_url.path.split("/")[-1]
+            parsed_url_path = str(urllib.parse.urlparse(request.url).path)
+            datasource_id = parsed_url_path.split("/")[-1]
 
             payload = CloudResponseSchema.from_datasource_json(request.body)
             LOGGER.info(f"PUT payload: ->\n{pf(payload.dict())}")

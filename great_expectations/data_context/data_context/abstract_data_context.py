@@ -390,7 +390,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             - CloudDataContext : Cloud endpoint
             - Ephemeral : not saved, and logging message outputted
         """
-        self.variables.save_config()
+        return self.variables.save_config()
 
     @public_api
     def update_project_config(
