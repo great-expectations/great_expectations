@@ -1,3 +1,4 @@
+import numbers
 from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from great_expectations.compatibility.sqlalchemy import (
@@ -29,7 +30,7 @@ class QueryTemplateValues(QueryMetricProvider):
     def get_query(cls, query, template_dict, selectable) -> str:
         template_dict_reformatted = {
             k: str(v).format(active_batch=selectable)
-            if isinstance(v, (float, int))
+            if isinstance(v, numbers.Number)
             else v.format(active_batch=selectable)
             for k, v in template_dict.items()
         }
