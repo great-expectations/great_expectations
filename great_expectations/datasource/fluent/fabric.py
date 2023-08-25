@@ -182,6 +182,7 @@ class PowerBIMeasure(_PowerBIAsset):
     _reader_method: ClassVar[FabricReaderMethods] = "evaluate_measure"
 
     type: Literal["powerbi_measure"] = "powerbi_measure"
+    measure: Union[str, List[str]]
     groupby_columns: Optional[List[Tuple[str, str]]] = None
     filters: Optional[Dict[Tuple[str, str], List[str]]] = None
     fully_qualified_columns: Optional[bool] = None
@@ -304,6 +305,7 @@ class FabricPowerBIDatasource(Datasource):
     def add_powerbi_measure_asset(  # noqa: PLR0913
         self,
         name: str,
+        measure: Union[str, List[str]],
         order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         groupby_columns: Optional[List[Tuple[str, str]]] = None,
@@ -329,6 +331,7 @@ class FabricPowerBIDatasource(Datasource):
             order_by=order_by_sorters,
             batch_metadata=batch_metadata or {},
             groupby_columns=groupby_columns,
+            measure=measure,
             # TODO: require custom serde for keys that are tuples
             filters=filters,
             fully_qualified_columns=fully_qualified_columns,
