@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
+import urllib
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
@@ -299,9 +300,14 @@ def test_cloud_context_delete_datasource(
 
 
 @pytest.fixture
-def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDetails):
+def verify_asset_names_mock(
+    cloud_api_fake: RequestsMock, cloud_details: CloudDetails, cloud_api_fake_db
+):
     def verify_asset_name_cb(request: PreparedRequest) -> CallbackResult:
         if request.body:
+            parsed_url = urllib.parse.urlparse(request.url)
+            datasource_id = parsed_url.path.split("/")[-1]
+
             payload = CloudResponseSchema.from_datasource_json(request.body)
             LOGGER.info(f"PUT payload: ->\n{pf(payload.dict())}")
             assets = payload.data.attributes["datasource_config"]["assets"]  # type: ignore[index]
@@ -311,6 +317,16 @@ def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDe
                     raise ValueError(
                         f"Asset name should not be default - '{DEFAULT_PANDAS_DATA_ASSET_NAME}'"
                     )
+            old_datasource: dict | None = cloud_api_fake_db["datasources"].get(
+                datasource_id
+            )
+            if old_datasource:
+                if (
+                    payload.data.name
+                    != old_datasource["data"]["attributes"]["datasource_config"]["name"]
+                ):
+                    raise NotImplementedError("Unsure how to handle name change")
+                cloud_api_fake_db["datasources"][datasource_id] = payload.dict()
             return CallbackResult(
                 200,
                 headers=DEFAULT_HEADERS,
