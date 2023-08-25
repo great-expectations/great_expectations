@@ -153,8 +153,21 @@ my_checkpoint_config = my_checkpoint_config.replace(
 my_checkpoint_config = yaml.load(my_checkpoint_config)
 
 # NOTE: The following code (up to and including the assert) is only for testing and can be ignored by users.
+# In the current test, an action_list without a build data docs is passed to .run because we do not want to update
+# and build data_docs
 checkpoint = context.add_or_update_checkpoint(**my_checkpoint_config)
-checkpoint_result = checkpoint.run()
+checkpoint_result = checkpoint.run(
+    action_list=[
+        {
+            "name": "store_validation_result",
+            "action": {"class_name": "StoreValidationResultAction"},
+        },
+        {
+            "name": "store_evaluation_params",
+            "action": {"class_name": "StoreEvaluationParametersAction"},
+        },
+    ]
+)
 assert checkpoint_result.run_results
 
 
@@ -191,6 +204,19 @@ yaml_config = yaml_config.replace(
 my_new_checkpoint_config = yaml.load(yaml_config)
 
 # NOTE: The following code (up to and including the assert) is only for testing and can be ignored by users.
+# In the current test, an action_list without a build data docs is passed to .run because we do not want to update
+# and build data_docs
 new_checkpoint = context.add_or_update_checkpoint(**my_new_checkpoint_config)
-new_checkpoint_result = new_checkpoint.run()
+new_checkpoint_result = new_checkpoint.run(
+    action_list=[
+        {
+            "name": "store_validation_result",
+            "action": {"class_name": "StoreValidationResultAction"},
+        },
+        {
+            "name": "store_evaluation_params",
+            "action": {"class_name": "StoreEvaluationParametersAction"},
+        },
+    ]
+)
 assert new_checkpoint_result.run_results
