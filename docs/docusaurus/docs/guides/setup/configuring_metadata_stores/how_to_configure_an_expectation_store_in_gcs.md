@@ -4,7 +4,7 @@ title: How to configure an Expectation Store to use GCS
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-By default, newl <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the ``expectations/`` subdirectory of your ``great_expectations/`` folder.  Use the information provided here to configure a new storage location for Expectations in Google Cloud Storage (GCS).
+By default, newl <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the ``expectations/`` subdirectory of your ``gx/`` folder.  Use the information provided here to configure a new storage location for Expectations in Google Cloud Storage (GCS).
 
 To view all the code used in this topic, see [how_to_configure_an_expectation_store_in_gcs.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py).
 

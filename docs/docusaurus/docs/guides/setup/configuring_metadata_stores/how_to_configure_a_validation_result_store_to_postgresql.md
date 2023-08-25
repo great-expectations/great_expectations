@@ -5,7 +5,7 @@ import Prerequisites from '../../connecting_to_your_data/components/prerequisite
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 
-By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder. Validation Results can include sensitive or regulated data that should not be committed to a source control system.  Use the information provided here to configure Great Expectations to store Validation Results in a PostgreSQL database.
+By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``gx/`` folder. Validation Results can include sensitive or regulated data that should not be committed to a source control system.  Use the information provided here to configure Great Expectations to store Validation Results in a PostgreSQL database.
 
 ## Prerequisites
 

@@ -4,7 +4,7 @@ title: How to configure a Validation Result store in GCS
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder. Validation Results can include sensitive or regulated data that should not be committed to a source control system.  Use the information provided here to configure a new storage location for Validation Results in Google Cloud Storage (GCS).
+By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``gx/`` folder. Validation Results can include sensitive or regulated data that should not be committed to a source control system.  Use the information provided here to configure a new storage location for Validation Results in Google Cloud Storage (GCS).
 
 To view all the code used in this topic, see [how_to_configure_a_validation_result_store_in_gcs.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py).
 

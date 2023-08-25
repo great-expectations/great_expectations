@@ -22,7 +22,7 @@ By default, <TechnicalTag tag="validation_result" text="Validation Results" /> a
 Run the following command to create a new folder for your Validation Results and move your existing Validation Results to the new folder:
 
 ```bash
-# in the great_expectations/ folder
+# in the gx/ folder
 mkdir shared_validations
 mv uncommitted/validations/npi_validations/ uncommitted/shared_validations/
 ```

@@ -4,7 +4,7 @@ title: How to configure a Validation Result Store in Azure Blob Storage
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx'
 
-By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder. Validation Results might include sensitive or regulated data that should not be committed to a source control system. Use the information provided here to configure a new storage location for Validation Results in Azure Blob Storage.
+By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``gx/`` folder. Validation Results might include sensitive or regulated data that should not be committed to a source control system. Use the information provided here to configure a new storage location for Validation Results in Azure Blob Storage.
 
 ## Prerequisites
 

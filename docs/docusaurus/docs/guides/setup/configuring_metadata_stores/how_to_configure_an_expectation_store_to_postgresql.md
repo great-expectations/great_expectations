@@ -5,7 +5,7 @@ import Prerequisites from '../../connecting_to_your_data/components/prerequisite
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 
-By default, new <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the `expectations/` subdirectory of your `great_expectations/` folder.  Use the information provided here to configure Great Expectations to store Expectations in a PostgreSQL database.
+By default, new <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the `expectations/` subdirectory of your `gx/` folder.  Use the information provided here to configure Great Expectations to store Expectations in a PostgreSQL database.
 
 ## Prerequisites
 

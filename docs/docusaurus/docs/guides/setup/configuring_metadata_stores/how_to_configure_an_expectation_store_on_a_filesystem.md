@@ -21,7 +21,7 @@ By default, new <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag t
 Run the following command to create a new folder for your Expectations and move your existing Expectations to the new folder:
 
 ```bash
-# in the great_expectations/ folder
+# in the gx/ folder
 mkdir shared_expectations
 mv expectations/npi_expectations.json shared_expectations/
 ```
