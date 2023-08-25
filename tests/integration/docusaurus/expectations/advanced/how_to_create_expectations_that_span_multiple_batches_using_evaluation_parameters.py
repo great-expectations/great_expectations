@@ -90,9 +90,8 @@ downstream_validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py run checkpoint">
-checkpoint = gx.checkpoint.SimpleCheckpoint(
+checkpoint = context.add_or_update_checkpoint(
     name="checkpoint",
-    data_context=context,
     validations=[
         {
             "batch_request": upstream_batch_request,
