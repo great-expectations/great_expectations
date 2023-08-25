@@ -22,12 +22,12 @@ from great_expectations.cli.util import verify_library_dependent_modules
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
+from great_expectations.data_context import get_context
 from great_expectations.data_context.templates import YAMLToString
 from great_expectations.datasource.types import DatasourceTypes
 from great_expectations.render.renderer.datasource_new_notebook_renderer import (
     DatasourceNewNotebookRenderer,
 )
-from great_expectations.util import get_context
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias

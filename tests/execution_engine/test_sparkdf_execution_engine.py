@@ -13,6 +13,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.batch_spec import PathBatchSpec, RuntimeDataBatchSpec
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
+from great_expectations.data_context import get_context
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     FilesystemStoreBackendDefaults,
@@ -23,7 +24,6 @@ from great_expectations.expectations.row_conditions import (
     RowConditionParserType,
 )
 from great_expectations.self_check.util import build_spark_engine
-from great_expectations.util import get_context
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
