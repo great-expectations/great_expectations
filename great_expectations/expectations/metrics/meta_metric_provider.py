@@ -36,7 +36,7 @@ class DeprecatedMetaMetricProvider(MetaMetricProvider):
         if alias is not None:
 
             def new(cls, *args, **kwargs):
-                alias = getattr(cls, "_DeprecatedMetaMetricProvider__alias")
+                alias = cls._DeprecatedMetaMetricProvider__alias
 
                 if alias is not None:
                     # deprecated-v0.13.12
@@ -86,6 +86,4 @@ as of v0.13.12 and will be removed in v0.16.
         if subclass is cls:
             return True
         else:
-            return issubclass(
-                subclass, getattr(cls, "_DeprecatedMetaMetricProvider__alias")
-            )
+            return issubclass(subclass, cls._DeprecatedMetaMetricProvider__alias)

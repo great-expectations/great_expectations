@@ -1,6 +1,6 @@
 If you are converting an existing local Great Expectations deployment to one that works in AWS, you might have Expectations saved that you want to transfer to your S3 bucket.
 
-To copy Expectations into Amazon S3, use the ``aws s3 sync`` command as shown in the following example:
+Run the following ``aws s3 sync``command to copy Expectations into Amazon S3:
 
 ```bash title="Terminal command"
 aws s3 sync '<base_directory>' s3://'<your_s3_bucket_name>'/'<your_s3_bucket_folder_name>'

@@ -1,4 +1,6 @@
+import uuid
 from typing import Literal, Sequence, Union
+from uuid import UUID
 
 from pydantic import BaseModel, Extra, Field
 from typing_extensions import Annotated
@@ -32,7 +34,8 @@ class RunMissingnessDataAssistantEvent(RunDataAssistantEvent):
 
 
 class RunCheckpointEvent(EventBase):
-    type: Literal["run_checkpoint_request.received"] = "run_checkpoint_request.received"
+    type: Literal["run_checkpoint_request"] = "run_checkpoint_request"
+    checkpoint_id: uuid.UUID
 
 
 class RunColumnDescriptiveMetricsEvent(EventBase):
@@ -50,6 +53,11 @@ class ListTableNamesEvent(EventBase):
     datasource_name: str
 
 
+class DraftDatasourceConfigEvent(EventBase):
+    type: Literal["test_datasource_config"] = "test_datasource_config"
+    config_id: UUID
+
+
 class UnknownEvent(EventBase):
     type: Literal["unknown_event"] = "unknown_event"
 
@@ -60,6 +68,7 @@ Event = Annotated[
         RunMissingnessDataAssistantEvent,
         RunCheckpointEvent,
         RunColumnDescriptiveMetricsEvent,
+        DraftDatasourceConfigEvent,
         ListTableNamesEvent,
         UnknownEvent,
     ],

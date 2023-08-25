@@ -3,7 +3,6 @@ import pytest
 from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
 from great_expectations.util import is_library_loadable
 
-
 pytestmark = pytest.mark.cli
 
 

@@ -10,7 +10,7 @@ import random
 import shutil
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Final, List, Optional
 from unittest import mock
 
 import numpy as np
@@ -125,25 +125,37 @@ locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
 logger = logging.getLogger(__name__)
 
-REQUIRED_MARKERS = {
+REQUIRED_MARKERS: Final[set[str]] = {
+    "all_backends",
+    "athena",
     "aws_creds",
+    "aws_deps",
     "big",
     "cli",
     "clickhouse",
     "cloud",
+    "databricks",
     "docs",
-    "external_sqldialect",
     "filesystem",
+    "mssql",
     "mysql",
     "openpyxl",
+    "performance",
     "postgresql",
     "project",
     "pyarrow",
+    "snowflake",
     "spark",
-    "sqlalchemy_version_compatibility",
     "sqlite",
+    "trino",
     "unit",
 }
+
+
+@pytest.fixture()
+def unset_gx_env_variables(monkeypatch: pytest.MonkeyPatch) -> None:
+    for var in GXCloudEnvironmentVariable:
+        monkeypatch.delenv(var, raising=False)
 
 
 @pytest.mark.order(index=2)
@@ -357,25 +369,67 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize("test_backends", [test_backends], scope="module")
 
 
+@dataclass(frozen=True)
+class TestMarkerCoverage:
+    path: str
+    name: str
+    markers: set[str]
+
+    def __str__(self):
+        return f"{self.path}, {self.name}, {self.markers}"
+
+
 def _verify_marker_coverage(
     session,
-) -> list[tuple[str, str, list[str]]]:
-    uncovered: list[tuple[str, str, set[str]]] = []
+) -> tuple[list[TestMarkerCoverage], list[TestMarkerCoverage]]:
+    uncovered: list[TestMarkerCoverage] = []
+    multiple_markers: list[TestMarkerCoverage] = []
     for test in session.items:
         markers = {m.name for m in test.iter_markers()}
-        if not REQUIRED_MARKERS.intersection(markers):
-            uncovered.append((str(test.path), test.name, markers))
-    return uncovered
+        required_intersection = markers.intersection(REQUIRED_MARKERS)
+        required_intersection_size = len(required_intersection)
+        # required_intersection_size is a non-zero integer so there 3 cases we care about:
+        #  0 => no marker coverage for this test
+        #  1 => the marker coverage for this test is correct
+        # >1 => too many markers are covering this test
+        if required_intersection_size == 0:
+            uncovered.append(
+                TestMarkerCoverage(path=str(test.path), name=test.name, markers=markers)
+            )
+        elif required_intersection_size > 1:
+            multiple_markers.append(
+                TestMarkerCoverage(
+                    path=str(test.path), name=test.name, markers=required_intersection
+                )
+            )
+    return uncovered, multiple_markers
 
 
 def pytest_collection_finish(session):
     if session.config.option.verify_marker_coverage_and_exit:
-        uncovered = _verify_marker_coverage(session)
-        if uncovered:
-            print(f"*** {len(uncovered)} tests have no marker coverage ***")
-            for uncovered_test_info in uncovered:
-                print(uncovered_test_info)
-            print("\n*** Every test is required to have 1 of the following markers ***")
+        uncovered, multiply_covered = _verify_marker_coverage(session)
+        if uncovered or multiply_covered:
+            print(
+                "*** Every test should be covered by exactly 1 of our required markers ***"
+            )
+            if uncovered:
+                print(f"*** {len(uncovered)} tests have no marker coverage ***")
+                for test_info in uncovered:
+                    print(test_info)
+                print()
+            else:
+                print(
+                    f"*** {len(multiply_covered)} tests have multiple marker coverage ***"
+                )
+                for test_info in multiply_covered:
+                    print(test_info)
+                print()
+
+            print("*** The required markers follow. ***")
+            print(
+                "*** Tests marked with 'performance' are not run in the PR or release pipeline. ***"
+            )
+            print("*** All other tests are. ***")
             for m in REQUIRED_MARKERS:
                 print(m)
             pytest.exit(
@@ -3543,12 +3597,13 @@ def empty_base_data_context_in_cloud_mode(
     project_path.mkdir(exist_ok=True)
     project_path = str(project_path)
 
-    context = gx.data_context.BaseDataContext(
-        project_config=empty_ge_cloud_data_context_config,
-        context_root_dir=project_path,
-        cloud_mode=True,
-        cloud_config=ge_cloud_config,
-    )
+    with pytest.deprecated_call():
+        context = gx.data_context.BaseDataContext(
+            project_config=empty_ge_cloud_data_context_config,
+            context_root_dir=project_path,
+            cloud_mode=True,
+            cloud_config=ge_cloud_config,
+        )
     assert context.list_datasources() == []
     return context
 
@@ -3600,9 +3655,9 @@ def empty_cloud_data_context(
     cloud_data_context: CloudDataContext = CloudDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path_name,
-        ge_cloud_base_url=ge_cloud_config.base_url,
-        ge_cloud_access_token=ge_cloud_config.access_token,
-        ge_cloud_organization_id=ge_cloud_config.organization_id,
+        cloud_base_url=ge_cloud_config.base_url,
+        cloud_access_token=ge_cloud_config.access_token,
+        cloud_organization_id=ge_cloud_config.organization_id,
     )
     return cloud_data_context
 
@@ -3626,12 +3681,13 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
     custom_ge_cloud_config = copy.deepcopy(ge_cloud_config)
     custom_ge_cloud_config.base_url = custom_base_url
 
-    context = gx.data_context.BaseDataContext(
-        project_config=empty_ge_cloud_data_context_config,
-        context_root_dir=project_path,
-        cloud_mode=True,
-        cloud_config=custom_ge_cloud_config,
-    )
+    with pytest.deprecated_call():
+        context = gx.data_context.BaseDataContext(
+            project_config=empty_ge_cloud_data_context_config,
+            context_root_dir=project_path,
+            cloud_mode=True,
+            cloud_config=custom_ge_cloud_config,
+        )
     assert context.list_datasources() == []
     assert context.ge_cloud_config.base_url != ge_cloud_config.base_url
     assert context.ge_cloud_config.base_url == custom_base_url
@@ -8335,3 +8391,13 @@ def csv_path() -> pathlib.Path:
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
     return abs_csv_path
+
+
+@pytest.fixture(scope="function")
+def aws_credentials():
+    """Mocked AWS Credentials for moto."""
+    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
+    os.environ["AWS_SECURITY_TOKEN"] = "testing"
+    os.environ["AWS_SESSION_TOKEN"] = "testing"
+    os.environ["AWS_DEFAULT_REGION"] = "testing"

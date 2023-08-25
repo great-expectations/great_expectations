@@ -27,7 +27,7 @@ In this tutorial, you will develop hands-on experience with configuring a Custom
 - Download [this directory](https://github.com/great-expectations/great_expectations/tree/develop/tests/test_sets/taxi_yellow_tripdata_samples) of yellow taxi trip `csv` files from the Great Expectations GitHub repo. You can use a tool like [DownGit](https://downgit.github.io/) to do so
 - Move the unzipped directory of `csv` files into the `data` directory that you created in Step 1
 
-## Create a context and add your Datasource
+## Create a context and add your Data Source
 
 - See [How to connect to data on a filesystem using Pandas](/docs/0.15.50/guides/connecting_to_your_data/filesystem/pandas). Run the following command to add a Pandas Filesystem asset for the taxi data.
 
@@ -37,7 +37,7 @@ In this tutorial, you will develop hands-on experience with configuring a Custom
 ## Configure the Custom Profiler
 
 - Now, we'll create a new script in the same top-level `taxi_profiling_tutorial` directory called `profiler_script.py`. If you prefer, you could open up a Jupyter Notebook and run this there instead.
-- At the top of this file, we will create a new YAML docstring assigned to a variable called `profiler_config`. This will look similar to the YAML docstring we used above when creating our Datasource. Over the next several steps, we will slowly add lines to this docstring by typing or pasting in the lines below:
+- At the top of this file, we will create a new YAML docstring assigned to a variable called `profiler_config`. This will look similar to the YAML docstring we used above when creating our Data Source. Over the next several steps, we will slowly add lines to this docstring by typing or pasting in the lines below:
 
 ```python 
 profiler_config = """

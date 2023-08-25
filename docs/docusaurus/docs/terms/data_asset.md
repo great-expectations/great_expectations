@@ -4,7 +4,7 @@ title: "Data Asset"
 
 import TechnicalTag from '../term_tags/_tag.mdx';
 
-A Data Asset is a collection of records within a <TechnicalTag relative="../" tag="datasource" text="Datasource" /> which is usually named based on the underlying data system and sliced to correspond to a desired specification.
+A Data Asset is a collection of records within a <TechnicalTag relative="../" tag="datasource" text="Data Source" /> which is usually named based on the underlying data system and sliced to correspond to a desired specification.
 
 Data Assets are used to specify how Great Expectations will organize data into <TechnicalTag relative="../" tag="batch" text="Batches" />.
 
@@ -52,13 +52,13 @@ permissions.
 
 ## Relationship to other objects
 
-A Data Asset is a collection of records that you care about, which a Datasource is configured to interact with.  Batches are subsets of Data Asset records.  When a <TechnicalTag relative="../" tag="batch_request" text="Batch Request" /> is provided to a Datasource, the Datasource will reference its Data Asset in order to translate the Batch Request into a query for a specific Batch of data.
+A Data Asset is a collection of records that you care about, which a Data Source is configured to interact with.  Batches are subsets of Data Asset records.  When a <TechnicalTag relative="../" tag="batch_request" text="Batch Request" /> is provided to a Data Source, the Data Source will reference its Data Asset in order to translate the Batch Request into a query for a specific Batch of data.
 
 For the most part, Data Assets are utilized by Great Expectations behind the scenes.  Other than configuring them, you will rarely have to interact with them directly (if at all).
 
 ## Use cases
 
-When connecting to your data you will define at least one Data Asset for each Datasource you create.  From these Data Assets you will be able to create Batch Requests, which will specify the data that you provide to your Expectations.
+When connecting to your data you will define at least one Data Asset for each Data Source you create.  From these Data Assets you will be able to create Batch Requests, which will specify the data that you provide to your Expectations.
 
 When using the interactive workflow for creating Expectations, it is often useful to utilize a simple Data Asset configuration for purposes of exploring the data.  This configuration can then be replaced when it is time to Validate data going forward.
 
@@ -85,11 +85,11 @@ For instance, imagine you are doing analysis on sales data for cars.  You could 
 
 ## Access
 
-You will not typically need to directly access a Data Asset.  Great Expectations validates Batches, and your Data Assets will be used behind the scenes in conjunction with Datasources and Batch Requests to provide those Batches.  However, you yourself will not need to work with the Data Asset beyond configuring it in a Datasource.
+You will not typically need to directly access a Data Asset.  Great Expectations validates Batches, and your Data Assets will be used behind the scenes in conjunction with Datasources and Batch Requests to provide those Batches.  However, you yourself will not need to work with the Data Asset beyond configuring it in a Data Source.
 
 ## Create
 
-You will not need to manually create a Data Asset.  Instead, they will be created from the configuration you provide for a Datasource when that Datasource needs them.
+You will not need to manually create a Data Asset.  Instead, they will be created from the configuration you provide for a Data Source when that Data Source needs them.
 
 ## Configure
 

@@ -2,6 +2,7 @@ import copy
 import json
 import pathlib
 import os
+import pathlib
 import shutil
 from collections import OrderedDict
 from typing import Dict, List, Union
@@ -35,7 +36,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.dataset import Dataset
 from great_expectations.datasource import (
     Datasource,
     LegacyDatasource,
@@ -850,7 +850,8 @@ def empty_context(tmp_path_factory) -> FileDataContext:
     assert os.path.isfile(  # noqa: PTH113
         os.path.join(ge_dir, FileDataContext.GX_YML)  # noqa: PTH118
     )
-    context = DataContext(ge_dir)
+    with pytest.deprecated_call():
+        context = DataContext(ge_dir)
     assert isinstance(context, FileDataContext)
     return context
 
@@ -1331,54 +1332,6 @@ def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
 
 
 @pytest.mark.unit
-def test_get_batch_raises_error_when_passed_a_non_string_type_for_suite_parameter(
-    titanic_data_context,
-):
-    with pytest.raises(gx_exceptions.DataContextError):
-        titanic_data_context.get_batch({}, 99)
-
-
-@pytest.mark.unit
-def test_get_batch_raises_error_when_passed_a_non_dict_or_batch_kwarg_type_for_batch_kwarg_parameter(
-    titanic_data_context,
-):
-    with pytest.raises(gx_exceptions.BatchKwargsError):
-        titanic_data_context.get_batch(99, "foo")
-
-
-@pytest.mark.filesystem
-def test_get_batch_when_passed_a_suite_name(titanic_data_context):
-    context = titanic_data_context
-    root_dir = context.root_directory
-    batch_kwargs = {
-        "datasource": "mydatasource",
-        "path": os.path.join(root_dir, "..", "data", "Titanic.csv"),  # noqa: PTH118
-    }
-    context.add_expectation_suite("foo")
-    assert context.list_expectation_suite_names() == ["foo"]
-    batch = context.get_batch(batch_kwargs, "foo")
-    assert isinstance(batch, Dataset)
-    assert isinstance(batch.get_expectation_suite(), ExpectationSuite)
-
-
-@pytest.mark.filesystem
-def test_get_batch_when_passed_a_suite(titanic_data_context):
-    context = titanic_data_context
-    root_dir = context.root_directory
-    batch_kwargs = {
-        "datasource": "mydatasource",
-        "path": os.path.join(root_dir, "..", "data", "Titanic.csv"),  # noqa: PTH118
-    }
-    context.add_expectation_suite("foo")
-    assert context.list_expectation_suite_names() == ["foo"]
-    suite = context.get_expectation_suite("foo")
-
-    batch = context.get_batch(batch_kwargs, suite)
-    assert isinstance(batch, Dataset)
-    assert isinstance(batch.get_expectation_suite(), ExpectationSuite)
-
-
-@pytest.mark.unit
 def test_list_validation_operators_data_context_with_none_returns_empty_list(
     titanic_data_context,
 ):
@@ -1754,38 +1707,6 @@ def test_get_validator_with_batch_list(in_memory_runtime_context):
         create_expectation_suite_with_name="A_expectation_suite",
     )
     assert len(my_validator.batches) == 2
-
-
-@pytest.mark.filesystem
-def test_get_batch_multiple_datasources_do_not_scan_all(
-    data_context_with_bad_datasource,
-):
-    """
-    What does this test and why?
-
-    A DataContext can have "stale" datasources in its configuration (ie. connections to DBs that are now offline).
-    If we configure a new datasource and are only using it (like the PandasDatasource below), then we don't
-    want to be dependent on all the "stale" datasources working too.
-
-    data_context_with_bad_datasource is a fixture that contains a configuration for an invalid datasource
-    (with "fake_port" and "fake_host")
-
-    In the test we configure a new expectation_suite, a local pandas_datasource and retrieve a single batch.
-
-    This tests a fix for the following issue:
-    https://github.com/great-expectations/great_expectations/issues/2241
-    """
-
-    context = data_context_with_bad_datasource
-    context.add_expectation_suite(expectation_suite_name="local_test.default")
-    expectation_suite = context.get_expectation_suite("local_test.default")
-    context.add_datasource("pandas_datasource", class_name="PandasDatasource")
-    df = pd.DataFrame({"a": [1, 2, 3]})
-    batch = context.get_batch(
-        batch_kwargs={"datasource": "pandas_datasource", "dataset": df},
-        expectation_suite_name=expectation_suite,
-    )
-    assert len(batch) == 3
 
 
 @pytest.mark.filesystem
@@ -2195,7 +2116,8 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
     # Check that the datasource was written to disk as expected
     root_directory = context.root_directory
     del context
-    context = DataContext(root_directory)
+    with pytest.deprecated_call():
+        context = DataContext(root_directory)
 
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
@@ -2355,7 +2277,8 @@ def test_add_datasource_from_yaml_sql_datasource(  # noqa: PLR0915
     # Check that the datasource was written to disk as expected
     root_directory = context.root_directory
     del context
-    context = DataContext(root_directory)
+    with pytest.deprecated_call():
+        context = DataContext(root_directory)
 
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
@@ -2738,7 +2661,8 @@ def test_add_datasource_from_yaml_with_substitution_variables(
     # Check that the datasource was written to disk as expected
     root_directory = context.root_directory
     del context
-    context = DataContext(root_directory)
+    with pytest.deprecated_call():
+        context = DataContext(root_directory)
 
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
@@ -3080,3 +3004,42 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
         actual_rendered_content.extend(expectation_configuration.rendered_content)
 
     assert actual_rendered_content == legacy_rendered_content
+
+
+@pytest.mark.filesystem
+def test_file_backed_context_scaffolds_gitignore(tmp_path: pathlib.Path):
+    project_path = tmp_path / "my_project_root_dir"
+    context_path = project_path / FileDataContext.GX_DIR
+    uncommitted = context_path / FileDataContext.GX_UNCOMMITTED_DIR
+    gitignore = context_path / FileDataContext.GITIGNORE
+
+    assert not uncommitted.exists()
+    assert not gitignore.exists()
+
+    # Scaffold project directory
+    _ = get_context(context_root_dir=context_path)
+
+    assert uncommitted.exists()
+    assert gitignore.exists()
+    assert FileDataContext.GX_UNCOMMITTED_DIR in gitignore.read_text()
+
+
+@pytest.mark.filesystem
+def test_file_backed_context_updates_existing_gitignore(tmp_path: pathlib.Path):
+    project_path = tmp_path / "my_project_root_dir"
+    context_path = project_path / FileDataContext.GX_DIR
+    uncommitted = context_path / FileDataContext.GX_UNCOMMITTED_DIR
+    gitignore = context_path / FileDataContext.GITIGNORE
+
+    # Scaffold necessary files so `get_context` updates rather than creates
+    uncommitted.mkdir(parents=True)
+    existing_value = "__pycache__/"
+    with gitignore.open("w") as f:
+        f.write(f"\n{existing_value}")
+
+    # Scaffold project directory
+    _ = get_context(context_root_dir=context_path)
+
+    contents = gitignore.read_text()
+    assert existing_value in contents
+    assert FileDataContext.GX_UNCOMMITTED_DIR in contents

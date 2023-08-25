@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import decimal
@@ -7,10 +9,10 @@ import logging
 import traceback
 import uuid
 import warnings
-from collections import Counter, defaultdict, namedtuple
+from collections import Counter, defaultdict
 from collections.abc import Hashable
 from functools import wraps
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, NamedTuple, Optional, Union
 
 from marshmallow import ValidationError
 
@@ -894,8 +896,7 @@ class DataAsset:
 
             self._data_context = validate__data_context
         except Exception:
-            if getattr(data_context, "_usage_statistics_handler", None):
-                handler = data_context._usage_statistics_handler
+            if handler := getattr(data_context, "_usage_statistics_handler", None):
                 handler.send_usage_message(
                     event=UsageStatsEvents.DATA_ASSET_VALIDATE,
                     event_payload=handler.anonymizer.anonymize(obj=self),
@@ -905,8 +906,7 @@ class DataAsset:
         finally:
             self._active_validation = False
 
-        if getattr(data_context, "_usage_statistics_handler", None):
-            handler = data_context._usage_statistics_handler
+        if handler := getattr(data_context, "_usage_statistics_handler", None):
             handler.send_usage_message(
                 event=UsageStatsEvents.DATA_ASSET_VALIDATE,
                 event_payload=handler.anonymizer.anonymize(obj=self),
@@ -1173,19 +1173,15 @@ class DataAsset:
         return new_function(self, *args, **kwargs)
 
 
-ValidationStatistics = namedtuple(
-    "ValidationStatistics",
-    [
-        "evaluated_expectations",
-        "successful_expectations",
-        "unsuccessful_expectations",
-        "success_percent",
-        "success",
-    ],
-)
+class ValidationStatistics(NamedTuple):
+    evaluated_expectations: int
+    successful_expectations: int
+    unsuccessful_expectations: int
+    success_percent: float | None
+    success: bool
 
 
-def _calc_validation_statistics(validation_results):
+def _calc_validation_statistics(validation_results) -> ValidationStatistics:
     """
     Calculate summary statistics for the validation results and
     return ``ExpectationStatistics``.

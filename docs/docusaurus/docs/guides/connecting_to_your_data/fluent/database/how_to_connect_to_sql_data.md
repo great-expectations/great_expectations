@@ -66,13 +66,13 @@ You can use either environment variables or a key in `config_variables.yml` to s
 
 In the above example `MY_PASSWORD` would be the name of the environment variable or the key to the value in `config_variables.yml` that corresponds to your password.
 
-If you include a password as plain text in your connection string when you define your Datasource, GX will automatically strip it out, add it to `config_variables.yml` and substitute it in the Datasource's saved configuration with a variable as was shown above.
+If you include a password as plain text in your connection string when you define your Data Source, GX will automatically strip it out, add it to `config_variables.yml` and substitute it in the Data Source's saved configuration with a variable as was shown above.
 
 :::
 
-### 3. Create a SQL Datasource
+### 3. Create a SQL Data Source
 
-Creating a SQL Datasource is as simple as providing the `add_sql(...)` method a `name` by which to reference it in the future and the `connection_string` with which to access it.
+Creating a SQL Data Source is as simple as providing the `add_sql(...)` method a `name` by which to reference it in the future and the `connection_string` with which to access it.
 
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py add_sql"

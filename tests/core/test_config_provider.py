@@ -14,7 +14,6 @@ organization_id = "0dcf5ce1-806f-4199-9e69-e24dfba5e62a"
 
 
 @pytest.mark.cloud
-@pytest.mark.unit
 @pytest.mark.parametrize(
     "cloud_config,expected_values",
     [

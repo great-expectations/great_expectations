@@ -8,6 +8,7 @@ from great_expectations.agent.actions.data_assistants import (
     RunOnboardingDataAssistantAction,
 )
 from great_expectations.agent.actions.list_table_names import ListTableNamesAction
+from great_expectations.agent.actions.run_checkpoint import RunCheckpointAction
 from great_expectations.agent.actions.run_column_descriptive_metrics_action import (
     ColumnDescriptiveMetricsAction,
 )

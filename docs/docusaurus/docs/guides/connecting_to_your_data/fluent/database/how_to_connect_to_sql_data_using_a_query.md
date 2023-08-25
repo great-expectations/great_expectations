@@ -27,7 +27,7 @@ To connect to the contents of a SQL table instead of the results of a SQL query,
 
 </Prerequisites> 
 
-### If you still need to connect a Datasource to a SQL database
+### If you still need to connect a Data Source to a SQL database
 
 <summary></summary>
 
@@ -39,7 +39,7 @@ Please reference the appropriate one of these guides:
 
 :::caution Datasources defined with the block-config method
 
-If you're using a Datasource that was created with the advanced block-config method, see [How to configure a SQL Datasource with the block-config method](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource), instead.
+If you're using a Data Source that was created with the advanced block-config method, see [How to configure a SQL Data Source with the block-config method](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource), instead.
 
 :::
 
@@ -49,16 +49,16 @@ If you're using a Datasource that was created with the advanced block-config met
 
 <ImportGxAndInstantiateADataContext />
 
-### 2. Retrieve a SQL Datasource
+### 2. Retrieve a SQL Data Source
 
-For this guide, we will use a previously defined Datasource named `"my_datasource"`.  For purposes of our demonstration, this Datasource was configured to connect to a SQL database.
+For this guide, we will use a previously defined Data Source named `"my_datasource"`.  For purposes of our demonstration, this Data Source was configured to connect to a SQL database.
 
-To retrieve this Datasource, we will supply the `get_datasource(...)` method of our Data Context with the name of the Datasource we wish to retrieve:
+To retrieve this Data Source, we will supply the `get_datasource(...)` method of our Data Context with the name of the Data Source we wish to retrieve:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data_using_a_query.py datasource"
 ```
 
-### 3. Add a query to the Datasource as a Data Asset
+### 3. Add a query to the Data Source as a Data Asset
 
 To indicate the query that provides the data to connect to we will define a Data Asset.  This is done by providing the `add_query_asset(...)` method a `name` by which we will reference the Data Asset in the future and a `query` which will provide the data we wish the Data Asset to connect to.
 

@@ -36,18 +36,35 @@ If you are using GX for multiple projects you may wish to utilize a different Da
 
 Each Filesystem Data Context has a root folder in which it was initialized.  This root folder will be used to indicate which specific Filesystem Data Context should be instantiated.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_instantiate_a_specific_filesystem_data_context.py path_to_context_root_folder"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_instantiate_a_specific_filesystem_data_context.py path_to_project_root"
 ```
 
 ### 2. Run GX's `get_context(...)` method
 
-We provide our Filesystem Data Context's root folder path to the GX library's `get_context(...)` method as the `context_root_dir` parameter.  Because we are providing a path to an existing Data Context, the `get_context(...)` method will instantiate and return the Data Context at that location.
+We provide our Filesystem Data Context's root folder path to the GX library's `get_context(...)` method as the `project_root_dir` parameter.  Because we are providing a path to an existing Data Context, the `get_context(...)` method will instantiate and return the Data Context at that location.
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_instantiate_a_specific_filesystem_data_context.py get_filesystem_data_context"
 ```
 
+:::info Project root vs context root
+Note that there is a subtle distinction between the `project_root_dir` and `context_root_dir` arguments accepted by `get_context(...)`.
+
+Your context root is the directory that contains all your GX config while your project root refers to your actual working directory (and therefore contains the context root).
+
+```bash
+# The overall directory is your project root
+data/
+great_expectations/ # The GX folder with your config is your context root
+  great_expectations.yml
+  ...
+...
+```
+
+Both are functionally equivalent for purposes of working with a file-backed project. 
+:::
+
 :::info What if the folder does not contain a Data Context?
-If the `context_root_dir` provided to the `get_context(...)` method points to a folder that does not already have a Data Context present, the `get_context(...)` method will initialize a new Filesystem Data Context at that location.
+If the root directory provided to the `get_context(...)` method points to a folder that does not already have a Data Context present, the `get_context(...)` method will initialize a new Filesystem Data Context at that location.
 
 The `get_context(...)` method will then instantiate and return the newly initialized Data Context.
 :::
@@ -63,12 +80,12 @@ For guidance on further customizing your Data Context's configurations for Metad
 - [How to configure an Expectation Store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem)
 - [How to configure a Validation Result Store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem)
 - [How to configure and use a Metric Store](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore)
-- [How to host and share Data Docs on a filesystem](/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem)
+- [How to host and share Data Docs on a filesystem](/docs/guides/setup/configuring_data_docs/host_and_share_data_docs)
 
 If you are content with the default configuration of your Data Context, you can move on to connecting GX to your source data:
-- [How to configure a Pandas Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
-- [How to configure a Spark Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
-- [How to configure a SQL Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
+- [How to configure a Pandas Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
+- [How to configure a Spark Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
+- [How to configure a SQL Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
 
 ## Additional information
 

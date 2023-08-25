@@ -46,7 +46,7 @@ In the following example, `validations_store_name` is set to ``validations_GCS_s
 ```
 
 :::warning
-If you are also storing [Expectations in GCS](../configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md) or [DataDocs in GCS](../configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md), make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
+If you are also storing [Expectations in GCS](../configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md) or [DataDocs in GCS](../configuring_data_docs/host_and_share_data_docs.md), make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
 :::
 
 ## 4. Copy existing Validation Results to the GCS bucket (Optional)

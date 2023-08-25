@@ -5,7 +5,7 @@ import datetime
 import json
 import os
 import uuid
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from dataclasses import asdict, dataclass, field
 from typing import (
     TYPE_CHECKING,
@@ -15,6 +15,7 @@ from typing import (
     Iterable,
     KeysView,
     List,
+    NamedTuple,
     Optional,
     Set,
     Union,
@@ -28,6 +29,7 @@ from IPython.display import HTML, display
 
 from great_expectations import __version__ as ge_version
 from great_expectations import exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -87,7 +89,10 @@ if TYPE_CHECKING:
         MetricValues,
     )
 
-ColumnDataFrame = namedtuple("ColumnDataFrame", ["column", "df"])
+
+class ColumnDataFrame(NamedTuple):
+    column: str
+    df: pd.DataFrame
 
 
 @dataclass
@@ -108,12 +113,14 @@ class RuleStats(SerializableDictDot):
     rule_domain_builder_execution_time: Optional[float] = None
     rule_execution_time: Optional[float] = None
 
+    @override
     def to_dict(self) -> dict:
         """
         Returns dictionary equivalent of this object.
         """
         return asdict(self)
 
+    @override
     def to_json_dict(self) -> dict:
         """
         Returns JSON dictionary equivalent of this object.
@@ -131,6 +138,7 @@ class DataAssistantResult(SerializableDictDot):
         profiler_execution_time: Effective Rule-Based Profiler overall execution time in seconds.
         rule_domain_builder_execution_time: Effective Rule-Based Profiler per-Rule DomainBuilder execution time in seconds.
         rule_execution_time: Effective Rule-Based Profiler per-Rule execution time in seconds.
+        rule_exception_tracebacks: Effective Rule-Based Profiler per-Rule exception tracebacks.
         metrics_by_domain: Metrics by Domain.
         expectation_configurations: Expectation configurations.
         citation: Citations.
@@ -143,6 +151,7 @@ class DataAssistantResult(SerializableDictDot):
         "profiler_execution_time",
         "rule_domain_builder_execution_time",
         "rule_execution_time",
+        "rule_exception_tracebacks",
         "metrics_by_domain",
         "expectation_configurations",
         "citation",
@@ -159,6 +168,7 @@ class DataAssistantResult(SerializableDictDot):
     profiler_execution_time: Optional[float] = None
     rule_domain_builder_execution_time: Optional[Dict[str, float]] = None
     rule_execution_time: Optional[Dict[str, float]] = None
+    rule_exception_tracebacks: Optional[Dict[str, Optional[str]]] = None
     metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = None
     expectation_configurations: Optional[List[ExpectationConfiguration]] = None
     citation: Optional[dict] = None
@@ -249,6 +259,7 @@ class DataAssistantResult(SerializableDictDot):
             include_profiler_config=include_profiler_config,
         )
 
+    @override
     def to_dict(self) -> dict:
         """
         Returns: This DataAssistantResult as dictionary (JSON-serializable dictionary for DataAssistantResult objects).
@@ -272,6 +283,9 @@ class DataAssistantResult(SerializableDictDot):
             "rule_execution_time": convert_to_json_serializable(
                 data=self.rule_execution_time
             ),
+            "rule_exception_tracebacks": convert_to_json_serializable(
+                data=self.rule_exception_tracebacks
+            ),
             "metrics_by_domain": [
                 {
                     "domain_id": domain.id,
@@ -294,6 +308,7 @@ class DataAssistantResult(SerializableDictDot):
         }
 
     @public_api
+    @override
     def to_json_dict(self) -> dict:
         """Returns JSON dictionary equivalent of this object.
 
@@ -302,6 +317,7 @@ class DataAssistantResult(SerializableDictDot):
         """
         return self.to_dict()
 
+    @override
     def __dir__(self) -> List[str]:
         """
         This custom magic method is used to enable tab completion on "DataAssistantResult" objects.
@@ -317,6 +333,7 @@ class DataAssistantResult(SerializableDictDot):
             }
         )
 
+    @override
     def __repr__(self) -> str:
         """
         # TODO: <Alex>6/23/2022</Alex>
@@ -348,6 +365,7 @@ class DataAssistantResult(SerializableDictDot):
 
         return json.dumps(json_dict, indent=2)
 
+    @override
     def __str__(self) -> str:
         """
         # TODO: <Alex>6/23/2022</Alex>

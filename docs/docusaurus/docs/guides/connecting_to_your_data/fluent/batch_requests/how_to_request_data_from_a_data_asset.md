@@ -15,14 +15,14 @@ import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_cont
 <!-- ### Retrieve existing DataAsset from existing Datsource -->
 import GetExistingDataAssetFromExistingDatasource from '/docs/components/setup/datasource/data_asset/_get_existing_data_asset_from_existing_datasource.md'
 
-This guide demonstrates how you can request data from a Datasource that has been defined with the `context.sources.add_*` method.
+This guide demonstrates how you can request data from a Data Source that has been defined with the `context.sources.add_*` method.
 
 ## Prerequisites
 
 <Prerequisites> 
 
 - An installation of GX
-- A Datasource with a configured Data Asset
+- A Data Source with a configured Data Asset
 
 </Prerequisites> 
 

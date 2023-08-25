@@ -252,7 +252,7 @@ def test_can_have_optional_arguments():
             # "qux": -100, #Optional property
         }
     )
-    assert my_B.qux == None
+    assert my_B.qux is None
 
 
 @pytest.mark.unit
@@ -392,10 +392,10 @@ def test_to_raw_dict_works_recursively():
 
     # Make sure it's a dictionary, not a DictDot
     assert type(C_dict) == dict
-    assert isinstance(C_dict, DictDot) == False
+    assert isinstance(C_dict, DictDot) is False
     # Dictionaries don't support dot notation.
     with raises(AttributeError):
-        C_dict.A_list
+        C_dict.A_list  # noqa: B018
 
     assert type(C_dict["A_list"][0]) == dict
     assert type(C_dict["B_list"][0]) == dict
@@ -470,7 +470,7 @@ def test_instantiation_with_a_from_legacy_dict_method():
                 # Ignore parameters that don't match the type definition
                 if k in inspect.signature(cls).parameters:
                     temp_dict[k] = v
-                else:
+                else:  # noqa: PLR5501
                     if k == "in":
                         temp_dict["input"] = v
                     else:
@@ -497,7 +497,7 @@ def test_instantiation_with_a_from_legacy_dict_method():
 
     # Note that after instantiation, the class does NOT have an "in" property
     with raises(AttributeError):
-        my_E["in"] == 10
+        my_E["in"] == 10  # noqa: B015
 
     # Because `in` is a reserved word, this will raise a SyntaxError:
     # my_F.in == 100

@@ -1,11 +1,19 @@
+from __future__ import annotations
+
 import os
 import sys
 import time
 import traceback
 from subprocess import PIPE, CalledProcessError, CompletedProcess, Popen, run
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import click
+
+if TYPE_CHECKING:
+    # I need to import this type for typechecking or mypy will complain. It is the return type of a public method
+    # even though it is in a private module
+    from click._termui_impl import ProgressBar
+
 
 from great_expectations.core import logger
 
@@ -81,6 +89,7 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
 
     gathered: int = 0
     progress: float
+    bar: ProgressBar
     with click.progressbar(length=bar_length_100_percent, label=command) as bar:
         try:
             with Popen(

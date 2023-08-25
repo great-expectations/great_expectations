@@ -188,7 +188,7 @@ try:
     from sqlalchemy.dialects.mssql import dialect as mssqlDialect  # noqa: TID251
 
     try:
-        getattr(mssqltypes, "INT")
+        mssqltypes.INT  # noqa: B018 # reassigning if attr not found
     except AttributeError:
         mssqltypes.INT = mssqltypes.INTEGER
 

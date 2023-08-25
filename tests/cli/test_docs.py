@@ -11,7 +11,6 @@ from tests.cli.utils import (
     assert_no_logging_messages_or_tracebacks,
 )
 
-
 pytestmark = pytest.mark.cli
 
 
@@ -123,7 +122,7 @@ def test_docs_build_happy_paths_build_site_on_single_site_context(
     context = titanic_data_context_stats_enabled_config_version_3
     root_dir = context.root_directory
     runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     result = runner.invoke(
         cli,
         invocation,
@@ -196,12 +195,14 @@ def test_docs_build_happy_paths_build_site_on_single_site_context(
             "great_expectations/uncommitted/data_docs/local_site/index.html"
             in obs_urls[0]["site_url"]
         )
-        site_dir = os.path.join(
+        site_dir = os.path.join(  # noqa: PTH118
             root_dir, context.GX_UNCOMMITTED_DIR, "data_docs", "local_site"
         )
-        assert os.path.isdir(site_dir)
+        assert os.path.isdir(site_dir)  # noqa: PTH112
         # Note the fixture has no expectations or validations - only check the index
-        assert os.path.isfile(os.path.join(site_dir, "index.html"))
+        assert os.path.isfile(  # noqa: PTH113
+            os.path.join(site_dir, "index.html")  # noqa: PTH118
+        )
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -351,7 +352,7 @@ def test_docs_build_happy_paths_build_site_on_multiple_site_context(
 
     root_dir = context.root_directory
     runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     result = runner.invoke(
         cli,
         invocation,
@@ -419,12 +420,14 @@ def test_docs_build_happy_paths_build_site_on_multiple_site_context(
     context = get_context(context_root_dir=root_dir)
     for expected_site_name in expected_built_site_names:
         assert expected_site_name in stdout
-        site_dir = os.path.join(
+        site_dir = os.path.join(  # noqa: PTH118
             root_dir, context.GX_UNCOMMITTED_DIR, "data_docs", expected_site_name
         )
-        assert os.path.isdir(site_dir)
+        assert os.path.isdir(site_dir)  # noqa: PTH112
         # Note the fixture has no expectations or validations - only check the index
-        assert os.path.isfile(os.path.join(site_dir, "index.html"))
+        assert os.path.isfile(  # noqa: PTH113
+            os.path.join(site_dir, "index.html")  # noqa: PTH118
+        )
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -438,7 +441,7 @@ def test_docs_list_with_no_sites(
     context = titanic_data_context_no_data_docs
 
     runner = CliRunner(mix_stderr=True)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     result = runner.invoke(
         cli,
         "docs list",
@@ -463,7 +466,7 @@ def test_docs_list(
 ):
     context = titanic_data_context_stats_enabled_config_version_3
     runner = CliRunner(mix_stderr=True)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     result = runner.invoke(
         cli,
         "docs list",
@@ -507,14 +510,14 @@ def context_with_site_built(titanic_data_context_stats_enabled_config_version_3)
     context.build_data_docs()
     obs_urls = context.get_docs_sites_urls()
     assert len(obs_urls) == 1
-    expected_index_path = os.path.join(
+    expected_index_path = os.path.join(  # noqa: PTH118
         context.root_directory,
         context.GX_UNCOMMITTED_DIR,
         "data_docs",
         "local_site",
         "index.html",
     )
-    assert os.path.isfile(expected_index_path)
+    assert os.path.isfile(expected_index_path)  # noqa: PTH113
     return context
 
 
@@ -572,7 +575,7 @@ def test_docs_clean_and_build_raises_helpful_errors(
     """
     context = context_with_site_built
     runner = CliRunner(mix_stderr=True)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     result = runner.invoke(
         cli,
         invocation,
@@ -627,7 +630,7 @@ def test_docs_clean_happy_paths_clean_expected_sites(
 ):
     context = context_with_site_built
     runner = CliRunner(mix_stderr=True)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     result = runner.invoke(
         cli,
         invocation,
@@ -656,14 +659,14 @@ def test_docs_clean_happy_paths_clean_expected_sites(
             }
         ),
     ]
-    expected_index_path = os.path.join(
+    expected_index_path = os.path.join(  # noqa: PTH118
         context.root_directory,
         context.GX_UNCOMMITTED_DIR,
         "data_docs",
         "local_site",
         "index.html",
     )
-    assert not os.path.isfile(expected_index_path)
+    assert not os.path.isfile(expected_index_path)  # noqa: PTH113
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,

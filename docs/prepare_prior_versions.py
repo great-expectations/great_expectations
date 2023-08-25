@@ -442,10 +442,13 @@ def prepend_version_info_for_md_absolute_links(
 def _prepend_version_info_for_md_absolute_links(contents: str, version: str) -> str:
     # The negative lookahead (?!\d{1,2}\.\d{1,2}\.\d{1,2}) ensures that we don't add the version if there
     # already is a version in the link (e.g. when we manually reference earlier versions):
+
     pattern = re.compile(
-        r"(?P<start>.*)(?P<text>\[.*\])(?P<link_start_no_version>\(/docs/(?!\d{1,2}\.\d{1,2}\.\d{1,2}))(?P<rest>.*)"
+        r"(?P<text>\[(.*?)\])(?P<link_start_no_version>\(/docs/(?!\d{1,2}\.\d{1,2}\.\d{1,2}))(?P<link_rest>(.*?)\))"
     )
-    contents = re.sub(pattern, rf"\g<start>\g<text>(/docs/{version}/\g<rest>", contents)
+    contents = re.sub(
+        pattern, rf"\g<text>\g<link_start_no_version>{version}/\g<link_rest>", contents
+    )
     return contents
 
 

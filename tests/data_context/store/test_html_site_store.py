@@ -95,8 +95,8 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
 
 @freeze_time("09/26/2019 13:42:41")
 @mock_s3
-@pytest.mark.big
-def test_HtmlSiteStore_S3_backend():
+@pytest.mark.aws_deps
+def test_HtmlSiteStore_S3_backend(aws_credentials):
     bucket = "test_validation_store_bucket"
     prefix = "test/prefix"
 

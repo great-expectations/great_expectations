@@ -1,6 +1,6 @@
 version: '3.2'
 services:
   trino_db:
-    image: trinodb/trino:400
+    image: trinodb/trino:latest
     ports:
       - "8088:8080"

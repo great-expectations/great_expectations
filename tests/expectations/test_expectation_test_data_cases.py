@@ -1,8 +1,9 @@
+import pytest
+
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationLegacyTestCaseAdapter,
     TestData,
 )
-import pytest
 
 # module level markers
 pytestmark = pytest.mark.unit

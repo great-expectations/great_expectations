@@ -827,7 +827,9 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
 
     for table_name in tables_to_drop:
         print(f"Dropping table {table_name}")
-        execution_engine.execute_query(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
+        execution_engine.execute_query_in_transaction(
+            sa.text(f"DROP TABLE IF EXISTS {table_name}")
+        )
         tables_dropped.append(table_name)
 
     tables_skipped: List[str] = list(set(tables_to_drop) - set(tables_dropped))

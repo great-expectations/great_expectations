@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
+import urllib.parse
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
@@ -150,7 +151,8 @@ def test_assets_are_persisted_on_creation_and_removed_on_deletion(
     assert asset_name not in fds_after_delete[datasource_name].get("assets", {})
 
 
-@pytest.mark.cloud
+# This test is parameterized by the fixture `empty_context`. This fixture will mark the test as
+# cloud or filesystem as appropriate
 def test_context_add_or_update_datasource(
     cloud_api_fake: RequestsMock,
     empty_contexts: CloudDataContext | FileDataContext,
@@ -216,7 +218,8 @@ def test_cloud_add_or_update_datasource_kw_vs_positional(
     assert datasource1 == datasource2 == datasource3
 
 
-@pytest.mark.cloud
+# This test is parameterized by the fixture `empty_context`. This fixture will mark the test as
+# cloud or filesystem as appropriate
 def test_context_add_and_then_update_datasource(
     cloud_api_fake: RequestsMock,
     empty_contexts: CloudDataContext | FileDataContext,
@@ -243,7 +246,8 @@ def test_context_add_and_then_update_datasource(
     assert datasource2 == datasource3
 
 
-@pytest.mark.cloud
+# This test is parameterized by the fixture `empty_context`. This fixture will mark the test as
+# cloud or filesystem as appropriate
 def test_update_non_existant_datasource(
     cloud_api_fake: RequestsMock,
     empty_contexts: CloudDataContext | FileDataContext,
@@ -296,9 +300,14 @@ def test_cloud_context_delete_datasource(
 
 
 @pytest.fixture
-def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDetails):
+def verify_asset_names_mock(
+    cloud_api_fake: RequestsMock, cloud_details: CloudDetails, cloud_api_fake_db
+):
     def verify_asset_name_cb(request: PreparedRequest) -> CallbackResult:
         if request.body:
+            parsed_url_path = str(urllib.parse.urlparse(request.url).path)
+            datasource_id = parsed_url_path.split("/")[-1]
+
             payload = CloudResponseSchema.from_datasource_json(request.body)
             LOGGER.info(f"PUT payload: ->\n{pf(payload.dict())}")
             assets = payload.data.attributes["datasource_config"]["assets"]  # type: ignore[index]
@@ -308,6 +317,16 @@ def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDe
                     raise ValueError(
                         f"Asset name should not be default - '{DEFAULT_PANDAS_DATA_ASSET_NAME}'"
                     )
+            old_datasource: dict | None = cloud_api_fake_db["datasources"].get(
+                datasource_id
+            )
+            if old_datasource:
+                if (
+                    payload.data.name
+                    != old_datasource["data"]["attributes"]["datasource_config"]["name"]
+                ):
+                    raise NotImplementedError("Unsure how to handle name change")
+                cloud_api_fake_db["datasources"][datasource_id] = payload.dict()
             return CallbackResult(
                 200,
                 headers=DEFAULT_HEADERS,

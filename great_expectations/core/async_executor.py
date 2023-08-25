@@ -4,7 +4,6 @@ for both when concurrency is enabled and disabled.
 
 WARNING: This module is experimental.
 """
-
 from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import AbstractContextManager
 from typing import Generic, Optional, TypeVar
@@ -12,6 +11,7 @@ from typing import Generic, Optional, TypeVar
 import requests
 
 from great_expectations.compatibility.google import python_bigquery
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.types.base import ConcurrencyConfig
 
 T = TypeVar("T")
@@ -85,6 +85,7 @@ class AsyncExecutor(AbstractContextManager):
             else None
         )
 
+    @override
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.shutdown()
         # Do NOT use the context manager exception arguments in order to get the desired default behavior (i.e. any

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import pathlib
 import sys
 from typing import List
 
@@ -48,7 +49,7 @@ def test_pandas_happy_path_onboarding_data_assistant(empty_data_context) -> None
     """
     data_context: FileDataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
-        __file__, os.path.join("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
+        __file__, pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
     )
 
     datasource_config: dict = {
@@ -156,7 +157,7 @@ def test_spark_happy_path_onboarding_data_assistant(
     schema: pyspark.types.StructType = spark_df_taxi_data_schema
     data_context: FileDataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
-        __file__, os.path.join("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
+        __file__, pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
     )
 
     datasource_config: dict = {
@@ -352,7 +353,7 @@ def test_sql_happy_path_onboarding_data_assistant_null_column_quantiles_metric_v
 
     db_file = file_relative_path(
         __file__,
-        os.path.join(
+        pathlib.Path(
             "..",
             "..",
             "test_sets",
@@ -411,7 +412,7 @@ def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_and_boolea
     try:
         csv_path: str = file_relative_path(
             __file__,
-            os.path.join(
+            pathlib.Path(
                 "..",
                 "..",
                 "test_sets",

@@ -1,7 +1,7 @@
 import copy
 import datetime
-from decimal import Decimal
 import logging
+from decimal import Decimal
 from typing import Dict, Tuple, Union
 
 import numpy as np
@@ -9,6 +9,10 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core.batch import Batch
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
@@ -23,8 +27,6 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.compatibility import pyspark
-from great_expectations.compatibility import sqlalchemy
 from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
 )
@@ -38,10 +40,6 @@ from great_expectations.util import isclose
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
-
-from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
-    add_dataframe_to_db,
-)
 
 
 @pytest.mark.unit
@@ -404,8 +402,8 @@ def test_column_quoted_name_type_sa(sa):
 
     for column_name in [
         "non_existent_column",
-        '"NAMES"',
-        '"Names"',
+        "?NAMES?",
+        "*Names*",
     ]:
         with pytest.raises(
             gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError
@@ -419,28 +417,66 @@ def test_column_quoted_name_type_sa(sa):
             == f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
-    quoted_batch_column_list = [
-        sqlalchemy.quoted_name(value=str(column_name), quote=True)
-        for column_name in [
-            "Names",
-            "names",
-        ]
-    ]
+
+@pytest.mark.unit
+def test_column_quoted_name_type_sa_handles_explicit_string_identifiers(sa):
+    """
+    Within SQLite, identifiers can be quoted using one of the following mechanisms:
+    'keyword'		A keyword in single quotes is a string literal.
+    "keyword"		A keyword in double-quotes is an identifier.
+    [keyword]		A keyword enclosed in square brackets is an identifier. This is not standard SQL.
+                    This quoting mechanism is used by MS Access and SQL Server and is included in SQLite for compatibility.
+    `keyword`		A keyword enclosed in grave accents (ASCII code 96) is an identifier. This is not standard SQL.
+                    This quoting mechanism is used by MySQL and is included in SQLite for compatibility.
+
+    When explicit quoted identifiers are passed in, we should use them as-is.
+    Explicit identifiers are used when the column contains a space or reserved word.
+    """
+    engine = build_sa_execution_engine(
+        pd.DataFrame(
+            {
+                "More Names": [
+                    "Ada Lovelace",
+                    "Alan Kay",
+                    "Donald Knuth",
+                    "Edsger Dijkstra",
+                    "Guido van Rossum",
+                    "John McCarthy",
+                    "Marvin Minsky",
+                    "Ray Ozzie",
+                ]
+            }
+        ),
+        sa,
+    )
+
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+
+    table_columns_metric: MetricConfiguration
+    results: Dict[Tuple[str, str, str], MetricValue]
+
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
+    metrics.update(results)
+
+    table_columns_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="table.columns",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+    table_columns_metric_id: Tuple[str, str, str] = table_columns_metric.id
+    batch_column_list = metrics[table_columns_metric_id]
+
     for column_name in [
-        "non_existent_column",
-        "NAMES",
+        '"More Names"',
+        "[More Names]",
+        "`More Names`",
     ]:
-        with pytest.raises(
-            gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError
-        ) as eee:
-            _ = get_dbms_compatible_column_names(
-                column_names=column_name,
-                batch_columns_list=quoted_batch_column_list,
-            )
-        assert (
-            str(eee.value)
-            == f'Error: The column "{column_name}" in BatchData does not exist.'
+        str_column_name = get_dbms_compatible_column_names(
+            column_names=column_name,
+            batch_columns_list=batch_column_list,
         )
+        assert isinstance(str_column_name, str)
+        assert str_column_name == column_name
 
 
 @pytest.mark.sqlite
@@ -1173,7 +1209,7 @@ def test_column_partition_metric_pd():
 
 
 @pytest.mark.sqlite
-def test_column_partition_metric_sa(sa):
+def test_column_partition_metric_sa(sa):  # noqa: PLR0915
     """
     Test of "column.partition" metric for both, standard numeric column and "datetime.datetime" valued column.
 
@@ -1408,7 +1444,7 @@ def test_column_partition_metric_sa(sa):
 
 
 @pytest.mark.spark
-def test_column_partition_metric_spark(spark_session):
+def test_column_partition_metric_spark(spark_session):  # noqa: PLR0915
     """
     Test of "column.partition" metric for both, standard numeric column and "datetime.datetime" valued column.
 
@@ -3109,7 +3145,7 @@ def test_table_metric_pd(caplog):
 
 
 @pytest.mark.big
-def test_map_column_pairs_equal_metric_pd():
+def test_map_column_pairs_equal_metric_pd():  # noqa: PLR0915
     engine = build_pandas_engine(
         pd.DataFrame(
             data={
@@ -3359,7 +3395,7 @@ def test_table_metric_sa(sa):
 
 
 @pytest.mark.sqlite
-def test_map_column_pairs_equal_metric_sa(sa):
+def test_map_column_pairs_equal_metric_sa(sa):  # noqa: PLR0915
     engine = build_sa_execution_engine(
         pd.DataFrame(
             data={
@@ -3574,7 +3610,7 @@ def test_map_column_pairs_equal_metric_sa(sa):
 
 
 @pytest.mark.spark
-def test_map_column_pairs_equal_metric_spark(spark_session):
+def test_map_column_pairs_equal_metric_spark(spark_session):  # noqa: PLR0915
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -5194,7 +5230,7 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
 
 
 @pytest.mark.big
-def test_map_multicolumn_sum_equal_pd():
+def test_map_multicolumn_sum_equal_pd():  # noqa: PLR0915
     engine = build_pandas_engine(
         pd.DataFrame(
             data={"a": [0, 1, 2], "b": [5, 4, 3], "c": [0, 0, 1], "d": [7, 8, 9]}
@@ -5406,7 +5442,7 @@ def test_map_multicolumn_sum_equal_pd():
 
 
 @pytest.mark.sqlite
-def test_map_multicolumn_sum_equal_sa(sa):
+def test_map_multicolumn_sum_equal_sa(sa):  # noqa: PLR0915
     engine = build_sa_execution_engine(
         pd.DataFrame(
             data={"a": [0, 1, 2], "b": [5, 4, 3], "c": [0, 0, 1], "d": [7, 8, 9]}
@@ -5608,7 +5644,7 @@ def test_map_multicolumn_sum_equal_sa(sa):
 
 
 @pytest.mark.spark
-def test_map_multicolumn_sum_equal_spark(spark_session):
+def test_map_multicolumn_sum_equal_spark(spark_session):  # noqa: PLR0915
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -5813,7 +5849,7 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
 
 
 @pytest.mark.big
-def test_map_compound_columns_unique_pd():
+def test_map_compound_columns_unique_pd():  # noqa: PLR0915
     engine = build_pandas_engine(
         pd.DataFrame(data={"a": [0, 1, 1], "b": [1, 2, 3], "c": [0, 2, 2]})
     )
@@ -6019,7 +6055,7 @@ def test_map_compound_columns_unique_pd():
 
 
 @pytest.mark.sqlite
-def test_map_compound_columns_unique_sa(sa):
+def test_map_compound_columns_unique_sa(sa):  # noqa: PLR0915
     engine = build_sa_execution_engine(
         pd.DataFrame(data={"a": [0, 1, 1], "b": [1, 2, 3], "c": [0, 2, 2]}),
         sa,
@@ -6254,7 +6290,7 @@ def test_map_compound_columns_unique_sa(sa):
 
 
 @pytest.mark.big
-def test_map_compound_columns_unique_spark(spark_session):
+def test_map_compound_columns_unique_spark(spark_session):  # noqa: PLR0915
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(data={"a": [0, 1, 1], "b": [1, 2, 3], "c": [0, 2, 2]}),
@@ -6453,7 +6489,7 @@ def test_map_compound_columns_unique_spark(spark_session):
 
 
 @pytest.mark.big
-def test_map_select_column_values_unique_within_record_pd():
+def test_map_select_column_values_unique_within_record_pd():  # noqa: PLR0915
     engine = build_pandas_engine(
         pd.DataFrame(
             data={
@@ -6704,7 +6740,7 @@ def test_map_select_column_values_unique_within_record_pd():
 
 
 @pytest.mark.sqlite
-def test_map_select_column_values_unique_within_record_sa(sa):
+def test_map_select_column_values_unique_within_record_sa(sa):  # noqa: PLR0915
     engine = build_sa_execution_engine(
         pd.DataFrame(
             data={
@@ -6918,7 +6954,9 @@ def test_map_select_column_values_unique_within_record_sa(sa):
 
 
 @pytest.mark.spark
-def test_map_select_column_values_unique_within_record_spark(spark_session):
+def test_map_select_column_values_unique_within_record_spark(  # noqa: PLR0915 # 56
+    spark_session,
+):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(

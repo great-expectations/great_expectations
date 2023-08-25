@@ -140,7 +140,7 @@ class EphemeralDataContextSpy(EphemeralDataContext):
     def checkpoint_store(self):
         return self._checkpoint_store
 
-    def _save_project_config(self):
+    def _save_project_config(self, _fds_datasource=None):
         """
         No-op our persistence mechanism but increment an internal counter to ensure it was used.
         """

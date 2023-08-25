@@ -1,8 +1,7 @@
 import datetime
-from typing import Dict, List, Union
+from typing import TYPE_CHECKING, Dict, List, Union
 
 import numpy as np
-import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
@@ -28,6 +27,9 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
 )
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 EFFICACY_TOLERANCE: float = 1.0e-2
 

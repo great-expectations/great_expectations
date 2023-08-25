@@ -14,7 +14,7 @@ import Introduction from '/docs/components/connect_to_data/intros/_abs_pandas_or
 <!-- ### 1. Import GX and instantiate a Data Context -->
 import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
 
-<!-- ### 3. Add S3 data to the Datasource as a Data Asset -->
+<!-- ### 3. Add S3 data to the Data Source as a Data Asset -->
 import BatchingRegexExplaination from '/docs/components/connect_to_data/cloud/_batching_regex_explaination.mdx'
 import AbsFluentAddDataAssetConfigKeys from '/docs/components/connect_to_data/cloud/_abs_fluent_data_asset_config_keys.mdx'
 
@@ -40,15 +40,15 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 <ImportGxAndInstantiateADataContext />
 
 
-### 2. Create a Datasource
+### 2. Create a Data Source
 
 We can define an Azure Blob Storage datasource by providing these pieces of information:
-- `name`: In our example, we will name our Datasource `"my_datasource"`
+- `name`: In our example, we will name our Data Source `"my_datasource"`
 - `azure_options`: We provide authentication settings here
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py define_add_pandas_abs_args"
 ```
-We can create a Datasource that points to our Azure Blob Storage with the code:
+We can create a Data Source that points to our Azure Blob Storage with the code:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py create_datasource"
 ```
@@ -57,7 +57,7 @@ We can create a Datasource that points to our Azure Blob Storage with the code:
 In the above example, the value for `account_url` will be substituted for the contents of the `AZURE_STORAGE_CONNECTION_STRING` key you configured when you [installed GX and set up your Azure Blob Storage dependancies](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs).
 :::
 
-### 3. Add ABS data to the Datasource as a Data Asset
+### 3. Add ABS data to the Data Source as a Data Asset
 
 <AbsFluentAddDataAssetConfigKeys />
 
