@@ -217,8 +217,8 @@ def test_pandas_source_read_csv(
         ),
         "unicode",
     )
-    assert len(batch["Μ"] == 1)
-    assert "😁" in list(batch["Μ"])
+    assert len(batch["M"] == 1)
+    assert "😁" in list(batch["M"])
 
     data_context_parameterized_expectation_suite.add_datasource(
         "mysource2",
@@ -238,7 +238,7 @@ def test_pandas_source_read_csv(
         ),
         "unicode",
     )
-    assert "😁" in list(batch["Μ"])
+    assert "😁" in list(batch["M"])
 
     data_context_parameterized_expectation_suite.add_datasource(
         "mysource3",
@@ -290,7 +290,7 @@ def test_pandas_source_read_csv(
         ),
         expectation_suite_name="unicode",
     )
-    assert "😁" in list(batch["Μ"])
+    assert "😁" in list(batch["M"])
 
 
 @pytest.mark.skipif(
