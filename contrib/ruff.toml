@@ -13,6 +13,8 @@ extend-ignore = [
     "DTZ", # TODO: probably want to enable this for contrib as well.
     # https://beta.ruff.rs/docs/rules/#pylint-pl
     "PL", # pylint TODO: enable this for contrib
+    # https://beta.ruff.rs/docs/rules/#ruff-specific-rules-ruf
+    "RUF013", # implicit-optional - TODO: enable this for contrib
 ]
 
 [isort]

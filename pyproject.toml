@@ -260,7 +260,6 @@ ignore = [
     # TODO: enable remaining ruf rules in followup PRs
     "RUF005", # collection-literal-concatenation
     "RUF012", # mutable-class-default - too many violations
-    "RUF013", # implicit-optional - mypy corrects for this. Wait for full type coverage before enabling
 ]
 extend-exclude = [
     "docs/*",
