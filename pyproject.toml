@@ -258,7 +258,8 @@ ignore = [
     "B028", # no-explicit-stacklevel - https://beta.ruff.rs/docs/rules/no-explicit-stacklevel/
     "B007", # unused-loop-control-variable
     # TODO: enable remaining ruf rules
-    "RUF013" # implicit-optional - mypy corrects for this. Wait for full type coverage before enabling
+    "RUF012", # mutable-class-default - too many violations
+    "RUF013", # implicit-optional - mypy corrects for this. Wait for full type coverage before enabling
 ]
 extend-exclude = [
     "docs/*",
