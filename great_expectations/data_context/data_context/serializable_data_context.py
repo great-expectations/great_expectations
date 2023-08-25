@@ -41,10 +41,11 @@ if TYPE_CHECKING:
 
 
 class SerializableDataContext(AbstractDataContext):
-    UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
-    GX_UNCOMMITTED_DIR = "uncommitted"
-    GITIGNORE = ".gitignore"
-    BASE_DIRECTORIES = [
+    UNCOMMITTED_DIRECTORIES: ClassVar[list[str]] = ["data_docs", "validations"]
+    GX_UNCOMMITTED_DIR: ClassVar[str] = "uncommitted"
+    GITIGNORE: ClassVar[str] = ".gitignore"
+    GX_CONFIG_VARIABLES: ClassVar[str] = "config_variables.yml"
+    BASE_DIRECTORIES: ClassVar[list[str]] = [
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.PLUGINS_BASE_DIRECTORY.value,
@@ -54,8 +55,8 @@ class SerializableDataContext(AbstractDataContext):
     GX_DIR: ClassVar[str] = "gx"
     _LEGACY_GX_DIR: ClassVar[str] = "great_expectations"
     GX_YML: ClassVar[str] = "great_expectations.yml"
-    GX_EDIT_NOTEBOOK_DIR = GX_UNCOMMITTED_DIR
-    DOLLAR_SIGN_ESCAPE_STRING = r"\$"
+    GX_EDIT_NOTEBOOK_DIR: ClassVar[str] = GX_UNCOMMITTED_DIR
+    DOLLAR_SIGN_ESCAPE_STRING: ClassVar[str] = r"\$"
 
     def __init__(
         self,
@@ -228,7 +229,7 @@ class SerializableDataContext(AbstractDataContext):
             cls._write_project_template_to_disk(gx_dir, usage_statistics_enabled)
 
         uncommitted_dir = gx_dir / cls.GX_UNCOMMITTED_DIR
-        if pathlib.Path.is_file(uncommitted_dir.joinpath("config_variables.yml")):
+        if pathlib.Path.is_file(uncommitted_dir.joinpath(cls.GX_CONFIG_VARIABLES)):
             message = """Warning. An existing `config_variables.yml` was found here: {}.
     - No action was taken.""".format(
                 uncommitted_dir
@@ -271,7 +272,7 @@ class SerializableDataContext(AbstractDataContext):
         uncommitted_dir = pathlib.Path(uncommitted_dir)
 
         uncommitted_dir.mkdir(exist_ok=True)
-        config_var_file = uncommitted_dir / "config_variables.yml"
+        config_var_file = uncommitted_dir / cls.GX_CONFIG_VARIABLES
         with config_var_file.open("w") as template:
             template.write(CONFIG_VARIABLES_TEMPLATE)
 
