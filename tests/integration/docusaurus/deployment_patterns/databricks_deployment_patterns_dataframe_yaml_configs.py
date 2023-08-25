@@ -165,7 +165,7 @@ my_checkpoint_name = "insert_your_checkpoint_name_here"
 my_checkpoint_config = f"""
 name: {my_checkpoint_name}
 config_version: 1.0
-class_name: SimpleCheckpoint
+class_name: Checkpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 """
 

@@ -265,7 +265,7 @@ context.add_or_update_expectation_suite(
 checkpoint_dict: dict = {
     "name": "my_checkpoint",
     "config_version": 1.0,
-    "class_name": "Checkpoint",  # or SimpleCheckpoint
+    "class_name": "Checkpoint",
     "module_name": "great_expectations.checkpoint",
     "template_name": None,
     "run_name_template": "%Y-%M-foo-bar-template-test",

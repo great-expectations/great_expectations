@@ -1,5 +1,4 @@
 import great_expectations as gx
-from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.profile.user_configurable_profiler import (
@@ -126,7 +125,7 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 my_checkpoint_config = f"""
 name: getting_started_checkpoint
 config_version: 1.0
-class_name: SimpleCheckpoint
+class_name: Checkpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
@@ -156,9 +155,7 @@ my_checkpoint_config = yaml.load(my_checkpoint_config)
 # NOTE: The following code (up to and including the assert) is only for testing and can be ignored by users.
 # In the current test, site_names are set to None because we do not want to update and build data_docs
 # If you would like to build data_docs then either remove `site_names=None` or pass in a list of site_names you would like to build the docs on.
-checkpoint = SimpleCheckpoint(
-    **my_checkpoint_config, data_context=context, site_names=None
-)
+checkpoint = context.add_or_update_checkpoint(**my_checkpoint_config, site_names=None)
 checkpoint_result = checkpoint.run(site_names=None)
 assert checkpoint_result.run_results
 
@@ -168,7 +165,7 @@ assert checkpoint_result.run_results
 yaml_config = f"""
 name: getting_started_checkpoint
 config_version: 1.0
-class_name: SimpleCheckpoint
+class_name: Checkpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
@@ -198,8 +195,8 @@ my_new_checkpoint_config = yaml.load(yaml_config)
 # NOTE: The following code (up to and including the assert) is only for testing and can be ignored by users.
 # In the current test, site_names are set to None because we do not want to update and build data_docs
 # If you would like to build data_docs then either remove `site_names=None` or pass in a list of site_names you would like to build the docs on.
-new_checkpoint = SimpleCheckpoint(
-    **my_new_checkpoint_config, data_context=context, site_names=None
+new_checkpoint = context.add_or_update_checkpoint(
+    **my_new_checkpoint_config, site_names=None
 )
 new_checkpoint_result = new_checkpoint.run(site_names=None)
 assert new_checkpoint_result.run_results
