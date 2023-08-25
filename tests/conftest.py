@@ -3597,12 +3597,13 @@ def empty_base_data_context_in_cloud_mode(
     project_path.mkdir(exist_ok=True)
     project_path = str(project_path)
 
-    context = gx.data_context.BaseDataContext(
-        project_config=empty_ge_cloud_data_context_config,
-        context_root_dir=project_path,
-        cloud_mode=True,
-        cloud_config=ge_cloud_config,
-    )
+    with pytest.deprecated_call():
+        context = gx.data_context.BaseDataContext(
+            project_config=empty_ge_cloud_data_context_config,
+            context_root_dir=project_path,
+            cloud_mode=True,
+            cloud_config=ge_cloud_config,
+        )
     assert context.list_datasources() == []
     return context
 
@@ -3654,9 +3655,9 @@ def empty_cloud_data_context(
     cloud_data_context: CloudDataContext = CloudDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path_name,
-        ge_cloud_base_url=ge_cloud_config.base_url,
-        ge_cloud_access_token=ge_cloud_config.access_token,
-        ge_cloud_organization_id=ge_cloud_config.organization_id,
+        cloud_base_url=ge_cloud_config.base_url,
+        cloud_access_token=ge_cloud_config.access_token,
+        cloud_organization_id=ge_cloud_config.organization_id,
     )
     return cloud_data_context
 
@@ -3680,12 +3681,13 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
     custom_ge_cloud_config = copy.deepcopy(ge_cloud_config)
     custom_ge_cloud_config.base_url = custom_base_url
 
-    context = gx.data_context.BaseDataContext(
-        project_config=empty_ge_cloud_data_context_config,
-        context_root_dir=project_path,
-        cloud_mode=True,
-        cloud_config=custom_ge_cloud_config,
-    )
+    with pytest.deprecated_call():
+        context = gx.data_context.BaseDataContext(
+            project_config=empty_ge_cloud_data_context_config,
+            context_root_dir=project_path,
+            cloud_mode=True,
+            cloud_config=custom_ge_cloud_config,
+        )
     assert context.list_datasources() == []
     assert context.ge_cloud_config.base_url != ge_cloud_config.base_url
     assert context.ge_cloud_config.base_url == custom_base_url

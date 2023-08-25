@@ -383,14 +383,14 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _save_project_config(
         self, _fds_datasource: FluentDatasource | None = None
-    ) -> None:
+    ) -> FluentDatasource | None:
         """
         Each DataContext will define how its project_config will be saved through its internal 'variables'.
             - FileDataContext : Filesystem.
             - CloudDataContext : Cloud endpoint
             - Ephemeral : not saved, and logging message outputted
         """
-        self.variables.save_config()
+        return self.variables.save_config()
 
     @public_api
     def update_project_config(
@@ -1172,8 +1172,8 @@ class AbstractDataContext(ConfigPeer, ABC):
     ) -> DataContextConfig:
         """
         Substitute vars in config of form ${var} or $(var) with values found in the following places,
-        in order of precedence: ge_cloud_config (for Data Contexts in GX Cloud mode), runtime_environment,
-        environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
+        in order of precedence: gx_cloud_config (for Data Contexts in GX Cloud mode), runtime_environment,
+        environment variables, config_variables, or gx_cloud_config_variable_defaults (allows certain variables to
         be optional in GX Cloud mode).
         """
         if not config:
