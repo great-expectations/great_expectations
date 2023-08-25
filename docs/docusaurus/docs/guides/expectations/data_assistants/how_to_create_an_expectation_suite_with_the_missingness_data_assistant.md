@@ -76,7 +76,7 @@ To run a Data Assistant, you can call the `run(...)` method for the assistant. H
 
 ## Save your Expectation Suite
 
-1. After executing the Missingness Data Assistant's `run(...)` method and generating Expectations for your data, run the following code to load and save them into your Expectation Suite:
+1. After executing the Missingness Data Assistant `run(...)` method and generating Expectations for your data, run the following code to load and save them into your Expectation Suite:
 
   ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py get_expectation_suite"
   ```
@@ -88,12 +88,12 @@ To run a Data Assistant, you can call the `run(...)` method for the assistant. H
 
 ## Test your Expectation Suite
 
-  Run the following code to use a Checkpoint to operate with the Expectation Suite and Batch Request that you defined:
+Run the following code to use a Checkpoint to operate with the Expectation Suite and Batch Request that you defined:
 
   ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py checkpoint"
   ```
 
-  You can check the `"success"` key of the Checkpoint's results to verify that your Expectation Suite worked.
+You can check the `"success"` key of the Checkpoint's results to verify that your Expectation Suite worked.
 
 ## Plot and inspect Metrics and Expectations
 
@@ -124,12 +124,12 @@ To run a Data Assistant, you can call the `run(...)` method for the assistant. H
   The Expectation and the Metric are not visualized by the `plot_expectations_and_metrics()` method when an Expectation is not produced by the Missingness Data Assistant for a given Metric.
   :::
 
-4. Run the following command to view the Expectations produced and grouped by Domain:
+4. Run the following code to view the Expectations produced and grouped by Domain:
 
   ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py show_expectations_by_domain_type"
   ```
 
-5. Run the following command to view the Expectations produced and grouped by Expectation type:
+5. Run the following code to view the Expectations produced and grouped by Expectation type:
 
   ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py show_expectations_by_expectation_type"
   ```
@@ -138,10 +138,4 @@ To run a Data Assistant, you can call the `run(...)` method for the assistant. H
 
 The Missingness Data Assistant creates as many Expectations as it can for the permitted columns. Although this can help with data analysis, it might be unnecessary.  It is also possible that you may possess some domain knowledge that is not reflected in the data that was sampled for the Profiling process. In these types of scenarios, you can edit your Expectation Suite to better align with your business requirements.
 
-Run the following code to edit an existing Expectation Suite:
-
-```markdown title="Terminal command"
-great_expectations suite edit <expectation_suite_name>
-```
-
-A Jupyter Notebook opens. You can review, edit, and save changes to the Expectation Suite.
+To edit an existing Expectation Suite, see [Edit an Expectation Suite](/docs/guides/expectations/how_to_edit_an_existing_expectationsuite).

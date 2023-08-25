@@ -4,6 +4,7 @@ from great_expectations.agent.actions.data_assistants.utils import (
     build_batch_request,
 )
 from great_expectations.agent.models import RunOnboardingDataAssistantEvent
+from great_expectations.compatibility.typing_extensions import override
 
 
 class RunOnboardingDataAssistantAction(AgentAction[RunOnboardingDataAssistantEvent]):
@@ -11,6 +12,7 @@ class RunOnboardingDataAssistantAction(AgentAction[RunOnboardingDataAssistantEve
         super().__init__(context=context)
         self._data_assistant = self._context.assistants.onboarding
 
+    @override
     def run(
         self,
         event: RunOnboardingDataAssistantEvent,

@@ -35,7 +35,7 @@ To check whether the Expectation you are interested in works under the auto-init
 
 For example:
 
-```python name="tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py is_expectation_self_initializing False"
+```python name="tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py is_expectation_auto_initializing False"
 ```
 
 will return `False` and print the message:
@@ -46,7 +46,7 @@ The Expectation expect_column_to_exist is not able to be auto-initialized.
 
 However, the command:
 
-```python name="tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py is_expectation_self_initializing True"
+```python name="tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py is_expectation_auto_initializing True"
 ```
 
 will return `True` and print the message:

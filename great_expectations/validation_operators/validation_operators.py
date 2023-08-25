@@ -307,7 +307,7 @@ class ActionListValidationOperator(ValidationOperator):
                 and isinstance(item[1], str)
             ):
                 raise ValueError("Unable to build batch from item.")
-            batch = self.data_context.get_batch(
+            batch = self.data_context._get_batch_v2(
                 batch_kwargs=item[0], expectation_suite_name=item[1]
             )
         else:

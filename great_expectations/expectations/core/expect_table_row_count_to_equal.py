@@ -1,5 +1,6 @@
 from typing import Dict, List, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -75,6 +76,7 @@ class ExpectTableRowCountToEqual(BatchExpectation):
     args_keys = ("value",)
 
     @public_api
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -118,6 +120,7 @@ class ExpectTableRowCountToEqual(BatchExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -131,6 +134,7 @@ class ExpectTableRowCountToEqual(BatchExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -165,6 +169,7 @@ class ExpectTableRowCountToEqual(BatchExpectation):
             )
         ]
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,
