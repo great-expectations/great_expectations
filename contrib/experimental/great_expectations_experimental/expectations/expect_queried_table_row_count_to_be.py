@@ -66,7 +66,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
         metrics = convert_to_json_serializable(data=metrics)
-        query_result = list(metrics.get("query.table")[0].values())[0]
+        query_result = next(iter(metrics.get("query.table")[0].values()))
         value = configuration["kwargs"].get("value")
 
         success = query_result == value

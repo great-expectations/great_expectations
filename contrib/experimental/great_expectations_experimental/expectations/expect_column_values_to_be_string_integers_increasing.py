@@ -70,9 +70,7 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
     ):
         column_name = metric_domain_kwargs["column"]
         table_columns = metrics["table.column_types"]
-        column_metadata = [col for col in table_columns if col["name"] == column_name][
-            0
-        ]
+        column_metadata = next(col for col in table_columns if col["name"] == column_name)
 
         if pyspark.types and isinstance(
             column_metadata["type"], pyspark.types.StringType

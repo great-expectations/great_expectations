@@ -65,7 +65,7 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
         metrics = convert_to_json_serializable(data=metrics)
-        count: int = list(metrics.get("query.template_values")[0].values())[0]
+        count: int = next(iter(metrics.get("query.template_values")[0].values()))
         threshold: Union[float, int] = configuration["kwargs"].get("threshold")
 
         return {

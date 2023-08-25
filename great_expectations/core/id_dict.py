@@ -20,7 +20,7 @@ class IDDict(dict):
         if len(id_keys) == 0:
             return tuple()
         elif len(id_keys) == 1:
-            key = list(id_keys)[0]
+            key = next(iter(id_keys))
             return f"{key}={self[key]!s}"
 
         _id_dict = convert_to_json_serializable(data={k: self[k] for k in id_keys})

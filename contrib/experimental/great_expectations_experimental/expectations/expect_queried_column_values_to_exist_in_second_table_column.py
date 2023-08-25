@@ -63,7 +63,7 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
         metrics = convert_to_json_serializable(data=metrics)
-        num_of_missing_rows = list(metrics.get("query.template_values")[0].values())[0]
+        num_of_missing_rows = next(iter(metrics.get("query.template_values")[0].values()))
 
         return {
             "success": num_of_missing_rows == 0,
