@@ -141,11 +141,11 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
     if hasattr(pytest_parsed_arguments, str(dialect_name.value)):
         if not getattr(pytest_parsed_arguments, str(dialect_name.value)):
             pytest.skip(
-                f"Skipping {str(dialect_name.value)} since the --{str(dialect_name.value)} pytest flag was not set"
+                f"Skipping {dialect_name.value!s} since the --{dialect_name.value!s} pytest flag was not set"
             )
     else:
         pytest.skip(
-            f"Skipping {str(dialect_name.value)} since the dialect is not runnable via pytest flag"
+            f"Skipping {dialect_name.value!s} since the dialect is not runnable via pytest flag"
         )
 
     # 1. Setup
