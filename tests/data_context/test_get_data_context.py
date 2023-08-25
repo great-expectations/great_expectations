@@ -1,4 +1,5 @@
 import pathlib
+import shutil
 from unittest import mock
 
 import pytest
@@ -354,3 +355,39 @@ def test_get_context_with_context_root_dir_gitignore_error(clear_env_vars, tmp_p
     ):
         with pytest.raises(GitIgnoreScaffoldingError):
             gx.get_context(context_root_dir=context_root_dir)
+
+
+@pytest.mark.filesystem
+def test_get_context_scaffolds_gx_dir(tmp_path: pathlib.Path):
+    with working_directory(tmp_path):
+        context = gx.get_context(mode="file")
+    assert isinstance(context, FileDataContext)
+
+    project_root_dir = pathlib.Path(context.root_directory)
+    assert project_root_dir.stem == FileDataContext.GX_DIR
+
+
+@pytest.mark.filesystem
+def test_get_data_context_finds_legacy_great_expectations_dir(
+    tmp_path: pathlib.Path,
+):
+    # Scaffold great_expectations
+    context_root_dir = tmp_path / FileDataContext._LEGACY_GX_DIR
+    context_root_dir.mkdir(parents=True)
+
+    # Scaffold great_expectations.yml
+    gx_yml = context_root_dir / FileDataContext.GX_YML
+    yml_fixture = (
+        pathlib.Path(__file__)
+        .joinpath("../../test_fixtures/great_expectations_basic.yml")
+        .resolve()
+    )
+    assert yml_fixture.exists()
+    shutil.copy(yml_fixture, gx_yml)
+
+    with working_directory(tmp_path):
+        context = gx.get_context()
+    assert isinstance(context, FileDataContext)
+
+    project_root_dir = pathlib.Path(context.root_directory)
+    assert project_root_dir.stem == FileDataContext._LEGACY_GX_DIR
