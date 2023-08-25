@@ -565,6 +565,7 @@ class Datasource(
                 return self._data_context._save_project_config(self)
             except TypeError as type_err:
                 warnings.warn(str(type_err), GxSerializationWarning)
+        return None
 
     def _rebuild_asset_data_connectors(self) -> None:
         """If Datasource required a data_connector we need to build the data_connector for each asset"""

@@ -919,6 +919,7 @@ class CloudDataContext(SerializableDataContext):
             logger.debug(
                 "CloudDataContext._save_project_config() has no `fds_datasource` to update"
             )
+            return None
 
     @override
     def _view_validation_result(self, result: CheckpointResult) -> None:
