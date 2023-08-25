@@ -167,7 +167,7 @@ runtime_configuration:
     result_format: BASIC
     partial_unexpected_count: 20
 # </snippet>
-    
+
 """
 # </snippet>
 
@@ -432,31 +432,6 @@ assert second_batch_identifiers == {
 }
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_simple_checkpoint">
-using_simple_checkpoint = """
-
-name: my_checkpoint
-config_version: 1
-class_name: SimpleCheckpoint
-validations:
-  - batch_request:
-      datasource_name: taxi_datasource
-      data_asset_name: taxi_asset
-      options:
-        year: "2019"
-        month: "01"
-    expectation_suite_name: my_expectation_suite
-site_names: all
-slack_webhook: <YOUR SLACK WEBHOOK URL>
-notify_on: failure
-notify_with: all
-
-"""
-# </snippet>
-using_simple_checkpoint = using_simple_checkpoint.replace(
-    "<YOUR SLACK WEBHOOK URL>", "https://hooks.slack.com/foo/bar"
-)
-context.add_or_update_checkpoint(**yaml.load(using_simple_checkpoint))
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_5">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
@@ -479,8 +454,8 @@ assert batch_identifiers == {
 }
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py equivalent_using_checkpoint">
-equivalent_using_checkpoint = """
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py checkpoint_example">
+checkpoint_example = """
 
 name: my_checkpoint
 config_version: 1
@@ -515,10 +490,10 @@ action_list:
 
 """
 # </snippet>
-equivalent_using_checkpoint = equivalent_using_checkpoint.replace(
+checkpoint_example = checkpoint_example.replace(
     "<YOUR SLACK WEBHOOK URL>", "https://hooks.slack.com/foo/bar"
 )
-context.add_or_update_checkpoint(**yaml.load(equivalent_using_checkpoint))
+context.add_or_update_checkpoint(**yaml.load(checkpoint_example))
 
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 
