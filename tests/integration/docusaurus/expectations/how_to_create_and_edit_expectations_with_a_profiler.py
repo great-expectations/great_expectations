@@ -97,7 +97,7 @@ assert len(suite.expectations) > 0
 print(validator.get_expectation_suite(discard_failed_expectations=False))
 validator.save_expectation_suite(discard_failed_expectations=False)
 
-# Set up and run a Simple Checkpoint for ad hoc validation of our data
+# Set up and run a Checkpoint for ad hoc validation of our data
 checkpoint_config = {
     "class_name": "Checkpoint",
     "validations": [
