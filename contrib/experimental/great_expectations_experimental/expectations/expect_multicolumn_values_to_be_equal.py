@@ -1,23 +1,52 @@
 from functools import reduce
-from typing import Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 import sqlalchemy as sa
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import (
     ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.core.expectation_configuration import parse_result_format
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
 )
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
+    ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation import MulticolumnMapExpectation
+from great_expectations.expectations.expectation import (
+    MulticolumnMapExpectation,
+    _format_map_output,
+    render_evaluation_parameter_string,
+)
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
     multicolumn_condition_partial,
 )
+from great_expectations.render import (
+    LegacyDescriptiveRendererType,
+    LegacyDiagnosticRendererType,
+    LegacyRendererType,
+    RenderedStringTemplateContent,
+)
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
+from great_expectations.render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class MulticolumnValuesToBeEqual(MulticolumnMapMetricProvider):
@@ -34,7 +63,14 @@ class MulticolumnValuesToBeEqual(MulticolumnMapMetricProvider):
     @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column_list, **kwargs):
         conditions = sa.or_(
-            *[column_list[idx] != column_list[0] for idx in range(1, len(column_list))]
+            *[
+                sa.or_(
+                    column_list[idx] != column_list[0],
+                    sa.and_(column_list[idx].is_(None), column_list[0].isnot(None)),
+                    sa.and_(column_list[idx].isnot(None), column_list[0].is_(None)),
+                )
+                for idx in range(1, len(column_list))
+            ]
         )
         row_wise_cond = sa.not_(conditions)
         return row_wise_cond
@@ -187,15 +223,234 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    @classmethod
+    def _prescriptive_template(
+        cls,
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column", RendererValueType.STRING),
+            ("mostly", RendererValueType.NUMBER),
+        )
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
+
+        params = renderer_configuration.params
+
+        if params.mostly and params.mostly.value < 1.0:
+            renderer_configuration = cls._add_mostly_pct_param(
+                renderer_configuration=renderer_configuration
+            )
+            template_str = (
+                f"$column_list values must be equal, at least $mostly_pct % of the time."
+            )
+        else:
+            template_str = f"$column_list values must be equal."
+
+        if renderer_configuration.include_column_name:
+            template_str = f"$column {template_str}"
+
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
+
+    @classmethod
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+        cls,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = (
+            False if runtime_configuration.get("include_column_name") is False else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            ["column", "mostly", "row_condition", "condition_parser"],
+        )
+
+        if params["mostly"] is not None and params["mostly"] < 1.0:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            if include_column_name:
+                template_str = f"$column_list values must be equal at least $mostly_pct % of the time."
+            else:
+                template_str = (
+                    f"$column_list values must be equal, at least $mostly_pct % of the time."
+                )
+        else:
+            if include_column_name:
+                template_str = f"$column_list values must be equal."
+            else:
+                template_str = f"$column_list values must be equal."
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = f"{conditional_template_str}, then {template_str}"
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
+
+    @classmethod
+    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
+    def _diagnostic_observed_value_renderer(
+        cls,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
+        **kwargs,
+    ):
+        result_dict = result.result
+
+        try:
+            null_percent = result_dict["unexpected_percent"]
+            return (
+                num_to_str(100 - null_percent, precision=5, use_locale=True)
+                + "% values are equal"
+            )
+        except KeyError:
+            return "unknown % values are not equal"
+        except TypeError:
+            return "NaN% values are not equal"
+
+    @classmethod
+    @renderer(
+        renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_MISSING_COUNT_ROW
+    )
+    def _descriptive_column_properties_table_missing_count_row_renderer(
+        cls,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
+        **kwargs,
+    ):
+        assert result, "Must pass in result."
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Missing (n)",
+                        "tooltip": {
+                            "content": "expect_multicolumn_values_to_be_equal"
+                        },
+                    },
+                }
+            ),
+            result.result["unexpected_count"]
+            if "unexpected_count" in result.result
+            and result.result["unexpected_count"] is not None
+            else "--",
+        ]
+
+    @classmethod
+    @renderer(
+        renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_MISSING_PERCENT_ROW
+    )
+    def _descriptive_column_properties_table_missing_percent_row_renderer(
+        cls,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
+        **kwargs,
+    ):
+        assert result, "Must pass in result."
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Missing (%)",
+                        "tooltip": {
+                            "content": "expect_multicolumn_values_to_be_equal"
+                        },
+                    },
+                }
+            ),
+            f"{result.result['unexpected_percent']:.1f}%"
+            if "unexpected_percent" in result.result
+            and result.result["unexpected_percent"] is not None
+            else "--",
+        ]
+
+    def _validate(
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+    ):
+        result_format = self.get_result_format(
+            configuration=configuration, runtime_configuration=runtime_configuration
+        )
+        mostly = self.get_success_kwargs().get(
+            "mostly", self.default_kwarg_values.get("mostly")
+        )
+        total_count = metrics.get("table.row_count")
+        unexpected_count = metrics.get(
+            f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+        )
+
+        if total_count is None or total_count == 0:
+            success = False
+        else:
+            success_ratio = (total_count - unexpected_count) / total_count
+            success = success_ratio >= mostly
+
+        nonnull_count = None
+
+        return _format_map_output(
+            result_format=parse_result_format(result_format),
+            success=success,
+            element_count=metrics.get("table.row_count"),
+            nonnull_count=nonnull_count,
+            unexpected_count=metrics.get(
+                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+            ),
+            unexpected_list=metrics.get(
+                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+            ),
+            unexpected_index_list=metrics.get(
+                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}"
+            ),
+            unexpected_index_query=metrics.get(
+                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}"
+            ),
+        )
+
     library_metadata = {
         "maturity": "experimental",
         "tags": [
-            "multicolumn-map-expectation",
-        ],  # Tags for this Expectation in the Gallery
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            "@karthigaiselvanm",  # Don't forget to add your github handle here!
+            "multicolumn-map-expectation", "experimental"
+        ],  
+        "contributors": [  
+            "@karthigaiselvanm",  
             "@jayamnatraj",
         ],
+        "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
 
