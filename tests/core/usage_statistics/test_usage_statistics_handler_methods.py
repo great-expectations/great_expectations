@@ -11,8 +11,8 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
     get_profiler_run_usage_statistics,
 )
+from great_expectations.data_context import get_context
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
-from great_expectations.util import get_context
 from tests.core.usage_statistics.util import usage_stats_invalid_messages_exist
 
 
