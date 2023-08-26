@@ -136,10 +136,10 @@ exclude = [
     'expectations/core/expect_table_column_count_to_equal\.py',                                            # 5
     'expectations/core/expect_table_column_count_to_be_between\.py',                                       # 3
     'expectations/core/expect_table_row_count_to_equal_other_table\.py',                                   # 11
-    'expectations/metrics/column_aggregate_metrics/column_value_counts\.py',                               # 6
-    'expectations/metrics/column_aggregate_metrics/column_partition\.py',                                  # 10
-    'expectations/metrics/map_metric_provider/column_function_partial\.py',                                # 9
-    'expectations/metrics/map_metric_provider/multicolumn_map_condition_auxilliary_methods\.py',           # 2
+    # 'expectations/metrics/column_aggregate_metrics/column_value_counts\.py',                               # 6
+    # 'expectations/metrics/column_aggregate_metrics/column_partition\.py',                                  # 10
+    # 'expectations/metrics/map_metric_provider/column_function_partial\.py',                                # 9
+    # 'expectations/metrics/map_metric_provider/multicolumn_map_condition_auxilliary_methods\.py',           # 2
     'expectations/regex_based_column_map_expectation\.py',                                                 # 3
     'expectations/row_conditions\.py',                                                                     # 4
     'expectations/set_based_column_map_expectation\.py',                                                   # 3
