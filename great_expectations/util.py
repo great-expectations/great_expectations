@@ -1617,7 +1617,7 @@ def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
 
 
 def is_ndarray_datetime_dtype(
-    data: np.ndarray, parse_strings_as_datetimes: bool = False, fuzzy: bool = False
+    data: npt.NDArray, parse_strings_as_datetimes: bool = False, fuzzy: bool = False
 ) -> bool:
     """
     Determine whether or not all elements of 1-D "np.ndarray" argument are "datetime.datetime" type objects.
@@ -1631,11 +1631,11 @@ def is_ndarray_datetime_dtype(
 
 
 def convert_ndarray_to_datetime_dtype_best_effort(
-    data: np.ndarray,
+    data: npt.NDArray | list,
     datetime_detected: bool = False,
     parse_strings_as_datetimes: bool = False,
     fuzzy: bool = False,
-) -> Tuple[bool, bool, np.ndarray]:
+) -> Tuple[bool, bool, npt.NDArray | list]:
     """
     Attempt to parse all elements of 1-D "np.ndarray" argument into "datetime.datetime" type objects.
 
