@@ -49,7 +49,7 @@ class ExpectQueriedCustomQueryToReturnNumRows(QueryExpectation):
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
         metrics = convert_to_json_serializable(data=metrics)
-        query_result = next(iter(metrics.get("query.template_values")[0].values()))
+        query_result = list(metrics.get("query.template_values")[0].values())[0]
         value = configuration["kwargs"].get("value")
 
         success = query_result == value

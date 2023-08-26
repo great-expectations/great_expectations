@@ -867,7 +867,7 @@ class Validator:
         ), "An override Rule-Based Profiler for an Expectation can have exactly one rule."
 
         if override_rules:
-            profiler.rules[0].name = next(iter(override_rules.keys()))
+            profiler.rules[0].name = list(override_rules.keys())[0]
             effective_rules: List[Rule] = profiler.reconcile_profiler_rules(
                 rules=override_rules,
                 reconciliation_directives=ReconciliationDirectives(

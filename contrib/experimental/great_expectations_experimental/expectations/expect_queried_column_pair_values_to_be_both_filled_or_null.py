@@ -100,9 +100,9 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
     ) -> Union[ExpectationValidationResult, dict]:
         metrics = convert_to_json_serializable(data=metrics)
         try:
-            num_of_inconsistent_rows = next(
-                iter(metrics.get("query.template_values")[0].values())
-            )
+            num_of_inconsistent_rows = list(
+                metrics.get("query.template_values")[0].values()
+            )[0]
         except IndexError:
             raise IndexError("Invalid index - query.template_values has no [0] index]")
 

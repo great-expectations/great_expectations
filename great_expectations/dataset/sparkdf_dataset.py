@@ -1164,7 +1164,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
         try:
             col_df = self.spark_df.select(eval_col)
-            col_data = next(f for f in col_df.schema.fields if f.name == eval_col)
+            col_data = [f for f in col_df.schema.fields if f.name == eval_col][0]
             col_type = type(col_data.dataType)
         except IndexError:
             raise ValueError(f"Unrecognized column: {column}")
@@ -1206,7 +1206,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
         try:
             col_df = self.spark_df.select(eval_col)
-            col_data = next(f for f in col_df.schema.fields if f.name == eval_col)
+            col_data = [f for f in col_df.schema.fields if f.name == eval_col][0]
             col_type = type(col_data.dataType)
         except IndexError:
             raise ValueError(f"Unrecognized column: {column}")

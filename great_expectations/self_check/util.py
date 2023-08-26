@@ -617,7 +617,7 @@ def get_test_validator_with_data(  # noqa: PLR0913
 
     # if pk_column is defined in our test, then we add a index column to our test set
     if pk_column:
-        first_column: List[Any] = next(iter(data.values()))
+        first_column: List[Any] = list(data.values())[0]
         data["pk_index"] = list(range(len(first_column)))
 
     df = pd.DataFrame(data)

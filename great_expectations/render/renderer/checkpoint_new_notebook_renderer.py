@@ -34,9 +34,9 @@ class CheckpointNewNotebookRenderer(BaseNotebookRenderer):
                     datasource_candidate = {
                         "datasource_name": datasource_name,
                         "data_connector_name": data_connector_name,
-                        "asset_name": next(
-                            iter(data_connector.get_available_data_asset_names())
-                        ),
+                        "asset_name": list(
+                            data_connector.get_available_data_asset_names()
+                        )[0],
                     }
                     break
         return datasource_candidate

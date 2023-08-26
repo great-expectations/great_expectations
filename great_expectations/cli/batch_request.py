@@ -177,7 +177,7 @@ def select_data_connector_name(
         return None
 
     if num_available_data_asset_names_by_data_connector == 1:
-        return next(iter(available_data_asset_names_by_data_connector_dict.keys()))
+        return list(available_data_asset_names_by_data_connector_dict.keys())[0]
 
     elif num_available_data_asset_names_by_data_connector == 2:  # noqa: PLR2004
         # if only default data_connectors are configured, select default_inferred_asset_data_connector

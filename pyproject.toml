@@ -260,6 +260,7 @@ ignore = [
     # TODO: enable remaining ruf rules in followup PRs
     "RUF005", # collection-literal-concatenation
     "RUF012", # mutable-class-default - too many violations
+    "RUF015", # unnecessary-iterable-allocation-for-first-element - requires more careful review
 ]
 extend-exclude = [
     "docs/*",

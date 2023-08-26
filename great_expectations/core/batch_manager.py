@@ -69,7 +69,7 @@ class BatchManager:
             return self._active_batch_data_id
 
         if len(self._batch_data_cache) == 1:
-            return next(iter(self._batch_data_cache.keys()))
+            return list(self._batch_data_cache.keys())[0]
 
         return None
 

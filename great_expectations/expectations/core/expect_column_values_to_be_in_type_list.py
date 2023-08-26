@@ -498,11 +498,11 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 [table_column_types_configuration]
             )[table_column_types_configuration.id]
             try:
-                actual_column_type = next(
+                actual_column_type = [
                     type_dict["type"]
                     for type_dict in actual_column_types_list
                     if type_dict["name"] == column_name
-                )
+                ][0]
             except IndexError:
                 actual_column_type = None
 
@@ -544,11 +544,11 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         column_name = configuration.kwargs.get("column")
         expected_types_list = configuration.kwargs.get("type_list")
         actual_column_types_list = metrics.get("table.column_types")
-        actual_column_type = next(
+        actual_column_type = [
             type_dict["type"]
             for type_dict in actual_column_types_list
             if type_dict["name"] == column_name
-        )
+        ][0]
 
         if isinstance(execution_engine, PandasExecutionEngine):
             # only PandasExecutionEngine supports map version of expectation and

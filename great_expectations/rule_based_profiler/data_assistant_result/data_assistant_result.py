@@ -1486,7 +1486,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         if len(sanitized_metric_names) > 1:
             y_axis_title = "Column Values"
         else:
-            y_axis_title = next(iter(sanitized_metric_names)).replace("_", " ").title()
+            y_axis_title = list(sanitized_metric_names)[0].replace("_", " ").title()
 
         metric_plot_component: MetricPlotComponent
         metric_plot_components: List[MetricPlotComponent] = []

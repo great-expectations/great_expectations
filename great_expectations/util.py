@@ -258,12 +258,12 @@ def get_currently_executing_function() -> Callable:
     cf = cast(FrameType, currentframe())
     fb = cast(FrameType, cf.f_back)
     fc: CodeType = fb.f_code
-    func_obj: Callable = next(
+    func_obj: Callable = [
         referer
         for referer in get_referrers(fc)
         if getattr(referer, "__code__", None) is fc
         and getclosurevars(referer).nonlocals.items() <= fb.f_locals.items()
-    )
+    ][0]
     return func_obj
 
 
@@ -292,12 +292,12 @@ def get_currently_executing_function_call_arguments(
     fb = cast(FrameType, cf.f_back)
     argvs: ArgInfo = getargvalues(fb)
     fc: CodeType = fb.f_code
-    cur_func_obj: Callable = next(
+    cur_func_obj: Callable = [
         referer
         for referer in get_referrers(fc)
         if getattr(referer, "__code__", None) is fc
         and getclosurevars(referer).nonlocals.items() <= fb.f_locals.items()
-    )
+    ][0]
     cur_mod = getmodule(cur_func_obj)
     sig: Signature = signature(cur_func_obj)
     params: dict = {}

@@ -134,14 +134,12 @@ class GxConfig(FluentBaseModel):
         """
         try:
             datasource: Datasource
-            return next(
-                iter(
-                    filter(
-                        lambda datasource: datasource.name == datasource_name,
-                        self.datasources,
-                    )
+            return list(
+                filter(
+                    lambda datasource: datasource.name == datasource_name,
+                    self.datasources,
                 )
-            )
+            )[0]
         except IndexError as exc:
             raise LookupError(
                 f"'{datasource_name}' not found. Available datasources are {self.get_datasource_names()}"
