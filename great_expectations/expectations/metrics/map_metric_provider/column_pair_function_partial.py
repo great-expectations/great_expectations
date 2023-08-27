@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 @public_api
 def column_pair_function_partial(  # noqa: C901 - 16
     engine: Type[ExecutionEngine],
-    partial_fn_type: str | MetricPartialFunctionTypes | None = None,
+    partial_fn_type: MetricPartialFunctionTypes | None = None,
     **kwargs,
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
