@@ -44,6 +44,7 @@ from great_expectations.data_context import (
     AbstractDataContext,
     BaseDataContext,
     CloudDataContext,
+    get_context,
 )
 from great_expectations.data_context._version_checker import _VersionChecker
 from great_expectations.data_context.cloud_constants import (
@@ -100,7 +101,6 @@ from great_expectations.self_check.util import (
 )
 from great_expectations.util import (
     build_in_memory_runtime_context,
-    get_context,
     is_library_loadable,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -3655,9 +3655,9 @@ def empty_cloud_data_context(
     cloud_data_context: CloudDataContext = CloudDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path_name,
-        ge_cloud_base_url=ge_cloud_config.base_url,
-        ge_cloud_access_token=ge_cloud_config.access_token,
-        ge_cloud_organization_id=ge_cloud_config.organization_id,
+        cloud_base_url=ge_cloud_config.base_url,
+        cloud_access_token=ge_cloud_config.access_token,
+        cloud_organization_id=ge_cloud_config.organization_id,
     )
     return cloud_data_context
 

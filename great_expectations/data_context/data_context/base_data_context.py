@@ -8,7 +8,7 @@ from great_expectations.core._docs_decorators import deprecated_method_or_class
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
-from great_expectations.util import get_context
+from great_expectations.data_context.data_context.context_factory import get_context
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
