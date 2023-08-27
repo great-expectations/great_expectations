@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 
 def column_function_partial(  # noqa: C901, PLR0915
     engine: Type[ExecutionEngine],
-    partial_fn_type: Optional[str] = None,
+    partial_fn_type: Optional[MetricPartialFunctionTypes] = None,
     **kwargs,
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
