@@ -4969,7 +4969,7 @@ def test_checkpoint_run_with_runtime_overrides(
     ephemeral_context_with_defaults: EphemeralDataContext,
 ):
     # This test is regarding incident #51-08-28-2023
-    # Unpacking dictionaries with overlapping keys raises when using `dict`: https://treyhunner.com/2018/03/tuple-unpacking-improves-python-code-readability/
+    # Unpacking dictionaries with overlapping keys raises when using `dict`: https://treyhunner.com/2016/02/how-to-merge-dictionaries-in-python/
     # The function in question: get_substituted_batch_request
 
     context = ephemeral_context_with_defaults
