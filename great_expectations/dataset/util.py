@@ -1,7 +1,6 @@
 # Utility methods for dealing with Dataset objects
 
 import logging
-import warnings
 from typing import Any, List, Optional, Union
 
 import numpy as np
@@ -141,16 +140,6 @@ def kde_partition_data(data, estimate_tails=True):
     weights = np.concatenate(([cdf_vals[0]], evaluation_weights, [1 - cdf_vals[-1]]))
 
     return {"bins": bins, "weights": weights}
-
-
-def partition_data(data, bins="auto", n_bins=10):
-    # deprecated-v0.10.10
-    warnings.warn(
-        "partition_data is deprecated as of v0.10.10 and will be removed is a future release. Use either continuous_partition_data or \
-                    categorical_partition_data instead.",
-        DeprecationWarning,
-    )
-    return continuous_partition_data(data, bins, n_bins)
 
 
 def continuous_partition_data(data, bins="auto", n_bins=10, **kwargs):

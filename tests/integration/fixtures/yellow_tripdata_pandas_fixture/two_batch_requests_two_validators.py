@@ -1,8 +1,8 @@
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
-from great_expectations.data_context.data_context import DataContext
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-context = DataContext()
+context = gx.get_context()
 suite = context.get_expectation_suite("yellow_tripdata_validations")
 
 # Get February BatchRequest and Validator

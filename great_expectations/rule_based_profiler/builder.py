@@ -4,6 +4,7 @@ import json
 from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -110,6 +111,7 @@ class Builder(SerializableDictDot):
         else:
             self.batch_list = batch_list
 
+    @override
     def to_dict(self) -> dict:
         dict_obj: dict = super().to_dict()
         dict_obj["class_name"] = self.__class__.__name__
@@ -120,6 +122,7 @@ class Builder(SerializableDictDot):
 
         return dict_obj
 
+    @override
     def to_json_dict(self) -> dict:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -144,6 +147,7 @@ class Builder(SerializableDictDot):
 
         return result
 
+    @override
     def __repr__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -159,6 +163,7 @@ class Builder(SerializableDictDot):
         )
         return json.dumps(json_dict, indent=2)
 
+    @override
     def __str__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>

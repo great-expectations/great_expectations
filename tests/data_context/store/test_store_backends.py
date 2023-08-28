@@ -12,7 +12,7 @@ from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import DataContext
+from great_expectations.data_context import DataContext, get_context
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
@@ -37,7 +37,6 @@ from great_expectations.exceptions import InvalidKeyError, StoreBackendError, St
 from great_expectations.self_check.util import expectationSuiteSchema
 from great_expectations.util import (
     gen_directory_tree_str,
-    get_context,
     is_library_loadable,
 )
 from tests import test_utils
@@ -122,7 +121,7 @@ def validation_operators_data_context(
     )
     data_context.add_expectation_suite("f1.foo")
 
-    df = data_context.get_batch(
+    df = data_context._get_batch_v2(
         batch_kwargs=data_context.build_batch_kwargs(
             "my_datasource", "subdir_reader", "f1"
         ),

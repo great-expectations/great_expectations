@@ -11,13 +11,12 @@ from typing import List, Optional
 from great_expectations import DataContext
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.data_context import AbstractDataContext
+from great_expectations.data_context import AbstractDataContext, get_context
 from great_expectations.data_context.types.base import (
     ConcurrencyConfig,
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
-from great_expectations.util import get_context
 
 
 def create_checkpoint(
