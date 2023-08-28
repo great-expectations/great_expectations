@@ -13,6 +13,7 @@ import pandas as pd
 import pytest
 
 import great_expectations as gx
+from great_expectations.checkpoint.util import get_substituted_batch_request
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -4896,3 +4897,57 @@ def test_checkpoint_with_validator_creates_validations_list(
         expectation_suite_name="default",
     )
     assert actual.to_dict() == expected.to_dict()
+
+
+@pytest.mark.unit
+def test_get_substituted_batch_request_with_no_substituted_config():
+    runtime_batch_request = {
+        "datasource_name":"my_datasource",
+        "data_connector_name":"my_basic_data_connector",
+        "data_asset_name":"my_asset_name",
+        "runtime_parameters":{},
+        "batch_identifiers":{},
+    }
+
+    batch_request = get_substituted_batch_request({"batch_request": runtime_batch_request}, None)
+
+    assert batch_request == RuntimeBatchRequest(**runtime_batch_request)
+
+@pytest.mark.unit
+def test_get_substituted_batch_request_with_substituted_config():
+    validation_batch_request = {
+        "datasource_name":"my_datasource",
+        "data_connector_name":"my_basic_data_connector",
+        "data_asset_name":"my_asset_name",
+    }
+    runtime_batch_request = {
+        "data_connector_name":"my_basic_data_connector",
+        "data_asset_name":"my_asset_name",
+        "runtime_parameters":{"query": "SELECT * FROM whatever"},
+        "batch_identifiers":{"default_identifier_name": "my_identifier"},
+    }
+
+    batch_request = get_substituted_batch_request({"batch_request": runtime_batch_request}, validation_batch_request)
+
+    assert batch_request == RuntimeBatchRequest(**{
+        "datasource_name":"my_datasource",
+        "data_connector_name":"my_basic_data_connector",
+        "data_asset_name":"my_asset_name",
+        "runtime_parameters":{"query": "SELECT * FROM whatever"},
+        "batch_identifiers":{"default_identifier_name": "my_identifier"},
+    })
+@pytest.mark.unit
+def test_get_substituted_batch_request_with_clashing_values():
+    validation_batch_request = {
+        "datasource_name":"my_datasource",
+        "data_connector_name":"my_basic_data_connector",
+        "data_asset_name":"my_asset_name",
+    }
+    runtime_batch_request = {
+        "datasource_name":"your_datasource",
+        "data_connector_name":"my_basic_data_connector",
+        "data_asset_name":"my_asset_name",
+    }
+
+    with pytest.raises(gx_exceptions.CheckpointError):
+        get_substituted_batch_request({"batch_request": runtime_batch_request}, validation_batch_request)
