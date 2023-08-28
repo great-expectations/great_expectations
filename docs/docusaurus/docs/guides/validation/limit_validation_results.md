@@ -1,8 +1,8 @@
 ---
-sidebar_label: 'Limit validation results in Data Docs'
-title: 'Limit validation results in Data Docs'
+sidebar_label: 'Limit Validation Results in Data Docs'
+title: 'Limit Validation Results in Data Docs'
 id: limit_validation_results
-description: Limit validation results to improve Data Doc updating and rendering performance.
+description: Limit Validation Results to improve Data Doc updating and rendering performance.
 ---
 
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
