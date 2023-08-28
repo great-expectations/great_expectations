@@ -14,7 +14,9 @@ folder_path = str(
 connection_string: str = f"sqlite:///{folder_path}/visits.db"
 
 # get context
-context = gx.get_context(context_root_dir="./great_expectations", cloud_mode=False)
+# <snippet name="tests/integration/docusaurus/expectations/advanced/failed_rows_sql.py get context">
+context = gx.get_context(context_root_dir="./great_expectations")
+# </snippet>
 
 # add datasource and asset
 datasource = context.sources.add_sqlite(

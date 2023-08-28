@@ -1,4 +1,3 @@
-import great_expectations as gx
 import pathlib
 
 folder_path = str(
@@ -15,7 +14,11 @@ folder_path = str(
 file_path: str = folder_path + "/visits.csv"
 
 # get context
-context = gx.get_context(context_root_dir="./great_expectations", cloud_mode=False)
+# <snippet name="tests/integration/docusaurus/expectations/advanced/failed_rows_pandas.py get context">
+import great_expectations as gx
+
+context = gx.get_context(context_root_dir="./great_expectations")
+# </snippet>
 
 # add datasource and asset
 data_asset = context.sources.add_pandas(name="visits_datasource").add_csv_asset(
@@ -23,8 +26,9 @@ data_asset = context.sources.add_pandas(name="visits_datasource").add_csv_asset(
 )
 
 # get checkpoint
+# <snippet name="tests/integration/docusaurus/expectations/advanced/failed_rows_pandas.py get checkpoint">
 my_checkpoint = context.get_checkpoint("my_checkpoint")
-
+# </snippet>
 
 # Example 1 - No unexpected_index_column_names. This is the default.
 results = my_checkpoint.run()
@@ -48,11 +52,16 @@ assert (evrs[0]["results"][0]["result"]) == {
 
 
 # Example 2 - 1 unexpected_index_column_names defined. Output will contain unexpected_index_list and unexpected_index_query.
+# <snippet name="tests/integration/docusaurus/expectations/advanced/failed_rows_pandas.py set unexpected_index_column_names">
 result_format: dict = {
     "result_format": "COMPLETE",
     "unexpected_index_column_names": ["event_id"],
 }
+# </snippet>
+
+# <snippet name="tests/integration/docusaurus/expectations/advanced/failed_rows_pandas.py run checkpoint">
 results = my_checkpoint.run(result_format=result_format)
+# </snippet>
 evrs = results.list_validation_results()
 assert (evrs[0]["results"][0]["result"]) == {
     "element_count": 6,

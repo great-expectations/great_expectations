@@ -13,7 +13,9 @@ folder_path = str(
 )
 
 # get context
-context = gx.get_context(context_root_dir="./great_expectations", cloud_mode=False)
+# <snippet name="tests/integration/docusaurus/expectations/advanced/failed_rows_spark.py get context">
+context = gx.get_context(context_root_dir="./great_expectations")
+# </snippet>
 
 # add datasource and asset
 data_asset = context.sources.add_spark_filesystem(
