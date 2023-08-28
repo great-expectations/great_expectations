@@ -19,7 +19,7 @@ from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import DataContext
+from great_expectations.data_context import DataContext, get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -52,7 +52,6 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.util import (
     deep_filter_properties_iterable,
     gen_directory_tree_str,
-    get_context,
 )
 from tests.test_utils import create_files_in_directory, safe_remove
 
