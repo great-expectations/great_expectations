@@ -9,7 +9,7 @@ from great_expectations.core.usage_statistics.payload_builder import (
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
-from great_expectations.util import get_context
+from great_expectations.data_context import get_context
 
 
 @pytest.mark.filesystem
