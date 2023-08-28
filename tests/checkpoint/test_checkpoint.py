@@ -14,6 +14,7 @@ import pytest
 
 import great_expectations as gx
 from great_expectations.checkpoint.util import get_substituted_batch_request
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -4936,6 +4937,7 @@ def test_get_substituted_batch_request_with_substituted_config():
         "runtime_parameters":{"query": "SELECT * FROM whatever"},
         "batch_identifiers":{"default_identifier_name": "my_identifier"},
     })
+
 @pytest.mark.unit
 def test_get_substituted_batch_request_with_clashing_values():
     validation_batch_request = {
@@ -4951,3 +4953,47 @@ def test_get_substituted_batch_request_with_clashing_values():
 
     with pytest.raises(gx_exceptions.CheckpointError):
         get_substituted_batch_request({"batch_request": runtime_batch_request}, validation_batch_request)
+
+
+@pytest.mark.big
+def test_checkpoint_run_with_runtime_overrides(
+    ephemeral_context_with_defaults: EphemeralDataContext
+):
+    # This test is regarding incident #51-08-28-2023
+    # Unpacking dictionaries with overlapping keys raises when using `dict`: https://treyhunner.com/2018/03/tuple-unpacking-improves-python-code-readability/
+    # The function in question: get_substituted_batch_request
+
+    context = ephemeral_context_with_defaults
+
+    ds = context.sources.add_or_update_pandas("incident_test")
+    my_asset = ds.add_dataframe_asset("inmemory_df")
+    df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    batch_request = my_asset.build_batch_request(dataframe=df)
+    context.add_or_update_expectation_suite(
+        expectation_suite_name="my_expectation_suite",
+        expectations=[{
+        "expectation_type": "expect_column_min_to_be_between",
+        "kwargs": {
+            "column": "col1",
+            "min_value": 0.1,
+            "max_value": 10.0,
+        },
+        }
+
+        ]
+
+    )
+    checkpoint = context.add_or_update_checkpoint(
+        name="my_checkpoint",
+        validations=[{
+            "expectation_suite_name":"my_expectation_suite",
+            "batch_request": {
+                "datasource_name": ds.name,
+                "data_asset_name": my_asset.name,
+            },
+        }]
+    )
+
+    result = checkpoint.run(batch_request=batch_request)
+    assert result.success
+
