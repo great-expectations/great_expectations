@@ -93,7 +93,7 @@ def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
         "datasource": "rad_datasource",
         "path": os.path.join(base_dir, "f1.csv"),  # noqa: PTH118
     }
-    batch = context.get_batch(batch_kwargs, "default")
+    batch = context._get_batch_v2(batch_kwargs, "default")
     expectation_suite, validation_results = BasicSuiteBuilderProfiler.profile(
         batch, profiler_configuration="demo"
     )
