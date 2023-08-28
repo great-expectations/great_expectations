@@ -1,6 +1,7 @@
 import copy
 import json
 import os
+import pathlib
 import shutil
 from collections import OrderedDict
 from typing import Dict, List, Union
@@ -18,7 +19,7 @@ from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import DataContext
+from great_expectations.data_context import DataContext, get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -51,7 +52,6 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.util import (
     deep_filter_properties_iterable,
     gen_directory_tree_str,
-    get_context,
 )
 from tests.test_utils import create_files_in_directory, safe_remove
 
@@ -848,7 +848,8 @@ def empty_context(tmp_path_factory) -> FileDataContext:
     assert os.path.isfile(  # noqa: PTH113
         os.path.join(ge_dir, FileDataContext.GX_YML)  # noqa: PTH118
     )
-    context = DataContext(ge_dir)
+    with pytest.deprecated_call():
+        context = DataContext(ge_dir)
     assert isinstance(context, FileDataContext)
     return context
 
@@ -2114,7 +2115,8 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
     # Check that the datasource was written to disk as expected
     root_directory = context.root_directory
     del context
-    context = DataContext(root_directory)
+    with pytest.deprecated_call():
+        context = DataContext(root_directory)
 
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
@@ -2274,7 +2276,8 @@ def test_add_datasource_from_yaml_sql_datasource(  # noqa: PLR0915
     # Check that the datasource was written to disk as expected
     root_directory = context.root_directory
     del context
-    context = DataContext(root_directory)
+    with pytest.deprecated_call():
+        context = DataContext(root_directory)
 
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
@@ -2657,7 +2660,8 @@ def test_add_datasource_from_yaml_with_substitution_variables(
     # Check that the datasource was written to disk as expected
     root_directory = context.root_directory
     del context
-    context = DataContext(root_directory)
+    with pytest.deprecated_call():
+        context = DataContext(root_directory)
 
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
@@ -2999,3 +3003,42 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
         actual_rendered_content.extend(expectation_configuration.rendered_content)
 
     assert actual_rendered_content == legacy_rendered_content
+
+
+@pytest.mark.filesystem
+def test_file_backed_context_scaffolds_gitignore(tmp_path: pathlib.Path):
+    project_path = tmp_path / "my_project_root_dir"
+    context_path = project_path / FileDataContext.GX_DIR
+    uncommitted = context_path / FileDataContext.GX_UNCOMMITTED_DIR
+    gitignore = context_path / FileDataContext.GITIGNORE
+
+    assert not uncommitted.exists()
+    assert not gitignore.exists()
+
+    # Scaffold project directory
+    _ = get_context(context_root_dir=context_path)
+
+    assert uncommitted.exists()
+    assert gitignore.exists()
+    assert FileDataContext.GX_UNCOMMITTED_DIR in gitignore.read_text()
+
+
+@pytest.mark.filesystem
+def test_file_backed_context_updates_existing_gitignore(tmp_path: pathlib.Path):
+    project_path = tmp_path / "my_project_root_dir"
+    context_path = project_path / FileDataContext.GX_DIR
+    uncommitted = context_path / FileDataContext.GX_UNCOMMITTED_DIR
+    gitignore = context_path / FileDataContext.GITIGNORE
+
+    # Scaffold necessary files so `get_context` updates rather than creates
+    uncommitted.mkdir(parents=True)
+    existing_value = "__pycache__/"
+    with gitignore.open("w") as f:
+        f.write(f"\n{existing_value}")
+
+    # Scaffold project directory
+    _ = get_context(context_root_dir=context_path)
+
+    contents = gitignore.read_text()
+    assert existing_value in contents
+    assert FileDataContext.GX_UNCOMMITTED_DIR in contents

@@ -5,7 +5,7 @@ import pytest
 from click.testing import CliRunner
 
 from great_expectations.cli import cli
-from great_expectations.util import get_context
+from great_expectations.data_context import get_context
 from tests.cli.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
