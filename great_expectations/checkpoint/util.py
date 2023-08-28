@@ -260,9 +260,10 @@ def get_substituted_batch_request(
                 f'BatchRequest attribute "{key}" was provided with different values'
             )
 
-    effective_batch_request: dict = dict(
-        **substituted_runtime_batch_request, **validation_batch_request
-    )
+    effective_batch_request: dict = {
+        **validation_batch_request,
+        **substituted_runtime_batch_request,
+    }
 
     return materialize_batch_request(batch_request=effective_batch_request)  # type: ignore[return-value] # see materialize_batch_request
 
