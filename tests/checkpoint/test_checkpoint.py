@@ -13,11 +13,10 @@ import pandas as pd
 import pytest
 
 import great_expectations as gx
-from great_expectations.checkpoint.util import get_substituted_batch_request
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.checkpoint.util import get_substituted_batch_request
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
@@ -4903,61 +4902,71 @@ def test_checkpoint_with_validator_creates_validations_list(
 @pytest.mark.unit
 def test_get_substituted_batch_request_with_no_substituted_config():
     runtime_batch_request = {
-        "datasource_name":"my_datasource",
-        "data_connector_name":"my_basic_data_connector",
-        "data_asset_name":"my_asset_name",
-        "runtime_parameters":{},
-        "batch_identifiers":{},
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "my_asset_name",
+        "runtime_parameters": {},
+        "batch_identifiers": {},
     }
 
-    batch_request = get_substituted_batch_request({"batch_request": runtime_batch_request}, None)
+    batch_request = get_substituted_batch_request(
+        {"batch_request": runtime_batch_request}, None
+    )
 
     assert batch_request == RuntimeBatchRequest(**runtime_batch_request)
+
 
 @pytest.mark.unit
 def test_get_substituted_batch_request_with_substituted_config():
     validation_batch_request = {
-        "datasource_name":"my_datasource",
-        "data_connector_name":"my_basic_data_connector",
-        "data_asset_name":"my_asset_name",
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "my_asset_name",
     }
     runtime_batch_request = {
-        "data_connector_name":"my_basic_data_connector",
-        "data_asset_name":"my_asset_name",
-        "runtime_parameters":{"query": "SELECT * FROM whatever"},
-        "batch_identifiers":{"default_identifier_name": "my_identifier"},
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "my_asset_name",
+        "runtime_parameters": {"query": "SELECT * FROM whatever"},
+        "batch_identifiers": {"default_identifier_name": "my_identifier"},
     }
 
-    batch_request = get_substituted_batch_request({"batch_request": runtime_batch_request}, validation_batch_request)
+    batch_request = get_substituted_batch_request(
+        {"batch_request": runtime_batch_request}, validation_batch_request
+    )
 
-    assert batch_request == RuntimeBatchRequest(**{
-        "datasource_name":"my_datasource",
-        "data_connector_name":"my_basic_data_connector",
-        "data_asset_name":"my_asset_name",
-        "runtime_parameters":{"query": "SELECT * FROM whatever"},
-        "batch_identifiers":{"default_identifier_name": "my_identifier"},
-    })
+    assert batch_request == RuntimeBatchRequest(
+        **{
+            "datasource_name": "my_datasource",
+            "data_connector_name": "my_basic_data_connector",
+            "data_asset_name": "my_asset_name",
+            "runtime_parameters": {"query": "SELECT * FROM whatever"},
+            "batch_identifiers": {"default_identifier_name": "my_identifier"},
+        }
+    )
+
 
 @pytest.mark.unit
 def test_get_substituted_batch_request_with_clashing_values():
     validation_batch_request = {
-        "datasource_name":"my_datasource",
-        "data_connector_name":"my_basic_data_connector",
-        "data_asset_name":"my_asset_name",
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "my_asset_name",
     }
     runtime_batch_request = {
-        "datasource_name":"your_datasource",
-        "data_connector_name":"my_basic_data_connector",
-        "data_asset_name":"my_asset_name",
+        "datasource_name": "your_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "my_asset_name",
     }
 
     with pytest.raises(gx_exceptions.CheckpointError):
-        get_substituted_batch_request({"batch_request": runtime_batch_request}, validation_batch_request)
+        get_substituted_batch_request(
+            {"batch_request": runtime_batch_request}, validation_batch_request
+        )
 
 
 @pytest.mark.big
 def test_checkpoint_run_with_runtime_overrides(
-    ephemeral_context_with_defaults: EphemeralDataContext
+    ephemeral_context_with_defaults: EphemeralDataContext,
 ):
     # This test is regarding incident #51-08-28-2023
     # Unpacking dictionaries with overlapping keys raises when using `dict`: https://treyhunner.com/2018/03/tuple-unpacking-improves-python-code-readability/
@@ -4971,29 +4980,29 @@ def test_checkpoint_run_with_runtime_overrides(
     batch_request = my_asset.build_batch_request(dataframe=df)
     context.add_or_update_expectation_suite(
         expectation_suite_name="my_expectation_suite",
-        expectations=[{
-        "expectation_type": "expect_column_min_to_be_between",
-        "kwargs": {
-            "column": "col1",
-            "min_value": 0.1,
-            "max_value": 10.0,
-        },
-        }
-
-        ]
-
+        expectations=[
+            {
+                "expectation_type": "expect_column_min_to_be_between",
+                "kwargs": {
+                    "column": "col1",
+                    "min_value": 0.1,
+                    "max_value": 10.0,
+                },
+            }
+        ],
     )
     checkpoint = context.add_or_update_checkpoint(
         name="my_checkpoint",
-        validations=[{
-            "expectation_suite_name":"my_expectation_suite",
-            "batch_request": {
-                "datasource_name": ds.name,
-                "data_asset_name": my_asset.name,
-            },
-        }]
+        validations=[
+            {
+                "expectation_suite_name": "my_expectation_suite",
+                "batch_request": {
+                    "datasource_name": ds.name,
+                    "data_asset_name": my_asset.name,
+                },
+            }
+        ],
     )
 
     result = checkpoint.run(batch_request=batch_request)
     assert result.success
-
