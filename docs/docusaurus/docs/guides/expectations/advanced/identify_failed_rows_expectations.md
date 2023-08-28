@@ -173,7 +173,7 @@ The following is an example of the information returned after running the Checkp
 </TabItem>
 <TabItem value="sqlalchemy">
 
-The following is an example of the information returned after running the Checkpoint. For SQLAlchemy, the utput includes a query that can be used directly against the database backend.
+The following is an example of the information returned after running the Checkpoint. For SQLAlchemy, the output includes a query that can be used directly against the database backend.
 
 </TabItem>
 </Tabs>
