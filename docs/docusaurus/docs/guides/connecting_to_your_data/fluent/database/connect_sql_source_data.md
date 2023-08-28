@@ -93,13 +93,6 @@ Run the following Python code to create a SQL Data Source:
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py add_sql"
 ```
 
-### Next steps
-
-<AfterCreateSqlDatasource />
-
-</TabItem>
-<TabItem value="postgresql">
-
 ## PostgreSQL
 
 Connect GX to a PostgreSQL database to access source data.
