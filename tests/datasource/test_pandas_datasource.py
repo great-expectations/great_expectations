@@ -217,8 +217,8 @@ def test_pandas_source_read_csv(
         ),
         "unicode",
     )
-    assert len(batch["Μ"] == 1)  # noqa: RUF001 
-    assert "😁" in list(batch["Μ"])  # noqa: RUF001
+    assert len(batch["Μ"] == 1)  # noqa: RUF001 # greek mu
+    assert "😁" in list(batch["Μ"])  # noqa: RUF001 # greek mu
 
     data_context_parameterized_expectation_suite.add_datasource(
         "mysource2",
@@ -238,7 +238,7 @@ def test_pandas_source_read_csv(
         ),
         "unicode",
     )
-    assert "😁" in list(batch["Μ"])  # noqa: RUF001
+    assert "😁" in list(batch["Μ"])  # noqa: RUF001 # greek mu
 
     data_context_parameterized_expectation_suite.add_datasource(
         "mysource3",
@@ -290,7 +290,7 @@ def test_pandas_source_read_csv(
         ),
         expectation_suite_name="unicode",
     )
-    assert "😁" in list(batch["Μ"])  # noqa: RUF001
+    assert "😁" in list(batch["Μ"])  # noqa: RUF001 # greek mu
 
 
 @pytest.mark.skipif(
