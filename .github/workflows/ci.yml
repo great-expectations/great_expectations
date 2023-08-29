@@ -242,7 +242,7 @@ jobs:
         run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5
 
   cloud-tests:
-    if: github.event.pull_request.head.repo.full_name == github.repository 
+    if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER_AND_TAG}}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
