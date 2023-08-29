@@ -455,7 +455,7 @@ def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_and_boolea
             if_exists="replace",
         )
     except ValueError as ve:
-        logger.warning(f"Unable to store information into database: {str(ve)}")
+        logger.warning(f"Unable to store information into database: {ve!s}")
 
     batch_options = {"year": 2021}
 

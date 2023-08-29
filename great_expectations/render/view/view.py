@@ -164,7 +164,7 @@ class DefaultJinjaView:
                 ):
                     new_content_block_id = None
                     if content_block_id:
-                        new_content_block_id = f"{content_block_id}-{str(idx)}"
+                        new_content_block_id = f"{content_block_id}-{idx!s}"
                     rendered_block += self.render_content_block(
                         jinja_context,
                         content_block_el,
@@ -175,7 +175,7 @@ class DefaultJinjaView:
                     if render_to_markdown:
                         rendered_block += str(content_block_el)
                     else:
-                        rendered_block += f"<span>{str(content_block_el)}</span>"
+                        rendered_block += f"<span>{content_block_el!s}</span>"
             return rendered_block
         elif not isinstance(content_block, dict):
             return content_block

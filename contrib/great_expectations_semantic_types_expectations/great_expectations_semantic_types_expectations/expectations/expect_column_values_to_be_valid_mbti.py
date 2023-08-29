@@ -41,7 +41,7 @@ class ColumnValuesToBeValidMbti(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidMbti(ColumnMapExpectation):
-    """Expect column values to conform to the valid Myers–Briggs Type Indicator (MBTI)."""
+    """Expect column values to conform to the valid Myers-Briggs Type Indicator (MBTI)."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
