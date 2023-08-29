@@ -24,14 +24,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ci-run-condition:
+
+  ci-does-not-run-on-draft-pull-requests:
     runs-on: ubuntu-latest
-    # CI steps will run if PR is not a draft, and repo name is the same as the head repo name (not a fork of the repo).
-    if: |
-      github.event.pull_request.draft == false &&
+    if: github.event.pull_request.draft == true
+    steps:
+      - run: echo "CI jobs won't run because this is a draft pull request."
+
+  ci-is-on-main-repo:
+    runs-on: ubuntu-latest
+    # job only runs on main repo where we have access to credentials 
+    if: | 
       github.event.pull_request.head.repo.full_name == github.repository 
     steps:
-      - run: echo "This CI step will be skipped if we are in a draft PR, or a fork of the repo."
+      - run: echo "This CI step only runs on the main repo, where we have access to credentials."
   
   docs-changes:
     # check whether docs were changed
@@ -54,10 +60,10 @@ jobs:
             - 'tests/integration/fixtures/**'
             - 'tests/test_sets/**'
   doc-checks:
-    needs: [docs-changes, ci-run-condition]
+    needs: [docs-changes]
     # run on every PR that is not a draft that has docs changes, and on tagged push events (ie. releases)
     if: |
-      needs.docs-changes.outputs.docs == 'true' ||
+      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
       (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     steps:
@@ -122,10 +128,10 @@ jobs:
 
   docs-snippets:
     name: docs-snippets
-    needs: [docs-changes, ci-run-condition]
-    # run on PRs with docs changes, and on tagged push events (ie. releases)
+    needs: [docs-changes, ci-is-on-main-repo]
+    # run on non-draft PRs with docs changes, and on tagged push events (ie. releases)
     if: |
-      needs.docs-changes.outputs.docs == 'true' ||
+      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
       (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     env:
@@ -235,7 +241,8 @@ jobs:
         run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5
 
   cloud-tests:
-    needs: ci-run-condition
+    needs: ci-is-on-main-repo
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
