@@ -295,7 +295,7 @@ def _get_column_quantiles_trino(
 
     try:
         quantiles_results = execution_engine.execute_query(quantiles_query).fetchone()
-        return next(iter(quantiles_results))
+        return list(quantiles_results)[0]
     except (sqlalchemy.ProgrammingError, trino.trinoexceptions.TrinoUserError) as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()

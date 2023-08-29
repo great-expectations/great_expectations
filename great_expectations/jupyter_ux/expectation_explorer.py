@@ -1947,7 +1947,7 @@ class ExpectationExplorer:
             column_accordion.selected_index = None
             column_accordions.append(column_accordion)
 
-        return [summary_widget, *column_accordions]
+        return [summary_widget] + column_accordions
 
     def edit_expectation_suite(self, data_asset):
         data_asset_name = data_asset.data_asset_name
