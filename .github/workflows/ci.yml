@@ -19,7 +19,10 @@ on:
 
 env:
   # Run only on PRs from the main repo, on scheduled, or triggered runs, or release tags
-  RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER_AND_TAG: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+  NON_FORK: github.event.pull_request.head.repo.full_name == github.repository
+  SCHEDULED: github.event_name == 'schedule'
+  TRIGGERED: github.event_name == 'workflow_dispatch'
+  TAGGED: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
 
 concurrency:
   # Only run one instance of this workflow in PRs, but allow multiple instances in develop.
@@ -245,9 +248,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
+        if: ${{env.NON_FORK}}
         uses: actions/checkout@v3
 
       - name: Set up Python
+        if: ${{env.NON_FORK}}
         uses: actions/setup-python@v4
         with:
           python-version: "3.8"
@@ -256,11 +261,13 @@ jobs:
             setup.py
 
       - name: Install dependencies
+        if: ${{env.NON_FORK}}
         run: |
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
           invoke deps --gx-install -m 'cloud' -r test
 
       - name: Run the tests
+        if: ${{env.NON_FORK}}
         env:
           GX_CLOUD_BASE_URL: ${{secrets.GX_CLOUD_BASE_URL}}
           GX_CLOUD_ORGANIZATION_ID: ${{secrets.GX_CLOUD_ORGANIZATION_ID}}
