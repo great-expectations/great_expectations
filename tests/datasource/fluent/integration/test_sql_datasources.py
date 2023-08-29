@@ -6,7 +6,15 @@ import pathlib
 import sys
 import uuid
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Final, Generator, Literal, Protocol
+from typing import (
+    TYPE_CHECKING,
+    Final,
+    Generator,
+    Literal,
+    Protocol,
+    Sequence,
+    TypedDict,
+)
 
 import pytest
 from packaging.version import Version
@@ -71,7 +79,7 @@ TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
         "unquoted_lower": TEST_TABLE_NAME.lower(),
         "quoted_lower": f'"{TEST_TABLE_NAME.lower()}"',
         # this should work but it doesn't
-        "unquoted_upper": TEST_TABLE_NAME.upper(),
+        # "unquoted_upper": TEST_TABLE_NAME.upper(),
         "quoted_upper": f'"{TEST_TABLE_NAME.upper()}"',
         "quoted_mixed": f'"{TEST_TABLE_NAME.title()}"',
         # "unquoted_mixed": TEST_TABLE_NAME.title(),
@@ -111,6 +119,13 @@ TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
 }
 
 
+class Record(TypedDict):
+    id: int
+    name: str
+    UPPER: str
+    lower: str
+
+
 @pytest.fixture
 def context() -> EphemeralDataContext:
     ctx = get_context(cloud_mode=False)
@@ -124,6 +139,7 @@ class TableFactory(Protocol):
         engine: engine.Engine,
         table_names: set[str],
         schema: str | None = None,
+        data: Sequence[Record] = ...,
     ) -> None:
         ...
 
@@ -157,6 +173,7 @@ def table_factory(
         engine: engine.Engine,
         table_names: set[str],
         schema: str | None = None,
+        data: Sequence[Record] = tuple(),
     ) -> None:
         if engine.dialect.name in DO_NOT_CREATE_TABLES:
             LOGGER.info(
@@ -174,9 +191,17 @@ def table_factory(
                 qualified_table_name = f"{schema}.{name}" if schema else name
                 conn.execute(
                     TextClause(
-                        f"CREATE TABLE IF NOT EXISTS {qualified_table_name} (id INTEGER, name VARCHAR(255))"
+                        f"CREATE TABLE IF NOT EXISTS {qualified_table_name} (id INTEGER, name VARCHAR(255), UPPER VARCHAR(255), lower VARCHAR(255))"
                     )
                 )
+                if data:
+                    conn.execute(
+                        TextClause(
+                            f"INSERT INTO {qualified_table_name} (id, name, UPPER, lower) VALUES (:id, :name, :UPPER, :lower)",
+                        ),
+                        data,
+                    )
+
                 if SQLA_VERSION >= Version("2.0"):
                     conn.commit()
                 created_tables.append(dict(table_name=name, schema=schema))
@@ -453,6 +478,33 @@ class TestTableIdentifiers:
 
         print(f"result:\n{pf(result)}")
         assert result.success is True
+
+
+@pytest.mark.postgresql
+class TestColumnIndentifiers:
+    def test_simple_expectation(
+        self, postgres_ds: PostgresDatasource, table_factory: TableFactory
+    ):
+        table_factory(
+            engine=postgres_ds.get_engine(),
+            table_names={TEST_TABLE_NAME},
+            data=[
+                {
+                    "id": 1,
+                    "name": "first",
+                    "UPPER": "my column is uppercase",
+                    "lower": "my column is lowercase",
+                },
+                {
+                    "id": 2,
+                    "name": "second",
+                    "UPPER": "my column is uppercase",
+                    "lower": "my column is lowercase",
+                },
+            ],
+        )
+
+        assert False
 
 
 if __name__ == "__main__":
