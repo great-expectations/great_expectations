@@ -25,6 +25,7 @@ from great_expectations.compatibility.sqlalchemy import (
     TextClause,
     engine,
     inspect,
+    quoted_name,
 )
 from great_expectations.compatibility.sqlalchemy import (
     __version__ as sqlalchemy_version,
@@ -481,9 +482,30 @@ class TestTableIdentifiers:
 
 
 @pytest.mark.postgresql
+@pytest.mark.parametrize(
+    "column_name",
+    [
+        "lower",
+        quoted_name(
+            "lower",
+            quote=None,
+        ),
+        quoted_name(
+            "UPPER",
+            quote=True,
+        ),
+        # '"UPPER"',
+        # "'UPPER'",
+        "UPPER",
+    ],
+)
 class TestColumnIndentifiers:
     def test_simple_expectation(
-        self, postgres_ds: PostgresDatasource, table_factory: TableFactory
+        self,
+        context: EphemeralDataContext,
+        postgres_ds: PostgresDatasource,
+        table_factory: TableFactory,
+        column_name: str | quoted_name,
     ):
         table_factory(
             engine=postgres_ds.get_engine(),
@@ -504,7 +526,41 @@ class TestColumnIndentifiers:
             ],
         )
 
-        assert False
+        asset = postgres_ds.add_table_asset("my_asset", table_name=TEST_TABLE_NAME)
+
+        suite = context.add_expectation_suite(
+            expectation_suite_name=f"{postgres_ds.name}-{asset.name}"
+        )
+        suite.add_expectation(
+            expectation_configuration=ExpectationConfiguration(
+                expectation_type="expect_column_values_to_not_be_null",
+                kwargs={
+                    "column": column_name,
+                    "mostly": 1,
+                },
+            )
+        )
+        suite = context.add_or_update_expectation_suite(expectation_suite=suite)
+
+        checkpoint_config = {
+            "name": f"{postgres_ds.name}-{asset.name}",
+            "validations": [
+                {
+                    "expectation_suite_name": suite.expectation_suite_name,
+                    "batch_request": {
+                        "datasource_name": postgres_ds.name,
+                        "data_asset_name": asset.name,
+                    },
+                }
+            ],
+        }
+        checkpoint = context.add_checkpoint(  # type: ignore[call-overload]
+            **checkpoint_config,
+        )
+        result = checkpoint.run()
+
+        print(f"result:\n{pf(result)}")
+        assert result.success is True
 
 
 if __name__ == "__main__":
