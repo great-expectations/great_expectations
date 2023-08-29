@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+from typing import Optional
 from unittest import mock
 
 import boto3
@@ -175,7 +176,7 @@ def test_StoreBackendValidation():
 
 
 def check_store_backend_store_backend_id_functionality(
-    store_backend: StoreBackend, store_backend_id: str = None
+    store_backend: StoreBackend, store_backend_id: Optional[str] = None
 ) -> None:
     """
     Assertions to check if a store backend is handling reading and writing a store_backend_id appropriately.

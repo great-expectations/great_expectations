@@ -240,7 +240,7 @@ class BatchKwargsGenerator:
         )
         if not param_keys <= recognized_params:
             logger.warning(
-                f"Unrecognized batch_parameter(s): {str(param_keys - recognized_params)}"
+                f"Unrecognized batch_parameter(s): {param_keys - recognized_params!s}"
             )
 
         batch_kwargs = self._build_batch_kwargs(batch_parameters)

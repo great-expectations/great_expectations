@@ -254,7 +254,7 @@ class DataAsset:
                         if catch_exceptions:
                             raised_exception = True
                             exception_traceback = traceback.format_exc()
-                            exception_message = f"{type(err).__name__}: {str(err)}"
+                            exception_message = f"{type(err).__name__}: {err!s}"
 
                             return_obj = ExpectationValidationResult(success=False)
 

@@ -51,7 +51,7 @@ class InMemoryStoreBackend(StoreBackend):
         try:
             return self._store[key]
         except KeyError as e:
-            raise InvalidKeyError(f"{str(e)}")
+            raise InvalidKeyError(f"{e!s}")
 
     @override
     def _set(self, key, value, **kwargs) -> None:
