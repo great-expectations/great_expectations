@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import logging
 import os
+import sys
 import uuid
 from pprint import pformat as pf
-from typing import Final, Generator, Literal, Protocol
+from typing import TYPE_CHECKING, Final, Generator, Literal, Protocol
 
 import pytest
 from packaging.version import Version
@@ -30,10 +31,16 @@ from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
 )
 
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
+PYTHON_VERSION: Final[
+    Literal["py38", "py39", "py310", "py311"]
+] = f"py{sys.version_info.major}{sys.version_info.minor}"  # type: ignore[assignment] # str for each python version
 SQLA_VERSION: Final = Version(sqlalchemy_version or "0.0.0")
 LOGGER: Final = logging.getLogger("tests")
 
-PG_TABLE: Final[str] = "test_table"
+TEST_TABLE_NAME: Final[str] = "test_table"
 # trino container ships with default test tables
 TRINO_TABLE: Final[str] = "customer"
 
@@ -41,18 +48,28 @@ TRINO_TABLE: Final[str] = "customer"
 # some of the trino tests probably don't make sense if we can't create tables
 DO_NOT_CREATE_TABLES: set[str] = {"trino"}
 
+DatabaseType: TypeAlias = Literal["trino", "postgres", "databricks_sql", "snowflake"]
+TableNameCase: TypeAlias = Literal[
+    "quoted_lower",
+    "quoted_mixed",
+    "quoted_upper",
+    "unquoted_lower",
+    "unquoted_mixed",
+    "unquoted_upper",
+]
+
 # TODO: simplify this and possible get rid of this mapping once we have settled on
 # all the naming conventions we want to support for different SQL dialects
 # NOTE: commented out are tests we know fail for individual datasources. Ideally all
 # test cases should work for all datasrouces
-TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
+TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
     "postgres": {
-        "unquoted_lower": PG_TABLE.lower(),
-        "quoted_lower": f'"{PG_TABLE.lower()}"',
-        # "unquoted_upper": PG_TABLE.upper(),
-        "quoted_upper": f'"{PG_TABLE.upper()}"',
-        "quoted_mixed": f'"{PG_TABLE.title()}"',
-        # "unquoted_mixed": PG_TABLE.title(),
+        "unquoted_lower": TEST_TABLE_NAME.lower(),
+        "quoted_lower": f'"{TEST_TABLE_NAME.lower()}"',
+        # "unquoted_upper": TEST_TABLE_NAME.upper(),
+        "quoted_upper": f'"{TEST_TABLE_NAME.upper()}"',
+        "quoted_mixed": f'"{TEST_TABLE_NAME.title()}"',
+        # "unquoted_mixed": TEST_TABLE_NAME.title(),
     },
     "trino": {
         "unquoted_lower": TRINO_TABLE.lower(),
@@ -63,20 +80,20 @@ TABLE_NAME_MAPPING: Final[dict[str, dict[str, str]]] = {
         # "unquoted_mixed": TRINO_TABLE.title(),
     },
     "databricks_sql": {
-        "unquoted_lower": PG_TABLE.lower(),
-        "quoted_lower": f"`{PG_TABLE.lower()}`",
-        "unquoted_upper": PG_TABLE.upper(),
-        "quoted_upper": f"`{PG_TABLE.upper()}`",
-        "quoted_mixed": f"`{PG_TABLE.title()}`",
-        "unquoted_mixed": PG_TABLE.title(),
+        "unquoted_lower": TEST_TABLE_NAME.lower(),
+        "quoted_lower": f"`{TEST_TABLE_NAME.lower()}`",
+        "unquoted_upper": TEST_TABLE_NAME.upper(),
+        "quoted_upper": f"`{TEST_TABLE_NAME.upper()}`",
+        "quoted_mixed": f"`{TEST_TABLE_NAME.title()}`",
+        "unquoted_mixed": TEST_TABLE_NAME.title(),
     },
     "snowflake": {
-        "unquoted_lower": PG_TABLE.lower(),
-        "quoted_lower": f'"{PG_TABLE.lower()}"',
-        "unquoted_upper": PG_TABLE.upper(),
-        "quoted_upper": f'"{PG_TABLE.upper()}"',
-        "quoted_mixed": f'"{PG_TABLE.title()}"',
-        # "unquoted_mixed": PG_TABLE.title(),
+        "unquoted_lower": TEST_TABLE_NAME.lower(),
+        "quoted_lower": f'"{TEST_TABLE_NAME.lower()}"',
+        "unquoted_upper": TEST_TABLE_NAME.upper(),
+        "quoted_upper": f'"{TEST_TABLE_NAME.upper()}"',
+        "quoted_mixed": f'"{TEST_TABLE_NAME.title()}"',
+        # "unquoted_mixed": TEST_TABLE_NAME.title(),
     },
 }
 
@@ -193,7 +210,10 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
 def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
     ds = context.sources.add_databricks_sql(
         "databricks_sql",
-        connection_string=r"databricks+connector://token:${DBS_TOKEN}@${DBS_HOST}:443/cloud_events?http_path=${DBS_HTTP_PATH}&catalog=catalog&schema=schema",
+        connection_string="databricks+connector://token:"
+        "${DATABRICKS_TOKEN}@${DATABRICKS_HOST}:443"
+        "/cloud_events?http_path=${DATABRICKS_HTTP_PATH}&catalog=hive_metastore&schema="
+        + PYTHON_VERSION,
     )
     return ds
 
@@ -231,7 +251,7 @@ def snowflake_ds(
 )
 class TestTableIdentifiers:
     @pytest.mark.trino
-    def test_trino(self, trino_ds: SQLDatasource, asset_name: str):
+    def test_trino(self, trino_ds: SQLDatasource, asset_name: TableNameCase):
         table_name = TABLE_NAME_MAPPING["trino"].get(asset_name)
         if not table_name:
             pytest.skip(f"no '{asset_name}' table_name for trino")
@@ -245,7 +265,7 @@ class TestTableIdentifiers:
     def test_postgres(
         self,
         postgres_ds: PostgresDatasource,
-        asset_name: str,
+        asset_name: TableNameCase,
         table_factory: TableFactory,
     ):
         table_name = TABLE_NAME_MAPPING["postgres"].get(asset_name)
@@ -259,30 +279,37 @@ class TestTableIdentifiers:
 
         postgres_ds.add_table_asset(asset_name, table_name=table_name)
 
-    @pytest.mark.skip(reason="TODO: implement Databricks SQL integration service")
     @pytest.mark.databricks
     def test_databricks_sql(
         self,
         databricks_sql_ds: DatabricksSQLDatasource,
-        asset_name: str,
-        # table_factory: TableFactory,
+        asset_name: TableNameCase,
+        table_factory: TableFactory,
     ):
-        table_name = TABLE_NAME_MAPPING["databricks"].get(asset_name)
+        table_name = TABLE_NAME_MAPPING["databricks_sql"].get(asset_name)
         if not table_name:
             pytest.skip(f"no '{asset_name}' table_name for databricks")
+        # create table
+        table_factory(
+            engine=databricks_sql_ds.get_engine(),
+            table_names={table_name},
+            schema=PYTHON_VERSION,
+        )
 
         table_names: list[str] = inspect(
             databricks_sql_ds.get_engine()
-        ).get_table_names()
+        ).get_table_names(schema=PYTHON_VERSION)
         print(f"databricks tables:\n{pf(table_names)}))")
 
-        databricks_sql_ds.add_table_asset(asset_name, table_name=table_name)
+        databricks_sql_ds.add_table_asset(
+            asset_name, table_name=table_name, schema_name=PYTHON_VERSION
+        )
 
     @pytest.mark.snowflake
     def test_snowflake(
         self,
         snowflake_ds: SnowflakeDatasource,
-        asset_name: str,
+        asset_name: TableNameCase,
         table_factory: TableFactory,
     ):
         table_name = TABLE_NAME_MAPPING["snowflake"].get(asset_name)
@@ -291,16 +318,21 @@ class TestTableIdentifiers:
         if not snowflake_ds:
             pytest.skip("no snowflake datasource")
         # create table
+        schema = get_random_identifier_name()
         table_factory(
             engine=snowflake_ds.get_engine(),
             table_names={table_name},
-            schema=get_random_identifier_name(),
+            schema=schema,
         )
 
-        table_names: list[str] = inspect(snowflake_ds.get_engine()).get_table_names()
+        table_names: list[str] = inspect(snowflake_ds.get_engine()).get_table_names(
+            schema=schema
+        )
         print(f"snowflake tables:\n{pf(table_names)}))")
 
-        snowflake_ds.add_table_asset(asset_name, table_name=table_name)
+        snowflake_ds.add_table_asset(
+            asset_name, table_name=table_name, schema_name=schema
+        )
 
     @pytest.mark.parametrize(
         "datasource_type,schema",
@@ -310,6 +342,11 @@ class TestTableIdentifiers:
             param(
                 "snowflake", get_random_identifier_name(), marks=[pytest.mark.snowflake]
             ),
+            param(
+                "databricks_sql",
+                PYTHON_VERSION,
+                marks=[pytest.mark.databricks],
+            ),
         ],
     )
     def test_checkpoint_run(
@@ -317,8 +354,8 @@ class TestTableIdentifiers:
         request: pytest.FixtureRequest,
         context: EphemeralDataContext,
         table_factory: TableFactory,
-        asset_name: str,
-        datasource_type: str,
+        asset_name: TableNameCase,
+        datasource_type: DatabaseType,
         schema: str | None,
     ):
         datasource: SQLDatasource = request.getfixturevalue(f"{datasource_type}_ds")
