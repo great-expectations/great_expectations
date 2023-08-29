@@ -242,7 +242,7 @@ jobs:
         run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5
 
   cloud-tests:
-    if: github.event.pull_request.draft == false 
+    if: github.event.pull_request.head.repo.full_name == github.repository 
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -257,13 +257,11 @@ jobs:
             setup.py
 
       - name: Install dependencies
-        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER_AND_TAG}}
         run: |
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
           invoke deps --gx-install -m 'cloud' -r test
 
       - name: Run the tests
-        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER_AND_TAG}}
         env:
           GX_CLOUD_BASE_URL: ${{secrets.GX_CLOUD_BASE_URL}}
           GX_CLOUD_ORGANIZATION_ID: ${{secrets.GX_CLOUD_ORGANIZATION_ID}}
