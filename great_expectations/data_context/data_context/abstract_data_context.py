@@ -4651,7 +4651,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         If there is an error when writing to disk, we default to a NoneType.
         """
         oss_id = uuid.uuid4()
-        config["anonymous_usage_statistics"] = {}
+
+        # If the section already exists, don't overwite usage_statistics_url
+        if not config.has_section("anonymous_usage_statistics"):
+            config["anonymous_usage_statistics"] = {}
         config["anonymous_usage_statistics"]["oss_id"] = str(oss_id)
 
         try:
