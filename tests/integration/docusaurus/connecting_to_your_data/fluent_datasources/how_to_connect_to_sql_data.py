@@ -25,9 +25,7 @@ sqlite_database_path = str(
 my_table_name = "yellow_tripdata_sample_2019_01"
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py sql_connection_string">
 connection_string = "postgresql+psycopg2://username:my_password@localhost/test"
-# </snippet>
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py connection_string">
