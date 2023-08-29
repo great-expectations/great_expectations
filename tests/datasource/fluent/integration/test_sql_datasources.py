@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import pathlib
 import sys
 import uuid
 from pprint import pformat as pf
@@ -250,9 +251,11 @@ def snowflake_ds(
 
 
 @pytest.fixture
-def sqlite_ds(context: EphemeralDataContext) -> SqliteDatasource:
+def sqlite_ds(
+    context: EphemeralDataContext, tmp_path: pathlib.Path
+) -> SqliteDatasource:
     ds = context.sources.add_sqlite(
-        "sqlite", connection_string="sqlite:///:memory:", create_temp_table=False
+        "sqlite", connection_string=f"sqlite:///{tmp_path}/test.db"
     )
     return ds
 
