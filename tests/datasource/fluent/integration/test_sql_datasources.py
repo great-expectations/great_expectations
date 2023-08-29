@@ -301,6 +301,7 @@ class TestTableIdentifiers:
 
         postgres_ds.add_table_asset(asset_name, table_name=table_name)
 
+    @pytest.mark.xfail(reason="need databricks aviailable in CI")
     @pytest.mark.databricks
     def test_databricks_sql(
         self,
@@ -386,7 +387,10 @@ class TestTableIdentifiers:
             param(
                 "databricks_sql",
                 PYTHON_VERSION,
-                marks=[pytest.mark.databricks],
+                marks=[
+                    pytest.mark.databricks,
+                    pytest.mark.xfail(reason="need custom exec engine creation logic"),
+                ],
             ),
             param("sqlite", None, marks=[pytest.mark.sqlite]),
         ],
