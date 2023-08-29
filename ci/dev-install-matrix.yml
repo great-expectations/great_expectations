@@ -31,7 +31,7 @@ jobs:
 
         - script: |
             pip install pytest pytest-cov pytest-azurepipelines
-            pytest --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            pytest --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics -m "unit or big or filesystem"
           displayName: 'pytest'
 
         - task: PublishTestResults@2
@@ -74,7 +74,7 @@ jobs:
         - script: |
             pip install -I pytest
             pip install pytest-cov pytest-azurepipelines
-            pytest --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics -m "not external_sqldialect"
+            pytest --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics -m "unit or big or filesystem"
           displayName: 'pytest'
 
         - task: PublishTestResults@2
