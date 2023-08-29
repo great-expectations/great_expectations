@@ -19,8 +19,7 @@ on:
 
 env:
   # Run only on PRs from the main repo, on scheduled, or triggered runs, or release tags
-  RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER_AND_TAG: github.event.pull_request.head.repo.full_name == github.repository 
-  #|| github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+  RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER_AND_TAG: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push' && contains(github.ref, 'refs/tags/')
 
 concurrency:
   # Only run one instance of this workflow in PRs, but allow multiple instances in develop.
@@ -242,7 +241,7 @@ jobs:
         run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5
 
   cloud-tests:
-    if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER_AND_TAG}}
+    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
