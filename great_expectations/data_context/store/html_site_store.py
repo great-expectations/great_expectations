@@ -294,9 +294,7 @@ class HtmlSiteStore:
             key = resource_identifier.to_tuple()
         else:
             # this method does not support getting the URL of static assets
-            raise ValueError(
-                f"Cannot get URL for resource {str(resource_identifier):s}"
-            )
+            raise ValueError(f"Cannot get URL for resource {resource_identifier!s:s}")
 
         # <WILL> : this is a hack for Taylor. Change this back. 20200924
         # if only_if_exists:

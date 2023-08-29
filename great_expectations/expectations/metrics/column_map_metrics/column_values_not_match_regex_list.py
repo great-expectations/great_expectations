@@ -39,7 +39,7 @@ class ColumnValuesNotMatchRegexList(ColumnMapMetricProvider):
             column, regex_list[0], _dialect, positive=False
         )
         if regex_expression is None:
-            logger.warning(f"Regex is not supported for dialect {str(_dialect)}")
+            logger.warning(f"Regex is not supported for dialect {_dialect!s}")
             raise NotImplementedError
 
         return sa.and_(
