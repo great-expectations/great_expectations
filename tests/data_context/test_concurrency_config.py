@@ -1,11 +1,11 @@
 import pytest
 
+from great_expectations.data_context import get_context
 from great_expectations.data_context.types.base import (
     ConcurrencyConfig,
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
-from great_expectations.util import get_context
 
 pytestmark = pytest.mark.unit
 

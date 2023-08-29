@@ -281,7 +281,7 @@ IGNORED_VIOLATIONS = [
     "tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler optional_params",
     "tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler semantic",
     "tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py assert_suite",
-    "tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py equivalent_using_checkpoint",
+    "tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py checkpoint_example",
     "tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py keys_passed_at_runtime",
     "tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults",
     "tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py no_nesting",

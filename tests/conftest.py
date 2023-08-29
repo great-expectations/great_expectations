@@ -44,6 +44,7 @@ from great_expectations.data_context import (
     AbstractDataContext,
     BaseDataContext,
     CloudDataContext,
+    get_context,
 )
 from great_expectations.data_context._version_checker import _VersionChecker
 from great_expectations.data_context.cloud_constants import (
@@ -100,7 +101,6 @@ from great_expectations.self_check.util import (
 )
 from great_expectations.util import (
     build_in_memory_runtime_context,
-    get_context,
     is_library_loadable,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
