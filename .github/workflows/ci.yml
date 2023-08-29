@@ -17,13 +17,6 @@ on:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+'
 
-env:
-  # Run only on PRs from the main repo, on scheduled, or triggered runs, or release tags
-  NON_FORK: "github.event.pull_request.head.repo.full_name == github.repository"
-  SCHEDULED: "github.event_name == 'schedule'"
-  TRIGGERED: "github.event_name == 'workflow_dispatch'"
-  TAGGED: "github.event_name == 'push' && contains(github.ref, 'refs/tags/')"
-
 concurrency:
   # Only run one instance of this workflow in PRs, but allow multiple instances in develop.
   # https://stackoverflow.com/questions/74117321/if-condition-in-concurrency-in-gha
@@ -31,13 +24,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ci-does-not-run-on-condition:
+  ci-run-condition:
     runs-on: ubuntu-latest
+    # CI steps will run if PR is not a draft, and repo name is the same as the head repo name (not a fork of the repo).
     if: |
-      github.event.pull_request.draft == true ||
-      github.event.pull_request.head.repo.full_name != github.repository 
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository 
     steps:
       - run: echo "CI jobs won't run because it is a draft or fork."
+
   
   docs-changes:
     # check whether docs were changed
@@ -128,7 +123,7 @@ jobs:
 
   docs-snippets:
     name: docs-snippets
-    needs: [docs-changes, ci-does-not-run-on-condition]
+    needs: [docs-changes, ci-run-condition]
     # run on every PR that is not a draft that has docs changes, and on tagged push events (ie. releases)
     if: |
       (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
@@ -241,7 +236,7 @@ jobs:
         run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5
 
   cloud-tests:
-    needs: ci-does-not-run-on-condition
+    needs: ci-run-condition
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
