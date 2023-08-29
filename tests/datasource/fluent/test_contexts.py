@@ -66,10 +66,12 @@ def test_add_fluent_datasource_are_persisted(
     )
 
     assert datasource.id
-    assert set_spy.call_count == 1
+
+    # Note - underlying logic could be optimized to have this only occur once
+    assert set_spy.call_count == 2
     cloud_api_fake.assert_call_count(
         f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources",
-        1,
+        2,
     )
 
 
