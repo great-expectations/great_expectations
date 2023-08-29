@@ -212,8 +212,7 @@ def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
         "databricks_sql",
         connection_string="databricks+connector://token:"
         "${DATABRICKS_TOKEN}@${DATABRICKS_HOST}:443"
-        "/cloud_events?http_path=${DATABRICKS_HTTP_PATH}&catalog=ci&schema="
-        + PYTHON_VERSION,
+        "/" + PYTHON_VERSION + "?http_path=${DATABRICKS_HTTP_PATH}&catalog=ci",
     )
     return ds
 
