@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event.pull_request.draft == true ||
-      github.event.pull_request.head.repo.full_name == github.repository 
+      github.event.pull_request.head.repo.full_name != github.repository 
     steps:
       - run: echo "CI jobs won't run because it is a draft or fork."
   
