@@ -19,10 +19,10 @@ on:
 
 env:
   # Run only on PRs from the main repo, on scheduled, or triggered runs, or release tags
-  NON_FORK: (github.event.pull_request.head.repo.full_name == github.repository)
-  SCHEDULED: (github.event_name == 'schedule')
-  TRIGGERED: (github.event_name == 'workflow_dispatch')
-  TAGGED: (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
+  NON_FORK: "(github.event.pull_request.head.repo.full_name == github.repository)"
+  SCHEDULED: "(github.event_name == 'schedule')"
+  TRIGGERED: "(github.event_name == 'workflow_dispatch')"
+  TAGGED: "(github.event_name == 'push' && contains(github.ref, 'refs/tags/'))"
 
 concurrency:
   # Only run one instance of this workflow in PRs, but allow multiple instances in develop.
