@@ -4653,9 +4653,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         oss_id = uuid.uuid4()
 
         # If the section already exists, don't overwite usage_statistics_url
-        if not config.has_section("anonymous_usage_statistics"):
-            config["anonymous_usage_statistics"] = {}
-        config["anonymous_usage_statistics"]["oss_id"] = str(oss_id)
+        section = "anonymous_usage_statistics"
+        if not config.has_section(section):
+            config[section] = {}
+        config[section]["oss_id"] = str(oss_id)
 
         try:
             with cls._ROOT_CONF_FILE.open("w") as f:
