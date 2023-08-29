@@ -124,8 +124,6 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 # Create first checkpoint on yellow_tripdata_sample_2019-01.csv
 my_checkpoint_config = f"""
 name: getting_started_checkpoint
-config_version: 1.0
-class_name: Checkpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
@@ -155,8 +153,8 @@ my_checkpoint_config = yaml.load(my_checkpoint_config)
 # NOTE: The following code (up to and including the assert) is only for testing and can be ignored by users.
 # In the current test, an action_list without a build data docs is passed to .run because we do not want to update
 # and build data_docs
-checkpoint = context.add_or_update_checkpoint(**my_checkpoint_config)
-checkpoint_result = checkpoint.run(
+checkpoint = context.add_or_update_checkpoint(
+    **my_checkpoint_config,
     action_list=[
         {
             "name": "store_validation_result",
@@ -166,8 +164,9 @@ checkpoint_result = checkpoint.run(
             "name": "store_evaluation_params",
             "action": {"class_name": "StoreEvaluationParametersAction"},
         },
-    ]
+    ],
 )
+checkpoint_result = checkpoint.run()
 assert checkpoint_result.run_results
 
 
@@ -175,8 +174,6 @@ assert checkpoint_result.run_results
 # <snippet name="tests/integration/docusaurus/tutorials/getting-started/getting_started.py checkpoint_yaml_config">
 yaml_config = f"""
 name: getting_started_checkpoint
-config_version: 1.0
-class_name: Checkpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
@@ -206,8 +203,8 @@ my_new_checkpoint_config = yaml.load(yaml_config)
 # NOTE: The following code (up to and including the assert) is only for testing and can be ignored by users.
 # In the current test, an action_list without a build data docs is passed to .run because we do not want to update
 # and build data_docs
-new_checkpoint = context.add_or_update_checkpoint(**my_new_checkpoint_config)
-new_checkpoint_result = new_checkpoint.run(
+new_checkpoint = context.add_or_update_checkpoint(
+    **my_new_checkpoint_config,
     action_list=[
         {
             "name": "store_validation_result",
@@ -217,6 +214,7 @@ new_checkpoint_result = new_checkpoint.run(
             "name": "store_evaluation_params",
             "action": {"class_name": "StoreEvaluationParametersAction"},
         },
-    ]
+    ],
 )
+new_checkpoint_result = new_checkpoint.run()
 assert new_checkpoint_result.run_results
