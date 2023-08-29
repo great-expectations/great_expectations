@@ -68,7 +68,7 @@ def titanic_data_context_with_sql_datasource(
         add_dataframe_to_db(df=df, name="incomplete", con=conn)
         add_dataframe_to_db(df=test_df, name="wrong", con=conn)
     except ValueError as ve:
-        logger.warning(f"Unable to store information into database: {str(ve)}")
+        logger.warning(f"Unable to store information into database: {ve!s}")
 
     datasource_config: str = f"""
 class_name: SimpleSqlalchemyDatasource
