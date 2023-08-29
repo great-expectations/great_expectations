@@ -167,7 +167,6 @@ runtime_configuration:
     result_format: BASIC
     partial_unexpected_count: 20
 # </snippet>
-    
 """
 # </snippet>
 
@@ -481,6 +480,8 @@ assert batch_identifiers == {
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py equivalent_using_checkpoint">
 equivalent_using_checkpoint = """
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py checkpoint_example">
+checkpoint_example = """
 
 name: my_checkpoint
 config_version: 1
@@ -515,10 +516,11 @@ action_list:
 
 """
 # </snippet>
-equivalent_using_checkpoint = equivalent_using_checkpoint.replace(
+checkpoint_example = checkpoint_example.replace(
     "<YOUR SLACK WEBHOOK URL>", "https://hooks.slack.com/foo/bar"
 )
 context.add_or_update_checkpoint(**yaml.load(equivalent_using_checkpoint))
+context.add_or_update_checkpoint(**yaml.load(checkpoint_example))
 
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 
