@@ -169,18 +169,18 @@ jobs:
           python ci/checks/validate_docs_snippets.py
       - name: Authenticate with GCP
 
-        if: ${{env.NON_FORK || env.SCHEDULED || env.TRIGGERED || env.TAGGED}}
+        if: env.NON_FORK || env.SCHEDULED || env.TRIGGERED || env.TAGGED
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
 
       - name: Create JSON file for following step
-        if: ${{env.NON_FORK || env.SCHEDULED || env.TRIGGERED || env.TAGGED}}
+        if: env.NON_FORK || env.SCHEDULED || env.TRIGGERED || env.TAGGED
         run: |
           echo "$GE_TEST_GCP_CREDENTIALS" > gcp-credentials.json
 
       - name: Install and setup Google Cloud SDK
-        if: ${{env.NON_FORK || env.SCHEDULED || env.TRIGGERED || env.TAGGED}}
+        if: env.NON_FORK || env.SCHEDULED || env.TRIGGERED || env.TAGGED
         run: |
           # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
           curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
@@ -209,7 +209,7 @@ jobs:
         run: |
           invoke docs-snippet-tests 'docs-basic' --up-services --verbose
       - name: Run the tests needing cloud credentials
-        if: ${{env.NON_FORK || env.SCHEDULED || env.TRIGGERED || env.TAGGED}}
+        if: env.NON_FORK || env.SCHEDULED || env.TRIGGERED || env.TAGGED
         run: |
           invoke docs-snippet-tests 'docs-creds-needed' --up-services --verbose
       # Spark tests are run as part of a separate task as we have not migrated all of Spark tests just yet (ie. Spark+Athena, Spark+S3 etc)
@@ -248,11 +248,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        if: ${{env.NON_FORK || env.SCHEDULED || env.TRIGGERED || env.TAGGED}}
+        if: env.NON_FORK || env.SCHEDULED || env.TRIGGERED || env.TAGGED
         uses: actions/checkout@v3
 
       - name: Set up Python
-        if: ${{env.NON_FORK || env.SCHEDULED || env.TRIGGERED || env.TAGGED}}
+        if: env.NON_FORK || env.SCHEDULED || env.TRIGGERED || env.TAGGED
         uses: actions/setup-python@v4
         with:
           python-version: "3.8"
@@ -261,13 +261,13 @@ jobs:
             setup.py
 
       - name: Install dependencies
-        if: ${{env.NON_FORK || env.SCHEDULED || env.TRIGGERED || env.TAGGED}}
+        if: env.NON_FORK || env.SCHEDULED || env.TRIGGERED || env.TAGGED
         run: |
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
           invoke deps --gx-install -m 'cloud' -r test
 
       - name: Run the tests
-        if: ${{env.NON_FORK || env.SCHEDULED || env.TRIGGERED || env.TAGGED}}
+        if: env.NON_FORK || env.SCHEDULED || env.TRIGGERED || env.TAGGED
         env:
           GX_CLOUD_BASE_URL: ${{secrets.GX_CLOUD_BASE_URL}}
           GX_CLOUD_ORGANIZATION_ID: ${{secrets.GX_CLOUD_ORGANIZATION_ID}}
