@@ -19,7 +19,8 @@ on:
 
 env:
   # Run only on PRs from the main repo, on scheduled, or triggered runs, or release tags
-  RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER_AND_TAG: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+  RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER_AND_TAG: github.event.pull_request.head.repo.full_name == github.repository 
+  #|| github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push' && contains(github.ref, 'refs/tags/')
 
 concurrency:
   # Only run one instance of this workflow in PRs, but allow multiple instances in develop.
@@ -206,7 +207,7 @@ jobs:
         run: |
           invoke docs-snippet-tests 'docs-basic' --up-services --verbose
       - name: Run the tests needing cloud credentials
-        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER_AND_TAG}}
         run: |
           invoke docs-snippet-tests 'docs-creds-needed' --up-services --verbose
       # Spark tests are run as part of a separate task as we have not migrated all of Spark tests just yet (ie. Spark+Athena, Spark+S3 etc)
