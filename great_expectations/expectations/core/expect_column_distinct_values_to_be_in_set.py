@@ -211,9 +211,9 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
 
         else:
             for i, v in enumerate(params["value_set"]):
-                params[f"v__{str(i)}"] = v
+                params[f"v__{i!s}"] = v
             values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
+                [f"$v__{i!s}" for i, v in enumerate(params["value_set"])]
             )
 
             if renderer_configuration.include_column_name:
@@ -322,7 +322,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
                 ),
                 "graph": chart,
                 "styling": {
-                    "classes": [f"col-{str(chart_container_col_width)}", "mt-1"],
+                    "classes": [f"col-{chart_container_col_width!s}", "mt-1"],
                 },
             }
         )

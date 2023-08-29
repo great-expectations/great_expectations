@@ -16,6 +16,7 @@ extend-ignore = [
     "DTZ", # naive tz in tests is not always a problem
     "PLR2004", # magic value comparison is common test pattern
     "PLR0913", # too many arguments
+    "RUF015", # element index slice is common test pattern
 ]
 
 [isort]
