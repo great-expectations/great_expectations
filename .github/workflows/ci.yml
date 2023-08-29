@@ -18,8 +18,8 @@ on:
       - '[0-9]+.[0-9]+.[0-9]+'
 
 env:
-  # Run only on PRs from the main repo, on scheduled, or triggered runs.
-  RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+  # Run only on PRs from the main repo, on scheduled, or triggered runs, or release tags
+  RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER_AND_TAG: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
 
 concurrency:
   # Only run one instance of this workflow in PRs, but allow multiple instances in develop.
@@ -166,18 +166,18 @@ jobs:
           python ci/checks/validate_docs_snippets.py
       - name: Authenticate with GCP
 
-        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER_AND_TAG}}
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
 
       - name: Create JSON file for following step
-        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER_AND_TAG}}
         run: |
           echo "$GE_TEST_GCP_CREDENTIALS" > gcp-credentials.json
 
       - name: Install and setup Google Cloud SDK
-        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER_AND_TAG}}
         run: |
           # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
           curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
@@ -241,9 +241,7 @@ jobs:
         run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5
 
   cloud-tests:
-    # Simplifying conditional for purposes of 0.17.12 release due to issues with prior release not passing this condition
-    # if: github.event.pull_request.draft == false && (github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' )
-    if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false 
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -263,6 +261,7 @@ jobs:
           invoke deps --gx-install -m 'cloud' -r test
 
       - name: Run the tests
+        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER_AND_TAG}}
         env:
           GX_CLOUD_BASE_URL: ${{secrets.GX_CLOUD_BASE_URL}}
           GX_CLOUD_ORGANIZATION_ID: ${{secrets.GX_CLOUD_ORGANIZATION_ID}}
