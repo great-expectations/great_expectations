@@ -27,11 +27,19 @@ jobs:
   ci-run-condition:
     runs-on: ubuntu-latest
     # CI steps will run if PR is not a draft, and repo name is the same as the head repo name (not a fork of the repo).
-    if: |
-      github.event.pull_request.draft == false &&
-      github.event.pull_request.head.repo.full_name == github.repository 
+    #if: |
+    #  github.event.pull_request.draft == false &&
+    #  github.event.pull_request.head.repo.full_name == github.repository 
+    outputs:
+      run_ci: ${{ steps.set.outputs.run_ci }}
     steps:
-      - run: echo "Some CI jobs won't run because we are on a draft PR or fork of the repo."
+      - run: echo "CI will run because we are not on a draft PR and the head repo name is the same as the base repo name"
+      - id: set
+        if: |  
+          github.event.pull_request.draft == false &&
+          github.event.pull_request.head.repo.full_name == github.repository 
+        run: |
+          echo "::set-output name=run_ci::true"
   
   docs-changes:
     # check whether docs were changed
@@ -56,9 +64,7 @@ jobs:
   doc-checks:
     needs: docs-changes
     # run on every PR that is not a draft that has docs changes, and on tagged push events (ie. releases)
-    if: |
-      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
-      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
+    if: needs.docs-changes.outputs.docs == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -123,10 +129,8 @@ jobs:
   docs-snippets:
     name: docs-snippets
     needs: [docs-changes, ci-run-condition]
-    # run on every PR that is not a draft that has docs changes, and on tagged push events (ie. releases)
-    if: |
-      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
-      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
+    # run on PRs with docs changes, and on tagged push events (ie. releases)
+    if: needs.docs-changes.outputs.docs == 'true'
     runs-on: ubuntu-latest
     env:
       # google
@@ -173,6 +177,7 @@ jobs:
           echo "$GE_TEST_GCP_CREDENTIALS" > gcp-credentials.json
 
       - name: Install and setup Google Cloud SDK
+        if: needs.ci-run-condition.outputs.run_ci == 'true'
         run: |
           # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
           curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
@@ -201,6 +206,7 @@ jobs:
         run: |
           invoke docs-snippet-tests 'docs-basic' --up-services --verbose
       - name: Run the tests needing cloud credentials
+        if: needs.ci-run-condition.outputs.run_ci == 'true'
         run: |
           invoke docs-snippet-tests 'docs-creds-needed' --up-services --verbose
       # Spark tests are run as part of a separate task as we have not migrated all of Spark tests just yet (ie. Spark+Athena, Spark+S3 etc)
@@ -236,6 +242,7 @@ jobs:
 
   cloud-tests:
     needs: ci-run-condition
+    if: needs.ci-run-condition.outputs.run_ci == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
