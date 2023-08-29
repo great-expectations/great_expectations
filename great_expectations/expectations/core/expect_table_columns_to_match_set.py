@@ -261,7 +261,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
             template_str = f"Must have {exact_match_str} these columns (in any order): {column_list_template_str}"
 
             for idx in range(len(params["column_list"])):
-                params[f"column_list_{str(idx)}"] = params["column_list"][idx]
+                params[f"column_list_{idx!s}"] = params["column_list"][idx]
 
         return [
             RenderedStringTemplateContent(
