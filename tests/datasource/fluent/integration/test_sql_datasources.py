@@ -26,6 +26,7 @@ from great_expectations.datasource.fluent import (
     PostgresDatasource,
     SnowflakeDatasource,
     SQLDatasource,
+    SqliteDatasource,
 )
 from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
@@ -48,7 +49,9 @@ TRINO_TABLE: Final[str] = "customer"
 # some of the trino tests probably don't make sense if we can't create tables
 DO_NOT_CREATE_TABLES: set[str] = {"trino"}
 
-DatabaseType: TypeAlias = Literal["trino", "postgres", "databricks_sql", "snowflake"]
+DatabaseType: TypeAlias = Literal[
+    "trino", "postgres", "databricks_sql", "snowflake", "sqlite"
+]
 TableNameCase: TypeAlias = Literal[
     "quoted_lower",
     "quoted_mixed",
@@ -94,6 +97,14 @@ TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
         "quoted_upper": f'"{TEST_TABLE_NAME.upper()}"',
         "quoted_mixed": f'"{TEST_TABLE_NAME.title()}"',
         # "unquoted_mixed": TEST_TABLE_NAME.title(),
+    },
+    "sqlite": {
+        "unquoted_lower": TEST_TABLE_NAME.lower(),
+        "quoted_lower": f'"{TEST_TABLE_NAME.lower()}"',
+        "unquoted_upper": TEST_TABLE_NAME.upper(),
+        "quoted_upper": f'"{TEST_TABLE_NAME.upper()}"',
+        "quoted_mixed": f'"{TEST_TABLE_NAME.title()}"',
+        "unquoted_mixed": TEST_TABLE_NAME.title(),
     },
 }
 
@@ -238,6 +249,14 @@ def snowflake_ds(
     return ds
 
 
+@pytest.fixture
+def sqlite_ds(context: EphemeralDataContext) -> SqliteDatasource:
+    ds = context.sources.add_sqlite(
+        "sqlite", connection_string="sqlite:///:memory:", create_temp_table=False
+    )
+    return ds
+
+
 @pytest.mark.parametrize(
     "asset_name",
     [
@@ -334,6 +353,25 @@ class TestTableIdentifiers:
             asset_name, table_name=table_name, schema_name=schema
         )
 
+    @pytest.mark.sqlite
+    def test_sqlite(
+        self,
+        sqlite_ds: SqliteDatasource,
+        asset_name: TableNameCase,
+        table_factory: TableFactory,
+    ):
+        table_name = TABLE_NAME_MAPPING["sqlite"][asset_name]
+        # create table
+        table_factory(
+            engine=sqlite_ds.get_engine(),
+            table_names={table_name},
+        )
+
+        table_names: list[str] = inspect(sqlite_ds.get_engine()).get_table_names()
+        print(f"sqlite tables:\n{pf(table_names)}))")
+
+        sqlite_ds.add_table_asset(asset_name, table_name=table_name)
+
     @pytest.mark.parametrize(
         "datasource_type,schema",
         [
@@ -347,6 +385,7 @@ class TestTableIdentifiers:
                 PYTHON_VERSION,
                 marks=[pytest.mark.databricks],
             ),
+            param("sqlite", None, marks=[pytest.mark.sqlite]),
         ],
     )
     def test_checkpoint_run(
