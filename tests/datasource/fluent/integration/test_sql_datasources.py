@@ -157,6 +157,7 @@ def capture_engine_logs(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFi
     return caplog
 
 
+@pytest.fixture
 def silence_sqla_warnings(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("SQLALCHEMY_SILENCE_UBER_WARNING", "1")
 
