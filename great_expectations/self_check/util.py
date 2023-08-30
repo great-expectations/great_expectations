@@ -598,7 +598,7 @@ def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
             spark_df = spark.createDataFrame(data_reshaped, columns)
         return SparkDFDataset(spark_df, profiler=profiler, caching=caching)
     else:
-        warnings.warn(f"Unknown dataset_type {str(dataset_type)}")
+        warnings.warn(f"Unknown dataset_type {dataset_type!s}")
 
 
 def get_test_validator_with_data(  # noqa: PLR0913
@@ -650,7 +650,7 @@ def get_test_validator_with_data(  # noqa: PLR0913
             pk_column=pk_column,
         )
     else:
-        raise ValueError(f"Unknown dataset_type {str(execution_engine)}")
+        raise ValueError(f"Unknown dataset_type {execution_engine!s}")
 
 
 def _get_test_validator_with_data_pandas(
@@ -1664,7 +1664,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     ) from e
                 else:
                     logger.warning(
-                        f"bigquery tests are requested, but unable to connect; {repr(e)}"
+                        f"bigquery tests are requested, but unable to connect; {e!r}"
                     )
             else:
                 test_backends += ["bigquery"]
@@ -1707,7 +1707,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     ) from e
                 else:
                     logger.warning(
-                        f"clickhouse tests are requested, but unable to connect; {repr(e)}"
+                        f"clickhouse tests are requested, but unable to connect; {e!r}"
                     )
             else:
                 test_backends += ["clickhouse"]
@@ -1725,7 +1725,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     ) from e
                 else:
                     logger.warning(
-                        f"trino tests are requested, but unable to connect; {repr(e)}"
+                        f"trino tests are requested, but unable to connect; {e!r}"
                     )
             else:
                 test_backends += ["trino"]
@@ -1757,7 +1757,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     ) from e
                 else:
                     logger.warning(
-                        f"redshift tests are requested, but unable to connect; {repr(e)}"
+                        f"redshift tests are requested, but unable to connect; {e!r}"
                     )
             else:
                 test_backends += ["redshift"]
@@ -1775,7 +1775,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     ) from e
                 else:
                     logger.warning(
-                        f"athena tests are requested, but unable to connect; {repr(e)}"
+                        f"athena tests are requested, but unable to connect; {e!r}"
                     )
             else:
                 test_backends += ["athena"]
@@ -1793,7 +1793,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     ) from e
                 else:
                     logger.warning(
-                        f"snowflake tests are requested, but unable to connect; {repr(e)}"
+                        f"snowflake tests are requested, but unable to connect; {e!r}"
                     )
             else:
                 test_backends += ["snowflake"]
@@ -2792,7 +2792,7 @@ def _create_clickhouse_engine(
     with engine.begin() as conn:
         try:
             schemas = conn.execute(
-                text(f"show schemas from memory like {repr(schema_name)}")
+                text(f"show schemas from memory like {schema_name!r}")
             ).fetchall()
             if (schema_name,) not in schemas:
                 conn.execute(text(f"create schema {schema_name}"))
@@ -2812,7 +2812,7 @@ def _create_trino_engine(
     with engine.begin() as conn:
         try:
             schemas = conn.execute(
-                sa.text(f"show schemas from memory like {repr(schema_name)}")
+                sa.text(f"show schemas from memory like {schema_name!r}")
             ).fetchall()
             if (schema_name,) not in schemas:
                 conn.execute(sa.text(f"create schema {schema_name}"))
