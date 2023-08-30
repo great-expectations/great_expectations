@@ -4651,8 +4651,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         If there is an error when writing to disk, we default to a NoneType.
         """
         oss_id = uuid.uuid4()
-        config["anonymous_usage_statistics"] = {}
-        config["anonymous_usage_statistics"]["oss_id"] = str(oss_id)
+
+        # If the section already exists, don't overwite usage_statistics_url
+        section = "anonymous_usage_statistics"
+        if not config.has_section(section):
+            config[section] = {}
+        config[section]["oss_id"] = str(oss_id)
 
         try:
             with cls._ROOT_CONF_FILE.open("w") as f:
