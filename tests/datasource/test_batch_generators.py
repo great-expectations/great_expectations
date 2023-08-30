@@ -3,7 +3,6 @@ import os
 import pytest
 
 from great_expectations.datasource.batch_kwargs_generator import (
-    DatabricksTableBatchKwargsGenerator,
     GlobReaderBatchKwargsGenerator,
     SubdirReaderBatchKwargsGenerator,
 )
@@ -174,16 +173,3 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
         ("f9", "file"),
         ("f8", "file"),
     }
-
-
-@pytest.mark.big
-def test_databricks_generator(basic_sparkdf_datasource):
-    generator = DatabricksTableBatchKwargsGenerator(datasource=basic_sparkdf_datasource)
-    available_assets = generator.get_available_data_asset_names()
-
-    # We have no tables available
-    assert available_assets == {"names": []}
-
-    databricks_kwargs_iterator = generator.get_iterator(data_asset_name="foo")
-    kwargs = [batch_kwargs for batch_kwargs in databricks_kwargs_iterator]
-    assert "select * from" in kwargs[0]["query"].lower()

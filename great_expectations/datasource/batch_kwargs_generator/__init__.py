@@ -1,4 +1,3 @@
-from .databricks_batch_kwargs_generator import DatabricksTableBatchKwargsGenerator
 from .glob_reader_batch_kwargs_generator import GlobReaderBatchKwargsGenerator
 from .manual_batch_kwargs_generator import ManualBatchKwargsGenerator
 from .query_batch_kwargs_generator import QueryBatchKwargsGenerator

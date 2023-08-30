@@ -284,7 +284,6 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "FixedLengthTupleS3StoreBackend": "TupleS3StoreBackend",
             "FixedLengthTupleGCSStoreBackend": "TupleGCSStoreBackend",
             "InMemoryEvaluationParameterStore": "EvaluationParameterStore",
-            "DatabricksTableGenerator": "DatabricksTableBatchKwargsGenerator",
             "GlobReaderGenerator": "GlobReaderBatchKwargsGenerator",
             "SubdirReaderGenerator": "SubdirReaderBatchKwargsGenerator",
             "QueryGenerator": "QueryBatchKwargsGenerator",
