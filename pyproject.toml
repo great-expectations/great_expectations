@@ -450,6 +450,9 @@ filterwarnings = [
     # Example Actual Warning: Found by running tests/expectations/metrics/test_core.py::test_value_counts_metric_spark
     # FutureWarning: The default dtype for empty Series will be 'object' instead of 'float64' in a future version. Specify a dtype explicitly to silence this warning.
     'ignore: The default dtype for empty Series will be:FutureWarning',
+    # Example Actual Warning: Found by running tests/render/test_column_section_renderer.py::test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table with Pandas 2.0. The warning is emitted through an Altair v5 codepath.
+    # FutureWarning: the convert_dtype parameter is deprecated and will be removed in a future version.  Do ``ser.astype(object).apply()`` instead if you want ``convert_dtype=False``.
+    'ignore: the convert_dtype parameter is deprecated and will be removed in a future version:FutureWarning'
 
     # numpy
     # Example Actual Warning: RuntimeWarning: Mean of empty slice.
