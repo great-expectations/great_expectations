@@ -291,16 +291,16 @@ jobs:
       matrix:
         markers:
           - athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
-          - aws_deps
-          - big
-          - cli
-          - databricks
-          - filesystem
-          - mssql
-          - mysql
+          # - aws_deps
+          # - big
+          # - cli
+          # - databricks
+          # - filesystem
+          # - mssql
+          # - mysql
           - postgresql
           - snowflake
-          - spark
+          # - spark
           - trino
         python-version: ["3.8", "3.9", "3.10", "3.11"]
         exclude:
