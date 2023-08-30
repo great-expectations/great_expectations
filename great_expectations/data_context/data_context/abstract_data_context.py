@@ -131,7 +131,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
     get_batch_list_usage_statistics,
     run_validation_operator_usage_statistics,
     save_expectation_suite_usage_statistics,
-    send_usage_message,
     usage_statistics_enabled_method,
 )
 from great_expectations.checkpoint import Checkpoint
@@ -5064,21 +5063,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                             "metric {} was requested by another expectation suite but is not available in "
                             "this validation result.".format(metric_name)
                         )
-
-    def send_usage_message(
-        self, event: str, event_payload: Optional[dict], success: Optional[bool] = None
-    ) -> None:
-        """helper method to send a usage method using DataContext. Used when sending usage events from
-            classes like ExpectationSuite.
-            event
-        Args:
-            event (str): str representation of event
-            event_payload (dict): optional event payload
-            success (bool): optional success param
-        Returns:
-            None
-        """
-        send_usage_message(self, event, event_payload, success)
 
     def _determine_if_expectation_suite_include_rendered_content(
         self, include_rendered_content: Optional[bool] = None

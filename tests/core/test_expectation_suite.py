@@ -1031,7 +1031,7 @@ def test_expectation_suite_send_usage_message(success: bool):
         data_context=dc_message_spy,  # type: ignore[arg-type]
     )
 
-    suite.send_usage_event(success=success)
+    suite._send_usage_event(success=success)
 
     assert dc_message_spy.messages
     assert len(dc_message_spy.messages) == 1

@@ -40,6 +40,7 @@ from great_expectations.core.expectation_configuration import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
@@ -622,7 +623,7 @@ class ExpectationSuite(SerializableDictDot):
 
         if len(found_expectation_indexes) > 1:
             if send_usage_event:
-                self.send_usage_event(success=False)
+                self._send_usage_event(success=False)
             raise ValueError(
                 "More than one matching expectation was found. Please be more specific with your search "
                 "criteria"
@@ -648,7 +649,7 @@ class ExpectationSuite(SerializableDictDot):
                 ] = expectation_configuration
             else:
                 if send_usage_event:
-                    self.send_usage_event(success=False)
+                    self._send_usage_event(success=False)
 
                 raise gx_exceptions.DataContextError(
                     "A matching ExpectationConfiguration already exists. If you would like to overwrite this "
@@ -658,16 +659,16 @@ class ExpectationSuite(SerializableDictDot):
             self.append_expectation(expectation_configuration)
 
         if send_usage_event:
-            self.send_usage_event(success=True)
+            self._send_usage_event(success=True)
 
         return expectation_configuration
 
-    def send_usage_event(self, success: bool) -> None:
-        usage_stats_event_payload: dict = {}
+    def _send_usage_event(self, success: bool) -> None:
         if self._data_context is not None:
-            self._data_context.send_usage_message(
+            send_usage_message(
+                data_context=self._data_context,
                 event=UsageStatsEvents.EXPECTATION_SUITE_ADD_EXPECTATION,
-                event_payload=usage_stats_event_payload,
+                event_payload={},
                 success=success,
             )
 
