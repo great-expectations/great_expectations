@@ -1631,7 +1631,7 @@ def is_ndarray_datetime_dtype(
 
 
 def convert_ndarray_to_datetime_dtype_best_effort(
-    data: npt.NDArray | list,
+    data: npt.NDArray,
     datetime_detected: bool = False,
     parse_strings_as_datetimes: bool = False,
     fuzzy: bool = False,
