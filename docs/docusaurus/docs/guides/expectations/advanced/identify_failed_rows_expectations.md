@@ -69,7 +69,7 @@ In our example, we are also setting  the `result_format` to `COMPLETE`, which me
 
 ## Run Checkpoint using `result_format`
 
-To apply the updated `result_format` to every Expectation in a Suite, you can pass it directly to the `run()` method. 
+To apply the updated `result_format` to every Expectation in your Suite, you can pass it directly to the `run()` method. 
 
 ```python name="tests/integration/docusaurus/expectations/advanced/failed_rows_pandas.py run checkpoint"
 ```
@@ -119,9 +119,9 @@ Run the following code to open the Data Docs:
 context.open_data_docs()
 ```
 
-You will see that blah blah blah
+You will see that the `unexpected_index_list` values are displayed as part of the validation output, and the filter condition to retrieve all unexpected values can be shown by clicking the dropdown. 
 
-![Screenshot of Data Docs](../../images/failed_rows_data_docs_pandas.png)
+![Screenshot of Pandas output](../../images/failed_rows_data_docs_pandas.png)
 
 </TabItem>
 
@@ -206,9 +206,9 @@ Run the following code to open the Data Docs:
 context.open_data_docs()
 ```
 
-You will see that blah blah blah
+You will see that the `unexpected_index_list` values are displayed as part of the validation output, and the filter condition to retrieve all unexpected values can be shown by clicking the dropdown. 
 
-![Screenshot of Data Docs](../../images/failed_rows_data_docs_spark.png)
+![Screenshot of Spark output](../../images/failed_rows_data_docs_spark.png)
 
 </TabItem>
 <TabItem value="sqlalchemy">
@@ -292,9 +292,9 @@ Run the following code to open the Data Docs:
 context.open_data_docs()
 ```
 
-You will see that blah blah blah
+You will see that the `unexpected_index_list` values are displayed as part of the validation output, and the sql query that can be used to retrieve all unexpected values can be shown by clicking the dropdown. 
 
-![Screenshot of Data Docs](../../images/failed_rows_data_docs_sql.png)
+![Screenshot of SQL output](../../images/failed_rows_data_docs_sql.png)
 
 </TabItem>
 </Tabs>
