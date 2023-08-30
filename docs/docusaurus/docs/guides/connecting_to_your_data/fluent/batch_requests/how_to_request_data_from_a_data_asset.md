@@ -59,6 +59,31 @@ For `dataframe` Data Assets, the `dataframe` is always specified as the argument
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py build_batch_request_with_dataframe"
 ```
 
+## Extract a Batch from a Batch Request (Optional)
+
+You can use the Python slice function to remove a subset of data from a Batch Request. This allows you to focus use a specific selection of records to build Metrics, Validations, and Profiles.
+
+1. Run the following code to retrieve an entire table of data from a SQL datasource:
+
+    ```python
+    table_asset = datasource.add_table_asset(name=asset_name, table_name=asset_table_name)
+    ```
+2. Run the following code to define the column to slice:
+
+    ```python
+    table_asset.add_splitter_column_value('column_name')
+    ```
+3. Run the following code to slice and filter the column:
+
+    ```python
+    batch_request = table_asset.build_batch_request(options = {'filter_options'})
+
+4. Run the following code to return the batch:
+
+    ```python
+    print(len(table_asset.get_batch_list_from_batch_request(batch_request)))
+    ```
+
 ## Verify that the correct Batches were returned
 
 The `get_batch_list_from_batch_request(...)` method will return a list of the Batches a given Batch Request refers to.
