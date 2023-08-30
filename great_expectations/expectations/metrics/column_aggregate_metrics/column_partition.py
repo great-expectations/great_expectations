@@ -155,7 +155,7 @@ def _get_column_partition_using_metrics(
             conversion_ndarray_to_datetime_type_performed,
             min_max_values,
         ) = convert_ndarray_to_datetime_dtype_best_effort(
-            data=[min_, max_],
+            data=[min_, max_],  # type: ignore[arg-type] # expects NDArray
             parse_strings_as_datetimes=True,
         )
         ndarray_is_datetime_type: bool = (
@@ -184,8 +184,8 @@ def _get_column_partition_using_metrics(
             original_ndarray_is_datetime_type,
             conversion_ndarray_to_datetime_type_performed,
             box_plot_values,
-        ) = convert_ndarray_to_datetime_dtype_best_effort(  # type: ignore[assignment] # TODO: ensure not None
-            data=[min_, _25, _75, max_],
+        ) = convert_ndarray_to_datetime_dtype_best_effort(
+            data=[min_, _25, _75, max_],  # type: ignore[arg-type] # expects NDArray
             parse_strings_as_datetimes=True,
         )
         ndarray_is_datetime_type = (
@@ -220,7 +220,7 @@ def _get_column_partition_using_metrics(
                     int(np.ceil(float(max_as_float_ - min_as_float_) / fd)),
                 )
 
-        result_bins = _determine_bins_using_proper_units(  # type: ignore[assignment] # TODO: ensure not None
+        result_bins = _determine_bins_using_proper_units(  # type: ignore[assignment] # need overloads to ensure not None
             ndarray_is_datetime_type=ndarray_is_datetime_type,
             n_bins=n_bins,
             min_=min_,
