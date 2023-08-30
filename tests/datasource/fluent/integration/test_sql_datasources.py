@@ -155,6 +155,7 @@ def table_factory(
         )
         created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
         with engine.connect() as conn:
+            transaction = conn.begin()
             if schema:
                 conn.execute(TextClause(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
             for name in table_names:
@@ -164,9 +165,8 @@ def table_factory(
                         f"CREATE TABLE IF NOT EXISTS {qualified_table_name} (id INTEGER, name VARCHAR(255))"
                     )
                 )
-                if SQLA_VERSION >= Version("2.0"):
-                    conn.commit()
                 created_tables.append(dict(table_name=name, schema=schema))
+            transaction.commit()
         all_created_tables[engine.dialect.name] = created_tables
         engines[engine.dialect.name] = engine
 
@@ -177,6 +177,7 @@ def table_factory(
     for dialect, tables in all_created_tables.items():
         engine = engines[dialect]
         with engine.connect() as conn:
+            transaction = conn.begin()
             for table in tables:
                 name = table["table_name"]
                 schema = table["schema"]
@@ -184,8 +185,7 @@ def table_factory(
                 conn.execute(TextClause(f"DROP TABLE IF EXISTS {qualified_table_name}"))
             if schema:
                 conn.execute(TextClause(f"DROP SCHEMA IF EXISTS {schema}"))
-            if SQLA_VERSION >= Version("2.0"):
-                conn.commit()
+            transaction.commit()
 
 
 @pytest.fixture
