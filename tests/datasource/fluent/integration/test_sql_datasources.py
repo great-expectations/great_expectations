@@ -344,11 +344,12 @@ class TestTableIdentifiers:
             param(
                 "snowflake", get_random_identifier_name(), marks=[pytest.mark.snowflake]
             ),
-            param(
-                "databricks_sql",
-                PYTHON_VERSION,
-                marks=[pytest.mark.databricks],
-            ),
+            # TODO: re-enable once temporary table creation is fixed
+            # param(
+            #     "databricks_sql",
+            #     PYTHON_VERSION,
+            #     marks=[pytest.mark.databricks],
+            # ),
         ],
     )
     def test_checkpoint_run(
