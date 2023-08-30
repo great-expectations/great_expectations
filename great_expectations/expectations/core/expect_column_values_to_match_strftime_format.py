@@ -186,7 +186,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
                     strftime_format,
                 )
         except ValueError as e:
-            raise ValueError(f"Unable to use provided strftime_format. {str(e)}")
+            raise ValueError(f"Unable to use provided strftime_format. {e!s}")
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
