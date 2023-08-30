@@ -490,18 +490,31 @@ class TestTableIdentifiers:
 @pytest.mark.parametrize(
     "column_name",
     [
-        "lower",
-        quoted_name(
-            "lower",
-            quote=None,
+        param("lower", id="str lower"),
+        param(
+            quoted_name(
+                "lower",
+                quote=None,
+            ),
+            id="sqla.quoted_name lower",
         ),
-        quoted_name(
-            "UPPER",
-            quote=True,
+        param(
+            quoted_name(
+                "UPPER",
+                quote=None,
+            ),
+            id="sqla.quoted_name UPPER",
         ),
-        # '"UPPER"',
-        # "'UPPER'",
-        "UPPER",
+        param(
+            quoted_name(
+                "UPPER",
+                quote=True,
+            ),
+            id="sqla.quoted_name UPPER qoute=True",
+        ),
+        param('"UPPER"', id='str "UPPER"'),
+        param("'UPPER'", id="str 'UPPER'"),
+        param("UPPER", id="str UPPER"),
     ],
 )
 class TestColumnIndentifiers:
