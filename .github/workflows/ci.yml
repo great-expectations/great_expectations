@@ -24,7 +24,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   ci-does-not-run-on-draft-pull-requests:
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == true
