@@ -286,7 +286,6 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "InMemoryEvaluationParameterStore": "EvaluationParameterStore",
             "GlobReaderGenerator": "GlobReaderBatchKwargsGenerator",
             "SubdirReaderGenerator": "SubdirReaderBatchKwargsGenerator",
-            "QueryGenerator": "QueryBatchKwargsGenerator",
             "TableGenerator": "TableBatchKwargsGenerator",
             "ExtractAndStoreEvaluationParamsAction": "StoreEvaluationParametersAction",
             "StoreAction": "StoreValidationResultAction",
