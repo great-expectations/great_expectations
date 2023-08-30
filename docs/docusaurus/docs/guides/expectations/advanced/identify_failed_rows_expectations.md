@@ -122,7 +122,7 @@ Run the following code to open the Data Docs:
 context.open_data_docs()
 ```
 
-The following image shows the `unexpected_index_list` values are displayed as part of the validation output. Click the dropdown to open the filter condition to retrieve all unexpected values. 
+The following image shows the `unexpected_index_list` values are displayed as part of the validation output. Click **To retrieve all unexpected values** to open the filter condition to retrieve all unexpected values. 
 
 ![Screenshot of Pandas output](../../images/failed_rows_data_docs_pandas.png)
 
@@ -211,7 +211,7 @@ Run the following code to open the Data Docs:
 context.open_data_docs()
 ```
 
-The following image shows the `unexpected_index_list` values are displayed as part of the validation output. Click the dropdown to open the filter condition to retrieve all unexpected values. 
+The following image shows the `unexpected_index_list` values are displayed as part of the validation output. Click **To retrieve all unexpected values** to open the filter condition to retrieve all unexpected values. 
 
 ![Screenshot of Spark output](../../images/failed_rows_data_docs_spark.png)
 
@@ -298,7 +298,7 @@ Run the following code to open the Data Docs:
 context.open_data_docs()
 ```
 
-The following image shows the `unexpected_index_list` values are displayed as part of the validation output. Click the dropdown to view the SQL query that you can use to retrieve all unexpected values. 
+The following image shows the `unexpected_index_list` values are displayed as part of the validation output. Click **To retrieve all unexpected values** to view the SQL query that you can use to retrieve all unexpected values. 
 
 ![Screenshot of SQL output](../../images/failed_rows_data_docs_sql.png)
 
