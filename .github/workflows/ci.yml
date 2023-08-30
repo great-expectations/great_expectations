@@ -39,9 +39,6 @@ jobs:
       (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     steps:
       - run: echo "This CI step only runs on the main repo, where we have access to credentials."
-      - run: echo ${{github.event.pull_request.head.repo.full_name}}
-      - run: echo ${{github.repository}}
-      - run: echo ${{github.ref}}
   
   docs-changes:
     # check whether docs were changed
@@ -225,11 +222,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - run: echo "This CI step only runs on the main repo, where we have access to credentials."
-      - run: echo ${{github.event.pull_request.head.repo.full_name}}
-      - run: echo ${{github.repository}}
-      - run: echo ${{github.ref}}
-
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -475,6 +467,7 @@ jobs:
 
   build-n-publish:
     needs: [
+      ci-is-on-main-repo,
       doc-checks,
       static-analysis,
       docs-snippets,
@@ -521,6 +514,7 @@ jobs:
 
   notify_on_failure:
     needs: [
+      ci-is-on-main-repo,
       doc-checks,
       static-analysis,
       docs-snippets,
