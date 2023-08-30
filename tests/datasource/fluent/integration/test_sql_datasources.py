@@ -491,6 +491,8 @@ class TestTableIdentifiers:
     "column_name",
     [
         param("lower", id="str lower"),
+        param("lower", id="str 'lower'"),
+        param("lower", id='str "lower"'),
         param(
             quoted_name(
                 "lower",
