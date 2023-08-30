@@ -113,7 +113,6 @@ Checkpoint configurations follow a nested pattern, where more general keys provi
   {label: 'Nesting with defaults', value: 'tab1'},
   {label: 'Keys passed at runtime', value: 'tab2'},
   {label: 'Using template', value: 'tab3'},
-  {label: 'Using SimpleCheckpoint', value: 'tab4'}
 ]}>
 
 <TabItem value="tab0">
@@ -187,42 +186,7 @@ This configuration references the Checkpoint detailed in the previous example ("
 ```
 
 </TabItem>
-<TabItem value="tab4">
-This configuration specifies the SimpleCheckpoint class under the "class_name" key, allowing for a much slimmer configuration.
-
-**YAML, using SimpleCheckpoint**:
-
-```yaml name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_simple_checkpoint just the yaml"
-```
-
-**Equivalent YAML, using Checkpoint**:
-
-```yaml name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py equivalent_using_checkpoint just the yaml"
-```
-
-**Runtime**:
-
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_6"
-```
-
-**Results**:
-
-```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py assert_suite_2"
-```
-
-</TabItem>
 </Tabs>
-
-## SimpleCheckpoint class
-
-For many use cases, the SimpleCheckpoint class can be used to simplify the process of specifying a Checkpoint configuration. SimpleCheckpoint provides a basic set of actions - store Validation Result, store <TechnicalTag relative="../" tag="evaluation_parameter" text="Evaluation Parameters" />, update <TechnicalTag relative="../" tag="data_docs" text="Data Docs" />, and optionally, send a Slack notification - allowing you to omit an `action_list` from your configuration and at runtime.
-
-Configurations using the SimpleCheckpoint class can optionally specify four additional top-level keys that customize and extend the basic set of default actions:
-
-* `site_names`: a list of Data Docs site names to update as part of the update Data Docs action - defaults to "all"
-* `slack_webhook`: if provided, an action will be added that sends a Slack notification to the provided webhook
-* `notify_on`: used to define when a notification is fired, according to Validation Result outcome - `all`, `failure`, or `success`. Defaults to `all`.
-* `notify_with`: a list of Data Docs site names for which to include a URL in any notifications - defaults to `all`
 
 ## CheckpointResult
 

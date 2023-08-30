@@ -3604,7 +3604,9 @@ def empty_base_data_context_in_cloud_mode(
             cloud_mode=True,
             cloud_config=ge_cloud_config,
         )
-    assert context.list_datasources() == []
+    context._datasources = (
+        {}
+    )  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
     return context
 
 
@@ -3639,7 +3641,11 @@ def empty_data_context_in_cloud_mode(
         context = CloudDataContext(
             context_root_dir=project_path_name,
         )
-        return context
+
+    context._datasources = (
+        {}
+    )  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
+    return context
 
 
 @pytest.fixture
@@ -3652,14 +3658,18 @@ def empty_cloud_data_context(
     project_path.mkdir()
     project_path_name: str = str(project_path)
 
-    cloud_data_context: CloudDataContext = CloudDataContext(
+    context = CloudDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path_name,
         cloud_base_url=ge_cloud_config.base_url,
         cloud_access_token=ge_cloud_config.access_token,
         cloud_organization_id=ge_cloud_config.organization_id,
     )
-    return cloud_data_context
+
+    context._datasources = (
+        {}
+    )  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
+    return context
 
 
 @pytest.fixture

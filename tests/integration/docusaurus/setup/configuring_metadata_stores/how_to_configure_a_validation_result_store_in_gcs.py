@@ -46,7 +46,7 @@ checkpoint_name = "my_checkpoint"
 checkpoint_config = f"""
 name: {checkpoint_name}
 config_version: 1
-class_name: SimpleCheckpoint
+class_name: Checkpoint
 validations:
   - batch_request:
       datasource_name: my_datasource

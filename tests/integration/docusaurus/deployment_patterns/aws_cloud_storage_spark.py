@@ -275,9 +275,8 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 
 # build Checkpoint
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py create_checkpoint">
-checkpoint = gx.checkpoint.SimpleCheckpoint(
+checkpoint = context.add_or_update_checkpoint(
     name="my_checkpoint",
-    data_context=context,
     validations=[{"batch_request": request, "expectation_suite_name": "test_suite"}],
 )
 # </snippet>

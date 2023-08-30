@@ -271,9 +271,8 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py checkpoint">
-checkpoint = gx.checkpoint.SimpleCheckpoint(
+checkpoint = context.add_or_update_checkpoint(
     name="bigquery_checkpoint",
-    data_context=context,
     validations=[
         {"batch_request": request, "expectation_suite_name": "test_bigquery_suite"}
     ],
