@@ -1,2 +1,1 @@
 from .subdir_reader_batch_kwargs_generator import SubdirReaderBatchKwargsGenerator
-from .table_batch_kwargs_generator import TableBatchKwargsGenerator

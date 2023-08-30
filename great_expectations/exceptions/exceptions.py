@@ -285,7 +285,6 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "FixedLengthTupleGCSStoreBackend": "TupleGCSStoreBackend",
             "InMemoryEvaluationParameterStore": "EvaluationParameterStore",
             "SubdirReaderGenerator": "SubdirReaderBatchKwargsGenerator",
-            "TableGenerator": "TableBatchKwargsGenerator",
             "ExtractAndStoreEvaluationParamsAction": "StoreEvaluationParametersAction",
             "StoreAction": "StoreValidationResultAction",
             "PartitionDefinitionSubset": "IDDict",
