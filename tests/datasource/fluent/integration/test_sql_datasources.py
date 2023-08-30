@@ -157,9 +157,14 @@ def capture_engine_logs(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFi
     return caplog
 
 
+def silence_sqla_warnings(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("SQLALCHEMY_SILENCE_UBER_WARNING", "1")
+
+
 @pytest.fixture(scope="function")
 def table_factory(
     capture_engine_logs: pytest.LogCaptureFixture,
+    silence_sqla_warnings: None,  # TODO: remove this
 ) -> Generator[TableFactory, None, None]:
     """
     Given a SQLALchemy engine, table_name and schema,
