@@ -35,7 +35,6 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from great_expectations.data_context import AbstractDataContext as GXDataContext
-    from great_expectations.datasource import BaseDatasource, LegacyDatasource
     from great_expectations.datasource.fluent import PandasDatasource
     from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
     from great_expectations.validator.validator import Validator
@@ -338,9 +337,7 @@ class _SourceFactories:
     def pandas_default(self) -> PandasDatasource:
         from great_expectations.datasource.fluent import PandasDatasource
 
-        datasources: dict[
-            str, LegacyDatasource | BaseDatasource | Datasource | PandasDatasource
-        ] = self._data_context.datasources
+        datasources = self._data_context.datasources
 
         # if a legacy datasource with this name already exists, we try a different name
         existing_datasource = datasources.get(DEFAULT_PANDAS_DATASOURCE_NAME)
