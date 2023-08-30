@@ -50,7 +50,7 @@ my_asset = context.get_datasource("my_datasource").get_asset("my_asset")
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_request_options">
-batch_request = table_asset.build_batch_request(options = {"options_values})
+print(my_asset.batch_request_options)
 # </snippet>
 
 assert my_asset.batch_request_options == ("year", "month", "path")
