@@ -99,7 +99,7 @@ def cli_message_dict(
                 recursion_flag=True,
             )
         else:
-            message = f"{' ' * indent}<cyan>{key}:</cyan> {str(dict_[key])}"
+            message = f"{' ' * indent}<cyan>{key}:</cyan> {dict_[key]!s}"
             message_list.append(message)
     if not recursion_flag:
         if bullet_char and indent > 1:
