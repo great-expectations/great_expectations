@@ -262,7 +262,7 @@ class UserConfigurableProfiler:
         else:
             raise ValueError(
                 f"""The "profile_dataset_type" property must be one of "Dataset", "Batch", or "Validator" objects. The \
-type detected is "{str(type(self.profile_dataset))}", which is illegal.
+type detected is "{type(self.profile_dataset)!s}", which is illegal.
 """
             )
 

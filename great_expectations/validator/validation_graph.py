@@ -149,7 +149,7 @@ class ValidationGraph:
                 # TODO: <Alex>In the future, provide a more robust cycle detection mechanism.</Alex>
                 if metric_dependency.id == metric_configuration.id:
                     logger.warning(
-                        f"Metric {str(metric_configuration.id)} has created a circular dependency"
+                        f"Metric {metric_configuration.id!s} has created a circular dependency"
                     )
                     continue
                 self.add(
@@ -316,7 +316,7 @@ class ValidationGraph:
             except Exception as e:
                 if catch_exceptions:
                     logger.error(
-                        f"""Caught exception {str(e)} while trying to resolve a set of {len(ready_metrics)} metrics; aborting graph resolution."""
+                        f"""Caught exception {e!s} while trying to resolve a set of {len(ready_metrics)} metrics; aborting graph resolution."""
                     )
                     done = True
                 else:

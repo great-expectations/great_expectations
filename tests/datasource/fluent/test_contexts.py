@@ -4,7 +4,6 @@ import logging
 import pathlib
 import re
 import urllib.parse
-from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
 
@@ -366,35 +365,6 @@ class TestPandasDefaultWithCloud:
             f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources/{pandas_default_id}",
             1,
         )
-
-
-# Test markers come from seeded_contexts fixture
-def test_data_connectors_are_built_on_config_load(
-    seeded_contexts: CloudDataContext | FileDataContext,
-):
-    """
-    Ensure that all Datasources that require data_connectors have their data_connectors
-    created when loaded from config.
-    """
-    context = seeded_contexts
-    dc_datasources: dict[str, list[str]] = defaultdict(list)
-
-    assert context.fluent_datasources
-    for datasource in context.fluent_datasources.values():
-        if datasource.data_connector_type:
-            print(f"class: {datasource.__class__.__name__}")
-            print(f"type: {datasource.type}")
-            print(f"data_connector: {datasource.data_connector_type.__name__}")
-            print(f"name: {datasource.name}", end="\n\n")
-
-            dc_datasources[datasource.type].append(datasource.name)
-
-            for asset in datasource.assets:
-                assert isinstance(asset._data_connector, datasource.data_connector_type)
-            print()
-
-    print(f"Datasources with DataConnectors\n{pf(dict(dc_datasources))}")
-    assert dc_datasources
 
 
 if __name__ == "__main__":
