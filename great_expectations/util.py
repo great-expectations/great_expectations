@@ -1635,7 +1635,7 @@ def convert_ndarray_to_datetime_dtype_best_effort(
     datetime_detected: bool = False,
     parse_strings_as_datetimes: bool = False,
     fuzzy: bool = False,
-) -> Tuple[bool, bool, npt.NDArray | list]:
+) -> Tuple[bool, bool, npt.NDArray]:
     """
     Attempt to parse all elements of 1-D "np.ndarray" argument into "datetime.datetime" type objects.
 
