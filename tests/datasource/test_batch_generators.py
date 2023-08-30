@@ -3,7 +3,6 @@ import os
 import pytest
 
 from great_expectations.datasource.batch_kwargs_generator import (
-    GlobReaderBatchKwargsGenerator,
     SubdirReaderBatchKwargsGenerator,
 )
 
@@ -61,60 +60,6 @@ def test_file_kwargs_generator(
     ]
     for batch in expected_batches:
         assert batch["path"] in f3_batches
-
-
-@pytest.mark.big
-def test_glob_reader_generator(basic_pandas_datasource, tmp_path_factory):
-    """Provides an example of how glob generator works: we specify our own
-    names for data_assets, and an associated glob; the generator
-    will take care of providing batches consisting of one file per
-    batch corresponding to the glob."""
-
-    basedir = str(tmp_path_factory.mktemp("test_glob_reader_generator"))
-
-    with open(os.path.join(basedir, "f1.blarg"), "w") as outfile:  # noqa: PTH118
-        outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f2.csv"), "w") as outfile:  # noqa: PTH118
-        outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f3.blarg"), "w") as outfile:  # noqa: PTH118
-        outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f4.blarg"), "w") as outfile:  # noqa: PTH118
-        outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f5.blarg"), "w") as outfile:  # noqa: PTH118
-        outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f6.blarg"), "w") as outfile:  # noqa: PTH118
-        outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f7.xls"), "w") as outfile:  # noqa: PTH118
-        outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f8.parquet"), "w") as outfile:  # noqa: PTH118
-        outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f9.xls"), "w") as outfile:  # noqa: PTH118
-        outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f0.json"), "w") as outfile:  # noqa: PTH118
-        outfile.write("\n\n\n")
-
-    g2 = GlobReaderBatchKwargsGenerator(
-        base_directory=basedir,
-        datasource=basic_pandas_datasource,
-        asset_globs={"blargs": {"glob": "*.blarg"}, "fs": {"glob": "f*"}},
-    )
-
-    g2_assets = g2.get_available_data_asset_names()
-    # Use set in test to avoid order issues
-    assert set(g2_assets["names"]) == {("blargs", "path"), ("fs", "path")}
-
-    blargs_kwargs = [x["path"] for x in g2.get_iterator(data_asset_name="blargs")]
-    real_blargs = [
-        os.path.join(basedir, "f1.blarg"),  # noqa: PTH118
-        os.path.join(basedir, "f3.blarg"),  # noqa: PTH118
-        os.path.join(basedir, "f4.blarg"),  # noqa: PTH118
-        os.path.join(basedir, "f5.blarg"),  # noqa: PTH118
-        os.path.join(basedir, "f6.blarg"),  # noqa: PTH118
-    ]
-    for kwargs in real_blargs:
-        assert kwargs in blargs_kwargs
-
-    assert len(blargs_kwargs) == len(real_blargs)
 
 
 @pytest.mark.big
