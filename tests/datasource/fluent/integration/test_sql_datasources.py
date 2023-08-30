@@ -481,7 +481,6 @@ class TestTableIdentifiers:
         assert result.success is True
 
 
-@pytest.mark.postgresql
 @pytest.mark.parametrize(
     "column_name",
     [
@@ -500,6 +499,7 @@ class TestTableIdentifiers:
     ],
 )
 class TestColumnIndentifiers:
+    @pytest.mark.postgresql
     def test_simple_expectation(
         self,
         context: EphemeralDataContext,
@@ -549,6 +549,69 @@ class TestColumnIndentifiers:
                     "expectation_suite_name": suite.expectation_suite_name,
                     "batch_request": {
                         "datasource_name": postgres_ds.name,
+                        "data_asset_name": asset.name,
+                    },
+                }
+            ],
+        }
+        checkpoint = context.add_checkpoint(  # type: ignore[call-overload]
+            **checkpoint_config,
+        )
+        result = checkpoint.run()
+
+        print(f"result:\n{pf(result)}")
+        assert result.success is True
+
+    @pytest.mark.snowflake
+    def test_simple_expectation_sf(
+        self,
+        context: EphemeralDataContext,
+        snowflake_ds: SnowflakeDatasource,
+        table_factory: TableFactory,
+        column_name: str | quoted_name,
+    ):
+        table_factory(
+            engine=snowflake_ds.get_engine(),
+            table_names={TEST_TABLE_NAME},
+            data=[
+                {
+                    "id": 1,
+                    "name": "first",
+                    "UPPER": "my column is uppercase",
+                    "lower": "my column is lowercase",
+                },
+                {
+                    "id": 2,
+                    "name": "second",
+                    "UPPER": "my column is uppercase",
+                    "lower": "my column is lowercase",
+                },
+            ],
+        )
+
+        asset = snowflake_ds.add_table_asset("my_asset", table_name=TEST_TABLE_NAME)
+
+        suite = context.add_expectation_suite(
+            expectation_suite_name=f"{snowflake_ds.name}-{asset.name}"
+        )
+        suite.add_expectation(
+            expectation_configuration=ExpectationConfiguration(
+                expectation_type="expect_column_values_to_not_be_null",
+                kwargs={
+                    "column": column_name,
+                    "mostly": 1,
+                },
+            )
+        )
+        suite = context.add_or_update_expectation_suite(expectation_suite=suite)
+
+        checkpoint_config = {
+            "name": f"{snowflake_ds.name}-{asset.name}",
+            "validations": [
+                {
+                    "expectation_suite_name": suite.expectation_suite_name,
+                    "batch_request": {
+                        "datasource_name": snowflake_ds.name,
                         "data_asset_name": asset.name,
                     },
                 }
