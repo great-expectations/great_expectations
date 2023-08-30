@@ -161,7 +161,7 @@ def table_factory(
                 qualified_table_name = f"{schema}.{name}" if schema else name
                 conn.execute(
                     TextClause(
-                        f"CREATE TABLE IF NOT EXISTS {qualified_object_name_prefix}{qualified_table_name} (id INTEGER, name VARCHAR(255))"
+                        f"CREATE TABLE IF NOT EXISTS {qualified_table_name} (id INTEGER, name VARCHAR(255))"
                     )
                 )
                 if SQLA_VERSION >= Version("2.0"):
@@ -210,7 +210,7 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
 def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
     ds = context.sources.add_databricks_sql(
         "databricks_sql",
-        connection_string="databricks+connector://token:"
+        connection_string="databricks://token:"
         "${DATABRICKS_TOKEN}@${DATABRICKS_HOST}:443"
         "/"
         + PYTHON_VERSION
