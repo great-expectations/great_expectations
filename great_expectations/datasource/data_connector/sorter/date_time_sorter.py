@@ -21,7 +21,7 @@ class DateTimeSorter(Sorter):
         if datetime_format and not isinstance(datetime_format, str):
             raise gx_exceptions.SorterError(
                 f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
-        "{str(type(datetime_format))}").
+        "{type(datetime_format)!s}").
                     """
             )
 
