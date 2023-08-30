@@ -933,7 +933,7 @@ def build_in_memory_runtime_context(
         store_backend_defaults=InMemoryStoreBackendDefaults(),
     )
 
-    context = context_factory(project_config=data_context_config)
+    context = context_factory(project_config=data_context_config, mode="ephemeral")  # type: ignore[call-overload] # Need to add overload
 
     return context
 
