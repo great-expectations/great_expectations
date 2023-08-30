@@ -15,13 +15,13 @@ import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_cont
 <!-- ### Retrieve existing DataAsset from existing Datsource -->
 import GetExistingDataAssetFromExistingDatasource from '/docs/components/setup/datasource/data_asset/_get_existing_data_asset_from_existing_datasource.md'
 
-This guide demonstrates how you can request data from a Data Source that has been defined with the `context.sources.add_*` method.
+Learn how you can request data from a Data Source that has been defined with the `context.sources.add_*` method.
 
 ## Prerequisites
 
 <Prerequisites> 
 
-- An installation of GX
+- An installation of Great Expectations (GX)
 - A Data Source with a configured Data Asset
 
 </Prerequisites> 
@@ -36,7 +36,7 @@ This guide demonstrates how you can request data from a Data Source that has bee
 
 ## Build an `options` dictionary for your Batch Request (Optional)
 
-An `options` dictionary can be used to limit the Batches returned by a Batch Request.  Omitting the `options` dictionary will result in all available Batches being returned.
+An `options` dictionary can be used to limit the Batches returned by a Batch Request. Omitting the `options` dictionary will result in all available Batches being returned.
 
 The structure of the `options` dictionary will depend on the type of Data Asset being used.  The valid keys for the `options` dictionary can be found by checking the Data Asset's `batch_request_options` property.
 
@@ -49,7 +49,7 @@ You can create a dictionary of keys pulled from the `batch_request_options` tupl
 
 ## Build your Batch Request
 
-We will use the `build_batch_request(...)` method of our Data Asset to generate a Batch Request.
+Use the `build_batch_request(...)` method of your Data Asset to generate a Batch Request.
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_request"
 ```
