@@ -225,6 +225,11 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - run: echo "This CI step only runs on the main repo, where we have access to credentials."
+      - run: echo ${{github.event.pull_request.head.repo.full_name}}
+      - run: echo ${{github.repository}}
+      - run: echo ${{github.ref}}
+
       - name: Checkout
         uses: actions/checkout@v3
 
