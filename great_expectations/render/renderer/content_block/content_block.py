@@ -114,7 +114,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     exception_traceback = traceback.format_exc()
                     exception_message = (
                         data_docs_exception_message
-                        + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                        + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                     )
                     logger.error(exception_message)
 
@@ -242,7 +242,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 exception_traceback = traceback.format_exc()
                 exception_message = (
                     data_docs_exception_message
-                    + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                    + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                 )
                 logger.error(exception_message)
 

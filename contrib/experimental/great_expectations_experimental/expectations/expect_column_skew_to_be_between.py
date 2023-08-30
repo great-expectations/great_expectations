@@ -116,7 +116,7 @@ def _get_query_result(func, selectable, execution_engine: SqlAlchemyExecutionEng
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
-            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+            f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
         raise pe
