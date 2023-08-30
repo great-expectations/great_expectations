@@ -288,7 +288,6 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "SubdirReaderGenerator": "SubdirReaderBatchKwargsGenerator",
             "QueryGenerator": "QueryBatchKwargsGenerator",
             "TableGenerator": "TableBatchKwargsGenerator",
-            "S3Generator": "S3GlobReaderBatchKwargsGenerator",
             "ExtractAndStoreEvaluationParamsAction": "StoreEvaluationParametersAction",
             "StoreAction": "StoreValidationResultAction",
             "PartitionDefinitionSubset": "IDDict",
