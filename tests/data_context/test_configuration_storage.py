@@ -61,14 +61,6 @@ def data_context_parameterized_expectation_suite_with_usage_statistics_enabled(
             )
         ),
     )
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sparkdf_dataset.py"
-            )
-        ),
-    )
     return gx.get_context(context_root_dir=context_path)
 
 

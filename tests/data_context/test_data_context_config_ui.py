@@ -110,21 +110,6 @@ def default_pandas_datasource_config():
     }
 
 
-@pytest.fixture()
-def default_spark_datasource_config():
-    return {
-        "my_spark_datasource": {
-            "batch_kwargs_generators": {},
-            "class_name": "SparkDFDatasource",
-            "data_asset_type": {
-                "class_name": "SparkDFDataset",
-                "module_name": "great_expectations.dataset",
-            },
-            "module_name": "great_expectations.datasource",
-        }
-    }
-
-
 @pytest.mark.unit
 def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
     construct_data_context_config, default_pandas_datasource_config
@@ -1114,7 +1099,6 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
 def test_override_general_defaults(
     construct_data_context_config,
     default_pandas_datasource_config,
-    default_spark_datasource_config,
 ):
     """
     What does this test and why?
@@ -1127,15 +1111,6 @@ def test_override_general_defaults(
         plugins_directory="custom_plugins_directory",
         config_variables_file_path="custom_config_variables_file_path",
         datasources={
-            "my_spark_datasource": {
-                "data_asset_type": {
-                    "class_name": "SparkDFDataset",
-                    "module_name": "great_expectations.dataset",
-                },
-                "class_name": "SparkDFDatasource",
-                "module_name": "great_expectations.datasource",
-                "batch_kwargs_generators": {},
-            },
             "my_pandas_datasource": DatasourceConfig(
                 class_name="PandasDatasource",
                 batch_kwargs_generators={
@@ -1348,7 +1323,6 @@ def test_override_general_defaults(
         data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
         datasources={
             **default_pandas_datasource_config,
-            **default_spark_datasource_config,
         },
         config_version=999.0,
         expectations_store_name="custom_expectations_store_name",

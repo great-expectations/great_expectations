@@ -196,8 +196,7 @@ def build_continuous_partition_object(
         n_bins (int): Ignored if bins is auto.
         allow_relative_error: passed to get_column_quantiles, set to False for only precise
             values, True to allow approximate values on systems with only binary choice (e.g. Redshift), and to a
-            value between zero and one for systems that allow specification of relative error (e.g.
-            SparkDFDataset).
+            value between zero and one for systems that allow specification of relative error.
 
     Returns:
 

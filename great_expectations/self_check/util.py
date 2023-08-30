@@ -391,30 +391,6 @@ ATHENA_TYPES: Dict[str, Any] = (
     else {}
 )
 
-# # Others from great_expectations/dataset/sqlalchemy_dataset.py
-# try:
-#     import sqlalchemy_dremio.pyodbc
-#
-#     sqlalchemy.dialects.registry.register(
-#         "dremio", "sqlalchemy_dremio.pyodbc", "dialect"
-#     )
-# except ImportError:
-#     sqlalchemy_dremio = None
-#
-# try:
-#     import teradatasqlalchemy.dialect
-#     import teradatasqlalchemy.types as teradatatypes
-# except ImportError:
-#     teradatasqlalchemy = None
-
-try:
-    from great_expectations.dataset import SparkDFDataset
-except ImportError:
-    SparkDFDataset = None  # type: ignore[misc,assignment] # could be None
-    logger.debug(
-        "Unable to load spark dataset; install optional spark dependency for support."
-    )
-
 import tempfile
 
 # from tests.rule_based_profiler.conftest import ATOL, RTOL
@@ -454,7 +430,7 @@ def get_sqlite_connection_url(sqlite_db_path):
     return url
 
 
-def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
+def get_dataset(  # noqa: PLR0913
     dataset_type,
     data,
     schemas=None,
@@ -493,110 +469,6 @@ def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
             # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
             df = df.astype(pandas_schema)
         return PandasDataset(df, profiler=profiler, caching=caching)
-
-    elif dataset_type == "SparkDFDataset":
-        spark_types = {
-            "StringType": pyspark.types.StringType,
-            "IntegerType": pyspark.types.IntegerType,
-            "LongType": pyspark.types.LongType,
-            "DateType": pyspark.types.DateType,
-            "TimestampType": pyspark.types.TimestampType,
-            "FloatType": pyspark.types.FloatType,
-            "DoubleType": pyspark.types.DoubleType,
-            "BooleanType": pyspark.types.BooleanType,
-            "DataType": pyspark.types.DataType,
-            "NullType": pyspark.types.NullType,
-        }
-        spark = get_or_create_spark_application(
-            spark_config={
-                "spark.sql.catalogImplementation": "hive",
-                "spark.executor.memory": "450m",
-                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
-            }
-        )
-        # We need to allow null values in some column types that do not support them natively, so we skip
-        # use of df in this case.
-        data_reshaped = list(
-            zip(*(v for _, v in data.items()))
-        )  # create a list of rows
-        if schemas and "spark" in schemas:
-            schema = schemas["spark"]
-            # sometimes first method causes Spark to throw a TypeError
-            try:
-                spark_schema = pyspark.types.StructType(
-                    [
-                        pyspark.types.StructField(
-                            column, spark_types[schema[column]](), True
-                        )
-                        for column in schema
-                    ]
-                )
-                # We create these every time, which is painful for testing
-                # However nuance around null treatment as well as the desire
-                # for real datetime support in tests makes this necessary
-                data = copy.deepcopy(data)
-                if "ts" in data:
-                    print(data)
-                    print(schema)
-                for col in schema:
-                    type_ = schema[col]
-                    if type_ in ["IntegerType", "LongType"]:
-                        # Ints cannot be None...but None can be valid in Spark (as Null)
-                        vals = []
-                        for val in data[col]:
-                            if val is None:
-                                vals.append(val)
-                            else:
-                                vals.append(int(val))
-                        data[col] = vals
-                    elif type_ in ["FloatType", "DoubleType"]:
-                        vals = []
-                        for val in data[col]:
-                            if val is None:
-                                vals.append(val)
-                            else:
-                                vals.append(float(val))
-                        data[col] = vals
-                    elif type_ in ["DateType", "TimestampType"]:
-                        vals = []
-                        for val in data[col]:
-                            if val is None:
-                                vals.append(val)
-                            else:
-                                vals.append(parse(val))
-                        data[col] = vals
-                # Do this again, now that we have done type conversion using the provided schema
-                data_reshaped = list(
-                    zip(*(v for _, v in data.items()))
-                )  # create a list of rows
-                spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
-            except TypeError:
-                string_schema = pyspark.types.StructType(
-                    [
-                        pyspark.types.StructField(column, pyspark.types.StringType())
-                        for column in schema
-                    ]
-                )
-                spark_df = spark.createDataFrame(data_reshaped, string_schema)
-                for c in spark_df.columns:
-                    spark_df = spark_df.withColumn(
-                        c, spark_df[c].cast(spark_types[schema[c]]())
-                    )
-        elif len(data_reshaped) == 0:
-            # if we have an empty dataset and no schema, need to assign an arbitrary type
-            columns = list(data.keys())
-            spark_schema = pyspark.types.StructType(
-                [
-                    pyspark.types.StructField(column, pyspark.types.StringType())
-                    for column in columns
-                ]
-            )
-            spark_df = spark.createDataFrame(data_reshaped, spark_schema)
-        else:
-            # if no schema provided, uses Spark's schema inference
-            columns = list(data.keys())
-            spark_df = spark.createDataFrame(data_reshaped, columns)
-        return SparkDFDataset(spark_df, profiler=profiler, caching=caching)
     else:
         warnings.warn(f"Unknown dataset_type {dataset_type!s}")
 
@@ -1372,17 +1244,6 @@ def candidate_test_is_on_temporary_notimplemented_list_v2_api(
             )  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
         return expectation_type in expectations_not_implemented_v2_sql
 
-    if context == "SparkDFDataset":
-        return expectation_type in [
-            "expect_column_values_to_be_dateutil_parseable",
-            "expect_column_values_to_be_json_parseable",
-            "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
-            "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
-            "expect_compound_columns_to_be_unique",
-            "expect_column_pair_cramers_phi_value_to_be_less_than",
-            "expect_table_row_count_to_equal_other_table",
-            "expect_column_value_z_scores_to_be_less_than",
-        ]
     if context == "PandasDataset":
         return expectation_type in [
             "expect_table_row_count_to_equal_other_table",

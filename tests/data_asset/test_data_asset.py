@@ -47,10 +47,6 @@ def data_context_simple_expectation_suite_with_custom_pandas_dataset(tmp_path_fa
         os.path.join(fixture_dir, "custom_pandas_dataset.py"),
         str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
     )
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
-        str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
-    )
     return gx.get_context(context_root_dir=context_path)
 
 

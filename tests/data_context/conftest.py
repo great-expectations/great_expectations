@@ -139,14 +139,6 @@ def create_common_data_context_files(context_path, asset_config_path):
             )
         ),
     )
-    copy_relative_path(
-        "../test_fixtures/custom_sparkdf_dataset.py",
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sparkdf_dataset.py"
-            )
-        ),
-    )
 
 
 def copy_relative_path(relative_src, dest):

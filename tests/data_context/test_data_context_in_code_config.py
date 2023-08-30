@@ -57,17 +57,7 @@ def build_in_code_data_context_project_config(
         config_version=2,
         plugins_directory=None,
         config_variables_file_path=None,
-        datasources={
-            "my_spark_datasource": {
-                "data_asset_type": {
-                    "class_name": "SparkDFDataset",
-                    "module_name": "great_expectations.dataset",
-                },
-                "class_name": "SparkDFDatasource",
-                "module_name": "great_expectations.datasource",
-                "batch_kwargs_generators": {},
-            }
-        },
+        datasources={},
         stores=stores,
         expectations_store_name="expectations_S3_store",
         validations_store_name="validations_S3_store",

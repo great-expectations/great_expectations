@@ -46,7 +46,6 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 from great_expectations.data_context.types.base import CheckpointValidationConfig
 from great_expectations.dataset.pandas_dataset import PandasDataset
-from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
@@ -2032,12 +2031,6 @@ class BridgeValidator:
                     self.expectation_engine = PandasDataset
 
         if self.expectation_engine is None:
-            from great_expectations.compatibility import pyspark
-
-            if pyspark.DataFrame and isinstance(batch.data, pyspark.DataFrame):  # type: ignore [truthy-function]
-                self.expectation_engine = SparkDFDataset
-
-        if self.expectation_engine is None:
             raise ValueError(
                 "Unable to identify expectation_engine. It must be a subclass of DataAsset."
             )
@@ -2059,27 +2052,6 @@ class BridgeValidator:
 
             return self.expectation_engine(
                 self.batch.data,
-                expectation_suite=self._expectation_suite,
-                batch_kwargs=self.batch.batch_kwargs,
-                batch_parameters=self.batch.batch_parameters,
-                batch_markers=self.batch.batch_markers,
-                data_context=self.batch.data_context,
-                **self.init_kwargs,
-                **self.batch.batch_kwargs.get("dataset_options", {}),
-            )
-
-        elif issubclass(self.expectation_engine, SparkDFDataset):
-            from great_expectations.compatibility import pyspark
-
-            if not (
-                pyspark.DataFrame and isinstance(self.batch.data, pyspark.DataFrame)  # type: ignore [truthy-function]
-            ):
-                raise ValueError(
-                    "SparkDFDataset expectation_engine requires a spark DataFrame for its batch"
-                )
-
-            return self.expectation_engine(
-                spark_df=self.batch.data,
                 expectation_suite=self._expectation_suite,
                 batch_kwargs=self.batch.batch_kwargs,
                 batch_parameters=self.batch.batch_parameters,

@@ -303,7 +303,6 @@ def build_test_backends_list_v2_api(metafunc):
     test_backend_names: List[str] = build_test_backends_list_v3_api(metafunc)
     backend_name_class_name_map: Dict[str, str] = {
         "pandas": "PandasDataset",
-        "spark": "SparkDFDataset",
     }
     backend_name: str
     """
@@ -2764,14 +2763,6 @@ def data_context_parameterized_expectation_suite_no_checkpoint_store(tmp_path_fa
             )
         ),
     )
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sparkdf_dataset.py"
-            )
-        ),
-    )
     return get_context(context_root_dir=context_path)
 
 
@@ -2811,14 +2802,6 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
             )
         ),
     )
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sparkdf_dataset.py"
-            )
-        ),
-    )
     return get_context(context_root_dir=context_path)
 
 
@@ -2855,14 +2838,6 @@ def data_context_simple_expectation_suite(tmp_path_factory):
         str(
             os.path.join(  # noqa: PTH118
                 context_path, "plugins", "custom_pandas_dataset.py"
-            )
-        ),
-    )
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sparkdf_dataset.py"
             )
         ),
     )

@@ -102,8 +102,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             by the current backend implementation and are dynamically loaded. For example, valid types for \
             PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
             whereas valid types for a SqlAlchemyDataset include types named by the current driver such as 'INTEGER' \
-            in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for SparkDFDataset include \
-            'StringType', 'BooleanType' and other pyspark-defined type names. Note that the strings representing these \
+            in most SQL dialects and 'TEXT' in dialects such as postgresql. Note that the strings representing these \
             types are sometimes case-sensitive. For instance, with a Pandas backend `timestamp` will be unrecognized and
             fail the expectation, while `Timestamp` would pass with valid data.
 

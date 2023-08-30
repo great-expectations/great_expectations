@@ -329,8 +329,7 @@ class Dataset(MetaDataset):
             n_bins: the number of bins to produce
             allow_relative_error: passed to get_column_quantiles, set to False for only precise
                 values, True to allow approximate values on systems with only binary choice (e.g. Redshift), and to a
-                value between zero and one for systems that allow specification of relative error (e.g.
-                SparkDFDataset).
+                value between zero and one for systems that allow specification of relative error
 
         Returns:
             A list of bins
@@ -1148,8 +1147,7 @@ class Dataset(MetaDataset):
                 by the current backend implementation and are dynamically loaded. For example, valid types for
                 PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'),
                 whereas valid types for a SqlAlchemyDataset include types named by the current driver such as 'INTEGER'
-                in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for SparkDFDataset include
-                'StringType', 'BooleanType' and other pyspark-defined type names.
+                in most SQL dialects and 'TEXT' in dialects such as postgresql.
 
 
         Keyword Args:
@@ -1213,8 +1211,7 @@ class Dataset(MetaDataset):
                 defined by the current backend implementation and are dynamically loaded. For example, valid types for
                 PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'),
                 whereas valid types for a SqlAlchemyDataset include types named by the current driver such as 'INTEGER'
-                in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for SparkDFDataset include
-                'StringType', 'BooleanType' and other pyspark-defined type names.
+                in most SQL dialects and 'TEXT' in dialects such as postgresql.
 
         Keyword Args:
             mostly (None or a float between 0 and 1): \
@@ -4798,6 +4795,6 @@ class Dataset(MetaDataset):
     def attempt_allowing_relative_error(self) -> Union[bool, float]:
         """
         Subclasses can override this method if the respective data source (e.g., Redshift) supports "approximate" mode.
-        In certain cases (e.g., for SparkDFDataset), a fraction between 0 and 1 (i.e., not only a boolean) is allowed.
+        In certain cases, a fraction between 0 and 1 (i.e., not only a boolean) is allowed.
         """
         return False

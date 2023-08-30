@@ -74,8 +74,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             defined by the current backend implementation and are dynamically loaded. For example, valid types for \
             PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
             whereas valid types for a SqlAlchemyDataset include types named by the current driver such as 'INTEGER' \
-            in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for SparkDFDataset include \
-            'StringType', 'BooleanType' and other pyspark-defined type names.
+            in most SQL dialects and 'TEXT' in dialects such as postgresql.
 
     Keyword Args:
         mostly (None or a float between 0 and 1): \
