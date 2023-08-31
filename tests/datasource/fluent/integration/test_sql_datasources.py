@@ -293,6 +293,25 @@ def sqlite_ds(
     return ds
 
 
+@pytest.fixture(
+    params=[
+        param("trino", marks=[pytest.mark.trino]),
+        param("postgres", marks=[pytest.mark.postgresql]),
+        param(
+            "databricks_sql",
+            marks=[pytest.mark.databricks, pytest.mark.skip("ci not setup")],
+        ),
+        param("snowflake", marks=[pytest.mark.snowflake]),
+        param("sqlite", marks=[pytest.mark.sqlite]),
+    ]
+)
+def all_sql_datasources(
+    request: pytest.FixtureRequest,
+) -> Generator[SQLDatasource, None, None]:
+    datasource = request.getfixturevalue(f"{request.param}_ds")
+    yield datasource
+
+
 @pytest.mark.parametrize(
     "asset_name",
     [
@@ -487,49 +506,51 @@ class TestTableIdentifiers:
         assert result.success is True
 
 
-@pytest.mark.parametrize(
-    "column_name",
-    [
-        param("lower", id="str lower"),
-        param("lower", id="str 'lower'"),
-        param("lower", id='str "lower"'),
-        param(
-            quoted_name(
-                "lower",
-                quote=None,
-            ),
-            id="sqla.quoted_name lower",
-        ),
-        param(
-            quoted_name(
-                "UPPER",
-                quote=None,
-            ),
-            id="sqla.quoted_name UPPER",
-        ),
-        param(
-            quoted_name(
-                "UPPER",
-                quote=True,
-            ),
-            id="sqla.quoted_name UPPER qoute=True",
-        ),
-        param('"UPPER"', id='str "UPPER"'),
-        param("'UPPER'", id="str 'UPPER'"),
-        param("UPPER", id="str UPPER"),
-    ],
-)
+# @pytest.mark.parametrize("datasource_type", ["postgres", "sqlite"])
 class TestColumnIndentifiers:
-    @pytest.mark.postgresql
+    @pytest.mark.parametrize(
+        "column_name",
+        [
+            param("lower", id="str lower"),
+            param("lower", id="str 'lower'"),
+            param("lower", id='str "lower"'),
+            param(
+                quoted_name(
+                    "lower",
+                    quote=None,
+                ),
+                id="sqla.quoted_name lower",
+            ),
+            param(
+                quoted_name(
+                    "UPPER",
+                    quote=None,
+                ),
+                id="sqla.quoted_name UPPER",
+            ),
+            param(
+                quoted_name(
+                    "UPPER",
+                    quote=True,
+                ),
+                id="sqla.quoted_name UPPER qoute=True",
+            ),
+            param('"UPPER"', id='str "UPPER"'),
+            param("'UPPER'", id="str 'UPPER'"),
+            param("UPPER", id="str UPPER"),
+        ],
+    )
     def test_simple_expectation(
         self,
         context: EphemeralDataContext,
-        postgres_ds: PostgresDatasource,
+        all_sql_datasources: SQLDatasource,
         table_factory: TableFactory,
         column_name: str | quoted_name,
     ):
+        datasource = all_sql_datasources
+
         table_factory(
-            engine=postgres_ds.get_engine(),
+            engine=datasource.get_engine(),
             table_names={TEST_TABLE_NAME},
             data=[
                 {
@@ -547,10 +568,10 @@ class TestColumnIndentifiers:
             ],
         )
 
-        asset = postgres_ds.add_table_asset("my_asset", table_name=TEST_TABLE_NAME)
+        asset = datasource.add_table_asset("my_asset", table_name=TEST_TABLE_NAME)
 
         suite = context.add_expectation_suite(
-            expectation_suite_name=f"{postgres_ds.name}-{asset.name}"
+            expectation_suite_name=f"{datasource.name}-{asset.name}"
         )
         suite.add_expectation(
             expectation_configuration=ExpectationConfiguration(
@@ -564,75 +585,12 @@ class TestColumnIndentifiers:
         suite = context.add_or_update_expectation_suite(expectation_suite=suite)
 
         checkpoint_config = {
-            "name": f"{postgres_ds.name}-{asset.name}",
+            "name": f"{datasource.name}-{asset.name}",
             "validations": [
                 {
                     "expectation_suite_name": suite.expectation_suite_name,
                     "batch_request": {
-                        "datasource_name": postgres_ds.name,
-                        "data_asset_name": asset.name,
-                    },
-                }
-            ],
-        }
-        checkpoint = context.add_checkpoint(  # type: ignore[call-overload]
-            **checkpoint_config,
-        )
-        result = checkpoint.run()
-
-        print(f"result:\n{pf(result)}")
-        assert result.success is True
-
-    @pytest.mark.snowflake
-    def test_simple_expectation_sf(
-        self,
-        context: EphemeralDataContext,
-        snowflake_ds: SnowflakeDatasource,
-        table_factory: TableFactory,
-        column_name: str | quoted_name,
-    ):
-        table_factory(
-            engine=snowflake_ds.get_engine(),
-            table_names={TEST_TABLE_NAME},
-            data=[
-                {
-                    "id": 1,
-                    "name": "first",
-                    "UPPER": "my column is uppercase",
-                    "lower": "my column is lowercase",
-                },
-                {
-                    "id": 2,
-                    "name": "second",
-                    "UPPER": "my column is uppercase",
-                    "lower": "my column is lowercase",
-                },
-            ],
-        )
-
-        asset = snowflake_ds.add_table_asset("my_asset", table_name=TEST_TABLE_NAME)
-
-        suite = context.add_expectation_suite(
-            expectation_suite_name=f"{snowflake_ds.name}-{asset.name}"
-        )
-        suite.add_expectation(
-            expectation_configuration=ExpectationConfiguration(
-                expectation_type="expect_column_values_to_not_be_null",
-                kwargs={
-                    "column": column_name,
-                    "mostly": 1,
-                },
-            )
-        )
-        suite = context.add_or_update_expectation_suite(expectation_suite=suite)
-
-        checkpoint_config = {
-            "name": f"{snowflake_ds.name}-{asset.name}",
-            "validations": [
-                {
-                    "expectation_suite_name": suite.expectation_suite_name,
-                    "batch_request": {
-                        "datasource_name": snowflake_ds.name,
+                        "datasource_name": datasource.name,
                         "data_asset_name": asset.name,
                     },
                 }
