@@ -121,7 +121,7 @@ class ExpectColumnToExist(BatchExpectation):
             ), "column_index must be an integer, dict, or None"
             if isinstance(configuration.kwargs.get("column_index"), dict):
                 assert "$PARAMETER" in configuration.kwargs.get(
-                    "column_index"
+                    "column_index", tuple()
                 ), 'Evaluation Parameter dict for column_index kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
@@ -215,7 +215,7 @@ class ExpectColumnToExist(BatchExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        actual_columns = metrics.get("table.columns")
+        actual_columns = metrics["table.columns"]
         expected_column_name = self.get_success_kwargs().get("column")
         expected_column_index = self.get_success_kwargs().get("column_index")
 
