@@ -532,6 +532,7 @@ class TestColumnIndentifiers:
                 ),
                 id="sqla.quoted_name lower quote=False",
             ),
+            param("upper", id="str upper"),
             param("UPPER", id="str UPPER"),
             param("'UPPER'", id="str 'UPPER'"),
             param('"UPPER"', id='str "UPPER"'),
