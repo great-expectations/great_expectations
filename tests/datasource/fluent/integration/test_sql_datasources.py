@@ -512,21 +512,38 @@ class TestColumnIndentifiers:
         "column_name",
         [
             param("lower", id="str lower"),
-            param("lower", id="str 'lower'"),
-            param("lower", id='str "lower"'),
+            param("'lower'", id="str 'lower'"),
+            param('"lower"', id='str "lower"'),
             param(
                 quoted_name(
                     "lower",
                     quote=None,
                 ),
-                id="sqla.quoted_name lower",
+                id="sqla.quoted_name lower qoute=None",
             ),
+            param(
+                quoted_name(
+                    "lower",
+                    quote=True,
+                ),
+                id="sqla.quoted_name lower quote=True",
+            ),
+            param(
+                quoted_name(
+                    "lower",
+                    quote=False,
+                ),
+                id="sqla.quoted_name lower quote=False",
+            ),
+            param("UPPER", id="str UPPER"),
+            param("'UPPER'", id="str 'UPPER'"),
+            param('"UPPER"', id='str "UPPER"'),
             param(
                 quoted_name(
                     "UPPER",
                     quote=None,
                 ),
-                id="sqla.quoted_name UPPER",
+                id="sqla.quoted_name UPPER qoute=None",
             ),
             param(
                 quoted_name(
@@ -535,9 +552,13 @@ class TestColumnIndentifiers:
                 ),
                 id="sqla.quoted_name UPPER qoute=True",
             ),
-            param('"UPPER"', id='str "UPPER"'),
-            param("'UPPER'", id="str 'UPPER'"),
-            param("UPPER", id="str UPPER"),
+            param(
+                quoted_name(
+                    "UPPER",
+                    quote=False,
+                ),
+                id="sqla.quoted_name UPPER qoute=False",
+            ),
         ],
     )
     def test_simple_expectation(
@@ -601,7 +622,7 @@ class TestColumnIndentifiers:
         )
         result = checkpoint.run()
 
-        print(f"result:\n{pf(result)}")
+        # print(f"result:\n{pf(result)}")
         assert result.success is True
 
 
