@@ -178,7 +178,7 @@ class ExpectColumnToExist(BatchExpectation):
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs,  # type: ignore[union-attr] # FIXME: could be None
             ["column", "column_index"],
         )
 

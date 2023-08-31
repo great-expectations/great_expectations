@@ -162,7 +162,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs,  # type: ignore[union-attr] # FIXME: could be None
             ["column", "mostly", "row_condition", "condition_parser"],
         )
 
@@ -214,7 +214,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
-        result_dict = result.result
+        result_dict = result.result  # type: ignore[union-attr] # FIXME: could be None
 
         try:
             null_percent = result_dict["unexpected_percent"]
