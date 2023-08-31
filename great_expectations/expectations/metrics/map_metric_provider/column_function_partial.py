@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 
 def column_function_partial(  # noqa: C901, PLR0915
     engine: Type[ExecutionEngine],
-    partial_fn_type: Optional[str] = None,
+    partial_fn_type: Optional[MetricPartialFunctionTypes] = None,
     **kwargs,
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
@@ -70,7 +70,7 @@ def column_function_partial(  # noqa: C901, PLR0915
         def wrapper(metric_fn: Callable):
             @metric_partial(
                 engine=engine,
-                partial_fn_type=partial_fn_type,
+                partial_fn_type=partial_fn_type,  # type: ignore[arg-type] # could be None?
                 domain_type=domain_type,
                 **kwargs,
             )
@@ -132,7 +132,7 @@ def column_function_partial(  # noqa: C901, PLR0915
         def wrapper(metric_fn: Callable):
             @metric_partial(
                 engine=engine,
-                partial_fn_type=partial_fn_type,
+                partial_fn_type=partial_fn_type,  # type: ignore[arg-type] # could be None?
                 domain_type=domain_type,
                 **kwargs,
             )

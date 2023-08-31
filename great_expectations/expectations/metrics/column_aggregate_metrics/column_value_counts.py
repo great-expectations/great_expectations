@@ -1,4 +1,6 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
 import pandas as pd
 
@@ -33,7 +35,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         metric_value_kwargs: Dict[str, Optional[str]],
         **kwargs,
     ) -> pd.Series:
-        sort: str = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
+        sort: str = metric_value_kwargs.get("sort") or cls.default_kwarg_values["sort"]
         collate: Optional[str] = metric_value_kwargs.get(
             "collate", cls.default_kwarg_values["collate"]
         )
@@ -74,7 +76,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         metric_value_kwargs: Dict[str, Optional[str]],
         **kwargs,
     ) -> pd.Series:
-        sort: str = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
+        sort: str = metric_value_kwargs.get("sort") or cls.default_kwarg_values["sort"]
         collate: Optional[str] = metric_value_kwargs.get(
             "collate", cls.default_kwarg_values["collate"]
         )
@@ -91,8 +93,9 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         )
         column: str = accessor_domain_kwargs["column"]
 
+        query: sqlalchemy.Select
         if hasattr(sa.column(column), "is_not"):
-            query: sqlalchemy.Select = (
+            query = (
                 sa.select(
                     sa.column(column).label("value"),
                     sa.func.count(sa.column(column)).label("count"),
@@ -101,7 +104,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
                 .group_by(sa.column(column))
             )
         else:
-            query: sqlalchemy.Select = (
+            query = (
                 sa.select(
                     sa.column(column).label("value"),
                     sa.func.count(sa.column(column)).label("count"),
@@ -139,7 +142,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         metric_value_kwargs: Dict[str, Optional[str]],
         **kwargs,
     ) -> pd.Series:
-        sort: str = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
+        sort: str = metric_value_kwargs.get("sort") or cls.default_kwarg_values["sort"]
         collate: Optional[str] = metric_value_kwargs.get(
             "collate", cls.default_kwarg_values["collate"]
         )
@@ -168,8 +171,8 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         value_counts: List[pyspark.Row] = value_counts_df.collect()
 
         # Numpy does not always infer the correct DataTypes for Spark df, so we cannot use vectorized approach.
-        values: List[Any]
-        counts: List[int]
+        values: Iterable[Any]
+        counts: Iterable[int]
         if len(value_counts) > 0:
             values, counts = zip(*value_counts)
         else:
