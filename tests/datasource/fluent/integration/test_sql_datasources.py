@@ -298,10 +298,7 @@ def sqlite_ds(
     params=[
         param("trino", marks=[pytest.mark.trino]),
         param("postgres", marks=[pytest.mark.postgresql]),
-        param(
-            "databricks_sql",
-            marks=[pytest.mark.databricks, pytest.mark.skip("ci not setup")],
-        ),
+        param("databricks_sql", marks=[pytest.mark.databricks]),
         param("snowflake", marks=[pytest.mark.snowflake]),
         param("sqlite", marks=[pytest.mark.sqlite]),
     ]
