@@ -138,7 +138,7 @@ class ColumnPartition(ColumnAggregateMetricProvider):
 
 
 def _get_column_partition_using_metrics(
-    bins: int | Literal["uniform", "ntile", "quantile", "percentile", "auto"],
+    bins: Literal["uniform", "ntile", "quantile", "percentile", "auto"],
     n_bins: int,
     _metrics: dict,
 ) -> list | npt.NDArray:
