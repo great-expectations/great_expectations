@@ -1,12 +1,28 @@
 from __future__ import annotations
 
 import uuid
-from typing import Generic, List, Optional, Sequence, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    AbstractSet,
+    Any,
+    Dict,
+    Generic,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    TypeVar,
+    Union,
+)
 
 import pydantic
 from pydantic import BaseModel, Field
 
 from great_expectations.compatibility.typing_extensions import override
+
+if TYPE_CHECKING:
+    MappingIntStrAny = Mapping[Union[int, str], Any]
+    AbstractSetIntStr = AbstractSet[Union[int, str]]
 
 
 class MetricRepositoryBaseModel(BaseModel):
@@ -65,6 +81,52 @@ class Metric(MetricRepositoryBaseModel, Generic[_ValueType]):
         else:
             return string_rep
 
+    @property
+    def metric_type(self) -> str:
+        return self.__class__.__name__
+
+    @classmethod
+    def get_properties(cls):
+        return [
+            prop for prop in cls.__dict__ if isinstance(cls.__dict__[prop], property)
+        ]
+
+    @override
+    def dict(  # noqa: PLR0913
+        self,
+        *,
+        include: AbstractSetIntStr | MappingIntStrAny | None = None,
+        exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
+        by_alias: bool = False,
+        skip_defaults: Optional[bool] = None,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+    ) -> Dict[str, Any]:
+        """Override the dict function to include @property fields, in pydandic v2 we can use computed_field.
+        https://docs.pydantic.dev/latest/usage/computed_fields/
+        """
+        attribs = super().dict(
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            skip_defaults=skip_defaults,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+        )
+        props = self.get_properties()
+
+        # Include and exclude properties
+        if include:
+            props = [prop for prop in props if prop in include]
+        if exclude:
+            props = [prop for prop in props if prop not in exclude]
+
+        # Update the attribute dict with the properties
+        if props:
+            attribs.update({prop: getattr(self, prop) for prop in props})
+        return attribs
+
 
 # Metric domain types
 
@@ -98,6 +160,10 @@ class ColumnQuantileValuesMetric(ColumnMetric[List[float]]):
     @override
     def value_type(self) -> str:
         return "list[float]"
+
+    @property
+    def metric_type(self) -> str:
+        return self.__class__.__name__
 
 
 class MetricRun(MetricRepositoryBaseModel):

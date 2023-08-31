@@ -19,7 +19,7 @@ from tests.datasource.fluent.conftest import (
 
 
 class TestCloudDataStoreMetricRun:
-    def test_add_metric_run(
+    def test_add_metric_run_non_generic_metric_type(
         self,
         empty_cloud_context_fluent: CloudDataContext,  # noqa: F811  # used as a fixture
     ):
@@ -50,6 +50,8 @@ class TestCloudDataStoreMetricRun:
                         "data_asset_id": data_asset_id,
                         "metrics": [
                             {
+                                "metric_type": "ColumnQuantileValuesMetric",
+                                "value_type": "list[float]",
                                 "allow_relative_error": 0.001,
                                 "batch_id": "batch_id",
                                 "column": "column",
