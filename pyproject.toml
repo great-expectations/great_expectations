@@ -457,6 +457,8 @@ filterwarnings = [
     'ignore: the convert_dtype parameter is deprecated and will be removed in a future version:FutureWarning',
     # Example Actual Warning: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
     'ignore: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.',
+    # Example Actual Warning: FutureWarning: Returning a DataFrame from Series.apply when the supplied function returns a Series is deprecated and will be removed in a future version.
+    'ignore: Returning a DataFrame from Series.apply when the supplied function returns a Series is deprecated and will be removed in a future version.',
 
     # numpy
     # Example Actual Warning: RuntimeWarning: Mean of empty slice.
