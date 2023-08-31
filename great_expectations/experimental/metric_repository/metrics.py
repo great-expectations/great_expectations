@@ -1,13 +1,10 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, Generic, List, Optional, Sequence, TypeVar, Union
+from typing import Generic, List, Optional, Sequence, TypeVar, Union
 
 import pydantic
 from pydantic import BaseModel, Field
-
-if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.interfaces import Batch
 
 
 class MetricRepositoryBaseModel(BaseModel):
@@ -43,7 +40,7 @@ class Metric(MetricRepositoryBaseModel, Generic[_ValueType]):
         return instance
 
     id: uuid.UUID = Field(description="Metric id")
-    batch: Batch = Field(description="Batch")
+    batch_id: str = Field(description="Batch id")
     metric_name: str = Field(description="Metric name")
     value: _ValueType = Field(description="Metric value")
     exception: Optional[MetricException] = Field(
@@ -83,7 +80,7 @@ class ColumnMetric(Metric, Generic[_ValueType]):
 
 class ColumnQuantileValuesMetric(ColumnMetric[List[float]]):
     quantiles: List[float] = Field(description="Quantiles to compute")
-    allow_relative_error: Union[str, float] = Field(
+    allow_relative_error: Union[float, str] = Field(
         description="Relative error interpolation type (pandas) or limit (e.g. spark) depending on data source"
     )
 
@@ -92,5 +89,8 @@ class MetricRun(MetricRepositoryBaseModel):
     """Collection of Metric objects produced during the same execution run."""
 
     id: uuid.UUID = Field(description="Run id")
+    data_asset_id: Union[uuid.UUID, None] = Field(
+        description="Data asset id", default=None
+    )
     # created_at, created_by filled in by the backend.
     metrics: Sequence[Metric]
