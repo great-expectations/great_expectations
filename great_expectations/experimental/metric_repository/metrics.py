@@ -78,10 +78,10 @@ class ColumnMetric(Metric, Generic[_ValueType]):
 # example, ColumnMetric[float] or TableMetric[list[str]].
 
 # TODO: Add metrics here for all Column Descriptive Metrics
-#  QuantileValuesColumnMetric is an example of a metric that has parameters
+#  ColumnQuantileValuesMetric is an example of a metric that has parameters
 
 
-class QuantileValuesColumnMetric(ColumnMetric[List[float]]):
+class ColumnQuantileValuesMetric(ColumnMetric[List[float]]):
     quantiles: List[float] = Field(description="Quantiles to compute")
     allow_relative_error: Union[str, float] = Field(
         description="Relative error interpolation type (pandas) or limit (e.g. spark) depending on data source"
