@@ -9,7 +9,6 @@ from great_expectations.experimental.metric_repository.metric_retriever import (
 )
 from great_expectations.experimental.metric_repository.metrics import (
     Metric,
-    MetricException,
     TableMetric,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -63,7 +62,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                 batch=validator.active_batch,
                 metric_name=metric_name,
                 value=computed_metrics[metric_lookup_key],  # type: ignore[arg-type] # Pydantic verifies the value type
-                exception=MetricException(),  # TODO: Pass through
+                exception=None,  # TODO: Pass through a MetricException() if an exception is thrown
             )
         )
 
@@ -75,7 +74,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                 batch=validator.active_batch,
                 metric_name=metric_name,
                 value=computed_metrics[metric_lookup_key],  # type: ignore[arg-type] # Pydantic verifies the value type
-                exception=MetricException(),  # TODO: Pass through
+                exception=None,  # TODO: Pass through a MetricException() if an exception is thrown
             )
         )
         return metrics
