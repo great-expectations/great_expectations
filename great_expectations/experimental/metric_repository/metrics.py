@@ -78,7 +78,7 @@ class ColumnMetric(Metric, Generic[_ValueType]):
 # bring together a domain type, value type and any parameters (aka metric_value_kwargs)
 
 # TODO: Add metrics here for all Column Descriptive Metrics
-#  QuantileValuesColumnMetric is an example of a metric that has parameters
+#  ColumnQuantileValuesMetric is an example of a metric that has parameters
 
 
 class ColumnQuantileValuesMetric(ColumnMetric[List[float]]):
