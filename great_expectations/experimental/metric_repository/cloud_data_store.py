@@ -20,16 +20,6 @@ StorableTypes: TypeAlias = Union[MetricRun,]
 T = TypeVar("T", bound=StorableTypes)
 
 
-def map_to_url(value: StorableTypes) -> str:
-    if isinstance(value, MetricRun):
-        return "/metric-runs"
-
-
-def map_to_resource_type(value: StorableTypes) -> str:
-    if isinstance(value, MetricRun):
-        return "metric-run"
-
-
 class PayloadData(BaseModel):
     type: str
     attributes: Dict[str, Any]
@@ -53,22 +43,30 @@ class CloudDataStore(DataStore[StorableTypes]):
             access_token=context.ge_cloud_config.access_token
         )
 
-    def build_payload(self, value: StorableTypes) -> dict:
+    def _map_to_url(self, value: StorableTypes) -> str:
+        if isinstance(value, MetricRun):
+            return "/metric-runs"
+
+    def _map_to_resource_type(self, value: StorableTypes) -> str:
+        if isinstance(value, MetricRun):
+            return "metric-run"
+
+    def _build_payload(self, value: StorableTypes) -> dict:
         payload = Payload(
             data=PayloadData(
-                type=map_to_resource_type(value),
+                type=self._map_to_resource_type(value),
                 attributes=value.dict(),
             )
         )
         return payload.dict()
 
-    def build_url(self, value: StorableTypes) -> str:
+    def _build_url(self, value: StorableTypes) -> str:
         config = self._context.ge_cloud_config
-        return f"{config.base_url}/organizations/{config.organization_id}{map_to_url(value)}"
+        return f"{config.base_url}/organizations/{config.organization_id}{self._map_to_url(value)}"
 
     @override
     def add(self, value: T) -> T:
-        url = self.build_url(value)
-        payload = self.build_payload(value)
+        url = self._build_url(value)
+        payload = self._build_payload(value)
         self._session.post(url=url, data=payload)
         return value
