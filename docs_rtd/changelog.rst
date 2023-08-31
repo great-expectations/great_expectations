@@ -4,6 +4,40 @@
 Changelog
 #########
 
+0.17.13
+-----------------
+* [FEATURE] Scripts for Identify Failed Rows (ID/PK) Doc ([#8606](https://github.com/great-expectations/great_expectations/pull/8606))
+* [FEATURE] Ensure FDS asset gets updated with new cloud id on add ([#8610](https://github.com/great-expectations/great_expectations/pull/8610))
+* [BUGFIX] Fix bug in Query template values metric when it gets int values ([#8614](https://github.com/great-expectations/great_expectations/pull/8614))
+* [BUGFIX] Fix bad checkpoint runtime config merge ([#8626](https://github.com/great-expectations/great_expectations/pull/8626))
+* [BUGFIX] Ensure that `oss_id` updates conf file rather than overwriting ([#8634](https://github.com/great-expectations/great_expectations/pull/8634))
+* [BUGFIX] Ensure `cloud` tests don't run for public Forks ([#8627](https://github.com/great-expectations/great_expectations/pull/8627))
+* [BUGFIX] Query Compatibility With Trino ([#8600](https://github.com/great-expectations/great_expectations/pull/8600)) (thanks @HadasManor)
+* [BUGFIX] Always run docs-snippets action on release tag. ([#8651](https://github.com/great-expectations/great_expectations/pull/8651))
+* [DOCS] Remove Unused Topics and Update YAML Examples ([#8581](https://github.com/great-expectations/great_expectations/pull/8581))
+* [DOCS] Add Limit Validation Results in Data Docs Topic ([#8571](https://github.com/great-expectations/great_expectations/pull/8571))
+* [DOCS] Fix Quickstart typo ([#8625](https://github.com/great-expectations/great_expectations/pull/8625))
+* [DOCS] Quick Fix ([#8628](https://github.com/great-expectations/great_expectations/pull/8628))
+* [DOCS] Remove Instances of SimpleCheckpoint in snippets ([#8622](https://github.com/great-expectations/great_expectations/pull/8622))
+* [DOCS] Update Connect to SQL database source data ([#8635](https://github.com/great-expectations/great_expectations/pull/8635))
+* [DOCS] Remove Instances of SimpleCheckpoint ([#8565](https://github.com/great-expectations/great_expectations/pull/8565))
+* [DOCS] add `@public_api` to `PandasDatasource` methods and assets ([#8620](https://github.com/great-expectations/great_expectations/pull/8620))
+* [MAINTENANCE] Update Docusaurus to `2.4.1` and ensure Algolia search works ([#8549](https://github.com/great-expectations/great_expectations/pull/8549))
+* [MAINTENANCE] add py311 min versions tests ([#8621](https://github.com/great-expectations/great_expectations/pull/8621))
+* [MAINTENANCE] Move `get_context` out of utils ([#8623](https://github.com/great-expectations/great_expectations/pull/8623))
+* [MAINTENANCE] Remove reference to CLI in generated GX YAML ([#8624](https://github.com/great-expectations/great_expectations/pull/8624))
+* [MAINTENANCE] enable `RUF` rules ([#8561](https://github.com/great-expectations/great_expectations/pull/8561))
+* [MAINTENANCE] Fix Azure CI packaging step ([#8629](https://github.com/great-expectations/great_expectations/pull/8629))
+* [MAINTENANCE] Ignore `pandas` warning emitted through `altair` codepath ([#8641](https://github.com/great-expectations/great_expectations/pull/8641))
+* [MAINTENANCE] Delete `ExpectationExplorer` ([#8643](https://github.com/great-expectations/great_expectations/pull/8643))
+* [MAINTENANCE] Kill datasource cache in non-Cloud envs ([#8608](https://github.com/great-expectations/great_expectations/pull/8608))
+* [MAINTENANCE] databricks_sql integration tests ([#8563](https://github.com/great-expectations/great_expectations/pull/8563))
+* [MAINTENANCE] Fix or ignore warnings appearing in python 3.11 ([#8645](https://github.com/great-expectations/great_expectations/pull/8645))
+* [MAINTENANCE] Remove deprecated sqlalchemy-databricks connector ([#8644](https://github.com/great-expectations/great_expectations/pull/8644))
+* [MAINTENANCE] Add ruff rule to disallow use of `os.environ` outside of config files ([#8588](https://github.com/great-expectations/great_expectations/pull/8588))
+* [MAINTENANCE] metrics typing ([#8633](https://github.com/great-expectations/great_expectations/pull/8633))
+* [MAINTENANCE] Delete misc batch kwarg generators ([#8640](https://github.com/great-expectations/great_expectations/pull/8640))
+
 0.17.12
 -----------------
 * [FEATURE] Use the explicit column delimiters if passed in by user. ([#8459](https://github.com/great-expectations/great_expectations/pull/8459))
