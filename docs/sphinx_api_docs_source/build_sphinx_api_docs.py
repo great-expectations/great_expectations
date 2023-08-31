@@ -227,7 +227,7 @@ class SphinxInvokeDocsBuilder:
             )
             mdx_stripped_path = str(stem_path.with_suffix(""))
             if mdx_stripped_path.lower() == title_str.lower():
-                title_str = str(stem_path.with_suffix("_module"))
+                title_str = str(stem_path.with_suffix("")) + "_module"
 
         # Add class="sphinx-api-doc" to section tag to reference in css
         doc = soup.find("section")
