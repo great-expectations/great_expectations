@@ -223,7 +223,7 @@ To make Great Expectations look for Validation Results on the GCS store, set the
 
 ### Confirm that the Validation Results Store has been correctly configured
 
-[Run a Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results Store on GCS, and then visualize the results by [re-building Data Docs](/docs/terms/data_docs).
+[Run a Checkpoint](/docs/guides/validation//checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional) to store results in the new Validation Results Store on GCS, and then visualize the results by [re-building Data Docs](/docs/terms/data_docs).
 
 </TabItem>
 <TabItem value="filesystem">
@@ -288,7 +288,7 @@ stores:
 
 ### Confirm that the Validation Results Store has been correctly configured
 
-Run a [Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results Store in your new location, and then visualize the results by re-building [Data Docs](../../../terms/data_docs.md).
+Run a [Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional) to store results in the new Validation Results Store in your new location, and then visualize the results by re-building [Data Docs](../../../terms/data_docs.md).
 
 </TabItem>
 <TabItem value="postgresql">
@@ -399,7 +399,7 @@ store_backend:
 
 ### Confirm the Validation Results Store is configured correctly
 
-[Run a Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results store in PostgreSQL, and then visualize the results by [re-building Data Docs](../../../terms/data_docs.md).
+[Run a Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional) to store results in the new Validation Results store in PostgreSQL, and then visualize the results by [re-building Data Docs](../../../terms/data_docs.md).
 
 Great Expectations creates a new table in your database named ``ge_validations_store``, and populates the fields with information from the Validation Results.
 
