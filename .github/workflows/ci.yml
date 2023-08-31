@@ -239,7 +239,7 @@ jobs:
         run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5
 
   cloud-tests:
-    needs: ci-is-on-main-repo
+    needs: [ci-is-on-main-repo, unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
