@@ -1171,10 +1171,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     assert result.exit_code == 1
 
     stdout: str = result.stdout
-    assert (
-        "Unable to load datasource `not_real` -- no configuration found or invalid configuration."
-        in stdout
-    )
+    assert "Could not find a datasource named 'not_real'" in stdout
 
     assert mock_subprocess.call_count == 0
 

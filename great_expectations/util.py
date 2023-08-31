@@ -533,7 +533,7 @@ def read_json(  # noqa: PLR0913
     if accessor_func is not None:
         json_obj = json.load(open(filename, "rb"))
         json_obj = accessor_func(json_obj)
-        df = pd.read_json(json.dumps(json_obj), *args, **kwargs)
+        df = pd.read_json(io.StringIO(json.dumps(json_obj)), *args, **kwargs)
 
     else:
         df = pd.read_json(filename, *args, **kwargs)
@@ -933,7 +933,7 @@ def build_in_memory_runtime_context(
         store_backend_defaults=InMemoryStoreBackendDefaults(),
     )
 
-    context = context_factory(project_config=data_context_config)
+    context = context_factory(project_config=data_context_config, mode="ephemeral")  # type: ignore[call-overload] # Need to add overload
 
     return context
 

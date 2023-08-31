@@ -146,7 +146,9 @@ class DatasourceStore(Store):
 
         return datasource_config_dict
 
-    def retrieve_by_name(self, datasource_name: str) -> DatasourceConfig:
+    def retrieve_by_name(
+        self, datasource_name: str
+    ) -> DatasourceConfig | FluentDatasource:
         """Retrieves a DatasourceConfig persisted in the store by it's given name.
 
         Args:
@@ -168,6 +170,7 @@ class DatasourceStore(Store):
             )
 
         datasource_config: DatasourceConfig = copy.deepcopy(self.get(datasource_key))  # type: ignore[assignment]
+        datasource_config.name = datasource_name
         return datasource_config
 
     def delete(self, datasource_config: DatasourceConfig | FluentDatasource) -> None:
