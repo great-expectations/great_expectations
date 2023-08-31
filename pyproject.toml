@@ -467,6 +467,8 @@ filterwarnings = [
     # spark
     # Example Actual Warning: FutureWarning: Deprecated in 3.0.0. Use SparkSession.builder.getOrCreate() instead.
     # Found when running test_case_runner_v2_api[SparkDFDataset/column_pair_map_expectations/expect_column_pair_values_to_be_in_set:basic_positive_test_without_nulls]    'ignore: Deprecated in 3.0.0. Use SparkSession.builder.getOrCreate\(\) instead.:FutureWarning',
+    # Example Acutal Warning: FutureWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
+    'ignore: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance\(dtype, pd.DatetimeTZDtype\)` instead.',
     # pymysql
     # Example Actual Warning: pymysql.err.Warning: (1292, "Truncated incorrect DOUBLE value: 'cat'")
     # Found in tests/test_definitions/test_expectations_v2_api.py, if not found in v3 api remove this ignore directive with the v2 api code.
