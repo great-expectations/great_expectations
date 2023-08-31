@@ -1,6 +1,5 @@
 ---
 title: Changelog
-
 ---
 
 ### Deprecation policy
