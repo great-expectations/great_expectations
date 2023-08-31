@@ -214,7 +214,6 @@ jobs:
 
   unit-tests:
     strategy:
-      fail-fast: false
       matrix:
         os: [ubuntu-latest]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
@@ -289,6 +288,7 @@ jobs:
       SNOWFLAKE_ROLE: ${{secrets.SNOWFLAKE_ROLE}}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         markers:
           - athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
