@@ -533,7 +533,7 @@ def read_json(  # noqa: PLR0913
     if accessor_func is not None:
         json_obj = json.load(open(filename, "rb"))
         json_obj = accessor_func(json_obj)
-        df = pd.read_json(json.dumps(json_obj), *args, **kwargs)
+        df = pd.read_json(io.StringIO(json.dumps(json_obj)), *args, **kwargs)
 
     else:
         df = pd.read_json(filename, *args, **kwargs)
