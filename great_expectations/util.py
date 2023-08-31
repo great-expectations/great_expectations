@@ -240,7 +240,7 @@ def measure_execution_time(
                         )
                         call_args: OrderedDict = bound_args.arguments
                         print(
-                            f"""Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} \
+                            f"""Total execution time of function {func.__name__}({dict(call_args)!s}): {delta_t} \
 seconds."""
                         )
                     else:
@@ -933,7 +933,7 @@ def build_in_memory_runtime_context(
         store_backend_defaults=InMemoryStoreBackendDefaults(),
     )
 
-    context = context_factory(project_config=data_context_config)
+    context = context_factory(project_config=data_context_config, mode="ephemeral")  # type: ignore[call-overload] # Need to add overload
 
     return context
 
@@ -1200,7 +1200,7 @@ def filter_properties_dict(  # noqa: PLR0913, PLR0912
 
     if not isinstance(properties, dict):
         raise ValueError(
-            f'Source "properties" must be a dictionary (illegal type "{str(type(properties))}" detected).'
+            f'Source "properties" must be a dictionary (illegal type "{type(properties)!s}" detected).'
         )
 
     if not inplace:

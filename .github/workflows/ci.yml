@@ -17,10 +17,6 @@ on:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+'
 
-env:
-  # Run only on PRs from the main repo, on scheduled, or triggered runs.
-  RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-
 concurrency:
   # Only run one instance of this workflow in PRs, but allow multiple instances in develop.
   # https://stackoverflow.com/questions/74117321/if-condition-in-concurrency-in-gha
@@ -34,6 +30,15 @@ jobs:
     steps:
       - run: echo "CI jobs won't run because this is a draft pull request."
 
+  ci-is-on-main-repo:
+    runs-on: ubuntu-latest
+    # job only runs on main repo where we have access to credentials, or as part of the release
+    if: | 
+      github.event.pull_request.head.repo.full_name == github.repository ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
+    steps:
+      - run: echo "This CI step only runs on the main repo, where we have access to credentials."
+  
   docs-changes:
     # check whether docs were changed
     runs-on: ubuntu-latest
@@ -55,7 +60,7 @@ jobs:
             - 'tests/integration/fixtures/**'
             - 'tests/test_sets/**'
   doc-checks:
-    needs: docs-changes
+    needs: [docs-changes]
     # run on every PR that is not a draft that has docs changes, and on tagged push events (ie. releases)
     if: |
       (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
@@ -123,11 +128,9 @@ jobs:
 
   docs-snippets:
     name: docs-snippets
-    needs: docs-changes
-    # run on every PR that is not a draft that has docs changes, and on tagged push events (ie. releases)
-    if: |
-      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
-      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
+    needs: [docs-changes, ci-is-on-main-repo]
+    # run on non-draft PRs with docs changes
+    if: (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true')
     runs-on: ubuntu-latest
     env:
       # google
@@ -165,19 +168,15 @@ jobs:
           yarn install
           python ci/checks/validate_docs_snippets.py
       - name: Authenticate with GCP
-
-        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
 
       - name: Create JSON file for following step
-        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         run: |
           echo "$GE_TEST_GCP_CREDENTIALS" > gcp-credentials.json
 
       - name: Install and setup Google Cloud SDK
-        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         run: |
           # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
           curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
@@ -206,7 +205,6 @@ jobs:
         run: |
           invoke docs-snippet-tests 'docs-basic' --up-services --verbose
       - name: Run the tests needing cloud credentials
-        if: ${{env.RUN_ON_PR_AND_SCHEDULE_AND_TRIGGER}}
         run: |
           invoke docs-snippet-tests 'docs-creds-needed' --up-services --verbose
       # Spark tests are run as part of a separate task as we have not migrated all of Spark tests just yet (ie. Spark+Athena, Spark+S3 etc)
@@ -241,9 +239,8 @@ jobs:
         run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5
 
   cloud-tests:
-    # Simplifying conditional for purposes of 0.17.12 release due to issues with prior release not passing this condition
-    # if: github.event.pull_request.draft == false && (github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' )
-    if: github.event.pull_request.draft == false
+    needs: ci-is-on-main-repo
+    if: github.event.pull_request.draft == false 
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -472,6 +469,7 @@ jobs:
 
   build-n-publish:
     needs: [
+      ci-is-on-main-repo,
       doc-checks,
       static-analysis,
       docs-snippets,
@@ -518,6 +516,7 @@ jobs:
 
   notify_on_failure:
     needs: [
+      ci-is-on-main-repo,
       doc-checks,
       static-analysis,
       docs-snippets,

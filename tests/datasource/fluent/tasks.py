@@ -5,6 +5,7 @@ CD to this directory to run these invoke commands.
 from __future__ import annotations
 
 import pathlib
+from typing import Optional
 
 import invoke
 import pandas as pd
@@ -15,7 +16,7 @@ TEST_ROOT = pathlib.Path(__file__).parent.parent.parent.resolve(strict=True)
 @invoke.task(aliases=["gen-assets"])
 def generate_asset_files(
     ctx: invoke.Context,
-    source_csv_dir: str | pathlib.Path = None,
+    source_csv_dir: Optional[str | pathlib.Path] = None,
     limit: int = 12,
     year: str = 2019,
 ):
