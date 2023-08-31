@@ -353,7 +353,7 @@ class SphinxInvokeDocsBuilder:
         else:
             definition_path = definition.filepath
 
-        return definition_path.with_suffix(".py.mdx")
+        return definition_path.with_suffix(".mdx")
 
     def _get_base_url(self) -> str:
         """The base url for use in generating absolute links.
