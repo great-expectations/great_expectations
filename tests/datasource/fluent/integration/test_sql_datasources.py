@@ -503,76 +503,78 @@ class TestTableIdentifiers:
         assert result.success is True
 
 
-# @pytest.mark.parametrize("datasource_type", ["postgres", "sqlite"])
-class TestColumnIndentifiers:
+@pytest.mark.parametrize(
+    "column_name",
+    [
+        param("lower", id="str lower"),
+        param("LOWER", id="str LOWER"),
+        param("'lower'", id="str 'lower'"),
+        param('"lower"', id='str "lower"'),
+        param(
+            quoted_name(
+                "lower",
+                quote=None,
+            ),
+            id="quoted_name lower quote=None",
+        ),
+        param(
+            quoted_name(
+                "lower",
+                quote=True,
+            ),
+            id="quoted_name lower quote=True",
+        ),
+        param(
+            quoted_name(
+                "lower",
+                quote=False,
+            ),
+            id="quoted_name lower quote=False",
+        ),
+        param(
+            quoted_name(
+                "LOWER",
+                quote=None,
+            ),
+            id="quoted_name LOWER quote=None",
+        ),
+        param("upper", id="str upper"),
+        param("UPPER", id="str UPPER"),
+        param("'UPPER'", id="str 'UPPER'"),
+        param('"UPPER"', id='str "UPPER"'),
+        param(
+            quoted_name(
+                "UPPER",
+                quote=None,
+            ),
+            id="quoted_name UPPER quote=None",
+        ),
+        param(
+            quoted_name(
+                "UPPER",
+                quote=True,
+            ),
+            id="quoted_name UPPER quote=True",
+        ),
+        param(
+            quoted_name(
+                "UPPER",
+                quote=False,
+            ),
+            id="quoted_name UPPER quote=False",
+        ),
+        param(
+            quoted_name(
+                "upper",
+                quote=None,
+            ),
+            id="quoted_name upper quote=None",
+        ),
+    ],
+)
+class TestColumnIdentifiers:
     @pytest.mark.parametrize(
-        "column_name",
-        [
-            param("lower", id="str lower"),
-            param("LOWER", id="str LOWER"),
-            param("'lower'", id="str 'lower'"),
-            param('"lower"', id='str "lower"'),
-            param(
-                quoted_name(
-                    "lower",
-                    quote=None,
-                ),
-                id="sqla.quoted_name lower qoute=None",
-            ),
-            param(
-                quoted_name(
-                    "lower",
-                    quote=True,
-                ),
-                id="sqla.quoted_name lower quote=True",
-            ),
-            param(
-                quoted_name(
-                    "lower",
-                    quote=False,
-                ),
-                id="sqla.quoted_name lower quote=False",
-            ),
-            param(
-                quoted_name(
-                    "LOWER",
-                    quote=None,
-                ),
-                id="sqla.quoted_name LOWER qoute=None",
-            ),
-            param("upper", id="str upper"),
-            param("UPPER", id="str UPPER"),
-            param("'UPPER'", id="str 'UPPER'"),
-            param('"UPPER"', id='str "UPPER"'),
-            param(
-                quoted_name(
-                    "UPPER",
-                    quote=None,
-                ),
-                id="sqla.quoted_name UPPER qoute=None",
-            ),
-            param(
-                quoted_name(
-                    "UPPER",
-                    quote=True,
-                ),
-                id="sqla.quoted_name UPPER qoute=True",
-            ),
-            param(
-                quoted_name(
-                    "UPPER",
-                    quote=False,
-                ),
-                id="sqla.quoted_name UPPER qoute=False",
-            ),
-            param(
-                quoted_name(
-                    "upper",
-                    quote=None,
-                ),
-                id="sqla.quoted_name upper qoute=None",
-            ),
-        ],
+        "expectation_type", ["expect_column_values_to_not_be_null"]
     )
     def test_column_expectation(
         self,
@@ -580,6 +582,7 @@ class TestColumnIndentifiers:
         all_sql_datasources: SQLDatasource,
         table_factory: TableFactory,
         column_name: str | quoted_name,
+        expectation_type: str,
     ):
         datasource = all_sql_datasources
 
@@ -615,7 +618,7 @@ class TestColumnIndentifiers:
         )
         suite.add_expectation(
             expectation_configuration=ExpectationConfiguration(
-                expectation_type="expect_column_values_to_not_be_null",
+                expectation_type=expectation_type,
                 kwargs={
                     "column": column_name,
                     "mostly": 1,
