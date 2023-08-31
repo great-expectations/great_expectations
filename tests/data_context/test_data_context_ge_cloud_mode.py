@@ -3,13 +3,13 @@ from unittest import mock
 import pytest
 import responses
 
+from great_expectations.data_context import get_context
 from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
 from great_expectations.exceptions import GXCloudError
 from great_expectations.exceptions.exceptions import GXCloudConfigurationError
-from great_expectations.util import get_context
 
 
 @pytest.mark.cloud

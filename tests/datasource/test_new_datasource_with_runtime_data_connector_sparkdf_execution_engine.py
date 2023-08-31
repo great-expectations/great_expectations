@@ -75,6 +75,7 @@ def datasource_with_runtime_data_connector_and_sparkdf_execution_engine(
 # Tests with SparkDFExecutionEngine : batch_data
 
 
+@pytest.mark.spark
 def test_sparkdf_execution_engine_self_check(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):

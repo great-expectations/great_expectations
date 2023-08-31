@@ -38,6 +38,7 @@ from pydantic import (
 )
 from pydantic import dataclasses as pydantic_dc
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.id_dict import BatchSpec
@@ -51,7 +52,7 @@ logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     import pandas as pd
-    from typing_extensions import TypeAlias, TypeGuard
+    from typing_extensions import Self, TypeAlias, TypeGuard
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
@@ -267,7 +268,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     ) -> List[Sorter]:
         return Datasource.parse_order_by_sorters(order_by=order_by)
 
-    def add_sorters(self: _DataAssetT, sorters: SortersDefinition) -> _DataAssetT:
+    def add_sorters(self: Self, sorters: SortersDefinition) -> Self:
         """Associates a sorter to this DataAsset
 
         The passed in sorters will replace any previously associated sorters.
@@ -429,7 +430,7 @@ class Datasource(
         cls._update_asset_forward_refs(asset_type)
 
         asset_of_intended_type = asset_type(**kwargs)
-        logger.debug(f"{asset_type_name} - {repr(asset_of_intended_type)}")
+        logger.debug(f"{asset_type_name} - {asset_of_intended_type!r}")
         return asset_of_intended_type
 
     def _execution_engine_type(self) -> Type[_ExecutionEngineT]:
@@ -547,16 +548,24 @@ class Datasource(
 
         self.assets.append(asset)
 
-        self._save_context_project_config()
+        # if asset was added to a cloud FDS, _save_context_project_config will return FDS fetched from cloud,
+        # which will contain the new asset populated with an id
+        cloud_fds = self._save_context_project_config()
+        if cloud_fds:
+            # update asset with new id
+            asset_with_id = cloud_fds.get_asset(asset_name=asset.name)
+            asset.id = asset_with_id.id
+
         return asset
 
-    def _save_context_project_config(self):
+    def _save_context_project_config(self) -> Union[Datasource, None]:
         """Check if a DataContext is available and save the project config."""
         if self._data_context:
             try:
-                self._data_context._save_project_config(self)
+                return self._data_context._save_project_config(self)
             except TypeError as type_err:
                 warnings.warn(str(type_err), GxSerializationWarning)
+        return None
 
     def _rebuild_asset_data_connectors(self) -> None:
         """If Datasource required a data_connector we need to build the data_connector for each asset"""
@@ -673,6 +682,7 @@ class HeadData:
 
     data: pd.DataFrame
 
+    @override
     def __repr__(self) -> str:
         return self.data.__repr__()
 

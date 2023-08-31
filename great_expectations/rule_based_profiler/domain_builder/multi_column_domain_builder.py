@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
@@ -61,9 +62,11 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
         )
 
     @property
+    @override
     def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.MULTICOLUMN
 
+    @override
     def _get_domains(
         self,
         rule_name: str,

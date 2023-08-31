@@ -67,8 +67,10 @@ def execute_shell_command(command: str) -> int:
     """
     cwd: str = os.getcwd()  # noqa: PTH109
 
-    path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
-    env: dict = dict(os.environ, PATH=path_env_var)
+    path_env_var: str = os.pathsep.join(
+        [os.environ.get("PATH", os.defpath), cwd]  # noqa: TID251
+    )
+    env: dict = dict(os.environ, PATH=path_env_var)  # noqa: TID251
 
     status_code: int = 0
     try:
@@ -97,7 +99,7 @@ def execute_shell_command(command: str) -> int:
         exception_message: str = "A Sub-Process call Exception occurred.\n"
         exception_traceback: str = traceback.format_exc()
         exception_message += (
-            f'{type(cpe).__name__}: "{str(cpe)}".  Traceback: "{exception_traceback}".'
+            f'{type(cpe).__name__}: "{cpe!s}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
 
@@ -144,7 +146,7 @@ def get_expectations_info_dict(
 
     if include_core:
         files_found.extend(
-            glob(
+            glob(  # noqa: PTH207
                 os.path.join(  # noqa: PTH118
                     repo_path,
                     "great_expectations",
@@ -157,7 +159,7 @@ def get_expectations_info_dict(
         )
     if include_contrib:
         files_found.extend(
-            glob(
+            glob(  # noqa: PTH207
                 os.path.join(repo_path, "contrib", "**", "expect_*.py"),  # noqa: PTH118
                 recursive=True,
             )
@@ -206,10 +208,8 @@ def get_expectations_info_dict(
                     f"..{os.path.sep}..", grandparent_dir
                 )
 
-        updated_at_cmd = f'git log -1 --format="%ai %ar" -- {repr(file_path)}'
-        created_at_cmd = (
-            f'git log --diff-filter=A --format="%ai %ar" -- {repr(file_path)}'
-        )
+        updated_at_cmd = f'git log -1 --format="%ai %ar" -- {file_path!r}'
+        created_at_cmd = f'git log --diff-filter=A --format="%ai %ar" -- {file_path!r}'
         result[expectation_name] = {
             "updated_at": check_output(updated_at_cmd, shell=True)
             .decode("utf-8")
@@ -328,7 +328,7 @@ def combine_backend_results(
     expected_full_backend_files = [
         f"{backend}_full.json" for backend in ALL_GALLERY_BACKENDS
     ]
-    found_full_backend_files = glob("*_full.json")
+    found_full_backend_files = glob("*_full.json")  # noqa: PTH207
 
     if sorted(found_full_backend_files) == sorted(expected_full_backend_files):
         logger.info(
@@ -434,7 +434,7 @@ def get_contrib_requirements(filepath: str) -> Dict:
                 if "library_metadata" in target_ids:
                     library_metadata = ast.literal_eval(node.value)
                     requirements = library_metadata.get("requirements", [])
-                    if type(requirements) == str:
+                    if type(requirements) == str:  # noqa: E721
                         requirements = [requirements]
                     requirements_info[current_class] = requirements
                     requirements_info["requirements"] += requirements

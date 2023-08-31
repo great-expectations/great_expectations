@@ -18,7 +18,7 @@ def is_valid_country(country: str):
     list_of_country_names = [item["name"] for item in list_of_countries]
     if len(country) > 252:
         return False
-    elif type(country) != str:
+    elif type(country) != str:  # noqa: E721
         return False
     elif country in list_of_country_names:
         return True

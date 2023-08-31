@@ -5,10 +5,10 @@ import pytest
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context import get_context
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import DataContextError
 from great_expectations.self_check.util import expectationSuiteSchema
-from great_expectations.util import get_context
 
 
 @pytest.fixture()
@@ -43,7 +43,7 @@ def validation_operators_data_context(
     )
     data_context.add_expectation_suite("f1.foo")
 
-    df = data_context.get_batch(
+    df = data_context._get_batch_v2(
         batch_kwargs=data_context.build_batch_kwargs(
             "my_datasource", "subdir_reader", "f1"
         ),
@@ -163,7 +163,7 @@ def test_action_list_operator(validation_operators_data_context):
         "my_datasource", "subdir_reader", "f1"
     )
 
-    batch = data_context.get_batch(
+    batch = data_context._get_batch_v2(
         expectation_suite_name="f1.failure", batch_kwargs=validator_batch_kwargs
     )
 
@@ -267,7 +267,7 @@ def test_warning_and_failure_validation_operator(validation_operators_data_conte
         "my_datasource", "subdir_reader", "f1"
     )
 
-    batch = data_context.get_batch(
+    batch = data_context._get_batch_v2(
         expectation_suite_name="f1.warning", batch_kwargs=validator_batch_kwargs
     )
 

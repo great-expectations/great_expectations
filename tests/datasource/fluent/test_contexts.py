@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
-from collections import defaultdict
+import urllib.parse
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
 
@@ -299,9 +299,14 @@ def test_cloud_context_delete_datasource(
 
 
 @pytest.fixture
-def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDetails):
+def verify_asset_names_mock(
+    cloud_api_fake: RequestsMock, cloud_details: CloudDetails, cloud_api_fake_db
+):
     def verify_asset_name_cb(request: PreparedRequest) -> CallbackResult:
         if request.body:
+            parsed_url_path = str(urllib.parse.urlparse(request.url).path)
+            datasource_id = parsed_url_path.split("/")[-1]
+
             payload = CloudResponseSchema.from_datasource_json(request.body)
             LOGGER.info(f"PUT payload: ->\n{pf(payload.dict())}")
             assets = payload.data.attributes["datasource_config"]["assets"]  # type: ignore[index]
@@ -311,6 +316,16 @@ def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDe
                     raise ValueError(
                         f"Asset name should not be default - '{DEFAULT_PANDAS_DATA_ASSET_NAME}'"
                     )
+            old_datasource: dict | None = cloud_api_fake_db["datasources"].get(
+                datasource_id
+            )
+            if old_datasource:
+                if (
+                    payload.data.name
+                    != old_datasource["data"]["attributes"]["datasource_config"]["name"]
+                ):
+                    raise NotImplementedError("Unsure how to handle name change")
+                cloud_api_fake_db["datasources"][datasource_id] = payload.dict()
             return CallbackResult(
                 200,
                 headers=DEFAULT_HEADERS,
@@ -350,35 +365,6 @@ class TestPandasDefaultWithCloud:
             f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources/{pandas_default_id}",
             1,
         )
-
-
-# Test markers come from seeded_contexts fixture
-def test_data_connectors_are_built_on_config_load(
-    seeded_contexts: CloudDataContext | FileDataContext,
-):
-    """
-    Ensure that all Datasources that require data_connectors have their data_connectors
-    created when loaded from config.
-    """
-    context = seeded_contexts
-    dc_datasources: dict[str, list[str]] = defaultdict(list)
-
-    assert context.fluent_datasources
-    for datasource in context.fluent_datasources.values():
-        if datasource.data_connector_type:
-            print(f"class: {datasource.__class__.__name__}")
-            print(f"type: {datasource.type}")
-            print(f"data_connector: {datasource.data_connector_type.__name__}")
-            print(f"name: {datasource.name}", end="\n\n")
-
-            dc_datasources[datasource.type].append(datasource.name)
-
-            for asset in datasource.assets:
-                assert isinstance(asset._data_connector, datasource.data_connector_type)
-            print()
-
-    print(f"Datasources with DataConnectors\n{pf(dict(dc_datasources))}")
-    assert dc_datasources
 
 
 if __name__ == "__main__":

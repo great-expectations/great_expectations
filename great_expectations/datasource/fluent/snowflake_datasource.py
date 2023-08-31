@@ -7,6 +7,7 @@ from pydantic import AnyUrl, errors
 
 from great_expectations.compatibility.snowflake import URL
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import (
@@ -44,6 +45,7 @@ class SnowflakeDsn(AnyUrl):
     }
 
     @classmethod
+    @override
     def validate_parts(cls, parts: Parts, validate_port: bool = True) -> Parts:
         """
         Overridden to validate additional fields outside of scheme (which is performed by AnyUrl).
@@ -120,6 +122,7 @@ class SnowflakeDatasource(SQLDatasource):
         # dump as json dict to force serialization of things like AnyUrl
         return self._json_dict(exclude=excluded_fields, exclude_none=True)
 
+    @override
     def get_engine(self) -> sqlalchemy.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
@@ -142,7 +145,7 @@ class SnowflakeDatasource(SQLDatasource):
                 raise SQLDatasourceError(
                     "Unable to create a SQLAlchemy engine from "
                     f"connection_string: {self.connection_string} due to the "
-                    f"following exception: {str(e)}"
+                    f"following exception: {e!s}"
                 ) from e
             # Since a connection string isn't strictly required for Snowflake, we conditionally cache
             if self.connection_string:

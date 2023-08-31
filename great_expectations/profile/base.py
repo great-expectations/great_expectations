@@ -6,6 +6,7 @@ import time
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.core.run_identifier import RunIdentifier
@@ -184,6 +185,7 @@ class DataAssetProfiler:
 
 class DatasetProfiler(DataAssetProfiler):
     @classmethod
+    @override
     def validate(cls, dataset) -> bool:
         return isinstance(dataset, (Dataset, Validator))
 
@@ -251,7 +253,7 @@ class DatasetProfiler(DataAssetProfiler):
             expectation_suite, run_id=run_id, result_format="SUMMARY"
         )
         expectation_suite.add_citation(
-            comment=f"{str(cls.__name__)} added a citation based on the current batch.",
+            comment=f"{cls.__name__!s} added a citation based on the current batch.",
             batch_kwargs=data_asset.batch_kwargs,
             batch_markers=data_asset.batch_markers,
             batch_parameters=data_asset.batch_parameters,

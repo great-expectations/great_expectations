@@ -32,6 +32,7 @@ from pydantic import (
 from pydantic.generics import GenericModel
 from typing_extensions import TypeAlias, TypedDict
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
     ExpectationConfiguration,  # noqa: TCH001
     ExpectationValidationResult,  # noqa: TCH001
@@ -71,6 +72,7 @@ class _RendererValueBase(BaseModel):
     def __len__(self) -> int:
         return len(self.__fields__)
 
+    @override
     def dict(  # noqa: PLR0913
         self,
         include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
@@ -214,7 +216,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                     str(value)
                 except Exception as e:
                     raise RendererConfigurationError(
-                        f"Value was unable to be represented as a string: {str(e)}"
+                        f"Value was unable to be represented as a string: {e!s}"
                     )
             else:
                 renderer_configuration_error = RendererConfigurationError(
@@ -238,7 +240,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
             return values
 
-        def __eq__(self, other: Any) -> bool:
+        @override
+        def __eq__(self, other: object) -> bool:
             if isinstance(other, BaseModel):
                 return self.dict() == other.dict()
             elif isinstance(other, dict):
@@ -337,7 +340,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         )
         renderer_params_args = {}
         for idx, condition in enumerate(row_conditions_list):
-            name = f"row_condition__{str(idx)}"
+            name = f"row_condition__{idx!s}"
             value = condition.replace(" NOT ", " not ")
             renderer_params_args[name] = RendererConfiguration._RendererParamArgs(
                 schema=RendererSchema(type=RendererValueType.STRING), value=value
@@ -474,7 +477,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         )
         for idx, condition in enumerate(row_conditions_list):
             row_condition_str = row_condition_str.replace(
-                condition, f"$row_condition__{str(idx)}"
+                condition, f"$row_condition__{idx!s}"
             )
         row_condition_str = row_condition_str.lower()
         return f"If {row_condition_str}, then "

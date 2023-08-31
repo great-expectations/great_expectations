@@ -1,7 +1,10 @@
 # PYTHON 2 - py2 - update to ABC direct use rather than __metaclass__ once we drop py2 support
+from __future__ import annotations
+
 import functools
 import logging
 import os
+import pathlib
 import random
 import re
 import shutil
@@ -9,6 +12,7 @@ from abc import ABCMeta
 from typing import Any, List, Tuple
 
 from great_expectations.compatibility import aws
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError
 from great_expectations.util import filter_properties_dict
@@ -74,6 +78,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             self.verify_that_key_to_filepath_operation_is_reversible()
             self._fixed_length_key = True
 
+    @override
     def _validate_key(self, key) -> None:
         super()._validate_key(key)
 
@@ -88,6 +93,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                         )
                     )
 
+    @override
     def _validate_value(self, value) -> None:
         if not isinstance(value, str) and not isinstance(value, bytes):
             raise TypeError(
@@ -192,13 +198,12 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                 tuple_index = int(
                     re.search(r"\d+", indexed_string_substitutions[i]).group(0)
                 )
-                key_element = matches.group(f"tuple_index_{str(i)}")
+                key_element = matches.group(f"tuple_index_{i!s}")
                 new_key[tuple_index] = key_element
 
             new_key = tuple(new_key)
         else:
-            filepath = os.path.normpath(filepath)
-            new_key = tuple(filepath.split(os.sep))
+            new_key = pathlib.Path(filepath).parts
         return new_key
 
     def verify_that_key_to_filepath_operation_is_reversible(self):
@@ -221,6 +226,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     @property
+    @override
     def config(self) -> dict:
         return self._config  # type: ignore[attr-defined]
 
@@ -315,7 +321,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 contents: str = infile.read().rstrip("\n")
         except FileNotFoundError:
             raise InvalidKeyError(
-                f"Unable to retrieve object from TupleFilesystemStoreBackend with the following Key: {str(filepath)}"
+                f"Unable to retrieve object from TupleFilesystemStoreBackend with the following Key: {filepath!s}"
             )
 
         return contents
@@ -353,6 +359,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         return False
 
+    @override
     def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
         key_list = []
         for root, dirs, files in os.walk(
@@ -445,6 +452,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         )
 
     @property
+    @override
     def config(self) -> dict:
         return self._config
 
@@ -557,7 +565,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
         except (s3.exceptions.NoSuchKey, s3.exceptions.NoSuchBucket):
             raise InvalidKeyError(
-                f"Unable to retrieve object from TupleS3StoreBackend with the following Key: {str(s3_object_key)}"
+                f"Unable to retrieve object from TupleS3StoreBackend with the following Key: {s3_object_key!s}"
             )
 
         return (
@@ -597,6 +605,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         return s3_object_key
 
+    @override
     def _move(self, source_key, dest_key, **kwargs) -> None:
         s3 = self._create_resource()
 
@@ -613,6 +622,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         s3.Object(self.bucket, source_filepath).delete()
 
+    @override
     def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
         # Note that the prefix arg is only included to maintain consistency with the parent class signature
         s3r = self._create_resource()
@@ -742,6 +752,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return aws.boto3.resource("s3", **self.boto3_options)
 
     @property
+    @override
     def config(self) -> dict:
         return self._config
 
@@ -842,7 +853,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         gcs_response_object = bucket.get_blob(gcs_object_key)
         if not gcs_response_object:
             raise InvalidKeyError(
-                f"Unable to retrieve object from TupleGCSStoreBackend with the following Key: {str(key)}"
+                f"Unable to retrieve object from TupleGCSStoreBackend with the following Key: {key!s}"
             )
         else:
             return gcs_response_object.download_as_bytes().decode("utf-8")
@@ -872,6 +883,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             blob.upload_from_string(value, content_type=content_type)
         return gcs_object_key
 
+    @override
     def _move(self, source_key, dest_key, **kwargs) -> None:
         from great_expectations.compatibility import google
 
@@ -888,6 +900,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         blob = bucket.blob(source_filepath)
         _ = bucket.rename_blob(blob, dest_filepath)
 
+    @override
     def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
         # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
@@ -1008,12 +1021,14 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             store_name=store_name,
         )
-        self.connection_string = connection_string or os.environ.get(
+        self.connection_string = connection_string or os.environ.get(  # noqa: TID251
             "AZURE_STORAGE_CONNECTION_STRING"
         )
         self.prefix = prefix or ""
         self.container = container
-        self.account_url = account_url or os.environ.get("AZURE_STORAGE_ACCOUNT_URL")
+        self.account_url = account_url or os.environ.get(  # noqa: TID251
+            "AZURE_STORAGE_ACCOUNT_URL"
+        )
 
     @property
     @functools.lru_cache  # noqa: B019 # lru_cache on method
@@ -1041,7 +1056,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             except Exception as e:
                 # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
                 raise StoreBackendError(
-                    f'Due to exception: "{str(e)}", "azure_client" could not be created.'
+                    f'Due to exception: "{e!s}", "azure_client" could not be created.'
                 ) from e
         else:
             raise StoreBackendError(
@@ -1088,6 +1103,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             )
         return az_blob_key
 
+    @override
     def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
         # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
@@ -1124,6 +1140,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         all_keys = self.list_keys()
         return key in all_keys
 
+    @override
     def _move(self, source_key, dest_key, **kwargs) -> None:
         source_blob_path = self._convert_key_to_filepath(source_key)
         if not source_blob_path.startswith(self.prefix):
@@ -1161,5 +1178,6 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         return True
 
     @property
+    @override
     def config(self) -> dict:
         return self._config  # type: ignore[attr-defined]
