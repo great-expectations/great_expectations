@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_configuration import parse_result_format
@@ -78,7 +78,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         [expect_column_values_to_be_null](https://greatexpectations.io/expectations/expect_column_values_to_be_null)
     """
 
-    library_metadata = {
+    library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
@@ -89,8 +89,8 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         "manually_reviewed_code": True,
     }
 
-    map_metric = "column_values.nonnull"
-    args_keys = ("column",)
+    map_metric: ClassVar[str] = "column_values.nonnull"
+    args_keys: ClassVar[tuple[str, ...]] = ("column",)
 
     @override
     def validate_configuration(
