@@ -39,7 +39,6 @@ class Metric(MetricRepositoryBaseModel, Generic[_ValueType]):
         instance = super().__new__(cls)
         return instance
 
-    id: uuid.UUID = Field(description="Metric id")
     batch_id: str = Field(description="Batch id")
     metric_name: str = Field(description="Metric name")
     value: _ValueType = Field(description="Metric value")
@@ -88,7 +87,6 @@ class ColumnQuantileValuesMetric(ColumnMetric[List[float]]):
 class MetricRun(MetricRepositoryBaseModel):
     """Collection of Metric objects produced during the same execution run."""
 
-    id: uuid.UUID = Field(description="Run id")
     data_asset_id: Union[uuid.UUID, None] = Field(
         description="Data asset id", default=None
     )
