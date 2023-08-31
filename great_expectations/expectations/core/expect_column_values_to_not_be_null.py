@@ -193,14 +193,12 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]
 
@@ -242,13 +240,11 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         assert result, "Must pass in result."
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "Missing (n)",
-                        "tooltip": {"content": "expect_column_values_to_not_be_null"},
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": "Missing (n)",
+                    "tooltip": {"content": "expect_column_values_to_not_be_null"},
+                },
             ),
             result.result["unexpected_count"]
             if "unexpected_count" in result.result
@@ -270,13 +266,11 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         assert result, "Must pass in result."
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": "Missing (%)",
-                        "tooltip": {"content": "expect_column_values_to_not_be_null"},
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": "Missing (%)",
+                    "tooltip": {"content": "expect_column_values_to_not_be_null"},
+                },
             ),
             f"{result.result['unexpected_percent']:.1f}%"
             if "unexpected_percent" in result.result
