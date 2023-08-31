@@ -60,7 +60,7 @@ def metric_value(
 @public_api
 def metric_partial(
     engine: Type[ExecutionEngine],
-    partial_fn_type: Union[str, MetricPartialFunctionTypes],
+    partial_fn_type: MetricPartialFunctionTypes,
     domain_type: Union[str, MetricDomainTypes],
     **kwargs,
 ):
