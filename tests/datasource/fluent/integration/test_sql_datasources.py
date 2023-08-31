@@ -586,6 +586,12 @@ class TestColumnIndentifiers:
             ],
         )
 
+        # examine columns
+        with datasource.get_engine().connect() as conn:
+            result = conn.execute(f"SELECT * FROM {TEST_TABLE_NAME}")
+            assert result
+            print(f"{TEST_TABLE_NAME} Columns:\n  {result.keys()}\n")
+
         asset = datasource.add_table_asset("my_asset", table_name=TEST_TABLE_NAME)
 
         suite = context.add_expectation_suite(
