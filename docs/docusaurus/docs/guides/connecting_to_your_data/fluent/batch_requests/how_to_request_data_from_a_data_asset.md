@@ -61,7 +61,7 @@ For `dataframe` Data Assets, the `dataframe` is always specified as the argument
 
 ## Extract a Batch from a Batch Request (Optional)
 
-You can use the Python slice function to remove a subset of data from a Batch Request and use a specific selection of records to build Metrics, Validations, and Profiles.
+You can use the Python slice function to remove a subset of data from a Batch Request and use a specific selection of records to build Metrics, Validations, and Profiles. In the following example, data is sliced and filtered by column, but you can also use other parameters such as time or date to slice and filter data.
 
 1. Run the following code to retrieve an entire table of data from a SQL datasource:
 
@@ -78,10 +78,10 @@ You can use the Python slice function to remove a subset of data from a Batch Re
     ```python
     batch_request = table_asset.build_batch_request(options = {'filter_options'})
 
-4. Run the following code to return the batch:
+4. Run the following code to return a batch list:
 
     ```python
-    print(len(table_asset.get_batch_list_from_batch_request(batch_request)))
+    table_asset.get_batch_list_from_batch_request(batch_request = batch_request)
     ```
 
 ## Verify that the correct Batches were returned
