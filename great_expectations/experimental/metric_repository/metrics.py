@@ -86,12 +86,14 @@ class Metric(MetricRepositoryBaseModel, Generic[_ValueType]):
         return self.__class__.__name__
 
     @classmethod
-    def get_properties(cls):
-        return [
+    def _get_properties(cls):
+        """in pydandic v2 we can use computed_field.
+        https://docs.pydantic.dev/latest/usage/computed_fields/"""
+        properties = [
             prop for prop in cls.__dict__ if isinstance(cls.__dict__[prop], property)
         ]
+        return properties
 
-    @override
     def dict(  # noqa: PLR0913
         self,
         *,
@@ -114,7 +116,7 @@ class Metric(MetricRepositoryBaseModel, Generic[_ValueType]):
             exclude_unset=exclude_unset,
             exclude_defaults=exclude_defaults,
         )
-        props = self.get_properties()
+        props = self._get_properties()
 
         # Include and exclude properties
         if include:
@@ -132,11 +134,35 @@ class Metric(MetricRepositoryBaseModel, Generic[_ValueType]):
 
 
 class TableMetric(Metric, Generic[_ValueType]):
-    pass
+    @property
+    def value_type(self) -> str:
+        type_ = self.__orig_class__.__args__[0]
+        string_rep = str(type_)
+        if string_rep.startswith("<class"):
+            return type_.__name__
+        else:
+            return string_rep
+
+    @property
+    def metric_type(self) -> str:
+        return self.__class__.__name__
 
 
 class ColumnMetric(Metric, Generic[_ValueType]):
     column: str = Field(description="Column name")
+
+    @property
+    def value_type(self) -> str:
+        type_ = self.__orig_class__.__args__[0]
+        string_rep = str(type_)
+        if string_rep.startswith("<class"):
+            return type_.__name__
+        else:
+            return string_rep
+
+    @property
+    def metric_type(self) -> str:
+        return self.__class__.__name__
 
 
 # TODO: Add ColumnPairMetric, MultiColumnMetric
