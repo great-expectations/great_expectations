@@ -33,12 +33,8 @@ class MetricRepositoryBaseModel(BaseModel):
 
 
 class MetricException(MetricRepositoryBaseModel):
-    exception_type: Optional[str] = Field(
-        description="Exception type if an exception is thrown", default=None
-    )
-    exception_message: Optional[str] = Field(
-        description="Exception message if an exception is thrown", default=None
-    )
+    type: str = Field(description="Exception type if an exception is thrown")
+    message: str = Field(description="Exception message if an exception is thrown")
 
 
 _ValueType = TypeVar("_ValueType")
