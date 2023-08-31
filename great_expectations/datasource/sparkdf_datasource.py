@@ -21,7 +21,6 @@ class SparkDFDatasource(LegacyDatasource):
         Accepted Batch Kwargs:
             - PathBatchKwargs ("path" or "s3" keys)
             - InMemoryBatchKwargs ("dataset" key)
-            - QueryBatchKwargs ("query" key)
 
     --ge-feature-maturity-info--
 
