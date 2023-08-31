@@ -153,7 +153,7 @@ def in_databricks() -> bool:
     Returns:
         bool
     """
-    return "DATABRICKS_RUNTIME_VERSION" in os.environ
+    return "DATABRICKS_RUNTIME_VERSION" in os.environ  # noqa: TID251
 
 
 def determine_progress_bar_method_by_environment() -> Callable:

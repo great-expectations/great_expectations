@@ -174,7 +174,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
             suite_notes=suite_notes,
             suite_name=suite_name,
             batch_kwargs=batch_kwargs,
-            env=os.environ,
+            env=os.environ,  # noqa: TID251
         )
         self.add_code_cell(code, lint=True)
 

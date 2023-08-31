@@ -42,7 +42,7 @@ if TYPE_CHECKING:
 @public_api
 def column_condition_partial(  # noqa: C901, PLR0915
     engine: Type[ExecutionEngine],
-    partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,
+    partial_fn_type: Optional[MetricPartialFunctionTypes] = None,
     **kwargs,
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
