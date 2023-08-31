@@ -83,7 +83,7 @@ class ColumnMetric(Metric, Generic[_ValueType]):
 
 class ColumnQuantileValuesMetric(ColumnMetric[List[float]]):
     quantiles: List[float] = Field(description="Quantiles to compute")
-    allow_relative_error: Union[str, float] = Field(
+    allow_relative_error: Union[float, str] = Field(
         description="Relative error interpolation type (pandas) or limit (e.g. spark) depending on data source"
     )
 
