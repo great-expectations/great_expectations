@@ -36,6 +36,11 @@ class Payload(BaseModel):
 
 
 class CloudDataStore(DataStore[StorableTypes]):
+    """DataStore implementation for GX Cloud.
+
+    Uses JSON:API https://jsonapi.org/
+    """
+
     @override
     def __init__(self, context: CloudDataContext):
         super().__init__(context=context)
@@ -68,6 +73,7 @@ class CloudDataStore(DataStore[StorableTypes]):
 
     @override
     def add(self, value: T) -> T:
+        """Add a value to the DataStore. Currently, returns the input value not the value from the DataStore."""
         url = self._build_url(value)
         payload = self._build_payload(value)
         self._session.post(url=url, data=payload)
