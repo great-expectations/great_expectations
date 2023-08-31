@@ -255,9 +255,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 {"ContinuationToken": iterator_dict["continuation_token"]}
             )
 
-        logger.debug(
-            f"Fetching objects from S3 with query options: {str(query_options)}"
-        )
+        logger.debug(f"Fetching objects from S3 with query options: {query_options!s}")
         asset_options = self._s3.list_objects_v2(**query_options)
         if directory_assets:
             if "CommonPrefixes" not in asset_options:

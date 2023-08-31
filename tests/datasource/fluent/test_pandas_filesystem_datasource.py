@@ -392,7 +392,7 @@ def test_invalid_connect_options_value(
             glob_directive=glob_directive,
         )
 
-    print(f"Exception raised:\n\t{repr(exc_info.value)}")
+    print(f"Exception raised:\n\t{exc_info.value!r}")
 
     if isinstance(exc_info.value, pydantic.ValidationError):
         error_dicts = exc_info.value.errors()

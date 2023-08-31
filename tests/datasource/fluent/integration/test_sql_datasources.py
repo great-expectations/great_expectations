@@ -15,6 +15,10 @@ from typing import (
     Sequence,
     TypedDict,
 )
+import sys
+import uuid
+from pprint import pformat as pf
+from typing import TYPE_CHECKING, Final, Generator, Literal, Protocol
 
 import pytest
 from packaging.version import Version
@@ -79,7 +83,6 @@ TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
     "postgres": {
         "unquoted_lower": TEST_TABLE_NAME.lower(),
         "quoted_lower": f'"{TEST_TABLE_NAME.lower()}"',
-        # this should work but it doesn't
         # "unquoted_upper": TEST_TABLE_NAME.upper(),
         "quoted_upper": f'"{TEST_TABLE_NAME.upper()}"',
         "quoted_mixed": f'"{TEST_TABLE_NAME.title()}"',
@@ -192,6 +195,7 @@ def table_factory(
         )
         created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
         with engine.connect() as conn:
+            transaction = conn.begin()
             if schema:
                 conn.execute(TextClause(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
             for name in table_names:
@@ -209,9 +213,8 @@ def table_factory(
                         data,
                     )
 
-                if SQLA_VERSION >= Version("2.0"):
-                    conn.commit()
                 created_tables.append(dict(table_name=name, schema=schema))
+            transaction.commit()
         all_created_tables[engine.dialect.name] = created_tables
         engines[engine.dialect.name] = engine
 
@@ -222,6 +225,7 @@ def table_factory(
     for dialect, tables in all_created_tables.items():
         engine = engines[dialect]
         with engine.connect() as conn:
+            transaction = conn.begin()
             for table in tables:
                 name = table["table_name"]
                 schema = table["schema"]
@@ -229,8 +233,7 @@ def table_factory(
                 conn.execute(TextClause(f"DROP TABLE IF EXISTS {qualified_table_name}"))
             if schema:
                 conn.execute(TextClause(f"DROP SCHEMA IF EXISTS {schema}"))
-            if SQLA_VERSION >= Version("2.0"):
-                conn.commit()
+            transaction.commit()
 
 
 @pytest.fixture
@@ -255,9 +258,11 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
 def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
     ds = context.sources.add_databricks_sql(
         "databricks_sql",
-        connection_string="databricks+connector://token:"
+        connection_string="databricks://token:"
         "${DATABRICKS_TOKEN}@${DATABRICKS_HOST}:443"
-        "/cloud_events?http_path=${DATABRICKS_HTTP_PATH}&catalog=hive_metastore&schema="
+        "/"
+        + PYTHON_VERSION
+        + "?http_path=${DATABRICKS_HTTP_PATH}&catalog=ci&schema="
         + PYTHON_VERSION,
     )
     return ds
@@ -353,7 +358,6 @@ class TestTableIdentifiers:
 
         postgres_ds.add_table_asset(asset_name, table_name=table_name)
 
-    @pytest.mark.xfail(reason="need databricks aviailable in CI")
     @pytest.mark.databricks
     def test_databricks_sql(
         self,

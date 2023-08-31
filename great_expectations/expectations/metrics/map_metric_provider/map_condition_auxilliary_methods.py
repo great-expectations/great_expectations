@@ -365,7 +365,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             unexpected_count = 0
 
     except sqlalchemy.OperationalError as oe:
-        exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
+        exception_message: str = f"An SQL execution Exception occurred: {oe!s}."
         raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=exception_message
         )
@@ -408,7 +408,7 @@ def _sqlalchemy_map_condition_rows(
     try:
         return execution_engine.execute_query(query).fetchall()
     except sqlalchemy.OperationalError as oe:
-        exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
+        exception_message: str = f"An SQL execution Exception occurred: {oe!s}."
         raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=exception_message
         )
