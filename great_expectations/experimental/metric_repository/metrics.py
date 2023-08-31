@@ -46,7 +46,9 @@ class Metric(MetricRepositoryBaseModel, Generic[_ValueType]):
     batch: Batch = Field(description="Batch")
     metric_name: str = Field(description="Metric name")
     value: _ValueType = Field(description="Metric value")
-    exception: MetricException = Field(description="Exception info if thrown")
+    exception: Optional[MetricException] = Field(
+        description="Exception info if thrown", default=None
+    )
 
     @classmethod
     def update_forward_refs(cls):
@@ -79,7 +81,7 @@ class ColumnMetric(Metric, Generic[_ValueType]):
 #  QuantileValuesColumnMetric is an example of a metric that has parameters
 
 
-class QuantileValuesColumnMetric(ColumnMetric[List[float]]):
+class ColumnQuantileValuesMetric(ColumnMetric[List[float]]):
     quantiles: List[float] = Field(description="Quantiles to compute")
     allow_relative_error: Union[str, float] = Field(
         description="Relative error interpolation type (pandas) or limit (e.g. spark) depending on data source"
