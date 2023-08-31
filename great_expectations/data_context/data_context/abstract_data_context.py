@@ -4182,8 +4182,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
         return os.path.isdir(profiler_directory_path)  # noqa: PTH112
 
-    @staticmethod
     def _get_global_config_value(
+        self,
         environment_variable: str,
         conf_file_section: Optional[str] = None,
         conf_file_option: Optional[str] = None,
@@ -4203,10 +4203,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         assert (conf_file_section and conf_file_option) or (
             not conf_file_section and not conf_file_option
         ), "Must pass both 'conf_file_section' and 'conf_file_option' or neither."
-        if environment_variable and os.environ.get(  # noqa: TID251
-            environment_variable, ""
+        if environment_variable and (
+            val := self._config_provider.get_values().get(environment_variable)
         ):
-            return os.environ.get(environment_variable)  # noqa: TID251
+            return val
         if conf_file_section and conf_file_option:
             for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
                 config: configparser.ConfigParser = configparser.ConfigParser()
@@ -4395,8 +4395,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             return config_var_provider.get_values()
         return {}
 
-    @staticmethod
-    def _is_usage_stats_enabled() -> bool:
+    def _is_usage_stats_enabled(self) -> bool:
         """
         Checks the following locations to see if usage_statistics is disabled in any of the following locations:
             - GE_USAGE_STATS, which is an environment_variable
@@ -4409,8 +4408,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             bool that tells you whether usage_statistics is on or off
         """
         usage_statistics_enabled: bool = True
-        if os.environ.get("GE_USAGE_STATS", False):  # noqa: TID251
-            ge_usage_stats = os.environ.get("GE_USAGE_STATS")  # noqa: TID251
+        if ge_usage_stats := self._config_provider.get_values().get(
+            "GE_USAGE_STATS", False
+        ):
             if ge_usage_stats in AbstractDataContext.FALSEY_STRINGS:
                 usage_statistics_enabled = False
             else:
