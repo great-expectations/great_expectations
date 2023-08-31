@@ -609,7 +609,7 @@ class TestColumnIdentifiers:
 
         # examine columns
         with datasource.get_engine().connect() as conn:
-            result = conn.execute(f"SELECT * FROM {TEST_TABLE_NAME}")
+            result = conn.execute(TextClause(f"SELECT * FROM {TEST_TABLE_NAME}"))
             assert result
             print(f"{TEST_TABLE_NAME} Columns:\n  {result.keys()}\n")
 
