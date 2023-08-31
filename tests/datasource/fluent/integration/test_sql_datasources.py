@@ -561,7 +561,7 @@ class TestColumnIndentifiers:
             ),
         ],
     )
-    def test_simple_expectation(
+    def test_column_expectation(
         self,
         context: EphemeralDataContext,
         all_sql_datasources: SQLDatasource,
