@@ -6,13 +6,16 @@ import pydantic
 from pydantic import BaseModel
 
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.http import create_session
 from great_expectations.experimental.metric_repository.data_store import DataStore
 from great_expectations.experimental.metric_repository.metrics import MetricRun
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-StorableTypes: TypeAlias = Union[MetricRun,]  # TODO: are there better approaches?
+    from great_expectations.data_context import CloudDataContext
+
+StorableTypes: TypeAlias = Union[MetricRun,]
 
 T = TypeVar("T", bound=StorableTypes)
 
@@ -43,6 +46,13 @@ class Payload(BaseModel):
 
 
 class CloudDataStore(DataStore[StorableTypes]):
+    @override
+    def __init__(self, context: CloudDataContext):
+        super().__init__(context=context)
+        self._session = create_session(
+            access_token=context.ge_cloud_config.access_token
+        )
+
     def build_payload(self, value: StorableTypes) -> dict:
         payload = Payload(
             data=PayloadData(
@@ -58,10 +68,7 @@ class CloudDataStore(DataStore[StorableTypes]):
 
     @override
     def add(self, value: T) -> T:
-        # TODO: implementation
-        # TODO: Serialize with organization_id from the context
-        print(f"Creating item of type {value.__class__.__name__}")
-        print(f" in {self.__class__.__name__}")
-        print("  sending a POST request to the cloud.")
-        print(value)
+        url = self.build_url(value)
+        payload = self.build_payload(value)
+        self._session.post(url=url, data=payload)
         return value
