@@ -6,6 +6,8 @@ from typing import Generic, List, Optional, Sequence, TypeVar, Union
 import pydantic
 from pydantic import BaseModel, Field
 
+from great_expectations.compatibility.typing_extensions import override
+
 
 class MetricRepositoryBaseModel(BaseModel):
     """Base class for all MetricRepository related models."""
@@ -54,6 +56,15 @@ class Metric(MetricRepositoryBaseModel, Generic[_ValueType]):
             Batch=Batch,
         )
 
+    @property
+    def value_type(self) -> str:
+        type_ = self.__orig_class__.__args__[0]
+        string_rep = str(type_)
+        if string_rep.startswith("<class"):
+            return type_.__name__
+        else:
+            return string_rep
+
 
 # Metric domain types
 
@@ -82,6 +93,11 @@ class ColumnQuantileValuesMetric(ColumnMetric[List[float]]):
     allow_relative_error: Union[float, str] = Field(
         description="Relative error interpolation type (pandas) or limit (e.g. spark) depending on data source"
     )
+
+    @property
+    @override
+    def value_type(self) -> str:
+        return "list[float]"
 
 
 class MetricRun(MetricRepositoryBaseModel):
