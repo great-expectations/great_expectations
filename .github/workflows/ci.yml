@@ -33,12 +33,12 @@ jobs:
   ci-is-on-main-repo:
     runs-on: ubuntu-latest
     # job only runs on main repo where we have access to credentials, or as part of the release
-    if: | 
+    if: |
       github.event.pull_request.head.repo.full_name == github.repository ||
       (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     steps:
       - run: echo "This CI step only runs on the main repo, where we have access to credentials."
-  
+
   docs-changes:
     # check whether docs were changed
     runs-on: ubuntu-latest
@@ -130,7 +130,9 @@ jobs:
     name: docs-snippets
     needs: [docs-changes, ci-is-on-main-repo]
     # run on non-draft PRs with docs changes
-    if: (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true')
+    if: |
+      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     env:
       # google
@@ -240,7 +242,7 @@ jobs:
 
   cloud-tests:
     needs: ci-is-on-main-repo
-    if: github.event.pull_request.draft == false 
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
