@@ -76,7 +76,8 @@ You can use the Python slice function to remove a subset of data from a Batch Re
 3. Run the following code to slice and filter the column:
 
     ```python
-    batch_request = table_asset.build_batch_request(options = {'filter_options'})
+    batch_request = table_asset.build_batch_request(options = {'my_column_name':'my_column_value'})
+    ```
 
 4. Run the following code to return a batch list:
 
