@@ -454,6 +454,8 @@ filterwarnings = [
     # FutureWarning: the convert_dtype parameter is deprecated and will be removed in a future version.  Do ``ser.astype(object).apply()`` instead if you want ``convert_dtype=False``.
     # GH Issue: https://github.com/altair-viz/altair/issues/3181
     'ignore: the convert_dtype parameter is deprecated and will be removed in a future version:FutureWarning',
+    # Example Actual Warning: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+    'ignore: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.',
 
     # numpy
     # Example Actual Warning: RuntimeWarning: Mean of empty slice.
