@@ -1,3 +1,4 @@
+from functools import wraps
 from textwrap import dedent
 from typing import Any, Callable, TypeVar
 
@@ -126,18 +127,22 @@ def deprecated_argument(
 
     text = f".. deprecated:: {version}" "\n" f"    {message}"
 
-    def wrapper(func: F) -> F:
-        """Wrapper method that accepts func, so we can modify the docstring."""
-        if not docstring_parser.docstring_parser:
-            return func
+    def _deprecated_argument(func: F) -> F:
+        @wraps(func)
+        def wrapper(*args, **kwargs) -> F:
+            """Wrapper method that accepts func, so we can modify the docstring."""
+            if not docstring_parser.docstring_parser:
+                return func
 
-        return _add_text_below_function_docstring_argument(
-            func=func,
-            argument_name=argument_name,
-            text=text,
-        )
+            return _add_text_below_function_docstring_argument(
+                func=func,
+                argument_name=argument_name,
+                text=text,
+            )
 
-    return wrapper
+        return wrapper
+
+    return _deprecated_argument
 
 
 def new_argument(
