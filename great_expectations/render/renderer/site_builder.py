@@ -602,18 +602,23 @@ class DefaultSiteIndexBuilder:
 
         if run_id:
             filepath = (
-                os.path.join(  # noqa: PTH118
-                    "validations",
-                    *expectation_suite_name.split("."),
-                    *run_id.to_tuple(),
-                    batch_identifier,
+                "/".join(
+                    [  # noqa: PTH118
+                        "validations",
+                        *expectation_suite_name.split("."),
+                        *run_id.to_tuple(),
+                        batch_identifier,
+                    ]
                 )
                 + ".html"
             )
         else:
             filepath = (
-                os.path.join(  # noqa: PTH118
-                    "expectations", *expectation_suite_name.split(".")
+                "/".join(
+                    [  # noqa: PTH118
+                        "expectations",
+                        *expectation_suite_name.split(".")
+                    ]
                 )
                 + ".html"
             )
