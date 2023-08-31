@@ -123,7 +123,7 @@ TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
 }
 
 
-class Record(TypedDict):
+class Row(TypedDict):
     id: int
     name: str
     UPPER: str
@@ -143,7 +143,7 @@ class TableFactory(Protocol):
         engine: engine.Engine,
         table_names: set[str],
         schema: str | None = None,
-        data: Sequence[Record] = ...,
+        data: Sequence[Row] = ...,
     ) -> None:
         ...
 
@@ -183,7 +183,7 @@ def table_factory(
         engine: engine.Engine,
         table_names: set[str],
         schema: str | None = None,
-        data: Sequence[Record] = tuple(),
+        data: Sequence[Row] = tuple(),
     ) -> None:
         if engine.dialect.name in DO_NOT_CREATE_TABLES:
             LOGGER.info(
