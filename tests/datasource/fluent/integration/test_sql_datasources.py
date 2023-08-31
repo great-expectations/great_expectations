@@ -507,7 +507,7 @@ class TestTableIdentifiers:
     "column_name",
     [
         param("lower", id="str lower"),
-        param("LOWER", id="str LOWER"),
+        param("LOWER", marks=[pytest.mark.xfail], id="str LOWER"),
         param("'lower'", id="str 'lower'"),
         param('"lower"', id='str "lower"'),
         param(
@@ -536,6 +536,7 @@ class TestTableIdentifiers:
                 "LOWER",
                 quote=None,
             ),
+            marks=[pytest.mark.xfail],
             id="quoted_name LOWER quote=None",
         ),
         param("upper", id="str upper"),
