@@ -19,6 +19,7 @@ def mock_metric_run():
     return Mock(autospec=MetricRun)
 
 
+@pytest.mark.unit
 def test_add_metric_run(mock_data_store: DataStore, mock_metric_run: MetricRun):
     metric_repository = MetricRepository(data_store=mock_data_store)
 
