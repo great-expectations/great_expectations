@@ -21,7 +21,7 @@ title: Changelog
 * [BUGFIX] Always run docs-snippets action on release tag. ([#8651](https://github.com/great-expectations/great_expectations/pull/8651))
 * [DOCS] Remove Unused Topics and Update YAML Examples ([#8581](https://github.com/great-expectations/great_expectations/pull/8581))
 * [DOCS] Add Limit Validation Results in Data Docs Topic ([#8571](https://github.com/great-expectations/great_expectations/pull/8571))
-* [DOCS] Fix Quickstart typo ([#8625](https://github.com/great-expectations/great_expectations/pull/8625)) (thanks @rachhouse)
+* [DOCS] Fix Quickstart typo ([#8625](https://github.com/great-expectations/great_expectations/pull/8625)) 
 * [DOCS] Quick Fix ([#8628](https://github.com/great-expectations/great_expectations/pull/8628))
 * [DOCS] Remove Instances of SimpleCheckpoint in snippets ([#8622](https://github.com/great-expectations/great_expectations/pull/8622))
 * [DOCS] Update Connect to SQL database source data ([#8635](https://github.com/great-expectations/great_expectations/pull/8635))
