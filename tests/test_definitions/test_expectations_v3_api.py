@@ -109,11 +109,8 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                             table_name=dataset_name,
                                             schemas=dataset.get("schemas"),
                                             sqlite_db_path=sqlite_db_path,
-                                            context=cast(
-                                                DataContext,
-                                                build_in_memory_runtime_context(),
-                                            ),
-                                        )
+                                            context=build_in_memory_runtime_context(),
+                                        ),
                                     )
                                 validator_with_data = datasets[0]
                             else:
