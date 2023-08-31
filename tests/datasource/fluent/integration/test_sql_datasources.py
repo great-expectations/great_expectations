@@ -509,6 +509,7 @@ class TestColumnIndentifiers:
         "column_name",
         [
             param("lower", id="str lower"),
+            param("LOWER", id="str LOWER"),
             param("'lower'", id="str 'lower'"),
             param('"lower"', id='str "lower"'),
             param(
@@ -531,6 +532,13 @@ class TestColumnIndentifiers:
                     quote=False,
                 ),
                 id="sqla.quoted_name lower quote=False",
+            ),
+            param(
+                quoted_name(
+                    "LOWER",
+                    quote=None,
+                ),
+                id="sqla.quoted_name LOWER qoute=None",
             ),
             param("upper", id="str upper"),
             param("UPPER", id="str UPPER"),
@@ -556,6 +564,13 @@ class TestColumnIndentifiers:
                     quote=False,
                 ),
                 id="sqla.quoted_name UPPER qoute=False",
+            ),
+            param(
+                quoted_name(
+                    "upper",
+                    quote=None,
+                ),
+                id="sqla.quoted_name upper qoute=None",
             ),
         ],
     )
