@@ -220,14 +220,14 @@ class SphinxInvokeDocsBuilder:
 
         sidebar_entry = self._get_sidebar_entry(html_file_path=html_file_path)
 
-        # Add .py to module titles
+        # Add _module suffix to module titles
         if sidebar_entry.type == SidebarEntryType.MODULE:
             stem_path = pathlib.Path(
                 self._get_mdx_file_path(sidebar_entry=sidebar_entry).stem
             )
             mdx_stripped_path = str(stem_path.with_suffix(""))
             if mdx_stripped_path.lower() == title_str.lower():
-                title_str = str(stem_path.with_suffix(".py"))
+                title_str = str(stem_path.with_suffix("_module"))
 
         # Add class="sphinx-api-doc" to section tag to reference in css
         doc = soup.find("section")
