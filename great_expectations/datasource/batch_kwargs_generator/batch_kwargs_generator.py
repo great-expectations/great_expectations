@@ -58,14 +58,6 @@ class BatchKwargsGenerator:
                     sep: "
                   base_directory: /data
 
-            my_datasource_3:
-              class_name: SqlalchemyDatasource
-              batch_kwargs_generators:
-                # This generator will search for a file named with the name of the requested data asset and the
-                # .sql suffix to open with a query to use to generate data
-                 default:
-                    class_name: QueryBatchKwargsGenerator
-
     --ge-feature-maturity-info--
 
         id: batch_kwargs_generator_manual
