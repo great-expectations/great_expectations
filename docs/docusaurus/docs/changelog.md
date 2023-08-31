@@ -1,5 +1,6 @@
 ---
 title: Changelog
+
 ---
 
 ### Deprecation policy
@@ -21,7 +22,7 @@ title: Changelog
 * [BUGFIX] Always run docs-snippets action on release tag. ([#8651](https://github.com/great-expectations/great_expectations/pull/8651))
 * [DOCS] Remove Unused Topics and Update YAML Examples ([#8581](https://github.com/great-expectations/great_expectations/pull/8581))
 * [DOCS] Add Limit Validation Results in Data Docs Topic ([#8571](https://github.com/great-expectations/great_expectations/pull/8571))
-* [DOCS] Fix Quickstart typo ([#8625](https://github.com/great-expectations/great_expectations/pull/8625)) 
+* [DOCS] Fix Quickstart typo ([#8625](https://github.com/great-expectations/great_expectations/pull/8625))
 * [DOCS] Quick Fix ([#8628](https://github.com/great-expectations/great_expectations/pull/8628))
 * [DOCS] Remove Instances of SimpleCheckpoint in snippets ([#8622](https://github.com/great-expectations/great_expectations/pull/8622))
 * [DOCS] Update Connect to SQL database source data ([#8635](https://github.com/great-expectations/great_expectations/pull/8635))
@@ -548,7 +549,7 @@ title: Changelog
 * [BUGFIX] `xfail` two cloud tests that are blocking release 0.16.14 ([#8008](https://github.com/great-expectations/great_expectations/pull/8008))
 * [DOCS] Technical tags in Versioned Docs reference correct version ([#7935](https://github.com/great-expectations/great_expectations/pull/7935))
 * [DOCS] Fix docs deploy ([#7958](https://github.com/great-expectations/great_expectations/pull/7958))
-* [DOCS] Add small doc change ([#7957](https://github.com/great-expectations/great_expectations/pull/7957)) 
+* [DOCS] Add small doc change ([#7957](https://github.com/great-expectations/great_expectations/pull/7957))
 * [DOCS] Fix issues with technical tags links in earlier versions ([#7961](https://github.com/great-expectations/great_expectations/pull/7961))
 * [DOCS] Temporarily pin typing-extensions for API docs ([#7977](https://github.com/great-expectations/great_expectations/pull/7977))
 * [DOCS] Add optional Slack step to Cloud Quickstart ([#7955](https://github.com/great-expectations/great_expectations/pull/7955))
@@ -560,7 +561,7 @@ title: Changelog
 * [DOCS] Removes Data Connector references ([#7930](https://github.com/great-expectations/great_expectations/pull/7930))
 * [DOCS] add in-memory add expectation suite ([#7973](https://github.com/great-expectations/great_expectations/pull/7973)) (thanks @tb102122)
 * [DOCS] Removes CLI documentation from current docs version ([#7975](https://github.com/great-expectations/great_expectations/pull/7975))
-* [DOCS] Delete CODE_OF_CONDUCT.md ([#7625](https://github.com/great-expectations/great_expectations/pull/7625)) 
+* [DOCS] Delete CODE_OF_CONDUCT.md ([#7625](https://github.com/great-expectations/great_expectations/pull/7625))
 * [MAINTENANCE] Fixing pytest: renderer assertion ([#7928](https://github.com/great-expectations/great_expectations/pull/7928))
 * [MAINTENANCE] Update `teams.yml` ([#7934](https://github.com/great-expectations/great_expectations/pull/7934))
 * [MAINTENANCE] Remove the -rs flag from the ci pytest invocations. ([#7937](https://github.com/great-expectations/great_expectations/pull/7937))
