@@ -52,6 +52,10 @@ class CloudDataStore(DataStore[StorableTypes]):
         )
         return payload.dict()
 
+    def build_url(self, value: StorableTypes) -> str:
+        config = self._context.ge_cloud_config
+        return f"{config.base_url}/organizations/{config.organization_id}{map_to_url(value)}"
+
     @override
     def add(self, value: T) -> T:
         # TODO: implementation
