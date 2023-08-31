@@ -454,6 +454,10 @@ filterwarnings = [
     # FutureWarning: the convert_dtype parameter is deprecated and will be removed in a future version.  Do ``ser.astype(object).apply()`` instead if you want ``convert_dtype=False``.
     # GH Issue: https://github.com/altair-viz/altair/issues/3181
     'ignore: the convert_dtype parameter is deprecated and will be removed in a future version:FutureWarning',
+    # Example Actual Warning: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+    'ignore: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.',
+    # Example Actual Warning: FutureWarning: Returning a DataFrame from Series.apply when the supplied function returns a Series is deprecated and will be removed in a future version.
+    'ignore: Returning a DataFrame from Series.apply when the supplied function returns a Series is deprecated and will be removed in a future version.',
 
     # numpy
     # Example Actual Warning: RuntimeWarning: Mean of empty slice.
@@ -463,10 +467,16 @@ filterwarnings = [
     # spark
     # Example Actual Warning: FutureWarning: Deprecated in 3.0.0. Use SparkSession.builder.getOrCreate() instead.
     # Found when running test_case_runner_v2_api[SparkDFDataset/column_pair_map_expectations/expect_column_pair_values_to_be_in_set:basic_positive_test_without_nulls]    'ignore: Deprecated in 3.0.0. Use SparkSession.builder.getOrCreate\(\) instead.:FutureWarning',
+    # Example Acutal Warning: FutureWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
+    'ignore: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance\(dtype, pd.DatetimeTZDtype\)` instead.',
     # pymysql
     # Example Actual Warning: pymysql.err.Warning: (1292, "Truncated incorrect DOUBLE value: 'cat'")
     # Found in tests/test_definitions/test_expectations_v2_api.py, if not found in v3 api remove this ignore directive with the v2 api code.
     'ignore: \(1292, "Truncated incorrect DOUBLE value:Warning',
+    # numpy and python 3.11
+    # Found when running tests in tests/profile/test_basic_suite_builder_profiler.py
+    # Example Actual Warning: RuntimeWarning: invalid value encountered in reduce
+    "ignore: invalid value encountered in reduce",
     # urllib3
     "ignore:'urllib3.contrib.pyopenssl' module is deprecated and will be removed in a future release of urllib3 2.x.:DeprecationWarning",
     # boto

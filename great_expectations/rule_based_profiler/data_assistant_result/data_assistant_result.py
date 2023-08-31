@@ -90,6 +90,17 @@ if TYPE_CHECKING:
     )
 
 
+import packaging.version
+
+PANDAS_210_OR_GREATER = packaging.version.parse(
+    pd.__version__
+) >= packaging.version.Version("2.1.0")
+
+
+def pandas_map(df: pd.DataFrame) -> Callable:
+    return df.map if PANDAS_210_OR_GREATER else df.applymap
+
+
 class ColumnDataFrame(NamedTuple):
     column: str
     df: pd.DataFrame
@@ -913,7 +924,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         df: pd.DataFrame,
     ) -> pd.DataFrame:
         col_has_list: pd.DataFrame = pd.DataFrame(
-            {"column_name": df.columns, "has_list": (df.applymap(type) == list).any()}
+            {
+                "column_name": df.columns,
+                "has_list": (pandas_map(df)(type) == list).any(),
+            }
         )
         list_column_names: List[str] = list(
             col_has_list[col_has_list["has_list"]]["column_name"]
@@ -3865,7 +3879,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 return pd.DataFrame()
 
         # if there are any lists in the dataframe
-        if (df.applymap(type) == list).any().any():
+        if (pandas_map(df)(type) == list).any().any():
             df = DataAssistantResult._transform_column_lists_to_rows(
                 df=df,
             )
