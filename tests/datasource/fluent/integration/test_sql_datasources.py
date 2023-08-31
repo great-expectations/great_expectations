@@ -296,7 +296,13 @@ def sqlite_ds(
 
 @pytest.fixture(
     params=[
-        param("trino", marks=[pytest.mark.trino]),
+        param(
+            "trino",
+            marks=[
+                pytest.mark.trino,
+                pytest.mark.skip(reason="cannot create trino tables"),
+            ],
+        ),
         param("postgres", marks=[pytest.mark.postgresql]),
         param("databricks_sql", marks=[pytest.mark.databricks]),
         param("snowflake", marks=[pytest.mark.snowflake]),
