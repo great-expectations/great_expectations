@@ -1,14 +1,12 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Dict, Optional
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     _format_map_output,
@@ -32,6 +30,11 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -89,6 +92,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     map_metric = "column_values.nonnull"
     args_keys = ("column",)
 
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -110,6 +114,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -141,6 +146,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         return renderer_configuration
 
     @classmethod
+    @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
@@ -199,6 +205,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         ]
 
     @classmethod
+    @override
     @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
@@ -277,6 +284,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             else "--",
         ]
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,
