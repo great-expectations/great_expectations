@@ -65,20 +65,16 @@ You can use the Python slice function to remove a subset of data from a Batch Re
 
 1. Run the following code to retrieve an entire table of data from a SQL datasource:
 
-    ```python
-    table_asset = datasource.add_table_asset(name=asset_name, table_name=asset_table_name)
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py create_datasource"
     ```
 2. Run the following code to define the column to slice:
 
-    ```python
-    table_asset.add_splitter_column_value('my_column_name')
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py add_vendor_id_splitter"
     ```
 3. Run the following code to slice and filter the column:
 
-    ```python
-    batch_request = table_asset.build_batch_request(options = {'my_column_name':'my_column_value'})
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py build_vendor_id_batch_request"
     ```
-
 4. Run the following code to return a batch list:
 
     ```python
