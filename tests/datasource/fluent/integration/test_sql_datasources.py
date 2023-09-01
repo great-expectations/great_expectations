@@ -439,14 +439,7 @@ class TestTableIdentifiers:
             param(
                 "snowflake", get_random_identifier_name(), marks=[pytest.mark.snowflake]
             ),
-            param(
-                "databricks_sql",
-                PYTHON_VERSION,
-                marks=[
-                    pytest.mark.databricks,
-                    pytest.mark.xfail(reason="need custom exec engine creation logic"),
-                ],
-            ),
+            param("databricks_sql", PYTHON_VERSION, marks=[pytest.mark.databricks]),
             param("sqlite", None, marks=[pytest.mark.sqlite]),
         ],
     )
