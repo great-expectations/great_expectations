@@ -568,12 +568,25 @@ class Datasource(
         return None
 
     def _rebuild_asset_data_connectors(self) -> None:
-        """If Datasource required a data_connector we need to build the data_connector for each asset"""
+        """
+        If Datasource required a data_connector we need to build the data_connector for each asset.
+        If data_connector cannot be built for an asset, a warning is raised.
+        This is needed because not all users may have access to the needed credentials and dependencies
+        needed for all assets.
+        """
         if self.data_connector_type:
             for data_asset in self.assets:
-                # check if data_connector exist before rebuilding?
-                connect_options = getattr(data_asset, "connect_options", {})
-                self._build_data_connector(data_asset, **connect_options)
+                try:
+                    # check if data_connector exist before rebuilding?
+                    connect_options = getattr(data_asset, "connect_options", {})
+                    self._build_data_connector(data_asset, **connect_options)
+                except Exception as dc_build_err:
+                    # TODO: allow users to opt out of these warnings
+                    warnings.warn(
+                        f"data_connector build failure for {self.name}.{data_asset.name}: {dc_build_err!r}",
+                        category=RuntimeWarning,
+                        source=dc_build_err,
+                    )
 
     @staticmethod
     def parse_order_by_sorters(
