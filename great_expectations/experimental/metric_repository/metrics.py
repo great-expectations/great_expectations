@@ -167,6 +167,8 @@ class ColumnMetric(Metric, Generic[_ValueType]):
 # Metrics with parameters (aka metric_value_kwargs)
 # This is where the concrete metric types are defined that
 # bring together a domain type, value type and any parameters (aka metric_value_kwargs)
+# If a metric has parameters, it should be defined here. If it doesn't, you can use the generic types above, for
+# example, ColumnMetric[float] or TableMetric[list[str]].
 
 # TODO: Add metrics here for all Column Descriptive Metrics
 #  ColumnQuantileValuesMetric is an example of a metric that has parameters
@@ -194,5 +196,4 @@ class MetricRun(MetricRepositoryBaseModel):
     data_asset_id: Union[uuid.UUID, None] = Field(
         description="Data asset id", default=None
     )
-    # created_at, created_by filled in by the backend.
     metrics: Sequence[Metric]
