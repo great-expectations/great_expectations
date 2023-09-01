@@ -448,6 +448,8 @@ class TestTableIdentifiers:
                 ],
             ),
             param("sqlite", None, marks=[pytest.mark.sqlite]),
+                marks=[pytest.mark.databricks],
+            ),
         ],
     )
     def test_checkpoint_run(

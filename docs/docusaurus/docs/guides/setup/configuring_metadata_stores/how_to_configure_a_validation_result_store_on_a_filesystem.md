@@ -62,4 +62,4 @@ stores:
 
 ## 4. Confirm that the Validation Results Store has been correctly configured
 
-Run a [Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results Store in your new location, and then visualize the results by re-building [Data Docs](../../../terms/data_docs.md).
+Run a [Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional) to store results in the new Validation Results Store in your new location, and then visualize the results by re-building [Data Docs](../../../terms/data_docs.md).
