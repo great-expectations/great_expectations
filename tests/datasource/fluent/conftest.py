@@ -418,8 +418,8 @@ def seeded_cloud_context(
 
 @pytest.fixture(
     params=[
-        pytest.param("seeded_file_context", marks=pytest.mark.filesystem),
-        pytest.param("seeded_cloud_context", marks=pytest.mark.cloud),
+        pytest.param("seeded_file_context", marks=[pytest.mark.filesystem]),
+        pytest.param("seeded_cloud_context", marks=[pytest.mark.cloud]),
     ]
 )
 def seeded_contexts(
