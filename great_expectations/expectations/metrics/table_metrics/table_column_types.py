@@ -89,9 +89,10 @@ class ColumnTypes(TableMetricProvider):
 
 
 def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
+    table_selectable: [str | sqlalchemy.TextClause]
     # if a custom query was passed
     if sqlalchemy.Table and isinstance(batch_data.selectable, sqlalchemy.Table):
-        table_selectable: str = (  # type: ignore[no-redef]
+        table_selectable: str = (
             batch_data.source_table_name or batch_data.selectable.name
         )
         schema_name = batch_data.source_schema_name or batch_data.selectable.schema
