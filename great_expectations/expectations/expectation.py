@@ -19,6 +19,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    ClassVar,
     Dict,
     Final,
     List,
@@ -327,25 +328,25 @@ class Expectation(metaclass=MetaExpectation):
         2. Data Docs rendering methods decorated with the @renderer decorator. See the
     """
 
-    version = ge_version
-    domain_keys: Tuple[str, ...] = ()
-    success_keys: Tuple[str, ...] = ()
-    runtime_keys: Tuple[str, ...] = (
+    version: ClassVar = ge_version
+    domain_keys: ClassVar[Tuple[str, ...]] = ()
+    success_keys: ClassVar[Tuple[str, ...]] = ()
+    runtime_keys: ClassVar[Tuple[str, ...]] = (
         "include_config",
         "catch_exceptions",
         "result_format",
     )
-    default_kwarg_values: dict[
-        str, bool | str | float | RuleBasedProfilerConfig | None
+    default_kwarg_values: ClassVar[
+        dict[str, bool | str | float | RuleBasedProfilerConfig | None]
     ] = {
         "include_config": True,
         "catch_exceptions": False,
         "result_format": "BASIC",
     }
-    args_keys: Tuple[str, ...] = ()
+    args_keys: ClassVar[Tuple[str, ...]] = ()
 
-    expectation_type: str
-    examples: List[dict] = []
+    expectation_type: ClassVar[str]
+    examples: ClassVar[List[dict]] = []
 
     def __init__(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -2334,15 +2335,15 @@ class BatchExpectation(Expectation, ABC):
             expectation.
     """
 
-    domain_keys: Tuple[str, ...] = (
+    domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
         "table",
         "row_condition",
         "condition_parser",
     )
-    metric_dependencies: Tuple[str, ...] = ()
-    domain_type = MetricDomainTypes.TABLE
-    args_keys: Tuple[str, ...] = ()
+    metric_dependencies: ClassVar[Tuple[str, ...]] = ()
+    domain_type: ClassVar = MetricDomainTypes.TABLE
+    args_keys: ClassVar[Tuple[str, ...]] = ()
 
     @override
     def get_validation_dependencies(
@@ -2564,7 +2565,7 @@ class QueryExpectation(BatchExpectation, ABC):
         - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
     """
 
-    default_kwarg_values: Dict = {
+    default_kwarg_values: ClassVar[Dict] = {
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
@@ -2573,7 +2574,7 @@ class QueryExpectation(BatchExpectation, ABC):
         "condition_parser": None,
     }
 
-    domain_keys: Tuple = (
+    domain_keys: ClassVar[Tuple] = (
         "batch_id",
         "row_condition",
         "condition_parser",
@@ -2738,10 +2739,16 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             kwargs from the Expectation Configuration.
     """
 
-    map_metric: Optional[str] = None
-    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
-    domain_type = MetricDomainTypes.COLUMN
-    success_keys: Tuple[str, ...] = ("mostly",)
+    map_metric: ClassVar[Optional[str]] = None
+    domain_keys: ClassVar[tuple[str, ...]] = (
+        "batch_id",
+        "table",
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
+    domain_type: ClassVar = MetricDomainTypes.COLUMN
+    success_keys: ClassVar[Tuple[str, ...]] = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
