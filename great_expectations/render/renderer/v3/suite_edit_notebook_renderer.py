@@ -189,7 +189,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
             default_file_name="header.py.j2",
             suite_name=suite_name,
             batch_request=batch_request,
-            env=os.environ,
+            env=os.environ,  # noqa: TID251
         )
         self.add_code_cell(code=code, lint=True)
 
@@ -206,7 +206,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
             notebook_config=self.footer_code,
             default_file_name="footer.py.j2",
             batch_request=batch_request,
-            env=os.environ,
+            env=os.environ,  # noqa: TID251
         )
         self.add_code_cell(code=code)
 
@@ -252,7 +252,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
                 notebook_config=self.table_expectations_not_found_markdown,
                 default_file_name="TABLE_EXPECTATIONS_NOT_FOUND.md",
                 batch_request=batch_request,
-                env=os.environ,
+                env=os.environ,  # noqa: TID251
             )
             self.add_markdown_cell(markdown=markdown)
             return
@@ -267,7 +267,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
                 default_file_name="table_expectation.py.j2",
                 expectation=expectation,
                 batch_request=batch_request,
-                env=os.environ,
+                env=os.environ,  # noqa: TID251
                 kwargs_string=self._build_kwargs_string(expectation=expectation),
                 meta_args=self._build_meta_arguments(meta=expectation.meta),
             )
@@ -283,7 +283,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
                 notebook_config=self.column_expectations_not_found_markdown,
                 default_file_name="COLUMN_EXPECTATIONS_NOT_FOUND.md",
                 batch_request=batch_request,
-                env=os.environ,
+                env=os.environ,  # noqa: TID251
             )
             self.add_markdown_cell(markdown=markdown)
             return
@@ -308,7 +308,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
                     default_file_name="column_expectation.py.j2",
                     expectation=expectation,
                     batch_request=batch_request,
-                    env=os.environ,
+                    env=os.environ,  # noqa: TID251
                     kwargs_string=self._build_kwargs_string(expectation=expectation),
                     meta_args=self._build_meta_arguments(meta=expectation.meta),
                 )
@@ -417,6 +417,6 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
             notebook_config=self.authoring_intro_markdown,
             default_file_name="AUTHORING_INTRO.md",
             batch_request=batch_request,
-            env=os.environ,
+            env=os.environ,  # noqa: TID251
         )
         self.add_markdown_cell(markdown=markdown)

@@ -239,6 +239,8 @@ class SqlAlchemyBatchData(BatchData):
                         CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
                     )
                     AS {query}"""
+        elif dialect == GXSqlDialect.DATABRICKS:
+            stmt = f"CREATE TEMPORARY VIEW `{temp_table_name}` AS {query}"
         elif dialect == GXSqlDialect.DREMIO:
             stmt = f"CREATE OR REPLACE VDS {temp_table_name} AS {query}"
         elif dialect == GXSqlDialect.SNOWFLAKE:

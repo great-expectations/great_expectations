@@ -33,12 +33,12 @@ jobs:
   ci-is-on-main-repo:
     runs-on: ubuntu-latest
     # job only runs on main repo where we have access to credentials, or as part of the release
-    if: | 
+    if: |
       github.event.pull_request.head.repo.full_name == github.repository ||
       (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     steps:
       - run: echo "This CI step only runs on the main repo, where we have access to credentials."
-  
+
   docs-changes:
     # check whether docs were changed
     runs-on: ubuntu-latest
@@ -130,7 +130,9 @@ jobs:
     name: docs-snippets
     needs: [docs-changes, ci-is-on-main-repo]
     # run on non-draft PRs with docs changes
-    if: (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true')
+    if: |
+      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     env:
       # google
@@ -240,7 +242,7 @@ jobs:
 
   cloud-tests:
     needs: ci-is-on-main-repo
-    if: github.event.pull_request.draft == false 
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -274,6 +276,9 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
       AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      DATABRICKS_TOKEN: ${{secrets.DATABRICKS_SQL_TOKEN}}
+      DATABRICKS_HOST: ${{secrets.DATABRICKS_HOST}}
+      DATABRICKS_HTTP_PATH: ${{secrets.DATABRICKS_HTTP_PATH}}
       SNOWFLAKE_CI_ACCOUNT: ${{secrets.SNOWFLAKE_CI_ACCOUNT}}
       SNOWFLAKE_CI_USER_PASSWORD: ${{secrets.SNOWFLAKE_CI_USER_PASSWORD}}
       SNOWFLAKE_ACCOUNT: ${{secrets.SNOWFLAKE_ACCOUNT}}
