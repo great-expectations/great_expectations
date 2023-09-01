@@ -82,23 +82,3 @@ for batch in batches:
 for batch in batches:
     print(batch.batch_spec)
 # </snippet>
-
-# Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py retrieve_table">
-table_asset = datasource.add_table_asset(name=asset_name, table_name=asset_table_name)
-# </snippet>
-
-# Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py define_column">
-table_asset.add_splitter_column_value('my_column_name')
-# </snippet>
-
-# Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py filter_column">
-batch_request = table_asset.build_batch_request(options = {'my_column_name':'my_column_value'})
-# </snippet>
-
-# Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py return_batch_list">
-table_asset.get_batch_list_from_batch_request(batch_request = batch_request)
-# </snippet>

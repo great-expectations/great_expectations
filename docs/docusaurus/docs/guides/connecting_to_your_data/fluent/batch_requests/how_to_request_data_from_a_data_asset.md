@@ -65,19 +65,24 @@ You can use the Python slice function to remove a subset of data from a Batch Re
 
 1. Run the following code to retrieve an entire table of data from a SQL datasource:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py retrieve_table"
+    ```python
+    table_asset = datasource.add_table_asset(name=asset_name, table_name=asset_table_name)
     ```
 2. Run the following code to define the column to slice:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py define_column"
+    ```python
+    table_asset.add_splitter_column_value('my_column_name')
     ```
 3. Run the following code to slice and filter the column:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py filter_column"
+    ```python
+    batch_request = table_asset.build_batch_request(options = {'my_column_name':'my_column_value'})
     ```
+
 4. Run the following code to return a batch list:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py return_batch_list"
+    ```python
+    table_asset.get_batch_list_from_batch_request(batch_request = batch_request)
     ```
 
 ## Verify that the correct Batches were returned
