@@ -34,10 +34,11 @@ class ColumnDescriptiveMetricsAction(AgentAction[RunColumnDescriptiveMetricsEven
 
         self._metric_repository.add_metric_run(metric_run)
 
+        # TODO: What should resource_id be? Likely the returned id for the metric run from the rest API call.
         return ActionResult(
             id=id,
             type=event.type,
             created_resources=[
-                CreatedResource(resource_id=str(metric_run.id), type="MetricRun"),
+                CreatedResource(resource_id="resource_id", type="MetricRun"),
             ],
         )
