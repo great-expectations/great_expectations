@@ -588,7 +588,7 @@ class Datasource(
                         f"Unable to build data_connector for {self.type} {data_asset.type} {data_asset.name}",
                         exc_info=True,
                     )
-                    # direct cause will be useful to users than a generic error
+                    # reveal direct cause instead of generic, unhelpful MyDatasourceError
                     asset_build_failure_direct_cause[data_asset.name] = (
                         dc_build_err.__cause__ or dc_build_err
                     )
@@ -601,6 +601,7 @@ class Datasource(
             warnings.warn(
                 f"data_connector build failure for {self.name} assets - {', '.join(names_and_error)}",
                 category=RuntimeWarning,
+                # TODO: how does `source` work with warnings?
                 source=names_and_error,
             )
 
