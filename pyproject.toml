@@ -87,7 +87,6 @@ exclude = [
     'expectations/core/expect_column_values_to_not_match_regex\.py',                                       # 2
     'expectations/core/expect_column_values_to_not_match_like_pattern_list\.py',                           # 3
     'expectations/core/expect_column_values_to_not_match_like_pattern\.py',                                # 2
-    'expectations/core/expect_column_values_to_not_be_null\.py',                                           # 2
     'expectations/core/expect_column_values_to_not_be_in_set\.py',                                         # 2
     'expectations/core/expect_column_values_to_match_strftime_format\.py',                                 # 2
     'expectations/core/expect_column_values_to_match_regex_list\.py',                                      # 2
@@ -105,7 +104,6 @@ exclude = [
     'expectations/core/expect_column_values_to_be_dateutil_parseable\.py',                                 # 1
     'expectations/core/expect_column_values_to_be_between\.py',                                            # 3
     'expectations/core/expect_column_unique_value_count_to_be_between\.py',                                # 1
-    'expectations/core/expect_column_to_exist\.py',                                                        # 4
     'expectations/core/expect_column_stdev_to_be_between\.py',                                             # 1
     'expectations/core/expect_column_quantile_values_to_be_between\.py',                                   # 15
     'expectations/core/expect_column_value_lengths_to_equal\.py',                                          # 1

@@ -37,7 +37,6 @@ from great_expectations.experimental.metric_repository.metric_repository import 
 )
 from great_expectations.experimental.metric_repository.metrics import (
     Metric,
-    MetricException,
     MetricRun,
     TableMetric,
 )
@@ -132,14 +131,14 @@ def test_demo_batch_inspector(
                 batch=batch,
                 metric_name="table.row_count",
                 value=2,
-                exception=MetricException(),
+                exception=None,
             ),
             TableMetric[List[str]](
                 id=metric_id,
                 batch=batch,
                 metric_name="table.columns",
                 value=["col1", "col2"],
-                exception=MetricException(),
+                exception=None,
             ),
         ],
     )
@@ -184,5 +183,5 @@ def test_cannot_init_abstract_metric(
             run_id=run_id,
             batch=batch,
             metric_name="table.columns",
-            exception=MetricException(),
+            exception=None,
         )
