@@ -568,12 +568,40 @@ class Datasource(
         return None
 
     def _rebuild_asset_data_connectors(self) -> None:
-        """If Datasource required a data_connector we need to build the data_connector for each asset"""
+        """
+        If Datasource required a data_connector we need to build the data_connector for each asset.
+
+        A warning is raised if a data_connector cannot be built for an asset.
+        Not all users will have access to the needed dependencies (packages or credentials) for every asset.
+        Missing dependencies will stop them from using the asset but should not stop them from loading it from config.
+        """
+        asset_build_failure_direct_cause: dict[str, Exception | BaseException] = {}
+
         if self.data_connector_type:
             for data_asset in self.assets:
-                # check if data_connector exist before rebuilding?
-                connect_options = getattr(data_asset, "connect_options", {})
-                self._build_data_connector(data_asset, **connect_options)
+                try:
+                    # check if data_connector exist before rebuilding?
+                    connect_options = getattr(data_asset, "connect_options", {})
+                    self._build_data_connector(data_asset, **connect_options)
+                except Exception as dc_build_err:
+                    logger.info(
+                        f"Unable to build data_connector for {self.type} {data_asset.type} {data_asset.name}",
+                        exc_info=True,
+                    )
+                    # reveal direct cause instead of generic, unhelpful MyDatasourceError
+                    asset_build_failure_direct_cause[data_asset.name] = (
+                        dc_build_err.__cause__ or dc_build_err
+                    )
+        if asset_build_failure_direct_cause:
+            # TODO: allow users to opt out of these warnings
+            names_and_error: List[str] = [
+                f"{name}:{type(exc).__name__}"
+                for (name, exc) in asset_build_failure_direct_cause.items()
+            ]
+            warnings.warn(
+                f"data_connector build failure for {self.name} assets - {', '.join(names_and_error)}",
+                category=RuntimeWarning,
+            )
 
     @staticmethod
     def parse_order_by_sorters(
