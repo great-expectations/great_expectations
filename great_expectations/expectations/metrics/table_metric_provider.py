@@ -24,7 +24,7 @@ class TableMetricProvider(MetricProvider):
     have correct values that may simply be inherited by Metric classes.
 
     ---Documentation---
-        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations
+        - https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp
     """
 
     domain_keys: Tuple[str, ...] = (
