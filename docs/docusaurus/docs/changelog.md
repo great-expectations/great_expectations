@@ -11,14 +11,14 @@ title: Changelog
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
 ### 0.17.14
-* [BUGFIX] Use correct syntax for creating temporary views for DatabricksSQL datasources ([#8655](GxURL.PULL_REQUESTS/8655))
-* [BUGFIX] Missing CloudDataContext when loading from config ([#8659](GxURL.PULL_REQUESTS/8659))
-* [BUGFIX] Raise warning if data_connector cannot be built on config load ([#8658](GxURL.PULL_REQUESTS/8658))
-* [DOCS] Add New Topic for Identifying Failed Table Rows ([#8554](GxURL.PULL_REQUESTS/8554))
-* [DOCS] Update Request Data from a Data Asset ([#8642](GxURL.PULL_REQUESTS/8642))
-* [MAINTENANCE] typing - `expect_column` - `to_exist` and `to_not_be_null` ([#8652](GxURL.PULL_REQUESTS/8652))
-* [MAINTENANCE] Column Descriptive Metrics: Synchronize domain models ([#8648](GxURL.PULL_REQUESTS/8648))
-* [MAINTENANCE] Column Descriptive Metrics: Add test for MetricRepository ([#8650](GxURL.PULL_REQUESTS/8650))
+* [BUGFIX] Use correct syntax for creating temporary views for DatabricksSQL datasources ([#8655](https://github.com/great-expectations/great_expectations/pull/8655))
+* [BUGFIX] Missing CloudDataContext when loading from config ([#8659](https://github.com/great-expectations/great_expectations/pull/8659))
+* [BUGFIX] Raise warning if data_connector cannot be built on config load ([#8658](https://github.com/great-expectations/great_expectations/pull/8658))
+* [DOCS] Add New Topic for Identifying Failed Table Rows ([#8554](https://github.com/great-expectations/great_expectations/pull/8554))
+* [DOCS] Update Request Data from a Data Asset ([#8642](https://github.com/great-expectations/great_expectations/pull/8642))
+* [MAINTENANCE] typing - `expect_column` - `to_exist` and `to_not_be_null` ([#8652](https://github.com/great-expectations/great_expectations/pull/8652))
+* [MAINTENANCE] Column Descriptive Metrics: Synchronize domain models ([#8648](https://github.com/great-expectations/great_expectations/pull/8648))
+* [MAINTENANCE] Column Descriptive Metrics: Add test for MetricRepository ([#8650](https://github.com/great-expectations/great_expectations/pull/8650))
 
 ### 0.17.13
 * [FEATURE] Scripts for Identify Failed Rows (ID/PK) Doc ([#8606](https://github.com/great-expectations/great_expectations/pull/8606))
