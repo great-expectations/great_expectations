@@ -371,13 +371,13 @@ class TestPandasDefaultWithCloud:
 # Test markers come from seeded_contexts fixture
 def test_data_connectors_are_built_on_config_load(
     cloud_storage_get_client_doubles,
-    seeded_contexts: CloudDataContext | FileDataContext,
+    seeded_file_context: FileDataContext,
 ):
     """
     Ensure that all Datasources that require data_connectors have their data_connectors
     created when loaded from config.
     """
-    context = seeded_contexts
+    context = seeded_file_context
     dc_datasources: dict[str, list[str]] = defaultdict(list)
 
     assert context.fluent_datasources
