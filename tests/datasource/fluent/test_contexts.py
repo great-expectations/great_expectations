@@ -343,16 +343,6 @@ def verify_asset_names_mock(
     return cloud_api_fake
 
 
-def test_data_context_is_available(
-    seeded_contexts: FileDataContext | CloudDataContext,
-):
-    # FIXME: this test does not catch the regression
-    context = seeded_contexts
-    for datasource in context.datasources.values():
-        assert datasource._data_context
-        assert isinstance(datasource._data_context, type(seeded_contexts))
-
-
 class TestPandasDefaultWithCloud:
     @pytest.mark.cloud
     def test_payload_sent_to_cloud(
