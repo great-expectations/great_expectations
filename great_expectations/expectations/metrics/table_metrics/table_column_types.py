@@ -92,9 +92,7 @@ def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
     table_selectable: str | sqlalchemy.TextClause
     # if a custom query was passed
     if sqlalchemy.Table and isinstance(batch_data.selectable, sqlalchemy.Table):
-        table_selectable = (
-            batch_data.source_table_name or batch_data.selectable.name
-        )
+        table_selectable = batch_data.source_table_name or batch_data.selectable.name
         schema_name = batch_data.source_schema_name or batch_data.selectable.schema
     else:
         table_selectable = batch_data.selectable
