@@ -1,6 +1,8 @@
 from unittest.mock import Mock
 from uuid import UUID
 
+import pytest
+
 from great_expectations.data_context import CloudDataContext
 from great_expectations.experimental.metric_repository.cloud_data_store import (
     CloudDataStore,
@@ -21,6 +23,7 @@ from tests.datasource.fluent.conftest import (
 
 
 class TestCloudDataStoreMetricRun:
+    @pytest.mark.unit
     def test_add_metric_run_non_generic_metric_type(
         self,
         empty_cloud_context_fluent: CloudDataContext,  # noqa: F811  # used as a fixture
@@ -68,6 +71,7 @@ class TestCloudDataStoreMetricRun:
             },
         )
 
+    @pytest.mark.unit
     def test_add_metric_run_generic_metric_type(
         self,
         empty_cloud_context_fluent: CloudDataContext,  # noqa: F811  # used as a fixture
@@ -111,6 +115,7 @@ class TestCloudDataStoreMetricRun:
             },
         )
 
+    @pytest.mark.unit
     def test_add_metric_run_generic_metric_type_with_exception(
         self,
         empty_cloud_context_fluent: CloudDataContext,  # noqa: F811  # used as a fixture
