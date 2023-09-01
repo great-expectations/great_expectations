@@ -191,6 +191,7 @@ class ColumnQuantileValuesMetric(ColumnMetric[List[float]]):
         return "list[float]"
 
     @property
+    @override
     def metric_type(self) -> str:
         return self.__class__.__name__
 

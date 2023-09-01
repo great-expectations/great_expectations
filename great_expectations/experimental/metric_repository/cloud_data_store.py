@@ -70,6 +70,7 @@ class CloudDataStore(DataStore[StorableTypes]):
         return payload.dict()
 
     def _build_url(self, value: StorableTypes) -> str:
+        assert self._context.ge_cloud_config is not None
         config = self._context.ge_cloud_config
         return f"{config.base_url}/organizations/{config.organization_id}{self._map_to_url(value)}"
 
