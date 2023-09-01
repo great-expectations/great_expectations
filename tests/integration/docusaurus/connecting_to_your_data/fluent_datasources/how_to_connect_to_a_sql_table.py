@@ -71,3 +71,13 @@ assert set(batches[0].columns()) == {
     "total_amount",
     "congestion_surcharge",
 }
+
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py add_vendor_id_splitter">
+table_asset.add_splitter_column_value("vendor_id")
+# </snippet>
+
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py build_vendor_id_batch_request">
+my_batch_request = my_asset.build_batch_request({"vendor_id": 1})
+# </snippet>
+
+batches = my_asset.get_batch_list_from_batch_request(my_batch_request)
