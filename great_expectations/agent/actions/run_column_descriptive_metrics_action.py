@@ -32,7 +32,7 @@ class ColumnDescriptiveMetricsAction(AgentAction[RunColumnDescriptiveMetricsEven
 
         metric_run = self._batch_inspector.compute_metric_run(batch_request)
 
-        self._metric_repository.add(metric_run)
+        self._metric_repository.add_metric_run(metric_run)
 
         return ActionResult(
             id=id,
