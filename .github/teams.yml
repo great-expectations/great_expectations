@@ -4,18 +4,16 @@
 
 dx:
   - '@Shinnnyshinshin' # Will Shin
-  - '@alexsherstinsky' # Alex Sherstinsky
   - '@anthonyburdi'    # Anthony Burdi
-  - '@kenwade4'        # Ken Wade
 
 devrel:
   - '@Rachel-Reverie'  # Rachel Reverie
   - '@austiezr'        # Austin Robinson
   - '@kwcanuck'        # Rob Gray
   - '@kyleaton'        # Kyle Eaton
+  - '@rachhouse'       # Rachel House
   - '@rdodev'          # Ruben Orduz
   - '@talagluck'       # Tal Gluck
-  - '@tjholsman'       # TJ Holsman
 
 core:
   - '@DrewHoo'         # Drew Hoover
@@ -27,7 +25,6 @@ core:
   - '@Super-Tanner'    # Tanner Beam
   - '@TrangPham'       # Thu Pham
   - '@abegong'         # Abe Gong
-  - '@alexsherstinsky' # Alex Sherstinsky
   - '@allensallinger'  # Allen Sallinger
   - '@anthonyburdi'    # Anthony Burdi
   - '@billdirks'       # Bill Dirks
@@ -40,7 +37,6 @@ core:
   - '@joshua-stauffer' # Josh Stauffer
   - '@joshzzheng'      # Josh Zheng
   - '@jshaikGX'        # Javed Shaik
-  - '@kenwade4'        # Ken Wade
   - '@lockettks'       # Kim Mathieu
   - '@nicgrayson'      # Nic Grayson
   - '@roblim'          # Rob Lim

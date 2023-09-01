@@ -112,6 +112,7 @@ class DatasourceDict(UserDict):
         return self._init_block_style_datasource(name=name, config=ds)
 
     def _init_fluent_datasource(self, ds: FluentDatasource) -> FluentDatasource:
+        ds._data_context = self._context
         ds._rebuild_asset_data_connectors()
         return ds
 
