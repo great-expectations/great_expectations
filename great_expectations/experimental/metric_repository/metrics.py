@@ -18,10 +18,8 @@ class MetricRepositoryBaseModel(BaseModel):
 
 
 class MetricException(MetricRepositoryBaseModel):
-    exception_type: str = Field(description="Exception type if an exception is thrown")
-    exception_message: str = Field(
-        description="Exception message if an exception is thrown"
-    )
+    type: str = Field(description="Exception type if an exception is thrown")
+    message: str = Field(description="Exception message if an exception is thrown")
 
 
 _ValueType = TypeVar("_ValueType")
@@ -78,12 +76,12 @@ class ColumnMetric(Metric, Generic[_ValueType]):
 # example, ColumnMetric[float] or TableMetric[list[str]].
 
 # TODO: Add metrics here for all Column Descriptive Metrics
-#  QuantileValuesColumnMetric is an example of a metric that has parameters
+#  ColumnQuantileValuesMetric is an example of a metric that has parameters
 
 
-class QuantileValuesColumnMetric(ColumnMetric[List[float]]):
+class ColumnQuantileValuesMetric(ColumnMetric[List[float]]):
     quantiles: List[float] = Field(description="Quantiles to compute")
-    allow_relative_error: Union[str, float] = Field(
+    allow_relative_error: Union[float, str] = Field(
         description="Relative error interpolation type (pandas) or limit (e.g. spark) depending on data source"
     )
 
