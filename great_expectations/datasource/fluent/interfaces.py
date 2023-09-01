@@ -570,9 +570,10 @@ class Datasource(
     def _rebuild_asset_data_connectors(self) -> None:
         """
         If Datasource required a data_connector we need to build the data_connector for each asset.
-        If data_connector cannot be built for an asset, a warning is raised.
-        This is needed because not all users may have access to the needed credentials and dependencies
-        needed for all assets.
+
+        A warning is raised if a data_connector cannot be built for an asset.
+        Not all users will have access to the needed dependencies (packages or credentials) for every asset.
+        Missing dependencies will stop them from using the asset but should not stop them from loading it from config.
         """
         if self.data_connector_type:
             for data_asset in self.assets:
