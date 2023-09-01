@@ -80,6 +80,4 @@ table_asset.add_splitter_column_value('vendor_id')
 my_batch_request = my_asset.build_batch_request({'vendor_id':1})
 # </snippet>
 ​
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py return_vendor_id_batch">
 batches = my_asset.get_batch_list_from_batch_request(my_batch_request)
-# </snippet>
