@@ -220,7 +220,7 @@ class SphinxInvokeDocsBuilder:
 
         sidebar_entry = self._get_sidebar_entry(html_file_path=html_file_path)
 
-        # Add _module suffix to module titles
+        # Add .py suffix to module titles
         if sidebar_entry.type == SidebarEntryType.MODULE:
             stem_path = pathlib.Path(
                 self._get_mdx_file_path(sidebar_entry=sidebar_entry).stem
