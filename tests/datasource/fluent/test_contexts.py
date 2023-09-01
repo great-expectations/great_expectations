@@ -368,7 +368,7 @@ class TestPandasDefaultWithCloud:
         )
 
 
-# Test markers come from seeded_contexts fixture
+@pytest.mark.filesystem
 def test_data_connectors_are_built_on_config_load(
     cloud_storage_get_client_doubles,
     seeded_file_context: FileDataContext,
