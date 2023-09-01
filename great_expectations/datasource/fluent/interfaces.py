@@ -601,8 +601,6 @@ class Datasource(
             warnings.warn(
                 f"data_connector build failure for {self.name} assets - {', '.join(names_and_error)}",
                 category=RuntimeWarning,
-                # TODO: how does `source` work with warnings?
-                source=names_and_error,
             )
 
     @staticmethod
