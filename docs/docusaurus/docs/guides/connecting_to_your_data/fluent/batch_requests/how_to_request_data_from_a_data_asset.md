@@ -75,11 +75,6 @@ You can use the Python slice function to remove a subset of data from a Batch Re
 
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py build_vendor_id_batch_request"
     ```
-4. Run the following code to return a batch list:
-
-    ```python
-    table_asset.get_batch_list_from_batch_request(batch_request = batch_request)
-    ```
 
 ## Verify that the correct Batches were returned
 
