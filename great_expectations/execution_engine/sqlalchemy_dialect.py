@@ -13,6 +13,7 @@ class GXSqlDialect(Enum):
 
     AWSATHENA = "awsathena"
     BIGQUERY = "bigquery"
+    DATABRICKS = "databricks"
     DREMIO = "dremio"
     HIVE = "hive"
     MSSQL = "mssql"
