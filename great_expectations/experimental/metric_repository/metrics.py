@@ -70,7 +70,7 @@ class Metric(MetricRepositoryBaseModel, Generic[_ValueType]):
 
     @property
     def value_type(self) -> str:
-        type_ = self.__orig_class__.__args__[0]
+        type_ = self.__orig_class__.__args__[0]  # type: ignore[attr-defined] # __orig_class__ is used to get the generic type
         string_rep = str(type_)
         if string_rep.startswith("<class"):
             return type_.__name__
@@ -90,6 +90,7 @@ class Metric(MetricRepositoryBaseModel, Generic[_ValueType]):
         ]
         return properties
 
+    @override
     def dict(  # noqa: PLR0913
         self,
         *,
@@ -130,15 +131,17 @@ class Metric(MetricRepositoryBaseModel, Generic[_ValueType]):
 
 
 class TableMetric(Metric, Generic[_ValueType]):
+    @override
     @property
     def value_type(self) -> str:
-        type_ = self.__orig_class__.__args__[0]
+        type_ = self.__orig_class__.__args__[0]  # type: ignore[attr-defined] # __orig_class__ is used to get the generic type
         string_rep = str(type_)
         if string_rep.startswith("<class"):
             return type_.__name__
         else:
             return string_rep
 
+    @override
     @property
     def metric_type(self) -> str:
         return self.__class__.__name__
@@ -147,15 +150,17 @@ class TableMetric(Metric, Generic[_ValueType]):
 class ColumnMetric(Metric, Generic[_ValueType]):
     column: str = Field(description="Column name")
 
+    @override
     @property
     def value_type(self) -> str:
-        type_ = self.__orig_class__.__args__[0]
+        type_ = self.__orig_class__.__args__[0]  # type: ignore[attr-defined] # __orig_class__ is used to get the generic type
         string_rep = str(type_)
         if string_rep.startswith("<class"):
             return type_.__name__
         else:
             return string_rep
 
+    @override
     @property
     def metric_type(self) -> str:
         return self.__class__.__name__

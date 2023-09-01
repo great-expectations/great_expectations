@@ -44,6 +44,8 @@ class CloudDataStore(DataStore[StorableTypes]):
     @override
     def __init__(self, context: CloudDataContext):
         super().__init__(context=context)
+        assert context.ge_cloud_config is not None
+        assert self._context.ge_cloud_config is not None
         self._session = create_session(
             access_token=context.ge_cloud_config.access_token
         )
