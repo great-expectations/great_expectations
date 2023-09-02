@@ -287,7 +287,7 @@ class TestTableIdentifiers:
     ):
         table_name = TABLE_NAME_MAPPING["postgres"].get(asset_name)
         if not table_name:
-            pytest.skip(f"no '{asset_name}' table_name for databricks")
+            pytest.skip(f"no '{asset_name}' table_name for postgres")
         # create table
         table_factory(engine=postgres_ds.get_engine(), table_names={table_name})
 
