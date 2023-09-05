@@ -21,7 +21,7 @@ class IDDict(dict):
             return tuple()
         elif len(id_keys) == 1:
             key = list(id_keys)[0]
-            return f"{key}={str(self[key])}"
+            return f"{key}={self[key]!s}"
 
         _id_dict = convert_to_json_serializable(data={k: self[k] for k in id_keys})
         return hashlib.md5(

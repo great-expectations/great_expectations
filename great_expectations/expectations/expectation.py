@@ -19,6 +19,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    ClassVar,
     Dict,
     Final,
     List,
@@ -327,25 +328,25 @@ class Expectation(metaclass=MetaExpectation):
         2. Data Docs rendering methods decorated with the @renderer decorator. See the
     """
 
-    version = ge_version
-    domain_keys: Tuple[str, ...] = ()
-    success_keys: Tuple[str, ...] = ()
-    runtime_keys: Tuple[str, ...] = (
+    version: ClassVar = ge_version
+    domain_keys: ClassVar[Tuple[str, ...]] = ()
+    success_keys: ClassVar[Tuple[str, ...]] = ()
+    runtime_keys: ClassVar[Tuple[str, ...]] = (
         "include_config",
         "catch_exceptions",
         "result_format",
     )
-    default_kwarg_values: dict[
-        str, bool | str | float | RuleBasedProfilerConfig | None
+    default_kwarg_values: ClassVar[
+        dict[str, bool | str | float | RuleBasedProfilerConfig | None]
     ] = {
         "include_config": True,
         "catch_exceptions": False,
         "result_format": "BASIC",
     }
-    args_keys: Tuple[str, ...] = ()
+    args_keys: ClassVar[Tuple[str, ...]] = ()
 
-    expectation_type: str
-    examples: List[dict] = []
+    expectation_type: ClassVar[str]
+    examples: ClassVar[List[dict]] = []
 
     def __init__(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -1748,7 +1749,7 @@ class Expectation(metaclass=MetaExpectation):
                     else:
                         param_type = RendererValueType.STRING
                     renderer_configuration.add_param(
-                        name=f"{param_prefix}{str(idx)}",
+                        name=f"{param_prefix}{idx!s}",
                         param_type=param_type,
                         value=value,
                     )
@@ -1774,7 +1775,7 @@ class Expectation(metaclass=MetaExpectation):
             ).value
             if array:
                 array_string = " ".join(
-                    [f"${param_prefix}{str(idx)}" for idx in range(len(array))]
+                    [f"${param_prefix}{idx!s}" for idx in range(len(array))]
                 )
             else:
                 array_string = "[ ]"
@@ -1931,7 +1932,7 @@ class Expectation(metaclass=MetaExpectation):
                 test_passed = True
                 error_diagnostics = None
             else:
-                _error(f"{repr(error_message)} for {exp_combined_test_name}")
+                _error(f"{error_message!r} for {exp_combined_test_name}")
                 print(f"{stack_trace[0]}")
                 error_diagnostics = ExpectationErrorDiagnostics(
                     error_msg=error_message,
@@ -1992,7 +1993,7 @@ class Expectation(metaclass=MetaExpectation):
             result = rendered_result.__str__()
 
         elif isinstance(rendered_result, RenderedAtomicContent):
-            result = f"(RenderedAtomicContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(RenderedAtomicContent) {rendered_result.to_json_dict()!r}"
 
         elif isinstance(rendered_result, RenderedContentBlockContainer):
             result = "(RenderedContentBlockContainer) " + repr(
@@ -2000,16 +2001,16 @@ class Expectation(metaclass=MetaExpectation):
             )
 
         elif isinstance(rendered_result, RenderedTableContent):
-            result = f"(RenderedTableContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(RenderedTableContent) {rendered_result.to_json_dict()!r}"
 
         elif isinstance(rendered_result, RenderedGraphContent):
-            result = f"(RenderedGraphContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(RenderedGraphContent) {rendered_result.to_json_dict()!r}"
 
         elif isinstance(rendered_result, ValueListContent):
-            result = f"(ValueListContent) {repr(rendered_result.to_json_dict())}"
+            result = f"(ValueListContent) {rendered_result.to_json_dict()!r}"
 
         elif isinstance(rendered_result, dict):
-            result = f"(dict) {repr(rendered_result)}"
+            result = f"(dict) {rendered_result!r}"
 
         elif isinstance(rendered_result, int):
             result = repr(rendered_result)
@@ -2334,15 +2335,15 @@ class BatchExpectation(Expectation, ABC):
             expectation.
     """
 
-    domain_keys: Tuple[str, ...] = (
+    domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
         "table",
         "row_condition",
         "condition_parser",
     )
-    metric_dependencies: Tuple[str, ...] = ()
-    domain_type = MetricDomainTypes.TABLE
-    args_keys: Tuple[str, ...] = ()
+    metric_dependencies: ClassVar[Tuple[str, ...]] = ()
+    domain_type: ClassVar = MetricDomainTypes.TABLE
+    args_keys: ClassVar[Tuple[str, ...]] = ()
 
     @override
     def get_validation_dependencies(
@@ -2469,7 +2470,7 @@ class BatchExpectation(Expectation, ABC):
                     min_value = parse(min_value)
                 except TypeError:
                     raise ValueError(
-                        f"""Could not parse "min_value" of {min_value} (of type "{str(type(min_value))}) into datetime \
+                        f"""Could not parse "min_value" of {min_value} (of type "{type(min_value)!s}) into datetime \
 representation."""
                     )
 
@@ -2478,7 +2479,7 @@ representation."""
                     max_value = parse(max_value)
                 except TypeError:
                     raise ValueError(
-                        f"""Could not parse "max_value" of {max_value} (of type "{str(type(max_value))}) into datetime \
+                        f"""Could not parse "max_value" of {max_value} (of type "{type(max_value)!s}) into datetime \
 representation."""
                     )
 
@@ -2564,7 +2565,7 @@ class QueryExpectation(BatchExpectation, ABC):
         - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
     """
 
-    default_kwarg_values: Dict = {
+    default_kwarg_values: ClassVar[Dict] = {
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
@@ -2573,7 +2574,7 @@ class QueryExpectation(BatchExpectation, ABC):
         "condition_parser": None,
     }
 
-    domain_keys: Tuple = (
+    domain_keys: ClassVar[Tuple] = (
         "batch_id",
         "row_condition",
         "condition_parser",
@@ -2738,10 +2739,16 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             kwargs from the Expectation Configuration.
     """
 
-    map_metric: Optional[str] = None
-    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
-    domain_type = MetricDomainTypes.COLUMN
-    success_keys: Tuple[str, ...] = ("mostly",)
+    map_metric: ClassVar[Optional[str]] = None
+    domain_keys: ClassVar[tuple[str, ...]] = (
+        "batch_id",
+        "table",
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
+    domain_type: ClassVar = MetricDomainTypes.COLUMN
+    success_keys: ClassVar[Tuple[str, ...]] = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
@@ -3732,7 +3739,7 @@ def add_values_with_json_schema_from_list_in_params(
     target_list = params.get(param_key_with_list)
     if target_list is not None and len(target_list) > 0:
         for i, v in enumerate(target_list):
-            params_with_json_schema[f"v__{str(i)}"] = {
+            params_with_json_schema[f"v__{i!s}"] = {
                 "schema": {"type": list_values_type},
                 "value": v,
             }

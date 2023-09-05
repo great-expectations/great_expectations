@@ -26,6 +26,7 @@ from great_expectations.core.config_provider import (
     _CloudConfigurationProvider,
     _ConfigurationProvider,
 )
+from great_expectations.core.datasource_dict import DatasourceDict
 from great_expectations.core.http import create_session
 from great_expectations.core.serializer import JsonConfigSerializer
 from great_expectations.data_context._version_checker import _VersionChecker
@@ -383,6 +384,15 @@ class CloudDataContext(SerializableDataContext):
             environment_variable=deprecated_environment_variable,
             conf_file_section=conf_file_section,
             conf_file_option=conf_file_option,
+        )
+
+    @override
+    def _init_datasources(self) -> None:
+        # Note that Cloud does NOT populate self._datasources with existing objects on init.
+        # Objects are retrieved only when requested and are NOT cached (this differs in ephemeral/file-backed contexts).
+        self._datasources = DatasourceDict(
+            context=self,
+            datasource_store=self._datasource_store,
         )
 
     @override

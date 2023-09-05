@@ -1,13 +1,28 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, Generic, List, Optional, Sequence, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    AbstractSet,
+    Any,
+    Dict,
+    Generic,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    TypeVar,
+    Union,
+)
 
 import pydantic
 from pydantic import BaseModel, Field
 
+from great_expectations.compatibility.typing_extensions import override
+
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.interfaces import Batch
+    MappingIntStrAny = Mapping[Union[int, str], Any]
+    AbstractSetIntStr = AbstractSet[Union[int, str]]
 
 
 class MetricRepositoryBaseModel(BaseModel):
@@ -18,12 +33,8 @@ class MetricRepositoryBaseModel(BaseModel):
 
 
 class MetricException(MetricRepositoryBaseModel):
-    exception_type: Optional[str] = Field(
-        description="Exception type if an exception is thrown", default=None
-    )
-    exception_message: Optional[str] = Field(
-        description="Exception message if an exception is thrown", default=None
-    )
+    type: str = Field(description="Exception type if an exception is thrown")
+    message: str = Field(description="Exception message if an exception is thrown")
 
 
 _ValueType = TypeVar("_ValueType")
@@ -42,11 +53,12 @@ class Metric(MetricRepositoryBaseModel, Generic[_ValueType]):
         instance = super().__new__(cls)
         return instance
 
-    id: uuid.UUID = Field(description="Metric id")
-    batch: Batch = Field(description="Batch")
+    batch_id: str = Field(description="Batch id")
     metric_name: str = Field(description="Metric name")
     value: _ValueType = Field(description="Metric value")
-    exception: MetricException = Field(description="Exception info if thrown")
+    exception: Optional[MetricException] = Field(
+        description="Exception info if thrown", default=None
+    )
 
     @classmethod
     def update_forward_refs(cls):
@@ -56,16 +68,102 @@ class Metric(MetricRepositoryBaseModel, Generic[_ValueType]):
             Batch=Batch,
         )
 
+    @property
+    def value_type(self) -> str:
+        type_ = self.__orig_class__.__args__[0]  # type: ignore[attr-defined] # __orig_class__ is used to get the generic type
+        string_rep = str(type_)
+        if string_rep.startswith("<class"):
+            return type_.__name__
+        else:
+            return string_rep
+
+    @property
+    def metric_type(self) -> str:
+        return self.__class__.__name__
+
+    @classmethod
+    def _get_properties(cls):
+        """in pydandic v2 we can use computed_field.
+        https://docs.pydantic.dev/latest/usage/computed_fields/"""
+        properties = [
+            prop for prop in cls.__dict__ if isinstance(cls.__dict__[prop], property)
+        ]
+        return properties
+
+    @override
+    def dict(  # noqa: PLR0913
+        self,
+        *,
+        include: AbstractSetIntStr | MappingIntStrAny | None = None,
+        exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
+        by_alias: bool = False,
+        skip_defaults: Optional[bool] = None,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+    ) -> Dict[str, Any]:
+        """Override the dict function to include @property fields, in pydandic v2 we can use computed_field.
+        https://docs.pydantic.dev/latest/usage/computed_fields/
+        """
+        attribs = super().dict(
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            skip_defaults=skip_defaults,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+        )
+        props = self._get_properties()
+
+        # Include and exclude properties
+        if include:
+            props = [prop for prop in props if prop in include]
+        if exclude:
+            props = [prop for prop in props if prop not in exclude]
+
+        # Update the attribute dict with the properties
+        if props:
+            attribs.update({prop: getattr(self, prop) for prop in props})
+        return attribs
+
 
 # Metric domain types
 
 
 class TableMetric(Metric, Generic[_ValueType]):
-    pass
+    @override
+    @property
+    def value_type(self) -> str:
+        type_ = self.__orig_class__.__args__[0]  # type: ignore[attr-defined] # __orig_class__ is used to get the generic type
+        string_rep = str(type_)
+        if string_rep.startswith("<class"):
+            return type_.__name__
+        else:
+            return string_rep
+
+    @override
+    @property
+    def metric_type(self) -> str:
+        return self.__class__.__name__
 
 
 class ColumnMetric(Metric, Generic[_ValueType]):
     column: str = Field(description="Column name")
+
+    @override
+    @property
+    def value_type(self) -> str:
+        type_ = self.__orig_class__.__args__[0]  # type: ignore[attr-defined] # __orig_class__ is used to get the generic type
+        string_rep = str(type_)
+        if string_rep.startswith("<class"):
+            return type_.__name__
+        else:
+            return string_rep
+
+    @override
+    @property
+    def metric_type(self) -> str:
+        return self.__class__.__name__
 
 
 # TODO: Add ColumnPairMetric, MultiColumnMetric
@@ -74,21 +172,34 @@ class ColumnMetric(Metric, Generic[_ValueType]):
 # Metrics with parameters (aka metric_value_kwargs)
 # This is where the concrete metric types are defined that
 # bring together a domain type, value type and any parameters (aka metric_value_kwargs)
+# If a metric has parameters, it should be defined here. If it doesn't, you can use the generic types above, for
+# example, ColumnMetric[float] or TableMetric[list[str]].
 
 # TODO: Add metrics here for all Column Descriptive Metrics
-#  QuantileValuesColumnMetric is an example of a metric that has parameters
+#  ColumnQuantileValuesMetric is an example of a metric that has parameters
 
 
-class QuantileValuesColumnMetric(ColumnMetric[List[float]]):
+class ColumnQuantileValuesMetric(ColumnMetric[List[float]]):
     quantiles: List[float] = Field(description="Quantiles to compute")
-    allow_relative_error: Union[str, float] = Field(
+    allow_relative_error: Union[float, str] = Field(
         description="Relative error interpolation type (pandas) or limit (e.g. spark) depending on data source"
     )
+
+    @property
+    @override
+    def value_type(self) -> str:
+        return "list[float]"
+
+    @property
+    @override
+    def metric_type(self) -> str:
+        return self.__class__.__name__
 
 
 class MetricRun(MetricRepositoryBaseModel):
     """Collection of Metric objects produced during the same execution run."""
 
-    id: uuid.UUID = Field(description="Run id")
-    # created_at, created_by filled in by the backend.
+    data_asset_id: Union[uuid.UUID, None] = Field(
+        description="Data asset id", default=None
+    )
     metrics: Sequence[Metric]

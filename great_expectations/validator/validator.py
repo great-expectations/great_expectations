@@ -223,11 +223,6 @@ class Validator:
         # This special state variable tracks whether a validation run is going on, which will disable
         # saving expectation config objects
         self._active_validation: bool = False
-        if self._data_context and hasattr(
-            self._data_context, "_expectation_explorer_manager"
-        ):
-            # TODO: verify flow of default expectation arguments
-            self.set_default_expectation_argument("include_config", True)
 
         self._include_rendered_content: Optional[bool] = include_rendered_content
 
@@ -585,7 +580,7 @@ class Validator:
             except Exception as err:
                 if basic_runtime_configuration.get("catch_exceptions"):
                     exception_traceback = traceback.format_exc()
-                    exception_message = f"{type(err).__name__}: {str(err)}"
+                    exception_message = f"{type(err).__name__}: {err!s}"
                     exception_info = ExceptionInfo(
                         exception_traceback=exception_traceback,
                         exception_message=exception_message,

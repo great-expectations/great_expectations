@@ -42,7 +42,7 @@ Run the following code to connect to `.csv` data stored in the `great_expectatio
 Run the following code to retrieve an Expectation Suite:
 
 ```python
-context.get_expectation_suite("expectation_suite_name")
+my suite = context.get_expectation_suite("expectation_suite_name")
 ```
 Replace `expectation_suite_name` with the name of your Expectation Suite.
 

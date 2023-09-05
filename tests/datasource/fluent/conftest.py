@@ -3,6 +3,7 @@ from __future__ import annotations
 import functools
 import logging
 import pathlib
+import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -212,6 +213,9 @@ def empty_cloud_context_fluent(
         cloud_base_url=cloud_details.base_url,
         cloud_mode=True,
     )
+    context._datasources = (
+        {}  # type: ignore[assignment]
+    )  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
     return context
 
 
@@ -328,6 +332,13 @@ def cloud_storage_get_client_doubles(
 
 
 @pytest.fixture
+def filter_data_connector_build_warning():
+    with warnings.catch_warnings() as w:
+        warnings.simplefilter("ignore", RuntimeWarning)
+        yield w
+
+
+@pytest.fixture
 def fluent_only_config(
     fluent_gx_config_yml_str: str, seed_ds_env_vars: tuple
 ) -> GxConfig:
@@ -362,7 +373,7 @@ def fluent_yaml_config_file(
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
 def seeded_file_context(
-    cloud_storage_get_client_doubles,
+    filter_data_connector_build_warning,
     fluent_yaml_config_file: pathlib.Path,
     seed_ds_env_vars: tuple,
 ) -> FileDataContext:
@@ -375,7 +386,7 @@ def seeded_file_context(
 
 @pytest.fixture
 def seed_cloud(
-    cloud_storage_get_client_doubles,
+    filter_data_connector_build_warning,
     cloud_api_fake: responses.RequestsMock,
     fluent_only_config: GxConfig,
 ):
@@ -407,8 +418,8 @@ def seeded_cloud_context(
 
 @pytest.fixture(
     params=[
-        pytest.param("seeded_file_context", marks=pytest.mark.filesystem),
-        pytest.param("seeded_cloud_context", marks=pytest.mark.cloud),
+        pytest.param("seeded_file_context", marks=[pytest.mark.filesystem]),
+        pytest.param("seeded_cloud_context", marks=[pytest.mark.cloud]),
     ]
 )
 def seeded_contexts(

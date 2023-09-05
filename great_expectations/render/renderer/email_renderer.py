@@ -72,7 +72,7 @@ class EmailRenderer(Renderer):
                         else:
                             report_element = str(
                                 f"<strong>ERROR</strong>: The email is trying to provide a link to the following DataDocs: "
-                                f"`{str(docs_link_key)}`, but it is not configured under data_docs_sites "
+                                f"`{docs_link_key!s}`, but it is not configured under data_docs_sites "
                                 "in the great_expectations.yml</br>"
                             )
                             logger.critical(report_element)

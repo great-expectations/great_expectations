@@ -240,7 +240,7 @@ def measure_execution_time(
                         )
                         call_args: OrderedDict = bound_args.arguments
                         print(
-                            f"""Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} \
+                            f"""Total execution time of function {func.__name__}({dict(call_args)!s}): {delta_t} \
 seconds."""
                         )
                     else:
@@ -533,7 +533,7 @@ def read_json(  # noqa: PLR0913
     if accessor_func is not None:
         json_obj = json.load(open(filename, "rb"))
         json_obj = accessor_func(json_obj)
-        df = pd.read_json(json.dumps(json_obj), *args, **kwargs)
+        df = pd.read_json(io.StringIO(json.dumps(json_obj)), *args, **kwargs)
 
     else:
         df = pd.read_json(filename, *args, **kwargs)
@@ -933,7 +933,7 @@ def build_in_memory_runtime_context(
         store_backend_defaults=InMemoryStoreBackendDefaults(),
     )
 
-    context = context_factory(project_config=data_context_config)
+    context = context_factory(project_config=data_context_config, mode="ephemeral")  # type: ignore[call-overload] # Need to add overload
 
     return context
 
@@ -1200,7 +1200,7 @@ def filter_properties_dict(  # noqa: PLR0913, PLR0912
 
     if not isinstance(properties, dict):
         raise ValueError(
-            f'Source "properties" must be a dictionary (illegal type "{str(type(properties))}" detected).'
+            f'Source "properties" must be a dictionary (illegal type "{type(properties)!s}" detected).'
         )
 
     if not inplace:
@@ -1617,7 +1617,7 @@ def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
 
 
 def is_ndarray_datetime_dtype(
-    data: np.ndarray, parse_strings_as_datetimes: bool = False, fuzzy: bool = False
+    data: npt.NDArray, parse_strings_as_datetimes: bool = False, fuzzy: bool = False
 ) -> bool:
     """
     Determine whether or not all elements of 1-D "np.ndarray" argument are "datetime.datetime" type objects.
@@ -1631,11 +1631,11 @@ def is_ndarray_datetime_dtype(
 
 
 def convert_ndarray_to_datetime_dtype_best_effort(
-    data: np.ndarray,
+    data: npt.NDArray,
     datetime_detected: bool = False,
     parse_strings_as_datetimes: bool = False,
     fuzzy: bool = False,
-) -> Tuple[bool, bool, np.ndarray]:
+) -> Tuple[bool, bool, npt.NDArray]:
     """
     Attempt to parse all elements of 1-D "np.ndarray" argument into "datetime.datetime" type objects.
 
