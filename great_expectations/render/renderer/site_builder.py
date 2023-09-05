@@ -1,5 +1,6 @@
 import logging
 import os
+import pathlib
 import traceback
 import urllib
 from collections import OrderedDict
@@ -602,21 +603,21 @@ class DefaultSiteIndexBuilder:
 
         if run_id:
             filepath = (
-                "/".join(
-                    [
+                pathlib.Path(
+                    *[
                         "validations",
                         *expectation_suite_name.split("."),
                         *run_id.to_tuple(),
                         batch_identifier,
                     ]
-                )
+                ).as_posix()
                 + ".html"
             )
         else:
             filepath = (
-                "/".join(
-                    ["expectations", *expectation_suite_name.split(".")]
-                )
+                pathlib.Path(
+                    *["expectations", *expectation_suite_name.split(".")]
+                ).as_posix()
                 + ".html"
             )
 
