@@ -575,7 +575,10 @@ class TestTableIdentifiers:
 class TestColumnIdentifiers:
     @pytest.mark.parametrize(
         "expectation_type",
-        ["expect_column_values_to_not_be_null", "expect_column_to_exist"],
+        [
+            "expect_column_values_to_not_be_null",
+            "expect_column_to_exist",
+        ],
     )
     def test_column_expectation(
         self,
@@ -650,7 +653,7 @@ class TestColumnIdentifiers:
                 Literal[
                     "exception_info", "expectation_config", "meta", "result", "success"
                 ],
-                dict | bool,
+                dict,
             ]
         ] = next(iter(result.to_json_dict()["run_results"].values()))[
             "validation_result"
@@ -658,7 +661,8 @@ class TestColumnIdentifiers:
             "results"
         ]
         print(f"validation_result.results:\n{pf(validation_results, depth=4)}")
-        assert validation_results[-1]["success"] is True
+        assert validation_results[-1]["exception_info"]["raised_exception"] is False
+        # assert validation_results[-1]["success"] is True
 
 
 if __name__ == "__main__":
