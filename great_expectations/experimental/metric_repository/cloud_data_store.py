@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
     from great_expectations.data_context import CloudDataContext
 
+# When more types are storable, convert StorableTypes to a Union and add them to the type alias:
 StorableTypes: TypeAlias = MetricRun
 
 T = TypeVar("T", bound=StorableTypes)
