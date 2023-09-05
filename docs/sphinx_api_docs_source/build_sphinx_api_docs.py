@@ -353,6 +353,7 @@ class SphinxInvokeDocsBuilder:
         else:
             definition_path = definition.filepath
 
+        # We don't want the .py suffix in the URL so we only add the .mdx suffix.
         return definition_path.with_suffix(".mdx")
 
     def _get_base_url(self) -> str:
