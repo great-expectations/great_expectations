@@ -1401,6 +1401,17 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             Sqlalchemy connection
         """
+
+        def normalize_name(name):
+            if name is None:
+                return None
+            elif name == "":
+                return ""
+            elif name.lower() == name:
+                return sa.sql.quoted_name(name, quote=True)
+            else:
+                return name
+
         if self.dialect_name in _PERSISTED_CONNECTION_DIALECTS:
             try:
                 if not self._connection:
@@ -1412,6 +1423,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 pass
         else:
             with self.engine.connect() as connection:
+                if connection.dialect.name == "snowflake":
+                    logger.warning("snowflake connection")  # TODO: remove me
+                    connection.dialect.normalize_name = normalize_name
                 yield connection
 
     @public_api
