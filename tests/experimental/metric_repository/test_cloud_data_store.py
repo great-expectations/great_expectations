@@ -1,3 +1,4 @@
+import uuid
 from unittest.mock import Mock
 from uuid import UUID
 
@@ -45,7 +46,38 @@ class TestCloudDataStoreMetricRun:
             ],
         )
         cloud_data_store._session = Mock()
-        cloud_data_store.add(metric_run)
+        cloud_data_store._session.post = Mock()
+        response_mock = Mock()
+        cloud_data_store._session.post.return_value = response_mock
+
+        response_metric_run_id = uuid.uuid4()
+        response_metric_id = uuid.uuid4()
+        response_mock.json.return_value = {
+            "data": {
+                "type": "metric-run",
+                "attributes": {
+                    "id": str(response_metric_run_id),
+                    "data_asset_id": str(data_asset_id),
+                    "metrics": [
+                        {
+                            "id": str(response_metric_id),
+                            "metric_type": "ColumnQuantileValuesMetric",
+                            "value_type": "list[float]",
+                            "allow_relative_error": 0.001,
+                            "batch_id": "batch_id",
+                            "column": "column",
+                            "exception": None,
+                            "metric_name": "metric_name",
+                            "quantiles": [0.25, 0.5, 0.75],
+                            "value": [0.25, 0.5, 0.75],
+                        }
+                    ],
+                },
+            }
+        }
+
+        uuid_from_add = cloud_data_store.add(metric_run)
+
         cloud_data_store._session.post.assert_called_once_with(
             url="https://app.greatexpectations.fake.io/organizations/12345678-1234-5678-1234-567812345678/metric-runs",
             data={
@@ -70,6 +102,7 @@ class TestCloudDataStoreMetricRun:
                 }
             },
         )
+        assert uuid_from_add == response_metric_run_id
 
     @pytest.mark.unit
     def test_add_metric_run_generic_metric_type(
