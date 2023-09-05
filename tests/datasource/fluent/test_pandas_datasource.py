@@ -7,11 +7,11 @@ import pathlib
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Callable, Type
 
-from great_expectations.compatibility import pydantic
 import pytest
 from pytest import MonkeyPatch, param
 
 import great_expectations.execution_engine.pandas_execution_engine
+from great_expectations.compatibility import pydantic
 from great_expectations.datasource.fluent import PandasDatasource
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations.datasource.fluent.pandas_datasource import (

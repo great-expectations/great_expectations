@@ -19,9 +19,9 @@ from typing import (
 )
 
 import pytest
-from great_expectations.compatibility.pydantic import ValidationError
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (

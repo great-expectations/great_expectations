@@ -5,7 +5,6 @@ from urllib import parse
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import AnyUrl
-
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -27,10 +26,10 @@ from great_expectations.datasource.fluent.sql_datasource import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.compatibility.pydantic.networks import Parts
     from sqlalchemy.sql import quoted_name  # noqa: TID251 # type-checking only
 
     from great_expectations.compatibility import sqlalchemy
+    from great_expectations.compatibility.pydantic.networks import Parts
     from great_expectations.core.config_provider import _ConfigurationProvider
 
 

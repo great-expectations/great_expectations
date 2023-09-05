@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from great_expectations.compatibility import pydantic
 import pytest
 
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.snowflake import snowflake
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.snowflake_datasource import (

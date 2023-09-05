@@ -31,9 +31,9 @@ from great_expectations.datasource.fluent.signatures import _merge_signatures
 from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
-    from great_expectations.compatibility import pydantic
     from typing_extensions import TypeAlias
 
+    from great_expectations.compatibility import pydantic
     from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.datasource.fluent import PandasDatasource
     from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource

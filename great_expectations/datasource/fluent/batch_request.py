@@ -15,7 +15,6 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import StrictStr
 from great_expectations.compatibility.pydantic import json as pydantic_json
 from great_expectations.compatibility.pydantic.schema import default_ref_template
-
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.batch_filter import (

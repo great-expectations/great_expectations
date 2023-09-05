@@ -30,8 +30,9 @@ from typing import (
 )
 
 import pandas as pd
-from great_expectations.compatibility import pydantic
 from packaging.version import Version
+
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import AnyUrl, Field, FilePath
 
 # from great_expectations.compatibility.pydantic.typing import resolve_annotations

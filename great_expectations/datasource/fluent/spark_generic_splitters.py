@@ -11,7 +11,6 @@ from typing import (
 )
 
 from great_expectations.compatibility import pydantic
-
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,

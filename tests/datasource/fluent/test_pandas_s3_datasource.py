@@ -7,13 +7,12 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, List, cast
 
 import pandas as pd
-from great_expectations.compatibility import pydantic
 import pytest
 from moto import mock_s3
 from pytest import param
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.compatibility import aws
+from great_expectations.compatibility import aws, pydantic
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import PandasS3Datasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (

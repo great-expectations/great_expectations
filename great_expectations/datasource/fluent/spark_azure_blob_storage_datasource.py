@@ -4,9 +4,7 @@ import logging
 import re
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Final, Literal, Type, Union
 
-from great_expectations.compatibility import pydantic
-
-from great_expectations.compatibility import azure
+from great_expectations.compatibility import azure, pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import AzureUrl

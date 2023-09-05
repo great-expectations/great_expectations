@@ -6,9 +6,6 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from functools import partial
 from typing import TYPE_CHECKING, Dict, Optional
 
-from great_expectations.compatibility import pydantic
-from great_expectations.compatibility.pydantic import AmqpDsn, AnyUrl
-
 from great_expectations import get_context
 from great_expectations.agent.actions.agent_action import ActionResult
 from great_expectations.agent.config import GxAgentEnvVars
@@ -32,6 +29,8 @@ from great_expectations.agent.models import (
     JobStatus,
     UnknownEvent,
 )
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import AmqpDsn, AnyUrl
 from great_expectations.core.http import create_session
 from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
 

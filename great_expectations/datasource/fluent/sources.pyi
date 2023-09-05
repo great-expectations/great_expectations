@@ -14,9 +14,9 @@ from typing import (
     overload,
 )
 
-from great_expectations.compatibility import pydantic
 from typing_extensions import TypeAlias, override
 
+from great_expectations.compatibility import pydantic
 from great_expectations.data_context import (
     AbstractDataContext as GXDataContext,
 )

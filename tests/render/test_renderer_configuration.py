@@ -1,8 +1,8 @@
 from typing import Union
 
 import pytest
-from great_expectations.compatibility.pydantic.error_wrappers import ValidationError
 
+from great_expectations.compatibility.pydantic.error_wrappers import ValidationError
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,

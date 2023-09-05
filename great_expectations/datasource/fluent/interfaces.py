@@ -37,7 +37,6 @@ from great_expectations.compatibility.pydantic import (
     validate_arguments,
 )
 from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
-
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor

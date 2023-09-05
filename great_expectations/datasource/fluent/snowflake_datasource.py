@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import AnyUrl, errors
-
 from great_expectations.compatibility.snowflake import URL
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
@@ -16,9 +15,8 @@ from great_expectations.datasource.fluent.sql_datasource import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.compatibility.pydantic.networks import Parts
-
     from great_expectations.compatibility import sqlalchemy
+    from great_expectations.compatibility.pydantic.networks import Parts
 
 
 class _UrlPasswordError(pydantic.UrlError):

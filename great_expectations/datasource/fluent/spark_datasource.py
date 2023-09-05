@@ -15,10 +15,14 @@ from typing import (
     Union,
 )
 
-from great_expectations.compatibility import pydantic
-from great_expectations.compatibility.pydantic import StrictBool, StrictFloat, StrictInt, StrictStr
-
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import (
+    StrictBool,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+)
 from great_expectations.compatibility.pyspark import DataFrame, pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (

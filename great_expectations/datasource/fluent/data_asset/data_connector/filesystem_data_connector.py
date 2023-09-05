@@ -6,7 +6,6 @@ import re
 from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
 
 from great_expectations.compatibility import pydantic
-
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,

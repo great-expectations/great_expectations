@@ -1,7 +1,5 @@
 from typing import TYPE_CHECKING, List
 
-from great_expectations.compatibility import pydantic
-
 from great_expectations.agent.actions.agent_action import (
     ActionResult,
     AgentAction,
@@ -10,6 +8,7 @@ from great_expectations.agent.config import GxAgentEnvVars
 from great_expectations.agent.models import (
     ListTableNamesEvent,
 )
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.sqlalchemy import inspect
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.http import create_session

@@ -8,7 +8,6 @@ from pprint import pformat as pf
 from typing import Set, Type
 
 from great_expectations.compatibility import pydantic
-
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.datasource.fluent.type_lookup import TypeLookup
 

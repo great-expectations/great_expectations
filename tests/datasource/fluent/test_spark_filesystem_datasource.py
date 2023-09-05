@@ -7,11 +7,11 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, List, cast
 
-from great_expectations.compatibility import pydantic
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.alias_types import PathStr
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.pyspark import types as pyspark_types
 from great_expectations.datasource.fluent.data_asset.data_connector import (

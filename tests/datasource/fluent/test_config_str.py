@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Callable, List, Union
 
-from great_expectations.compatibility import pydantic
 import pytest
 from pytest import MonkeyPatch
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.config_provider import (
     _ConfigurationProvider,
     _EnvironmentConfigurationProvider,
