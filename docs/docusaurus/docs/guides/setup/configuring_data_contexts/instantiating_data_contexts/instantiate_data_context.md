@@ -120,7 +120,7 @@ If you're using GX for multiple projects, you might want to use a different Data
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- A previously initialized Filesystem Data Context. See [How to initialize a Filesystem Data Context in Python](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/instantiate_data_context).
+- A previously initialized Filesystem Data Context.
 
 </Prerequisites>
 
