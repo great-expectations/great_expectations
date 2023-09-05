@@ -662,7 +662,7 @@ class TestColumnIdentifiers:
         ]
         print(f"validation_result.results:\n{pf(validation_results, depth=4)}")
         assert validation_results[-1]["exception_info"]["raised_exception"] is False
-        # assert validation_results[-1]["success"] is True
+        assert validation_results[-1]["success"] is True
 
 
 if __name__ == "__main__":
