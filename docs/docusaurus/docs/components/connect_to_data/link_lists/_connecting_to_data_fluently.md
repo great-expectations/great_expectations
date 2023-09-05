@@ -15,7 +15,7 @@
 - [Connect to data on GCS using Spark](/docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data)
 
 **Azure Blob Storage**
-- [How to connect to data on Azure Blob Storage using Pandas](/docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_datas)
+- [How to connect to data on Azure Blob Storage using Pandas](/docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data)
 - [How to connect to data on Azure Blob Storage using Spark](/docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data)
 
 **Amazon Web Services**
