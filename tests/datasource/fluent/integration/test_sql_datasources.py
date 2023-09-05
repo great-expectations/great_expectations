@@ -645,8 +645,20 @@ class TestColumnIdentifiers:
         )
         result = checkpoint.run()
 
-        # print(f"result:\n{pf(result)}")
-        assert result.success is True
+        validation_results: list[
+            dict[
+                Literal[
+                    "exception_info", "expectation_config", "meta", "result", "success"
+                ],
+                dict | bool,
+            ]
+        ] = next(iter(result.to_json_dict()["run_results"].values()))[
+            "validation_result"
+        ][
+            "results"
+        ]
+        print(f"validation_result.results:\n{pf(validation_results, depth=4)}")
+        assert validation_results[-1]["success"] is True
 
 
 if __name__ == "__main__":
