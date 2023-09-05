@@ -794,4 +794,11 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
             "great_expectations/agent/actions/draft_datasource_config_action.py"
         ),
     ),
+    IncludeExcludeDefinition(
+        reason="Metric values are not included in the public API.",
+        name="dict",
+        filepath=pathlib.Path(
+            "great_expectations/experimental/metric_repository/metrics.py"
+        ),
+    ),
 ]
