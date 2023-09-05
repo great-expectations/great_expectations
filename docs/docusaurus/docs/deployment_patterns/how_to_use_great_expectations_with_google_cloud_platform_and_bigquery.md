@@ -53,7 +53,7 @@ The following diagram shows the recommended components for a Great Expectations 
 Relevant documentation for the components can also be found here:
 
 - [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/configure_expectation_stores.md)
-- [How to configure a Validation Result store in GCS](../guides/setup/configuring_metadata_stores/how_to_coconfigure_result_stores.md)
+- [How to configure a Validation Result store in GCS](../guides/setup/configuring_metadata_stores/configure_result_stores.md)
 - [How to host and share Data Docs on GCS](../guides/setup/configuring_data_docs/host_and_share_data_docs.md)
 - Optionally, you can also use a [Secret Manager for GCP Credentials](../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
 

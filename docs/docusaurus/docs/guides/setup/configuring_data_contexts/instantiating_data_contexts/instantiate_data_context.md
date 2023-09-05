@@ -244,8 +244,4 @@ To connect GX to source data:
 - [How to configure a Spark Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
 - [How to configure a SQL Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
 
-## Related documentation
-
-- To initialize and instantiate a temporary Data Context, see [Instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
-
 
