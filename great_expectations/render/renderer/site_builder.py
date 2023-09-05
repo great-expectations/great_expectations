@@ -615,10 +615,7 @@ class DefaultSiteIndexBuilder:
         else:
             filepath = (
                 "/".join(
-                    [  # noqa: PTH118
-                        "expectations",
-                        *expectation_suite_name.split(".")
-                    ]
+                    ["expectations", *expectation_suite_name.split(".")]  # noqa: PTH118
                 )
                 + ".html"
             )
