@@ -128,15 +128,17 @@ class ExpectColumnToExist(BatchExpectation):
 
         # TODO: remove this POC code
         from great_expectations.compatibility import sqlalchemy
-        from great_expectations.execution_engine.sqlalchemy_dialect import (
-            GXSqlDialect,
-            wrap_identifier,
-        )
+
+        # from great_expectations.execution_engine.sqlalchemy_dialect import (
+        #     GXSqlDialect,
+        #     wrap_identifier,
+        # )
 
         if sqlalchemy:
-            configuration.kwargs["column"] = wrap_identifier(
-                configuration.kwargs["column"], dialect=GXSqlDialect.POSTGRESQL
-            )
+            # configuration.kwargs["column"] = wrap_identifier(
+            #     configuration.kwargs["column"], dialect=GXSqlDialect.POSTGRESQL
+            # )
+            pass
 
     @classmethod
     @override
