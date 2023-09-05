@@ -31,7 +31,7 @@ from great_expectations.compatibility.pydantic import (
     root_validator,
     validator,
 )
-from great_expectations.compatibility.pydantic.generics import GenericModel
+from great_expectations.compatibility.pydantic import generics as pydantic_generics
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
     ExpectationConfiguration,  # noqa: TCH001
@@ -135,7 +135,7 @@ class MetaNotes(TypedDict):
     content: List[str]
 
 
-class RendererConfiguration(GenericModel, Generic[RendererParams]):
+class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererParams]):
     """
     Configuration object built for each renderer. Operations to be performed strictly on this object at the renderer
         implementation-level.
