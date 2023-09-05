@@ -30,15 +30,10 @@ Here’s how to handle each of those cases:
 * [Instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
 
 ## Options for storing Expectations
+
 Many teams find it convenient to store Expectations in Git. Essentially, this approach treats Expectations like test fixtures: they live adjacent to code and are stored within version control. Git acts as a collaboration tool and source of record.
 
-Alternatively, you can treat Expectations like configs, and store them in a blob store. Finally, you can store them in a database.
-
-* [How to configure an Expectation store in Amazon S3](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3.md)
-* [How to configure an Expectation store in GCS](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md)
-* [How to configure an Expectation store in Azure Blob Storage](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.md)
-* [How to configure an Expectation store to PostgreSQL](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql.md)
-* [How to configure an Expectation store on a filesystem](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql.md)
+Alternatively, you can treat Expectations like configs, and store them in a blob store. Finally, you can store them in a database. See [Configure Expectation Stores](../guides/setup/configuring_metadata_stores/configure_expectation_stores.md).
 
 ## Options for storing Validation Results
 By default, Validation Results are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. The most common pattern is to use a cloud-based blob store such as S3, GCS, or Azure blob store. You can also store Validation Results in a database.

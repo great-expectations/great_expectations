@@ -332,7 +332,7 @@ docs/guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_
 /docs/guides/miscellaneous/how_to_use_the_great_expectations_cli /docs/0.15.50/guides/miscellaneous/how_to_use_the_great_expectations_cli
 /docs/guides/miscellaneous/how_to_use_the_project_check_config_command /docs/0.15.50/guides/miscellaneous/how_to_use_the_project_check_config_command
 /docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli 
-/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python
+/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/instantiate_data_context
 
 ## Redircet UserConfigurableProfiler doc to v 0.15.50 docs
 

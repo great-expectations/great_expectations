@@ -6,11 +6,11 @@
 </summary>
 
 **Quickstart Data Context**
-- [How to quickly instantiate a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
+- [Instantiate a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
 
 **Filesystem Data Contexts**
-- [How to initialize a filesystem Data Context in Python](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python)
-- [How to instantiate a specific Filesystem Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context)
+- [How to initialize a filesystem Data Context in Python](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/instantiate_data_context)
+- [How to instantiate a specific Filesystem Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
 
 **In-memory Data Contexts**
 - [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
