@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, List, Union
+from typing import Any, Final, List, Mapping, Union
 
+from great_expectations.compatibility.sqlalchemy import quoted_name
 from great_expectations.compatibility.typing_extensions import override
 
 
@@ -64,3 +65,29 @@ class GXSqlDialect(Enum):
     def get_all_dialects(cls) -> List[GXSqlDialect]:
         """Get all dialects."""
         return [dialect for dialect in cls if dialect != GXSqlDialect.OTHER]
+
+
+DIALECT_QUOTE_STRINGS: Final[Mapping[GXSqlDialect, str]] = {
+    # TODO: add other dialects
+    GXSqlDialect.SNOWFLAKE: '"',
+    GXSqlDialect.POSTGRESQL: '"',
+    GXSqlDialect.SQLITE: '"',
+    GXSqlDialect.DATABRICKS: "`",
+}
+
+
+def _strip_quotes(s: str, dialect: GXSqlDialect) -> str:
+    quote_str = DIALECT_QUOTE_STRINGS[dialect]
+    if s.startswith(quote_str) and s.endswith(quote_str):
+        return s[1:-1]
+    return s
+
+
+# TODO: only require dialect for string inputs (add overloads)
+def wrap_identifier(
+    indentifier: str | quoted_name, dialect: GXSqlDialect
+) -> quoted_name:
+    if isinstance(indentifier, quoted_name):
+        return indentifier
+    wo_quotes = _strip_quotes(indentifier, dialect)
+    return quoted_name(wo_quotes, quote=True)
