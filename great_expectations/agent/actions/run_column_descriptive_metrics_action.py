@@ -38,6 +38,6 @@ class ColumnDescriptiveMetricsAction(AgentAction[RunColumnDescriptiveMetricsEven
             id=id,
             type=event.type,
             created_resources=[
-                CreatedResource(resource_id=metric_run_id, type="MetricRun"),
+                CreatedResource(resource_id=str(metric_run_id), type="MetricRun"),
             ],
         )
