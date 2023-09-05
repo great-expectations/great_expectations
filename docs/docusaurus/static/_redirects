@@ -236,6 +236,15 @@
 /docs/api_docs/methods/great_expectations-data_context-data_context-data_context-datacontext-test_yaml_config /docs/reference/api/abstract_data_context
 /docs/api_docs/methods/great_expectations-data_context-data_context-data_context-datacontext-create /docs/reference/api/great_expectations.util
 
+# Redirects for module API docs with .py suffix
+
+/docs/reference/api/core/util.py /docs/reference/api/core/util
+/docs/reference/api/data_context/data_context/context_factory.py /docs/reference/api/data_context/data_context/context_factory
+/docs/reference/api/expectations/expectation.py /docs/reference/api/expectations/expectation
+/docs/reference/api/expectations/registry.py /docs/reference/api/expectations/registry
+/docs/reference/api/expectations/util.py /docs/reference/api/expectations/util
+/docs/reference/api/render/util.py /docs/reference/api/render/util
+
 # Redirects for renamed reference docs
 
 /docs/reference/anonymous_usage_statistics /docs/reference/usage_statistics
