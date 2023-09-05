@@ -86,8 +86,6 @@ class DataAsset:
         self._active_validation = False
         if profiler is not None:
             profiler.profile(self)
-        if data_context and hasattr(data_context, "_expectation_explorer_manager"):
-            self.set_default_expectation_argument("include_config", True)
 
     def list_available_expectation_types(self):
         keys = dir(self)
@@ -110,12 +108,6 @@ class DataAsset:
             self, profiler_configuration
         )
         return expectation_suite, validation_results
-
-    # TODO: add warning if no expectation_explorer_manager and how to turn on
-    def edit_expectation_suite(self):
-        return self._data_context._expectation_explorer_manager.edit_expectation_suite(
-            self
-        )
 
     @classmethod  # - complexity 24
     def expectation(cls, method_arg_names):  # noqa: C901, PLR0915
@@ -254,7 +246,7 @@ class DataAsset:
                         if catch_exceptions:
                             raised_exception = True
                             exception_traceback = traceback.format_exc()
-                            exception_message = f"{type(err).__name__}: {str(err)}"
+                            exception_message = f"{type(err).__name__}: {err!s}"
 
                             return_obj = ExpectationValidationResult(success=False)
 

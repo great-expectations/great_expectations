@@ -37,6 +37,7 @@ yaml.default_flow_style = False
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
+    from great_expectations.datasource.fluent import Datasource as FluentDatasource
 
 
 class SerializableDataContext(AbstractDataContext):
@@ -86,12 +87,29 @@ class SerializableDataContext(AbstractDataContext):
 
     @abc.abstractmethod
     @override
-    def _save_project_config(self, _fds_datasource=None) -> None:
+    def _save_project_config(self, _fds_datasource=None) -> FluentDatasource | None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
         Explicitly override base class implementation to retain legacy behavior.
         """
         raise NotImplementedError
+
+    @classmethod
+    def _resolve_context_root_dir_and_project_root_dir(
+        cls, context_root_dir: PathStr | None, project_root_dir: PathStr | None
+    ) -> PathStr | None:
+        if project_root_dir and context_root_dir:
+            raise TypeError(
+                "'project_root_dir' and 'context_root_dir' are conflicting args; please only provide one"
+            )
+
+        if project_root_dir:
+            project_root_dir = pathlib.Path(project_root_dir).absolute()
+            context_root_dir = pathlib.Path(project_root_dir) / cls.GX_DIR
+        elif context_root_dir:
+            context_root_dir = pathlib.Path(context_root_dir).absolute()
+
+        return context_root_dir
 
     def _check_for_usage_stats_sync(  # noqa: PLR0911
         self, project_config: DataContextConfig
@@ -457,7 +475,7 @@ class SerializableDataContext(AbstractDataContext):
                 )
                 if os.path.isfile(potential_yml):  # noqa: PTH113
                     yml_path = potential_yml
-                    logger.debug(f"Found config file at {str(yml_path)}")
+                    logger.debug(f"Found config file at {yml_path!s}")
                     break
             # move up one directory
             search_start_dir = os.path.dirname(search_start_dir)  # noqa: PTH120

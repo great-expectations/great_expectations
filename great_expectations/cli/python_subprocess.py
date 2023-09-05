@@ -30,8 +30,10 @@ def execute_shell_command(command: str) -> int:
     """
     cwd: str = os.getcwd()  # noqa: PTH109
 
-    path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
-    env: dict = dict(os.environ, PATH=path_env_var)
+    path_env_var: str = os.pathsep.join(
+        [os.environ.get("PATH", os.defpath), cwd]  # noqa: TID251
+    )
+    env: dict = dict(os.environ, PATH=path_env_var)  # noqa: TID251
 
     status_code: int = 0
     try:
@@ -60,7 +62,7 @@ def execute_shell_command(command: str) -> int:
         exception_message: str = "A Sub-Process call Exception occurred.\n"
         exception_traceback: str = traceback.format_exc()
         exception_message += (
-            f'{type(cpe).__name__}: "{str(cpe)}".  Traceback: "{exception_traceback}".'
+            f'{type(cpe).__name__}: "{cpe!s}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
 
@@ -76,8 +78,10 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
     """
     cwd: str = os.getcwd()  # noqa: PTH109
 
-    path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
-    env: dict = dict(os.environ, PATH=path_env_var)
+    path_env_var: str = os.pathsep.join(
+        [os.environ.get("PATH", os.defpath), cwd]  # noqa: TID251
+    )
+    env: dict = dict(os.environ, PATH=path_env_var)  # noqa: TID251
 
     status_code: int
 
@@ -146,7 +150,9 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
             sys.stderr.flush()
             exception_message: str = "A Sub-Process call Exception occurred.\n"
             exception_traceback: str = traceback.format_exc()
-            exception_message += f'{type(cpe).__name__}: "{str(cpe)}".  Traceback: "{exception_traceback}".'
+            exception_message += (
+                f'{type(cpe).__name__}: "{cpe!s}".  Traceback: "{exception_traceback}".'
+            )
             logger.error(exception_message)
 
     return status_code

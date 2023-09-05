@@ -235,7 +235,7 @@ def test_invalid_connect_options_value(
             **connect_option_kwargs,
         )
 
-    print(f"Exception raised:\n\t{repr(exc_info.value)}")
+    print(f"Exception raised:\n\t{exc_info.value!r}")
     error_dicts = exc_info.value.errors()
     print(pf(error_dicts))
     assert expected_error_dicts == error_dicts
@@ -266,7 +266,7 @@ def test_asset_connect_options_in_repr(
         **connect_options,
     )
 
-    print(f"__repr__\n{repr(asset)}\n")
+    print(f"__repr__\n{asset!r}\n")
     asset_as_str = str(asset)
     print(f"__str__\n{asset_as_str}\n")
 

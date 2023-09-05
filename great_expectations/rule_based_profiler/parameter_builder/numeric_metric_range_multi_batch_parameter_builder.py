@@ -254,7 +254,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
                 ):
                     raise gx_exceptions.ProfilerExecutionError(
                         message=f"""Unrecognized truncate_values key(s) in {self.__class__.__name__}:
-"{str(truncate_values_keys - NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS)}" \
+"{truncate_values_keys - NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS!s}" \
 detected.
 """
                     )

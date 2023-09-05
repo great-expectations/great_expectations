@@ -268,10 +268,10 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
-                params[f"v__{str(i)}"] = v
+                params[f"v__{i!s}"] = v
 
             values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
+                [f"$v__{i!s}" for i, v in enumerate(params["value_set"])]
             )
 
         template_str = f"values must belong to this set: {values_string}"

@@ -34,7 +34,7 @@ def DataContext(  # noqa: PLR0913
     cloud_access_token: None = ...,
     cloud_organization_id: None = ...,
 ) -> FileDataContext:
-    # If `context_root_dir` is provided and `cloud_mode`/`ge_cloud_mode` are `False` a `FileDataContext` will always be returned.
+    # If `context_root_dir` is provided and `cloud_mode` is `False` a `FileDataContext` will always be returned.
     ...
 
 
@@ -169,7 +169,8 @@ def _init_context_root_directory(
 ) -> str:
     if cloud_mode and context_root_dir is None:
         context_root_dir = CloudDataContext.determine_context_root_directory(
-            context_root_dir
+            context_root_dir=context_root_dir,
+            project_root_dir=None,
         )
     else:
         context_root_dir = (
