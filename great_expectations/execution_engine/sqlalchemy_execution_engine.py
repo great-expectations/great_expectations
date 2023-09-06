@@ -1403,6 +1403,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
 
         def normalize_name(name):
+            logger.warning(f"normalize_name - {name}")  # TODO: remove me
             if name is None:
                 return None
             elif name == "":
