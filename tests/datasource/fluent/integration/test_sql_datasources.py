@@ -279,9 +279,9 @@ def databricks_sql_ds(
         connection_string="databricks://token:"
         "${DATABRICKS_TOKEN}@${DATABRICKS_HOST}:443"
         "/"
-        + RAND_SCHEMA
+        + PYTHON_VERSION
         + "?http_path=${DATABRICKS_HTTP_PATH}&catalog=ci&schema="
-        + RAND_SCHEMA,
+        + PYTHON_VERSION,
     )
     return ds
 
@@ -638,7 +638,7 @@ class TestColumnIdentifiers:
         if _is_quote_char_dialect_mismatch(dialect, column_name):
             pytest.skip(reason=f"quote char dialect mismatch: {column_name[0]}")
 
-        schema: str | None = RAND_SCHEMA if dialect == "snowflake" else None
+        schema: str | None = PYTHON_VERSION if dialect == "snowflake" else None
 
         table_factory(
             engine=datasource.get_engine(),
