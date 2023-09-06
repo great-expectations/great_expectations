@@ -529,6 +529,7 @@ def _xfail_if_quote_char_dialect_mismatch(
         dialect = datasource.get_engine().dialect.name
         dialect_quote_char = DIALECT_IDENTIFIER_QUOTE_STRINGS[dialect]
         if quote_char != dialect_quote_char:
+            # TODO: should this be a strict xfail?
             pytest.xfail(reason=f"quote character mismatch: {quote_char}")
 
 
