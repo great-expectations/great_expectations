@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import pathlib
+import shutil
 import sys
 import uuid
 from pprint import pformat as pf
@@ -48,6 +49,9 @@ from great_expectations.expectations.expectation import (
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
+
+TERMINAL_WIDTH: Final = shutil.get_terminal_size().columns
+TERM_SEPARATOR: Final = "*" * TERMINAL_WIDTH
 
 PYTHON_VERSION: Final[
     Literal["py38", "py39", "py310", "py311"]
@@ -698,9 +702,18 @@ class TestColumnIdentifiers:
         ][
             "results"
         ]
-        print(f"validation_result.results:\n{pf(validation_results, depth=4)}")
-        exc_msg = validation_results[-1]["exception_info"].get("exception_message")
-        assert not exc_msg, exc_msg
+
+        print(f"validation_result.results:\n{pf(validation_results, depth=2)}\n")
+        exc_msgs = [
+            r["exception_info"]["exception_message"]
+            for r in validation_results
+            if r["exception_info"].get("exception_message")
+        ]
+        if exc_msgs:
+            print(f"{len(exc_msgs)} exception_message(s):\n{TERM_SEPARATOR}")
+            for i, msg in enumerate(exc_msgs, start=1):
+                print(f"  {i}: {msg}\n{TERM_SEPARATOR}")
+        assert not exc_msgs, exc_msgs
 
         assert validation_results[-1]["success"] is True, "validation failed"
 
