@@ -1,6 +1,6 @@
 ---
 title: Welcome
-slug: /
+slug: /oss
 ---
 
 Great Expectations is the leading tool for [validating](./terms/validation.md), [documenting](./terms/data_docs.md), and [profiling](./terms/profiler.md) your data to maintain quality and improve communication between teams. If you're ready to get started, see the [Quickstart](tutorials/quickstart/quickstart.md).

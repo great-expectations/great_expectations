@@ -1,8 +1,8 @@
 ---
 sidebar_label: 'Reference'
 title: 'Reference'
-id: reference_overview
 description: Supplemental information that will help you get the most out of Great Expectations.
+slug: /reference
 ---
 
 import LinkCardGrid from '/docs/components/LinkCardGrid';

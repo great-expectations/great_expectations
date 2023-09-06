@@ -1,6 +1,6 @@
 ---
-sidebar_label: 'Quickstart'
-title: Quickstart
+sidebar_label: 'Try open-source GX'
+title: Try open-source Great Expectations
 tag: [tutorial, getting started]
 ---
 import Prerequisites from '/docs/components/_prerequisites.jsx'

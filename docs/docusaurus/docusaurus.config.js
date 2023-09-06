@@ -67,7 +67,7 @@ module.exports = {
         },
         {
           type: 'docsVersionDropdown',
-          position: 'left',
+          position: 'right',
           dropdownItemsAfter: [
             {
               to: 'https://legacy.docs.greatexpectations.io/',
@@ -77,22 +77,32 @@ module.exports = {
           dropdownActiveClassDisabled: true
         },
         {
-          label: 'Product',
-          position: 'right',
-          items: [
-            {
-              label: 'GX CLOUD',
-              to: 'https://greatexpectations.io/gx-cloud'
-            },
-            {
-              label: 'GX OSS',
-              to: 'https://greatexpectations.io/gx-oss'
-            }
-          ]
+          to: '/docs/oss',
+          label: 'Open-source',
+          position: 'left',
+          'aria-label': 'OSS Documentation'
+        },
+        {
+          to: 'https://greatexpectations.io/gx-cloud',
+          label: 'Cloud',
+          position: 'left',
+          'aria-label': 'GX Cloud Documentation'
+        },
+        {
+          to: 'https://greatexpectations.io/gx-cloud',
+          label: 'Learn',
+          position: 'left',
+          'aria-label': 'How-to guides'
+        },
+        {
+          to: '/docs/reference',
+          label: 'Reference',
+          position: 'left',
+          'aria-label': 'Reference documents'
         },
         {
           label: 'Community',
-          position: 'right',
+          position: 'left',
           items: [
             {
               label: 'COMMUNITY HOME',
@@ -107,48 +117,12 @@ module.exports = {
               to: 'https://github.com/great-expectations/great_expectations'
             },
             {
-              label: 'JOIN THE EMAIL LIST',
-              to: 'https://greatexpectations.io/newsletter'
-            }
-          ]
-        },
-        {
-          label: 'RESOURCES',
-          position: 'right',
-          items: [
-            {
-              label: 'INTEGRATIONS',
-              to: 'https://greatexpectations.io/integrations'
-            },
-            {
-              label: 'DOCUMENTATION',
-              to: 'https://docs.greatexpectations.io/docs/'
-            },
-            {
-              label: 'EXPECTATION GALLERY',
-              to: 'https://greatexpectations.io/expectations'
-            },
-            {
               label: 'GREAT EXPECTATIONS BLOG',
               to: 'https://greatexpectations.io/blog'
             },
             {
-              label: 'GREAT EXPECTATIONS CASE STUDIES',
-              to: 'https://greatexpectations.io/case-studies'
-            }
-          ]
-        },
-        {
-          label: 'Company',
-          position: 'right',
-          items: [
-            {
-              label: 'ABOUT US',
-              to: 'https://greatexpectations.io/company'
-            },
-            {
-              label: 'CAREERS',
-              to: 'https://jobs.greatexpectations.io/'
+              label: 'JOIN THE EMAIL LIST',
+              to: 'https://greatexpectations.io/newsletter'
             }
           ]
         },
@@ -187,6 +161,10 @@ module.exports = {
         {
           title: 'Company',
           items: [
+            {
+              label: 'ABOUT US',
+              to: 'https://greatexpectations.io/company'
+            },
             {
               label: 'Careers',
               to: 'https://jobs.greatexpectations.io/'
