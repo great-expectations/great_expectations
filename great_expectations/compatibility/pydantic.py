@@ -23,6 +23,17 @@ if is_version_greater_or_equal(version=pydantic.VERSION, compare_version="2.0.0"
 else:
     # from pydantic import BaseModel, Field, StrictStr
     from pydantic import *  # noqa: F403
+    from pydantic import (
+        AnyUrl,
+        UrlError,
+        error_wrappers,
+        errors,
+        generics,
+        json,
+        schema,
+    )
+    from pydantic.generics import GenericModel
+    from pydantic.main import ModelMetaclass
 
     # from pydantic import Extra
 
