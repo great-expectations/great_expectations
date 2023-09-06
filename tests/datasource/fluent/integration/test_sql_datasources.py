@@ -196,15 +196,17 @@ def table_factory(
                 conn.execute(TextClause(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
             for name in table_names:
                 qualified_table_name = f"{schema}.{name}" if schema else name
+                # TODO: use dialect specific quotes
                 conn.execute(
                     TextClause(
-                        f"CREATE TABLE IF NOT EXISTS {qualified_table_name} (id INTEGER, name VARCHAR(255), UPPER VARCHAR(255), lower VARCHAR(255))"
+                        f'CREATE TABLE IF NOT EXISTS {qualified_table_name} (id INTEGER, name VARCHAR(255), "UPPER" VARCHAR(255), "lower" VARCHAR(255))'
                     )
                 )
                 if data:
+                    # TODO: use dialect specific quotes
                     conn.execute(
                         TextClause(
-                            f"INSERT INTO {qualified_table_name} (id, name, UPPER, lower) VALUES (:id, :name, :UPPER, :lower)",
+                            f'INSERT INTO {qualified_table_name} (id, name, "UPPER", "lower") VALUES (:id, :name, :UPPER, :lower)',
                         ),
                         data,
                     )
