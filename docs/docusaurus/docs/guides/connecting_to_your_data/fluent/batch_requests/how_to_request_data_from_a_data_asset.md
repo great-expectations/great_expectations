@@ -21,7 +21,7 @@ Learn how you can request data from a Data Source that has been defined with the
 
 <Prerequisites> 
 
-- An installation of Great Expectations (GX)
+- [An installation of GX](/docs/guides/setup/installation/install_gx)
 - A Data Source with a configured Data Asset
 
 </Prerequisites> 

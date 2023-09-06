@@ -247,7 +247,22 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
 
 
 @pytest.fixture
-def databricks_sql_ds(context: EphemeralDataContext) -> DatabricksSQLDatasource:
+def databricks_creds_populated() -> bool:
+    if (
+        os.getenv("DATABRICKS_TOKEN")
+        or os.getenv("DATABRICKS_HOST")
+        or os.getenv("DATABRICKS_HTTP_PATH")
+    ):
+        return True
+    return False
+
+
+@pytest.fixture
+def databricks_sql_ds(
+    context: EphemeralDataContext, databricks_creds_populated: bool
+) -> DatabricksSQLDatasource:
+    if not databricks_creds_populated:
+        pytest.skip("no databricks credentials")
     ds = context.sources.add_databricks_sql(
         "databricks_sql",
         connection_string="databricks://token:"
@@ -344,7 +359,7 @@ class TestTableIdentifiers:
     ):
         table_name = TABLE_NAME_MAPPING["postgres"].get(asset_name)
         if not table_name:
-            pytest.skip(f"no '{asset_name}' table_name for databricks")
+            pytest.skip(f"no '{asset_name}' table_name for postgres")
         # create table
         table_factory(engine=postgres_ds.get_engine(), table_names={table_name})
 
@@ -388,7 +403,7 @@ class TestTableIdentifiers:
     ):
         table_name = TABLE_NAME_MAPPING["snowflake"].get(asset_name)
         if not table_name:
-            pytest.skip(f"no '{asset_name}' table_name for databricks")
+            pytest.skip(f"no '{asset_name}' table_name for snowflake")
         if not snowflake_ds:
             pytest.skip("no snowflake datasource")
         # create table

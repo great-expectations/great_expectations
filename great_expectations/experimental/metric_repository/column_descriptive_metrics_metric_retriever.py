@@ -19,7 +19,8 @@ if TYPE_CHECKING:
 
 
 class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
-    # TODO: Docstrings
+    """Compute and retrieve Column Descriptive Metrics for a batch of data."""
+
     @override
     def get_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
         table_metrics_list = self._get_table_metrics(batch_request)

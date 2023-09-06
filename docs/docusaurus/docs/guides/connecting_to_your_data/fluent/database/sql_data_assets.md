@@ -50,7 +50,7 @@ The following code examples use a previously defined Data Source named `"my_data
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- An installation of GX set up to work with SQL
+- [An installation of GX set up to work with SQL](/docs/guides/setup/installation/install_gx)
 - Source data stored in a SQL database
 - A SQL-based Data Source
 
@@ -100,7 +100,7 @@ The following code examples use a previously defined Data Source named `"my_data
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- An installation of GX set up to work with SQL. See [How to set up GX to work with SQL databases](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases).
+- [An installation of GX set up to work with SQL](/docs/guides/setup/installation/install_gx).
 - Source data stored in a SQL database.
 
 </Prerequisites> 
