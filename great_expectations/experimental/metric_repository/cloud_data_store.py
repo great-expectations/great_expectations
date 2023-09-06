@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, TypeVar, Union
+import uuid
+from typing import TYPE_CHECKING, Any, Dict, TypeVar
 
 import pydantic
 from pydantic import BaseModel
@@ -15,7 +16,8 @@ if TYPE_CHECKING:
 
     from great_expectations.data_context import CloudDataContext
 
-StorableTypes: TypeAlias = Union[MetricRun,]
+# When more types are storable, convert StorableTypes to a Union and add them to the type alias:
+StorableTypes: TypeAlias = MetricRun
 
 T = TypeVar("T", bound=StorableTypes)
 
@@ -75,9 +77,19 @@ class CloudDataStore(DataStore[StorableTypes]):
         return f"{config.base_url}/organizations/{config.organization_id}{self._map_to_url(value)}"
 
     @override
-    def add(self, value: T) -> T:
-        """Add a value to the DataStore. Currently, returns the input value not the value from the DataStore."""
+    def add(self, value: T) -> uuid.UUID:
+        """Add a value to the DataStore.
+
+        Args:
+            value: Value to add to the DataStore. Must be one of StorableTypes.
+
+        Returns:
+            id of the created resource.
+        """
         url = self._build_url(value)
         payload = self._build_payload(value)
-        self._session.post(url=url, data=payload)
-        return value
+        response = self._session.post(url=url, data=payload)
+        response.raise_for_status()
+
+        response_json = response.json()
+        return uuid.UUID(response_json["data"]["attributes"]["id"])
