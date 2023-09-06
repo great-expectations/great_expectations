@@ -101,13 +101,10 @@ def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
     elif sqlalchemy.TextClause and isinstance(
         batch_data.selectable, sqlalchemy.TextClause
     ):
-        table_selectable: sqlalchemy.TextClause = batch_data.selectable
+        table_selectable = batch_data.selectable
         schema_name = None
     else:
-        # default to selectable
-        table_selectable: str = (  # type: ignore[no-redef]
-            batch_data.source_table_name or batch_data.selectable.name
-        )
+        table_selectable = batch_data.source_table_name or batch_data.selectable.name
         schema_name = batch_data.source_schema_name or batch_data.selectable.schema
 
     return get_sqlalchemy_column_metadata(
