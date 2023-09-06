@@ -51,7 +51,7 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
 TERMINAL_WIDTH: Final = shutil.get_terminal_size().columns
-TERM_SEPARATOR: Final = "*" * TERMINAL_WIDTH
+STAR_SEPARATOR: Final = "*" * TERMINAL_WIDTH
 
 PYTHON_VERSION: Final[
     Literal["py38", "py39", "py310", "py311"]
@@ -68,7 +68,7 @@ TRINO_TABLE: Final[str] = "customer"
 DO_NOT_CREATE_TABLES: set[str] = {"trino"}
 
 DatabaseType: TypeAlias = Literal[
-    "trino", "postgres", "databricks_sql", "snowflake", "sqlite"
+    "databricks_sql", "postgres", "snowflake", "sqlite", "trino"
 ]
 TableNameCase: TypeAlias = Literal[
     "quoted_lower",
@@ -710,9 +710,9 @@ class TestColumnIdentifiers:
             if r["exception_info"].get("exception_message")
         ]
         if exc_msgs:
-            print(f"{len(exc_msgs)} exception_message(s):\n{TERM_SEPARATOR}")
+            print(f"{len(exc_msgs)} exception_message(s):\n{STAR_SEPARATOR}")
             for i, msg in enumerate(exc_msgs, start=1):
-                print(f"  {i}: {msg}\n{TERM_SEPARATOR}")
+                print(f"  {i}: {msg}\n{STAR_SEPARATOR}")
         assert not exc_msgs, exc_msgs
 
         assert validation_results[-1]["success"] is True, "validation failed"
