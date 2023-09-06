@@ -516,21 +516,17 @@ class TestTableIdentifiers:
         assert result.success is True
 
 
-def _xfail_if_quote_char_dialect_mismatch(
+def _is_quote_char_dialect_mismatch(
     datasource: SQLDatasource,
     column_name: str | quoted_name,
-) -> None:
-    quote_char = (
-        column_name[0]
-        if column_name[0] in DIALECT_IDENTIFIER_QUOTE_STRINGS.values()
-        else None
-    )
+) -> bool:
+    quote_char = column_name[0] if column_name[0] in ("'", '"', "`") else None
     if quote_char:
         dialect = datasource.get_engine().dialect.name
         dialect_quote_char = DIALECT_IDENTIFIER_QUOTE_STRINGS[dialect]
         if quote_char != dialect_quote_char:
-            # TODO: should this be a strict xfail?
-            pytest.xfail(reason=f"quote character mismatch: {quote_char}")
+            return True
+    return False
 
 
 @pytest.mark.parametrize(
@@ -629,7 +625,8 @@ class TestColumnIdentifiers:
         expectation_type: str,
     ):
         datasource = all_sql_datasources
-        _xfail_if_quote_char_dialect_mismatch(datasource, column_name)
+        if _is_quote_char_dialect_mismatch(datasource, column_name):
+            pytest.skip(reason=f"quote char dialect mismatch: {column_name[0]}")
 
         table_factory(
             engine=datasource.get_engine(),
