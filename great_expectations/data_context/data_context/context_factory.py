@@ -96,7 +96,7 @@ def get_context(  # noqa: PLR0913
     cloud_organization_id: str | None = ...,
     cloud_mode: bool | None = ...,
     mode: None = ...,
-) -> AbstractDataContext:
+) -> EphemeralDataContext:
     ...
 
 
