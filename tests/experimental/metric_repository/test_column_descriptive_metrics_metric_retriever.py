@@ -22,6 +22,7 @@ def test_get_metrics():
     mock_validator.compute_metrics.return_value = {
         ("table.row_count", (), ()): 2,
         ("table.columns", (), ()): ["col1", "col2"],
+        ("table.column_types", (), ()): ["int", "int"],
     }
     mock_batch = Mock(spec=Batch)
     mock_batch.id = "batch_id"
@@ -43,6 +44,12 @@ def test_get_metrics():
             batch_id="batch_id",
             metric_name="table.columns",
             value=["col1", "col2"],
+            exception=None,
+        ),
+        TableMetric[List[str]](
+            batch_id="batch_id",
+            metric_name="table.column_types",
+            value=["int", "int"],
             exception=None,
         ),
     ]

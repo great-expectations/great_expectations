@@ -28,7 +28,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         return table_metrics_list
 
     def _get_table_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
-        table_metric_names = ["table.row_count", "table.columns"]
+        table_metric_names = ["table.row_count", "table.columns", "table.column_types"]
         table_metric_configs = [
             MetricConfiguration(
                 metric_name=metric_name, metric_domain_kwargs={}, metric_value_kwargs={}
@@ -57,6 +57,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             tuple(),
             tuple(),
         )
+
         metrics.append(
             TableMetric[int](
                 batch_id=validator.active_batch.id,
@@ -76,4 +77,18 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                 exception=None,  # TODO: Pass through a MetricException() if an exception is thrown
             )
         )
+
+        metric_name = "table.column_types"
+        metric_lookup_key = (metric_name, tuple(), tuple())
+        metrics.append(
+            TableMetric[List[str]](
+                batch_id=validator.active_batch.id,
+                metric_name=metric_name,
+                value=computed_metrics[metric_lookup_key],  # type: ignore[arg-type] # Pydantic verifies the value type
+                exception=None,  # TODO: Pass through a MetricException() if an exception is thrown
+            )
+        )
         return metrics
+
+    def _get_column_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
+        pass
