@@ -41,6 +41,7 @@ from great_expectations.datasource.fluent import (
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import (
     DIALECT_IDENTIFIER_QUOTE_STRINGS,
+    GXSqlDialect,
     quote_str,
 )
 from great_expectations.expectations.expectation import (
@@ -282,7 +283,6 @@ def databricks_sql_ds(
         + "?http_path=${DATABRICKS_HTTP_PATH}&catalog=ci&schema="
         + RAND_SCHEMA,
     )
-    ds.test_schema = RAND_SCHEMA  # type:ignore[attr-defined]
     return ds
 
 
@@ -527,12 +527,11 @@ class TestTableIdentifiers:
 
 
 def _is_quote_char_dialect_mismatch(
-    datasource: SQLDatasource,
+    dialect: GXSqlDialect,
     column_name: str | quoted_name,
 ) -> bool:
     quote_char = column_name[0] if column_name[0] in ("'", '"', "`") else None
     if quote_char:
-        dialect = datasource.get_engine().dialect.name
         dialect_quote_char = DIALECT_IDENTIFIER_QUOTE_STRINGS[dialect]
         if quote_char != dialect_quote_char:
             return True
@@ -635,13 +634,16 @@ class TestColumnIdentifiers:
         expectation_type: str,
     ):
         datasource = all_sql_datasources
-        if _is_quote_char_dialect_mismatch(datasource, column_name):
+        dialect = datasource.get_engine().dialect.name
+        if _is_quote_char_dialect_mismatch(dialect, column_name):
             pytest.skip(reason=f"quote char dialect mismatch: {column_name[0]}")
+
+        schema: str | None = RAND_SCHEMA if dialect == "snowflake" else None
 
         table_factory(
             engine=datasource.get_engine(),
             table_names={TEST_TABLE_NAME},
-            schema=getattr(datasource, "test_schema", None),
+            schema=schema,
             data=[
                 {
                     "id": 1,
@@ -664,7 +666,9 @@ class TestColumnIdentifiers:
             assert result
             print(f"{TEST_TABLE_NAME} Columns:\n  {result.keys()}\n")
 
-        asset = datasource.add_table_asset("my_asset", table_name=TEST_TABLE_NAME)
+        asset = datasource.add_table_asset(
+            "my_asset", table_name=TEST_TABLE_NAME, schema_name=schema
+        )
 
         suite = context.add_expectation_suite(
             expectation_suite_name=f"{datasource.name}-{asset.name}"
