@@ -35,26 +35,15 @@ You can find the template file for a custom [`SetBasedColumnMapExpectation` here
 cp set_based_column_map_expectation_template.py /SOME_DIRECTORY/expect_column_values_to_be_in_solfege_scale_set.py
 ```
 
-<details>
-  <summary>Where should I put my Expectation file?</summary>
-  <div>
-    <p>
-        During development, you don't actually need to put the file anywhere in particular. It's self-contained, and can be executed anywhere as long as <code>great_expectations</code> is installed.
-    </p>
-    <p>
-        But to use your new Expectation alongside the other components of Great Expectations, you'll need to make sure the file is in the right place. The right place depends on what you intend to use it for.
-    </p>
-    <p>
-        <ul>
-            <li>If you're building a Custom Expectation for personal use, you'll need to put it in the <code>great_expectations/plugins/expectations</code> folder of your Great Expectations deployment, and import your Custom Expectation from that directory whenever it will be used. When you instantiate the corresponding <code>DataContext</code>, it will automatically make all plugins in the directory available for use.</li>
-            <li>If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.</li>
-        </ul>
-    </p>
-	<p>
-		See our <a href="how_to_use_custom_expectations"> guide on how to use a Custom Expectation</a> for more!
-	</p>
-  </div>
-</details>
+### Storing Expectation files
+
+During development, you don't need to store Expectation files in a specific location. Expectation files are self-contained and can be executed anywhere as long as GX is installed However, to use your new Expectation with other GX components, you'll need to make sure the file is stored one of the following locations:
+
+- If you're building a <TechnicalTag tag="custom_expectation" text="Custom Expectation" /> for personal use, you'll need to put it in the <code>great_expectations/plugins/expectations</code> folder of your GX deployment, and import your Custom Expectation from that directory whenever it will be used. When you instantiate the corresponding <code>DataContext</code>, it will automatically make all <TechnicalTag tag="plugin" text="Plugins" /> in the directory available for use.
+
+- If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.
+
+For more information about Custom Expectations, see [Use a Custom Expectation](./how_to_use_custom_expectations.md).
 
 ## Generate a diagnostic checklist for your Expectation
 
@@ -130,13 +119,13 @@ Congratulations! You're one step closer to implementing a Custom Expectation.
 
 ## Add example cases
 
-Next, we're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve a dual purpose:
+You're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve the following purposes:
 
-1. They provide test fixtures that Great Expectations can execute automatically via pytest.
+- They provide test fixtures that Great Expectations can execute automatically with pytest.
 
-2. They help users understand the logic of your Expectation by providing tidy examples of paired input and output. If you contribute your Expectation to open source, these examples will appear in the Gallery.
+- They help users understand the logic of your Expectation by providing tidy examples of paired input and output. If you contribute your Expectation to open source, these examples will appear in the Gallery.
 
-Your examples will look something like this:
+Your examples will look similar to this example:
 
 ```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py examples"
 ```
@@ -208,17 +197,11 @@ Great Expectations will use these values to tell your Custom Expectation to appl
 
 This is all that you need to define for now. The `SetBasedColumnMapExpectation` class has built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
 
-<details>
-  <summary>Other parameters</summary>
-  <div>
-    <p>
-        <b>Expectation Success Keys</b> - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
-    </p>
-    <p>
-        <b>Expectation Default Kwarg Values</b> (Optional) - Default values for success keys and the defined domain, among other values.
-    </p>
-  </div>
-</details>
+### Other parameters
+
+Expectation Success Keys - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
+
+Expectation Default Kwarg Values (Optional) - Default values for success keys and the defined domain, among other values.
 
 Running your diagnostic checklist at this point should return something like this:
 ```
@@ -261,12 +244,6 @@ Completeness checklist for ExpectColumnValuesToBeInSolfegeScaleSet:
   ✔ Passes all linting checks
 ...
 ```
-
-<div style={{"text-align":"center"}}>
-<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
-Congratulations!<br/>&#127881; You've just built your first Custom Set-Based Column Map Expectation! &#127881;
-</b></p>
-</div>
 
 :::note
 If you've already built a [Custom Expectation](../custom_expectations_lp.md) of a different type,
