@@ -406,6 +406,24 @@ jobs:
       - name: Run the tests
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
+  pydantic-v1:
+    needs: [unit-tests, static-analysis]
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "pip"
+          cache-dependency-path: reqs/requirements-dev-test.txt
+      - name: Install dependencies
+        run: pip install . -c ci/constraints-test/pydantic-v1-install.txt -r reqs/requirements-dev-test.txt
+      - name: Run the tests
+        run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
+
   airflow220-min-versions:
     needs: [unit-tests, static-analysis]
     runs-on: ubuntu-latest
@@ -482,6 +500,7 @@ jobs:
       py39-min-versions,
       py310-min-versions,
       py311-min-versions,
+      pydantic-v1,
       airflow220-min-versions,
       import_gx,
       usage_stats_integration
@@ -529,6 +548,7 @@ jobs:
       py39-min-versions,
       py310-min-versions,
       py311-min-versions,
+      pydantic-v1,
       airflow220-min-versions,
       import_gx,
       usage_stats_integration,
