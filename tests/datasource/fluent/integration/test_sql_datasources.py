@@ -38,7 +38,10 @@ from great_expectations.datasource.fluent import (
     SQLDatasource,
     SqliteDatasource,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import quote_str
+from great_expectations.execution_engine.sqlalchemy_dialect import (
+    GXSqlDialect,
+    quote_str,
+)
 from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
 )
@@ -117,6 +120,14 @@ TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
         "quoted_mixed": f'"{TEST_TABLE_NAME.title()}"',
         "unquoted_mixed": TEST_TABLE_NAME.title(),
     },
+}
+
+QUOTE_CHARACTER_MAPPING: Final[dict[GXSqlDialect, Literal["'", '"', "`"]]] = {
+    GXSqlDialect.DATABRICKS: "`",
+    GXSqlDialect.POSTGRESQL: '"',
+    GXSqlDialect.SNOWFLAKE: '"',
+    GXSqlDialect.SQLITE: '"',
+    GXSqlDialect.TRINO: "'",
 }
 
 
@@ -513,6 +524,20 @@ class TestTableIdentifiers:
         assert result.success is True
 
 
+def _xfail_if_quote_char_dialect_mismatch(
+    datasource: SQLDatasource,
+    column_name: str | quoted_name,
+) -> None:
+    quote_char = (
+        column_name[0] if column_name[0] in QUOTE_CHARACTER_MAPPING.values() else None
+    )
+    if quote_char:
+        dialect = datasource.get_engine().dialect.name
+        dialect_quote_char = QUOTE_CHARACTER_MAPPING[dialect]
+        if quote_char != dialect_quote_char:
+            pytest.xfail(reason=f"quote character mismatch: {quote_char}")
+
+
 @pytest.mark.parametrize(
     "column_name",
     [
@@ -609,6 +634,7 @@ class TestColumnIdentifiers:
         expectation_type: str,
     ):
         datasource = all_sql_datasources
+        _xfail_if_quote_char_dialect_mismatch(datasource, column_name)
 
         table_factory(
             engine=datasource.get_engine(),
