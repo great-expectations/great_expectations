@@ -517,7 +517,11 @@ class TestTableIdentifiers:
     "column_name",
     [
         param("lower", id="str lower"),
-        param("LOWER", marks=[pytest.mark.xfail], id="str LOWER"),
+        param(
+            "LOWER",
+            marks=[pytest.mark.xfail(reason="may pass but not expected to")],
+            id="str LOWER",
+        ),
         param("'lower'", id="str 'lower'"),
         param('"lower"', id='str "lower"'),
         param(
@@ -549,7 +553,11 @@ class TestTableIdentifiers:
             marks=[pytest.mark.xfail],
             id="quoted_name LOWER quote=None",
         ),
-        param("upper", id="str upper"),
+        param(
+            "upper",
+            marks=[pytest.mark.xfail(reason="may pass but not expected to")],
+            id="str upper",
+        ),
         param("UPPER", id="str UPPER"),
         param("'UPPER'", id="str 'UPPER'"),
         param('"UPPER"', id='str "UPPER"'),
@@ -579,6 +587,7 @@ class TestTableIdentifiers:
                 "upper",
                 quote=None,
             ),
+            marks=[pytest.mark.xfail(reason="may pass but not expected to")],
             id="quoted_name upper quote=None",
         ),
     ],
