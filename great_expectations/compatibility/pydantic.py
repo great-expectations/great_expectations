@@ -12,8 +12,10 @@ if is_version_greater_or_equal(version=pydantic.VERSION, compare_version="2.0.0"
         UrlError,
         error_wrappers,
         errors,
+        fields,
         generics,
         json,
+        networks,
         schema,
     )
     from pydantic.v1.generics import GenericModel
@@ -28,8 +30,10 @@ else:
         UrlError,
         error_wrappers,
         errors,
+        fields,
         generics,
         json,
+        networks,
         schema,
     )
     from pydantic.generics import GenericModel
@@ -42,13 +46,15 @@ else:
 # from pydantic.schema import default_ref_template
 
 __all__ = [
-    "ModelMetaclass",
-    "errors",
-    "generics",
-    "error_wrappers",
-    "GenericModel",
-    "json",
-    "schema",
     "AnyUrl",
+    "error_wrappers",
+    "errors",
+    "fields",
+    "GenericModel",
+    "generics",
+    "json",
+    "ModelMetaclass",
+    "networks",
+    "schema",
     "UrlError",
 ]

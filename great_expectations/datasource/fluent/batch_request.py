@@ -12,7 +12,7 @@ from typing import (
 )
 
 from great_expectations.compatibility import pydantic
-from great_expectations.compatibility.pydantic import StrictStr
+from great_expectations.compatibility.pydantic import Field, StrictStr
 from great_expectations.compatibility.pydantic import json as pydantic_json
 from great_expectations.compatibility.pydantic import (
     schema as pydantic_schema,
@@ -62,17 +62,17 @@ class BatchRequest(pydantic.BaseModel):
         BatchRequest
     """
 
-    datasource_name: StrictStr = pydantic.Field(
+    datasource_name: StrictStr = Field(
         ...,
         allow_mutation=False,
         description="The name of the Datasource used to connect to the data.",
     )
-    data_asset_name: StrictStr = pydantic.Field(
+    data_asset_name: StrictStr = Field(
         ...,
         allow_mutation=False,
         description="The name of the Data Asset used to connect to the data.",
     )
-    options: BatchRequestOptions = pydantic.Field(
+    options: BatchRequestOptions = Field(
         default_factory=dict,
         allow_mutation=True,
         description=(
