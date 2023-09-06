@@ -282,7 +282,7 @@ def databricks_sql_ds(
         + "?http_path=${DATABRICKS_HTTP_PATH}&catalog=ci&schema="
         + RAND_SCHEMA,
     )
-    ds.test_schema = RAND_SCHEMA
+    ds.test_schema = RAND_SCHEMA  # type:ignore[attr-defined]
     return ds
 
 
