@@ -1,6 +1,8 @@
 import uuid
 from unittest.mock import MagicMock, Mock
 
+import pytest
+
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource.fluent.batch_request import BatchRequest
 from great_expectations.experimental.metric_repository.batch_inspector import (
@@ -13,6 +15,8 @@ from great_expectations.experimental.metric_repository.metrics import (
     MetricRun,
     TableMetric,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_compute_metric_run_with_no_metric_retrievers():
