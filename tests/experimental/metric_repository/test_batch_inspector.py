@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, Mock
 import pytest
 
 from great_expectations.data_context import CloudDataContext
-from great_expectations.datasource.fluent.batch_request import BatchRequest
+from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.experimental.metric_repository.batch_inspector import (
     BatchInspector,
 )
