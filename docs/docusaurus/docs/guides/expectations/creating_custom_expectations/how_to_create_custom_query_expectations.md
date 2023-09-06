@@ -67,7 +67,7 @@ During development, you don't need to store Expectation files in a specific loca
 
 - If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.
 
-For more information about Custom Expectations, see [Use a Custom Expectation](how_to_use_custom_expectations.md).
+For more information about Custom Expectations, see [Use a Custom Expectation](./how_to_use_custom_expectations.md).
 
 ## Generate a diagnostic checklist for your Expectation
 
@@ -345,7 +345,7 @@ During development, you don't need to store Expectation files in a specific loca
 
 - If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.
 
-For more information about Custom Expectations, see [Use a Custom Expectation](how_to_use_custom_expectations.md).
+For more information about Custom Expectations, see [Use a Custom Expectation](./how_to_use_custom_expectations.md).
 
 ## Generate a diagnostic checklist for your Expectation
 
@@ -470,8 +470,7 @@ Completeness checklist for ExpectQueriedColumnValueFrequencyToMeetThreshold:
 ```
 
 :::note
-For more information on tests and example cases, <br/>
-see our guide on [how to create example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
+For more information on tests and example cases, see our guide on [how to create example cases for a Custom Expectation](./how_to_use_custom_expectations.md).
 :::
 
 ## Implement a Query & Connect a Metric to your Expectation
