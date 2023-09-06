@@ -699,8 +699,10 @@ class TestColumnIdentifiers:
             "results"
         ]
         print(f"validation_result.results:\n{pf(validation_results, depth=4)}")
-        assert validation_results[-1]["exception_info"]["raised_exception"] is False
-        assert validation_results[-1]["success"] is True
+        exc_msg = validation_results[-1]["exception_info"].get("exception_message")
+        assert not exc_msg, exc_msg
+
+        assert validation_results[-1]["success"] is True, "validation failed"
 
 
 if __name__ == "__main__":
