@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Final, List, Literal, Mapping, Union
+from typing import Any, Final, List, Literal, Mapping, Union, overload
 
 from great_expectations.compatibility.sqlalchemy import quoted_name
 from great_expectations.compatibility.typing_extensions import override
@@ -97,11 +97,22 @@ def _strip_quotes(s: str, dialect: GXSqlDialect) -> str:
     return s
 
 
-# TODO: only require dialect for string inputs (add overloads)
+@overload
+def wrap_identifier(indentifier: str, dialect: GXSqlDialect = ...) -> quoted_name:
+    ...
+
+
+@overload
 def wrap_identifier(
-    indentifier: str | quoted_name, dialect: GXSqlDialect
+    indentifier: quoted_name, dialect: GXSqlDialect | None = ...
+) -> quoted_name:
+    ...
+
+
+def wrap_identifier(
+    indentifier: str | quoted_name, dialect: GXSqlDialect | None = None
 ) -> quoted_name:
     if isinstance(indentifier, quoted_name):
         return indentifier
-    wo_quotes = _strip_quotes(indentifier, dialect)
+    wo_quotes = _strip_quotes(indentifier, dialect)  # type: ignore[arg-type] # accounted for in overload
     return quoted_name(wo_quotes, quote=True)
