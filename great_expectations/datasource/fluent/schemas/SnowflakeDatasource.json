@@ -107,6 +107,7 @@
         },
         "schema": {
             "title": "Schema",
+            "default": "PUBLIC",
             "type": "string"
         },
         "warehouse": {

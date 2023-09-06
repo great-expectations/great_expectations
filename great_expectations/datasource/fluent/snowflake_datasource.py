@@ -85,7 +85,7 @@ class SnowflakeDatasource(SQLDatasource):
     password: Optional[Union[ConfigStr, str]] = None
     database: Optional[str] = None
     schema_: Optional[str] = pydantic.Field(
-        None, alias="schema"
+        "PUBLIC", alias="schema"
     )  # schema is a reserved attr in BaseModel
     warehouse: Optional[str] = None
     role: Optional[str] = None
