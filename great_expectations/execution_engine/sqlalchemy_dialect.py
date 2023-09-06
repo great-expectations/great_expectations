@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Final, List, Mapping, Union
+from typing import Any, Final, List, Literal, Mapping, Union
 
 from great_expectations.compatibility.sqlalchemy import quoted_name
 from great_expectations.compatibility.typing_extensions import override
@@ -67,23 +67,24 @@ class GXSqlDialect(Enum):
         return [dialect for dialect in cls if dialect != GXSqlDialect.OTHER]
 
 
-DIALECT_QUOTE_STRINGS: Final[Mapping[GXSqlDialect, str]] = {
+DIALECT_IDENTIFIER_QUOTE_STRINGS: Final[Mapping[GXSqlDialect, Literal['"', "`"]]] = {
     # TODO: add other dialects
     GXSqlDialect.SNOWFLAKE: '"',
     GXSqlDialect.POSTGRESQL: '"',
     GXSqlDialect.SQLITE: '"',
     GXSqlDialect.DATABRICKS: "`",
+    GXSqlDialect.MYSQL: "`",
 }
 
 
 def quote_str(unquoted_identifier: str, dialect: GXSqlDialect) -> str:
     """Quote a string using the specified dialect's quote character."""
-    quote_char = DIALECT_QUOTE_STRINGS[dialect]
+    quote_char = DIALECT_IDENTIFIER_QUOTE_STRINGS[dialect]
     return f"{quote_char}{unquoted_identifier}{quote_char}"
 
 
 def _strip_quotes(s: str, dialect: GXSqlDialect) -> str:
-    quote_str = DIALECT_QUOTE_STRINGS[dialect]
+    quote_str = DIALECT_IDENTIFIER_QUOTE_STRINGS[dialect]
     if s.startswith(quote_str) and s.endswith(quote_str):
         return s[1:-1]
     return s
