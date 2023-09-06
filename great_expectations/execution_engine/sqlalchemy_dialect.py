@@ -69,11 +69,12 @@ class GXSqlDialect(Enum):
 
 DIALECT_IDENTIFIER_QUOTE_STRINGS: Final[Mapping[GXSqlDialect, Literal['"', "`"]]] = {
     # TODO: add other dialects
-    GXSqlDialect.SNOWFLAKE: '"',
-    GXSqlDialect.POSTGRESQL: '"',
-    GXSqlDialect.SQLITE: '"',
     GXSqlDialect.DATABRICKS: "`",
     GXSqlDialect.MYSQL: "`",
+    GXSqlDialect.POSTGRESQL: '"',
+    GXSqlDialect.SNOWFLAKE: '"',
+    GXSqlDialect.SQLITE: '"',
+    GXSqlDialect.TRINO: "`",
 }
 
 
