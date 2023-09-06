@@ -279,9 +279,9 @@ def databricks_sql_ds(
         connection_string="databricks://token:"
         "${DATABRICKS_TOKEN}@${DATABRICKS_HOST}:443"
         "/"
-        + PYTHON_VERSION
+        + RAND_SCHEMA
         + "?http_path=${DATABRICKS_HTTP_PATH}&catalog=ci&schema="
-        + PYTHON_VERSION,
+        + RAND_SCHEMA,
     )
     return ds
 
@@ -393,16 +393,16 @@ class TestTableIdentifiers:
         table_factory(
             engine=databricks_sql_ds.get_engine(),
             table_names={table_name},
-            schema=PYTHON_VERSION,
+            schema=RAND_SCHEMA,
         )
 
         table_names: list[str] = inspect(
             databricks_sql_ds.get_engine()
-        ).get_table_names(schema=PYTHON_VERSION)
+        ).get_table_names(schema=RAND_SCHEMA)
         print(f"databricks tables:\n{pf(table_names)}))")
 
         databricks_sql_ds.add_table_asset(
-            asset_name, table_name=table_name, schema_name=PYTHON_VERSION
+            asset_name, table_name=table_name, schema_name=RAND_SCHEMA
         )
 
     @pytest.mark.snowflake
@@ -638,7 +638,12 @@ class TestColumnIdentifiers:
         if _is_quote_char_dialect_mismatch(dialect, column_name):
             pytest.skip(reason=f"quote char dialect mismatch: {column_name[0]}")
 
-        schema: str | None = PYTHON_VERSION if dialect == "snowflake" else None
+        schema: str | None = (
+            RAND_SCHEMA
+            if GXSqlDialect(dialect)
+            in (GXSqlDialect.SNOWFLAKE, GXSqlDialect.DATABRICKS)
+            else None
+        )
 
         table_factory(
             engine=datasource.get_engine(),
