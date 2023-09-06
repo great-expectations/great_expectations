@@ -282,6 +282,7 @@ def databricks_sql_ds(
         + "?http_path=${DATABRICKS_HTTP_PATH}&catalog=ci&schema="
         + RAND_SCHEMA,
     )
+    ds.test_schema = RAND_SCHEMA
     return ds
 
 
@@ -640,6 +641,7 @@ class TestColumnIdentifiers:
         table_factory(
             engine=datasource.get_engine(),
             table_names={TEST_TABLE_NAME},
+            schema=getattr(datasource, "test_schema", None),
             data=[
                 {
                     "id": 1,
