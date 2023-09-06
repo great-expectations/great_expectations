@@ -157,6 +157,9 @@ def get_random_identifier_name() -> str:
     return f"i{guid.hex}"
 
 
+RAND_SCHEMA: Final[str] = f"{PYTHON_VERSION}_{get_random_identifier_name()}"
+
+
 @pytest.fixture(scope="function")
 def capture_engine_logs(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFixture:
     """Capture SQLAlchemy engine logs and display them if the test fails."""
@@ -275,9 +278,9 @@ def databricks_sql_ds(
         connection_string="databricks://token:"
         "${DATABRICKS_TOKEN}@${DATABRICKS_HOST}:443"
         "/"
-        + PYTHON_VERSION
+        + RAND_SCHEMA
         + "?http_path=${DATABRICKS_HTTP_PATH}&catalog=ci&schema="
-        + PYTHON_VERSION,
+        + RAND_SCHEMA,
     )
     return ds
 
@@ -454,10 +457,12 @@ class TestTableIdentifiers:
         [
             param("trino", None, marks=[pytest.mark.trino]),
             param("postgres", None, marks=[pytest.mark.postgresql]),
+            param("snowflake", RAND_SCHEMA, marks=[pytest.mark.snowflake]),
             param(
-                "snowflake", get_random_identifier_name(), marks=[pytest.mark.snowflake]
+                "databricks_sql",
+                RAND_SCHEMA,
+                marks=[pytest.mark.databricks],
             ),
-            param("databricks_sql", PYTHON_VERSION, marks=[pytest.mark.databricks]),
             param("sqlite", None, marks=[pytest.mark.sqlite]),
         ],
     )
