@@ -38,6 +38,7 @@ from great_expectations.datasource.fluent import (
     SQLDatasource,
     SqliteDatasource,
 )
+from great_expectations.execution_engine.sqlalchemy_dialect import quote_str
 from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
 )
@@ -191,25 +192,20 @@ def table_factory(
         )
         created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
         with engine.connect() as conn:
+            upper: str = quote_str("UPPER", dialect=engine.dialect.name)
+            lower: str = quote_str("lower", dialect=engine.dialect.name)
             transaction = conn.begin()
             if schema:
                 conn.execute(TextClause(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
             for name in table_names:
                 qualified_table_name = f"{schema}.{name}" if schema else name
                 # TODO: use dialect specific quotes
-                conn.execute(
-                    TextClause(
-                        f'CREATE TABLE IF NOT EXISTS {qualified_table_name} (id INTEGER, name VARCHAR(255), "UPPER" VARCHAR(255), "lower" VARCHAR(255))'
-                    )
-                )
+                create_tables = f"CREATE TABLE IF NOT EXISTS {qualified_table_name} (id INTEGER, name VARCHAR(255), {upper} VARCHAR(255), {lower} VARCHAR(255))"
+                conn.execute(TextClause(create_tables))
                 if data:
                     # TODO: use dialect specific quotes
-                    conn.execute(
-                        TextClause(
-                            f'INSERT INTO {qualified_table_name} (id, name, "UPPER", "lower") VALUES (:id, :name, :UPPER, :lower)',
-                        ),
-                        data,
-                    )
+                    insert_data = f"INSERT INTO {qualified_table_name} (id, name, {upper}, {lower}) VALUES (:id, :name, :UPPER, :lower)"
+                    conn.execute(TextClause(insert_data), data)
 
                 created_tables.append(dict(table_name=name, schema=schema))
             transaction.commit()

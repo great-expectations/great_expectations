@@ -76,6 +76,12 @@ DIALECT_QUOTE_STRINGS: Final[Mapping[GXSqlDialect, str]] = {
 }
 
 
+def quote_str(unquoted_identifier: str, dialect: GXSqlDialect) -> str:
+    """Quote a string using the specified dialect's quote character."""
+    quote_char = DIALECT_QUOTE_STRINGS[dialect]
+    return f"{quote_char}{unquoted_identifier}{quote_char}"
+
+
 def _strip_quotes(s: str, dialect: GXSqlDialect) -> str:
     quote_str = DIALECT_QUOTE_STRINGS[dialect]
     if s.startswith(quote_str) and s.endswith(quote_str):
