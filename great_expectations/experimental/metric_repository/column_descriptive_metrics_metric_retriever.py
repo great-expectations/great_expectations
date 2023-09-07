@@ -92,24 +92,6 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                 exception=None,  # TODO: Pass through a MetricException() if an exception is thrown
             )
         )
-        # metric_name = "table.column_types"
-        # # TODO: fix this jankiness
-        # # (metric_name, tuple(), tuple())
-        # # or
-        # # (metric_name, tuple(), 'include_nested=True')
-        # if (metric_name, tuple(), "include_nested=True") in computed_metrics.keys():
-        #     metric_lookup_key = (metric_name, tuple(), "include_nested=True")
-        # else:
-        #     metric_lookup_key = (metric_name, tuple(), tuple())
-        #
-        # metrics.append(
-        #     TableMetric[List[str]](
-        #         batch_id=validator.active_batch.id,
-        #         metric_name=metric_name,
-        #         value=computed_metrics[metric_lookup_key],  # type: ignore[arg-type] # Pydantic verifies the value type
-        #         exception=None,  # TODO: Pass through a MetricException() if an exception is thrown
-        #     )
-        # )
         return metrics
 
     def _get_column_metrics(

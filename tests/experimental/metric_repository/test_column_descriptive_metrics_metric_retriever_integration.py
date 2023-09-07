@@ -67,12 +67,6 @@ def test_get_metrics(
             value=["col1", "col2"],
             exception=None,
         ),
-        # TableMetric[List[Dict[str, str]]](
-        #     batch_id=batch_id,
-        #     metric_name="table.column_types",
-        #     value=[{'name': 'col1', 'type': int}, {'name': 'col2', 'type': int}],
-        #     exception=None,
-        # ),
         ColumnMetric[float](
             batch_id=batch_id,
             metric_name="column.min",
