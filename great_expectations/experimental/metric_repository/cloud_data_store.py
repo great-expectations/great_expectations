@@ -3,9 +3,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, TypeVar
 
-import pydantic
-from pydantic import BaseModel
-
+from great_expectations.compatibility.pydantic import BaseModel, Extra
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.http import create_session
 from great_expectations.experimental.metric_repository.data_store import DataStore
@@ -27,14 +25,14 @@ class PayloadData(BaseModel):
     attributes: Dict[str, Any]
 
     class Config:
-        extra = pydantic.Extra.forbid
+        extra = Extra.forbid
 
 
 class Payload(BaseModel):
     data: PayloadData
 
     class Config:
-        extra = pydantic.Extra.forbid
+        extra = Extra.forbid
 
 
 class CloudDataStore(DataStore[StorableTypes]):
@@ -60,7 +58,7 @@ class CloudDataStore(DataStore[StorableTypes]):
         if isinstance(value, MetricRun):
             return "metric-run"
 
-    def _build_payload(self, value: StorableTypes) -> dict:
+    def _build_payload(self, value: StorableTypes) -> str:
         payload = Payload(
             data=PayloadData(
                 type=self._map_to_resource_type(value),
@@ -69,7 +67,7 @@ class CloudDataStore(DataStore[StorableTypes]):
                 ),
             )
         )
-        return payload.dict()
+        return payload.json()
 
     def _build_url(self, value: StorableTypes) -> str:
         assert self._context.ge_cloud_config is not None
@@ -92,4 +90,4 @@ class CloudDataStore(DataStore[StorableTypes]):
         response.raise_for_status()
 
         response_json = response.json()
-        return uuid.UUID(response_json["data"]["attributes"]["id"])
+        return uuid.UUID(response_json["id"])

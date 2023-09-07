@@ -4,6 +4,27 @@
 Changelog
 #########
 
+0.17.15
+-----------------
+* [BUGFIX] Databricks tests skipped for Forks ([#8662](https://github.com/great-expectations/great_expectations/pull/8662))
+* [BUGFIX] Fix backslashes in url path under Windows ([#8663](https://github.com/great-expectations/great_expectations/pull/8663)) (thanks @MarcelBeining)
+* [BUGFIX] Fix validation for `QueryAsset` with `create_temp_table: False` ([#8611](https://github.com/great-expectations/great_expectations/pull/8611)) (thanks @moatazelmohtaseb)
+* [DOCS] Remove .py suffix from URL for module pages ([#8649](https://github.com/great-expectations/great_expectations/pull/8649))
+* [DOCS] Add redirects for module API docs ([#8665](https://github.com/great-expectations/great_expectations/pull/8665))
+* [DOCS] Fix Orphaned Pages in Prerequisites Blocks ([#8666](https://github.com/great-expectations/great_expectations/pull/8666))
+* [MAINTENANCE] Column Descriptive Metrics: Implement cloud data store ([#8656](https://github.com/great-expectations/great_expectations/pull/8656))
+* [MAINTENANCE] Update team members ([#8654](https://github.com/great-expectations/great_expectations/pull/8654))
+* [MAINTENANCE] Update GitPython ([#8661](https://github.com/great-expectations/great_expectations/pull/8661))
+* [MAINTENANCE] Column Descriptive Metrics: Return id from Data Store ([#8667](https://github.com/great-expectations/great_expectations/pull/8667))
+* [MAINTENANCE] Column Descriptive Metrics: ColumnDescriptiveMetricsAction tests ([#8668](https://github.com/great-expectations/great_expectations/pull/8668))
+* [MAINTENANCE] Column Descriptive Metrics: Add tests and cleanup ([#8669](https://github.com/great-expectations/great_expectations/pull/8669))
+* [MAINTENANCE] Column Descriptive Metrics: Fix cloud data store - use pydantic ([#8677](https://github.com/great-expectations/great_expectations/pull/8677))
+* [MAINTENANCE] Run doc-checks on every PR. ([#8678](https://github.com/great-expectations/great_expectations/pull/8678))
+* [MAINTENANCE] Column Descriptive Metrics - Additional Table and Column Metrics ([#8679](https://github.com/great-expectations/great_expectations/pull/8679))
+* [MAINTENANCE] Column Descriptive Metrics: Additional metrics mean median ([#8680](https://github.com/great-expectations/great_expectations/pull/8680))
+* [MAINTENANCE] Pydantic 2.0 support ([#8604](https://github.com/great-expectations/great_expectations/pull/8604))
+* [CONTRIB] fixing null eq safe for SQLAlchemy and rendering ([#8617](https://github.com/great-expectations/great_expectations/pull/8617)) (thanks @karthigaiselvanm)
+
 0.17.14
 -----------------
 * [BUGFIX] Use correct syntax for creating temporary views for DatabricksSQL datasources ([#8655](https://github.com/great-expectations/great_expectations/pull/8655))
