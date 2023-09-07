@@ -46,7 +46,7 @@ class ListTableNamesAction(AgentAction[ListTableNamesEvent]):
         self, datasource_id: str, table_names: List[str]
     ) -> None:
         try:
-            cloud_config = GxAgentEnvVars()
+            cloud_config = GxAgentEnvVars()  # type: ignore[call-arg] # args pulled from env vars
         except pydantic.ValidationError as validation_err:
             raise RuntimeError(
                 f"Missing or badly formed environment variable\n{validation_err.errors()}"
