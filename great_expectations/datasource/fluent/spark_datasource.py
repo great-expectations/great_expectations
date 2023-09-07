@@ -265,7 +265,7 @@ class SparkDatasource(_SparkDatasource):
     # instance attributes
     type: Literal["spark"] = "spark"
 
-    assets: List[DataFrameAsset] = []  # type: ignore[assignment]
+    assets: List[DataFrameAsset] = []
 
     @override
     def test_connection(self, test_assets: bool = True) -> None:

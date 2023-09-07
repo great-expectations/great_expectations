@@ -1042,7 +1042,7 @@ def datasource_test_connection_error_messages(
     request,
 ) -> tuple[SparkFilesystemDatasource, TestConnectionError]:
     batching_regex, test_connection_error = request.param(csv_path=csv_path)
-    csv_asset = CSVAsset(
+    csv_asset = CSVAsset(  # type: ignore[call-arg] # missing args
         name="csv_asset",
         batching_regex=batching_regex,
     )

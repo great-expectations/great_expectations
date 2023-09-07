@@ -650,4 +650,4 @@ class _SparkFilePathDatasource(_SparkDatasource):
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = _SPARK_FILE_PATH_ASSET_TYPES
 
     # instance attributes
-    assets: List[_SPARK_FILE_PATH_ASSET_TYPES_UNION] = []  # type: ignore[assignment]
+    assets: List[_SPARK_FILE_PATH_ASSET_TYPES_UNION] = []
