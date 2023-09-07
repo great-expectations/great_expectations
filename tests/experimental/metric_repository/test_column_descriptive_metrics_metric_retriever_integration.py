@@ -40,7 +40,7 @@ def cloud_context_and_batch_request_with_simple_dataframe(
     return context, batch_request
 
 
-# @pytest.mark.cloud
+@pytest.mark.cloud
 def test_get_metrics(
     cloud_context_and_batch_request_with_simple_dataframe: tuple[
         CloudDataContext, BatchRequest
