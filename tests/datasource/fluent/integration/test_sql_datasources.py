@@ -127,44 +127,6 @@ TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
     },
 }
 
-# TODO: remove items from this lookup when working on fixes
-REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
-    'expect_column_values_to_not_be_null-str "lower"': ["postgres", "snowflake"],
-    "expect_column_values_to_not_be_null-str LOWER": [
-        "databricks_sql",
-        "postgres",
-        "snowflake",
-        "sqlite",
-    ],
-    "expect_column_values_to_not_be_null-str upper": [
-        "databricks_sql",
-        "postgres",
-        "sqlite",
-    ],
-    'expect_column_values_to_not_be_null-str "UPPER"': ["postgres", "snowflake"],
-    "expect_column_values_to_not_be_null-str UPPER": ["snowflake"],
-    "expect_column_values_to_not_be_null-quoted_name UPPER quote=None": ["snowflake"],
-    "expect_column_values_to_not_be_null-quoted_name UPPER quote=True": ["snowflake"],
-    "expect_column_values_to_not_be_null-quoted_name UPPER quote=False": ["snowflake"],
-    "expect_column_values_to_not_be_null-quoted_name upper quote=None": [
-        "databricks_sql",
-        "postgres",
-        "sqlite",
-    ],
-    "expect_column_to_exist-str LOWER": ["databricks_sql", "postgres", "sqlite"],
-    "expect_column_to_exist-str upper": ["databricks_sql", "postgres", "sqlite"],
-    'expect_column_to_exist-str "lower"': ["postgres", "snowflake", "sqlite"],
-    'expect_column_to_exist-str "UPPER"': ["postgres", "snowflake", "sqlite"],
-    "expect_column_to_exist-quoted_name UPPER quote=False": ["snowflake"],
-    "expect_column_to_exist-quoted_name UPPER quote=True": ["snowflake"],
-    "expect_column_to_exist-quoted_name UPPER quote=None": ["postgres", "snowflake"],
-    "expect_column_to_exist-quoted_name upper quote=None": [
-        "databricks_sql",
-        "postgres",
-        "sqlite",
-    ],
-}
-
 
 class Row(TypedDict):
     id: int
@@ -562,6 +524,45 @@ class TestTableIdentifiers:
 
         print(f"result:\n{pf(result)}")
         assert result.success is True
+
+
+# TODO: remove items from this lookup when working on fixes
+REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
+    'expect_column_values_to_not_be_null-str "lower"': ["postgres", "snowflake"],
+    "expect_column_values_to_not_be_null-str LOWER": [
+        "databricks_sql",
+        "postgres",
+        "snowflake",
+        "sqlite",
+    ],
+    "expect_column_values_to_not_be_null-str upper": [
+        "databricks_sql",
+        "postgres",
+        "sqlite",
+    ],
+    'expect_column_values_to_not_be_null-str "UPPER"': ["postgres", "snowflake"],
+    "expect_column_values_to_not_be_null-str UPPER": ["snowflake"],
+    "expect_column_values_to_not_be_null-quoted_name UPPER quote=None": ["snowflake"],
+    "expect_column_values_to_not_be_null-quoted_name UPPER quote=True": ["snowflake"],
+    "expect_column_values_to_not_be_null-quoted_name UPPER quote=False": ["snowflake"],
+    "expect_column_values_to_not_be_null-quoted_name upper quote=None": [
+        "databricks_sql",
+        "postgres",
+        "sqlite",
+    ],
+    "expect_column_to_exist-str LOWER": ["databricks_sql", "postgres", "sqlite"],
+    "expect_column_to_exist-str upper": ["databricks_sql", "postgres", "sqlite"],
+    'expect_column_to_exist-str "lower"': ["postgres", "snowflake", "sqlite"],
+    'expect_column_to_exist-str "UPPER"': ["postgres", "snowflake", "sqlite"],
+    "expect_column_to_exist-quoted_name UPPER quote=False": ["snowflake"],
+    "expect_column_to_exist-quoted_name UPPER quote=True": ["snowflake"],
+    "expect_column_to_exist-quoted_name UPPER quote=None": ["postgres", "snowflake"],
+    "expect_column_to_exist-quoted_name upper quote=None": [
+        "databricks_sql",
+        "postgres",
+        "sqlite",
+    ],
+}
 
 
 def _requires_fix(param_id: str) -> bool:
