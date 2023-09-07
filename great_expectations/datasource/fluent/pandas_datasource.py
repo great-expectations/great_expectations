@@ -24,10 +24,9 @@ from typing import (
 )
 
 import pandas as pd
-import pydantic
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility import pydantic, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (
@@ -769,7 +768,7 @@ class PandasDatasource(_PandasDatasource):
         """
         asset = CSVAsset(
             name=name,
-            filepath_or_buffer=filepath_or_buffer,
+            filepath_or_buffer=filepath_or_buffer,  # type: ignore[call-arg]
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -818,7 +817,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The ExcelAsset that has been added to this datasource.
         """
-        asset = ExcelAsset(
+        asset = ExcelAsset(  # type: ignore[call-arg]
             name=name,
             io=io,
             **kwargs,
@@ -869,7 +868,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The FeatherAsset that has been added to this datasource.
         """
-        asset = FeatherAsset(
+        asset = FeatherAsset(  # type: ignore[call-arg]
             name=name,
             path=path,
             **kwargs,
@@ -920,7 +919,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The FWFAsset that has been added to this datasource.
         """
-        asset = FWFAsset(
+        asset = FWFAsset(  # type: ignore[call-arg]
             name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
@@ -971,7 +970,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The GBQAsset that has been added to this datasource.
         """
-        asset = GBQAsset(
+        asset = GBQAsset(  # type: ignore[call-arg]
             name=name,
             query=query,
             **kwargs,
@@ -1022,7 +1021,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The HDFAsset that has been added to this datasource.
         """
-        asset = HDFAsset(
+        asset = HDFAsset(  # type: ignore[call-arg]
             name=name,
             path_or_buf=path_or_buf,
             **kwargs,
@@ -1073,7 +1072,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The HTMLAsset that has been added to this datasource.
         """
-        asset = HTMLAsset(
+        asset = HTMLAsset(  # type: ignore[call-arg]
             name=name,
             io=io,
             **kwargs,
@@ -1124,7 +1123,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The JSONAsset that has been added to this datasource.
         """
-        asset = JSONAsset(
+        asset = JSONAsset(  # type: ignore[call-arg]
             name=name,
             path_or_buf=path_or_buf,
             **kwargs,
@@ -1175,7 +1174,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The ORCAsset that has been added to this datasource.
         """
-        asset = ORCAsset(
+        asset = ORCAsset(  # type: ignore[call-arg]
             name=name,
             path=path,
             **kwargs,
@@ -1226,7 +1225,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The ParquetAsset that has been added to this datasource.
         """
-        asset = ParquetAsset(
+        asset = ParquetAsset(  # type: ignore[call-arg]
             name=name,
             path=path,
             **kwargs,
@@ -1277,7 +1276,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The PickleAsset that has been added to this datasource.
         """
-        asset = PickleAsset(
+        asset = PickleAsset(  # type: ignore[call-arg]
             name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
@@ -1328,7 +1327,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The SASAsset that has been added to this datasource.
         """
-        asset = SASAsset(
+        asset = SASAsset(  # type: ignore[call-arg]
             name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
@@ -1379,7 +1378,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The SPSSAsset that has been added to this datasource.
         """
-        asset = SPSSAsset(
+        asset = SPSSAsset(  # type: ignore[call-arg]
             name=name,
             path=path,
             **kwargs,
@@ -1432,7 +1431,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The SQLAsset that has been added to this datasource.
         """
-        asset = SQLAsset(
+        asset = SQLAsset(  # type: ignore[call-arg]
             name=name,
             sql=sql,
             con=con,
@@ -1489,7 +1488,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The SQLQueryAsset that has been added to this datasource.
         """
-        asset = SQLQueryAsset(
+        asset = SQLQueryAsset(  # type: ignore[call-arg]
             name=name,
             sql=sql,
             con=con,
@@ -1546,7 +1545,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The SQLTableAsset that has been added to this datasource.
         """
-        asset = SQLTableAsset(
+        asset = SQLTableAsset(  # type: ignore[call-arg]
             name=name,
             table_name=table_name,
             con=con,
@@ -1601,7 +1600,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The StataAsset that has been added to this datasource.
         """
-        asset = StataAsset(
+        asset = StataAsset(  # type: ignore[call-arg]
             name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
@@ -1652,7 +1651,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The TableAsset that has been added to this datasource.
         """
-        asset = TableAsset(
+        asset = TableAsset(  # type: ignore[call-arg]
             name=name,
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
@@ -1703,7 +1702,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The XMLAsset that has been added to this datasource.
         """
-        asset = XMLAsset(
+        asset = XMLAsset(  # type: ignore[call-arg]
             name=name,
             path_or_buffer=path_or_buffer,
             **kwargs,

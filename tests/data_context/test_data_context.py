@@ -1,8 +1,10 @@
+import configparser
 import copy
 import json
 import os
 import pathlib
 import shutil
+import uuid
 from collections import OrderedDict
 from typing import Dict, List, Union
 
@@ -19,7 +21,10 @@ from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import DataContext
+from great_expectations.data_context import DataContext, get_context
+from great_expectations.data_context.data_context.ephemeral_data_context import (
+    EphemeralDataContext,
+)
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -52,7 +57,6 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.util import (
     deep_filter_properties_iterable,
     gen_directory_tree_str,
-    get_context,
 )
 from tests.test_utils import create_files_in_directory, safe_remove
 
@@ -3043,3 +3047,45 @@ def test_file_backed_context_updates_existing_gitignore(tmp_path: pathlib.Path):
     contents = gitignore.read_text()
     assert existing_value in contents
     assert FileDataContext.GX_UNCOMMITTED_DIR in contents
+
+
+@pytest.mark.unit
+def test_set_oss_id_with_empty_config(in_memory_runtime_context: EphemeralDataContext):
+    context = in_memory_runtime_context
+    config = configparser.ConfigParser()
+
+    oss_id = context._set_oss_id(config)
+
+    assert config.sections() == ["anonymous_usage_statistics"]
+    assert list(config["anonymous_usage_statistics"]) == ["oss_id"]
+    assert oss_id == uuid.UUID(config["anonymous_usage_statistics"]["oss_id"])
+
+
+@pytest.mark.unit
+def test_set_oss_id_with_existing_config(
+    in_memory_runtime_context: EphemeralDataContext,
+):
+    context = in_memory_runtime_context
+
+    # Set up existing config
+    # [anonymous_usage_statistics]
+    # usage_statistics_url=https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
+    config = configparser.ConfigParser()
+    config["anonymous_usage_statistics"] = {}
+    usage_statistics_url = (
+        "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+    )
+    config["anonymous_usage_statistics"]["usage_statistics_url"] = usage_statistics_url
+
+    oss_id = context._set_oss_id(config)
+
+    assert config.sections() == ["anonymous_usage_statistics"]
+    assert list(config["anonymous_usage_statistics"]) == [
+        "usage_statistics_url",
+        "oss_id",
+    ]
+    assert (
+        usage_statistics_url
+        == config["anonymous_usage_statistics"]["usage_statistics_url"]
+    )
+    assert oss_id == uuid.UUID(config["anonymous_usage_statistics"]["oss_id"])

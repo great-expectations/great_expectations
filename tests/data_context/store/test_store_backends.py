@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+from typing import Optional
 from unittest import mock
 
 import boto3
@@ -12,7 +13,7 @@ from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import DataContext
+from great_expectations.data_context import DataContext, get_context
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
@@ -37,7 +38,6 @@ from great_expectations.exceptions import InvalidKeyError, StoreBackendError, St
 from great_expectations.self_check.util import expectationSuiteSchema
 from great_expectations.util import (
     gen_directory_tree_str,
-    get_context,
     is_library_loadable,
 )
 from tests import test_utils
@@ -176,7 +176,7 @@ def test_StoreBackendValidation():
 
 
 def check_store_backend_store_backend_id_functionality(
-    store_backend: StoreBackend, store_backend_id: str = None
+    store_backend: StoreBackend, store_backend_id: Optional[str] = None
 ) -> None:
     """
     Assertions to check if a store backend is handling reading and writing a store_backend_id appropriately.

@@ -12,9 +12,8 @@ from typing import (
     Union,
 )
 
-import pydantic
-from pydantic import Field
-
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import Field
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent import _SparkDatasource
 from great_expectations.datasource.fluent.directory_data_asset import (
@@ -651,4 +650,4 @@ class _SparkFilePathDatasource(_SparkDatasource):
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = _SPARK_FILE_PATH_ASSET_TYPES
 
     # instance attributes
-    assets: List[_SPARK_FILE_PATH_ASSET_TYPES_UNION] = []  # type: ignore[assignment]
+    assets: List[_SPARK_FILE_PATH_ASSET_TYPES_UNION] = []

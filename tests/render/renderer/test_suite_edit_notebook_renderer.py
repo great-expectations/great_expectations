@@ -8,6 +8,7 @@ from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     ExpectationSuiteSchema,
 )
+from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -19,7 +20,6 @@ from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
 from great_expectations.render.renderer_configuration import MetaNotesFormat
-from great_expectations.util import get_context
 
 pytestmark = pytest.mark.filesystem
 

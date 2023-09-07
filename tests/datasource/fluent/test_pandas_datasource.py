@@ -7,11 +7,11 @@ import pathlib
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Callable, Type
 
-import pydantic
 import pytest
 from pytest import MonkeyPatch, param
 
 import great_expectations.execution_engine.pandas_execution_engine
+from great_expectations.compatibility import pydantic
 from great_expectations.datasource.fluent import PandasDatasource
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations.datasource.fluent.pandas_datasource import (
@@ -48,7 +48,7 @@ pytestmark = [
 
 @pytest.fixture
 def pandas_datasource() -> PandasDatasource:
-    return PandasDatasource(  # type: ignore[call-arg] # type field not required
+    return PandasDatasource(
         name="pandas_datasource",
     )
 
@@ -149,7 +149,7 @@ class TestDynamicPandasAssets:
 
         assert method_name in PandasDatasource.__dict__
 
-        ds = PandasDatasource(  # type: ignore[call-arg] # type field not required
+        ds = PandasDatasource(
             name="ds_for_testing_add_asset_methods",
         )
         method = getattr(ds, method_name)
@@ -175,7 +175,7 @@ class TestDynamicPandasAssets:
         type_name: str = _get_field_details(asset_class, "type").default_value
         method_name: str = f"add_{type_name}_asset"
 
-        ds = PandasDatasource(  # type: ignore[call-arg] # type field not required
+        ds = PandasDatasource(
             name="ds_for_testing_add_asset_methods",
         )
         method = getattr(ds, method_name)

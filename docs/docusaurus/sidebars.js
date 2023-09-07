@@ -74,6 +74,7 @@ module.exports = {
             'guides/expectations/how_to_use_auto_initializing_expectations',
             'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
             'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
+            'guides/expectations/advanced/identify_failed_rows_expectations',
           ]
         },
         {
@@ -152,6 +153,7 @@ module.exports = {
             'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
           ]
         },
+        'guides/validation/limit_validation_results',
       ]
     },
     {

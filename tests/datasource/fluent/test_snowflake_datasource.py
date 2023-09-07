@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import pydantic
 import pytest
 
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.snowflake import snowflake
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.snowflake_datasource import (
@@ -108,7 +108,9 @@ def test_invalid_connection_string_raises_dsn_error(
     connection_string: str, expected_errors: list[dict]
 ):
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        _ = SnowflakeDatasource(name="my_snowflake", connection_string=connection_string)  # type: ignore[arg-type] # Pydantic coerces connection_string to SnowflakeDsn
+        _ = SnowflakeDatasource(
+            name="my_snowflake", connection_string=connection_string
+        )
 
     assert expected_errors == exc_info.value.errors()
 

@@ -21,9 +21,9 @@ from typing import (
     overload,
 )
 
-from pydantic import Extra, Field, validator
 from ruamel.yaml import YAML
 
+from great_expectations.compatibility.pydantic import Extra, Field, validator
 from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.constants import (
@@ -40,8 +40,9 @@ from great_expectations.datasource.fluent.sources import (
 )
 
 if TYPE_CHECKING:
-    from pydantic.error_wrappers import ErrorDict as PydanticErrorDict
-
+    from great_expectations.compatibility.pydantic.error_wrappers import (
+        ErrorDict as PydanticErrorDict,
+    )
     from great_expectations.datasource.fluent.fluent_base_model import (
         AbstractSetIntStr,
         MappingIntStrAny,
@@ -221,7 +222,7 @@ class GxConfig(FluentBaseModel):
                 for asset in datasource.assets:
                     asset._datasource = datasource
 
-        logger.debug(f"Loaded 'datasources' ->\n{repr(loaded_datasources)}")
+        logger.debug(f"Loaded 'datasources' ->\n{loaded_datasources!r}")
 
         if v and not loaded_datasources:
             logger.info(f"Of {len(v)} entries, no 'datasources' could be loaded")

@@ -17,11 +17,11 @@ from typing import (
     cast,
 )
 
-import pydantic
-from pydantic import Field
 from typing_extensions import Annotated
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import Field
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
@@ -1020,7 +1020,7 @@ class SQLDatasource(Datasource):
                 raise SQLDatasourceError(
                     "Unable to create a SQLAlchemy engine from "
                     f"connection_string: {self.connection_string} due to the "
-                    f"following exception: {str(e)}"
+                    f"following exception: {e!s}"
                 ) from e
             self._cached_connection_string = self.connection_string
         return self._engine
@@ -1071,7 +1071,7 @@ class SQLDatasource(Datasource):
         except Exception as e:
             raise TestConnectionError(
                 "Attempt to connect to datasource failed with the following error message: "
-                f"{str(e)}"
+                f"{e!s}"
             ) from e
         if self.assets and test_assets:
             for asset in self.assets:

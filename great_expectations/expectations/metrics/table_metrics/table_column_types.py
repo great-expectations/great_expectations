@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict, Optional, cast
 
 from great_expectations.compatibility import pyspark, sqlalchemy
@@ -91,16 +93,20 @@ class ColumnTypes(TableMetricProvider):
 def _get_sqlalchemy_column_metadata(
     execution_engine: SqlAlchemyExecutionEngine, batch_data: SqlAlchemyBatchData
 ):
-    # if a custom query was passed
-    if sqlalchemy.TextClause and isinstance(
+    table_selectable: str | sqlalchemy.TextClause
+
+    if sqlalchemy.Table and isinstance(batch_data.selectable, sqlalchemy.Table):
+        table_selectable = batch_data.source_table_name or batch_data.selectable.name
+        schema_name = batch_data.source_schema_name or batch_data.selectable.schema
+
+    # if custom query was passed in
+    elif sqlalchemy.TextClause and isinstance(
         batch_data.selectable, sqlalchemy.TextClause
     ):
-        table_selectable: sqlalchemy.TextClause = batch_data.selectable
+        table_selectable = batch_data.selectable
         schema_name = None
     else:
-        table_selectable: str = (  # type: ignore[no-redef]
-            batch_data.source_table_name or batch_data.selectable.name
-        )
+        table_selectable = batch_data.source_table_name or batch_data.selectable.name
         schema_name = batch_data.source_schema_name or batch_data.selectable.schema
 
     return get_sqlalchemy_column_metadata(

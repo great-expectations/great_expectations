@@ -318,7 +318,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._connection_string = connection_string
         self._url = url
         self._create_temp_table = create_temp_table
-        os.environ["SF_PARTNER"] = "great_expectations_oss"
+        os.environ["SF_PARTNER"] = "great_expectations_oss"  # noqa: TID251
 
         # sqlite/mssql temp tables only persist within a connection, so we need to keep the connection alive by
         # keeping a reference to it.
@@ -1130,7 +1130,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         selectable
                     )
 
-                logger.debug(f"Attempting query {str(sa_query_object)}")
+                logger.debug(f"Attempting query {sa_query_object!s}")
                 res = self.execute_query(sa_query_object).fetchall()
 
                 logger.debug(
@@ -1140,7 +1140,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             except sqlalchemy.OperationalError as oe:
                 exception_message: str = "An SQL execution Exception occurred.  "
                 exception_traceback: str = traceback.format_exc()
-                exception_message += f'{type(oe).__name__}: "{str(oe)}".  Traceback: "{exception_traceback}".'
+                exception_message += f'{type(oe).__name__}: "{oe!s}".  Traceback: "{exception_traceback}".'
                 logger.error(exception_message)
                 raise ExecutionEngineError(message=exception_message)
 
@@ -1329,7 +1329,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         ):
             raise InvalidBatchSpecError(
                 f"""SqlAlchemyExecutionEngine accepts batch_spec only of type SqlAlchemyDatasourceBatchSpec or
-        RuntimeQueryBatchSpec (illegal type "{str(type(batch_spec))}" was received).
+        RuntimeQueryBatchSpec (illegal type "{type(batch_spec)!s}" was received).
                         """
             )
         if (
