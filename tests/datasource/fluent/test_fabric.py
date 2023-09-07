@@ -10,7 +10,7 @@ import pytest
 from packaging.version import Version
 
 import great_expectations.core.batch_spec
-from great_expectations.datasource.fluent.fabric import (
+from great_expectations.experimental.datasource.fabric import (
     FabricPowerBIDatasource,
     _PowerBIAsset,
 )
@@ -88,10 +88,17 @@ class TestFabricPowerBI:
         ["asset_type", "asset_kwargs"],
         [
             param("powerbi_dax", {"dax_string": "my_dax_string"}, id="dax min_args"),
-            param("powerbi_measure", {}, id="measure min_args"),
             param(
                 "powerbi_measure",
                 {
+                    "measure": "my_measure",
+                },
+                id="measure min_args",
+            ),
+            param(
+                "powerbi_measure",
+                {
+                    "measure": "my_measure",
                     "groupby_columns": [("foo", "bar"), ("fizz", "buzz")],
                     # TODO: require custom serde for keys that are tuples
                     # "filters": {

@@ -210,6 +210,9 @@ fluent_datasources:
         dax_string: "foo bar"
       my_measure_asset:
         type: powerbi_measure
+        measure:
+          - foo
+          - bar
         groupby_columns:
           - [foo, bar]
           - [fizz, buzz]
