@@ -1,14 +1,15 @@
 from uuid import UUID
 
-import pydantic
-
 from great_expectations.agent.actions import ActionResult, AgentAction
 from great_expectations.agent.config import GxAgentEnvVars
 from great_expectations.agent.models import DraftDatasourceConfigEvent
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.http import create_session
 
 
 class DraftDatasourceConfigAction(AgentAction[DraftDatasourceConfigEvent]):
+    @override
     def run(self, event: DraftDatasourceConfigEvent, id: str) -> ActionResult:
         draft_config = self.get_draft_config(config_id=event.config_id)
         datasource_type = draft_config.get("type", None)
@@ -23,6 +24,7 @@ class DraftDatasourceConfigAction(AgentAction[DraftDatasourceConfigEvent]):
                 "DraftDatasourceConfigAction received an unknown datasource type."
             ) from exc
         datasource = datasource_cls(**draft_config)
+        datasource._data_context = self._context
         datasource.test_connection(
             test_assets=True
         )  # raises `TestConnectionError` on failure
@@ -30,7 +32,7 @@ class DraftDatasourceConfigAction(AgentAction[DraftDatasourceConfigEvent]):
 
     def get_draft_config(self, config_id: UUID) -> dict:
         try:
-            config = GxAgentEnvVars()
+            config = GxAgentEnvVars()  # type: ignore[call-arg] # args pulled from env vars
         except pydantic.ValidationError as validation_err:
             raise RuntimeError(
                 f"Missing or badly formed environment variable\n{validation_err.errors()}"

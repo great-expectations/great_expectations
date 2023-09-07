@@ -12,7 +12,7 @@ By default, a Checkpoint only validates the last Batch included in a Batch Reque
 
 <Prerequisites>
 
-- [A configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [A configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 - [A Data Asset with multiple Batches](/docs/guides/connecting_to_your_data/connect_to_data_lp).
 - [An Expectation Suite](/docs/guides/expectations/expectations_lp). 
 

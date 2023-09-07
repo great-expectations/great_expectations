@@ -6,6 +6,7 @@ import pytest
 from freezegun import freeze_time
 
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -20,7 +21,6 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
 from great_expectations.render.renderer.site_builder import SiteBuilder
-from great_expectations.util import get_context
 
 # module level markers
 pytestmark = pytest.mark.filesystem
@@ -152,7 +152,7 @@ def test_configuration_driven_site_builder(  # noqa: PLR0915
         datasource_name, generator_name, data_asset_name, profiler_name
     )
 
-    batch = context.get_batch(
+    batch = context._get_batch_v2(
         batch_kwargs=batch_kwargs,
         expectation_suite_name=expectation_suite_name,
     )
@@ -423,7 +423,7 @@ def test_configuration_driven_site_builder_skip_and_clean_missing(
         datasource_name, generator_name, data_asset_name, profiler_name
     )
 
-    batch = context.get_batch(
+    batch = context._get_batch_v2(
         batch_kwargs=batch_kwargs,
         expectation_suite_name=expectation_suite_name,
     )
@@ -561,7 +561,7 @@ def test_configuration_driven_site_builder_without_how_to_buttons(
         datasource_name, generator_name, data_asset_name, profiler_name
     )
 
-    batch = context.get_batch(
+    batch = context._get_batch_v2(
         batch_kwargs=batch_kwargs,
         expectation_suite_name=expectation_suite_name,
     )

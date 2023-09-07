@@ -37,7 +37,7 @@ Connect GX to a SQL database to access source data.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases)
+- [An installation of GX set up to work with SQL](/docs/guides/setup/installation/install_gx)
 - Source data stored in a SQL database
 
 </Prerequisites> 
@@ -66,9 +66,7 @@ The following are some of the connection strings that are available for differen
 
 :::
 
-The following code examples use a PostgreSQL connection string. A PostgreSQL connection string connects GX to the SQL database.
-
-Run the following code to store the connection string in the `connection_string` variable with plain text credentials:
+Run one of the connection strings in your preferred SQL dialect to store the connection string in the `connection_string` variable with plain text credentials. The following code is an example of the PostgreSQL connection string format:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py sql_connection_string"
 ```
@@ -93,10 +91,6 @@ Run the following Python code to create a SQL Data Source:
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py add_sql"
 ```
 
-### Next steps
-
-<AfterCreateSqlDatasource />
-
 </TabItem>
 <TabItem value="postgresql">
 
@@ -108,7 +102,7 @@ Connect GX to a PostgreSQL database to access source data.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with PostgreSQL](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases)
+- [An installation of GX set up to work with PostgreSQL](/docs/guides/setup/installation/install_gx)
 - Source data stored in a PostgreSQL database
 
 </Prerequisites> 
@@ -195,7 +189,7 @@ Connect GX to a SQLite database to access source data.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQLite](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases)
+- [An installation of GX set up to work with SQLite](/docs/guides/setup/installation/install_gx)
 - Source data stored in a SQLite database
 
 </Prerequisites> 
@@ -273,7 +267,7 @@ Connect GX to a Snowflake database to access source data.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases)
+- [An installation of GX set up to work with SQL](/docs/guides/setup/installation/install_gx)
 - Source data stored in a Snowflake database
 
 </Prerequisites> 
@@ -387,7 +381,7 @@ Connect GX to Databricks to access source data.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases)
+- [An installation of GX set up to work with SQL](/docs/guides/setup/installation/install_gx)
 - Source data stored in a Databricks cluster
 
 </Prerequisites> 

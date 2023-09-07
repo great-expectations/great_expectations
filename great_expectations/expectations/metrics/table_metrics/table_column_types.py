@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict, Optional, cast
 
 from great_expectations.compatibility import pyspark, sqlalchemy
@@ -82,22 +84,27 @@ class ColumnTypes(TableMetricProvider):
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        return _get_spark_column_metadata(
+        spark_column_metadata = _get_spark_column_metadata(
             df.schema, include_nested=metric_value_kwargs["include_nested"]
         )
+        return spark_column_metadata
 
 
 def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
-    # if a custom query was passed
-    if sqlalchemy.TextClause and isinstance(
+    table_selectable: str | sqlalchemy.TextClause
+
+    if sqlalchemy.Table and isinstance(batch_data.selectable, sqlalchemy.Table):
+        table_selectable = batch_data.source_table_name or batch_data.selectable.name
+        schema_name = batch_data.source_schema_name or batch_data.selectable.schema
+
+    # if custom query was passed in
+    elif sqlalchemy.TextClause and isinstance(
         batch_data.selectable, sqlalchemy.TextClause
     ):
-        table_selectable: sqlalchemy.TextClause = batch_data.selectable
+        table_selectable = batch_data.selectable
         schema_name = None
     else:
-        table_selectable: str = (  # type: ignore[no-redef]
-            batch_data.source_table_name or batch_data.selectable.name
-        )
+        table_selectable = batch_data.source_table_name or batch_data.selectable.name
         schema_name = batch_data.source_schema_name or batch_data.selectable.schema
 
     return get_sqlalchemy_column_metadata(
@@ -119,7 +126,11 @@ def _get_spark_column_metadata(field, parent_name="", include_nested=True):
             )
     elif pyspark.types and isinstance(field, pyspark.types.StructField):
         if include_nested and "." in field.name:
-            name = f"{parent_name}`{field.name}`"
+            # Only add backticks to escape dotted fields if they don't already exist
+            if field.name.startswith("`") and field.name.endswith("`"):
+                name = f"{parent_name}{field.name}"
+            else:
+                name = f"{parent_name}`{field.name}`"
         else:
             name = parent_name + field.name
 

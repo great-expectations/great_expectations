@@ -113,8 +113,6 @@ def _read_sql_table_as_df(  # noqa: PLR0913
             rows to include in each chunk.
         dialect: we need to handle `sqlite` differently, so dialect is now optionally passed in.
     """
-    schema = schema
-    columns = columns
     if dialect == GXSqlDialect.TRINO:
         return pd.read_sql_table(
             table_name=table_name,

@@ -2,6 +2,7 @@ import hashlib
 import json
 from typing import Any, Set, TypeVar, Union
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
 
 T = TypeVar("T")
@@ -20,13 +21,14 @@ class IDDict(dict):
             return tuple()
         elif len(id_keys) == 1:
             key = list(id_keys)[0]
-            return f"{key}={str(self[key])}"
+            return f"{key}={self[key]!s}"
 
         _id_dict = convert_to_json_serializable(data={k: self[k] for k in id_keys})
         return hashlib.md5(
             json.dumps(_id_dict, sort_keys=True).encode("utf-8")
         ).hexdigest()
 
+    @override
     def __hash__(self) -> int:  # type: ignore[override]
         """Overrides the default implementation"""
         _result_hash: int = hash(self.to_id())

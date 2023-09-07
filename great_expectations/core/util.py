@@ -30,11 +30,10 @@ from urllib.parse import urlparse
 import dateutil.parser
 import numpy as np
 import pandas as pd
-import pydantic
 from IPython import get_ipython
 
 from great_expectations import exceptions as gx_exceptions
-from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility import pydantic, pyspark, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     SQLALCHEMY_NOT_IMPORTED,
     LegacyRow,
@@ -153,7 +152,7 @@ def in_databricks() -> bool:
     Returns:
         bool
     """
-    return "DATABRICKS_RUNTIME_VERSION" in os.environ
+    return "DATABRICKS_RUNTIME_VERSION" in os.environ  # noqa: TID251
 
 
 def determine_progress_bar_method_by_environment() -> Callable:
@@ -413,7 +412,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
 
     # Unable to serialize (unrecognized data type).
     raise TypeError(
-        f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
+        f"{data!s} is of type {type(data).__name__} which cannot be serialized."
     )
 
 
@@ -527,7 +526,7 @@ def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
         return
 
     raise InvalidExpectationConfigurationError(
-        f"{str(data)} is of type {type(data).__name__} which cannot be serialized to json"
+        f"{data!s} is of type {type(data).__name__} which cannot be serialized to json"
     )
 
 
@@ -561,7 +560,7 @@ def parse_string_to_datetime(
 ) -> datetime.datetime:
     if not isinstance(datetime_string, str):
         raise gx_exceptions.SorterError(
-            f"""Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
+            f"""Source "datetime_string" must have string type (actual type is "{type(datetime_string)!s}").
             """
         )
 
@@ -571,7 +570,7 @@ def parse_string_to_datetime(
     if datetime_format_string and not isinstance(datetime_format_string, str):
         raise gx_exceptions.SorterError(
             f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
-"{str(type(datetime_format_string))}").
+"{type(datetime_format_string)!s}").
             """
         )
 

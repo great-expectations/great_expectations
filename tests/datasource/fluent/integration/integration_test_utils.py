@@ -4,10 +4,10 @@ import logging
 from typing import TYPE_CHECKING, Dict, Tuple
 
 import pytest
-from pydantic import ValidationError
 
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent import BatchRequest, PandasDatasource
 from great_expectations.datasource.fluent.interfaces import (
@@ -243,7 +243,7 @@ def run_batch_head(  # noqa: PLR0915
         AbstractDataContext, Datasource, DataAsset, BatchRequest
     ],
     fetch_all: bool | str,
-    n_rows: int | float | str | None,
+    n_rows: int | float | str | None,  # noqa: PYI041
     success: bool,
 ) -> None:
     _, datasource, _, batch_request = datasource_test_data

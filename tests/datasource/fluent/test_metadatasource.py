@@ -8,10 +8,11 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 import pytest
-from pydantic import DirectoryPath, validate_arguments
 
+from great_expectations.compatibility.pydantic import DirectoryPath, validate_arguments
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
+from great_expectations.data_context import get_context as get_gx_context
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
@@ -30,7 +31,6 @@ from great_expectations.datasource.fluent.sources import (
     _SourceFactories,
 )
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.util import get_context as get_gx_context
 
 yaml = YAMLHandler()
 

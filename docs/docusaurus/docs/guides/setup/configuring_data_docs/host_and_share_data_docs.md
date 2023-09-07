@@ -70,6 +70,14 @@ Host and share <TechnicalTag relative="../../../" tag="data_docs" text="Data Doc
 
 </Prerequisites>
 
+### Install Azure Storage Blobs client library for Python
+
+Run the following pip command in a terminal to install Azure Storage Blobs client library and its dependencies:
+
+```markup title="Terminal command:"
+pip install azure-storage-blob
+```
+
 ### Create an Azure Blob Storage static website
 
 1. Create a [storage account](https://docs.microsoft.com/en-us/azure/storage).
@@ -96,7 +104,7 @@ To review additional options for configuring the ``config_variables.yml`` file o
     AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
     ```
    
-### 3. Add a new Azure site to the data_docs_sites section of your great_expectations.yml
+### Add a new Azure site to the data_docs_sites section of your great_expectations.yml
 
 1. Open the ``great_expectations.yml`` file and add the following entry:
   

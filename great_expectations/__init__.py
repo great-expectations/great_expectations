@@ -8,11 +8,10 @@ from great_expectations.expectations.registry import register_core_expectations
 
 del get_versions  # isort:skip
 
-from great_expectations.data_context import DataContext
+from great_expectations.data_context import DataContext, get_context
 
 from .util import (
     from_pandas,
-    get_context,
     read_csv,
     read_excel,
     read_feather,

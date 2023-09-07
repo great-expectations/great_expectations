@@ -35,7 +35,7 @@ my_checkpoint_name = "my_checkpoint"
 yaml_config = f"""
 name: {my_checkpoint_name}
 config_version: 1.0
-class_name: SimpleCheckpoint
+class_name: Checkpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:

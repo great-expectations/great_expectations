@@ -2,8 +2,8 @@ from typing import List
 
 import numpy as np
 
+import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest
-from great_expectations.data_context.data_context import DataContext
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
@@ -11,7 +11,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
-context = DataContext()
+context = gx.get_context()
 suite = context.get_expectation_suite("yellow_tripdata_validations")
 
 # Create a BatchRequest and instantiate a Validator with only the January 2019 data

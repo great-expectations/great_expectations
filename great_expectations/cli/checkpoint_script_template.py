@@ -21,8 +21,7 @@ import sys
 from great_expectations.checkpoint.types.checkpoint_result import (
     CheckpointResult,
 )
-from great_expectations.data_context import FileDataContext
-from great_expectations.util import get_context
+from great_expectations.data_context import FileDataContext, get_context
 
 data_context: FileDataContext = get_context(context_root_dir="{1:s}")
 

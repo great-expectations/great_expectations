@@ -1,7 +1,6 @@
 import great_expectations as gx
 from great_expectations.datasource.fluent import Datasource
 from great_expectations.datasource.fluent import DataAsset
-from great_expectations.checkpoint import SimpleCheckpoint
 
 context = gx.get_context()
 
@@ -19,9 +18,8 @@ taxi_suite.expectation_suite_name = "taxi_suite"
 
 context.add_expectation_suite(expectation_suite=taxi_suite)
 
-checkpoint = SimpleCheckpoint(
+checkpoint = context.add_or_update_checkpoint(
     name="taxi_checkpoint",
-    data_context=context,
     batch_request=batch_request,
     expectation_suite_name="taxi_suite",
 )

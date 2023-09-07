@@ -49,7 +49,7 @@ class ColumnValuesEdtfParseable(ColumnMapMetricProvider):
     def _pandas(cls, column, level=None, **kwargs):
         def is_parseable(val):
             try:
-                if type(val) != str:
+                if type(val) != str:  # noqa: E721
                     raise TypeError(
                         "Values passed to expect_column_values_to_be_edtf_parseable must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format."
                     )
@@ -59,7 +59,7 @@ class ColumnValuesEdtfParseable(ColumnMapMetricProvider):
             except (ValueError, OverflowError):
                 return False
 
-        if level is not None and type(level) != int:
+        if level is not None and type(level) != int:  # noqa: E721
             raise TypeError("level must be of type int.")
 
         return column.map(is_parseable)
