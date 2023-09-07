@@ -6,7 +6,7 @@ from great_expectations.compatibility.not_imported import (
 
 if is_version_greater_or_equal(version=pydantic.VERSION, compare_version="2.0.0"):
     # from pydantic.v1 import BaseModel, Field, StrictStr
-    from pydantic.v1 import *  # noqa: F403 # type: ignore[assignment]
+    from pydantic.v1 import *  # type: ignore[assignment] # noqa: F403
     from pydantic.v1 import (
         AnyUrl,
         UrlError,
@@ -24,7 +24,7 @@ if is_version_greater_or_equal(version=pydantic.VERSION, compare_version="2.0.0"
     # from pydantic.v1 import Extra
 else:
     # from pydantic import BaseModel, Field, StrictStr
-    from pydantic import *  # noqa: F403 # type: ignore[assignment,no-redef]
+    from pydantic import *  # type: ignore[assignment,no-redef] # noqa: F403
     from pydantic import (  # type: ignore[no-redef]
         AnyUrl,
         UrlError,
