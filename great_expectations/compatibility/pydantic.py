@@ -24,8 +24,8 @@ if is_version_greater_or_equal(version=pydantic.VERSION, compare_version="2.0.0"
     # from pydantic.v1 import Extra
 else:
     # from pydantic import BaseModel, Field, StrictStr
-    from pydantic import *  # noqa: F403 # type: ignore[assignment]
-    from pydantic import (
+    from pydantic import *  # noqa: F403 # type: ignore[assignment,no-redef]
+    from pydantic import (  # type: ignore[no-redef]
         AnyUrl,
         UrlError,
         error_wrappers,
@@ -36,8 +36,8 @@ else:
         networks,
         schema,
     )
-    from pydantic.generics import GenericModel
-    from pydantic.main import ModelMetaclass
+    from pydantic.generics import GenericModel  # type: ignore[no-redef]
+    from pydantic.main import ModelMetaclass  # type: ignore[no-redef]
 
     # from pydantic import Extra
 
