@@ -48,7 +48,7 @@ pytestmark = [
 
 @pytest.fixture
 def pandas_datasource() -> PandasDatasource:
-    return PandasDatasource(  # type: ignore[call-arg] # type field not required
+    return PandasDatasource(
         name="pandas_datasource",
     )
 
@@ -149,7 +149,7 @@ class TestDynamicPandasAssets:
 
         assert method_name in PandasDatasource.__dict__
 
-        ds = PandasDatasource(  # type: ignore[call-arg] # type field not required
+        ds = PandasDatasource(
             name="ds_for_testing_add_asset_methods",
         )
         method = getattr(ds, method_name)
@@ -175,7 +175,7 @@ class TestDynamicPandasAssets:
         type_name: str = _get_field_details(asset_class, "type").default_value
         method_name: str = f"add_{type_name}_asset"
 
-        ds = PandasDatasource(  # type: ignore[call-arg] # type field not required
+        ds = PandasDatasource(
             name="ds_for_testing_add_asset_methods",
         )
         method = getattr(ds, method_name)

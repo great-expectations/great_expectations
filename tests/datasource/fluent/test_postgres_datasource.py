@@ -90,7 +90,7 @@ def _source(
         PostgresDatasource.execution_engine_override = execution_eng_cls  # type: ignore[misc]
         postgres_datasource = PostgresDatasource(
             name="my_datasource",
-            connection_string=connection_string,  # type: ignore[arg-type] # coerced
+            connection_string=connection_string,
             create_temp_table=create_temp_table,
         )
         if data_context:

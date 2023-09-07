@@ -65,7 +65,7 @@ def spark_dbfs_datasource(fs: FakeFilesystem, test_backends) -> SparkDBFSDatasou
         ],
     )
 
-    return SparkDBFSDatasource(  # type: ignore[call-arg]
+    return SparkDBFSDatasource(
         name="spark_dbfs_datasource",
         base_directory=pathlib.Path(base_directory),
     )
