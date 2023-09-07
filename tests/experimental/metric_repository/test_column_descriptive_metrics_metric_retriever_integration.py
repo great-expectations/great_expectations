@@ -12,6 +12,7 @@ from great_expectations.experimental.metric_repository.column_descriptive_metric
     ColumnDescriptiveMetricsMetricRetriever,
 )
 from great_expectations.experimental.metric_repository.metrics import (
+    ColumnMetric,
     TableMetric,
 )
 
@@ -51,7 +52,9 @@ def test_get_metrics(
     metrics = metric_retriever.get_metrics(batch_request=batch_request)
     validator = context.get_validator(batch_request=batch_request)
     batch_id = validator.active_batch.id
-    assert metrics == [
+
+    # Note: expected_metrics needs to be in the same order as metrics for the assert statement.
+    expected_metrics = [
         TableMetric[int](
             batch_id=batch_id,
             metric_name="table.row_count",
@@ -64,4 +67,65 @@ def test_get_metrics(
             value=["col1", "col2"],
             exception=None,
         ),
+        ColumnMetric[float](
+            batch_id=batch_id,
+            metric_name="column.min",
+            column="col1",
+            value=1,
+            exception=None,
+        ),
+        ColumnMetric[float](
+            batch_id=batch_id,
+            metric_name="column.min",
+            column="col2",
+            value=3,
+            exception=None,
+        ),
+        ColumnMetric[float](
+            batch_id=batch_id,
+            metric_name="column.max",
+            column="col1",
+            value=2,
+            exception=None,
+        ),
+        ColumnMetric[float](
+            batch_id=batch_id,
+            metric_name="column.max",
+            column="col2",
+            value=4,
+            exception=None,
+        ),
+        ColumnMetric[float](
+            batch_id=batch_id,
+            metric_name="column.mean",
+            column="col1",
+            value=1.5,
+            exception=None,
+        ),
+        ColumnMetric[float](
+            batch_id=batch_id,
+            metric_name="column.mean",
+            column="col2",
+            value=3.5,
+            exception=None,
+        ),
+        ColumnMetric[float](
+            batch_id=batch_id,
+            metric_name="column.median",
+            column="col1",
+            value=1.5,
+            exception=None,
+        ),
+        ColumnMetric[float](
+            batch_id=batch_id,
+            metric_name="column.median",
+            column="col2",
+            value=3.5,
+            exception=None,
+        ),
     ]
+
+    # Assert each metric so it is easier to see which one fails (instead of assert metrics == expected_metrics):
+    assert len(metrics) == len(expected_metrics)
+    for metric, expected_metric in zip(metrics, expected_metrics):
+        assert metric.dict() == expected_metric.dict()

@@ -9,12 +9,12 @@ from dataclasses import dataclass
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Optional, Type
 
-import pydantic
 import pytest
 from pytest import MonkeyPatch, param
 
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
+from great_expectations.compatibility import pydantic
 from great_expectations.datasource.fluent import PandasFilesystemDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
@@ -57,7 +57,7 @@ def pandas_filesystem_datasource(empty_data_context) -> PandasFilesystemDatasour
         .parent.joinpath(base_directory_rel_path)
         .resolve(strict=True)
     )
-    pandas_filesystem_datasource = PandasFilesystemDatasource(  # type: ignore[call-arg]
+    pandas_filesystem_datasource = PandasFilesystemDatasource(
         name="pandas_filesystem_datasource",
         base_directory=base_directory_abs_path,
     )
@@ -171,7 +171,7 @@ class TestDynamicPandasAssets:
 
         assert method_name in PandasFilesystemDatasource.__dict__
 
-        ds = PandasFilesystemDatasource(  # type: ignore[call-arg]
+        ds = PandasFilesystemDatasource(
             name="ds_for_testing_add_asset_methods",
             base_directory=pathlib.Path.cwd(),
         )
@@ -191,7 +191,7 @@ class TestDynamicPandasAssets:
         type_name: str = _get_field_details(asset_class, "type").default_value
         method_name: str = f"add_{type_name}_asset"
 
-        ds = PandasFilesystemDatasource(  # type: ignore[call-arg]
+        ds = PandasFilesystemDatasource(
             name="ds_for_testing_add_asset_methods",
             base_directory=pathlib.Path.cwd(),
         )

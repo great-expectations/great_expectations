@@ -30,11 +30,10 @@ from urllib.parse import urlparse
 import dateutil.parser
 import numpy as np
 import pandas as pd
-import pydantic
 from IPython import get_ipython
 
 from great_expectations import exceptions as gx_exceptions
-from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility import pydantic, pyspark, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     SQLALCHEMY_NOT_IMPORTED,
     LegacyRow,
