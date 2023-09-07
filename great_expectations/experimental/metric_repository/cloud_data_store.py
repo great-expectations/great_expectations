@@ -60,7 +60,7 @@ class CloudDataStore(DataStore[StorableTypes]):
         if isinstance(value, MetricRun):
             return "metric-run"
 
-    def _build_payload(self, value: StorableTypes) -> dict:
+    def _build_payload(self, value: StorableTypes) -> str:
         payload = Payload(
             data=PayloadData(
                 type=self._map_to_resource_type(value),
@@ -69,7 +69,7 @@ class CloudDataStore(DataStore[StorableTypes]):
                 ),
             )
         )
-        return payload.dict()
+        return payload.json()
 
     def _build_url(self, value: StorableTypes) -> str:
         assert self._context.ge_cloud_config is not None
@@ -92,4 +92,4 @@ class CloudDataStore(DataStore[StorableTypes]):
         response.raise_for_status()
 
         response_json = response.json()
-        return uuid.UUID(response_json["data"]["attributes"]["id"])
+        return uuid.UUID(response_json["id"])
