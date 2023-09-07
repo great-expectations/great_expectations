@@ -1053,7 +1053,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
                         account_url=self.account_url,
                         credential=azure.DefaultAzureCredential(),
                     )
-                elif self.credential:
+                elif self.credential and self.account_url:
                     blob_service_client = azure.BlobServiceClient(
                         account_url=self.account_url, credential=self.credential
                     )
