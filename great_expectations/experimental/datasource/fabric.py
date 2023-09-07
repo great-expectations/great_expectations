@@ -272,8 +272,6 @@ class FabricPowerBIDatasource(Datasource):
                 "Could not import `sempy.fabric`\npip install semantic-link"
             ) from import_err
 
-        # TODO: check if we are running from within fabric?
-
         if self.assets and test_assets:
             for asset in self.assets:
                 asset._datasource = self
