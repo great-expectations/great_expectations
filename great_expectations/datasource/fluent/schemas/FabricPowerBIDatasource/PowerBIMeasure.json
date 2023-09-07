@@ -32,6 +32,20 @@
             "title": "Batch Metadata",
             "type": "object"
         },
+        "measure": {
+            "title": "Measure",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
         "groupby_columns": {
             "title": "Groupby Columns",
             "type": "array",
@@ -79,7 +93,8 @@
         }
     },
     "required": [
-        "name"
+        "name",
+        "measure"
     ],
     "additionalProperties": false,
     "definitions": {
