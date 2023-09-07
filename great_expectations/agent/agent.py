@@ -221,7 +221,7 @@ class GXAgent:
         # ensure we have all required env variables, and provide a useful error if not
 
         try:
-            env_vars = GxAgentEnvVars()
+            env_vars = GxAgentEnvVars()  # type: ignore[call-arg] # args pulled from env vars
         except pydantic.ValidationError as validation_err:
             raise GXAgentError(
                 f"Missing or badly formed environment variable\n{validation_err.errors()}"
