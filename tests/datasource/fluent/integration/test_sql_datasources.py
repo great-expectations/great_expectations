@@ -129,14 +129,23 @@ TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
 
 # TODO: remove items from this lookup when working on fixes
 REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
-    'expect_column_to_exist-str "lower"': ["sqlite", "postgres", "snowflake"],
-    'expect_column_to_exist-str "UPPER"': ["sqlite", "postgres", "snowflake"],
+    "expect_column_to_exist-str LOWER": ["postgres", "sqlite"],
+    "expect_column_to_exist-str upper": ["postgres", "sqlite"],
+    'expect_column_to_exist-str "lower"': ["postgres", "snowflake", "sqlite"],
+    'expect_column_to_exist-str "UPPER"': ["postgres", "snowflake", "sqlite"],
+    "expect_column_to_exist-quoted_name UPPER quote=False": ["snowflake"],
+    "expect_column_to_exist-quoted_name UPPER quote=True": ["snowflake"],
+    "expect_column_to_exist-quoted_name UPPER quote=None": ["postgres", "snowflake"],
+    "expect_column_to_exist-quoted_name upper quote=None": ["postgres", "sqlite"],
     'expect_column_values_to_not_be_null-str "lower"': ["postgres", "snowflake"],
+    "expect_column_values_to_not_be_null-str LOWER": ["postgres", "sqlite"],
+    "expect_column_values_to_not_be_null-str upper": ["postgres", "sqlite"],
     'expect_column_values_to_not_be_null-str "UPPER"': ["postgres"],
     "expect_column_values_to_not_be_null-str UPPER": ["snowflake"],
-    "expect_column_to_exist-quoted_name UPPER quote=False": ["snowflake"],
-    "expect_column_to_exist-quoted_name UPPER quote=True]": ["snowflake"],
-    "expect_column_to_exist-quoted_name UPPER quote=None": ["snowflake"],
+    "expect_column_values_to_not_be_null-quoted_name upper quote=None": [
+        "postgres",
+        "sqlite",
+    ],
 }
 
 
@@ -568,11 +577,7 @@ def _is_quote_char_dialect_mismatch(
     "column_name",
     [
         param("lower", id="str lower"),
-        param(
-            "LOWER",
-            marks=[pytest.mark.xfail(reason="may pass but not expected to")],
-            id="str LOWER",
-        ),
+        param("LOWER", id="str LOWER"),
         param("'lower'", id="str 'lower'"),
         param('"lower"', id='str "lower"'),
         param(
@@ -604,11 +609,7 @@ def _is_quote_char_dialect_mismatch(
             marks=[pytest.mark.xfail],
             id="quoted_name LOWER quote=None",
         ),
-        param(
-            "upper",
-            marks=[pytest.mark.xfail(reason="may pass but not expected to")],
-            id="str upper",
-        ),
+        param("upper", id="str upper"),
         param("UPPER", id="str UPPER"),
         param("'UPPER'", id="str 'UPPER'"),
         param('"UPPER"', id='str "UPPER"'),
@@ -638,7 +639,6 @@ def _is_quote_char_dialect_mismatch(
                 "upper",
                 quote=None,
             ),
-            marks=[pytest.mark.xfail(reason="may pass but not expected to")],
             id="quoted_name upper quote=None",
         ),
     ],
