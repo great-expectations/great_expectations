@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import uuid
 from pprint import pformat as pf
 from typing import (
@@ -259,6 +260,11 @@ class FabricPowerBIDatasource(Datasource):
         Raises:
             TestConnectionError: If the connection test fails.
         """
+        if not self._running_on_fabric():
+            raise TestConnectionError(
+                "Must be running Microsoft Fabric to use this datasource"
+            )
+
         try:
             from sempy import fabric  # noqa: F401 # test if fabric is installed
         except Exception as import_err:
@@ -376,3 +382,15 @@ class FabricPowerBIDatasource(Datasource):
             pandas_convert_dtypes=pandas_convert_dtypes,
         )
         return self._add_asset(asset)
+
+    @staticmethod
+    def _running_on_fabric() -> bool:
+        if (
+            os.environ.get("AZURE_SERVICE", None)  # noqa: TID251 # needed for fabric
+            != "Microsoft.ProjectArcadia"
+        ):
+            return False
+        from pyspark.sql import SparkSession  # noqa: TID251 # needed for fabric
+
+        sc = SparkSession.builder.getOrCreate().sparkContext
+        return sc.getConf().get("spark.cluster.type") != "synapse"
