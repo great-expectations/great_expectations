@@ -95,8 +95,37 @@ def test_get_metrics(
             value=4,
             exception=None,
         ),
+        ColumnMetric[float](
+            batch_id=batch_id,
+            metric_name="column.mean",
+            column="col1",
+            value=1.5,
+            exception=None,
+        ),
+        ColumnMetric[float](
+            batch_id=batch_id,
+            metric_name="column.mean",
+            column="col2",
+            value=3.5,
+            exception=None,
+        ),
+        ColumnMetric[float](
+            batch_id=batch_id,
+            metric_name="column.median",
+            column="col1",
+            value=1.5,
+            exception=None,
+        ),
+        ColumnMetric[float](
+            batch_id=batch_id,
+            metric_name="column.median",
+            column="col2",
+            value=3.5,
+            exception=None,
+        ),
     ]
 
     # Assert each metric so it is easier to see which one fails (instead of assert metrics == expected_metrics):
+    assert len(metrics) == len(expected_metrics)
     for metric, expected_metric in zip(metrics, expected_metrics):
         assert metric.dict() == expected_metric.dict()
