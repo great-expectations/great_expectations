@@ -12,6 +12,7 @@ from great_expectations.experimental.metric_repository.column_descriptive_metric
     ColumnDescriptiveMetricsMetricRetriever,
 )
 from great_expectations.experimental.metric_repository.metrics import (
+    ColumnMetric,
     TableMetric,
 )
 
@@ -62,6 +63,40 @@ def test_get_metrics(
             batch_id=batch_id,
             metric_name="table.columns",
             value=["col1", "col2"],
+            exception=None,
+        ),
+        # TableMetric[List[Dict[str, str]]](
+        #     batch_id=batch_id,
+        #     metric_name="table.column_types",
+        #     value=[{'name': 'col1', 'type': int}, {'name': 'col2', 'type': int}],
+        #     exception=None,
+        # ),
+        ColumnMetric[int](
+            batch_id=batch_id,
+            metric_name="column.min",
+            column="col1",
+            value=1,
+            exception=None,
+        ),
+        ColumnMetric[int](
+            batch_id=batch_id,
+            metric_name="column.min",
+            column="col2",
+            value=3,
+            exception=None,
+        ),
+        ColumnMetric[int](
+            batch_id=batch_id,
+            metric_name="column.max",
+            column="col1",
+            value=2,
+            exception=None,
+        ),
+        ColumnMetric[int](
+            batch_id=batch_id,
+            metric_name="column.max",
+            column="col2",
+            value=4,
             exception=None,
         ),
     ]

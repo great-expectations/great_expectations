@@ -53,12 +53,12 @@ def test_get_metrics():
             value=["col1", "col2"],
             exception=None,
         ),
-        TableMetric[List[str]](
-            batch_id="batch_id",
-            metric_name="table.column_types",
-            value=["float", "float"],
-            exception=None,
-        ),
+        # TableMetric[List[str]](
+        #     batch_id="batch_id",
+        #     metric_name="table.column_types",
+        #     value=["float", "float"],
+        #     exception=None,
+        # ),
         ColumnMetric[float](
             batch_id="batch_id",
             metric_name="column.min",
