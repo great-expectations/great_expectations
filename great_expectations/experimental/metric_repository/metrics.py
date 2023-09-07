@@ -15,9 +15,8 @@ from typing import (
     Union,
 )
 
-import pydantic
-from pydantic import BaseModel, Field
-
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import BaseModel, Field
 from great_expectations.compatibility.typing_extensions import override
 
 if TYPE_CHECKING:
