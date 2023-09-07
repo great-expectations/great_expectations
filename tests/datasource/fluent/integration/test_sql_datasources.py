@@ -538,6 +538,13 @@ def _is_quote_char_dialect_mismatch(
     return False
 
 
+# TODO: simplify these parametrizations
+# quoted_upper_str
+# unqouted_upper_str
+# quoted_lower_str
+# unqouted_lower_str
+# upper_quoted_name
+# lower_quoted_name
 @pytest.mark.parametrize(
     "column_name",
     [
