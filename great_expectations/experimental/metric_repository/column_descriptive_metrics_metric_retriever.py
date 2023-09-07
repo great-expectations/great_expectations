@@ -97,7 +97,12 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
     def _get_column_metrics(
         self, batch_request: BatchRequest, column_list: List[str]
     ) -> Sequence[Metric]:
-        column_metric_names = ["column.min", "column.max"]
+        column_metric_names = [
+            "column.min",
+            "column.max",
+            "column.mean",
+            "column.median",
+        ]
 
         column_metric_configs: List[MetricConfiguration] = list()
 
