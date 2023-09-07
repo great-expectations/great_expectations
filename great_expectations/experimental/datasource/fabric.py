@@ -158,7 +158,7 @@ class _PowerBIAsset(DataAsset):
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options={},
-                batch_slice=batch_request._batch_slice_input,
+                batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined] # private attr does exist
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
