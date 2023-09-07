@@ -1205,6 +1205,49 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
 
 
 @pytest.mark.big
+def test_TupleAzureBlobStoreBackend_credential():
+    pytest.importorskip("azure.storage.blob")
+    pytest.importorskip("azure.identity")
+    """
+    What does this test test and why?
+    Since no package like moto exists for Azure-Blob services, we mock the Azure-blob client
+    and assert that the store backend makes the right calls for set, get, and list.
+    """
+    credential = "this_is_a_test_credential_string"
+    account_url = "this_is_a_test_account_url"
+    prefix = "this_is_a_test_prefix"
+    container = "dummy-container"
+
+    my_store = TupleAzureBlobStoreBackend(
+        credential=credential,
+        account_url=account_url,
+        prefix=prefix,
+        container=container,
+    )
+    with mock.patch(
+        "great_expectations.compatibility.azure.BlobServiceClient", autospec=True
+    ):
+        mock_container_client = my_store._container_client
+        my_store.set(("AAA",), "aaa")
+        mock_container_client.upload_blob.assert_called_once_with(
+            name="this_is_a_test_prefix/AAA",
+            data="aaa",
+            encoding="utf-8",
+            overwrite=True,
+        )
+
+        my_store.get(("BBB",))
+        mock_container_client.download_blob.assert_called_once_with(
+            "this_is_a_test_prefix/BBB"
+        )
+
+        my_store.list_keys()
+        mock_container_client.list_blobs.assert_called_once_with(
+            name_starts_with="this_is_a_test_prefix"
+        )
+
+
+@pytest.mark.big
 def test_TupleAzureBlobStoreBackend_connection_string():
     pytest.importorskip("azure.storage.blob")
     pytest.importorskip("azure.identity")

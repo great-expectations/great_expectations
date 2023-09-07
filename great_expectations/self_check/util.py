@@ -1731,9 +1731,16 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 test_backends += ["trino"]
 
         if include_azure:
+            azure_connection_string: Optional[str] = os.getenv(
+                "AZURE_CONNECTION_STRING"
+            )
             azure_credential: Optional[str] = os.getenv("AZURE_CREDENTIAL")
             azure_access_key: Optional[str] = os.getenv("AZURE_ACCESS_KEY")
-            if not azure_access_key and not azure_credential:
+            if azure_credential:
+                logger.warning(
+                    "AZURE_CREDENTIAL is deprecated and will be removed in a future release. Please use AZURE_CONNECTION_STRING instead."
+                )
+            if not azure_access_key and not azure_connection_string:
                 if raise_exceptions_for_backends is True:
                     raise ImportError(
                         "Azure tests are requested, but credentials were not set up"
