@@ -34,7 +34,7 @@ from great_expectations.datasource.fluent.pandas_google_cloud_storage_datasource
 from great_expectations.datasource.fluent.pandas_azure_blob_storage_datasource import (
     PandasAzureBlobStorageDatasource,
 )
-from great_expectations.datasource.fluent.fabric import FabricPowerBIDatasource
+from great_expectations.experimental.datasource.fabric import FabricPowerBIDatasource
 from great_expectations.datasource.fluent.postgres_datasource import (
     PostgresDatasource,
 )
