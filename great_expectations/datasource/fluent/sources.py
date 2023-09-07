@@ -463,7 +463,7 @@ class _SourceFactories:
                     datasource_type, name_or_datasource, **kwargs
                 )
             ) or (
-                datasource_type(name=name_or_datasource, **kwargs)  # type: ignore[arg-type] # could be Datasource - expect str
+                datasource_type(name=name_or_datasource, **kwargs)
                 if name_or_datasource
                 else datasource_type(**kwargs)
             )
