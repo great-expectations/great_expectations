@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections import UserDict
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
@@ -17,9 +17,20 @@ if TYPE_CHECKING:
         AbstractDataContext,
     )
     from great_expectations.data_context.store.datasource_store import DatasourceStore
+    from great_expectations.datasource.fluent.interfaces import DataAsset
     from great_expectations.datasource.new_datasource import BaseDatasource
 
 logger = logging.getLogger(__name__)
+
+
+@runtime_checkable
+class SupportsInMemoryDataAssets(Protocol):
+    @property
+    def assets(self) -> list[DataAsset]:
+        ...
+
+    def add_dataframe_asset(self, **kwargs) -> DataAsset:
+        ...
 
 
 class DatasourceDict(UserDict):
@@ -77,6 +88,10 @@ class DatasourceDict(UserDict):
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
         config: FluentDatasource | DatasourceConfig
         if isinstance(ds, FluentDatasource):
+            if isinstance(ds, SupportsInMemoryDataAssets):
+                for asset in ds.assets:
+                    ...
+                # self._in_memory_assets[f"{name}-{name}"]
             config = ds
         else:
             config = self._prep_legacy_datasource_config(name=name, ds=ds)
