@@ -322,6 +322,7 @@ If you are working in a configuration file you may use the inline comment \
 "trino".msg = "Please do not import trino directly, import from great_expectations.compatibility.trino instead."
 "pyarrow".msg = "Please do not import pyarrow directly, import from great_expectations.compatibility.pyarrow instead."
 "typing_extensions.override".msg = "Do not import typing_extensions.override directly, import `override` from great_expectations.compatibility.typing_extensions instead."
+# TODO: remove pydantic once our min version is pydantic v2
 "pydantic".msg = "Please do not import pydantic directly, import from great_expectations.compatibility.pydantic instead."
 
 
