@@ -5,7 +5,7 @@ from great_expectations.compatibility.not_imported import (
 )
 
 if is_version_greater_or_equal(version=pydantic.VERSION, compare_version="2.0.0"):
-    # from pydantic.v1 import BaseModel, Field, StrictStr
+    # TODO: don't use star imports
     from pydantic.v1 import *  # noqa: F403
     from pydantic.v1 import (
         AnyUrl,
@@ -22,9 +22,8 @@ if is_version_greater_or_equal(version=pydantic.VERSION, compare_version="2.0.0"
     from pydantic.v1.generics import GenericModel
     from pydantic.v1.main import ModelMetaclass
 
-    # from pydantic.v1 import Extra
 else:
-    # from pydantic import BaseModel, Field, StrictStr
+    # TODO: don't use star imports
     from pydantic import *  # type: ignore[assignment,no-redef] # noqa: F403
     from pydantic import (  # type: ignore[no-redef]
         AnyUrl,
@@ -40,12 +39,6 @@ else:
     )
     from pydantic.generics import GenericModel  # type: ignore[no-redef]
     from pydantic.main import ModelMetaclass  # type: ignore[no-redef]
-
-    # from pydantic import Extra
-
-
-# from pydantic import StrictStr
-# from pydantic.schema import default_ref_template
 
 __all__ = [
     "AnyUrl",
