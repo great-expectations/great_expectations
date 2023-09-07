@@ -129,6 +129,28 @@ TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
 
 # TODO: remove items from this lookup when working on fixes
 REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
+    'expect_column_values_to_not_be_null-str "lower"': ["postgres", "snowflake"],
+    "expect_column_values_to_not_be_null-str LOWER": [
+        "databricks_sql",
+        "postgres",
+        "snowflake",
+        "sqlite",
+    ],
+    "expect_column_values_to_not_be_null-str upper": [
+        "databricks_sql",
+        "postgres",
+        "sqlite",
+    ],
+    'expect_column_values_to_not_be_null-str "UPPER"': ["postgres", "snowflake"],
+    "expect_column_values_to_not_be_null-str UPPER": ["snowflake"],
+    "expect_column_values_to_not_be_null-quoted_name UPPER quote=None": ["snowflake"],
+    "expect_column_values_to_not_be_null-quoted_name UPPER quote=True": ["snowflake"],
+    "expect_column_values_to_not_be_null-quoted_name UPPER quote=False": ["snowflake"],
+    "expect_column_values_to_not_be_null-quoted_name upper quote=None": [
+        "databricks_sql",
+        "postgres",
+        "sqlite",
+    ],
     "expect_column_to_exist-str LOWER": ["databricks_sql", "postgres", "sqlite"],
     "expect_column_to_exist-str upper": ["databricks_sql", "postgres", "sqlite"],
     'expect_column_to_exist-str "lower"': ["postgres", "snowflake", "sqlite"],
@@ -137,24 +159,6 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     "expect_column_to_exist-quoted_name UPPER quote=True": ["snowflake"],
     "expect_column_to_exist-quoted_name UPPER quote=None": ["postgres", "snowflake"],
     "expect_column_to_exist-quoted_name upper quote=None": [
-        "databricks_sql",
-        "postgres",
-        "sqlite",
-    ],
-    'expect_column_values_to_not_be_null-str "lower"': ["postgres", "snowflake"],
-    "expect_column_values_to_not_be_null-str LOWER": [
-        "databricks_sql",
-        "postgres",
-        "sqlite",
-    ],
-    "expect_column_values_to_not_be_null-str upper": [
-        "databricks_sql",
-        "postgres",
-        "sqlite",
-    ],
-    'expect_column_values_to_not_be_null-str "UPPER"': ["postgres"],
-    "expect_column_values_to_not_be_null-str UPPER": ["snowflake"],
-    "expect_column_values_to_not_be_null-quoted_name upper quote=None": [
         "databricks_sql",
         "postgres",
         "sqlite",
@@ -581,9 +585,9 @@ def _is_quote_char_dialect_mismatch(
 
 # TODO: simplify these parametrizations
 # quoted_upper_str
-# unqouted_upper_str
+# unquoted_upper_str
 # quoted_lower_str
-# unqouted_lower_str
+# unquoted_lower_str
 # upper_quoted_name
 # lower_quoted_name
 @pytest.mark.parametrize(
