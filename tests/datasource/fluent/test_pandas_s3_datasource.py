@@ -108,7 +108,7 @@ def pandas_s3_datasource(
             Key=key,
         )
 
-    pandas_s3_datasource = PandasS3Datasource(  # type: ignore[call-arg]
+    pandas_s3_datasource = PandasS3Datasource(
         name="pandas_s3_datasource",
         bucket=s3_bucket,
     )
