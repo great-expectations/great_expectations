@@ -130,10 +130,13 @@ TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
 # TODO: remove items from this lookup when working on fixes
 REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     'expect_column_to_exist-str "lower"': ["sqlite", "postgres", "snowflake"],
-    'expect_column_to_exist-str "UPPER"': ["sqlite", "postgres"],
+    'expect_column_to_exist-str "UPPER"': ["sqlite", "postgres", "snowflake"],
     'expect_column_values_to_not_be_null-str "lower"': ["postgres", "snowflake"],
     'expect_column_values_to_not_be_null-str "UPPER"': ["postgres"],
     "expect_column_values_to_not_be_null-str UPPER": ["snowflake"],
+    "expect_column_to_exist-quoted_name UPPER quote=False": ["snowflake"],
+    "expect_column_to_exist-quoted_name UPPER quote=True]": ["snowflake"],
+    "expect_column_to_exist-quoted_name UPPER quote=None": ["snowflake"],
 }
 
 
