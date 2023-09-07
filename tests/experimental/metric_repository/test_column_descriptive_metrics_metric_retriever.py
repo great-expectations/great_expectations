@@ -25,7 +25,7 @@ def test_get_metrics():
     mock_validator.compute_metrics.return_value = {
         ("table.row_count", (), ()): 2,
         ("table.columns", (), ()): ["col1", "col2"],
-        ("table.column_types", (), ()): ["float", "float"],
+        # ("table.column_types", (), ()): ["float", "float"],
         ("column.min", "column=col1", ()): 2.5,
         ("column.min", "column=col2", ()): 2.7,
         ("column.max", "column=col1", ()): 5.5,

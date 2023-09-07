@@ -33,7 +33,10 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         return list(chain(table_metrics_list, column_metrics_list))
 
     def _get_table_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
-        table_metric_names = ["table.row_count", "table.columns", "table.column_types"]
+        table_metric_names = [
+            "table.row_count",
+            "table.columns",
+        ]  # , "table.column_types"]
         table_metric_configs = [
             MetricConfiguration(
                 metric_name=metric_name, metric_domain_kwargs={}, metric_value_kwargs={}
