@@ -115,7 +115,6 @@ class GXDependencies:
             "snowflake-sqlalchemy",
             "sqlalchemy",
             "sqlalchemy-bigquery",
-            "sqlalchemy-databricks",
             "sqlalchemy-dremio",
             "sqlalchemy-redshift",
             "teradatasqlalchemy",

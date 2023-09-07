@@ -6,6 +6,7 @@ import pytest
 from freezegun import freeze_time
 
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -20,7 +21,6 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
 from great_expectations.render.renderer.site_builder import SiteBuilder
-from great_expectations.util import get_context
 
 # module level markers
 pytestmark = pytest.mark.filesystem

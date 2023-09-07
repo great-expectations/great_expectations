@@ -11,7 +11,7 @@ Add validation data or <TechnicalTag tag="expectation_suite" text="Expectation S
 
 <Prerequisites>
 
-- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 - [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 - [A Checkpoint](./how_to_create_a_new_checkpoint.md).
 

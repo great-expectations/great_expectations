@@ -30,14 +30,16 @@ class ColumnDescriptiveMetricsAction(AgentAction[RunColumnDescriptiveMetricsEven
         data_asset = datasource.get_asset(event.data_asset_name)  # type: ignore[union-attr] # Non fluent datasources BaseDatasource, LegacyDatasource does not have get_asset
         batch_request = data_asset.build_batch_request()
 
-        metric_run = self._batch_inspector.compute_metric_run(batch_request)
+        metric_run = self._batch_inspector.compute_metric_run(
+            data_asset_id=data_asset.id, batch_request=batch_request
+        )
 
-        self._metric_repository.add(metric_run)
+        metric_run_id = self._metric_repository.add_metric_run(metric_run)
 
         return ActionResult(
             id=id,
             type=event.type,
             created_resources=[
-                CreatedResource(resource_id=str(metric_run.id), type="MetricRun"),
+                CreatedResource(resource_id=str(metric_run_id), type="MetricRun"),
             ],
         )

@@ -120,7 +120,7 @@ If you're using GX for multiple projects, you might want to use a different Data
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- A previously initialized Filesystem Data Context. See [How to initialize a Filesystem Data Context in Python](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python).
+- A previously initialized Filesystem Data Context.
 
 </Prerequisites>
 
@@ -232,18 +232,16 @@ Now that you have an Ephemeral Data Context you can connect GX to your data. See
 ## Next steps
 
 To customize a Data Context configuration for Metadata Stores and Data Docs, see:
-- [How to configure an Expectation Store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem)
-- [How to configure a Validation Result Store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem)
+
+- [Configure Expectation Stores](/docs/guides/setup/configuring_metadata_stores/configure_expectation_stores)
+- [Configure Validation Result Stores](/docs/guides/setup/configuring_metadata_stores/configure_result_stores)
 - [How to configure and use a Metric Store](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore)
 - [How to host and share Data Docs on a filesystem](/docs/guides/setup/configuring_data_docs/host_and_share_data_docs)
 
-To connecting GX to your source data:
+To connect GX to source data:
+
 - [How to configure a Pandas Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
 - [How to configure a Spark Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
 - [How to configure a SQL Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
-
-## Related documentation
-
-- To initialize and instantiate a temporary Data Context, see [Instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
 
 

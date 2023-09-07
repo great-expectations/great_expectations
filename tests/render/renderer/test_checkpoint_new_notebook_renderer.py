@@ -6,6 +6,7 @@ import pytest
 
 import great_expectations as gx
 from great_expectations import DataContext
+from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -13,7 +14,6 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer.checkpoint_new_notebook_renderer import (
     CheckpointNewNotebookRenderer,
 )
-from great_expectations.util import get_context
 
 if TYPE_CHECKING:
     import nbformat

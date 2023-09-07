@@ -9,7 +9,6 @@ from great_expectations.experimental.metric_repository.metric_retriever import (
 )
 from great_expectations.experimental.metric_repository.metrics import (
     Metric,
-    MetricException,
     TableMetric,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -20,7 +19,8 @@ if TYPE_CHECKING:
 
 
 class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
-    # TODO: Docstrings
+    """Compute and retrieve Column Descriptive Metrics for a batch of data."""
+
     @override
     def get_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
         table_metrics_list = self._get_table_metrics(batch_request)
@@ -59,11 +59,10 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         )
         metrics.append(
             TableMetric[int](
-                id=self._generate_metric_id(),
-                batch=validator.active_batch,
+                batch_id=validator.active_batch.id,
                 metric_name=metric_name,
                 value=computed_metrics[metric_lookup_key],  # type: ignore[arg-type] # Pydantic verifies the value type
-                exception=MetricException(),  # TODO: Pass through
+                exception=None,  # TODO: Pass through a MetricException() if an exception is thrown
             )
         )
 
@@ -71,11 +70,10 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         metric_lookup_key = (metric_name, tuple(), tuple())
         metrics.append(
             TableMetric[List[str]](
-                id=self._generate_metric_id(),
-                batch=validator.active_batch,
+                batch_id=validator.active_batch.id,
                 metric_name=metric_name,
                 value=computed_metrics[metric_lookup_key],  # type: ignore[arg-type] # Pydantic verifies the value type
-                exception=MetricException(),  # TODO: Pass through
+                exception=None,  # TODO: Pass through a MetricException() if an exception is thrown
             )
         )
         return metrics

@@ -86,7 +86,6 @@ class _UrlSchemaError(pydantic.UrlError):
 class DatabricksDsn(AnyUrl):
     allowed_schemes = {
         "databricks",
-        "databricks+connector",
     }
     query: str  # if query is not provided, validate_parts() will raise an error
 

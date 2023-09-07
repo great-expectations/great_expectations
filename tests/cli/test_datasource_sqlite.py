@@ -7,7 +7,7 @@ from click.testing import CliRunner
 from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations.cli import cli
-from great_expectations.util import get_context
+from great_expectations.data_context import get_context
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 pytestmark = pytest.mark.cli

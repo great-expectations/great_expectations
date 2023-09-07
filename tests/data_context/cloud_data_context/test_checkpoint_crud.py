@@ -7,6 +7,7 @@ import pytest
 
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.data_context import get_context
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -20,7 +21,6 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions import CheckpointNotFoundError, StoreBackendError
-from great_expectations.util import get_context
 from tests.data_context.conftest import MockResponse
 
 

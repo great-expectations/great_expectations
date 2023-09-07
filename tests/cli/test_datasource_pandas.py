@@ -11,7 +11,7 @@ from great_expectations.cli.cli_messages import (
     FLUENT_DATASOURCE_DELETE_ERROR,
     FLUENT_DATASOURCE_LIST_WARNING,
 )
-from great_expectations.util import get_context
+from great_expectations.data_context import get_context
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks, escape_ansi
 
 pytestmark = pytest.mark.cli

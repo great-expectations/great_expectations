@@ -79,7 +79,7 @@ class LegacyDatasource:
         how_to_guide_url:
         maturity: Experimental
         maturity_details:
-            api_stability: Medium (supported via native ‘gs://' syntax in Pandas and Pyspark; medium because we expect configuration to evolve)
+            api_stability: Medium (supported via native `gs://' syntax in Pandas and Pyspark; medium because we expect configuration to evolve)
             implementation_completeness: Medium (works via passthrough, not via CLI)
             unit_test_coverage: Minimal
             integration_infrastructure_test_coverage: Minimal
@@ -94,7 +94,7 @@ class LegacyDatasource:
         how_to_guide_url:
         maturity: In Roadmap (Sub-Experimental - "Not Impossible")
         maturity_details:
-            api_stability: N/A (Supported on Databricks Spark via ‘wasb://' / ‘wasps://' url; requires local download first for Pandas)
+            api_stability: N/A (Supported on Databricks Spark via `wasb://' / `wasps://' url; requires local download first for Pandas)
             implementation_completeness: Minimal
             unit_test_coverage: N/A
             integration_infrastructure_test_coverage: N/A
