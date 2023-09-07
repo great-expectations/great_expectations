@@ -1,7 +1,5 @@
 from typing import TYPE_CHECKING, List
 
-import pydantic
-
 from great_expectations.agent.actions.agent_action import (
     ActionResult,
     AgentAction,
@@ -10,6 +8,7 @@ from great_expectations.agent.config import GxAgentEnvVars
 from great_expectations.agent.models import (
     ListTableNamesEvent,
 )
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.sqlalchemy import inspect
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.http import create_session
@@ -47,7 +46,7 @@ class ListTableNamesAction(AgentAction[ListTableNamesEvent]):
         self, datasource_id: str, table_names: List[str]
     ) -> None:
         try:
-            cloud_config = GxAgentEnvVars()
+            cloud_config = GxAgentEnvVars()  # type: ignore[call-arg] # args pulled from env vars
         except pydantic.ValidationError as validation_err:
             raise RuntimeError(
                 f"Missing or badly formed environment variable\n{validation_err.errors()}"

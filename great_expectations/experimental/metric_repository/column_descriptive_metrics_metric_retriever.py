@@ -78,7 +78,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             TableMetric[int](
                 batch_id=validator.active_batch.id,
                 metric_name=metric_name,
-                value=computed_metrics[metric_lookup_key],  # type: ignore[arg-type] # Pydantic verifies the value type
+                value=computed_metrics[metric_lookup_key],
                 exception=None,  # TODO: Pass through a MetricException() if an exception is thrown
             )
         )
@@ -89,7 +89,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             TableMetric[List[str]](
                 batch_id=validator.active_batch.id,
                 metric_name=metric_name,
-                value=computed_metrics[metric_lookup_key],  # type: ignore[arg-type] # Pydantic verifies the value type
+                value=computed_metrics[metric_lookup_key],
                 exception=None,  # TODO: Pass through a MetricException() if an exception is thrown
             )
         )
@@ -142,7 +142,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                         batch_id=validator.active_batch.id,
                         metric_name=metric_name,
                         column=column,
-                        value=computed_metrics[metric_lookup_key],  # type: ignore[arg-type] # Pydantic verifies the value type
+                        value=computed_metrics[metric_lookup_key],
                         exception=None,  # TODO: Pass through a MetricException() if an exception is thrown
                     )
                 )
