@@ -573,6 +573,12 @@ def column_reflection_fallback(  # noqa: PLR0915
             # if a custom query was passed
             if sqlalchemy.TextClause and isinstance(selectable, sqlalchemy.TextClause):
                 query: sqlalchemy.TextClause = selectable
+            elif sqlalchemy.Table and isinstance(selectable, sqlalchemy.Table):
+                query = (
+                    sa.select(sa.text("*"))
+                    .select_from(selectable)
+                    .limit(1)
+                )
             else:  # noqa: PLR5501
                 # noinspection PyUnresolvedReferences
                 if dialect.name.lower() == GXSqlDialect.REDSHIFT:
