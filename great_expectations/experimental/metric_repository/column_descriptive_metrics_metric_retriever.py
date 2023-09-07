@@ -26,11 +26,18 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
     @override
     def get_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
         table_metrics_list = self._get_table_metrics(batch_request)
-        column_list: List[str] = table_metrics_list[1].value
+        column_list: List[str] = self._get_column_list(table_metrics_list)
         column_metrics_list = self._get_column_metrics(
             batch_request=batch_request, column_list=column_list
         )
         return list(chain(table_metrics_list, column_metrics_list))
+
+    def _get_column_list(self, metrics: Sequence[Metric]) -> List[str]:
+        column_list: List[str] = []
+        for metric in metrics:
+            if metric.metric_name == "table.columns":
+                column_list = metric.value
+        return column_list
 
     def _get_table_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
         table_metric_names = [
