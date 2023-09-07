@@ -30,7 +30,8 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         column_metrics_list = self._get_column_metrics(
             batch_request=batch_request, column_list=column_list
         )
-        return list(chain(table_metrics_list, column_metrics_list))
+        bundled_list = list(chain(table_metrics_list, column_metrics_list))
+        return bundled_list
 
     def _get_column_list(self, metrics: Sequence[Metric]) -> List[str]:
         column_list: List[str] = []
