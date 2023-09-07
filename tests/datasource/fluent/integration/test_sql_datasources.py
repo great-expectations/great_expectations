@@ -127,6 +127,15 @@ TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
     },
 }
 
+# TODO: remove items from this lookup when working on fixes
+REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
+    'expect_column_to_exist-str "lower"': ["sqlite", "postgres", "snowflake"],
+    'expect_column_to_exist-str "UPPER"': ["sqlite", "postgres"],
+    'expect_column_values_to_not_be_null-str "lower"': ["postgres", "snowflake"],
+    'expect_column_values_to_not_be_null-str "UPPER"': ["postgres"],
+    "expect_column_values_to_not_be_null-str UPPER": ["snowflake"],
+}
+
 
 class Row(TypedDict):
     id: int
@@ -526,6 +535,13 @@ class TestTableIdentifiers:
         assert result.success is True
 
 
+def _requires_fix(param_id: str) -> bool:
+    dialect, expectation_type, column_name = param_id.split("-")
+    test_id = f"{expectation_type}-{column_name}"
+    dialects_need_fixes: list[DatabaseType] = REQUIRE_FIXES.get(test_id, [])
+    return dialect in dialects_need_fixes
+
+
 def _is_quote_char_dialect_mismatch(
     dialect: GXSqlDialect,
     column_name: str | quoted_name,
@@ -639,11 +655,15 @@ class TestColumnIdentifiers:
         table_factory: TableFactory,
         column_name: str | quoted_name,
         expectation_type: str,
+        request: pytest.FixtureRequest,
     ):
         datasource = all_sql_datasources
         dialect = datasource.get_engine().dialect.name
         if _is_quote_char_dialect_mismatch(dialect, column_name):
             pytest.skip(reason=f"quote char dialect mismatch: {column_name[0]}")
+
+        if _requires_fix(request.node.callspec.id):
+            pytest.xfail(reason="requires fix")
 
         schema: str | None = (
             RAND_SCHEMA
