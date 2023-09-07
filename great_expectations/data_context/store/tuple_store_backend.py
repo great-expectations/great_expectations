@@ -1039,7 +1039,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
     def _container_client(self) -> Any:
         from great_expectations.compatibility import azure
 
-        # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
+        # Validate that "azure" libraries were successfully imported and attempt to create "azure_client" handle.
         if azure.BlobServiceClient:  # type: ignore[truthy-function] # False if NotImported
             try:
                 if self.connection_string:
