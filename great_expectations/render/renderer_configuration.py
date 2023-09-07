@@ -580,13 +580,13 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
             # we need to combine the param passed to add_param() with those existing raw_kwargs
             if (
                 name in renderer_params_args
-                and renderer_params_args[name]["evaluation_parameter"]
+                and renderer_params_args[name]["evaluation_parameter"]  # type: ignore[index]
             ):
                 new_args = {
                     name: renderer_param(
                         schema=RendererSchema(type=param_type),
                         value=value,
-                        evaluation_parameter=renderer_params_args[name][
+                        evaluation_parameter=renderer_params_args[name][  # type: ignore[index]
                             "evaluation_parameter"
                         ],
                     )
