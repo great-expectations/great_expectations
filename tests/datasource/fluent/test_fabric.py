@@ -83,10 +83,6 @@ def capture_reader_fn_params(
 
 
 @pytest.mark.unit
-# @pytest.mark.skipif(
-#     PYTHON_VERSION < Version("3.10"),
-#     reason="fabric datasource's `semantic-link` package requires python 3.10+",
-# )
 class TestFabricPowerBI:
     @pytest.mark.parametrize(
         ["asset_type", "asset_kwargs"],
