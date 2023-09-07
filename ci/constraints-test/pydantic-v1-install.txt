@@ -1,1 +1,3 @@
-pydantic==1.10
+# this is higher than our min version but is the earliest version that actually works
+# TODO: update our min version or fix gx for our current min version
+pydantic==1.10.8
