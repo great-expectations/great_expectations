@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import TYPE_CHECKING, Any, List, Sequence
+from typing import TYPE_CHECKING, Any, List, Sequence, Type
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.interfaces import Batch
@@ -150,14 +150,14 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         metric_lookup_key: _MetricKey
 
         # TODO: nested for-loop can be better
-        value_type = float
+        value_type: Type[int] | Type[float] = float
         for metric_name in column_metric_names:
             if metric_name == "column_values.null.count":
                 value_type = int
             for column in column_list:
                 metric_lookup_key = (metric_name, f"column={column}", tuple())
                 metrics.append(
-                    ColumnMetric[value_type](
+                    ColumnMetric[value_type](  # type: ignore[valid-type]  # Will be refactored in upcoming PR
                         batch_id=validator.active_batch.id,
                         metric_name=metric_name,
                         column=column,
