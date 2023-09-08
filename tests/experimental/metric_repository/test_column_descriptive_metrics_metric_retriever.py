@@ -25,6 +25,10 @@ def test_get_metrics():
     mock_validator.compute_metrics.return_value = {
         ("table.row_count", (), ()): 2,
         ("table.columns", (), ()): ["col1", "col2"],
+        ("table.column_types", (), "include_nested=True"): [
+            {"name": "col1", "type": "float"},
+            {"name": "col2", "type": "float"},
+        ],
         ("column.min", "column=col1", ()): 2.5,
         ("column.min", "column=col2", ()): 2.7,
         ("column.max", "column=col1", ()): 5.5,
@@ -54,6 +58,15 @@ def test_get_metrics():
             batch_id="batch_id",
             metric_name="table.columns",
             value=["col1", "col2"],
+            exception=None,
+        ),
+        TableMetric[List[str]](
+            batch_id="batch_id",
+            metric_name="table.column_types",
+            value=[
+                {"name": "col1", "type": "float"},
+                {"name": "col2", "type": "float"},
+            ],
             exception=None,
         ),
         ColumnMetric[float](
@@ -113,8 +126,3 @@ def test_get_metrics():
             column="col2",
         ),
     ]
-
-
-def test_get_metrics_with_exception():
-    # TODO: Implement this test in DX-749
-    pass

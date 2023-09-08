@@ -123,9 +123,20 @@ def test_get_metrics(
             value=3.5,
             exception=None,
         ),
+        TableMetric[List[str]](
+            batch_id=batch_id,
+            metric_name="table.column_types",
+            value=[
+                {"name": "col1", "type": "int64"},
+                {"name": "col2", "type": "int64"},
+            ],
+            exception=None,
+        ),
     ]
 
     # Assert each metric so it is easier to see which one fails (instead of assert metrics == expected_metrics):
     assert len(metrics) == len(expected_metrics)
-    for metric, expected_metric in zip(metrics, expected_metrics):
-        assert metric.dict() == expected_metric.dict()
+    for metric in metrics:
+        assert metric.dict() in [
+            expected_metric.dict() for expected_metric in expected_metrics
+        ]
