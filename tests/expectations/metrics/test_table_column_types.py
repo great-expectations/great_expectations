@@ -10,7 +10,7 @@ from tests.expectations.test_util import get_table_columns_metric
 
 
 @pytest.mark.sqlite
-def test_table_column_introspection(sa, capfd):
+def test_table_column_introspection(sa, capsys):
     db_file = file_relative_path(
         __file__,
         "../../test_sets/test_cases_for_sql_data_connector.db",
@@ -36,7 +36,7 @@ def test_table_column_introspection(sa, capfd):
         "event_type",
         "favorite_color",
     ]
-    std, err = capfd.readouterr()
+    std, err = capsys.readouterr()
 
     assert std
     assert not err
@@ -46,14 +46,14 @@ def test_table_column_introspection(sa, capfd):
         batch_data.selectable.name, schema=batch_data.selectable.schema
     )
 
-    std, err = capfd.readouterr()
+    std, err = capsys.readouterr()
 
     assert not std
     assert not err
 
 
 @pytest.mark.sqlite
-def test_table_column_type__sqlalchemy_happy_path(sa, capfd):
+def test_table_column_type__sqlalchemy_happy_path(sa, capsys):
     db_file = file_relative_path(
         __file__,
         "../../test_sets/test_cases_for_sql_data_connector.db",
@@ -69,7 +69,7 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capfd):
     assert batch_data.selectable.schema is None
 
     table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
-    std, err = capfd.readouterr()
+    std, err = capsys.readouterr()
 
     assert results[("table.columns", (), ())] == [
         "index",
@@ -83,7 +83,7 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capfd):
     assert not err
 
     table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
-    std, err = capfd.readouterr()
+    std, err = capsys.readouterr()
 
     assert results[("table.columns", (), ())] == [
         "index",
@@ -111,7 +111,7 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capfd):
     assert batch_data.selectable.schema is None
 
     table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
-    std, err = capfd.readouterr()
+    std, err = capsys.readouterr()
 
     assert results[("table.columns", (), ())] == [
         "index",
@@ -126,7 +126,7 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capfd):
 
 
 @pytest.mark.sqlite
-def test_table_column_types__sqlalchemy_table_not_found(sa, capfd):
+def test_table_column_types__sqlalchemy_table_not_found(sa,):
     db_file = file_relative_path(
         __file__,
         "../../test_sets/test_cases_for_sql_data_connector.db",
