@@ -5,8 +5,8 @@ from contextlib import _GeneratorContextManager, contextmanager
 from typing import TYPE_CHECKING, Any, Callable, Generator, Optional
 
 import pytest
-from pydantic import ValidationError
 
+from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.datasource.fluent import SqliteDatasource
 from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
 
@@ -39,7 +39,7 @@ def sqlite_datasource(
     connection_string = f"sqlite:///{sqlite_database_path}"
     return SqliteDatasource(
         name=sqlite_datasource_name,
-        connection_string=connection_string,  # type: ignore[arg-type]  # pydantic will coerce
+        connection_string=connection_string,
     )
 
 
@@ -100,7 +100,7 @@ def _create_sqlite_source(
         SqliteDatasource.execution_engine_override = execution_eng_cls  # type: ignore[misc]
         sqlite_datasource = SqliteDatasource(
             name="sqlite_datasource",
-            connection_string="sqlite://",  # type: ignore[arg-type]  # pydantic will coerce
+            connection_string="sqlite://",
             create_temp_table=create_temp_table,
         )
         if data_context:

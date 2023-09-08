@@ -6,11 +6,11 @@ from typing import TYPE_CHECKING
 from unittest import mock
 
 import pandas as pd
-import pydantic
 import pytest
 
 import great_expectations as gx
 from great_expectations.checkpoint import SimpleCheckpoint
+from great_expectations.compatibility import pydantic
 from great_expectations.data_context import (
     AbstractDataContext,
     CloudDataContext,
