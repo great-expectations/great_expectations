@@ -200,7 +200,7 @@ jobs:
         run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5
 
   doc-checks:
-    needs: [unit-tests, static-analysis]
+    needs: [static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
