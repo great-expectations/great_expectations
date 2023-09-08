@@ -555,7 +555,7 @@ class Datasource(
             asset_with_id = cloud_fds.get_asset(asset_name=asset.name)
             asset.id = asset_with_id.id
             # datasources setter will attach dataframe to in-memory assets
-            self._data_context.datasources[self.name] = self
+            self._data_context.datasources[self.name] = self  # type: ignore[union-attr]
 
         return asset
 

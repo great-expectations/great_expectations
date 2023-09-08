@@ -54,7 +54,7 @@ class DatasourceDict(UserDict):
     ):
         self._context = context  # If possible, we should avoid passing the context through - once block-style is removed, we can extract this
         self._datasource_store = datasource_store
-        self._in_memory_data_assets = {}
+        self._in_memory_data_assets: dict[str, DataAsset] = {}
 
     @property
     def _names(self) -> set[str]:

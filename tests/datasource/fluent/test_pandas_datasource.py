@@ -486,7 +486,7 @@ def test_cloud_add_dataframe_asset(test_df_pandas: pd.DataFrame):
     dataframe_asset.build_batch_request(dataframe=test_df_pandas)
 
     assert dataframe_asset.dataframe.equals(
-        context.datasources[datasource_name].assets[0].dataframe
+        context.datasources[datasource_name].assets[0].dataframe  # type: ignore[union-attr]
     )
 
 
