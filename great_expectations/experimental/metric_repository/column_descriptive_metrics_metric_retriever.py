@@ -92,10 +92,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         )
 
         metric_name = "table.column_types"
-        if (metric_name, tuple(), "include_nested=True") in computed_metrics.keys():
-            metric_lookup_key = (metric_name, tuple(), "include_nested=True")
-        else:
-            metric_lookup_key = (metric_name, tuple(), tuple())
+        metric_lookup_key = (metric_name, tuple(), "include_nested=True")
 
         raw_column_types = computed_metrics[metric_lookup_key]
         column_types_converted_to_str = [
