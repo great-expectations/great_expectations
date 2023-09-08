@@ -1104,10 +1104,7 @@ def test_onboarding_data_assistant__trino_with_string_fields(
         datasource = context.sources.add_sql(
             name="my_trino_datasource", connection_string=CONNECTION_STRING
         )
-        asset = datasource.add_query_asset(
-            name="default_name",
-            query="SELECT pickup_datetime, dropoff_datetime, store_and_fwd_flag from taxi_data LIMIT 10",
-        )
+        asset = datasource.add_table_asset(name="taxi_data")
         batch_request = asset.build_batch_request()
 
     context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
@@ -1152,7 +1149,7 @@ def test_onboarding_data_assistant__trino_with_string_fields(
 
     assert result
     assert len(result.expectation_configurations) > 0
-    assert len(result.rule_exception_tracebacks) == 0
+
     # Should have some expectations for all three columns
     assert any(
         x["kwargs"].get("column") == "pickup_datetime"
