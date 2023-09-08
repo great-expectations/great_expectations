@@ -22,7 +22,7 @@ def test_simple_sematic_filter_defaults_to_all_columns(empty_data_context):
         table_name="taxi_data",
         csv_path=file_relative_path(
             __file__,
-            "../../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
+            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
         ),
         connection_string=CONNECTION_STRING,
         convert_colnames_to_datetime=["pickup_datetime"],
