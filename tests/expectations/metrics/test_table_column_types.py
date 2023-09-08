@@ -71,9 +71,20 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capfd):
     table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     std, err = capfd.readouterr()
 
+    assert results[("table.columns", (), ())] == [
+        "index",
+        "id",
+        "date",
+        "event_type",
+        "favorite_color",
+    ]
+
     assert std
     assert not err
 
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
+    std, err = capfd.readouterr()
+
     assert results[("table.columns", (), ())] == [
         "index",
         "id",
@@ -82,19 +93,9 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capfd):
         "favorite_color",
     ]
 
-    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
-    std, err = capfd.readouterr()
     # Should not have to re-inspect
     assert not std
     assert not err
-
-    assert results[("table.columns", (), ())] == [
-        "index",
-        "id",
-        "date",
-        "event_type",
-        "favorite_color",
-    ]
 
     # Add another batch
     batch_data = SqlAlchemyBatchData(
@@ -111,9 +112,6 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capfd):
 
     table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     std, err = capfd.readouterr()
-    # Should have to re-inspect due to new batch
-    assert std
-    assert not err
 
     assert results[("table.columns", (), ())] == [
         "index",
@@ -121,6 +119,10 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capfd):
         "event_type",
         "favorite_color",
     ]
+
+    # Should have to re-inspect due to new batch
+    assert std
+    assert not err
 
 
 @pytest.mark.sqlite
