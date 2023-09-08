@@ -118,6 +118,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             "column.max",
             "column.mean",
             "column.median",
+            "column_values.null.count",
         ]
 
         column_metric_configs: List[MetricConfiguration] = list()
@@ -149,11 +150,14 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         metric_lookup_key: _MetricKey
 
         # TODO: nested for-loop can be better
+        value_type = float
         for metric_name in column_metric_names:
+            if metric_name == "column_values.null.count":
+                value_type = int
             for column in column_list:
                 metric_lookup_key = (metric_name, f"column={column}", tuple())
                 metrics.append(
-                    ColumnMetric[float](
+                    ColumnMetric[value_type](
                         batch_id=validator.active_batch.id,
                         metric_name=metric_name,
                         column=column,

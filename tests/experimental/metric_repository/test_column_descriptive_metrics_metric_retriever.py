@@ -37,6 +37,8 @@ def test_get_metrics():
         ("column.mean", "column=col2", ()): 2.7,
         ("column.median", "column=col1", ()): 2.5,
         ("column.median", "column=col2", ()): 2.7,
+        ("column_values.null.count", "column=col1", ()): 3,
+        ("column_values.null.count", "column=col2", ()): 5,
     }
     mock_batch = Mock(spec=Batch)
     mock_batch.id = "batch_id"
@@ -122,6 +124,20 @@ def test_get_metrics():
             batch_id="batch_id",
             metric_name="column.median",
             value=2.7,
+            exception=None,
+            column="col2",
+        ),
+        ColumnMetric[int](
+            batch_id="batch_id",
+            metric_name="column_values.null.count",
+            value=3,
+            exception=None,
+            column="col1",
+        ),
+        ColumnMetric[int](
+            batch_id="batch_id",
+            metric_name="column_values.null.count",
+            value=5,
             exception=None,
             column="col2",
         ),
