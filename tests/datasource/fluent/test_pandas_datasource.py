@@ -439,6 +439,7 @@ def test_default_pandas_datasource_name_conflict(
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
 
 
+@pytest.mark.filesystem
 def test_read_dataframe(
     empty_data_context: AbstractDataContext, test_df_pandas: pd.DataFrame
 ):
