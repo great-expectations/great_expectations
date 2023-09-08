@@ -54,6 +54,7 @@ class DatasourceDict(UserDict):
     ):
         self._context = context  # If possible, we should avoid passing the context through - once block-style is removed, we can extract this
         self._datasource_store = datasource_store
+        self._in_memory_data_assets = {}
 
     @property
     def _names(self) -> set[str]:
@@ -90,8 +91,8 @@ class DatasourceDict(UserDict):
         if isinstance(ds, FluentDatasource):
             if isinstance(ds, SupportsInMemoryDataAssets):
                 for asset in ds.assets:
-                    ...
-                # self._in_memory_assets[f"{name}-{name}"]
+                    if asset.type == "dataframe":
+                        self._in_memory_data_assets[f"{name}-{asset.name}"] = asset
             config = ds
         else:
             config = self._prep_legacy_datasource_config(name=name, ds=ds)
@@ -123,6 +124,12 @@ class DatasourceDict(UserDict):
 
         ds = self._datasource_store.retrieve_by_name(name)
         if isinstance(ds, FluentDatasource):
+            if isinstance(ds, SupportsInMemoryDataAssets):
+                for idx, asset in enumerate(ds.assets):
+                    if asset.type == "dataframe":
+                        ds.assets[idx] = self._in_memory_data_assets[
+                            f"{name}-{asset.name}"
+                        ]
             return self._init_fluent_datasource(ds)
         return self._init_block_style_datasource(name=name, config=ds)
 
