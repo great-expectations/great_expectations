@@ -484,9 +484,9 @@ def test_cloud_add_dataframe_asset(test_df_pandas: pd.DataFrame):
     try:
         datasource = context.sources.add_pandas(name=datasource_name)
     except gx.exceptions.exceptions.DataContextError:
-        datasource = context.get_datasource(datasource_name=datasource_name)
+        datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
     try:
-        dataframe_asset = datasource.add_dataframe_asset(name=dataframe_asset_name)  # type: ignore[union-attr]
+        dataframe_asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
     except ValueError:
         dataframe_asset = datasource.get_asset(asset_name=dataframe_asset_name)
 
