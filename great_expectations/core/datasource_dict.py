@@ -128,7 +128,6 @@ class DatasourceDict(UserDict):
             if isinstance(hydrated_ds, SupportsInMemoryDataAssets):
                 for asset in hydrated_ds.assets:
                     if asset.type == "dataframe":
-                        print(type(asset.dataframe))
                         cached_data_asset = self._in_memory_data_assets.get(
                             f"{name}-{asset.name}"
                         )
