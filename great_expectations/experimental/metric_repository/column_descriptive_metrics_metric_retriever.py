@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import TYPE_CHECKING, List, Sequence
+from typing import TYPE_CHECKING, Any, List, Sequence
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.interfaces import Batch
@@ -94,8 +94,9 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         metric_name = "table.column_types"
         metric_lookup_key = (metric_name, tuple(), "include_nested=True")
 
-        raw_column_types = computed_metrics[metric_lookup_key]
-        column_types_converted_to_str = [
+        raw_column_types: list[dict[str, Any]] = computed_metrics[metric_lookup_key]  # type: ignore[assignment] # Metric results from computed_metrics are not typed
+
+        column_types_converted_to_str: list[dict[str, str]] = [
             {"name": raw_column_type["name"], "type": str(raw_column_type["type"])}
             for raw_column_type in raw_column_types
         ]
