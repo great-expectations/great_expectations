@@ -39,7 +39,7 @@ It is recommended that you install the GX library in a Python virtual environmen
 
 :::
 
-For more guidance on setting up your Python environment and installing GX, see [Install Great Expectations](/oss/docs/proofs/teaching/setup/install_gx.md).
+For more guidance on setting up your Python environment and installing GX, see [Install Great Expectations](/oss/proofs/teaching/setup/install_gx.md).
 
 ## Start a GX project
 
@@ -64,7 +64,7 @@ In-memory GX projects don't persist beyond the current Python session unless you
 
 :::
 
-For more information on creating, saving, and selecting projects in GX see: [Manage GX projects](/oss/proofs/end2end/_filesystem/_pandas.md).
+For more information on creating, saving, and selecting projects in GX see: [Manage GX projects](/guides/setup/setup_overview_lp.md).
 
 ## Connect to data
 
