@@ -36,7 +36,6 @@ if TYPE_CHECKING:
 
     from great_expectations.data_context import (
         AbstractDataContext,
-        FileDataContext,
     )
 
 
@@ -440,12 +439,12 @@ def test_default_pandas_datasource_name_conflict(
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
 
 
-def test_read_dataframe_file_data_context(
-    empty_file_context: FileDataContext, test_df_pandas: pd.DataFrame
+def test_read_dataframe(
+    empty_data_context: AbstractDataContext, test_df_pandas: pd.DataFrame
 ):
     # validates that a dataframe object is passed
     with pytest.raises(ValueError) as exc_info:
-        _ = empty_file_context.sources.pandas_default.read_dataframe(dataframe={})
+        _ = empty_data_context.sources.pandas_default.read_dataframe(dataframe={})
 
     assert (
         'Cannot execute "PandasDatasource.read_dataframe()" without a valid "dataframe" argument.'
@@ -453,11 +452,11 @@ def test_read_dataframe_file_data_context(
     )
 
     # correct working behavior with read method
-    datasource = empty_file_context.sources.pandas_default
+    datasource = empty_data_context.sources.pandas_default
     validator = datasource.read_dataframe(dataframe=test_df_pandas)
     assert isinstance(validator, Validator)
     assert isinstance(
-        empty_file_context.sources.pandas_default.get_asset(
+        empty_data_context.sources.pandas_default.get_asset(
             asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME
         ),
         DataFrameAsset,
@@ -465,16 +464,16 @@ def test_read_dataframe_file_data_context(
 
     # correct working behavior with add method
     dataframe_asset_name = "my_dataframe_asset"
-    dataframe_asset = empty_file_context.sources.pandas_default.add_dataframe_asset(
+    dataframe_asset = empty_data_context.sources.pandas_default.add_dataframe_asset(
         name=dataframe_asset_name
     )
     assert isinstance(dataframe_asset, DataFrameAsset)
     assert dataframe_asset.name == "my_dataframe_asset"
-    assert len(empty_file_context.sources.pandas_default.assets) == 2
+    assert len(empty_data_context.sources.pandas_default.assets) == 2
     _ = dataframe_asset.build_batch_request(dataframe=test_df_pandas)
     assert all(
         asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
-        for asset in empty_file_context.sources.pandas_default.assets
+        for asset in empty_data_context.sources.pandas_default.assets
     )
 
 
