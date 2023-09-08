@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, Callable, Type
 import pytest
 from pytest import MonkeyPatch, param
 
+import great_expectations as gx
 import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.compatibility import pydantic
 from great_expectations.datasource.fluent import PandasDatasource
@@ -35,7 +36,6 @@ if TYPE_CHECKING:
 
     from great_expectations.data_context import (
         AbstractDataContext,
-        CloudDataContext,
         FileDataContext,
     )
 
@@ -478,22 +478,16 @@ def test_read_dataframe_file_data_context(
     )
 
 
-def test_add_dataframe_asset(
-    empty_contexts: FileDataContext | CloudDataContext, test_df_pandas: pd.DataFrame
-):
-    dataframe_asset = empty_contexts.sources.pandas_default.add_dataframe_asset(
-        name="test_df"
-    )
-    batch_request = dataframe_asset.build_batch_request(dataframe=test_df_pandas)
+@pytest.mark.cloud
+def test_cloud_add_dataframe_asset(test_df_pandas: pd.DataFrame):
+    context = gx.get_context(mode="cloud")
+    datasource_name = "pandas_debugging_datasource"
+    datasource = context.sources.add_pandas(name=datasource_name)
+    dataframe_asset = datasource.add_dataframe_asset(name="test_df")
+    dataframe_asset.build_batch_request(dataframe=test_df_pandas)
 
-    expectation_suite_name = "test_df_suite"
-    empty_contexts.add_or_update_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
-
-    _ = empty_contexts.get_validator(
-        batch_request=batch_request,
-        expectation_suite_name=expectation_suite_name,
+    assert dataframe_asset.dataframe.equals(
+        context.datasources[datasource_name].assets[0].dataframe
     )
 
 

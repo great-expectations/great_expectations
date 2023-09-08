@@ -124,13 +124,18 @@ class DatasourceDict(UserDict):
 
         ds = self._datasource_store.retrieve_by_name(name)
         if isinstance(ds, FluentDatasource):
-            if isinstance(ds, SupportsInMemoryDataAssets):
-                for idx, asset in enumerate(ds.assets):
+            hydrated_ds = self._init_fluent_datasource(ds)
+            if isinstance(hydrated_ds, SupportsInMemoryDataAssets):
+                for asset in hydrated_ds.assets:
                     if asset.type == "dataframe":
-                        ds.assets[idx] = self._in_memory_data_assets[
+                        print(type(asset.dataframe))
+                        cached_data_asset = self._in_memory_data_assets.get(
                             f"{name}-{asset.name}"
-                        ]
-            return self._init_fluent_datasource(ds)
+                        )
+                        if cached_data_asset:
+                            asset.dataframe = cached_data_asset.dataframe
+                        print(type(asset.dataframe))
+            return hydrated_ds
         return self._init_block_style_datasource(name=name, config=ds)
 
     def _init_fluent_datasource(self, ds: FluentDatasource) -> FluentDatasource:
