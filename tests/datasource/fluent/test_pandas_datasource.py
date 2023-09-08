@@ -34,9 +34,7 @@ from great_expectations.validator.validator import Validator
 if TYPE_CHECKING:
     import pandas as pd
 
-    from great_expectations.data_context import (
-        AbstractDataContext,
-    )
+    from great_expectations.data_context import AbstractDataContext
 
 
 logger = logging.getLogger(__file__)
