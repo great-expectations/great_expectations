@@ -263,7 +263,7 @@ class DataAssistantRunner:
                 validator=validator,
             )
         else:
-            validator: Validator = get_validator_with_expectation_suite(
+            validator = get_validator_with_expectation_suite(
                 data_context=self._data_context,
                 batch_list=None,
                 batch_request=batch_request,
