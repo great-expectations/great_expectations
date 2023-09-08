@@ -47,6 +47,8 @@ yaml = YAMLHandler()
 
 logger = logging.getLogger(__name__)
 
+# Let's see how the merge queue handles conflicts
+
 
 @pytest.mark.filesystem
 @mock.patch(
