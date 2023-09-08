@@ -232,11 +232,26 @@ jobs:
         run: invoke public-api
       - name: link_checker
         run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -s docs --skip-external
-      - name: docs_build
+
+  docs-build:
+    needs: [doc-checks, docs-changes]
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "pip"
+          cache-dependency-path: reqs/requirements-dev-test.txt
+      - name: Install dependencies
+        run: pip install -r reqs/requirements-dev-test.txt
+      - name: Build docs
         env:
           NODE_OPTIONS: --max_old_space_size=4096
         run: cd docs/docusaurus && yarn install && bash ../build_docs
-
 
   cloud-tests:
     needs: [unit-tests, static-analysis, ci-is-on-main-repo]
