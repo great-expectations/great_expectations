@@ -64,7 +64,7 @@ In-memory GX projects don't persist beyond the current Python session unless you
 
 :::
 
-For more information on creating, saving, and selecting projects in GX see: [Manage GX projects](./_filesystem/_pandas.md).
+For more information on creating, saving, and selecting projects in GX see: [Manage GX projects](/oss/docs/proofs/end2end/_filesystem/_pandas.md).
 
 ## Connect to data
 
@@ -87,7 +87,7 @@ For more information on creating, saving, and selecting projects in GX see: [Man
 
 </Tabs>
 
-For more guidance on connecting to and organizing file data in GX, see [Connect to filesystem data](./_filesystem/_pandas.md).
+For more guidance on connecting to and organizing file data in GX, see [Connect to filesystem data](/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data.md).
 
 ## Create Expectations
 
@@ -103,7 +103,7 @@ my_expectations.expect_
 my_expectations.expect_
 ```
 
-For more guidance on how to create Expectations in GX, see [Create Expectations](./_filesystem/_pandas.md).
+For more guidance on how to create Expectations in GX, see [Create Expectations](/guides/expectations/expectations_lp.md).
 
 ## Validate data
 
@@ -119,7 +119,7 @@ checkpoint = context.add_or_update_checkpoint(
 checkpoint.run()
 ```
 
-For more guidance on creating a new Checkpoint and validating your data, see [Validate data with a Checkpoint](./_filesystem/_pandas.md).
+For more guidance on creating a new Checkpoint and validating your data, see [Validate data with a Checkpoint](/guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 
 ## Review results
 
@@ -129,16 +129,16 @@ You can build and view documentation that GX generates from your Checkpoint resu
 context.build_data_docs()
 ```
 
-For more information on the GX generated documentation for your project, see [Customize and configure project documentation](./_filesystem/_pandas.md).
+For more information on the GX generated documentation for your project, see [Customize and configure project documentation](/guides/setup/configuring_data_docs/host_and_share_data_docs.md).
 
 ## Next steps
 
 You have now installed GX and run through a basic workflow for the first time.
 
 Next, you can:
-- [Further expand the scope of your project](./_filesystem/_pandas.md) with additional data sources, sets of Expectations, and Checkpoints.
-- [Customize the internal workings of your project](./_filesystem/_pandas.md) by configuring its documentation and metadata storage options.
-- [Expand on the basic GX workflow](./_filesystem/_pandas.md) with data pipeline integration and iterative procedures.
+- [Further expand the scope of your project](/conceptual_guides/gx_overview.md) with additional data sources, sets of Expectations, and Checkpoints.
+- [Customize the internal workings of your project](/guides/setup/setup_overview_lp.md) by configuring its documentation and metadata storage options.
+- [Expand on the basic GX workflow](/docs/conceptual_guides/learn_lp.md) with data pipeline integration and iterative procedures.
 
 ## Quick reference
 
