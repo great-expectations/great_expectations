@@ -235,7 +235,10 @@ jobs:
 
   docs-build:
     needs: [doc-checks, docs-changes]
-    if: github.event.pull_request.draft == false
+    # run on non-draft PRs with docs changes
+    if: |
+      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
