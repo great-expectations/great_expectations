@@ -47,7 +47,11 @@ def build_action_result(
     data_assistant_result: DataAssistantResult,
     id: str,
 ) -> ActionResult:
-    expectation_suite_name = f"{event.type} {event.data_asset_name} assistant suite"
+    if event.expectation_suite_name is not None:
+        expectation_suite_name = event.expectation_suite_name
+    else:
+        expectation_suite_name = f"{event.type} {event.data_asset_name} assistant suite"
+
     checkpoint_name = f"{event.type} {event.data_asset_name} assistant checkpoint"
 
     # build tz aware timestamp

@@ -1,5 +1,5 @@
 import uuid
-from typing import Literal, Sequence, Union
+from typing import Literal, Optional, Sequence, Union
 from uuid import UUID
 
 from typing_extensions import Annotated
@@ -20,6 +20,7 @@ class RunDataAssistantEvent(EventBase):
     type: str
     datasource_name: str
     data_asset_name: str
+    expectation_suite_name: Optional[str] = None
 
 
 class RunOnboardingDataAssistantEvent(RunDataAssistantEvent):
