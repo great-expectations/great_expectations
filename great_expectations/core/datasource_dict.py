@@ -134,7 +134,6 @@ class DatasourceDict(UserDict):
                         )
                         if cached_data_asset:
                             asset.dataframe = cached_data_asset.dataframe
-                        print(type(asset.dataframe))
             return hydrated_ds
         return self._init_block_style_datasource(name=name, config=ds)
 
