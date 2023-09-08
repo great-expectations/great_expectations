@@ -1204,7 +1204,7 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
     )
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_TupleAzureBlobStoreBackend_credential():
     pytest.importorskip("azure.storage.blob")
     pytest.importorskip("azure.identity")
@@ -1247,7 +1247,7 @@ def test_TupleAzureBlobStoreBackend_credential():
         )
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_TupleAzureBlobStoreBackend_connection_string():
     pytest.importorskip("azure.storage.blob")
     pytest.importorskip("azure.identity")
@@ -1289,7 +1289,7 @@ def test_TupleAzureBlobStoreBackend_connection_string():
         )
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_TupleAzureBlobStoreBackend_account_url():
     pytest.importorskip("azure.storage.blob")
     pytest.importorskip("azure.identity")
