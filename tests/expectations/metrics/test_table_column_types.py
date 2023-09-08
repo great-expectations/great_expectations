@@ -126,7 +126,7 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capsys):
 
 
 @pytest.mark.sqlite
-def test_table_column_types__sqlalchemy_table_not_found(sa,):
+def test_table_column_types__sqlalchemy_table_not_found(sa):
     db_file = file_relative_path(
         __file__,
         "../../test_sets/test_cases_for_sql_data_connector.db",
