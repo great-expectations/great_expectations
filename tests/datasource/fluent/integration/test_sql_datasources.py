@@ -298,7 +298,7 @@ def snowflake_ds(
     context: EphemeralDataContext, snowflake_creds_populated: bool
 ) -> SnowflakeDatasource:
     if not snowflake_creds_populated:
-        LOGGER.warning("no snowflake credentials")
+       pytest.skip("no snowflake credentials")
     ds = context.sources.add_snowflake(
         "snowflake",
         connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
