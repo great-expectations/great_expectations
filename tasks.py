@@ -805,7 +805,6 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     ),
     "databricks": TestDependencies(
         requirement_files=("reqs/requirements-dev-databricks.txt",),
-        services=("databricks",),
     ),
     "docs-basic": TestDependencies(
         # these installs are handled by the CI
