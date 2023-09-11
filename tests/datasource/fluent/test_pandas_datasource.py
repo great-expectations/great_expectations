@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, Callable, Type
 import pytest
 from pytest import MonkeyPatch, param
 
+import great_expectations as gx
 import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.compatibility import pydantic
 from great_expectations.datasource.fluent import PandasDatasource
@@ -437,7 +438,7 @@ def test_default_pandas_datasource_name_conflict(
 
 
 @pytest.mark.filesystem
-def test_dataframe_asset(
+def test_read_dataframe(
     empty_data_context: AbstractDataContext, test_df_pandas: pd.DataFrame
 ):
     # validates that a dataframe object is passed
@@ -450,9 +451,8 @@ def test_dataframe_asset(
     )
 
     # correct working behavior with read method
-    validator = empty_data_context.sources.pandas_default.read_dataframe(
-        dataframe=test_df_pandas
-    )
+    datasource = empty_data_context.sources.pandas_default
+    validator = datasource.read_dataframe(dataframe=test_df_pandas)
     assert isinstance(validator, Validator)
     assert isinstance(
         empty_data_context.sources.pandas_default.get_asset(
@@ -473,6 +473,21 @@ def test_dataframe_asset(
     assert all(
         asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
         for asset in empty_data_context.sources.pandas_default.assets
+    )
+
+
+@pytest.mark.cloud
+def test_cloud_add_dataframe_asset(test_df_pandas: pd.DataFrame):
+    context = gx.get_context(mode="cloud")
+    datasource_name = "pandas_debugging_datasource"
+    dataframe_asset_name = "test_df"
+
+    datasource = context.get_datasource(datasource_name=datasource_name)
+    dataframe_asset = datasource.get_asset(asset_name=dataframe_asset_name)  # type: ignore[union-attr]
+    dataframe_asset.build_batch_request(dataframe=test_df_pandas)
+
+    assert dataframe_asset.dataframe.equals(
+        context.datasources[datasource_name].assets[0].dataframe  # type: ignore[union-attr]
     )
 
 
