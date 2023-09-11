@@ -1401,17 +1401,21 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             Sqlalchemy connection
         """
+        from sqlalchemy.engine.default import DefaultDialect  # noqa: TID251
 
-        def normalize_name(name):
-            logger.warning(f"normalize_name - {name}")  # TODO: remove me
-            if name is None:
-                return None
-            elif name == "":
-                return ""
-            elif name.lower() == name:
-                return sa.sql.quoted_name(name, quote=True)
-            else:
-                return name
+        normalize_name_default = DefaultDialect.normalize_name
+        denormalize_name_default = DefaultDialect.denormalize_name
+
+        # def normalize_name(name):
+        #     logger.warning(f"normalize_name - {name}")  # TODO: remove me
+        #     if name is None:
+        #         return None
+        #     elif name == "":
+        #         return ""
+        #     elif name.lower() == name:
+        #         return sa.sql.quoted_name(name, quote=True)
+        #     else:
+        #         return name
 
         if self.dialect_name in _PERSISTED_CONNECTION_DIALECTS:
             try:
@@ -1426,7 +1430,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             with self.engine.connect() as connection:
                 if connection.dialect.name == "snowflake":
                     logger.warning("snowflake connection")  # TODO: remove me
-                    connection.dialect.normalize_name = normalize_name
+                    connection.dialect.normalize_name = normalize_name_default
+                    connection.dialect.denormalize_name = denormalize_name_default
                 yield connection
 
     @public_api
