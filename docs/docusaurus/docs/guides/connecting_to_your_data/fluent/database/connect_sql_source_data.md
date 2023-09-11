@@ -502,7 +502,7 @@ GX recommends that you use the following services to integrate GX with GCP:
 
 The following diagram shows the recommended components for a GX deployment in GCP:
 
-![Screenshot of Data Docs](../deployment_patterns/images/ge_and_gcp_diagram.png)
+![Screenshot of Data Docs](../../../../deployment_patterns/images/ge_and_gcp_diagram.png)
 
 ## Upgrade your GX version (Optional)
 
@@ -557,7 +557,7 @@ To configure GX to use the new `validations_GCS_store` Validations Store, set th
 
 ### Add a Data Docs Store
 
-To host and share Data Docs on GCS, see [Host and share Data Docs](../guides/setup/configuring_data_docs/host_and_share_data_docs.md).
+To host and share Data Docs on GCS, see [Host and share Data Docs](../../../setup/configuring_data_docs/host_and_share_data_docs.md).
 
 After you have hosted and shared Data Docs, your `great-expectations.yml` contains the following configuration below `data_docs_sites`:
 
@@ -766,9 +766,9 @@ To configure the BatchRequest and learn how you can load data by specifying a ta
 
 Migrate your local GX configuration to a Cloud Composer environment to automate the workflow. You can use one of the following methods to run GX in Cloud Composer or Airflow:
 
-- [Using a `bash operator`](./how_to_use_great_expectations_with_airflow.md#option-1-running-a-checkpoint-with-a-bashoperator)
+- [Using a `bash operator`](../../../../deployment_patterns/how_to_use_great_expectations_with_airflow.md)
 
-- [Using a `python operator`](./how_to_use_great_expectations_with_airflow.md#option-2-running-the-checkpoint-script-output-with-a-pythonoperator)
+- [Using a `python operator`](../../../../deployment_patterns/how_to_use_great_expectations_with_airflow.md#option-2-running-the-checkpoint-script-output-with-a-pythonoperator)
 
 - [Using a `Airflow operator`](https://github.com/great-expectations/airflow-provider-great-expectations)
 
@@ -912,10 +912,10 @@ To trigger the DAG manually:
 
 - [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant)
 
-- [Configure Expectation Stores](../guides/setup/configuring_metadata_stores/configure_expectation_stores.md)
+- [Configure Expectation Stores](../../../setup/configuring_metadata_stores/configure_expectation_stores.md)
 
-- [Configure Validation Result Stores](../guides/setup/configuring_metadata_stores/configure_result_stores.md)
+- [Configure Validation Result Stores](../../../setup/configuring_metadata_stores/configure_result_stores.md)
 
-- [Host and share Data Docs](../guides/setup/configuring_data_docs/host_and_share_data_docs.md)
+- [Host and share Data Docs](../../../setup/configuring_data_docs/host_and_share_data_docs.md)
 
-- [Configure credentials](../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
+- [Configure credentials](../../../setup/configuring_data_contexts/how_to_configure_credentials.md)
