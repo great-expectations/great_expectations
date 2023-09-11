@@ -506,7 +506,7 @@ class Datasource(
             found_asset._datasource = self
             if self._data_context:
                 # datasources setter will attach dataframe to in-memory assets
-                self._data_context.datasources[self.name] = self  # type: ignore[union-attr]
+                self._data_context.datasources[self.name] = self
             return found_asset
         except IndexError as exc:
             raise LookupError(
@@ -559,7 +559,7 @@ class Datasource(
             asset.id = asset_with_id.id
             if self._data_context:
                 # datasources setter will attach dataframe to in-memory assets
-                self._data_context.datasources[self.name] = self  # type: ignore[union-attr]
+                self._data_context.datasources[self.name] = self
 
         return asset
 
