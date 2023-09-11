@@ -1389,7 +1389,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return batch_data, batch_markers
 
     @contextmanager
-    def get_connection(self) -> sqlalchemy.Connection:
+    def get_connection(self) -> sqlalchemy.Connection:  # noqa: C901 # TODO: simplify
         """Get a connection for executing queries.
 
         Some databases sqlite/mssql temp tables only persist within a connection,
@@ -1401,21 +1401,63 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             Sqlalchemy connection
         """
-        from sqlalchemy.engine.default import DefaultDialect  # noqa: TID251
+        from sqlalchemy.sql import quoted_name  # noqa: TID251
 
-        normalize_name_default = DefaultDialect.normalize_name
-        denormalize_name_default = DefaultDialect.denormalize_name
+        def ibis_normalize_name(name):
+            logger.warning(f"ibis_normalize_name - {name}")  # TODO: remove me
+            if name is None:
+                return None
+            elif not name:
+                return ""
+            elif name.lower() == name:
+                return quoted_name(name, quote=True)
+            else:
+                return name
 
-        # def normalize_name(name):
-        #     logger.warning(f"normalize_name - {name}")  # TODO: remove me
-        #     if name is None:
-        #         return None
-        #     elif name == "":
-        #         return ""
-        #     elif name.lower() == name:
-        #         return sa.sql.quoted_name(name, quote=True)
-        #     else:
-        #         return name
+        def default_normalize_name(name):
+            logger.warning(f"default_normalize_name - {name}")  # TODO: remove me
+            if name is None:
+                return None
+
+            name_lower = name.lower()
+            name_upper = name.upper()
+
+            if name_upper == name_lower:
+                # name has no upper/lower conversion, e.g. non-european characters.
+                # return unchanged
+                return name
+            elif name_upper == name and not (self.identifier_preparer._requires_quotes)(
+                name_lower
+            ):
+                # name is all uppercase and doesn't require quoting; normalize
+                # to all lower case
+                return name_lower
+            elif name_lower == name:
+                # name is all lower case, which if denormalized means we need to
+                # force quoting on it
+                return quoted_name(name, quote=True)
+            else:
+                # name is mixed case, means it will be quoted in SQL when used
+                # later, no normalizes
+                return name
+
+        def default_denormalize_name(name):
+            logger.warning(f"default_denormalize_name - {name}")  # TODO: remove me
+            if name is None:
+                return None
+
+            name_lower = name.lower()
+            name_upper = name.upper()
+
+            if name_upper == name_lower:
+                # name has no upper/lower conversion, e.g. non-european characters.
+                # return unchanged
+                return name
+            elif name_lower == name and not (self.identifier_preparer._requires_quotes)(
+                name_lower
+            ):
+                name = name_upper
+            return name
 
         if self.dialect_name in _PERSISTED_CONNECTION_DIALECTS:
             try:
@@ -1430,8 +1472,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             with self.engine.connect() as connection:
                 if connection.dialect.name == "snowflake":
                     logger.warning("snowflake connection")  # TODO: remove me
-                    connection.dialect.normalize_name = normalize_name_default
-                    connection.dialect.denormalize_name = denormalize_name_default
+                    # connection.dialect.normalize_name = default_normalize_name
+                    connection.dialect.normalize_name = ibis_normalize_name
+                    connection.dialect.denormalize_name = default_denormalize_name
                 yield connection
 
     @public_api
