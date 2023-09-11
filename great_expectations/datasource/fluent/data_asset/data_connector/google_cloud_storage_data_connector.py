@@ -4,8 +4,7 @@ import logging
 import re
 from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
 
-import pydantic
-
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.util import (

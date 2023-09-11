@@ -23,10 +23,9 @@ from typing import (
 )
 
 import pandas as pd
-import pydantic
 from typing_extensions import TypeAlias
 
-from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility import pydantic, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (

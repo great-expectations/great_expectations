@@ -75,7 +75,7 @@ def _build_pandas_abs_datasource(
     azure_client: azure.BlobServiceClient = cast(
         azure.BlobServiceClient, MockBlobServiceClient()
     )
-    pandas_abs_datasource = PandasAzureBlobStorageDatasource(  # type: ignore[call-arg]
+    pandas_abs_datasource = PandasAzureBlobStorageDatasource(
         name="pandas_abs_datasource",
         azure_options=azure_options or {},
     )
@@ -157,7 +157,7 @@ def test_construct_pandas_abs_datasource_with_account_url_and_config_credential(
 ):
     monkeypatch.setenv("MY_CRED", "my_secret_credential")
 
-    pandas_abs_datasource = PandasAzureBlobStorageDatasource(  # type: ignore[call-arg] # args are optional
+    pandas_abs_datasource = PandasAzureBlobStorageDatasource(
         name="pandas_abs_datasource",
         azure_options={
             "account_url": "my_account_url.blob.core.windows.net",
