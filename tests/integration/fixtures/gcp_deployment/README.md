@@ -1,6 +1,6 @@
 # Example Configuration for GCP Deployment Guide
 
-This directory contains an example configuration for the guide: [How to Use Great Expectations with Google Cloud Platform and BigQuery](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery)
+This directory contains an example configuration for [Using Great Expectations with Google Cloud Platform and BigQuery](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data)
 
 It contains a `great_expectations.yml` with a configuration for Metadata stores in GCS, and a Datadocs store in GCS, both with placeholder values. 
 
