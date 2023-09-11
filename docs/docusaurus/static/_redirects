@@ -392,6 +392,7 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs/guides/expectations/creating_custom_expectations/overview /docs/guides/expectations/custom_expectations_lp
 /docs/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas /docs/guides/connecting_to_your_data/fluent/in_memory/connect_in_memory_data
 /docs/guides/validation/how_to_validate_data_by_running_a_checkpoint /docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint
+/docs/deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery /docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data
 
 # Redirects for pages removed as no longer applicable
 
