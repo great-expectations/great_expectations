@@ -62,6 +62,12 @@ class DatasourceDict(UserDict):
         keys = self._datasource_store.list_keys()
         return {key.resource_name for key in keys}  # type: ignore[attr-defined] # list_keys() is annotated with generic DataContextKey instead of subclass
 
+    @staticmethod
+    def _get_in_memory_data_asset_name(
+        datasource_name: str, data_asset_name: str
+    ) -> str:
+        return f"{datasource_name}-{data_asset_name}"
+
     @override
     @property
     def data(self) -> dict[str, FluentDatasource | BaseDatasource]:  # type: ignore[override] # `data` is meant to be a writeable attr (not a read-only property)
@@ -92,7 +98,13 @@ class DatasourceDict(UserDict):
             if isinstance(ds, SupportsInMemoryDataAssets):
                 for asset in ds.assets:
                     if asset.type == "dataframe":
-                        self._in_memory_data_assets[f"{name}-{asset.name}"] = asset
+                        in_memory_asset_name: str = (
+                            DatasourceDict._get_in_memory_data_asset_name(
+                                datasource_name=name,
+                                data_asset_name=asset.name,
+                            )
+                        )
+                        self._in_memory_data_assets[in_memory_asset_name] = asset
             config = ds
         else:
             config = self._prep_legacy_datasource_config(name=name, ds=ds)
@@ -128,8 +140,14 @@ class DatasourceDict(UserDict):
             if isinstance(hydrated_ds, SupportsInMemoryDataAssets):
                 for asset in hydrated_ds.assets:
                     if asset.type == "dataframe":
+                        in_memory_asset_name: str = (
+                            DatasourceDict._get_in_memory_data_asset_name(
+                                datasource_name=name,
+                                data_asset_name=asset.name,
+                            )
+                        )
                         cached_data_asset = self._in_memory_data_assets.get(
-                            f"{name}-{asset.name}"
+                            in_memory_asset_name
                         )
                         if cached_data_asset:
                             asset.dataframe = cached_data_asset.dataframe
