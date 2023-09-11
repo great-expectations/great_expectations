@@ -542,7 +542,7 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "sqlite",
     ],
     'expect_column_values_to_not_be_null-str "UPPER"': ["postgres", "snowflake"],
-    "expect_column_values_to_not_be_null-str UPPER": ["snowflake"],
+    # "expect_column_values_to_not_be_null-str UPPER": ["snowflake"],  # TODO: highest priority
     "expect_column_values_to_not_be_null-quoted_name UPPER quote=None": ["snowflake"],
     "expect_column_values_to_not_be_null-quoted_name UPPER quote=True": ["snowflake"],
     "expect_column_values_to_not_be_null-quoted_name UPPER quote=False": ["snowflake"],
