@@ -481,15 +481,9 @@ def test_cloud_add_dataframe_asset(test_df_pandas: pd.DataFrame):
     context = gx.get_context(mode="cloud")
     datasource_name = "pandas_debugging_datasource"
     dataframe_asset_name = "test_df"
-    try:
-        datasource = context.sources.add_pandas(name=datasource_name)
-    except gx.exceptions.exceptions.DataContextError:
-        datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
-    try:
-        dataframe_asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
-    except ValueError:
-        dataframe_asset = datasource.get_asset(asset_name=dataframe_asset_name)
 
+    datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
+    dataframe_asset = datasource.get_asset(asset_name=dataframe_asset_name)
     dataframe_asset.build_batch_request(dataframe=test_df_pandas)
 
     assert dataframe_asset.dataframe.equals(
