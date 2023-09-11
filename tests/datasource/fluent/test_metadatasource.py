@@ -36,6 +36,7 @@ yaml = YAMLHandler()
 
 if TYPE_CHECKING:
     from great_expectations.core.config_provider import _ConfigurationProvider
+    from great_expectations.core.datasource_dict import DatasourceDict
 
 
 logger = logging.getLogger(__name__)
@@ -88,6 +89,10 @@ class DataContext:
     @property
     def sources(self) -> _SourceFactories:
         return self._sources
+
+    @property
+    def datasources(self) -> DatasourceDict:
+        return self._datasources
 
     def _add_fluent_datasource(self, datasource: Datasource) -> None:
         self._datasources[datasource.name] = datasource
