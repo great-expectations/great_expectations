@@ -504,8 +504,9 @@ class Datasource(
                 filter(lambda asset: asset.name == asset_name, self.assets)
             )[0]
             found_asset._datasource = self
-            # datasources setter will attach dataframe to in-memory assets
-            self._data_context.datasources[self.name] = self  # type: ignore[union-attr]
+            if self._data_context:
+                # datasources setter will attach dataframe to in-memory assets
+                self._data_context.datasources[self.name] = self  # type: ignore[union-attr]
             return found_asset
         except IndexError as exc:
             raise LookupError(
@@ -556,8 +557,9 @@ class Datasource(
             # update asset with new id
             asset_with_id = cloud_fds.get_asset(asset_name=asset.name)
             asset.id = asset_with_id.id
-            # datasources setter will attach dataframe to in-memory assets
-            self._data_context.datasources[self.name] = self  # type: ignore[union-attr]
+            if self._data_context:
+                # datasources setter will attach dataframe to in-memory assets
+                self._data_context.datasources[self.name] = self  # type: ignore[union-attr]
 
         return asset
 
