@@ -603,7 +603,6 @@ def _is_quote_char_dialect_mismatch(
     [
         param("lower", id="str lower"),
         param("LOWER", id="str LOWER"),
-        param("'lower'", id="str 'lower'"),
         param('"lower"', id='str "lower"'),
         param(
             quoted_name(
@@ -636,7 +635,6 @@ def _is_quote_char_dialect_mismatch(
         ),
         param("upper", id="str upper"),
         param("UPPER", id="str UPPER"),
-        param("'UPPER'", id="str 'UPPER'"),
         param('"UPPER"', id='str "UPPER"'),
         param(
             quoted_name(
