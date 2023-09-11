@@ -20,47 +20,15 @@ An Ephemeral Data Context is a temporary, in-memory Data Context that will not p
 
 </Prerequisites> 
 
-<details>
-<summary>
 
-### If you still need to set up and install GX...
+## Confirm your Data Context is Ephemeral
 
-</summary>
-
-<IfYouStillNeedToSetupGx />
-
-</details>
-
-
-<details>
-<summary>
-
-### If you still need to create a Data Context...
-
-</summary>
-
-The `get_context()` method will return an Ephemeral Data Context if your system is not set up to work with GX Cloud and a Filesystem Data Context cannot be found.  For more information, see:
-- [How to quickly instantiate a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
-
-You can also instantiate an Ephemeral Data Context (for those occasions when your system is set up to work with GX Cloud or you do have a previously initialized Filesystem Data Context).  For more information, see:
-- [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
-
-</details>
-
-<details>
-
-<summary>
-
-### If you aren't certain that your Data Context is Ephemeral...
-
-</summary>
-
-You can easily check to see if you are working with an Ephemeral Data Context with the following code (in this example, we are assuming your Data Context is stored in the variable `context`):
+To confirm that you're working with an Ephemeral Data Context, run the following code:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py check_data_context_is_ephemeral"
 ```
 
-</details>
+In the example code, it is assumed that your Data Context is stored in the variable `context`.
 
 ## Verify that your current working directory does not already contain a GX Filesystem Data Context
 
@@ -85,13 +53,13 @@ For these reasons, it is strongly advised that once you have converted your Ephe
 
 :::
 
-
 ## Next steps
 
-### Customize Data Context configurations 
-
-<SetupConfigurations />
-
-### Connect GX to source data systems
-
-<ConnectingToDataFluently />
+- [Configure credentials](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)
+- [Configure Expectation Stores](/docs/guides/setup/configuring_metadata_stores/configure_expectation_stores)
+- [Configure Validation Result Stores](/docs/guides/setup/configuring_metadata_stores/configure_result_stores)
+- [Configure a MetricStore](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore)
+- [Host and share Data Docs](/docs/guides/setup/configuring_data_docs/host_and_share_data_docs)
+- [Connect to filesystem source data](/docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data)
+- [Connect to in-memory source data](/docs/guides/connecting_to_your_data/fluent/in_memory/connect_in_memory_data)
+- [Connect to SQL database source data](/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data)

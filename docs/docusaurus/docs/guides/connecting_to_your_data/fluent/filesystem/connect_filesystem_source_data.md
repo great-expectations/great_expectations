@@ -57,7 +57,7 @@ The following examples connect to .csv data. However, GX supports most of the Pa
 
 <Prerequisites>
 
-- [An installation of GX set up to work with S3](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3)
+- [An installation of GX set up to work with S3](/docs/guides/setup/installation/install_gx)
 - Access to data on a S3 bucket
 
 </Prerequisites> 
@@ -116,7 +116,7 @@ The following examples connect to .csv data.
 
 <Prerequisites>
 
-- [An installation of GX set up to work with S3](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3)
+- [An installation of GX set up to work with S3](/docs/guides/setup/installation/install_gx)
 - Access to data on a S3 bucket
 
 </Prerequisites> 
@@ -217,7 +217,7 @@ The following information is required when you create a Microsoft Azure Blob Sto
     ```
 
     :::tip Where did that connection string come from?
-    In the previous example, the value for `account_url` is substituted for the contents of the `AZURE_STORAGE_CONNECTION_STRING` key you configured when you [installed GX and set up your Azure Blob Storage dependencies](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs).
+    In the previous example, the value for `account_url` is substituted for the contents of the `AZURE_STORAGE_CONNECTION_STRING` key you configured when you [installed GX and set up your Azure Blob Storage dependencies](/docs/guides/setup/installation/install_gx).
     :::
 
 ### Add data to the Data Source as a Data Asset
@@ -271,7 +271,7 @@ The following information is required when you create a Microsoft Azure Blob Sto
     ```
 
     :::tip Where did that connection string come from?
-    In the previous example, the value for `account_url` is substituted for the contents of the `AZURE_STORAGE_CONNECTION_STRING` key you configured when you [installed GX and set up your Azure Blob Storage dependencies](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs).
+    In the previous example, the value for `account_url` is substituted for the contents of the `AZURE_STORAGE_CONNECTION_STRING` key you configured when you [installed GX and set up your Azure Blob Storage dependencies](/docs/guides/setup/installation/install_gx).
     :::
 
 ### Add data to the Data Source as a Data Asset
@@ -313,7 +313,7 @@ The following examples connect to .csv data. However, GX supports most of the Pa
 
 <Prerequisites>
 
-- [An installation of GX set up to work with GCS](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs)
+- [An installation of GX set up to work with GCS](/docs/guides/setup/installation/install_gx)
 - Access to data in a GCS bucket
 
 </Prerequisites> 
@@ -371,7 +371,7 @@ Use Spark to connect to source data stored on GCS.  The following examples conne
 
 <Prerequisites>
 
-- [An installation of GX set up to work with GCS](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs)
+- [An installation of GX set up to work with GCS](/docs/guides/setup/installation/install_gx)
 - Access to data on a GCS bucket
 
 </Prerequisites> 

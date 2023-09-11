@@ -187,7 +187,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/bigquery.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery/">
+				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data">
 					BigQuery
 				</a>
 			</td>
@@ -226,7 +226,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/Google_Cloud_logo.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery/">
+				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data">
 					Google Cloud Platform &#40;GCP&#41;
 				</a>
 			</td>

@@ -1,8 +1,10 @@
 from typing import Union
 
 import pytest
-from pydantic.error_wrappers import ValidationError
 
+from great_expectations.compatibility.pydantic import (
+    error_wrappers as pydantic_error_wrappers,
+)
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -96,7 +98,7 @@ def test_successful_renderer_configuration_instantiation(
     strict=True,
 )
 def test_failed_renderer_configuration_instantiation():
-    with pytest.raises(ValidationError) as e:
+    with pytest.raises(pydantic_error_wrappers.ValidationError) as e:
         RendererConfiguration(
             runtime_configuration={},
         )
@@ -134,7 +136,7 @@ def test_renderer_configuration_add_param_validation(
     renderer_configuration = RendererConfiguration(
         configuration=expectation_configuration
     )
-    with pytest.raises(ValidationError) as e:
+    with pytest.raises(pydantic_error_wrappers.ValidationError) as e:
         renderer_configuration.add_param(name="value", param_type=param_type)
 
     if param_type is RendererValueType.STRING:

@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, TypeVar, Union
+import uuid
+from typing import TYPE_CHECKING, Any, Dict, TypeVar
 
-import pydantic
-from pydantic import BaseModel
-
+from great_expectations.compatibility.pydantic import BaseModel, Extra
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.http import create_session
 from great_expectations.experimental.metric_repository.data_store import DataStore
@@ -15,7 +14,8 @@ if TYPE_CHECKING:
 
     from great_expectations.data_context import CloudDataContext
 
-StorableTypes: TypeAlias = Union[MetricRun,]
+# When more types are storable, convert StorableTypes to a Union and add them to the type alias:
+StorableTypes: TypeAlias = MetricRun
 
 T = TypeVar("T", bound=StorableTypes)
 
@@ -25,14 +25,14 @@ class PayloadData(BaseModel):
     attributes: Dict[str, Any]
 
     class Config:
-        extra = pydantic.Extra.forbid
+        extra = Extra.forbid
 
 
 class Payload(BaseModel):
     data: PayloadData
 
     class Config:
-        extra = pydantic.Extra.forbid
+        extra = Extra.forbid
 
 
 class CloudDataStore(DataStore[StorableTypes]):
@@ -58,7 +58,7 @@ class CloudDataStore(DataStore[StorableTypes]):
         if isinstance(value, MetricRun):
             return "metric-run"
 
-    def _build_payload(self, value: StorableTypes) -> dict:
+    def _build_payload(self, value: StorableTypes) -> str:
         payload = Payload(
             data=PayloadData(
                 type=self._map_to_resource_type(value),
@@ -67,7 +67,7 @@ class CloudDataStore(DataStore[StorableTypes]):
                 ),
             )
         )
-        return payload.dict()
+        return payload.json()
 
     def _build_url(self, value: StorableTypes) -> str:
         assert self._context.ge_cloud_config is not None
@@ -75,9 +75,19 @@ class CloudDataStore(DataStore[StorableTypes]):
         return f"{config.base_url}/organizations/{config.organization_id}{self._map_to_url(value)}"
 
     @override
-    def add(self, value: T) -> T:
-        """Add a value to the DataStore. Currently, returns the input value not the value from the DataStore."""
+    def add(self, value: T) -> uuid.UUID:
+        """Add a value to the DataStore.
+
+        Args:
+            value: Value to add to the DataStore. Must be one of StorableTypes.
+
+        Returns:
+            id of the created resource.
+        """
         url = self._build_url(value)
         payload = self._build_payload(value)
-        self._session.post(url=url, data=payload)
-        return value
+        response = self._session.post(url=url, data=payload)
+        response.raise_for_status()
+
+        response_json = response.json()
+        return uuid.UUID(response_json["id"])

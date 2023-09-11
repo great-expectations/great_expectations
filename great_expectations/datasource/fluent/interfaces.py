@@ -28,16 +28,15 @@ from typing import (
     Union,
 )
 
-import pydantic
-from pydantic import (
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import (
     Field,
     StrictBool,
     StrictInt,
     root_validator,
     validate_arguments,
 )
-from pydantic import dataclasses as pydantic_dc
-
+from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
@@ -505,6 +504,9 @@ class Datasource(
                 filter(lambda asset: asset.name == asset_name, self.assets)
             )[0]
             found_asset._datasource = self
+            if self._data_context:
+                # datasources setter will attach dataframe to in-memory assets
+                self._data_context.datasources[self.name] = self
             return found_asset
         except IndexError as exc:
             raise LookupError(
@@ -561,6 +563,9 @@ class Datasource(
             # update asset with new id
             asset_with_id = cloud_fds.get_asset(asset_name=asset.name)
             asset.id = asset_with_id.id
+            if self._data_context:
+                # datasources setter will attach dataframe to in-memory assets
+                self._data_context.datasources[self.name] = self
 
         return asset
 
