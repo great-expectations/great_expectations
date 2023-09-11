@@ -797,7 +797,7 @@ If you are accessing data in BigQuery, the following privileges are required for
 
 See [Create Cloud Composer environments](https://cloud.google.com/composer/docs/composer-2/create-environments).
 
-### Install Great Expectations in Cloud Composer
+#### Install Great Expectations in Cloud Composer
 
 You can use the Composer web Console (recommended), `gcloud`, or a REST query to install Python dependencies in Cloud Composer. To install `great-expectations` in Cloud Composer, see [Installing Python dependencies in Google Cloud](https://cloud.google.com/composer/docs/how-to/using/installing-python-dependencies#install-package). If you are connecting to data in BigQuery, make sure `sqlalchemy-bigquery` is also installed in your Cloud Composer environment.
 
