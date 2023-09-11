@@ -22,3 +22,5 @@ MATCH_ALL_PATTERN: Final[re.Pattern] = re.compile(".*")
 DEFAULT_PANDAS_DATASOURCE_NAME: Final[str] = "default_pandas_datasource"
 
 DEFAULT_PANDAS_DATA_ASSET_NAME: Final[str] = "#ephemeral_pandas_asset"
+
+_IN_MEMORY_DATA_ASSET_TYPE: Final[str] = "dataframe"

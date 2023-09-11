@@ -477,7 +477,8 @@ def test_read_dataframe(
 
 
 @pytest.mark.cloud
-def test_cloud_add_dataframe_asset(test_df_pandas: pd.DataFrame):
+def test_cloud_get_dataframe_asset(test_df_pandas: pd.DataFrame):
+    # this test runs end-to-end in a real Cloud Data Context
     context = gx.get_context(mode="cloud")
     datasource_name = "pandas_debugging_datasource"
     dataframe_asset_name = "test_df"
@@ -486,9 +487,23 @@ def test_cloud_add_dataframe_asset(test_df_pandas: pd.DataFrame):
     dataframe_asset = datasource.get_asset(asset_name=dataframe_asset_name)  # type: ignore[union-attr]
     dataframe_asset.build_batch_request(dataframe=test_df_pandas)
 
-    assert dataframe_asset.dataframe.equals(
-        context.datasources[datasource_name].assets[0].dataframe  # type: ignore[union-attr]
-    )
+    for asset in context.datasources[datasource_name].assets:  # type: ignore[union-attr]
+        if asset.name == dataframe_asset_name:
+            assert dataframe_asset.dataframe.equals(asset.dataframe)
+
+
+@pytest.mark.cloud
+def test_cloud_get_csv_asset_not_in_memory():
+    # this test runs end-to-end in a real Cloud Data Context
+    context = gx.get_context(mode="cloud")
+    datasource_name = "pandas_debugging_datasource"
+    csv_asset_name = "test_csv"
+
+    datasource = context.get_datasource(datasource_name=datasource_name)
+    csv_asset = datasource.get_asset(asset_name=csv_asset_name)
+    csv_asset.build_batch_request()
+
+    assert csv_asset_name not in context.datasources._in_memory_data_assets
 
 
 @pytest.mark.filesystem
