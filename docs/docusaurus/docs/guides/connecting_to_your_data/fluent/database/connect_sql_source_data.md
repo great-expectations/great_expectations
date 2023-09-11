@@ -456,6 +456,8 @@ Repeat the previous steps to add additional Data Assets.
 </TabItem>
 <TabItem value="bigquery">
 
+## BigQuery SQL
+
 Integrate GX with [Google Cloud Platform](https://cloud.google.com/gcp) (GCP).
 
 The following scripts and configuration files are used in the examples:
@@ -466,7 +468,7 @@ The following scripts and configuration files are used in the examples:
 
 - The script to test the GCS configuration is located in [gcp_deployment_patterns_file_gcs.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py).
 
-## Prerequisites
+### Prerequisites
 
 <Prerequisites>
 
@@ -503,7 +505,7 @@ The following diagram shows the recommended components for a GX deployment in GC
 
 ![Screenshot of Data Docs](../../../../deployment_patterns/images/ge_and_gcp_diagram.png)
 
-## Upgrade your GX version (Optional)
+### Upgrade your GX version (Optional)
 
 Run the following code to upgrade your GX version:
 
@@ -511,7 +513,7 @@ Run the following code to upgrade your GX version:
 pip install great-expectations --upgrade
 ```
 
-## Get DataContext
+### Get DataContext
 
 Run the following code to create a new <TechnicalTag relative="../../../" tag="data_context" text="Data Context" />: 
 
@@ -520,7 +522,7 @@ Run the following code to create a new <TechnicalTag relative="../../../" tag="d
 
 The `full_path_to_project_directory` parameter can be an empty directory where you intend to build your GX configuration.
 
-## Connect to GCP Metadata Stores 
+### Connect to GCP Metadata Stores 
 
 The code examples are located in the [`great-expectations` repository](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/fixtures/gcp_deployment/).
 
@@ -571,7 +573,7 @@ gcloud app browse
 
 The URL to your app appears and opens in a new browser window. You can view the index page of your Data Docs site.
 
-## Connect to source data
+### Connect to source data
 
 Connect to source data stored on a GCS or .
 
@@ -614,7 +616,7 @@ To configure the BigQuery Data Source, see [How to connect to a BigQuery databas
 </TabItem>
 </Tabs>
 
-## Create Assets
+### Create Assets
 <Tabs
   groupId="connect-to-data-gcs-bigquery"
   defaultValue='gcs'
@@ -663,7 +665,7 @@ In the following example, a query `Asset` named `my_query_asset` is built by sub
 </TabItem>
 </Tabs>
 
-## Get a Batch and Create Expectation Suite
+### Get a Batch and Create Expectation Suite
 
 <Tabs
   groupId="connect-to-data-gcs-bigquery"
@@ -722,7 +724,7 @@ To configure the BatchRequest and learn how you can load data by specifying a ta
 </TabItem>
 </Tabs>
 
-## Build and run a Checkpoint
+### Build and run a Checkpoint
 
 <Tabs
   groupId="connect-to-data-gcs-bigquery"
@@ -761,7 +763,7 @@ To configure the BatchRequest and learn how you can load data by specifying a ta
 </TabItem>
 </Tabs>
 
-## Migrate your local configuration to Cloud Composer
+### Migrate your local configuration to Cloud Composer
 
 Migrate your local GX configuration to a Cloud Composer environment to automate the workflow. You can use one of the following methods to run GX in Cloud Composer or Airflow:
 
@@ -773,7 +775,7 @@ Migrate your local GX configuration to a Cloud Composer environment to automate 
 
 In this example, you'll use the `bash operator` to run the Checkpoint. A video overview of this process is also available in this [video](https://drive.google.com/file/d/1YhEMqSRkp5JDIQA_7fleiKTTlEmYx2K8/view?usp=sharing).
 
-### Create and Configure a GCP Service Account
+#### Create and Configure a GCP Service Account
 
 To create a GCP Service Account, see [Service accounts overview](https://cloud.google.com/iam/docs/service-accounts).
 
@@ -791,7 +793,7 @@ If you are accessing data in BigQuery, the following privileges are required for
 - `BigQuery Job User`
 - `BigQuery Read Session User`
 
-### Create a Cloud Composer environment
+#### Create a Cloud Composer environment
 
 See [Create Cloud Composer environments](https://cloud.google.com/composer/docs/composer-2/create-environments).
 
@@ -803,7 +805,7 @@ You can use the Composer web Console (recommended), `gcloud`, or a REST query to
 If you run into trouble when you install GX in Cloud Composer, see [Troubleshooting PyPI package installation](https://cloud.google.com/composer/docs/troubleshooting-package-installation).
 :::
 
-### Move your local configuration to Cloud Composer
+#### Move your local configuration to Cloud Composer
 
 Cloud Composer uses Cloud Storage to store Apache Airflow DAGs (also known as workflows), with each Environment having an associated Cloud Storage bucket. Typically, the bucket name uses this pattern: `[region]-[composer environment name]-[UUID]-bucket`.
 
@@ -817,7 +819,7 @@ To migrate your local configuration, you can move the local `great_expectations/
 
     After the `great_expectations/` folder is uploaded to the Cloud Storage bucket, it is mapped to the Airflow instances in your Cloud Composer and is accessible from the Airflow Worker nodes at: `/home/airflow/gcsfuse/great_expectations`.
 
-### Write the DAG and add it to Cloud Composer
+#### Write the DAG and add it to Cloud Composer
 <Tabs
   groupId="connect-to-data-gcs-bigquery"
   defaultValue='gcs'
@@ -878,7 +880,7 @@ To add the DAG to Cloud Composer, you move `ge_checkpoint_bigquery.py` to the en
 </Tabs>
 
 
-### Run the DAG and the Checkpoint
+#### Run the DAG and the Checkpoint
 
 Use one of the following methods to [trigger the DAG](https://cloud.google.com/composer/docs/triggering-dags):
 
