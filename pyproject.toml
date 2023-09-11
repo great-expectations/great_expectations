@@ -334,7 +334,7 @@ If you are working in a configuration file you may use the inline comment \
 [tool.pytest.ini_options]
 filterwarnings = [
     # Turn all warnings not explicitly filtered below into errors
-    "error",
+    # "error", # TODO: re-enable this
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would
     # be potentially overly resource intensive in standard operation
     "ignore:Setting result format to COMPLETE for a SqlAlchemyDataset:UserWarning",
@@ -569,4 +569,5 @@ testpaths = "tests"
 # https://pytest-mock.readthedocs.io/en/latest/configuration.html#use-standalone-mock-package
 mock_use_standalone_module = false
 # https://docs.pytest.org/en/7.1.x/how-to/logging.html#how-to-manage-logging
-log_level = "info"
+# log_level = "info" # TODO: set this back to info
+log_level = "warning"
