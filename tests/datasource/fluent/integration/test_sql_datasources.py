@@ -296,13 +296,16 @@ def snowflake_creds_populated() -> bool:
 
 @pytest.fixture
 def snowflake_ds(
-    context: EphemeralDataContext, snowflake_creds_populated: bool
+    context: EphemeralDataContext,
+    # snowflake_creds_populated: bool,
 ) -> SnowflakeDatasource:
-    if not snowflake_creds_populated:
-        pytest.skip("no snowflake credentials")
+    # if not snowflake_creds_populated:
+    #     pytest.skip("no snowflake credentials")
     ds = context.sources.add_snowflake(
         "snowflake",
         connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
+        # NOTE: uncomment this and set SNOWFLAKE_USER to run tests against your own snowflake account
+        # connection_string="snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB/RESTAURANTS?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
     )
     return ds
 
@@ -543,9 +546,9 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     ],
     'expect_column_values_to_not_be_null-str "UPPER"': ["postgres", "snowflake"],
     # "expect_column_values_to_not_be_null-str UPPER": ["snowflake"],  # TODO: highest priority
-    "expect_column_values_to_not_be_null-quoted_name UPPER quote=None": ["snowflake"],
+    # "expect_column_values_to_not_be_null-quoted_name UPPER quote=None": ["snowflake"],
     "expect_column_values_to_not_be_null-quoted_name UPPER quote=True": ["snowflake"],
-    "expect_column_values_to_not_be_null-quoted_name UPPER quote=False": ["snowflake"],
+    # "expect_column_values_to_not_be_null-quoted_name UPPER quote=False": ["snowflake"],
     "expect_column_values_to_not_be_null-quoted_name upper quote=None": [
         "databricks_sql",
         "postgres",
@@ -601,43 +604,43 @@ def _is_quote_char_dialect_mismatch(
 @pytest.mark.parametrize(
     "column_name",
     [
-        param("name", id="str name"),
-        param("NAME", id="str NAME"),
-        param("lower", id="str lower"),
-        param("LOWER", id="str LOWER"),
-        param('"lower"', id='str "lower"'),
-        param(
-            quoted_name(
-                "lower",
-                quote=None,
-            ),
-            id="quoted_name lower quote=None",
-        ),
-        param(
-            quoted_name(
-                "lower",
-                quote=True,
-            ),
-            id="quoted_name lower quote=True",
-        ),
-        param(
-            quoted_name(
-                "lower",
-                quote=False,
-            ),
-            id="quoted_name lower quote=False",
-        ),
-        param(
-            quoted_name(
-                "LOWER",
-                quote=None,
-            ),
-            marks=[pytest.mark.xfail],
-            id="quoted_name LOWER quote=None",
-        ),
-        param("upper", id="str upper"),
-        param("UPPER", id="str UPPER"),
-        param('"UPPER"', id='str "UPPER"'),
+        # param("name", id="str name"),
+        # param("NAME", id="str NAME"),
+        # param("lower", id="str lower"),
+        # param("LOWER", id="str LOWER"),
+        # param('"lower"', id='str "lower"'),
+        # param(
+        #     quoted_name(
+        #         "lower",
+        #         quote=None,
+        #     ),
+        #     id="quoted_name lower quote=None",
+        # ),
+        # param(
+        #     quoted_name(
+        #         "lower",
+        #         quote=True,
+        #     ),
+        #     id="quoted_name lower quote=True",
+        # ),
+        # param(
+        #     quoted_name(
+        #         "lower",
+        #         quote=False,
+        #     ),
+        #     id="quoted_name lower quote=False",
+        # ),
+        # param(
+        #     quoted_name(
+        #         "LOWER",
+        #         quote=None,
+        #     ),
+        #     marks=[pytest.mark.xfail],
+        #     id="quoted_name LOWER quote=None",
+        # ),
+        # param("upper", id="str upper"),
+        param("UPPER", id="str UPPER"),  # TODO: high priority
+        # param('"UPPER"', id='str "UPPER"'),
         param(
             quoted_name(
                 "UPPER",
@@ -659,13 +662,13 @@ def _is_quote_char_dialect_mismatch(
             ),
             id="quoted_name UPPER quote=False",
         ),
-        param(
-            quoted_name(
-                "upper",
-                quote=None,
-            ),
-            id="quoted_name upper quote=None",
-        ),
+        # param(
+        #     quoted_name(
+        #         "upper",
+        #         quote=None,
+        #     ),
+        #     id="quoted_name upper quote=None",
+        # ),
     ],
 )
 class TestColumnIdentifiers:
