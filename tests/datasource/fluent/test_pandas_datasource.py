@@ -487,11 +487,9 @@ def test_cloud_get_dataframe_asset(test_df_pandas: pd.DataFrame):
     dataframe_asset = datasource.get_asset(asset_name=dataframe_asset_name)  # type: ignore[union-attr]
     dataframe_asset.build_batch_request(dataframe=test_df_pandas)
 
-    for asset in context.datasources[datasource_name].assets:
+    for asset in context.datasources[datasource_name].assets:  # type: ignore[union-attr]
         if asset.name == dataframe_asset_name:
-            assert dataframe_asset.dataframe.equals(
-                asset.dataframe  # type: ignore[union-attr]
-            )
+            assert dataframe_asset.dataframe.equals(asset.dataframe)
 
 
 @pytest.mark.cloud
