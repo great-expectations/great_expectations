@@ -312,6 +312,7 @@ def is_column_present_in_table(
     column_name: str,
     schema_name: Optional[str] = None,
 ) -> bool:
+    logger.warning(f"is_column_present_in_table() {column_name}")
     all_columns_metadata: List[Dict[str, Any]] = (
         get_sqlalchemy_column_metadata(
             engine=engine, table_selectable=table_selectable, schema_name=schema_name
@@ -328,6 +329,7 @@ def get_sqlalchemy_column_metadata(
     table_selectable: sqlalchemy.Select,
     schema_name: Optional[str] = None,
 ) -> Optional[List[Dict[str, Any]]]:
+    logger.warning(f"get_sqlalchemy_column_metadata() {table_selectable}")
     try:
         columns: List[Dict[str, Any]]
 
@@ -353,7 +355,10 @@ def get_sqlalchemy_column_metadata(
             AttributeError,
             sa.exc.NoSuchTableError,
             sa.exc.ProgrammingError,
-        ):
+        ) as exc:
+            logger.error(
+                f"get_sqlalchemy_column_metadata() {table_selectable}", exc_info=exc
+            )
             # we will get a KeyError for temporary tables, since
             # reflection will not find the temporary schema
             columns = column_reflection_fallback(

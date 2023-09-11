@@ -1474,7 +1474,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     logger.warning("snowflake connection")  # TODO: remove me
                     # connection.dialect.normalize_name = default_normalize_name
                     connection.dialect.normalize_name = ibis_normalize_name
-                    connection.dialect.denormalize_name = default_denormalize_name
+                    # connection.dialect.denormalize_name = default_denormalize_name
                 yield connection
 
     @public_api
