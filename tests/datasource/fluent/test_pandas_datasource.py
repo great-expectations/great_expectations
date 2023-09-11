@@ -482,8 +482,8 @@ def test_cloud_add_dataframe_asset(test_df_pandas: pd.DataFrame):
     datasource_name = "pandas_debugging_datasource"
     dataframe_asset_name = "test_df"
 
-    datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
-    dataframe_asset = datasource.get_asset(asset_name=dataframe_asset_name)
+    datasource = context.get_datasource(datasource_name=datasource_name)
+    dataframe_asset = datasource.get_asset(asset_name=dataframe_asset_name)  # type: ignore[union-attr]
     dataframe_asset.build_batch_request(dataframe=test_df_pandas)
 
     assert dataframe_asset.dataframe.equals(
