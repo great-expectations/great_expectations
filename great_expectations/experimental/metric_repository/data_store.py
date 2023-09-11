@@ -1,4 +1,5 @@
 import abc
+import uuid
 from typing import Generic, TypeVar
 
 from great_expectations.data_context import CloudDataContext
@@ -13,13 +14,13 @@ class DataStore(abc.ABC, Generic[T]):
         self._context = context
 
     @abc.abstractmethod
-    def add(self, value: T) -> T:
+    def add(self, value: T) -> uuid.UUID:
         """Add a value to the DataStore.
 
         Args:
             value: Value to add to the DataStore.
 
         Returns:
-            `value` passed in.
+            id of the created resource.
         """
         raise NotImplementedError
