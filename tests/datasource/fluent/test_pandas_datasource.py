@@ -501,7 +501,7 @@ def test_cloud_get_csv_asset_not_in_memory(valid_file_path):
 
     datasource = context.get_datasource(datasource_name=datasource_name)
     csv_asset = datasource.add_csv_asset(
-        asset_name=csv_asset_name, filepath_or_buffer=valid_file_path
+        name=csv_asset_name, filepath_or_buffer=valid_file_path
     )
     csv_asset.build_batch_request()
 
