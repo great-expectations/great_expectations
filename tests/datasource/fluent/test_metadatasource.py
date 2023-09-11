@@ -8,8 +8,8 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 import pytest
-from pydantic import DirectoryPath, validate_arguments
 
+from great_expectations.compatibility.pydantic import DirectoryPath, validate_arguments
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.data_context import get_context as get_gx_context
@@ -36,6 +36,7 @@ yaml = YAMLHandler()
 
 if TYPE_CHECKING:
     from great_expectations.core.config_provider import _ConfigurationProvider
+    from great_expectations.core.datasource_dict import DatasourceDict
 
 
 logger = logging.getLogger(__name__)
@@ -88,6 +89,10 @@ class DataContext:
     @property
     def sources(self) -> _SourceFactories:
         return self._sources
+
+    @property
+    def datasources(self) -> DatasourceDict:
+        return self._datasources
 
     def _add_fluent_datasource(self, datasource: Datasource) -> None:
         self._datasources[datasource.name] = datasource
