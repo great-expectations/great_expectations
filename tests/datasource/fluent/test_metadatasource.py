@@ -8,8 +8,8 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 import pytest
-from pydantic import DirectoryPath, validate_arguments
 
+from great_expectations.compatibility.pydantic import DirectoryPath, validate_arguments
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.data_context import get_context as get_gx_context

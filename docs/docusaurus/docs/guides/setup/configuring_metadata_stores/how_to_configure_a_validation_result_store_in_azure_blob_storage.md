@@ -93,3 +93,4 @@ To make Great Expectations look for Validation Results on the Azure store, set t
 
 [Run a Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint) to store results in the new Validation Results Store on Azure Blob and then visualize the results by [re-building Data Docs](../../../terms/data_docs.md).
 
+

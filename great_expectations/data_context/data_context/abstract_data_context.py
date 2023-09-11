@@ -58,6 +58,7 @@ from great_expectations.core.config_provider import (
     _EnvironmentConfigurationProvider,
     _RuntimeEnvironmentConfigurationProvider,
 )
+from great_expectations.core.datasource_dict import CacheableDatasourceDict
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
@@ -148,6 +149,7 @@ if TYPE_CHECKING:
 
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+    from great_expectations.core.datasource_dict import DatasourceDict
     from great_expectations.core.expectation_configuration import (
         ExpectationConfiguration,
     )
@@ -298,9 +300,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         # Init stores
         self._stores: dict = {}
         self._init_primary_stores(self.project_config_with_variables_substituted.stores)
+
         # The DatasourceStore is inherent to all DataContexts but is not an explicit part of the project config.
         # As such, it must be instantiated separately.
         self._datasource_store = self._init_datasource_store()
+        self._init_datasources()
 
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
@@ -310,12 +314,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._initialize_usage_statistics(
             self.project_config_with_variables_substituted.anonymous_usage_statistics
         )
-
-        # Store cached datasources but don't init them
-        self._cached_datasources: dict = {}
-
-        # Build the datasources we know about and have access to
-        self._init_datasources()
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies: dict = {}
@@ -795,7 +793,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         assert isinstance(datasource, FluentDatasource)
 
         datasource._data_context = self
-
         datasource._data_context._save_project_config()
 
         # temporary workaround while we update stores to work better with Fluent Datasources for all contexts
@@ -806,7 +803,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             if set_datasource.id:
                 logger.debug(f"Assigning `id` to '{datasource_name}'")
                 datasource.id = set_datasource.id
+
         self.datasources[datasource_name] = datasource
+
         return datasource
 
     def _update_fluent_datasource(
@@ -848,7 +847,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource = self.datasources.get(datasource_name)
         if datasource:
             if self._datasource_store.cloud_mode and _call_store:
-                self._datasource_store.delete(datasource)  # type: ignore[arg-type] # Could be a LegacyDatasource
+                self._datasource_store.delete(datasource)
         else:
             # Raise key error instead?
             logger.info(f"No Datasource '{datasource_name}' to delete")
@@ -1374,33 +1373,15 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "Must provide a datasource_name to retrieve an existing Datasource"
             )
 
-        datasource: BaseDatasource | LegacyDatasource | FluentDatasource
-        if datasource_name in self.datasources:
-            datasource = self.datasources[datasource_name]
-            if not isinstance(datasource, BaseDatasource):
-                datasource._data_context = self
-            return self.datasources[datasource_name]
-
-        datasource_config: DatasourceConfig | FluentDatasource = (
-            self._datasource_store.retrieve_by_name(datasource_name=datasource_name)
-        )
-
-        if isinstance(datasource_config, FluentDatasource):
-            datasource = datasource_config
-            datasource_config._data_context = self
-            # Fluent Datasource has already been hydrated into runtime model and uses lazy config substitution
-        else:
-            raw_config_dict: dict = dict(datasourceConfigSchema.dump(datasource_config))
-            raw_config = datasourceConfigSchema.load(raw_config_dict)
-
-            substituted_config = self.config_provider.substitute_config(raw_config_dict)
-
-            # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
-            datasource = self._instantiate_datasource_from_config(
-                raw_config=raw_config, substituted_config=substituted_config
+        try:
+            datasource: BaseDatasource | LegacyDatasource | FluentDatasource = (
+                self.datasources[datasource_name]
             )
+        except KeyError as e:
+            raise ValueError(str(e)) from e
 
-        self.datasources[datasource_name] = datasource
+        if not isinstance(datasource, BaseDatasource):
+            datasource._data_context = self
         return datasource
 
     def _serialize_substitute_and_sanitize_datasource_config(
@@ -1609,9 +1590,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             # Note: this results in some unnecessary dict lookups
             self._delete_fluent_datasource(datasource_name)
         elif save_changes:
-            datasource_config = datasourceConfigSchema.load(datasource.config)
-            self._datasource_store.delete(datasource_config)
-        self.datasources.pop(datasource_name, None)
+            self.datasources.pop(datasource_name, None)
+
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
         if save_changes:
@@ -2733,17 +2713,16 @@ class AbstractDataContext(ConfigPeer, ABC):
             **kwargs,
         )
         datasource_name = result.datasource_name
-        if datasource_name not in self.datasources:
+
+        datasource = self.datasources.get(datasource_name)
+        if not datasource:
             raise gx_exceptions.DatasourceError(
                 datasource_name,
                 "The given datasource could not be retrieved from the DataContext; "
                 "please confirm that your configuration is accurate.",
             )
 
-        datasource = self.datasources[
-            datasource_name
-        ]  # this can return one of three datasource types, including Fluent datasource types
-        return datasource.get_batch_list_from_batch_request(batch_request=result)  # type: ignore[union-attr, return-value, arg-type]
+        return datasource.get_batch_list_from_batch_request(batch_request=result)
 
     @public_api
     @deprecated_method_or_class(
@@ -4224,8 +4203,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         assert (conf_file_section and conf_file_option) or (
             not conf_file_section and not conf_file_option
         ), "Must pass both 'conf_file_section' and 'conf_file_option' or neither."
-        if environment_variable and os.environ.get(environment_variable, ""):
-            return os.environ.get(environment_variable)
+        if environment_variable and os.environ.get(  # noqa: TID251
+            environment_variable, ""
+        ):
+            return os.environ.get(environment_variable)  # noqa: TID251
         if conf_file_section and conf_file_option:
             for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
                 config: configparser.ConfigParser = configparser.ConfigParser()
@@ -4428,8 +4409,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             bool that tells you whether usage_statistics is on or off
         """
         usage_statistics_enabled: bool = True
-        if os.environ.get("GE_USAGE_STATS", False):
-            ge_usage_stats = os.environ.get("GE_USAGE_STATS")
+        if os.environ.get("GE_USAGE_STATS", False):  # noqa: TID251
+            ge_usage_stats = os.environ.get("GE_USAGE_STATS")  # noqa: TID251
             if ge_usage_stats in AbstractDataContext.FALSEY_STRINGS:
                 usage_statistics_enabled = False
             else:
@@ -4545,11 +4526,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return self.variables.notebooks  # type: ignore[return-value]
 
     @property
-    def datasources(
-        self,
-    ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, FluentDatasource]]:
+    def datasources(self) -> DatasourceDict:
         """A single holder for all Datasources in this context"""
-        return self._cached_datasources
+        return self._datasources
 
     @property
     def fluent_datasources(self) -> Dict[str, FluentDatasource]:
@@ -4689,11 +4668,17 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
+        self._datasources: DatasourceDict = CacheableDatasourceDict(
+            context=self,
+            datasource_store=self._datasource_store,
+        )
+
         config: DataContextConfig = self.config
 
         if self._datasource_store.cloud_mode:
             for fds in config.fluent_datasources.values():
-                self._add_fluent_datasource(**fds)._rebuild_asset_data_connectors()
+                datasource = self._add_fluent_datasource(**fds)
+                datasource._rebuild_asset_data_connectors()
 
         datasources: Dict[str, DatasourceConfig] = cast(
             Dict[str, DatasourceConfig], config.datasources
@@ -4701,30 +4686,37 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         for datasource_name, datasource_config in datasources.items():
             try:
-                config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
-
-                raw_config_dict = dict(datasourceConfigSchema.dump(config))
-                substituted_config_dict: dict = self.config_provider.substitute_config(
-                    raw_config_dict
+                ds = self._init_block_style_datasource(
+                    datasource_name=datasource_name, datasource_config=datasource_config
                 )
-
-                raw_datasource_config = datasourceConfigSchema.load(raw_config_dict)
-                substituted_datasource_config = datasourceConfigSchema.load(
-                    substituted_config_dict
-                )
-                substituted_datasource_config.name = datasource_name
-
-                datasource = self._instantiate_datasource_from_config(
-                    raw_config=raw_datasource_config,
-                    substituted_config=substituted_datasource_config,
-                )
-                self.datasources[datasource_name] = datasource
+                self.datasources.data[datasource_name] = ds
             except gx_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
                 # this error will happen if our configuration contains datasources that GX can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch_list() step. So we just pass here.
                 pass
+
+    def _init_block_style_datasource(
+        self, datasource_name: str, datasource_config: DatasourceConfig
+    ) -> BaseDatasource:
+        config = copy.deepcopy(datasource_config)
+
+        raw_config_dict = dict(datasourceConfigSchema.dump(config))
+        substituted_config_dict: dict = self.config_provider.substitute_config(
+            raw_config_dict
+        )
+
+        raw_datasource_config = datasourceConfigSchema.load(raw_config_dict)
+        substituted_datasource_config = datasourceConfigSchema.load(
+            substituted_config_dict
+        )
+        substituted_datasource_config.name = datasource_name
+
+        return self._instantiate_datasource_from_config(
+            raw_config=raw_datasource_config,
+            substituted_config=substituted_datasource_config,
+        )
 
     def _instantiate_datasource_from_config(
         self,
@@ -4845,7 +4837,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         # If attempting to override an existing value, ensure that the id persists
         name = config.name
-        if not config.id and name in self.datasources:
+        if not config.id and name and name in self.datasources:
             existing_datasource = self.datasources[name]
             if isinstance(existing_datasource, BaseDatasource):
                 config.id = existing_datasource.id

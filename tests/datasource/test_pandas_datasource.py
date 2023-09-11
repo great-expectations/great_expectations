@@ -1,12 +1,9 @@
 import os
 import shutil
 from functools import partial
-from tempfile import mkstemp
 
-import boto3
 import pandas as pd
 import pytest
-from moto import mock_s3
 
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -27,7 +24,6 @@ from great_expectations.datasource.datasource_serializer import (
 )
 from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
-from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import BridgeValidator
 
 yaml = YAMLHandler()
@@ -291,67 +287,6 @@ def test_pandas_source_read_csv(
         expectation_suite_name="unicode",
     )
     assert "😁" in list(batch["Μ"])  # noqa: RUF001 # greek mu
-
-
-@pytest.mark.skipif(
-    not is_library_loadable(library_name="pyarrow")
-    and not is_library_loadable(library_name="fastparquet"),
-    reason="pyarrow and fastparquet are not installed",
-)
-@mock_s3
-@pytest.mark.aws_deps
-def test_s3_pandas_source_read_parquet(
-    data_context_parameterized_expectation_suite, tmp_path_factory, monkeypatch
-):
-    # remove env variables, which can get in the way the Mocked S3 client.
-    monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
-
-    test_bucket = "test-bucket"
-    # set up dummy bucket
-    s3 = boto3.client("s3", region_name="us-east-1")
-    s3.create_bucket(Bucket=test_bucket)
-
-    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
-    _, tmp = mkstemp(suffix=".parquet")
-    with open(tmp, "wb") as fp:
-        df1.to_parquet(fp)
-
-    with open(tmp, "rb") as fp:
-        s3.upload_fileobj(fp, test_bucket, "test_data.parquet")
-
-    data_context_parameterized_expectation_suite.add_datasource(
-        "parquet_source",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "s3_reader": {
-                "class_name": "S3GlobReaderBatchKwargsGenerator",
-                "bucket": test_bucket,
-                "assets": {
-                    "test_data": {
-                        "prefix": "",
-                        "regex_filter": r".*parquet",
-                    },
-                },
-                "reader_options": {"columns": ["col_1"]},
-            }
-        },
-    )
-
-    data_context_parameterized_expectation_suite.add_expectation_suite(
-        expectation_suite_name="test_parquet"
-    )
-    with pytest.deprecated_call():  # "Direct GX Support for the s3 BatchKwarg will be removed in v0.16.
-        batch = data_context_parameterized_expectation_suite._get_batch_v2(
-            data_context_parameterized_expectation_suite.build_batch_kwargs(
-                "parquet_source",
-                "s3_reader",
-                "test_data",
-            ),
-            "test_parquet",
-        )
-    assert batch.columns == ["col_1"]
-    assert batch["col_1"][4] == 5
 
 
 @pytest.mark.filesystem

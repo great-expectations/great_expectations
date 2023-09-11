@@ -44,12 +44,6 @@ In this case, we will only be changing our `value_set`:
 ```python name="tests/expectations/core/test_expect_column_values_to_be_in_set.py ExpectColumnValuesToBeTwoLetterCountryCode_class_def"
 ```
 
-<div style={{"text-align":"center"}}>
-<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
-Congratulations!<br/>&#127881; You've just built your first Parameterized Custom Expectation! &#127881;
-</b></p>
-</div>
-
 ## Contribute (Optional)
 
 If you plan to contribute your Expectation to the public open source project, you should include a `library_metadata` object. For example:

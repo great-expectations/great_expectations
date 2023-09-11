@@ -1117,7 +1117,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    context.datasources["my_test_datasource"]._execution_engine = execution_engine  # type: ignore[union-attr]
+    context.datasources["my_test_datasource"]._execution_engine = execution_engine
     my_data_connector: ConfiguredAssetSqlDataConnector = (
         ConfiguredAssetSqlDataConnector(
             name="my_sql_data_connector",
@@ -1731,9 +1731,16 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 test_backends += ["trino"]
 
         if include_azure:
+            azure_connection_string: Optional[str] = os.getenv(
+                "AZURE_CONNECTION_STRING"
+            )
             azure_credential: Optional[str] = os.getenv("AZURE_CREDENTIAL")
             azure_access_key: Optional[str] = os.getenv("AZURE_ACCESS_KEY")
-            if not azure_access_key and not azure_credential:
+            if (
+                not azure_access_key
+                and not azure_connection_string
+                and not azure_credential
+            ):
                 if raise_exceptions_for_backends is True:
                     raise ImportError(
                         "Azure tests are requested, but credentials were not set up"
@@ -2863,12 +2870,12 @@ def _get_redshift_connection_string() -> str:
     """
     Copied get_redshift_connection_url func from tests/test_utils.py
     """
-    host = os.environ.get("REDSHIFT_HOST")
-    port = os.environ.get("REDSHIFT_PORT")
-    user = os.environ.get("REDSHIFT_USERNAME")
-    pswd = os.environ.get("REDSHIFT_PASSWORD")
-    db = os.environ.get("REDSHIFT_DATABASE")
-    ssl = os.environ.get("REDSHIFT_SSLMODE")
+    host = os.environ.get("REDSHIFT_HOST")  # noqa: TID251
+    port = os.environ.get("REDSHIFT_PORT")  # noqa: TID251
+    user = os.environ.get("REDSHIFT_USERNAME")  # noqa: TID251
+    pswd = os.environ.get("REDSHIFT_PASSWORD")  # noqa: TID251
+    db = os.environ.get("REDSHIFT_DATABASE")  # noqa: TID251
+    ssl = os.environ.get("REDSHIFT_SSLMODE")  # noqa: TID251
 
     if not host:
         raise ValueError(
@@ -2939,13 +2946,13 @@ def _get_snowflake_connection_string() -> str:
     """
     Copied get_snowflake_connection_url func from tests/test_utils.py
     """
-    sfUser = os.environ.get("SNOWFLAKE_USER")
-    sfPswd = os.environ.get("SNOWFLAKE_PW")
-    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
-    sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
-    sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
-    sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
-    sfRole = os.environ.get("SNOWFLAKE_ROLE") or "PUBLIC"
+    sfUser = os.environ.get("SNOWFLAKE_USER")  # noqa: TID251
+    sfPswd = os.environ.get("SNOWFLAKE_PW")  # noqa: TID251
+    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")  # noqa: TID251
+    sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")  # noqa: TID251
+    sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")  # noqa: TID251
+    sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")  # noqa: TID251
+    sfRole = os.environ.get("SNOWFLAKE_ROLE") or "PUBLIC"  # noqa: TID251
 
     url = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}&role={sfRole}"
 

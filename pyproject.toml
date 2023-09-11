@@ -26,7 +26,10 @@ extend_skip_glob = ['venv/*', 'docs/*']
 
 [tool.mypy]
 python_version = "3.8"
-plugins = ["pydantic.mypy"]
+plugins = [
+    "pydantic.mypy",
+    "sqlalchemy.ext.mypy.plugin"
+    ]
 files = [
     "great_expectations",
     "tests/datasource/fluent",
@@ -87,7 +90,6 @@ exclude = [
     'expectations/core/expect_column_values_to_not_match_regex\.py',                                       # 2
     'expectations/core/expect_column_values_to_not_match_like_pattern_list\.py',                           # 3
     'expectations/core/expect_column_values_to_not_match_like_pattern\.py',                                # 2
-    'expectations/core/expect_column_values_to_not_be_null\.py',                                           # 2
     'expectations/core/expect_column_values_to_not_be_in_set\.py',                                         # 2
     'expectations/core/expect_column_values_to_match_strftime_format\.py',                                 # 2
     'expectations/core/expect_column_values_to_match_regex_list\.py',                                      # 2
@@ -105,7 +107,6 @@ exclude = [
     'expectations/core/expect_column_values_to_be_dateutil_parseable\.py',                                 # 1
     'expectations/core/expect_column_values_to_be_between\.py',                                            # 3
     'expectations/core/expect_column_unique_value_count_to_be_between\.py',                                # 1
-    'expectations/core/expect_column_to_exist\.py',                                                        # 4
     'expectations/core/expect_column_stdev_to_be_between\.py',                                             # 1
     'expectations/core/expect_column_quantile_values_to_be_between\.py',                                   # 15
     'expectations/core/expect_column_value_lengths_to_equal\.py',                                          # 1
@@ -136,10 +137,6 @@ exclude = [
     'expectations/core/expect_table_column_count_to_equal\.py',                                            # 5
     'expectations/core/expect_table_column_count_to_be_between\.py',                                       # 3
     'expectations/core/expect_table_row_count_to_equal_other_table\.py',                                   # 11
-    'expectations/metrics/column_aggregate_metrics/column_value_counts\.py',                               # 6
-    'expectations/metrics/column_aggregate_metrics/column_partition\.py',                                  # 10
-    'expectations/metrics/map_metric_provider/column_function_partial\.py',                                # 9
-    'expectations/metrics/map_metric_provider/multicolumn_map_condition_auxilliary_methods\.py',           # 2
     'expectations/regex_based_column_map_expectation\.py',                                                 # 3
     'expectations/row_conditions\.py',                                                                     # 4
     'expectations/set_based_column_map_expectation\.py',                                                   # 3
@@ -317,6 +314,9 @@ convention = "google"
 
 [tool.ruff.flake8-tidy-imports]
 [tool.ruff.flake8-tidy-imports.banned-api]
+"os.environ".msg = """Please do not use os.environ outside of configuration files.
+If you are working in a configuration file you may use the inline comment \
+"# noqa: TID251 # os.enrivon allowed in config files" to ignore this error."""
 "sqlalchemy".msg = "Please do not import sqlalchemy directly, import from great_expectations.compatibility.sqlalchemy instead."
 "pyspark".msg = "Please do not import pyspark directly, import from great_expectations.compatibility.pyspark instead."
 "boto3".msg = "Please do not import boto3 directly, import from great_expectations.compatibility.aws instead."
@@ -325,6 +325,8 @@ convention = "google"
 "trino".msg = "Please do not import trino directly, import from great_expectations.compatibility.trino instead."
 "pyarrow".msg = "Please do not import pyarrow directly, import from great_expectations.compatibility.pyarrow instead."
 "typing_extensions.override".msg = "Do not import typing_extensions.override directly, import `override` from great_expectations.compatibility.typing_extensions instead."
+# TODO: remove pydantic once our min version is pydantic v2
+"pydantic".msg = "Please do not import pydantic directly, import from great_expectations.compatibility.pydantic instead."
 
 
 # -----------------------------------------------------------------
@@ -454,6 +456,10 @@ filterwarnings = [
     # FutureWarning: the convert_dtype parameter is deprecated and will be removed in a future version.  Do ``ser.astype(object).apply()`` instead if you want ``convert_dtype=False``.
     # GH Issue: https://github.com/altair-viz/altair/issues/3181
     'ignore: the convert_dtype parameter is deprecated and will be removed in a future version:FutureWarning',
+    # Example Actual Warning: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+    'ignore: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.',
+    # Example Actual Warning: FutureWarning: Returning a DataFrame from Series.apply when the supplied function returns a Series is deprecated and will be removed in a future version.
+    'ignore: Returning a DataFrame from Series.apply when the supplied function returns a Series is deprecated and will be removed in a future version.',
 
     # numpy
     # Example Actual Warning: RuntimeWarning: Mean of empty slice.
@@ -463,10 +469,16 @@ filterwarnings = [
     # spark
     # Example Actual Warning: FutureWarning: Deprecated in 3.0.0. Use SparkSession.builder.getOrCreate() instead.
     # Found when running test_case_runner_v2_api[SparkDFDataset/column_pair_map_expectations/expect_column_pair_values_to_be_in_set:basic_positive_test_without_nulls]    'ignore: Deprecated in 3.0.0. Use SparkSession.builder.getOrCreate\(\) instead.:FutureWarning',
+    # Example Acutal Warning: FutureWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
+    'ignore: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance\(dtype, pd.DatetimeTZDtype\)` instead.',
     # pymysql
     # Example Actual Warning: pymysql.err.Warning: (1292, "Truncated incorrect DOUBLE value: 'cat'")
     # Found in tests/test_definitions/test_expectations_v2_api.py, if not found in v3 api remove this ignore directive with the v2 api code.
     'ignore: \(1292, "Truncated incorrect DOUBLE value:Warning',
+    # numpy and python 3.11
+    # Found when running tests in tests/profile/test_basic_suite_builder_profiler.py
+    # Example Actual Warning: RuntimeWarning: invalid value encountered in reduce
+    "ignore: invalid value encountered in reduce",
     # urllib3
     "ignore:'urllib3.contrib.pyopenssl' module is deprecated and will be removed in a future release of urllib3 2.x.:DeprecationWarning",
     # boto
@@ -509,6 +521,12 @@ filterwarnings = [
     # Example Actual Warning:
     # DeprecationWarning: Importing ErrorTree directly from the jsonschema package is deprecated and will become an ImportError. Import it from jsonschema.exceptions instead.
     "ignore: Importing ErrorTree directly from the jsonschema package is deprecated and will become an ImportError. Import it from jsonschema.exceptions instead.:DeprecationWarning",
+
+
+    # sqlalchemy
+    # Example Actual Warning:
+    # sqlalchemy.exc.RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    'ignore: Deprecated API features detected! These feature\(s\) are not compatible with SQLAlchemy 2\.0\.',
 
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
 ]

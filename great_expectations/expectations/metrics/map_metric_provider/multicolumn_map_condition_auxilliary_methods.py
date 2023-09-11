@@ -259,14 +259,14 @@ def _spark_multicolumn_map_condition_values(
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
         domain_values = (
-            domain_values.select(column_selector).toPandas().to_dict("records")
+            domain_values.select(column_selector).toPandas().to_dict("records")  # type: ignore[attr-defined] # ?
         )
     else:
         domain_values = (
             domain_values.select(column_selector)
             .limit(result_format["partial_unexpected_count"])
             .toPandas()
-            .to_dict("records")
+            .to_dict("records")  # type: ignore[attr-defined] # ?
         )
 
     return domain_values
