@@ -187,7 +187,6 @@ module.exports = {
         'integrations/integration_datahub',
         'deployment_patterns/how_to_use_great_expectations_in_deepnote',
         'deployment_patterns/how_to_use_great_expectations_in_flyte',
-        'deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery',
         'deployment_patterns/how_to_use_great_expectations_with_meltano',
         'deployment_patterns/how_to_use_great_expectations_with_prefect',
         'deployment_patterns/how_to_use_great_expectations_with_ydata_synthetic',
