@@ -493,16 +493,14 @@ def test_cloud_get_dataframe_asset(test_df_pandas: pd.DataFrame):
 
 
 @pytest.mark.cloud
-def test_cloud_get_csv_asset_not_in_memory(valid_file_path):
+def test_cloud_get_csv_asset_not_in_memory():
     # this test runs end-to-end in a real Cloud Data Context
     context = gx.get_context(mode="cloud")
     datasource_name = "pandas_debugging_datasource"
     csv_asset_name = "test_csv"
 
     datasource = context.get_datasource(datasource_name=datasource_name)
-    csv_asset = datasource.add_csv_asset(
-        name=csv_asset_name, filepath_or_buffer=valid_file_path
-    )
+    csv_asset = datasource.get_asset(asset_name=csv_asset_name)
     csv_asset.build_batch_request()
 
     assert csv_asset_name not in context.datasources._in_memory_data_assets
