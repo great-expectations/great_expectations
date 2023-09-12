@@ -235,7 +235,8 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         else:
             params = None
 
-        return self._send_get_request_to_api(url=url, params=params)
+        payload = self._send_get_request_to_api(url=url, params=params)
+        return cast(ResponsePayload, payload)
 
     @override
     def _get_all(self) -> ResponsePayload:  # type: ignore[override]
@@ -245,11 +246,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             resource_name=self.ge_cloud_resource_name,
         )
 
-        return self._send_get_request_to_api(url=url)
+        payload = self._send_get_request_to_api(url=url)
+        return cast(ResponsePayload, payload)
 
-    def _send_get_request_to_api(
-        self, url: str, params: dict | None = None
-    ) -> ResponsePayload:
+    def _send_get_request_to_api(self, url: str, params: dict | None = None) -> dict:
         try:
             response = self._session.get(
                 url=url,
@@ -264,7 +264,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 raise StoreBackendError(
                     "Unable to get object in GX Cloud Store Backend: Object does not exist."
                 )
-            return cast(ResponsePayload, response.json())
+            return response_json
         except json.JSONDecodeError as jsonError:
             logger.debug(  # noqa: PLE1205
                 "Failed to parse GX Cloud Response into JSON",
