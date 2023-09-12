@@ -607,12 +607,11 @@ def column_reflection_fallback(  # noqa: PLR0915
                 else:
                     logger.warning(f"2. \tselectable {type(selectable)} - {selectable}")
                     try:
-                        # TODO: conditional sa.text()
-                        query = (
-                            sa.select(sa.text("*"))
-                            .select_from(sa.text(selectable))
-                            .limit(1)
-                        )
+                        if isinstance(selectable, sqlalchemy.quoted_name):
+                            sub_query = sa.text(selectable)
+                        else:
+                            sub_query = selectable
+                        query = sa.select(sa.text("*")).select_from(sub_query).limit(1)
                     except Exception as e:
                         logger.error("2.1 \tI died", exc_info=e)
                         raise e
