@@ -55,6 +55,7 @@ class MyClassC(SerializableDictDot):
         return len(self.B_list)
 
 
+@pytest.mark.unit
 def test_access_using_dict_notation():
     "Keys can be accessed using dict notation"
     my_A = MyClassA(
@@ -67,6 +68,7 @@ def test_access_using_dict_notation():
     assert my_A["bar"] == 1
 
 
+@pytest.mark.unit
 def test_has_keys():
     "the .keys method works"
     my_A = MyClassA(
@@ -78,6 +80,7 @@ def test_has_keys():
     assert set(my_A.keys()) == {"foo", "bar"}
 
 
+@pytest.mark.unit
 def test_has_items():
     "the .items method works"
     my_A = MyClassA(
@@ -90,6 +93,7 @@ def test_has_items():
     assert items == [("foo", "a string"), ("bar", 1)]
 
 
+@pytest.mark.unit
 def test_has_to_raw_dict():
     "the .to_raw_dict method works"
     my_A = MyClassA(
@@ -105,11 +109,13 @@ def test_has_to_raw_dict():
 
 
 @pytest.mark.skip(reason="Not sure what our preferred pattern for this is")
+@pytest.mark.unit
 def test_incorrect_type():
     "Throws an error if instantiated with an incorrect type"
     MyClassA(**{"foo": "a string", "bar": "SHOULD BE AN INT", "baz": ["a", "b", "c"]})
 
 
+@pytest.mark.unit
 def test_renders_to_a_useful_str():
     "Renders to a string that exposes the internals of the object"
     assert (
@@ -122,6 +128,7 @@ def test_renders_to_a_useful_str():
 
 
 @pytest.mark.skip(reason="hmmm. We should be able to make this work by default")
+@pytest.mark.unit
 def test_is_json_serializable():
     assert MyClassA(
         foo="a string",
@@ -129,6 +136,7 @@ def test_is_json_serializable():
     ).to_json_dict() == {"foo": "a string", "bar": 1}
 
 
+@pytest.mark.unit
 def test_missing_keys():
     "Throws a TypeError if instantiated with missing arguments"
 
@@ -144,6 +152,7 @@ def test_missing_keys():
         MyClassA(bar=1)
 
 
+@pytest.mark.unit
 def test_extra_keys():
     "Throws a TypeError if instantiated with extra arguments"
 
@@ -151,6 +160,7 @@ def test_extra_keys():
         MyClassA(**{"foo": "a string", "bar": 1, "baz": ["a", "b", "c"]})
 
 
+@pytest.mark.unit
 def test_update_after_instantiation():
     "Can be updated after instantiation, using both dot and dict notation"
 
@@ -172,6 +182,7 @@ def test_update_after_instantiation():
     assert my_A.foo == "a third string"
 
 
+@pytest.mark.unit
 def test_can_be_subclassed():
     my_B = MyClassB(
         foo="a string",
@@ -216,6 +227,7 @@ def test_can_be_subclassed():
     assert my_B.quux == 43
 
 
+@pytest.mark.unit
 def test_can_have_derived_properties():
     "Can have derived properties"
     my_B = MyClassB(
@@ -229,6 +241,7 @@ def test_can_have_derived_properties():
     assert my_B.num_bazzes == 3
 
 
+@pytest.mark.unit
 def test_can_have_optional_arguments():
     "Can have optional arguments"
     my_B = MyClassB(
@@ -239,9 +252,10 @@ def test_can_have_optional_arguments():
             # "qux": -100, #Optional property
         }
     )
-    assert my_B.qux == None
+    assert my_B.qux is None
 
 
+@pytest.mark.unit
 def test_can_have_default_values():
     "Can have default values"
     my_B = MyClassB(
@@ -255,6 +269,7 @@ def test_can_have_default_values():
     assert my_B.quux == 42
 
 
+@pytest.mark.unit
 def test_can_use_positional_arguments():
     "Can use a normal mix of positional and keyword arguments"
     my_B = MyClassB(
@@ -280,6 +295,7 @@ def test_can_use_positional_arguments():
     assert my_B.qux == -100
 
 
+@pytest.mark.unit
 def test_can_be_nested():
     "Objects of this type can be nested"
 
@@ -322,6 +338,7 @@ def test_can_be_nested():
     assert my_C["beta_var"] == MyEnum("x")
 
 
+@pytest.mark.unit
 def test_to_raw_dict_works_recursively():
     "the .to_raw_dict method works recursively on both DotDicts and Enums"
 
@@ -375,10 +392,10 @@ def test_to_raw_dict_works_recursively():
 
     # Make sure it's a dictionary, not a DictDot
     assert type(C_dict) == dict
-    assert isinstance(C_dict, DictDot) == False
+    assert isinstance(C_dict, DictDot) is False
     # Dictionaries don't support dot notation.
     with raises(AttributeError):
-        C_dict.A_list
+        C_dict.A_list  # noqa: B018
 
     assert type(C_dict["A_list"][0]) == dict
     assert type(C_dict["B_list"][0]) == dict
@@ -426,6 +443,7 @@ def test_to_raw_dict_works_recursively():
     }
 
 
+@pytest.mark.unit
 def test_instantiation_with_a_from_legacy_dict_method():
     """Can be instantiated from a legacy dictionary.
 
@@ -452,7 +470,7 @@ def test_instantiation_with_a_from_legacy_dict_method():
                 # Ignore parameters that don't match the type definition
                 if k in inspect.signature(cls).parameters:
                     temp_dict[k] = v
-                else:
+                else:  # noqa: PLR5501
                     if k == "in":
                         temp_dict["input"] = v
                     else:
@@ -479,7 +497,7 @@ def test_instantiation_with_a_from_legacy_dict_method():
 
     # Note that after instantiation, the class does NOT have an "in" property
     with raises(AttributeError):
-        my_E["in"] == 10
+        my_E["in"] == 10  # noqa: B015
 
     # Because `in` is a reserved word, this will raise a SyntaxError:
     # my_F.in == 100

@@ -1,20 +1,25 @@
 from __future__ import annotations
 
+import copy
 import dataclasses
 import functools
 import logging
-import re
 import uuid
+import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
+    AbstractSet,
     Any,
     Callable,
     ClassVar,
     Dict,
+    Final,
     Generic,
     List,
+    Mapping,
     MutableMapping,
+    MutableSequence,
     Optional,
     Sequence,
     Set,
@@ -23,13 +28,19 @@ from typing import (
     Union,
 )
 
-import pandas as pd
-import pydantic
-from pydantic import Field, StrictBool, StrictInt, root_validator, validate_arguments
-from pydantic import dataclasses as pydantic_dc
-from typing_extensions import TypeAlias, TypeGuard
-
-from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import (
+    Field,
+    StrictBool,
+    StrictInt,
+    root_validator,
+    validate_arguments,
+)
+from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
+from great_expectations.core.id_dict import BatchSpec
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -39,6 +50,11 @@ from great_expectations.validator.metrics_calculator import MetricsCalculator
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    import pandas as pd
+    from typing_extensions import Self, TypeAlias, TypeGuard
+
+    MappingIntStrAny = Mapping[Union[int, str], Any]
+    AbstractSetIntStr = AbstractSet[Union[int, str]]
     # TODO: We should try to import the annotations from core.batch so we no longer need to call
     #  Batch.update_forward_refs() before instantiation.
     from great_expectations.core.batch import (
@@ -47,39 +63,31 @@ if TYPE_CHECKING:
         BatchMarkers,
     )
     from great_expectations.core.config_provider import _ConfigurationProvider
+    from great_expectations.data_context import (
+        AbstractDataContext as GXDataContext,
+    )
+    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
+    from great_expectations.datasource.fluent import (
+        BatchRequest,
+        BatchRequestOptions,
+    )
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
-    from great_expectations.datasource.fluent.type_lookup import TypeLookup
-
-try:
-    import pyspark
-    from pyspark.sql import Row as pyspark_sql_Row
-except ImportError:
-    pyspark = None  # type: ignore[assignment]
-    pyspark_sql_Row = None  # type: ignore[assignment,misc]
-    logger.debug("No spark sql dataframe module available.")
+    from great_expectations.datasource.fluent.type_lookup import (
+        TypeLookup,
+    )
 
 
 class TestConnectionError(Exception):
     pass
 
 
-# BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
-# Batches one wants as returned. The keys represent dimensions one can slice the data along
-# and the values are the realized. If a value is None or unspecified, the batch_request
-# will capture all data along this dimension. For example, if we have a year and month
-# splitter, and we want to query all months in the year 2020, the batch request options
-# would look like:
-#   options = { "year": 2020 }
-BatchRequestOptions: TypeAlias = Dict[str, Any]
+class GxSerializationWarning(UserWarning):
+    pass
 
 
-@dataclasses.dataclass(frozen=True)
-class BatchRequest:
-    datasource_name: str
-    data_asset_name: str
-    options: BatchRequestOptions
+BatchMetadata: TypeAlias = Dict[str, Any]
 
 
 @pydantic_dc.dataclass(frozen=True)
@@ -140,7 +148,7 @@ def _sorter_from_str(sort_key: str) -> Sorter:
 
 
 # It would be best to bind this to Datasource, but we can't now due to circular dependencies
-_DatasourceT = TypeVar("_DatasourceT")
+_DatasourceT = TypeVar("_DatasourceT", bound=MetaDatasource)
 
 
 class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
@@ -155,6 +163,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     id: Optional[uuid.UUID] = Field(default=None, description="DataAsset id")
 
     order_by: List[Sorter] = Field(default_factory=list)
+    batch_metadata: BatchMetadata = pydantic.Field(default_factory=dict)
 
     # non-field private attributes
     _datasource: _DatasourceT = pydantic.PrivateAttr()
@@ -195,22 +204,19 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             """One needs to implement "batch_request_options" on a DataAsset subclass."""
         )
 
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> List[Batch]:
-        raise NotImplementedError
-
-    # End Abstract Methods
-
     def build_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
+        self,
+        options: Optional[BatchRequestOptions] = None,
+        batch_slice: Optional[BatchSlice] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
-            options: A dict that can be used to limit the number of batches returned from the asset.
+            options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
                 calling batch_request_options.
+            batch_slice: A python slice that can be used to limit the sorted batches by index.
+                e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -220,8 +226,10 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             """One must implement "build_batch_request" on a DataAsset subclass."""
         )
 
-    def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
-        return set(options.keys()).issubset(set(self.batch_request_options))
+    def get_batch_list_from_batch_request(
+        self, batch_request: BatchRequest
+    ) -> List[Batch]:
+        raise NotImplementedError
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.
@@ -233,6 +241,25 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             """One must implement "_validate_batch_request" on a DataAsset subclass."""
         )
 
+    # End Abstract Methods
+
+    def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
+        return set(options.keys()).issubset(set(self.batch_request_options))
+
+    def _get_batch_metadata_from_batch_request(
+        self, batch_request: BatchRequest
+    ) -> BatchMetadata:
+        """Performs config variable substitution and populates batch request options for
+        Batch.metadata at runtime.
+        """
+        batch_metadata = copy.deepcopy(self.batch_metadata)
+        config_variables = self._datasource._data_context.config_variables  # type: ignore[attr-defined]
+        batch_metadata = _ConfigurationSubstitutor().substitute_all_config_variables(
+            data=batch_metadata, replace_variables_dict=config_variables
+        )
+        batch_metadata.update(copy.deepcopy(batch_request.options))
+        return batch_metadata
+
     # Sorter methods
     @pydantic.validator("order_by", pre=True)
     def _parse_order_by_sorters(
@@ -240,7 +267,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     ) -> List[Sorter]:
         return Datasource.parse_order_by_sorters(order_by=order_by)
 
-    def add_sorters(self: _DataAssetT, sorters: SortersDefinition) -> _DataAssetT:
+    def add_sorters(self: Self, sorters: SortersDefinition) -> Self:
         """Associates a sorter to this DataAsset
 
         The passed in sorters will replace any previously associated sorters.
@@ -350,25 +377,10 @@ class Datasource(
 
     # class attrs
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
-    # Datasource instance attrs but these will be fed into the `execution_engine` constructor
-    _EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = {
-        "name",
-        "type",
-        "id",
-        "execution_engine",
-        "assets",
-        "base_directory",  # filesystem argument
-        "glob_directive",  # filesystem argument
-        "data_context_root_directory",  # filesystem argument
-        "bucket",  # s3 argument
-        "boto3_options",  # s3 argument
-        "prefix",  # s3 argument and gcs argument
-        "delimiter",  # s3 argument and gcs argument
-        "max_keys",  # s3 argument
-        "bucket_or_name",  # gcs argument
-        "gcs_options",  # gcs argument
-        "max_results",  # gcs argument
-    }
+    # Not all Datasources require a DataConnector
+    data_connector_type: ClassVar[Optional[Type[DataConnector]]] = None
+    # Datasource sublcasses should update this set if the field should not be passed to the execution engine
+    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = set()
     _type_lookup: ClassVar[  # This attribute is set in `MetaDatasource.__new__`
         TypeLookup
     ]
@@ -380,13 +392,16 @@ class Datasource(
     type: str
     name: str
     id: Optional[uuid.UUID] = Field(default=None, description="Datasource id")
-    assets: MutableMapping[str, _DataAssetT] = {}
+    assets: MutableSequence[_DataAssetT] = []
 
     # private attrs
-    _data_context = pydantic.PrivateAttr()
+    _data_context: Union[GXDataContext, None] = pydantic.PrivateAttr(None)
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
-    _config_provider: Union[_ConfigurationProvider, None] = pydantic.PrivateAttr(None)
+
+    @property
+    def _config_provider(self) -> Union[_ConfigurationProvider, None]:
+        return getattr(self._data_context, "config_provider", None)
 
     @pydantic.validator("assets", each_item=True)
     @classmethod
@@ -399,7 +414,7 @@ class Datasource(
         If a more specific subtype is needed the `data_asset` will be converted to a
         more specific `DataAsset`.
         """
-        logger.info(f"Loading '{data_asset.name}' asset ->\n{pf(data_asset, depth=4)}")
+        logger.debug(f"Loading '{data_asset.name}' asset ->\n{pf(data_asset, depth=4)}")
         asset_type_name: str = data_asset.type
         asset_type: Type[_DataAssetT] = cls._type_lookup[asset_type_name]
 
@@ -411,8 +426,10 @@ class Datasource(
         kwargs = data_asset.dict(exclude_unset=True)
         logger.debug(f"{asset_type_name} - kwargs\n{pf(kwargs)}")
 
+        cls._update_asset_forward_refs(asset_type)
+
         asset_of_intended_type = asset_type(**kwargs)
-        logger.debug(f"{asset_type_name} - {repr(asset_of_intended_type)}")
+        logger.debug(f"{asset_type_name} - {asset_of_intended_type!r}")
         return asset_of_intended_type
 
     def _execution_engine_type(self) -> Type[_ExecutionEngineT]:
@@ -421,7 +438,8 @@ class Datasource(
 
     def get_execution_engine(self) -> _ExecutionEngineT:
         current_execution_engine_kwargs = self.dict(
-            exclude=self._EXCLUDED_EXEC_ENG_ARGS, config_provider=self._config_provider
+            exclude=self._get_exec_engine_excludes(),
+            config_provider=self._config_provider,
         )
         if (
             current_execution_engine_kwargs != self._cached_execution_engine_kwargs
@@ -448,17 +466,67 @@ class Datasource(
         data_asset = self.get_asset(batch_request.data_asset_name)
         return data_asset.get_batch_list_from_batch_request(batch_request)
 
+    def get_assets_as_dict(self) -> MutableMapping[str, _DataAssetT]:
+        """Returns available DataAsset objects as dictionary, with corresponding name as key.
+
+        Returns:
+            Dictionary of "_DataAssetT" objects with "name" attribute serving as key.
+        """
+        asset: _DataAssetT
+        assets_as_dict: MutableMapping[str, _DataAssetT] = {
+            asset.name: asset for asset in self.assets
+        }
+
+        return assets_as_dict
+
+    def get_asset_names(self) -> Set[str]:
+        """Returns the set of available DataAsset names
+
+        Returns:
+            Set of available DataAsset names.
+        """
+        asset: _DataAssetT
+        return {asset.name for asset in self.assets}
+
     def get_asset(self, asset_name: str) -> _DataAssetT:
-        """Returns the DataAsset referred to by name"""
+        """Returns the DataAsset referred to by asset_name
+
+        Args:
+            asset_name: name of DataAsset sought.
+
+        Returns:
+            _DataAssetT -- if named "DataAsset" object exists; otherwise, exception is raised.
+        """
         # This default implementation will be used if protocol is inherited
         try:
-            return self.assets[asset_name]
-        except KeyError as exc:
+            asset: _DataAssetT
+            found_asset: _DataAssetT = list(
+                filter(lambda asset: asset.name == asset_name, self.assets)
+            )[0]
+            found_asset._datasource = self
+            if self._data_context:
+                # datasources setter will attach dataframe to in-memory assets
+                self._data_context.datasources[self.name] = self
+            return found_asset
+        except IndexError as exc:
             raise LookupError(
-                f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
+                f'"{asset_name}" not found. Available assets are {", ".join(self.get_asset_names())})'
             ) from exc
 
-    def add_asset(self, asset: _DataAssetT) -> _DataAssetT:
+    def delete_asset(self, asset_name: str) -> None:
+        """Removes the DataAsset referred to by asset_name from internal list of available DataAsset objects.
+
+        Args:
+            asset_name: name of DataAsset to be deleted.
+        """
+        asset: _DataAssetT
+        self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
+
+        self._save_context_project_config()
+
+    def _add_asset(
+        self, asset: _DataAssetT, connect_options: dict | None = None
+    ) -> _DataAssetT:
         """Adds an asset to a datasource
 
         Args:
@@ -468,11 +536,77 @@ class Datasource(
         # See the comment in DataAsset for more information.
         asset._datasource = self
 
+        if not connect_options:
+            connect_options = {}
+        self._build_data_connector(asset, **connect_options)
+
         asset.test_connection()
 
-        self.assets[asset.name] = asset
+        asset_names: Set[str] = self.get_asset_names()
+        if asset.name in asset_names:
+            raise ValueError(
+                f'"{asset.name}" already exists (all existing assets are {", ".join(asset_names)})'
+            )
+
+        self.assets.append(asset)
+
+        # if asset was added to a cloud FDS, _save_context_project_config will return FDS fetched from cloud,
+        # which will contain the new asset populated with an id
+        cloud_fds = self._save_context_project_config()
+        if cloud_fds:
+            # update asset with new id
+            asset_with_id = cloud_fds.get_asset(asset_name=asset.name)
+            asset.id = asset_with_id.id
+            if self._data_context:
+                # datasources setter will attach dataframe to in-memory assets
+                self._data_context.datasources[self.name] = self
 
         return asset
+
+    def _save_context_project_config(self) -> Union[Datasource, None]:
+        """Check if a DataContext is available and save the project config."""
+        if self._data_context:
+            try:
+                return self._data_context._save_project_config(self)
+            except TypeError as type_err:
+                warnings.warn(str(type_err), GxSerializationWarning)
+        return None
+
+    def _rebuild_asset_data_connectors(self) -> None:
+        """
+        If Datasource required a data_connector we need to build the data_connector for each asset.
+
+        A warning is raised if a data_connector cannot be built for an asset.
+        Not all users will have access to the needed dependencies (packages or credentials) for every asset.
+        Missing dependencies will stop them from using the asset but should not stop them from loading it from config.
+        """
+        asset_build_failure_direct_cause: dict[str, Exception | BaseException] = {}
+
+        if self.data_connector_type:
+            for data_asset in self.assets:
+                try:
+                    # check if data_connector exist before rebuilding?
+                    connect_options = getattr(data_asset, "connect_options", {})
+                    self._build_data_connector(data_asset, **connect_options)
+                except Exception as dc_build_err:
+                    logger.info(
+                        f"Unable to build data_connector for {self.type} {data_asset.type} {data_asset.name}",
+                        exc_info=True,
+                    )
+                    # reveal direct cause instead of generic, unhelpful MyDatasourceError
+                    asset_build_failure_direct_cause[data_asset.name] = (
+                        dc_build_err.__cause__ or dc_build_err
+                    )
+        if asset_build_failure_direct_cause:
+            # TODO: allow users to opt out of these warnings
+            names_and_error: List[str] = [
+                f"{name}:{type(exc).__name__}"
+                for (name, exc) in asset_build_failure_direct_cause.items()
+            ]
+            warnings.warn(
+                f"data_connector build failure for {self.name} assets - {', '.join(names_and_error)}",
+                category=RuntimeWarning,
+            )
 
     @staticmethod
     def parse_order_by_sorters(
@@ -503,19 +637,21 @@ class Datasource(
         return order_by_sorters
 
     @staticmethod
-    def parse_batching_regex_string(
-        batching_regex: Optional[Union[re.Pattern, str]] = None
-    ) -> re.Pattern:
-        pattern: re.Pattern
-        if not batching_regex:
-            pattern = re.compile(".*")
-        elif isinstance(batching_regex, str):
-            pattern = re.compile(batching_regex)
-        elif isinstance(batching_regex, re.Pattern):
-            pattern = batching_regex
-        else:
-            raise ValueError('"batching_regex" must be either re.Pattern, str, or None')
-        return pattern
+    def _update_asset_forward_refs(asset_type: Type[_DataAssetT]) -> None:
+        """Update forward refs of an asset_type if necessary.
+
+        Note, this should be overridden in child datasource classes if forward
+        refs need to be updated. For example, in Spark datasources we need to
+        update forward refs only if the optional spark dependencies are installed
+        so this method is overridden. Here it is a no op.
+
+        Args:
+            asset_type: Asset type to update forward refs.
+
+        Returns:
+            None, asset refs is updated in place.
+        """
+        pass
 
     # Abstract Methods
     @property
@@ -538,31 +674,36 @@ class Datasource(
             """One needs to implement "test_connection" on a Datasource subclass."""
         )
 
-    def _build_data_connector(self, data_asset_name: str, **kwargs) -> None:
+    def _build_data_connector(self, data_asset: _DataAssetT, **kwargs) -> None:
         """Any Datasource subclass that utilizes DataConnector should overwrite this method.
 
         Specific implementations instantiate appropriate DataConnector class and set "self._data_connector" to it.
 
         Args:
-            data_asset_name: The name of the DataAsset using this DataConnector instance
+            data_asset: DataAsset using this DataConnector instance
             kwargs: Extra keyword arguments allow specification of arguments used by particular DataConnector subclasses
         """
         pass
 
-    def _build_test_connection_error_message(
-        self, data_asset_name: str, **kwargs
-    ) -> None:
-        """Any Datasource subclass can overwrite this method.
-
-        Specific implementations create appropriate error message and set "self._test_connection_error_message" to it.
-
-        Args:
-            data_asset_name: The name of the DataAsset using this DataConnector instance
-            kwargs: Extra keyword arguments allow specification of arguments used by particular subclass' error message
+    @classmethod
+    def _get_exec_engine_excludes(cls) -> Set[str]:
         """
-        pass
+        Return a set of field names to exclude from the execution engine.
+
+        All datasource fields are passed to the execution engine by default unless they are in this set.
+
+        Default implementation is to return the combined set of field names from `_EXTRA_EXCLUDED_EXEC_ENG_ARGS`
+        and `_BASE_DATASOURCE_FIELD_NAMES`.
+        """
+        return cls._EXTRA_EXCLUDED_EXEC_ENG_ARGS.union(_BASE_DATASOURCE_FIELD_NAMES)
 
     # End Abstract Methods
+
+
+# This is used to prevent passing things like `type`, `assets` etc. to the execution engine
+_BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {
+    name for name in Datasource.__fields__.keys()
+}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -574,6 +715,7 @@ class HeadData:
 
     data: pd.DataFrame
 
+    @override
     def __repr__(self) -> str:
         return self.data.__repr__()
 
@@ -592,7 +734,7 @@ class Batch(FluentBaseModel):
     id: str = ""
     # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
     # to a batch so developers may want to namespace any custom metadata they add.
-    metadata: Dict[str, Any] = {}
+    metadata: Dict[str, Any] = Field(default_factory=dict, allow_mutation=True)
 
     # TODO: These legacy fields are currently required. They are only used in usage stats so we
     #       should figure out a better way to anonymize and delete them.
@@ -625,13 +767,31 @@ class Batch(FluentBaseModel):
             BatchDefinition,
             BatchMarkers,
         )
+        from great_expectations.datasource.fluent import BatchRequest
 
         super().update_forward_refs(
             BatchData=BatchData,
             BatchDefinition=BatchDefinition,
             BatchMarkers=BatchMarkers,
+            BatchRequest=BatchRequest,
         )
 
+    @public_api
+    @validate_arguments
+    def columns(self) -> List[str]:
+        """Return column names of this Batch.
+
+        Returns
+            List[str]
+        """
+        self.data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
+        metrics_calculator = MetricsCalculator(
+            execution_engine=self.data.execution_engine,
+            show_progress_bars=True,
+        )
+        return metrics_calculator.columns()
+
+    @public_api
     @validate_arguments
     def head(
         self,

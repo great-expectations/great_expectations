@@ -1,10 +1,12 @@
 import logging
 import os
+import pathlib
 import traceback
+import urllib
 from collections import OrderedDict
 from typing import Any, List, Optional, Tuple
 
-import great_expectations.exceptions as exceptions
+from great_expectations import exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
@@ -110,7 +112,7 @@ class SiteBuilder:
                         class_name: DefaultJinjaIndexPageView
     """
 
-    def __init__(  # noqa: C901 - 16
+    def __init__(  # noqa: C901, PLR0912, PLR0913
         self,
         data_context,
         store_backend,
@@ -342,7 +344,7 @@ class SiteBuilder:
 
 
 class DefaultSiteSectionBuilder:
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name,
         data_context,
@@ -415,7 +417,7 @@ class DefaultSiteSectionBuilder:
                 class_name=view["class_name"],
             )
 
-    def build(self, resource_identifiers=None) -> None:
+    def build(self, resource_identifiers=None) -> None:  # noqa: PLR0912
         source_store_keys = self.source_store.list_keys()
         if self.name == "validations" and self.validation_results_limit:
             source_store_keys = sorted(
@@ -444,7 +446,7 @@ class DefaultSiteSectionBuilder:
                     )
             except exceptions.InvalidKeyError:
                 logger.warning(
-                    f"Object with Key: {str(resource_key)} could not be retrieved. Skipping..."
+                    f"Object with Key: {resource_key!s} could not be retrieved. Skipping..."
                 )
                 continue
 
@@ -465,7 +467,6 @@ class DefaultSiteSectionBuilder:
                         f"        Rendering profiling for batch {resource_key.batch_identifier}"
                     )
                 else:
-
                     logger.debug(
                         f"        Rendering validation: run name: {run_name}, run time: {run_time}, suite {expectation_suite_name} for batch {resource_key.batch_identifier}"
                     )
@@ -504,14 +505,14 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 """
                 exception_traceback = traceback.format_exc()
                 exception_message += (
-                    f'{type(e).__name__}: "{str(e)}".  '
+                    f'{type(e).__name__}: "{e!s}".  '
                     f'Traceback: "{exception_traceback}".'
                 )
                 logger.error(exception_message)
 
 
 class DefaultSiteIndexBuilder:
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name,
         site_name,
@@ -581,7 +582,7 @@ class DefaultSiteIndexBuilder:
                 class_name=view["class_name"],
             )
 
-    def add_resource_info_to_index_links_dict(
+    def add_resource_info_to_index_links_dict(  # noqa: PLR0913
         self,
         index_links_dict,
         expectation_suite_name,
@@ -602,21 +603,25 @@ class DefaultSiteIndexBuilder:
 
         if run_id:
             filepath = (
-                os.path.join(  # noqa: PTH118
-                    "validations",
-                    *expectation_suite_name.split("."),
-                    *run_id.to_tuple(),
-                    batch_identifier,
-                )
+                pathlib.Path(
+                    *[
+                        "validations",
+                        *expectation_suite_name.split("."),
+                        *run_id.to_tuple(),
+                        batch_identifier,
+                    ]
+                ).as_posix()
                 + ".html"
             )
         else:
             filepath = (
-                os.path.join(  # noqa: PTH118
-                    "expectations", *expectation_suite_name.split(".")
-                )
+                pathlib.Path(
+                    *["expectations", *expectation_suite_name.split(".")]
+                ).as_posix()
                 + ".html"
             )
+
+        url_encoded_filepath = urllib.parse.quote(filepath)
 
         expectation_suite_filepath = os.path.join(  # noqa: PTH118
             "expectations", *expectation_suite_name.split(".")
@@ -626,7 +631,7 @@ class DefaultSiteIndexBuilder:
         index_links_dict[f"{section_name}_links"].append(
             {
                 "expectation_suite_name": expectation_suite_name,
-                "filepath": filepath,
+                "filepath": url_encoded_filepath,
                 "run_id": run_id,
                 "batch_identifier": batch_identifier,
                 "validation_success": validation_success,
@@ -777,7 +782,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             """
             exception_traceback = traceback.format_exc()
             exception_message += (
-                f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
             )
             logger.error(exception_message)
 
@@ -905,7 +910,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         batch_spec=batch_spec,
                     )
                 except Exception:
-                    error_msg = f"Profiling result not found: {str(profiling_result_key.to_tuple()):s} - skipping"
+                    error_msg = f"Profiling result not found: {profiling_result_key.to_tuple()!s:s} - skipping"
                     logger.warning(error_msg)
 
     def _add_validations_to_index_links(
@@ -962,7 +967,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         batch_spec=batch_spec,
                     )
                 except Exception:
-                    error_msg = f"Validation result not found: {str(validation_result_key.to_tuple()):s} - skipping"
+                    error_msg = f"Validation result not found: {validation_result_key.to_tuple()!s:s} - skipping"
                     logger.warning(error_msg)
 
 

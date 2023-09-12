@@ -3,8 +3,8 @@ from unittest import mock
 
 import pytest
 
-import tests.test_utils as test_utils
 from great_expectations.data_context.store.query_store import SqlAlchemyQueryStore
+from tests import test_utils
 
 
 @pytest.fixture()
@@ -47,7 +47,7 @@ def sqlalchemy_query_store_specified_return_type(titanic_sqlite_db):
     )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_basic_query(basic_sqlalchemy_query_store):
     assert (
         basic_sqlalchemy_query_store.get("q1") == "SELECT DISTINCT PClass FROM titanic;"
@@ -61,7 +61,7 @@ def test_basic_query(basic_sqlalchemy_query_store):
     assert res == ["1st", "2nd", "*", "3rd"]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_query_connection_string(basic_sqlalchemy_query_store_connection_string):
     assert (
         basic_sqlalchemy_query_store_connection_string.get("q1")
@@ -69,7 +69,7 @@ def test_query_connection_string(basic_sqlalchemy_query_store_connection_string)
     )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_queries_with_return_types(sqlalchemy_query_store_specified_return_type):
     default_result = sqlalchemy_query_store_specified_return_type.get_query_result("q1")
     list_result = sqlalchemy_query_store_specified_return_type.get_query_result("q2")
@@ -83,8 +83,8 @@ def test_queries_with_return_types(sqlalchemy_query_store_specified_return_type)
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.data_context.store.query_store.create_engine")
-def test_init_query_store_with_dict_credentials(mock_create_engine):
+@mock.patch("great_expectations.data_context.store.query_store.sa")
+def test_init_query_store_with_dict_credentials(mock_sqlalchemy):
     """credentials can take a dict of params to pass to either URL() (< v0.14.0) or
     URL.create() (>= v0.14.0) depending on the sqlalchemy version."""
     credentials = {"drivername": "postgresql+psycopg2", "username": "some_user"}
@@ -92,10 +92,10 @@ def test_init_query_store_with_dict_credentials(mock_create_engine):
         warnings.simplefilter("error")  # No warnings allowed
         SqlAlchemyQueryStore(credentials=credentials)
 
-    mock_create_engine.assert_called_once()
+    mock_sqlalchemy.create_engine.assert_called_once()
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_query_store_store_backend_id(basic_sqlalchemy_query_store):
     """
     What does this test and why?

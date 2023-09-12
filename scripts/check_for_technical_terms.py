@@ -1,9 +1,16 @@
+from __future__ import annotations
+
 import json
 import os
 import re
-from collections import namedtuple
+from typing import NamedTuple
 
-Phrase = namedtuple("Phrase", "one_of_these but_not_in")
+
+class Phrase(NamedTuple):
+    one_of_these: tuple[str, ...]
+    but_not_in: tuple[str, ...]
+
+
 TODO = "- [ ]"
 DONE = "- [X]"
 NOTE = "-"
@@ -173,7 +180,7 @@ def phrase_is_tagged_in_generic_tag(line_working_contents, phrase):
     return is_tagged, is_present
 
 
-def scan_file(file_path, phrases):  # noqa: C901 - complexity 21
+def scan_file(file_path, phrases):  # noqa: C901, PLR0915
     output = [file_path]
     with open(file_path) as active_file:
         for phrase in phrases:

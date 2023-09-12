@@ -142,7 +142,8 @@ class DataProfilerProfileNumericColumnsDiffBetweenInclusiveThresholdRange(
 class ExpectProfileNumericColumnsDiffBetweenInclusiveThresholdRange(
     ProfileNumericColumnsDiffExpectation
 ):
-    """
+    """Expect a statistic's value for a given column of a DataProfiler difference report to be within the specified threshold, inclusive.
+
     This expectation takes the difference report between the data it is called on and a DataProfiler profile of the same schema loaded from a provided path.
     This function builds upon the custom ProfileNumericColumnsDiff Expectation of Capital One's DataProfiler Expectations.
     Each numerical column will be checked against a user provided dictionary of columns paired with dictionaries of statistics containing lower and upper bounds.

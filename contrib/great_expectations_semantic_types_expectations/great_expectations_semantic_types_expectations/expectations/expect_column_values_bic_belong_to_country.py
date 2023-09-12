@@ -7,14 +7,17 @@ from schwifty.exceptions import SchwiftyException
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
-    SparkDFExecutionEngine,
 )
+
+# SparkDFExecutionEngine,
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
+
+# from great_expectations.compatibility.pyspark import functions as F
+# from great_expectations.compatibility import pyspark
 
 
 def bic_belong_to_country(bic: str, country_code: str) -> bool:
@@ -36,13 +39,13 @@ class ColumnValuesBicBelongToCountry(ColumnMapMetricProvider):
     def _pandas(cls, column, country_code, **kwargs):
         return column.apply(partial(bic_belong_to_country, country_code=country_code))
 
-    @column_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(cls, column, country_code, **kwargs):
-        @F.udf(sparktypes.BooleanType())
-        def bic_belong_to_country_udf(bic: str) -> bool:
-            return bic_belong_to_country(bic, country_code)
+    # @column_condition_partial(engine=SparkDFExecutionEngine)
+    # def _spark(cls, column, country_code, **kwargs):
+    #     @F.udf(pyspark.types.BooleanType())
+    #     def bic_belong_to_country_udf(bic: str) -> bool:
+    #         return bic_belong_to_country(bic, country_code)
 
-        return bic_belong_to_country_udf(column)
+    #     return bic_belong_to_country_udf(column)
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -51,8 +54,7 @@ class ColumnValuesBicBelongToCountry(ColumnMapMetricProvider):
 
 
 class ExpectColumnValuesBicBelongToCountry(ColumnMapExpectation):
-    """Expect the provided BIC (Business Identifier Code)
-    in the country which code (alpha-2) passed in the parameters."""
+    """Expect the provided BIC (Business Identifier Code) in the country which code (alpha-2) passed in the parameters."""
 
     map_metric = "column_values.bic_belong_to_country"
 

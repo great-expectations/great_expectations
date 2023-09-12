@@ -13,52 +13,27 @@ the snippets that are specified for use in documentation are maintained.  These 
     https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant
 """
 import great_expectations as gx
-from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.datasource.fluent.interfaces import DataAsset
 
 yaml = YAMLHandler()
 
-context: gx.DataContext = gx.get_context()
+context = gx.get_context()
 
 # Configure your datasource (if you aren't using one that already exists)
 
 # <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py datasource_config">
-datasource_config = {
-    "name": "taxi_multi_batch_datasource",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "module_name": "great_expectations.execution_engine",
-        "class_name": "PandasExecutionEngine",
-    },
-    "data_connectors": {
-        "inferred_data_connector_all_years": {
-            "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "<PATH_TO_YOUR_DATA_HERE>",
-            "default_regex": {
-                "group_names": ["data_asset_name", "year", "month"],
-                "pattern": "(yellow_tripdata_sample)_(\\d.*)-(\\d.*)\\.csv",
-            },
-        },
-    },
-}
+
+context.sources.add_pandas_filesystem(
+    "taxi_multi_batch_datasource",
+    base_directory="./data",  # replace with your data directory
+).add_csv_asset(
+    "all_years",
+    batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+)
+
 # </snippet>
-
-# Please note this override is only to provide good UX for docs and tests.
-# In normal usage you'd set your path directly in the yaml above.
-datasource_config["data_connectors"]["inferred_data_connector_all_years"][
-    "base_directory"
-] = "../data/"
-
-context.test_yaml_config(yaml.dump(datasource_config))
-
-# add_datasource only if it doesn't already exist in our configuration
-
-try:
-    context.get_datasource(datasource_config["name"])
-except ValueError:
-    context.add_datasource(**datasource_config)
 
 # Prepare an Expectation Suite
 
@@ -73,10 +48,12 @@ expectation_suite = context.add_or_update_expectation_suite(
 # Prepare a Batch Request
 
 # <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py batch_request">
-multi_batch_all_years_batch_request: BatchRequest = BatchRequest(
-    datasource_name="taxi_multi_batch_datasource",
-    data_connector_name="inferred_data_connector_all_years",
-    data_asset_name="yellow_tripdata_sample",
+all_years_asset: DataAsset = context.datasources[
+    "taxi_multi_batch_datasource"
+].get_asset("all_years")
+
+multi_batch_all_years_batch_request: BatchRequest = (
+    all_years_asset.build_batch_request()
 )
 # </snippet>
 
@@ -120,25 +97,17 @@ expectation_suite = data_assistant_result.get_expectation_suite(
 context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
 # </snippet>
 
-# Use a SimpleCheckpoint to verify that your new Expectation Suite works.
+# Use a Checkpoint to verify that your new Expectation Suite works.
 
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py checkpoint_config">
-checkpoint_config = {
-    "class_name": "SimpleCheckpoint",
-    "validations": [
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py checkpoint">
+checkpoint = context.add_or_update_checkpoint(
+    name=f"yellow_tripdata_sample_{expectation_suite_name}",
+    validations=[
         {
             "batch_request": multi_batch_all_years_batch_request,
             "expectation_suite_name": expectation_suite_name,
         }
     ],
-}
-# </snippet>
-
-# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py checkpoint">
-checkpoint = SimpleCheckpoint(
-    f"yellow_tripdata_sample_{expectation_suite_name}",
-    context,
-    **checkpoint_config,
 )
 checkpoint_result = checkpoint.run()
 

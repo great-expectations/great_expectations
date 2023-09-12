@@ -1,13 +1,14 @@
 from typing import TYPE_CHECKING, Dict, List, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    TableExpectation,
+    BatchExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -37,11 +38,11 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectTableRowCountToBeBetween(TableExpectation):
+class ExpectTableRowCountToBeBetween(BatchExpectation):
     """Expect the number of rows to be between two values.
 
     expect_table_row_count_to_be_between is a \
-    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
+    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     Keyword Args:
         min_value (int or None): \
@@ -175,6 +176,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
     )
 
     @public_api
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -195,6 +197,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls, renderer_configuration: RendererConfiguration
     ) -> RendererConfiguration:
@@ -237,6 +240,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -282,6 +286,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             )
         ]
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,

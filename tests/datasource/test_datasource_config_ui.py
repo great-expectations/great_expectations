@@ -9,6 +9,8 @@ from tests.data_context.test_data_context_config_ui import (
     default_spark_datasource_config,  # noqa: F401
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture()
 def default_sql_alchemy_datasource_config():
@@ -33,7 +35,6 @@ def default_sql_alchemy_datasource_config():
 
 
 def test_PandasDatasource_config(default_pandas_datasource_config):  # noqa: F811
-
     datasource_config = DatasourceConfig(
         class_name="PandasDatasource",
         batch_kwargs_generators={
@@ -51,7 +52,6 @@ def test_PandasDatasource_config(default_pandas_datasource_config):  # noqa: F81
 
 
 def test_SqlAlchemyDatasource_config(default_sql_alchemy_datasource_config):
-
     datasource_config = DatasourceConfig(
         class_name="SqlAlchemyDatasource",
         credentials={
@@ -71,7 +71,6 @@ def test_SqlAlchemyDatasource_config(default_sql_alchemy_datasource_config):
 
 
 def test_SparkDatasource_config(default_spark_datasource_config):  # noqa: F811
-
     datasource_config = DatasourceConfig(
         class_name="SparkDFDatasource",
         batch_kwargs_generators={},

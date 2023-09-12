@@ -17,7 +17,7 @@ def is_valid_us_county_fip(county_fip: str):
     list_of_county_fips = [d["fips"] for d in dict_of_counties]
     if len(county_fip) > 5:
         return False
-    elif type(county_fip) != str:
+    elif type(county_fip) != str:  # noqa: E721
         return False
     if county_fip in list_of_county_fips:
         return True
@@ -28,7 +28,6 @@ def is_valid_us_county_fip(county_fip: str):
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidUSCountyFip(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_us_county_fip"
 

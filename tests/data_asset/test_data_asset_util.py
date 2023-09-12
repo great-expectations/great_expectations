@@ -12,6 +12,7 @@ import great_expectations as gx
 from great_expectations.self_check.util import expectationSuiteSchema
 
 
+@pytest.mark.big
 @pytest.mark.filterwarnings(
     "ignore:partition_data*:DeprecationWarning:great_expectations.dataset.util"
 )
@@ -25,7 +26,7 @@ def test_recursively_convert_to_json_serializable(tmp_path):
         "x", [1, 2, 3, 4, 5, 6, 7, 8, 9], mostly=0.8
     )
 
-    part = gx.dataset.util.partition_data(asset.x)
+    part = gx.dataset.util.continuous_partition_data(asset.x)
     asset.expect_column_kl_divergence_to_be_less_than("x", part, 0.6)
 
     # Dumping this JSON object verifies that everything is serializable
@@ -138,6 +139,7 @@ class Child(Parent):
         """
 
 
+@pytest.mark.unit
 def test_doc_inheritance():
     c = Child()
 

@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Union
 from unittest.mock import MagicMock
 
 import pytest
-from ruamel.yaml import YAML
 
+import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -15,6 +15,7 @@ from great_expectations.core.expectation_suite import (
     expectationSuiteSchema,
 )
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.util import filter_properties_dict
@@ -405,7 +406,7 @@ class TestIsEquivalentTo:
         return_value = suite_with_single_expectation.isEquivalentTo(UnsupportedClass())
         assert return_value == NotImplemented
 
-    @pytest.mark.integration
+    @pytest.mark.unit
     def test_is_equivalent_to_expectation_suite_classes_true_with_changes_to_non_considered_attributes(
         self, suite_with_single_expectation: ExpectationSuite
     ):
@@ -423,7 +424,7 @@ class TestIsEquivalentTo:
             suite_with_single_expectation
         )
 
-    @pytest.mark.integration
+    @pytest.mark.unit
     def test_is_equivalent_to_expectation_suite_classes_false(
         self, suite_with_single_expectation: ExpectationSuite
     ):
@@ -443,7 +444,7 @@ class TestIsEquivalentTo:
             suite_with_single_expectation
         )
 
-    @pytest.mark.integration
+    @pytest.mark.unit
     def test_is_equivalent_to_expectation_suite_classes_false_multiple_equivalent_expectations(
         self, suite_with_single_expectation: ExpectationSuite
     ):
@@ -534,7 +535,6 @@ class TestEqDunder:
         new_value: Union[str, Dict[str, str]],
         suite_with_single_expectation: ExpectationSuite,
     ):
-
         different_but_equivalent_suite = deepcopy(suite_with_single_expectation)
 
         setattr(different_but_equivalent_suite, attribute, new_value)
@@ -715,7 +715,8 @@ def profiler_config():
            meta:
              profiler_details: $parameter.row_count_range.details
     """
-    yaml = YAML()
+
+    yaml = YAMLHandler()
     return yaml.load(yaml_config)
 
 
@@ -1039,3 +1040,20 @@ def test_expectation_suite_send_usage_message(success: bool):
         "event_payload": {},
         "success": success,
     }
+
+
+@pytest.mark.unit
+def test_add_expectation_fails_validation(empty_suite_with_meta: ExpectationSuite):
+    suite = empty_suite_with_meta
+
+    expectation_type = "my_fake_expectation"
+    kwargs = {"foo": "bar"}
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type=expectation_type,
+        kwargs=kwargs,
+    )
+
+    with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
+        suite.add_expectation(expectation_configuration)
+
+    assert f"{expectation_type} not found" in str(e)

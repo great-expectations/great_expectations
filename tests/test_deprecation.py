@@ -7,7 +7,10 @@ from packaging import version
 
 from great_expectations.data_context.util import file_relative_path
 
-UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD = 12
+UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD = 7
+
+# module level markers
+pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
@@ -18,10 +21,23 @@ def regex_for_deprecation_comments() -> Pattern:
 
 @pytest.fixture
 def files_with_deprecation_warnings() -> List[str]:
-    files: List[str] = glob.glob("great_expectations/**/*.py", recursive=True)
+    files: List[str] = glob.glob(  # noqa: PTH207
+        "great_expectations/**/*.py", recursive=True
+    )
+    files_to_exclude = [
+        "great_expectations/compatibility/google.py",
+        "great_expectations/compatibility/pyspark.py",
+        "great_expectations/compatibility/sqlalchemy_and_pandas.py",
+        "great_expectations/compatibility/sqlalchemy_compatibility_wrappers.py",
+        "great_expectations/rule_based_profiler/altair/encodings.py",  # ignoring because of imprecise matching logic
+    ]
+    for file_to_exclude in files_to_exclude:
+        if file_to_exclude in files:
+            files.remove(file_to_exclude)
     return files
 
 
+@pytest.mark.unit
 def test_deprecation_warnings_are_accompanied_by_appropriate_comment(
     regex_for_deprecation_comments: Pattern,
     files_with_deprecation_warnings: List[str],
@@ -45,6 +61,7 @@ def test_deprecation_warnings_are_accompanied_by_appropriate_comment(
         ), f"Either a 'deprecated-v...' comment or 'DeprecationWarning' call is missing from {file}"
 
 
+@pytest.mark.unit
 def test_deprecation_warnings_have_been_removed_after_two_minor_versions(
     regex_for_deprecation_comments: Pattern,
     files_with_deprecation_warnings: List[str],

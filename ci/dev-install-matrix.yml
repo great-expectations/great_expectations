@@ -1,11 +1,11 @@
 parameters:
   vmImage: '' # Must be specified in primary YAML
-  pythonVersion: ["3.7", "3.8", "3.9", "3.10"]
+  pythonVersion: ["3.8", "3.9", "3.10"]
 
 jobs:
   - ${{ each pythonVersion in parameters.pythonVersion }}:
     - job:
-      timeoutInMinutes: 120
+      timeoutInMinutes: 60
       displayName: full${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
@@ -13,7 +13,7 @@ jobs:
             versionSpec: ${{ pythonVersion }}
           displayName: Use Python ${{ pythonVersion }}
 
-        - bash: python -m pip install --upgrade pip==21.3.1
+        - bash: python -m pip install --upgrade pip
           displayName: 'Update pip'
 
         - script: |
@@ -26,13 +26,12 @@ jobs:
           displayName: 'Checkout latest tag'
 
         - script: |
-            pip install --requirement requirements-dev.txt --constraint constraints-dev.txt
-            pip install .
+            pip install --constraint constraints-dev.txt ".[test]"
           displayName: 'Install dependencies'
 
         - script: |
             pip install pytest pytest-cov pytest-azurepipelines
-            pytest --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            pytest --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics -m "unit or big or filesystem"
           displayName: 'pytest'
 
         - task: PublishTestResults@2
@@ -48,7 +47,7 @@ jobs:
             reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
     - job:
-      timeoutInMinutes: 120
+      timeoutInMinutes: 60
       displayName: lightweight${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
@@ -56,7 +55,7 @@ jobs:
             versionSpec: ${{ pythonVersion }}
           displayName: Use Python ${{ pythonVersion }}
 
-        - bash: python -m pip install --upgrade pip==21.3.1
+        - bash: python -m pip install --upgrade pip
           displayName: 'Update pip'
 
         - script: |
@@ -69,17 +68,13 @@ jobs:
           displayName: 'Checkout latest tag'
 
         - script: |
-            pip install \
-              --requirement requirements.txt \
-              --requirement reqs/requirements-dev-test.txt \
-              --constraint constraints-dev.txt \
-              --editable .
+            pip install --constraint constraints-dev.txt --editable ".[test]"
           displayName: 'Install dependencies'
 
         - script: |
             pip install -I pytest
             pip install pytest-cov pytest-azurepipelines
-            pytest --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics -m "not external_sqldialect"
+            pytest --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics -m "unit or big or filesystem"
           displayName: 'pytest'
 
         - task: PublishTestResults@2

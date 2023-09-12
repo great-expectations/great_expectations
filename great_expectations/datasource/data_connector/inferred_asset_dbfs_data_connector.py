@@ -1,11 +1,12 @@
 import logging
 from typing import Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector import (
     InferredAssetFilesystemDataConnector,
 )
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ class InferredAssetDBFSDataConnector(InferredAssetFilesystemDataConnector):
         id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -52,6 +53,7 @@ class InferredAssetDBFSDataConnector(InferredAssetFilesystemDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
 
+    @override
     def _get_full_file_path(
         self, path: str, data_asset_name: Optional[str] = None
     ) -> str:

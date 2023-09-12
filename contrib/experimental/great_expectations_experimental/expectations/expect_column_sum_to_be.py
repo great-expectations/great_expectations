@@ -1,5 +1,5 @@
 """
-This is a template for creating custom ColumnExpectations.
+This is a template for creating custom ColumnAggregateExpectations.
 For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations
 """
@@ -8,11 +8,11 @@ from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 
 
 # This class defines the Expectation itself
-class ExpectColumnSumToBe(ColumnExpectation):
+class ExpectColumnSumToBe(ColumnAggregateExpectation):
     """Expect the sum of a column to be exactly a value."""
 
     # These examples will be shown in the public gallery.

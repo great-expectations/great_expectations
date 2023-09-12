@@ -1,23 +1,23 @@
 from typing import Dict
 
-import scipy.stats as stats
+from scipy import stats
 
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import column_aggregate_partial
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F
 
 
-class ColumnKurtosis(ColumnMetricProvider):
+class ColumnKurtosis(ColumnAggregateMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
     metric_name = "column.custom.kurtosis"
@@ -100,7 +100,7 @@ class ColumnKurtosis(ColumnMetricProvider):
     #     return dependencies
 
 
-class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
+class ExpectColumnKurtosisToBeBetween(ColumnAggregateExpectation):
     """Expect column Kurtosis to be between. Test values are drawn from various distributions (uniform, normal, gamma, student-t)."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation

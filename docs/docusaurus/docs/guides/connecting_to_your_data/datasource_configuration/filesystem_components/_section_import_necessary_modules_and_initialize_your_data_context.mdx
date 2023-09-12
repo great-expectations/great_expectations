@@ -3,6 +3,6 @@
 
 The `great_expectations` module will give you access to your Data Context, which is the entry point for working with a Great Expectations project.
 
-The `yaml` module from `ruamel` will be used in validating your Datasource's configuration.  Great Expectations will use a Python dictionary representation of your Datasource configuration when you add your Datasource to your Data Context.  However, Great Expectations saves configurations as `yaml` files, so when you validate your configuration you will need to convert it from a Python dictionary to a `yaml` string, first.
+The `yaml` module from `ruamel` will be used in validating your Data Source's configuration (via `great_expectations.core.yaml_handler.YAMLHandler`).  Great Expectations will use a Python dictionary representation of your Data Source configuration when you add your Data Source to your Data Context.  However, Great Expectations saves configurations as `yaml` files, so when you validate your configuration you will need to convert it from a Python dictionary to a `yaml` string, first.
 
-Your Data Context that is initialized by `get_data_context()` will be the Data Context defined in your current working directory.  It will provide you with convenience methods that we will use to validate your Datasource configuration and add your Datasource to your Great Expectations project once you have configured it.
+Your Data Context that is initialized by `get_data_context()` will be the Data Context defined in your current working directory.  It will provide you with convenience methods that we will use to validate your Data Source configuration and add your Data Source to your Great Expectations project once you have configured it.

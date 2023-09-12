@@ -130,7 +130,7 @@ class ParameterBuilder(ABC, Builder):
             data_context=self._data_context,
         )
 
-    def build_parameters(
+    def build_parameters(  # noqa: PLR0913
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
@@ -207,7 +207,7 @@ class ParameterBuilder(ABC, Builder):
                 parameter_values=parameter_values,
             )
 
-    def resolve_evaluation_dependencies(
+    def resolve_evaluation_dependencies(  # noqa: PLR0913
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
@@ -339,7 +339,7 @@ class ParameterBuilder(ABC, Builder):
             parameters=parameters,
         )
 
-    def get_metrics(
+    def get_metrics(  # noqa: PLR0913
         self,
         metric_name: str,
         metric_domain_kwargs: Optional[
@@ -589,7 +589,7 @@ specified (empty "metric_name" value detected)."""
         )
 
     @staticmethod
-    def _sanitize_metric_computation(
+    def _sanitize_metric_computation(  # noqa: PLR0913
         parameter_builder: ParameterBuilder,
         metric_name: str,
         attributed_resolved_metrics: AttributedResolvedMetrics,
@@ -667,7 +667,7 @@ specified (empty "metric_name" value detected)."""
 
                         batch_metric_values.append(0.0)
                     elif not (
-                        (
+                        (  # noqa: PLR1701
                             isinstance(metric_value, (str, np.str_))
                             and is_parseable_date(value=metric_value)
                         )
@@ -678,7 +678,7 @@ specified (empty "metric_name" value detected)."""
                     ):
                         raise gx_exceptions.ProfilerExecutionError(
                             message=f"""Applicability of {parameter_builder.__class__.__name__} is restricted to \
-numeric-valued and datetime-valued metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
+numeric-valued and datetime-valued metrics (value {metric_value} of type "{type(metric_value)!s}" was computed).
 """
                         )
                     else:

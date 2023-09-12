@@ -1,6 +1,6 @@
 import pytest
 
-import great_expectations.data_context.templates as templates
+from great_expectations.data_context import templates
 
 
 @pytest.fixture()
@@ -96,13 +96,13 @@ def project_help_comment():
 config_version: 3
 
 # Datasources tell Great Expectations where your data lives and how to get it.
-# You can use the CLI command `great_expectations datasource new` to help you
-# add a new datasource. Read more at https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview
+# Read more at https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview
 datasources: {}
 """
     return PROJECT_HELP_COMMENT
 
 
+@pytest.mark.unit
 def test_project_optional_config_comment_matches_default(
     project_optional_config_comment,
 ):
@@ -114,6 +114,7 @@ def test_project_optional_config_comment_matches_default(
     assert templates.PROJECT_OPTIONAL_CONFIG_COMMENT == project_optional_config_comment
 
 
+@pytest.mark.unit
 def test_project_help_comment_matches_default(project_help_comment):
     """
     What does this test and why?

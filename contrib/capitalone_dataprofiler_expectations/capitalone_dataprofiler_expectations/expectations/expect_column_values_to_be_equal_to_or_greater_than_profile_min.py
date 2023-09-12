@@ -23,7 +23,6 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesGreaterThanOrEqualToProfileMin(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.greater_than_or_equal_to_profile_min"
 
@@ -67,7 +66,8 @@ class ColumnValuesGreaterThanOrEqualToProfileMin(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeEqualToOrGreaterThanProfileMin(ColumnMapExpectation):
-    """
+    """Expect the column values to be greater than or equal to the minimum value of the respective column within the DataProfiler report.
+
     This function builds upon the custom column map expectations of Great Expectations. This function asks a yes/no question of each row in the user-specified column;
     namely, is the value greater than or equal to the minimum value of the respective column within the provided profile report generated from the DataProfiler.
 

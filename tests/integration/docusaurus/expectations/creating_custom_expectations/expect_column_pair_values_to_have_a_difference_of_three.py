@@ -14,7 +14,8 @@ from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
     ExpectationValidationResult,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,
@@ -35,6 +36,7 @@ class ColumnPairValuesDiffThree(ColumnPairMapMetricProvider):
         "column_B",
     )
     condition_value_keys = ()
+
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py _pandas">
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):

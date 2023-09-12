@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
 
 class ColumnPairDomainBuilder(ColumnDomainBuilder):
     """
-    This DomainBuilder uses relative tolerance of specified map metric to identify domains.
+    This DomainBuilder uses "include_column_names" property of its parent class to specify "column_A" and "column_B" (order-preserving).
     """
 
     exclude_field_names: ClassVar[
@@ -61,16 +62,18 @@ class ColumnPairDomainBuilder(ColumnDomainBuilder):
         )
 
     @property
+    @override
     def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.COLUMN_PAIR
 
+    @override
     def _get_domains(
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
-        """Return domains matching the specified tolerance limits.
+        """Obtains and returns Domain object, whose domain_kwargs consists of "column_A" and "column_B" (order-preserving) column-pair.
 
         Args:
             rule_name: name of Rule object, for which "Domain" objects are obtained.
@@ -90,7 +93,10 @@ class ColumnPairDomainBuilder(ColumnDomainBuilder):
             variables=variables,
         )
 
-        if not (effective_column_names and (len(effective_column_names) == 2)):
+        if not (
+            effective_column_names
+            and (len(effective_column_names) == 2)  # noqa: PLR2004
+        ):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Error: Columns specified for {self.__class__.__name__} in sorted order must correspond to \
 "column_A" and "column_B" (in this exact order).

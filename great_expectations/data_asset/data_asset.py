@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import decimal
@@ -7,10 +9,10 @@ import logging
 import traceback
 import uuid
 import warnings
-from collections import Counter, defaultdict, namedtuple
+from collections import Counter, defaultdict
 from collections.abc import Hashable
 from functools import wraps
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, NamedTuple, Optional, Union
 
 from marshmallow import ValidationError
 
@@ -39,7 +41,6 @@ logging.captureWarnings(True)
 
 
 class DataAsset:
-
     # This should in general only be changed when a subclass *adds expectations* or *changes expectation semantics*
     # That way, multiple backends can implement the same data_asset_type
     _data_asset_type = "DataAsset"
@@ -69,12 +70,6 @@ class DataAsset:
         batch_parameters = kwargs.pop("batch_parameters", {})
         batch_markers = kwargs.pop("batch_markers", {})
 
-        if "autoinspect_func" in kwargs:
-            # deprecated-v0.10.10
-            warnings.warn(
-                "Autoinspect_func is deprecated as of v0.10.10 and will be removed in v0.16; use a profiler instead (migration is easy!).",
-                category=DeprecationWarning,
-            )
         super().__init__(*args, **kwargs)
         self._config = {"interactive_evaluation": interactive_evaluation}
         self._data_context = data_context
@@ -91,34 +86,12 @@ class DataAsset:
         self._active_validation = False
         if profiler is not None:
             profiler.profile(self)
-        if data_context and hasattr(data_context, "_expectation_explorer_manager"):
-            self.set_default_expectation_argument("include_config", True)
 
     def list_available_expectation_types(self):
         keys = dir(self)
         return [
             expectation for expectation in keys if expectation.startswith("expect_")
         ]
-
-    def autoinspect(self, profiler):
-        """Deprecated: use profile instead.
-
-        Use the provided profiler to evaluate this data_asset and assign the resulting expectation suite as its own.
-
-        Args:
-            profiler: The profiler to use
-
-        Returns:
-            tuple(expectation_suite, validation_results)
-        """
-        # deprecated-v0.10.10
-        warnings.warn(
-            "The term autoinspect is deprecated as of v0.10.10 and will be removed in v0.16. Please use 'profile'\
-        instead.",
-            DeprecationWarning,
-        )
-        expectation_suite, validation_results = profiler.profile(self)
-        return expectation_suite, validation_results
 
     def profile(self, profiler, profiler_configuration=None):
         """Use the provided profiler to evaluate this data_asset and assign the resulting expectation suite as its own.
@@ -136,14 +109,8 @@ class DataAsset:
         )
         return expectation_suite, validation_results
 
-    # TODO: add warning if no expectation_explorer_manager and how to turn on
-    def edit_expectation_suite(self):
-        return self._data_context._expectation_explorer_manager.edit_expectation_suite(
-            self
-        )
-
-    @classmethod  # noqa: C901 - complexity 24
-    def expectation(cls, method_arg_names):  # noqa: C901
+    @classmethod  # - complexity 24
+    def expectation(cls, method_arg_names):  # noqa: C901, PLR0915
         """Manages configuration and running of expectation objects.
 
         Expectation builds and saves a new expectation configuration to the DataAsset object. It is the core decorator \
@@ -175,10 +142,9 @@ class DataAsset:
                     modification. For more detail, see :ref:`meta`.
         """
 
-        def outer_wrapper(func):  # noqa: C901 - 22
+        def outer_wrapper(func):  # noqa: C901, PLR0915
             @wraps(func)
-            def wrapper(self, *args, **kwargs):  # noqa: C901 - 21
-
+            def wrapper(self, *args, **kwargs):  # noqa: C901, PLR0912, PLR0915
                 # Get the name of the method
                 method_name = func.__name__
 
@@ -216,7 +182,7 @@ class DataAsset:
 
                 if "result_format" in argspec:
                     all_args["result_format"] = result_format
-                else:
+                else:  # noqa: PLR5501
                     if "result_format" in all_args:
                         del all_args["result_format"]
 
@@ -280,7 +246,7 @@ class DataAsset:
                         if catch_exceptions:
                             raised_exception = True
                             exception_traceback = traceback.format_exc()
-                            exception_message = f"{type(err).__name__}: {str(err)}"
+                            exception_message = f"{type(err).__name__}: {err!s}"
 
                             return_obj = ExpectationValidationResult(success=False)
 
@@ -470,7 +436,7 @@ class DataAsset:
 
         self.default_expectation_args[argument] = value
 
-    def get_expectation_suite(  # noqa: C901 - complexity 17
+    def get_expectation_suite(  # noqa: C901, PLR0912, PLR0913
         self,
         discard_failed_expectations=True,
         discard_result_format_kwargs=True,
@@ -572,7 +538,7 @@ class DataAsset:
             logger.info(message + settings_message)
         return expectation_suite
 
-    def save_expectation_suite(
+    def save_expectation_suite(  # noqa: PLR0913
         self,
         filepath=None,
         discard_failed_expectations=True,
@@ -632,7 +598,7 @@ class DataAsset:
                 "Unable to save config: filepath or data_context must be available."
             )
 
-    def validate(  # noqa: C901 - complexity 36
+    def validate(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         expectation_suite=None,
         run_id=None,
@@ -828,10 +794,9 @@ class DataAsset:
                 expectations_to_evaluate.extend(columns[col])
 
             for expectation in expectations_to_evaluate:
-
                 try:
                     # copy the config so we can modify it below if needed
-                    expectation = copy.deepcopy(expectation)
+                    expectation = copy.deepcopy(expectation)  # noqa: PLW2901
 
                     expectation_method = getattr(self, expectation.expectation_type)
 
@@ -923,8 +888,7 @@ class DataAsset:
 
             self._data_context = validate__data_context
         except Exception:
-            if getattr(data_context, "_usage_statistics_handler", None):
-                handler = data_context._usage_statistics_handler
+            if handler := getattr(data_context, "_usage_statistics_handler", None):
                 handler.send_usage_message(
                     event=UsageStatsEvents.DATA_ASSET_VALIDATE,
                     event_payload=handler.anonymizer.anonymize(obj=self),
@@ -934,8 +898,7 @@ class DataAsset:
         finally:
             self._active_validation = False
 
-        if getattr(data_context, "_usage_statistics_handler", None):
-            handler = data_context._usage_statistics_handler
+        if handler := getattr(data_context, "_usage_statistics_handler", None):
             handler.send_usage_message(
                 event=UsageStatsEvents.DATA_ASSET_VALIDATE,
                 event_payload=handler.anonymizer.anonymize(obj=self),
@@ -970,7 +933,7 @@ class DataAsset:
             {parameter_name: parameter_value}
         )
 
-    def add_citation(
+    def add_citation(  # noqa: PLR0913
         self,
         comment,
         batch_kwargs=None,
@@ -1008,7 +971,7 @@ class DataAsset:
     #
     ###
 
-    def _format_map_output(  # noqa: C901 - complexity 21
+    def _format_map_output(  # noqa: PLR0912, PLR0913
         self,
         result_format,
         success,
@@ -1182,8 +1145,8 @@ class DataAsset:
 
         Args:
             function (func): The function to be tested. (Must be a valid expectation function.)
-            *args          : Positional arguments to be passed the the function
-            **kwargs       : Keyword arguments to be passed the the function
+            *args          : Positional arguments to be passed the function
+            **kwargs       : Keyword arguments to be passed the function
 
         Returns:
             A JSON-serializable expectation result object.
@@ -1202,19 +1165,15 @@ class DataAsset:
         return new_function(self, *args, **kwargs)
 
 
-ValidationStatistics = namedtuple(
-    "ValidationStatistics",
-    [
-        "evaluated_expectations",
-        "successful_expectations",
-        "unsuccessful_expectations",
-        "success_percent",
-        "success",
-    ],
-)
+class ValidationStatistics(NamedTuple):
+    evaluated_expectations: int
+    successful_expectations: int
+    unsuccessful_expectations: int
+    success_percent: float | None
+    success: bool
 
 
-def _calc_validation_statistics(validation_results):
+def _calc_validation_statistics(validation_results) -> ValidationStatistics:
     """
     Calculate summary statistics for the validation results and
     return ``ExpectationStatistics``.

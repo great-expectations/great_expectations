@@ -28,6 +28,10 @@
                 "$ref": "#/definitions/Sorter"
             }
         },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
         "path": {
             "title": "Path",
             "anyOf": [

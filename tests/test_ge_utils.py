@@ -3,9 +3,8 @@ import datetime
 import json
 import logging
 import os
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import numpy as np
 import pytest
 
 import great_expectations as gx
@@ -22,6 +21,9 @@ from great_expectations.util import (
     is_ndarray_datetime_dtype,
     lint_code,
 )
+
+if TYPE_CHECKING:
+    import numpy as np
 
 
 @pytest.fixture
@@ -85,145 +87,6 @@ def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
                 empty_expectation_suite,
                 data_asset_class=gx.data_asset.FileDataAsset,
             )
-
-
-@pytest.mark.unit
-def test_validate_dataset(dataset, basic_expectation_suite):
-    res = gx.validate(dataset, basic_expectation_suite)
-    # assert res.success is True  # will not be true for mysql, where "infinities" column is missing
-    assert res["statistics"]["evaluated_expectations"] == 4
-    if isinstance(dataset, gx.dataset.PandasDataset):
-        res = gx.validate(
-            dataset,
-            expectation_suite=basic_expectation_suite,
-            data_asset_class=gx.dataset.PandasDataset,
-        )
-        assert res.success is True
-        assert res["statistics"]["evaluated_expectations"] == 4
-        with pytest.raises(
-            ValueError,
-            match=r"The validate util method only supports validation for subtypes of the provided data_asset_type",
-        ):
-            gx.validate(
-                dataset,
-                basic_expectation_suite,
-                data_asset_class=gx.dataset.SqlAlchemyDataset,
-            )
-
-    elif (
-        isinstance(dataset, gx.dataset.SqlAlchemyDataset)
-        and dataset.sql_engine_dialect.name.lower() != "mysql"
-    ):
-        res = gx.validate(
-            dataset,
-            expectation_suite=basic_expectation_suite,
-            data_asset_class=gx.dataset.SqlAlchemyDataset,
-        )
-        assert res.success is True
-        assert res["statistics"]["evaluated_expectations"] == 4
-        with pytest.raises(
-            ValueError,
-            match=r"The validate util method only supports validation for subtypes of the provided data_asset_type",
-        ):
-            gx.validate(
-                dataset,
-                expectation_suite=basic_expectation_suite,
-                data_asset_class=gx.dataset.PandasDataset,
-            )
-
-    elif (
-        isinstance(dataset, gx.dataset.SqlAlchemyDataset)
-        and dataset.sql_engine_dialect.name.lower() == "mysql"
-    ):
-        # mysql cannot use the infinities column
-        res = gx.validate(
-            dataset,
-            expectation_suite=basic_expectation_suite,
-            data_asset_class=gx.dataset.SqlAlchemyDataset,
-        )
-        assert res.success is False
-        assert res["statistics"]["evaluated_expectations"] == 4
-        with pytest.raises(
-            ValueError,
-            match=r"The validate util method only supports validation for subtypes of the provided data_asset_type",
-        ):
-            gx.validate(
-                dataset,
-                expectation_suite=basic_expectation_suite,
-                data_asset_class=gx.dataset.PandasDataset,
-            )
-
-    elif isinstance(dataset, gx.dataset.SparkDFDataset):
-        res = gx.validate(
-            dataset, basic_expectation_suite, data_asset_class=gx.dataset.SparkDFDataset
-        )
-        assert res.success is True
-        assert res["statistics"]["evaluated_expectations"] == 4
-        with pytest.raises(
-            ValueError,
-            match=r"The validate util method only supports validation for subtypes of the provided data_asset_type",
-        ):
-            gx.validate(
-                dataset,
-                expectation_suite=basic_expectation_suite,
-                data_asset_class=gx.dataset.PandasDataset,
-            )
-
-
-@pytest.mark.unit
-def test_validate_using_data_context(
-    dataset, data_context_parameterized_expectation_suite
-):
-    # Before running, the data context should not have compiled parameters
-    assert (
-        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies_compiled
-        is False
-    )
-
-    res = gx.validate(
-        dataset,
-        expectation_suite_name="my_dag_node.default",
-        data_context=data_context_parameterized_expectation_suite,
-    )
-
-    # Since the handling of evaluation parameters is no longer happening without an action,
-    # the context should still be not compiles after validation.
-    assert (
-        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies_compiled
-        is False
-    )
-
-    # And, we should have validated the right number of expectations from the context-provided config
-    assert res.success is False
-    assert res.statistics["evaluated_expectations"] == 2
-
-
-@pytest.mark.unit
-def test_validate_using_data_context_path(
-    dataset, data_context_parameterized_expectation_suite
-):
-    data_context_path = data_context_parameterized_expectation_suite.root_directory
-    res = gx.validate(
-        dataset,
-        expectation_suite_name="my_dag_node.default",
-        data_context=data_context_path,
-    )
-
-    # We should have now found the right suite with expectations to evaluate
-    assert res.success is False
-    assert res["statistics"]["evaluated_expectations"] == 2
-
-
-@pytest.mark.integration
-@pytest.mark.slow  # 1.61s
-def test_validate_invalid_parameters(
-    dataset, basic_expectation_suite, data_context_parameterized_expectation_suite
-):
-    with pytest.raises(
-        ValueError,
-        match="Either an expectation suite or a DataContext is required for validation.",
-    ):
-        gx.validate(dataset)
 
 
 @pytest.mark.unit

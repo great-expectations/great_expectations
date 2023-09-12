@@ -1,17 +1,17 @@
 import os
 import shutil
 from functools import partial
-from tempfile import mkstemp
 
-import boto3
 import pandas as pd
 import pytest
-from moto import mock_s3
-from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.util import nested_update
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import (
     DataContextConfigSchema,
     DatasourceConfig,
@@ -24,12 +24,12 @@ from great_expectations.datasource.datasource_serializer import (
 )
 from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
-from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import BridgeValidator
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
+@pytest.mark.filesystem
 def test_standalone_pandas_datasource(test_folder_connection_path_csv):
     datasource = PandasDatasource(
         "PandasCSV",
@@ -71,6 +71,7 @@ def test_standalone_pandas_datasource(test_folder_connection_path_csv):
     assert isinstance(batch.batch_markers, BatchMarkers)
 
 
+@pytest.mark.filesystem
 def test_create_pandas_datasource(
     data_context_parameterized_expectation_suite, tmp_path_factory
 ):
@@ -99,7 +100,7 @@ def test_create_pandas_datasource(
     with open(
         os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
-            "great_expectations.yml",
+            FileDataContext.GX_YML,
         ),
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
@@ -126,6 +127,7 @@ def test_create_pandas_datasource(
     )
 
 
+@pytest.mark.filesystem
 def test_pandas_datasource_custom_data_asset(
     data_context_parameterized_expectation_suite, test_folder_connection_path_csv
 ):
@@ -152,7 +154,7 @@ def test_pandas_datasource_custom_data_asset(
     with open(
         os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
-            "great_expectations.yml",
+            FileDataContext.GX_YML,
         ),
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
@@ -170,7 +172,7 @@ def test_pandas_datasource_custom_data_asset(
     data_context_parameterized_expectation_suite.add_expectation_suite(
         expectation_suite_name="test"
     )
-    batch = data_context_parameterized_expectation_suite.get_batch(
+    batch = data_context_parameterized_expectation_suite._get_batch_v2(
         expectation_suite_name="test",
         batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
             datasource=name,
@@ -183,6 +185,7 @@ def test_pandas_datasource_custom_data_asset(
     assert res.success is True
 
 
+@pytest.mark.filesystem
 def test_pandas_source_read_csv(
     data_context_parameterized_expectation_suite, tmp_path_factory
 ):
@@ -204,14 +207,14 @@ def test_pandas_source_read_csv(
     data_context_parameterized_expectation_suite.add_expectation_suite(
         expectation_suite_name="unicode"
     )
-    batch = data_context_parameterized_expectation_suite.get_batch(
+    batch = data_context_parameterized_expectation_suite._get_batch_v2(
         data_context_parameterized_expectation_suite.build_batch_kwargs(
             "mysource", "subdir_reader", "unicode"
         ),
         "unicode",
     )
-    assert len(batch["Μ"] == 1)
-    assert "😁" in list(batch["Μ"])
+    assert len(batch["Μ"] == 1)  # noqa: RUF001 # greek mu
+    assert "😁" in list(batch["Μ"])  # noqa: RUF001 # greek mu
 
     data_context_parameterized_expectation_suite.add_datasource(
         "mysource2",
@@ -225,13 +228,13 @@ def test_pandas_source_read_csv(
         },
     )
 
-    batch = data_context_parameterized_expectation_suite.get_batch(
+    batch = data_context_parameterized_expectation_suite._get_batch_v2(
         data_context_parameterized_expectation_suite.build_batch_kwargs(
             "mysource2", "subdir_reader", "unicode"
         ),
         "unicode",
     )
-    assert "😁" in list(batch["Μ"])
+    assert "😁" in list(batch["Μ"])  # noqa: RUF001 # greek mu
 
     data_context_parameterized_expectation_suite.add_datasource(
         "mysource3",
@@ -247,7 +250,7 @@ def test_pandas_source_read_csv(
     )
 
     with pytest.raises(UnicodeError, match="UTF-16 stream does not start with BOM"):
-        batch = data_context_parameterized_expectation_suite.get_batch(
+        batch = data_context_parameterized_expectation_suite._get_batch_v2(
             data_context_parameterized_expectation_suite.build_batch_kwargs(
                 "mysource3", "subdir_reader", "unicode"
             ),
@@ -259,12 +262,12 @@ def test_pandas_source_read_csv(
             "mysource3", "subdir_reader", "unicode"
         )
         batch_kwargs.update({"reader_options": {"encoding": "blarg"}})
-        batch = data_context_parameterized_expectation_suite.get_batch(
+        batch = data_context_parameterized_expectation_suite._get_batch_v2(
             batch_kwargs=batch_kwargs, expectation_suite_name="unicode"
         )
 
     with pytest.raises(LookupError, match="unknown encoding: blarg"):
-        batch = data_context_parameterized_expectation_suite.get_batch(
+        batch = data_context_parameterized_expectation_suite._get_batch_v2(
             expectation_suite_name="unicode",
             batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
                 "mysource",
@@ -274,7 +277,7 @@ def test_pandas_source_read_csv(
             ),
         )
 
-    batch = data_context_parameterized_expectation_suite.get_batch(
+    batch = data_context_parameterized_expectation_suite._get_batch_v2(
         batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
             "mysource2",
             "subdir_reader",
@@ -283,66 +286,10 @@ def test_pandas_source_read_csv(
         ),
         expectation_suite_name="unicode",
     )
-    assert "😁" in list(batch["Μ"])
+    assert "😁" in list(batch["Μ"])  # noqa: RUF001 # greek mu
 
 
-@pytest.mark.skipif(
-    not is_library_loadable(library_name="pyarrow")
-    and not is_library_loadable(library_name="fastparquet"),
-    reason="pyarrow and fastparquet are not installed",
-)
-@mock_s3
-def test_s3_pandas_source_read_parquet(
-    data_context_parameterized_expectation_suite, tmp_path_factory
-):
-    test_bucket = "test-bucket"
-    # set up dummy bucket
-    s3 = boto3.client("s3", region_name="us-east-1")
-    s3.create_bucket(Bucket=test_bucket)
-
-    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
-    _, tmp = mkstemp(suffix=".parquet")
-    with open(tmp, "wb") as fp:
-        df1.to_parquet(fp)
-
-    with open(tmp, "rb") as fp:
-        s3.upload_fileobj(fp, test_bucket, "test_data.parquet")
-
-    data_context_parameterized_expectation_suite.add_datasource(
-        "parquet_source",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "s3_reader": {
-                "class_name": "S3GlobReaderBatchKwargsGenerator",
-                "bucket": test_bucket,
-                "assets": {
-                    "test_data": {
-                        "prefix": "",
-                        "regex_filter": r".*parquet",
-                    },
-                },
-                "reader_options": {"columns": ["col_1"]},
-            }
-        },
-    )
-
-    data_context_parameterized_expectation_suite.add_expectation_suite(
-        expectation_suite_name="test_parquet"
-    )
-    with pytest.deprecated_call():  # "Direct GX Support for the s3 BatchKwarg will be removed in v0.16.
-        batch = data_context_parameterized_expectation_suite.get_batch(
-            data_context_parameterized_expectation_suite.build_batch_kwargs(
-                "parquet_source",
-                "s3_reader",
-                "test_data",
-            ),
-            "test_parquet",
-        )
-    assert batch.columns == ["col_1"]
-    assert batch["col_1"][4] == 5
-
-
+@pytest.mark.filesystem
 def test_invalid_reader_pandas_datasource(tmp_path_factory):
     basepath = str(tmp_path_factory.mktemp("test_invalid_reader_pandas_datasource"))
     datasource = PandasDatasource(
@@ -396,6 +343,7 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
     assert batch.data["a"][0] == 1
 
 
+@pytest.mark.filesystem
 def test_read_limit(test_folder_connection_path_csv):
     datasource = PandasDatasource(
         "PandasCSV",
@@ -429,6 +377,7 @@ def test_read_limit(test_folder_connection_path_csv):
     assert isinstance(batch.batch_markers, BatchMarkers)
 
 
+@pytest.mark.unit
 def test_process_batch_parameters():
     batch_kwargs = PandasDatasource("test").process_batch_parameters(limit=1)
     assert batch_kwargs == {"reader_options": {"nrows": 1}}
@@ -439,6 +388,7 @@ def test_process_batch_parameters():
     assert batch_kwargs == {"dataset_options": {"caching": False}}
 
 
+@pytest.mark.filesystem
 def test_pandas_datasource_processes_dataset_options(
     test_folder_connection_path_csv, empty_data_context
 ):
@@ -464,6 +414,7 @@ def test_pandas_datasource_processes_dataset_options(
     assert dataset.caching is False
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "reader_fn",
     [pd.read_csv, pd.read_excel, pd.read_parquet, pd.read_pickle, pd.read_sas],

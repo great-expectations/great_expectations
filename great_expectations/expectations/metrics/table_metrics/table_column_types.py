@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 from typing import Any, Dict, Optional, cast
 
+from great_expectations.compatibility import pyspark, sqlalchemy
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.execution_engine import (
@@ -10,17 +13,11 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.expectations.metrics.import_manager import sparktypes
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
 from great_expectations.expectations.metrics.util import get_sqlalchemy_column_metadata
-
-try:
-    from sqlalchemy.sql.elements import TextClause
-except ImportError:
-    TextClause = None
 
 
 class ColumnTypes(TableMetricProvider):
@@ -29,7 +26,7 @@ class ColumnTypes(TableMetricProvider):
     default_kwarg_values = {"include_nested": True}
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: PLR0913
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
@@ -46,7 +43,7 @@ class ColumnTypes(TableMetricProvider):
         ]
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -76,7 +73,7 @@ class ColumnTypes(TableMetricProvider):
         return _get_sqlalchemy_column_metadata(execution_engine.engine, batch_data)
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,
@@ -87,20 +84,27 @@ class ColumnTypes(TableMetricProvider):
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        return _get_spark_column_metadata(
+        spark_column_metadata = _get_spark_column_metadata(
             df.schema, include_nested=metric_value_kwargs["include_nested"]
         )
+        return spark_column_metadata
 
 
 def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
-    # if a custom query was passed
-    if isinstance(batch_data.selectable, TextClause):
-        table_selectable: TextClause = batch_data.selectable
+    table_selectable: str | sqlalchemy.TextClause
+
+    if sqlalchemy.Table and isinstance(batch_data.selectable, sqlalchemy.Table):
+        table_selectable = batch_data.source_table_name or batch_data.selectable.name
+        schema_name = batch_data.source_schema_name or batch_data.selectable.schema
+
+    # if custom query was passed in
+    elif sqlalchemy.TextClause and isinstance(
+        batch_data.selectable, sqlalchemy.TextClause
+    ):
+        table_selectable = batch_data.selectable
         schema_name = None
     else:
-        table_selectable: str = (  # type: ignore[no-redef]
-            batch_data.source_table_name or batch_data.selectable.name
-        )
+        table_selectable = batch_data.source_table_name or batch_data.selectable.name
         schema_name = batch_data.source_schema_name or batch_data.selectable.schema
 
     return get_sqlalchemy_column_metadata(
@@ -115,17 +119,29 @@ def _get_spark_column_metadata(field, parent_name="", include_nested=True):
     if parent_name != "":
         parent_name = f"{parent_name}."
 
-    if isinstance(field, sparktypes.StructType):
+    if pyspark.types and isinstance(field, pyspark.types.StructType):
         for child in field.fields:
-            cols += _get_spark_column_metadata(child, parent_name=parent_name)
-    elif isinstance(field, sparktypes.StructField):
-        if "." in field.name:
-            name = f"{parent_name}`{field.name}`"
+            cols += _get_spark_column_metadata(
+                child, parent_name=parent_name, include_nested=include_nested
+            )
+    elif pyspark.types and isinstance(field, pyspark.types.StructField):
+        if include_nested and "." in field.name:
+            # Only add backticks to escape dotted fields if they don't already exist
+            if field.name.startswith("`") and field.name.endswith("`"):
+                name = f"{parent_name}{field.name}"
+            else:
+                name = f"{parent_name}`{field.name}`"
         else:
             name = parent_name + field.name
+
         field_metadata = {"name": name, "type": field.dataType}
         cols.append(field_metadata)
-        if include_nested and isinstance(field.dataType, sparktypes.StructType):
+
+        if (
+            include_nested
+            and pyspark.types
+            and isinstance(field.dataType, pyspark.types.StructType)
+        ):
             for child in field.dataType.fields:
                 cols += _get_spark_column_metadata(
                     child,

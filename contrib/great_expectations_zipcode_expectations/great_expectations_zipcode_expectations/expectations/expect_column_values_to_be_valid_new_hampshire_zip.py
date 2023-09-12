@@ -18,7 +18,7 @@ def is_valid_new_hampshire_zip(zip: str):
     ]
     if len(zip) > 10:
         return False
-    elif type(zip) != str:
+    elif type(zip) != str:  # noqa: E721
         return False
     elif zip in list_of_new_hampshire_zips:
         return True
@@ -29,7 +29,6 @@ def is_valid_new_hampshire_zip(zip: str):
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidNewHampshireZip(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_new_hampshire_zip"
 

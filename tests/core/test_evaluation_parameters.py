@@ -124,7 +124,7 @@ def test_parse_evaluation_parameter():
     )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_query_store_results_in_evaluation_parameters(data_context_with_query_store):
     TITANIC_ROW_COUNT = 1313  # taken from the titanic db conftest
     DISTINCT_TITANIC_ROW_COUNT = 4
@@ -302,7 +302,7 @@ def test_deduplicate_evaluation_parameter_dependencies():
     } == deduplicated
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 @pytest.mark.parametrize(
     "dataframe,evaluation_parameters,expectation_type,expectation_kwargs,expected_expectation_validation_result",
     [

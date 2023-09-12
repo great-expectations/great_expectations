@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
     InferredAssetFilePathDataConnector,
@@ -10,7 +11,7 @@ from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
     normalize_directory_path,
 )
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -59,6 +60,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         self._base_directory = base_directory
         self._glob_directive = glob_directive
 
+    @override
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
     ) -> List[str]:
@@ -72,6 +74,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         )
         return sorted(path_list)
 
+    @override
     def _get_full_file_path(
         self, path: str, data_asset_name: Optional[str] = None
     ) -> str:

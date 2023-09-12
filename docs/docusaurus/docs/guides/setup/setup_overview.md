@@ -1,100 +1,65 @@
 ---
-title: "Setup: Overview"
+sidebar_label: 'GX installation and configuration workflow'
+title: "Great Expectations installation and configuration workflow"
 ---
-# [![Setup Icon](../../images/universal_map/Gear-active.png)](./setup_overview.md) Setup: Overview
-
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import UniversalMap from '@site/docs/images/universal_map/_universal_map.mdx';
+import GxData from '/docs/components/_data.jsx';
 
 <!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->
 
-<UniversalMap setup='active' connect='inactive' create='inactive' validate='inactive'/>
+Setting up Great Expectations (GX) includes installing GX and initializing your deployment. Optionally, you can customize the configuration of some components, such as Stores, Data Docs, and Plugins.
 
-<!-- Only keep one of the 'To best understand this document' lines.  For processes like the Universal Map steps, use the first one.  For processes like the Architecture Reviews, use the second one. -->
+After you've completed the setup for your production deployment, you can access all GX features from your <TechnicalTag relative="../" tag="data_context" text="Data Context" />. Also, your <TechnicalTag relative="../" tag="store" text="Stores" /> and <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> will be optimized for your business requirements.
 
-:::note Prerequisites
-- Completing [Step 1: Setup](../../tutorials/getting_started/tutorial_setup.md) of the Getting Started tutorial is recommended.
+To set up <TechnicalTag relative="../" tag="datasource" text="Datasources" />, <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />, and <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> see the specific topics for these components. 
+
+If you don't want to manage your own configurations and infrastructure, then Great Expectations Cloud might be the solution. If you're interested in participating in the Great Expectations Cloud Beta program, or you want to receive progress updates, [**sign up for the Beta program**](https://greatexpectations.io/cloud).
+
+:::info Windows Support
+
+Windows support for the open source Python version of GX is currently unavailable. If you’re using GX in a Windows environment, you might experience errors or performance issues.
+
 :::
 
-Getting started with Great Expectations is quick and easy.  Once you have completed setup for your production deployment, you will have access to all of the features of Great Expectations from a single entry point: Your <TechnicalTag relative="../" tag="data_context" text="Data Context" />.  You will also have your <TechnicalTag relative="../" tag="store" text="Stores" /> and <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> configured in the manner most suitable for your project's purposes.
+## Before you start
 
-### The alternative to manual Setup
+Before you start installing and configuring GX, you should complete the [Quickstart guide](tutorials/quickstart/quickstart.md) and have the following items installed:
 
-If you're not interested in managing your own configuration or infrastructure then Great Expectations Cloud may be of interest to you. You can learn more about Great Expectations Cloud — our fully managed SaaS offering — by signing up for [our weekly cloud workshop!](https://greatexpectations.io/cloud) You’ll get to see our newest features and apply for our private Alpha program!
+- <span>A supported version of Python. GX supports Python versions {GxData.min_python} to {GxData.max_python}.</span>
+- pip (the package installer for Python).
+- An internet connection.
+- A web browser (for Jupyter Notebooks).
+- A virtual environment. Recommended for your project workspace.
 
-## The Setup process
+## Install Great Expectations
 
-<!-- Brief outline of what the process entails.  -->
+See [Install Great Expectations](./installation/install_gx.md).
 
-Setup entails ensuring your system is prepared to run Great Expectations, installing Great Expectations itself, and initializing your deployment. Optionally, you can also tweak the configuration of some components, such as Stores and Data Docs. We'll look at each of these things in sequence.
+## Initialize a Data Context
 
-Note: configuration of <TechnicalTag relative="../" tag="datasource" text="Datasources" />, <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />, and <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> will be handled separately. We consider those to be configuration of components after your main Great Expectations deployment is set up.
-
-<!-- The following subsections should be repeated as necessary.  They should give a high level map of the things that need to be done or optionally can be done in this process, preferably in the order that they should be addressed (assuming there is one). If the process crosses multiple steps of the Universal Map, use the <SetupHeader> <ConnectHeader> <CreateHeader> and <ValidateHeader> tags to indicate which Universal Map step the subsections fall under. -->
-
-### 1. System Dependencies
-
-The first thing to take care of is making sure your work environment has the utilities you need to install and run Great Expectations.  These include a working Python install (version 3.7 or greater), the ability to pip install Python packages, an internet connection, and a browser so that you can use Jupyter notebooks.  Best practices are to use a virtual environment for your project's workspace.
-
-If you are having trouble with any of these, our documentation on <TechnicalTag relative="../" tag="supporting_resource" text="Supporting Resources" /> will direct you to more information and helpful tutorials.
-
-### 2. Installation
-
-Installing Great Expectations is a simple pip command.  From the terminal, execute:
-
-```markup title="Terminal command:"
-pip install great_expectations
-```
-
-Running this command in an environment configured to accept Python pip install commands will handle the entire installation process for Great Expectations and its dependencies.
-
-See our [guides for the installation process](./index.md#installation) for more information.
-
-### 3. Initialize a Data Context
-
-Your Data Context contains the entirety of your Great Expectations project and provides the entry point for all of the primary methods you will use to configure and interact with Great Expectations.  At every step in your use of Great Expectations, the Data Context provides easy access to the key elements you will need to interact with.  Furthermore, the Data Context will internally manage various classes so that you don't have to.  Because of this, once you have completed the configurations in your Setup there will be relatively few objects you will need to manage to get Great Expectations working for you.
-
-That's why the first thing you'll do once you've installed Great Expectations will be to initialize your Data Context.
+Your Data Context contains your Great Expectations project, and it is the entry point for configuring and interacting with Great Expectations. The Data Context manages various classes and helps limit the number of objects you need to manage to get Great Expectations working.
 
 ![what the data context does for you](../images/overview_illustrations/data_context_does_for_you.png)
 
-Initializing your Data Context is another one-line command.  Simply go to the root folder for your project and execute:
+See [Configure Data Contexts](./configure_data_contexts_lp.md).
 
-```markdown title="Terminal command:"
-great_expectations init
-```
+## Optional configurations
 
-Running this command will initialize your Data Context in the directory that the command is run from.  It will create the folder structure a Data Context requires to organize your project.
+After you've initialized your Data Context, you can start using Great Expectations. However, a few components such as Stores, Data Docs, and Plugins that are configured by default to operate locally can be changed to hosted if it better suits your use case.
 
-See our [guides for configuring your Data Context](./index.md#data-contexts) for more information.
+### Stores
 
-### 4. Optional Configurations
+Stores are the locations where your Data Context stores information about your <TechnicalTag relative="../" tag="expectation" text="Expectations" />, your <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, and your <TechnicalTag relative="../" tag="metric" text="Metrics" />.  By default, these are stored locally. To reconfigure a Store to work with a specific backend, see [Configure Expectation Stores](./configuring_metadata_stores/configure_expectation_stores.md), [Configure Validation Result Stores](./configuring_metadata_stores/configure_result_stores.md), and [Configure a MetricStore](./configuring_metadata_stores/how_to_configure_a_metricsstore.md).
 
-Once your Data Context is initialized, you'll be all set to start using Great Expectations.  However, there are a few things that are configured by default to operate locally which you may want to configure to be hosted elsewhere.  We include these optional configurations in our Setup instructions.  Using the Data Context, you can easily create and test your configurations.
+### Data Docs
 
-#### Stores
+Data Docs provide human-readable renderings of your Expectation Suites and Validation Results, and they are built locally by default. To host and share Data Docs differently, see [Host and share Data Docs](./configuring_data_docs/host_and_share_data_docs.md).
 
-Stores are the locations where your Data Context stores information about your <TechnicalTag relative="../" tag="expectation" text="Expectations" />, your <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, and your <TechnicalTag relative="../" tag="metric" text="Metrics" />.  By default, these are stored locally.  But you can reconfigure them to work with a variety of backends.
+### Plugins
 
-See our [guides for configuring Stores](./index.md#stores) for more information.
+Python files are treated as <TechnicalTag relative="../" tag="plugin" text="Plugins" /> when they are in the `plugins` directory of your project (which is created automatically when you initialize your Data Context) and they can be used to extend Great Expectations.  If you have <TechnicalTag relative="../" tag="custom_expectation" text="Custom Expectations" /> or other extensions that you want to use as Plugins with Great Expectations, add them to the `plugins` directory.
 
-#### Data Docs
+## Next steps
 
-Data Docs provide human readable renderings of your Expectation Suites and Validation Results.  As with Stores, these are built locally by default.  However, you can configure them to be hosted and shared in a variety of different ways.
-
-See our [guides on configuring Data Docs](./index.md#data-docs) for more information.
-
-#### Plugins
-
-Python files are treated as <TechnicalTag relative="../" tag="plugin" text="Plugins" /> if they are in the `plugins` directory in your project (which is created automatically when you initialize your Data Context) can be used to extend Great Expectations.  If you have <TechnicalTag relative="../" tag="custom_expectation" text="Custom Expectations" /> or other extensions to Great Expectations that you wish to use as Plugins in your deployment of Great Expectations, you should include them in the `plugins` directory.
-
-## Wrapping up
-
-That's all there is to the Setup step.  Once you have your Data Context initialized you will almost always start from your Data Context (as illustrated below) for everything else you do through Great Expectations.
-
-```markdown title="Python code:"
-import great_expectations as gx
-context = gx.get_context()
-```
-
-From here you will move on to the next step of working with Great Expectations: Connecting to Data.
+- [Install Great Expectations](./installation/install_gx.md)

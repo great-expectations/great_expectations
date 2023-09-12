@@ -3,12 +3,12 @@ from typing import TYPE_CHECKING, Dict, List, Optional
 import pandas as pd
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
+class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
     """Expect the set of distinct column values to contain a given set.
 
     expect_column_distinct_values_to_contain_set is a \
@@ -197,10 +197,10 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
-                params[f"v__{str(i)}"] = v
+                params[f"v__{i!s}"] = v
 
             values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
+                [f"$v__{i!s}" for i, v in enumerate(params["value_set"])]
             )
 
         template_str = f"distinct values must contain this set: {values_string}."

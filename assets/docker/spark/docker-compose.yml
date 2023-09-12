@@ -1,0 +1,6 @@
+services:
+  spark:
+    image: bitnami/spark:3.3.2
+    ports:
+      - "9090:8080"
+      - "7077:7077"

@@ -1,5 +1,3 @@
-from typing import Any
-
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
@@ -19,7 +17,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_invalid_parameter
         gx_exceptions.ProfilerExecutionError, match=r".+start with \$.*"
     ):
         # noinspection PyUnusedLocal
-        parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
+        get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name="mean",
             domain=column_Age_domain,
             variables=variables_multi_part_name_parameter_container,
@@ -312,7 +310,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
         domain = column_Date_domain
     else:
         raise ValueError(
-            f'Supported "domain_name" parameter values are "age" and "date".'
+            'Supported "domain_name" parameter values are "age" and "date".'
         )
 
     if value_accessor is None:

@@ -1,12 +1,5 @@
-from typing import Dict, Optional
-
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions.exceptions import (
-    InvalidExpectationConfigurationError,
-)
 from great_expectations.expectations.regex_based_column_map_expectation import (
     RegexBasedColumnMapExpectation,
-    RegexColumnMapMetricProvider,
 )
 
 
@@ -14,7 +7,7 @@ from great_expectations.expectations.regex_based_column_map_expectation import (
 class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py docstring">
-    """Values in this column should only contain vowels"""
+    """Expect values in this column to only contain vowels."""
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py definition">
     regex_camel_name = "Vowel"
@@ -40,6 +33,7 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
                     "*",
                 ],
             },
+            "only_for": ["pandas", "spark", "sqlite", "postgresql"],
             "tests": [
                 {
                     "title": "positive_test",
@@ -96,20 +90,6 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
                         "success": False,
                     },
                     "include_in_gallery": True,
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite", "postgresql"],
-                },
-                {
-                    "backend": "spark",
-                    "dialects": None,
                 },
             ],
         }

@@ -5,11 +5,11 @@ from typing import List, Optional
 
 import pytest
 from marshmallow import INCLUDE, Schema, fields, validates_schema
-from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import BaseYamlConfig
@@ -25,7 +25,7 @@ from tests.test_utils import (
     save_config_to_filesystem,
 )
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 logger = logging.getLogger(__name__)
 
@@ -41,8 +41,8 @@ class SampleConfig(BaseYamlConfig):
 
     def __init__(
         self,
-        some_param_0: str = None,
-        some_param_1: int = None,
+        some_param_0: Optional[str] = None,
+        some_param_1: Optional[int] = None,
         commented_map: CommentedMap = None,
     ):
         if some_param_0 is None:
@@ -81,7 +81,7 @@ class SampleConfigurationStore(ConfigurationStore):
         ]
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_v3_configuration_store(tmp_path_factory):
     root_directory_path: str = "test_v3_configuration_store"
     root_directory: str = str(tmp_path_factory.mktemp(root_directory_path))

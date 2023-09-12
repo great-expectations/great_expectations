@@ -13,14 +13,6 @@ connecting_to_your_data = [
         backend_dependencies=[BackendDependencies.SQLALCHEMY],
     ),
     IntegrationTestFixture(
-        name="sqlite_yaml_example",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.SQLALCHEMY],
-    ),
-    IntegrationTestFixture(
         name="sqlite_python_example",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",

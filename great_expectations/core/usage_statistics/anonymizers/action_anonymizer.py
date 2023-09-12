@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 
 if TYPE_CHECKING:
@@ -11,14 +14,15 @@ if TYPE_CHECKING:
 class ActionAnonymizer(BaseAnonymizer):
     def __init__(
         self,
-        aggregate_anonymizer: "Anonymizer",
+        aggregate_anonymizer: Anonymizer,
         salt: Optional[str] = None,
     ) -> None:
         super().__init__(salt=salt)
 
         self._aggregate_anonymizer = aggregate_anonymizer
 
-    def anonymize(
+    @override
+    def anonymize(  # type: ignore[override] # differs from parent class
         self,
         action_name: str,
         action_obj: Optional[object] = None,
@@ -38,5 +42,6 @@ class ActionAnonymizer(BaseAnonymizer):
 
         return anonymized_info_dict
 
+    @override
     def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
         return "action_name" in kwargs

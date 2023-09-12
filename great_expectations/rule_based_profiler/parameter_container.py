@@ -1,6 +1,6 @@
 import copy
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional, Set, TypeVar, Union
+from typing import Any, Dict, Final, List, Optional, Set, TypeVar, Union
 
 from pyparsing import (
     Literal,
@@ -13,10 +13,10 @@ from pyparsing import (
     alphas,
     nums,
 )
-from typing_extensions import Final
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.domain import Domain
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot, SerializableDotDict
 
@@ -109,18 +109,10 @@ def _parse_attribute_naming_pattern(name: str) -> ParseResults:
         )
 
 
-def is_fully_qualified_parameter_name_literal_string_format(
-    fully_qualified_parameter_name: str,
-) -> bool:
-    return fully_qualified_parameter_name.startswith(
-        f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}"
-    )
-
-
-def validate_fully_qualified_parameter_name(
+def validate_fully_qualified_parameter_name_delimiter(
     fully_qualified_parameter_name: str,
 ) -> None:
-    if not is_fully_qualified_parameter_name_literal_string_format(
+    if not is_fully_qualified_parameter_name_delimiter_in_literal(
         fully_qualified_parameter_name=fully_qualified_parameter_name
     ):
         raise gx_exceptions.ProfilerExecutionError(
@@ -128,6 +120,26 @@ def validate_fully_qualified_parameter_name(
 names must start with {FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER} (e.g., "{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{fully_qualified_parameter_name}").
 """
         )
+
+
+def is_fully_qualified_parameter_name_delimiter_in_literal(
+    fully_qualified_parameter_name: str,
+) -> bool:
+    return fully_qualified_parameter_name.startswith(
+        f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}"
+    )
+
+
+def is_fully_qualified_parameter_name_prefix_in_literal(
+    fully_qualified_parameter_name: str,
+) -> bool:
+    return (
+        fully_qualified_parameter_name.startswith(f"{VARIABLES_PREFIX}")
+        or fully_qualified_parameter_name.startswith(f"{PARAMETER_PREFIX}")
+        or fully_qualified_parameter_name.startswith(
+            f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}"
+        )
+    )
 
 
 class ParameterNode(SerializableDotDict):
@@ -153,6 +165,7 @@ class ParameterNode(SerializableDotDict):
     def to_dict(self) -> dict:
         return convert_parameter_node_to_dictionary(source=dict(self))  # type: ignore[return-value] # could be None
 
+    @override
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())
 
@@ -229,9 +242,11 @@ class ParameterContainer(SerializableDictDot):
 
         return self.parameter_nodes.get(parameter_name_root)
 
+    @override
     def to_dict(self) -> dict:
         return asdict(self)
 
+    @override
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())
 
@@ -370,7 +385,7 @@ def build_parameter_container(
         fully_qualified_parameter_name,
         parameter_value,
     ) in parameter_values.items():
-        validate_fully_qualified_parameter_name(
+        validate_fully_qualified_parameter_name_delimiter(
             fully_qualified_parameter_name=fully_qualified_parameter_name
         )
         fully_qualified_parameter_name_as_list = fully_qualified_parameter_name[
@@ -446,7 +461,7 @@ def get_parameter_value_by_fully_qualified_parameter_name(
     :return: Optional[Union[Any, ParameterNode]] object corresponding to the last part of the fully-qualified parameter
     name supplied as argument -- a value (of type "Any") or a ParameterNode object (containing the sub-tree structure).
     """
-    validate_fully_qualified_parameter_name(
+    validate_fully_qualified_parameter_name_delimiter(
         fully_qualified_parameter_name=fully_qualified_parameter_name
     )
 
@@ -638,7 +653,7 @@ def _get_parameter_node_attribute_names(
 
     attribute_name: str
     for attribute_name_as_list in attribute_names_as_lists:
-        attribute_name_as_list = (
+        attribute_name_as_list = (  # noqa: PLW2901
             _get_parameter_name_parts_up_to_including_reserved_literal(
                 attribute_name_as_list=attribute_name_as_list
             )

@@ -16,11 +16,11 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     render_evaluation_parameter_string,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
@@ -34,7 +34,7 @@ from great_expectations.render.util import (
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnDiscreteEntropy(ColumnMetricProvider):
+class ColumnDiscreteEntropy(ColumnAggregateMetricProvider):
     """MetricProvider Class for Discrete Entropy MetricProvider"""
 
     metric_name = "column.discrete.entropy"
@@ -95,7 +95,6 @@ class ColumnDiscreteEntropy(ColumnMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-
         dependencies = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
@@ -128,7 +127,7 @@ class ColumnDiscreteEntropy(ColumnMetricProvider):
         return dependencies
 
 
-class ExpectColumnDiscreteEntropyToBeBetween(ColumnExpectation):
+class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
     """Expect the column discrete entropy to be between a minimum value and a maximum value.
             The Shannon entropy of a discrete probability distribution is given by
             - \\sum_{i=1}^{n} P(x_i) * \\log(P(x_i))

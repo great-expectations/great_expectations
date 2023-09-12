@@ -18,7 +18,7 @@ def is_valid_country(country: str):
     list_of_country_names = [item["name"] for item in list_of_countries]
     if len(country) > 252:
         return False
-    elif type(country) != str:
+    elif type(country) != str:  # noqa: E721
         return False
     elif country in list_of_country_names:
         return True
@@ -29,7 +29,6 @@ def is_valid_country(country: str):
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidCountry(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_country"
 

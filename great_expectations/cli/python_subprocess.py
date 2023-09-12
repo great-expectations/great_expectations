@@ -1,11 +1,19 @@
+from __future__ import annotations
+
 import os
 import sys
 import time
 import traceback
 from subprocess import PIPE, CalledProcessError, CompletedProcess, Popen, run
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import click
+
+if TYPE_CHECKING:
+    # I need to import this type for typechecking or mypy will complain. It is the return type of a public method
+    # even though it is in a private module
+    from click._termui_impl import ProgressBar
+
 
 from great_expectations.core import logger
 
@@ -22,8 +30,10 @@ def execute_shell_command(command: str) -> int:
     """
     cwd: str = os.getcwd()  # noqa: PTH109
 
-    path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
-    env: dict = dict(os.environ, PATH=path_env_var)
+    path_env_var: str = os.pathsep.join(
+        [os.environ.get("PATH", os.defpath), cwd]  # noqa: TID251
+    )
+    env: dict = dict(os.environ, PATH=path_env_var)  # noqa: TID251
 
     status_code: int = 0
     try:
@@ -52,7 +62,7 @@ def execute_shell_command(command: str) -> int:
         exception_message: str = "A Sub-Process call Exception occurred.\n"
         exception_traceback: str = traceback.format_exc()
         exception_message += (
-            f'{type(cpe).__name__}: "{str(cpe)}".  Traceback: "{exception_traceback}".'
+            f'{type(cpe).__name__}: "{cpe!s}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
 
@@ -68,8 +78,10 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
     """
     cwd: str = os.getcwd()  # noqa: PTH109
 
-    path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
-    env: dict = dict(os.environ, PATH=path_env_var)
+    path_env_var: str = os.pathsep.join(
+        [os.environ.get("PATH", os.defpath), cwd]  # noqa: TID251
+    )
+    env: dict = dict(os.environ, PATH=path_env_var)  # noqa: TID251
 
     status_code: int
 
@@ -81,6 +93,7 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
 
     gathered: int = 0
     progress: float
+    bar: ProgressBar
     with click.progressbar(length=bar_length_100_percent, label=command) as bar:
         try:
             with Popen(
@@ -111,11 +124,11 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
                     progress = float(gathered) / max_work_amount
                     excess: float = progress - 1.0
                     if excess > 0:
-                        if 0.0 < excess <= 1.0:
+                        if 0.0 < excess <= 1.0:  # noqa: PLR2004
                             max_work_amount += 2.0 * excess * max_work_amount
-                        elif 1.0 < excess <= 2.0:
+                        elif 1.0 < excess <= 2.0:  # noqa: PLR2004
                             max_work_amount += 5.0 * excess * max_work_amount
-                        elif 2.0 < excess <= 1.0e1:
+                        elif 2.0 < excess <= 1.0e1:  # noqa: PLR2004
                             max_work_amount += 1.0e1 * excess * max_work_amount
                         else:
                             max_work_amount += 1.0e2 * excess * max_work_amount
@@ -137,7 +150,9 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
             sys.stderr.flush()
             exception_message: str = "A Sub-Process call Exception occurred.\n"
             exception_traceback: str = traceback.format_exc()
-            exception_message += f'{type(cpe).__name__}: "{str(cpe)}".  Traceback: "{exception_traceback}".'
+            exception_message += (
+                f'{type(cpe).__name__}: "{cpe!s}".  Traceback: "{exception_traceback}".'
+            )
             logger.error(exception_message)
 
     return status_code

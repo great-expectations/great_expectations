@@ -2,7 +2,6 @@ from unittest import mock
 
 import pytest
 
-import tests.test_utils as test_utils
 from great_expectations import DataContext
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.store import ExpectationsStore
@@ -10,13 +9,14 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
 from great_expectations.util import gen_directory_tree_str
+from tests import test_utils
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,
 )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_expectations_store(empty_data_context):
     context: DataContext = empty_data_context
     my_store = ExpectationsStore()
@@ -53,7 +53,7 @@ def test_expectations_store(empty_data_context):
     }
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_ExpectationsStore_with_DatabaseStoreBackend(sa, empty_data_context):
     context: DataContext = empty_data_context
     # Use sqlite so we don't require postgres for this test.
@@ -138,7 +138,7 @@ def test_expectations_store_report_store_backend_id_in_memory_store_backend():
     assert test_utils.validate_uuid4(in_memory_expectations_store.store_backend_id)
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_expectations_store_report_same_id_with_same_configuration_TupleFilesystemStoreBackend(
     tmp_path_factory,
 ):
@@ -200,7 +200,7 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
@@ -239,7 +239,6 @@ store_backend:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_ge_cloud_response_json_to_object_dict() -> None:
     store = ExpectationsStore(store_name="expectations_store")

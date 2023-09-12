@@ -7,9 +7,14 @@ from great_expectations.cli import cli
 from great_expectations.cli.python_subprocess import (
     execute_shell_command_with_progress_polling,
 )
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.util import gen_directory_tree_str, is_library_loadable
 from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+
+pytestmark = pytest.mark.cli
 
 
 def _library_not_loaded_test(
@@ -30,7 +35,7 @@ def _library_not_loaded_test(
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(basedir)
     result = runner.invoke(
-        cli, ["--v3-api", "init", "--no-view"], input=cli_input, catch_exceptions=False
+        cli, ["init", "--no-view"], input=cli_input, catch_exceptions=False
     )
     stdout = result.output
     print(stdout)
@@ -62,14 +67,20 @@ but the package `{library_name}` containing this library is not installed.
 
     assert result.exit_code == 1
 
-    assert os.path.isdir(os.path.join(basedir, "great_expectations"))
-    config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
-    assert os.path.isfile(config_path)
+    assert os.path.isdir(  # noqa: PTH112
+        os.path.join(basedir, FileDataContext.GX_DIR)  # noqa: PTH118
+    )
+    config_path = os.path.join(  # noqa: PTH118
+        basedir, "great_expectations/great_expectations.yml"
+    )
+    assert os.path.isfile(config_path)  # noqa: PTH113
 
     config = yaml.load(open(config_path))
     assert config["datasources"] == {}
 
-    obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
+    obs_tree = gen_directory_tree_str(
+        os.path.join(basedir, FileDataContext.GX_DIR)  # noqa: PTH118
+    )
     assert (
         obs_tree
         == """\
@@ -119,7 +130,7 @@ def test_init_install_sqlalchemy(caplog, tmp_path_factory, monkeypatch):
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(basedir)
     result = runner.invoke(
-        cli, ["--v3-api", "init", "--no-view"], input=cli_input, catch_exceptions=False
+        cli, ["init", "--no-view"], input=cli_input, catch_exceptions=False
     )
     stdout = result.output
 
@@ -265,7 +276,7 @@ def test_cli_init_spark_without_library_installed_instructs_user(
     monkeypatch.chdir(basedir)
     result = runner.invoke(
         cli,
-        ["--v3-api", "init", "--no-view"],
+        ["init", "--no-view"],
         input="\n\n1\n2\nn\n",
         catch_exceptions=False,
     )
@@ -294,14 +305,20 @@ but the package `pyspark` containing this library is not installed.
 
     assert result.exit_code == 1
 
-    assert os.path.isdir(os.path.join(basedir, "great_expectations"))
-    config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
-    assert os.path.isfile(config_path)
+    assert os.path.isdir(  # noqa: PTH112
+        os.path.join(basedir, FileDataContext.GX_DIR)  # noqa: PTH118
+    )
+    config_path = os.path.join(  # noqa: PTH118
+        basedir, "great_expectations/great_expectations.yml"
+    )
+    assert os.path.isfile(config_path)  # noqa: PTH113
 
     config = yaml.load(open(config_path))
     assert config["datasources"] == {}
 
-    obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
+    obs_tree = gen_directory_tree_str(
+        os.path.join(basedir, FileDataContext.GX_DIR)  # noqa: PTH118
+    )
     assert (
         obs_tree
         == """\

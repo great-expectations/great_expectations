@@ -51,7 +51,43 @@ snapshots[
 }
 
 snapshots[
-    "test_atomic_diagnostic_observed_value_with_boolean_columun_expect_column_kl_divergence_to_be_less_than 1"
+    "test_atomic_diagnostic_observed_value_expect_column_quantile_values_to_be_between 1"
+] = {
+    "name": "atomic.diagnostic.observed_value",
+    "value": {
+        "header_row": [
+            {"schema": {"type": "string"}, "value": "Quantile"},
+            {"schema": {"type": "string"}, "value": "Value"},
+        ],
+        "schema": {"type": "TableType"},
+        "table": [
+            [
+                {"schema": {"type": "string"}, "value": "0.05"},
+                {"schema": {"type": "number"}, "value": 67},
+            ],
+            [
+                {"schema": {"type": "string"}, "value": "Q1"},
+                {"schema": {"type": "number"}, "value": 329},
+            ],
+            [
+                {"schema": {"type": "string"}, "value": "Median"},
+                {"schema": {"type": "number"}, "value": 657},
+            ],
+            [
+                {"schema": {"type": "string"}, "value": "Q3"},
+                {"schema": {"type": "number"}, "value": 985},
+            ],
+            [
+                {"schema": {"type": "string"}, "value": "0.95"},
+                {"schema": {"type": "number"}, "value": 1247},
+            ],
+        ],
+    },
+    "value_type": "TableType",
+}
+
+snapshots[
+    "test_atomic_diagnostic_observed_value_with_boolean_column_expect_column_kl_divergence_to_be_less_than 1"
 ] = {
     "name": "atomic.diagnostic.observed_value",
     "value": {
@@ -96,39 +132,48 @@ snapshots[
 }
 
 snapshots[
-    "test_atomic_diagnostic_observed_value_expect_column_quantile_values_to_be_between 1"
+    "test_atomic_diagnostic_observed_value_with_boolean_columun_expect_column_kl_divergence_to_be_less_than 1"
 ] = {
     "name": "atomic.diagnostic.observed_value",
     "value": {
-        "header_row": [
-            {"schema": {"type": "string"}, "value": "Quantile"},
-            {"schema": {"type": "string"}, "value": "Value"},
-        ],
-        "schema": {"type": "TableType"},
-        "table": [
-            [
-                {"schema": {"type": "string"}, "value": "0.05"},
-                {"schema": {"type": "number"}, "value": 67},
-            ],
-            [
-                {"schema": {"type": "string"}, "value": "Q1"},
-                {"schema": {"type": "number"}, "value": 329},
-            ],
-            [
-                {"schema": {"type": "string"}, "value": "Median"},
-                {"schema": {"type": "number"}, "value": 657},
-            ],
-            [
-                {"schema": {"type": "string"}, "value": "Q3"},
-                {"schema": {"type": "number"}, "value": 985},
-            ],
-            [
-                {"schema": {"type": "string"}, "value": "0.95"},
-                {"schema": {"type": "number"}, "value": 1247},
-            ],
-        ],
+        "graph": {
+            "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
+            "autosize": "fit",
+            "config": {"view": {"continuousHeight": 300, "continuousWidth": 400}},
+            "data": {"name": "data-d8f1a1ab1f79e142d9ca399157673554"},
+            "datasets": {
+                "data-d8f1a1ab1f79e142d9ca399157673554": [
+                    {"fraction": 0.5, "values": "True"},
+                    {"fraction": 0.5, "values": "False"},
+                ]
+            },
+            "encoding": {
+                "tooltip": [
+                    {"field": "values", "type": "nominal"},
+                    {"field": "fraction", "type": "quantitative"},
+                ],
+                "x": {"field": "values", "type": "nominal"},
+                "y": {"field": "fraction", "type": "quantitative"},
+            },
+            "height": 400,
+            "mark": "bar",
+            "width": 250,
+        },
+        "header": {
+            "schema": {"type": "StringValueType"},
+            "value": {
+                "params": {
+                    "observed_value": {
+                        "schema": {"type": "string"},
+                        "value": "None (-infinity, infinity, or NaN)",
+                    }
+                },
+                "template": "KL Divergence: $observed_value",
+            },
+        },
+        "schema": {"type": "GraphType"},
     },
-    "value_type": "TableType",
+    "value_type": "GraphType",
 }
 
 snapshots["test_atomic_diagnostic_observed_value_with_empty_result 1"] = {
@@ -454,7 +499,7 @@ snapshots[
             "schema": {"type": "StringValueType"},
             "value": {
                 "params": {
-                    "column": {"schema": {"type": "string"}, "value": "Unnamed: 0"},
+                    "column": {"schema": {"type": "string"}, "value": "Unnamed: 0"}
                 },
                 "template": "$column quantiles must be within the following value ranges.",
             },
@@ -790,11 +835,13 @@ snapshots[
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "json_schema": {"schema": {"type": "object"}, "value": {"foo": "bar"}},
             "formatted_json": {
                 "schema": {"type": "string"},
-                "value": "<pre>{\n" '    "foo": "bar"\n' "}</pre>",
+                "value": """<pre>{
+    "foo": "bar"
+}</pre>""",
             },
+            "json_schema": {"schema": {"type": "object"}, "value": {"foo": "bar"}},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
         },
@@ -957,12 +1004,12 @@ snapshots[
     "value": {
         "params": {
             "column_list": {"schema": {"type": "array"}, "value": ["A", "B", "C"]},
-            "ignore_row_if": {"schema": {"type": "string"}, "value": "foo"},
-            "mostly": {"schema": {"type": "number"}, "value": 0.8},
-            "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
             "column_list_0": {"schema": {"type": "string"}, "value": "A"},
             "column_list_1": {"schema": {"type": "string"}, "value": "B"},
             "column_list_2": {"schema": {"type": "string"}, "value": "C"},
+            "ignore_row_if": {"schema": {"type": "string"}, "value": "foo"},
+            "mostly": {"schema": {"type": "number"}, "value": 0.8},
+            "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "Values must be unique across columns, at least $mostly_pct % of the time: $column_list_0 $column_list_1 $column_list_2",
@@ -980,14 +1027,14 @@ snapshots[
                 "schema": {"type": "array"},
                 "value": ["my_first_column", "my_second_column"],
             },
-            "ignore_row_if": {"schema": {"type": "string"}, "value": "foo"},
-            "mostly": {"schema": {"type": "number"}, "value": 0.8},
-            "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
             "column_list_0": {"schema": {"type": "string"}, "value": "my_first_column"},
             "column_list_1": {
                 "schema": {"type": "string"},
                 "value": "my_second_column",
             },
+            "ignore_row_if": {"schema": {"type": "string"}, "value": "foo"},
+            "mostly": {"schema": {"type": "number"}, "value": 0.8},
+            "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "Values must be unique across columns, at least $mostly_pct % of the time: $column_list_0 $column_list_1",
@@ -1000,9 +1047,7 @@ snapshots[
 ] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "params": {
-            "min_value": {"schema": {"type": "number"}, "value": 5},
-        },
+        "params": {"min_value": {"schema": {"type": "number"}, "value": 5}},
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "Must have greater than or equal to $min_value columns.",
     },
@@ -1055,9 +1100,7 @@ snapshots["test_atomic_prescriptive_summary_expect_table_columns_to_match_set 1"
 snapshots["test_atomic_prescriptive_summary_expect_table_row_count_to_be_between 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
-        "params": {
-            "min_value": {"schema": {"type": "number"}, "value": 1},
-        },
+        "params": {"min_value": {"schema": {"type": "number"}, "value": 1}},
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "Must have greater than or equal to $min_value rows.",
     },

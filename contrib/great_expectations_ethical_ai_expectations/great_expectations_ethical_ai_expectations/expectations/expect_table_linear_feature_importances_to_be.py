@@ -11,7 +11,7 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.expectations.metrics.metric_provider import (
     MetricConfiguration,
     metric_value,
@@ -23,7 +23,6 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 
 # This class defines the Metric, a class used by the Expectation to compute important data for validating itself
 class TableModelingRidgeFeatureImportances(TableMetricProvider):
-
     metric_name = "table.modeling.linear.feature_importances"
     value_keys = ("y_column",)
 
@@ -73,7 +72,7 @@ class TableModelingRidgeFeatureImportances(TableMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectTableLinearFeatureImportancesToBe(TableExpectation):
+class ExpectTableLinearFeatureImportancesToBe(BatchExpectation):
     """Expect Feature Importances of specified columns in table for Linear Regression to meet threshold."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -115,7 +114,7 @@ class ExpectTableLinearFeatureImportancesToBe(TableExpectation):
     library_metadata = {
         "tags": ["ai/ml", "fair-ai", "hackathon-22"],
         "contributors": ["@austiezr"],
-        "requirements": ["sklearn"],
+        "requirements": ["scikit-learn"],
     }
 
     metric_dependencies = ("table.modeling.linear.feature_importances",)
@@ -188,7 +187,6 @@ class ExpectTableLinearFeatureImportancesToBe(TableExpectation):
         runtime_configuration=None,
         execution_engine=None,
     ):
-
         importances = dict(
             sorted(
                 metrics["table.modeling.linear.feature_importances"].items(),

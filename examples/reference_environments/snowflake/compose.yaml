@@ -1,0 +1,35 @@
+services:
+  jupyter:
+    image: gx/snowflake_example_jupyter
+    container_name: gx_snowflake_example_jupyter
+    build:
+      context: .
+      dockerfile: jupyter.Dockerfile
+    environment:
+      SNOWFLAKE_CONNECTION_STRING: ${SNOWFLAKE_CONNECTION_STRING}
+    ports:
+      - "8888:8888"
+    volumes:
+      - gx_stores:/gx/gx_stores
+    networks:
+      - dbnet
+
+  data_docs:
+    image: gx/snowflake_data_docs
+    container_name: gx_snowflake_data_docs
+    build:
+      context: .
+      dockerfile: data_docs.Dockerfile
+    networks:
+      - dbnet
+    ports:
+      - "3000:3000"
+    volumes:
+      - gx_stores:/gx/gx_stores:ro
+
+networks:
+  dbnet:
+    driver: bridge
+
+volumes:
+  gx_stores:

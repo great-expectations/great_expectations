@@ -164,7 +164,7 @@ class EvaluationParameterParser:
             self._parser = expr
         return self._parser
 
-    def evaluate_stack(self, s):
+    def evaluate_stack(self, s):  # noqa: PLR0911, PLR0912
         op, num_args, has_fn_kwargs = s.pop(), 0, False
         if isinstance(op, tuple):
             op, num_args, has_fn_kwargs = op
@@ -291,12 +291,10 @@ def find_evaluation_parameter_dependencies(parameter_expression):
         _ = parser.parseString(parameter_expression, parseAll=True)
     except ParseException as err:
         raise EvaluationParameterError(
-            f"Unable to parse evaluation parameter: {str(err)} at line {err.line}, column {err.column}"
+            f"Unable to parse evaluation parameter: {err!s} at line {err.line}, column {err.column}"
         )
     except AttributeError as err:
-        raise EvaluationParameterError(
-            f"Unable to parse evaluation parameter: {str(err)}"
-        )
+        raise EvaluationParameterError(f"Unable to parse evaluation parameter: {err!s}")
 
     for word in expr.exprStack:
         if isinstance(word, (int, float)):
@@ -331,7 +329,7 @@ def find_evaluation_parameter_dependencies(parameter_expression):
     return dependencies
 
 
-def parse_evaluation_parameter(  # noqa: C901 - complexity 19
+def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
     parameter_expression: str,
     evaluation_parameters: Optional[Dict[str, Any]] = None,
     data_context: Optional[AbstractDataContext] = None,
@@ -378,19 +376,17 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
                     "Unrecognized urn_type in ge_urn: must be 'stores' to use a metric store."
                 )
                 raise EvaluationParameterError(
-                    f"No value found for $PARAMETER {str(parse_results[0])}"
+                    f"No value found for $PARAMETER {parse_results[0]!s}"
                 )
         except ParseException as e:
-            logger.debug(
-                f"Parse exception while parsing evaluation parameter: {str(e)}"
-            )
+            logger.debug(f"Parse exception while parsing evaluation parameter: {e!s}")
             raise EvaluationParameterError(
-                f"No value found for $PARAMETER {str(parse_results[0])}"
+                f"No value found for $PARAMETER {parse_results[0]!s}"
             ) from e
         except AttributeError as e:
             logger.warning("Unable to get store for store-type valuation parameter.")
             raise EvaluationParameterError(
-                f"No value found for $PARAMETER {str(parse_results[0])}"
+                f"No value found for $PARAMETER {parse_results[0]!s}"
             ) from e
 
     elif len(parse_results) == 1:
@@ -439,11 +435,11 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
     except Exception as e:
         exception_traceback = traceback.format_exc()
         exception_message = (
-            f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+            f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
         )
         logger.debug(exception_message, e, exc_info=True)
         raise EvaluationParameterError(
-            f"Error while evaluating evaluation parameter expression: {str(e)}"
+            f"Error while evaluating evaluation parameter expression: {e!s}"
         ) from e
 
     return result
@@ -451,7 +447,7 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
 
 def _get_parse_results(
     parameter_expression: str,
-) -> Union[ParseResults, Union[ParseResults, list]]:
+) -> Union[ParseResults, list]:
     # Calling get_parser clears the stack
     parser = EXPR.get_parser()
     try:
@@ -504,7 +500,7 @@ def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:
     return deduplicated
 
 
-EvaluationParameterIdentifier = namedtuple(
+EvaluationParameterIdentifier = namedtuple(  # noqa: PYI024 # this class is not used
     "EvaluationParameterIdentifier",
     ["expectation_suite_name", "metric_name", "metric_kwargs_id"],
 )

@@ -1,6 +1,7 @@
 from typing import Optional
 
 import pandas as pd
+import pytest
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.batch import RuntimeBatchRequest
@@ -20,6 +21,7 @@ class ExpectColumnValuesAsStringToBePositiveInteger(ExpectColumnValuesToMatchReg
         assert "regex" not in configuration.kwargs, "regex cannot be altered"
 
 
+@pytest.mark.big
 def test_expect_column_values_as_string_to_be_positive_integers_pass(
     data_context_with_datasource_pandas_engine,
 ):
@@ -44,6 +46,7 @@ def test_expect_column_values_as_string_to_be_positive_integers_pass(
     ).success
 
 
+@pytest.mark.big
 def test_expect_column_values_as_string_to_be_positive_integers_fail(
     data_context_with_datasource_pandas_engine,
 ):

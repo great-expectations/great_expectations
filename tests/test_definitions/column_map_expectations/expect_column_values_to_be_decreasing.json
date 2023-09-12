@@ -1,6 +1,7 @@
 {
   "expectation_type" : "expect_column_values_to_be_decreasing",
   "datasets" : [{
+    "dataset_name": "expect_column_values_to_be_decreasing_1",
     "data" : {
       "w" : [1, 2, 3, 7, 6, 5, 4, 3, 2, 1],
       "x" : [null, null, 10, 9, 8, 7, null, 6, 5, 4],
@@ -57,6 +58,7 @@
       }
     }]},
     {
+      "dataset_name": "expect_column_values_to_be_decreasing_2",
       "data": {
         "empty_column": []
       },

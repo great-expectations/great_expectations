@@ -6,13 +6,17 @@
 import json
 import logging
 import os
-from typing import List
+from typing import TYPE_CHECKING, List
 
 import pip
 from great_expectations_contrib.commands import read_package_from_file, sync_package
-from great_expectations_contrib.package import GreatExpectationsContribPackageManifest
 
 from great_expectations.core.util import convert_to_json_serializable
+
+if TYPE_CHECKING:
+    from great_expectations_contrib.package import (
+        GreatExpectationsContribPackageManifest,
+    )
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -46,7 +50,7 @@ def gather_all_package_manifests(package_paths: List[str]) -> List[dict]:
         A list of dictionaries that represents contributor package manifests
     """
     payload: List[dict] = []
-    root = os.getcwd()
+    root = os.getcwd()  # noqa: PTH109
     for path in package_paths:
         try:
             # Go to package, install deps, read manifest, and sync it
@@ -98,8 +102,10 @@ def write_results_to_disk(path: str, package_manifests: List[dict]) -> None:
 
 
 if __name__ == "__main__":
-    pwd = os.path.abspath(os.getcwd())
-    root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
+    pwd = os.path.abspath(os.getcwd())  # noqa: PTH100, PTH109
+    root = os.path.join(  # noqa: PTH118
+        os.path.dirname(os.path.abspath(__file__)), "..", ".."  # noqa: PTH100, PTH120
+    )
     try:
         os.chdir(root)
         package_paths = gather_all_contrib_package_paths()
@@ -108,7 +114,8 @@ if __name__ == "__main__":
             len(payload) > 0
         ), "Something went wrong; there should packages in the payload!"
         write_results_to_disk(
-            os.path.join(pwd, "./package_manifests--staging.json"), payload
+            os.path.join(pwd, "./package_manifests--staging.json"),  # noqa: PTH118
+            payload,
         )
     finally:
         os.chdir(pwd)

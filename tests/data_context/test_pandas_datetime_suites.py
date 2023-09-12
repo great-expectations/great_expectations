@@ -2,11 +2,13 @@ import datetime
 from tempfile import TemporaryDirectory
 
 import pandas as pd
+import pytest
 
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.dataset import PandasDataset
 
 
+@pytest.mark.filesystem
 def test_save_expectation_suite_with_datetime_objects(
     data_context_parameterized_expectation_suite,
 ):
@@ -24,7 +26,7 @@ def test_save_expectation_suite_with_datetime_objects(
     test_df = pd.DataFrame(test_data)
     dataset_name = "test_pandas_source"
 
-    with TemporaryDirectory() as tempdir:
+    with TemporaryDirectory():
         context = data_context_parameterized_expectation_suite
         ge_path = context.root_directory
 
@@ -39,7 +41,7 @@ def test_save_expectation_suite_with_datetime_objects(
 
         empty_suite = context.add_expectation_suite("test_suite")
 
-        batch = context.get_batch(
+        batch = context._get_batch_v2(
             batch_kwargs=batch_kwargs, expectation_suite_name=empty_suite
         )
         for param in evaluation_parameters:
@@ -79,7 +81,7 @@ def test_save_expectation_suite_with_datetime_objects(
         )
 
         # Check that we can reload the expectation suite and validate
-        reloaded_batch = context.get_batch(
+        reloaded_batch = context._get_batch_v2(
             batch_kwargs=batch_kwargs, expectation_suite_name=reloaded_expectation_suite
         )
 

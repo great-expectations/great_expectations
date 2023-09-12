@@ -16,7 +16,7 @@ def is_validarizonazip(zip: str):
     list_ofarizonazips = [d["zip_code"] for d in list_of_dicts_ofarizonazips]
     if len(zip) > 10:
         return False
-    elif type(zip) != str:
+    elif type(zip) != str:  # noqa: E721
         return False
     elif zip in list_ofarizonazips:
         return True
@@ -27,7 +27,6 @@ def is_validarizonazip(zip: str):
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidArizonaZip(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.validarizonazip"
 

@@ -7,7 +7,6 @@ import boto3
 import pandas as pd
 import pytest
 from moto import mock_s3
-from ruamel.yaml import YAML
 
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import DataContext
@@ -17,15 +16,19 @@ from great_expectations.core.batch import (
     BatchRequestBase,
     IDDict,
 )
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
 from great_expectations.datasource.data_connector.util import (
     sanitize_prefix,
-    sanitize_prefix_for_s3,
+    sanitize_prefix_for_gcs_and_s3,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
 
-yaml = YAML()
+yaml = YAMLHandler()
+
+# module level markers
+pytestmark = pytest.mark.big
 
 
 @mock_s3
@@ -1126,7 +1129,7 @@ assets:
 
 def test_sanitize_prefix_behaves_the_same_as_local_files():
     def check_sameness(prefix, expected_output):
-        s3_sanitized = sanitize_prefix_for_s3(prefix)
+        s3_sanitized = sanitize_prefix_for_gcs_and_s3(text=prefix)
         file_system_sanitized = sanitize_prefix(prefix)
         if os.sep == "\\":  # Fix to ensure tests work on Windows
             file_system_sanitized = file_system_sanitized.replace("\\", "/")

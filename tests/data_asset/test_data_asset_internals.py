@@ -14,6 +14,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 
 
+@pytest.mark.filesystem
 def test_get_and_save_expectation_suite(
     tmp_path_factory, empty_data_context_stats_enabled
 ):
@@ -161,6 +162,7 @@ def test_get_and_save_expectation_suite(
     assert output_config == loaded_suite
 
 
+@pytest.mark.big
 def test_expectation_meta():
     df = gx.dataset.PandasDataset(
         {
@@ -189,6 +191,7 @@ def test_expectation_meta():
     assert "which cannot be serialized to json" in exc.value.message
 
 
+@pytest.mark.unit
 def test_set_default_expectation_argument():
     df = gx.dataset.PandasDataset(
         {
@@ -213,6 +216,7 @@ def test_set_default_expectation_argument():
     } == df.get_default_expectation_arguments()
 
 
+@pytest.mark.big
 def test_test_column_map_expectation_function():
     asset = gx.dataset.PandasDataset(
         {
@@ -264,6 +268,7 @@ def test_test_column_map_expectation_function():
     ) == ExpectationValidationResult(success=True)
 
 
+@pytest.mark.big
 def test_test_column_aggregate_expectation_function():
     asset = gx.dataset.PandasDataset(
         {
@@ -336,6 +341,8 @@ def test_test_column_aggregate_expectation_function():
     ) == ExpectationValidationResult(success=True)
 
 
+# This looks like a bunch of unit tests rolled into 1 test.
+@pytest.mark.unit
 def test_format_map_output():
     df = gx.dataset.PandasDataset(
         {
@@ -623,6 +630,8 @@ def test_format_map_output():
     }
 
 
+# This looks like a bunch of unit tests rolled into 1 test.
+@pytest.mark.unit
 def test_calc_map_expectation_success():
     df = gx.dataset.PandasDataset({"x": list("abcdefghijklmnopqrstuvwxyz")})
     assert df._calc_map_expectation_success(
@@ -676,6 +685,7 @@ def test_calc_map_expectation_success():
     ) == (True, 0.0)
 
 
+@pytest.mark.big
 def test_discard_failing_expectations():
     df = gx.dataset.PandasDataset(
         {
@@ -826,6 +836,7 @@ def test_discard_failing_expectations():
     assert sub1.get_expectation_suite().expectations == exp1
 
 
+@pytest.mark.unit
 def test_test_expectation_function():
     asset = gx.dataset.PandasDataset(
         {

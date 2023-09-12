@@ -1,21 +1,22 @@
-import os
+import pathlib
 import shutil
 
 import pytest
+from pytest import MonkeyPatch, TempPathFactory
 
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
 
 
 @pytest.fixture
 def empty_context_with_checkpoint_v1_stats_enabled(
-    empty_data_context_stats_enabled, monkeypatch
+    empty_data_context_stats_enabled: FileDataContext, monkeypatch: MonkeyPatch
 ):
-    try:
-        monkeypatch.delenv("VAR")
-        monkeypatch.delenv("MY_PARAM")
-        monkeypatch.delenv("OLD_PARAM")
-    except:
-        pass
+    monkeypatch.delenv("VAR", raising=False)
+    monkeypatch.delenv("MY_PARAM", raising=False)
+    monkeypatch.delenv("OLD_PARAM", raising=False)
 
     monkeypatch.setenv("VAR", "test")
     monkeypatch.setenv("MY_PARAM", "1")
@@ -27,7 +28,7 @@ def empty_context_with_checkpoint_v1_stats_enabled(
     fixture_path = file_relative_path(
         __file__, f"../data_context/fixtures/contexts/{fixture_name}"
     )
-    checkpoints_file = os.path.join(root_dir, "checkpoints", fixture_name)
+    checkpoints_file = pathlib.Path(root_dir, "checkpoints", fixture_name)
     shutil.copy(fixture_path, checkpoints_file)
     # # noinspection PyProtectedMember
     context._save_project_config()
@@ -35,13 +36,14 @@ def empty_context_with_checkpoint_v1_stats_enabled(
 
 
 @pytest.fixture
-def v10_project_directory(tmp_path_factory):
+def v10_project_directory(tmp_path_factory: TempPathFactory) -> str:
     """
     GX 0.10.x project for testing upgrade helper
     """
 
-    project_path = str(tmp_path_factory.mktemp("v10_project"))
-    context_root_dir = os.path.join(project_path, "great_expectations")
+    project_path = tmp_path_factory.mktemp("v10_project")
+    context_root_dir = project_path / FileDataContext.GX_DIR
+
     shutil.copytree(
         file_relative_path(
             __file__, "../test_fixtures/upgrade_helper/great_expectations_v10_project/"
@@ -52,14 +54,14 @@ def v10_project_directory(tmp_path_factory):
         file_relative_path(
             __file__, "../test_fixtures/upgrade_helper/great_expectations_v1_basic.yml"
         ),
-        os.path.join(context_root_dir, "great_expectations.yml"),
+        context_root_dir / FileDataContext.GX_YML,
     )
-    return context_root_dir
+    return str(context_root_dir)
 
 
 @pytest.fixture(scope="function")
-def misc_directory(tmp_path):
+def misc_directory(tmp_path: pathlib.Path) -> pathlib.Path:
     misc_dir = tmp_path / "random"
     misc_dir.mkdir()
-    assert os.path.isabs(misc_dir)
+    assert misc_dir.is_absolute()
     return misc_dir

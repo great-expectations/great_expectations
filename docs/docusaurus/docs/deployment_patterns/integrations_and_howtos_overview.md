@@ -1,11 +1,10 @@
 ---
-title: Integrations guides
+sidebar_label: 'Integrate'
+title: 'Integrate'
+id: integrations_and_howtos_overview
+description: Integrate third party products and services with Great Expectations (GX).
 ---
 
-## Overview
+This where you'll find information about integrating third party products and services with Great Expectations (GX). The content is a collaborative effort between the teams who maintain the products and GX.
 
-In this section of the documentation you will find our guides on how to work with third party products and services alongside Great Expectations.
-
-Some of these guides were written by the teams who maintain those products, though many were written by the Great Expectations team as well.
-
-For those who are interested, we have [a guide on how to contribute integration documentation](../integrations/contributing_integration.md).  If you have a third party product or service that you would like to collaborate on building an integration for, please reach out to us on [Slack](https://greatexpectations.io/slack).
+To collaborate on integration documentation for a third party product or service, submit your request on [Slack](https://greatexpectations.io/slack).

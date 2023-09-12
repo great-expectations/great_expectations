@@ -4,18 +4,20 @@ from unittest import mock
 
 import pytest
 from click.testing import CliRunner, Result
-from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
 from great_expectations.cli import cli
+from great_expectations.core.yaml_handler import YAMLHandler
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
-yaml = YAML()
-yaml.default_flow_style = False
+yaml = YAMLHandler()
 
 
-@pytest.mark.parametrize("invocation", [None, "--help", "--v3-api --help"])
+pytestmark = pytest.mark.cli
+
+
+@pytest.mark.parametrize("invocation", [None, "--help"])
 def test_cli_command_help(caplog, invocation):
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(cli, invocation, catch_exceptions=False)
@@ -35,9 +37,7 @@ def test_cli_command_help(caplog, invocation):
     )
     assert (
         """Options:
-  --version                Show the version and exit.
-  --v3-api / --v2-api      Default to v3 (Batch Request) API. Use --v2-api for
-                           v2 (Batch Kwargs) API"""
+  --version                Show the version and exit."""
         in result.output
     )
     assert (
@@ -74,7 +74,7 @@ Commands:
 
 def test_cli_command_invalid_command(caplog):
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, "--v3-api blarg")
+    result = runner.invoke(cli, "blarg")
     assert result.exit_code == 2
     assert "Error: No such command" in result.stderr
     assert ("'blarg'" in result.stderr) or ('"blarg"' in result.stderr)
@@ -82,7 +82,7 @@ def test_cli_command_invalid_command(caplog):
 
 def test_cli_ge_version_exists(caplog):
     runner = CliRunner(mix_stderr=True)
-    result = runner.invoke(cli, "--v3-api --version", catch_exceptions=False)
+    result = runner.invoke(cli, "--version", catch_exceptions=False)
     assert ge_version in str(result.output)
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -92,8 +92,10 @@ def test_cli_works_from_adjacent_directory_without_config_flag(
 ):
     """We don't care about the NOUN here just combinations of the config flag"""
     runner = CliRunner(mix_stderr=True)
-    monkeypatch.chdir(os.path.dirname(empty_data_context.root_directory))
-    result = runner.invoke(cli, "--v3-api checkpoint list", catch_exceptions=False)
+    monkeypatch.chdir(
+        os.path.dirname(empty_data_context.root_directory)  # noqa: PTH120
+    )
+    result = runner.invoke(cli, "checkpoint list", catch_exceptions=False)
     assert result.exit_code == 0
     assert "No Checkpoints found" in result.output
 
@@ -104,7 +106,7 @@ def test_cli_works_from_great_expectations_directory_without_config_flag(
     """We don't care about the NOUN here just combinations of the config flag"""
     runner = CliRunner(mix_stderr=True)
     monkeypatch.chdir(empty_data_context.root_directory)
-    result = runner.invoke(cli, "--v3-api checkpoint list", catch_exceptions=False)
+    result = runner.invoke(cli, "checkpoint list", catch_exceptions=False)
     assert result.exit_code == 0
     assert "No Checkpoints found" in result.output
 
@@ -119,7 +121,7 @@ def test_cli_works_from_random_directory_with_config_flag_fully_specified_yml(
     monkeypatch.chdir(temp_dir)
     result = runner.invoke(
         cli,
-        f"--config {context.root_directory}/great_expectations.yml --v3-api checkpoint list",
+        f"--config {context.root_directory}/great_expectations.yml checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -136,7 +138,7 @@ def test_cli_works_from_random_directory_with_config_flag_great_expectations_dir
     monkeypatch.chdir(temp_dir)
     result = runner.invoke(
         cli,
-        f"--config {context.root_directory} --v3-api checkpoint list",
+        f"--config {context.root_directory} checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -153,7 +155,7 @@ def test_cli_works_from_random_directory_with_c_flag_fully_specified_yml(
     monkeypatch.chdir(temp_dir)
     result = runner.invoke(
         cli,
-        f"-c {context.root_directory}/great_expectations.yml --v3-api checkpoint list",
+        f"-c {context.root_directory}/great_expectations.yml checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -170,7 +172,7 @@ def test_cli_works_from_random_directory_with_c_flag_great_expectations_director
     monkeypatch.chdir(temp_dir)
     result = runner.invoke(
         cli,
-        f"-c {context.root_directory} --v3-api checkpoint list",
+        f"-c {context.root_directory} checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -187,12 +189,10 @@ def test_cli_config_not_found_raises_error_for_datasource_list(
     monkeypatch.chdir(tmp_dir)
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
-        cli, ["-c", "./", "--v3-api", "datasource", "list"], catch_exceptions=False
+        cli, ["-c", "./", "datasource", "list"], catch_exceptions=False
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "datasource", "list"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["datasource", "list"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -203,12 +203,10 @@ def test_cli_config_not_found_raises_error_for_datasource_new(
     monkeypatch.chdir(tmp_dir)
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
-        cli, ["-c", "./", "--v3-api", "datasource", "new"], catch_exceptions=False
+        cli, ["-c", "./", "datasource", "new"], catch_exceptions=False
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "datasource", "new"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["datasource", "new"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -220,13 +218,11 @@ def test_cli_config_not_found_raises_error_for_datasource_delete(
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
         cli,
-        ["-c", "./", "--v3-api", "datasource", "delete", "new"],
+        ["-c", "./", "datasource", "delete", "new"],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "datasource", "delete", "new"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["datasource", "delete", "new"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -238,13 +234,11 @@ def test_cli_config_not_found_raises_error_for_project_check_config(
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
         cli,
-        ["-c", "./", "--v3-api", "project", "check-config"],
+        ["-c", "./", "project", "check-config"],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "project", "check-config"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["project", "check-config"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -256,13 +250,11 @@ def test_cli_config_not_found_raises_error_for_project_upgrade(
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
         cli,
-        ["-c", "./", "--v3-api", "project", "upgrade"],
+        ["-c", "./", "project", "upgrade"],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "project", "upgrade"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["project", "upgrade"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -272,11 +264,9 @@ def test_cli_config_not_found_raises_error_for_store_list(
     tmp_dir = str(tmp_path_factory.mktemp("test_cli_config_not_found"))
     monkeypatch.chdir(tmp_dir)
     runner = CliRunner(mix_stderr=True)
-    result = runner.invoke(
-        cli, ["-c", "./", "--v3-api", "store", "list"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["-c", "./", "store", "list"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(cli, ["--v3-api", "store", "list"], catch_exceptions=False)
+    result = runner.invoke(cli, ["store", "list"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -284,11 +274,9 @@ def test_cli_config_not_found_raises_error_for_suite_new(tmp_path_factory, monke
     tmp_dir = str(tmp_path_factory.mktemp("test_cli_config_not_found"))
     monkeypatch.chdir(tmp_dir)
     runner = CliRunner(mix_stderr=True)
-    result = runner.invoke(
-        cli, ["-c", "./", "--v3-api", "suite", "new"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["-c", "./", "suite", "new"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(cli, ["--v3-api", "suite", "new"], catch_exceptions=False)
+    result = runner.invoke(cli, ["suite", "new"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -298,11 +286,9 @@ def test_cli_config_not_found_raises_error_for_suite_list(
     tmp_dir = str(tmp_path_factory.mktemp("test_cli_config_not_found"))
     monkeypatch.chdir(tmp_dir)
     runner = CliRunner(mix_stderr=True)
-    result = runner.invoke(
-        cli, ["-c", "./", "--v3-api", "suite", "list"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["-c", "./", "suite", "list"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(cli, ["--v3-api", "suite", "list"], catch_exceptions=False)
+    result = runner.invoke(cli, ["suite", "list"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -314,13 +300,13 @@ def test_cli_config_not_found_raises_error_for_suite_scaffold(
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
         cli,
-        ["-c", "./", "--v3-api", "suite", "new", "--profile", "--interactive"],
+        ["-c", "./", "suite", "new", "--profile", "--interactive"],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
     result = runner.invoke(
         cli,
-        ["--v3-api", "suite", "new", "--profile", "--interactive"],
+        ["suite", "new", "--profile", "--interactive"],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
@@ -333,12 +319,10 @@ def test_cli_config_not_found_raises_error_for_suite_edit(
     monkeypatch.chdir(tmp_dir)
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
-        cli, ["-c", "./", "--v3-api", "suite", "edit", "FAKE"], catch_exceptions=False
+        cli, ["-c", "./", "suite", "edit", "FAKE"], catch_exceptions=False
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "suite", "edit", "FAKE"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["suite", "edit", "FAKE"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -352,9 +336,7 @@ def test_cli_config_not_found_raises_error_for_suite_delete(
         cli, ["-c", "./", "suite", "delete", "deleteme"], catch_exceptions=False
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "suite", "delete", "deleteme"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["suite", "delete", "deleteme"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -365,12 +347,10 @@ def test_cli_config_not_found_raises_error_for_checkpoint_new(
     monkeypatch.chdir(tmp_dir)
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
-        cli, ["-c", "./", "--v3-api", "checkpoint", "new"], catch_exceptions=False
+        cli, ["-c", "./", "checkpoint", "new"], catch_exceptions=False
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "checkpoint", "new"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["checkpoint", "new"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -381,12 +361,10 @@ def test_cli_config_not_found_raises_error_for_checkpoint_list(
     monkeypatch.chdir(tmp_dir)
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
-        cli, ["-c", "./", "--v3-api", "checkpoint", "list"], catch_exceptions=False
+        cli, ["-c", "./", "checkpoint", "list"], catch_exceptions=False
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "checkpoint", "list"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["checkpoint", "list"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -398,12 +376,12 @@ def test_cli_config_not_found_raises_error_for_checkpoint_delete(
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
         cli,
-        ["-c", "./", "--v3-api", "checkpoint", "delete", "deleteme"],
+        ["-c", "./", "checkpoint", "delete", "deleteme"],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
     result = runner.invoke(
-        cli, ["--v3-api", "checkpoint", "delete", "deleteme"], catch_exceptions=False
+        cli, ["checkpoint", "delete", "deleteme"], catch_exceptions=False
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
@@ -419,14 +397,13 @@ def test_cli_config_not_found_raises_error_for_docs_clean(
         [
             "-c",
             "./",
-            "--v3-api",
             "docs",
             "clean",
         ],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(cli, ["--v3-api", "docs", "clean"], catch_exceptions=False)
+    result = runner.invoke(cli, ["docs", "clean"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -439,14 +416,13 @@ def test_cli_config_not_found_raises_error_for_docs_list(tmp_path_factory, monke
         [
             "-c",
             "./",
-            "--v3-api",
             "docs",
             "list",
         ],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(cli, ["--v3-api", "docs", "list"], catch_exceptions=False)
+    result = runner.invoke(cli, ["docs", "list"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -458,20 +434,18 @@ def test_cli_config_not_found_raises_error_for_docs_build(
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
         cli,
-        ["-c", "./", "--v3-api", "docs", "build", "--no-view"],
+        ["-c", "./", "docs", "build", "--no-view"],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
     result = runner.invoke(
         cli,
-        ["-c", "./", "--v3-api", "docs", "build", "--no-view"],
+        ["-c", "./", "docs", "build", "--no-view"],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "docs", "build", "--no-view"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["docs", "build", "--no-view"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -489,12 +463,12 @@ def test_assume_yes_using_full_flag_using_checkpoint_delete(
     All versions of the --assume-yes flag (--assume-yes/--yes/-y) should behave the same.
     """
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     runner: CliRunner = CliRunner(mix_stderr=False)
     checkpoint_name: str = "my_v1_checkpoint"
     result: Result = runner.invoke(
         cli,
-        f"--v3-api --assume-yes checkpoint delete {checkpoint_name}",
+        f"--assume-yes checkpoint delete {checkpoint_name}",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -539,7 +513,7 @@ def test_assume_yes_using_full_flag_using_checkpoint_delete(
 
     result = runner.invoke(
         cli,
-        "--v3-api checkpoint list",
+        "checkpoint list",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -561,12 +535,12 @@ def test_assume_yes_using_yes_flag_using_checkpoint_delete(
     All versions of the --assume-yes flag (--assume-yes/--yes/-y) should behave the same.
     """
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     runner: CliRunner = CliRunner(mix_stderr=False)
     checkpoint_name: str = "my_v1_checkpoint"
     result: Result = runner.invoke(
         cli,
-        f"--v3-api --yes checkpoint delete {checkpoint_name}",
+        f"--yes checkpoint delete {checkpoint_name}",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -611,7 +585,7 @@ def test_assume_yes_using_yes_flag_using_checkpoint_delete(
 
     result = runner.invoke(
         cli,
-        "--v3-api checkpoint list",
+        "checkpoint list",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -633,12 +607,12 @@ def test_assume_yes_using_y_flag_using_checkpoint_delete(
     All versions of the --assume-yes flag (--assume-yes/--yes/-y) should behave the same.
     """
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     runner: CliRunner = CliRunner(mix_stderr=False)
     checkpoint_name: str = "my_v1_checkpoint"
     result: Result = runner.invoke(
         cli,
-        f"--v3-api -y checkpoint delete {checkpoint_name}",
+        f"-y checkpoint delete {checkpoint_name}",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -683,7 +657,7 @@ def test_assume_yes_using_y_flag_using_checkpoint_delete(
 
     result = runner.invoke(
         cli,
-        "--v3-api checkpoint list",
+        "checkpoint list",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -705,11 +679,11 @@ def test_using_assume_yes_flag_on_command_with_no_assume_yes_implementation(
     The --assume-yes flag should not cause issues when run with commands that do not implement any logic based on it.
     """
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        "--v3-api --assume-yes checkpoint list",
+        "--assume-yes checkpoint list",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -725,7 +699,7 @@ def test_using_assume_yes_flag_on_command_with_no_assume_yes_implementation(
         "my_simple_checkpoint_with_slack",
         "my_simple_template_checkpoint",
     ]
-    assert all([checkpoint_name in stdout for checkpoint_name in checkpoint_names_list])
+    assert all(checkpoint_name in stdout for checkpoint_name in checkpoint_names_list)
 
     expected_call_args_list = [
         mock.call(

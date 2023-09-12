@@ -4,7 +4,6 @@ import logging
 from typing import (
     TYPE_CHECKING,
     ClassVar,
-    Dict,
     List,
     Type,
 )
@@ -33,7 +32,7 @@ _PANDAS_FILE_TYPE_READER_METHOD_UNSUPPORTED_LIST = (
     # "read_parquet",
     "read_clipboard",  # not path based
     # "read_feather",
-    "read_fwf",  # unhandled type
+    # "read_fwf",
     "read_gbq",  # not path based
     # "read_hdf",
     # "read_html",
@@ -61,6 +60,9 @@ CSVAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get(
 ExcelAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get(
     "excel", _FilePathDataAsset
 )
+FWFAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get(
+    "fwf", _FilePathDataAsset
+)
 JSONAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get(
     "json", _FilePathDataAsset
 )
@@ -79,4 +81,4 @@ class _PandasFilePathDatasource(_PandasDatasource):
     )
 
     # instance attributes
-    assets: Dict[str, _FilePathDataAsset] = {}
+    assets: List[_FilePathDataAsset] = []

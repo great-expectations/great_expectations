@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Final, Optional, Union
 from unittest import mock
 
 import pytest
@@ -33,14 +33,17 @@ class StubConfigurationProvider(_ConfigurationProvider):
         return self._config_values
 
 
+_STUB_CONFIG_PROVIDER: Final = StubConfigurationProvider()
+
+
 class FakeAbstractDataContext(AbstractDataContext):
     def __init__(
-        self, config_provider: StubConfigurationProvider = StubConfigurationProvider()
+        self, config_provider: StubConfigurationProvider = _STUB_CONFIG_PROVIDER
     ) -> None:
         """Override __init__ with only the needed attributes."""
         self._datasource_store = StubDatasourceStore()
         self._variables: Optional[DataContextVariables] = None
-        self._cached_datasources: dict = {}
+        self._datasources: dict = {}
         self._usage_statistics_handler = None
         self._config_provider = config_provider
 
@@ -65,7 +68,6 @@ class FakeAbstractDataContext(AbstractDataContext):
 
 @pytest.mark.unit
 def test_save_datasource_empty_store(datasource_config_with_names: DatasourceConfig):
-
     context = FakeAbstractDataContext()
     # Make sure the fixture has the right configuration
     assert len(context.list_datasources()) == 0
@@ -80,7 +82,6 @@ def test_save_datasource_empty_store(datasource_config_with_names: DatasourceCon
         autospec=True,
         return_value=datasource_config_with_names,
     ) as mock_set, pytest.deprecated_call():
-
         saved_datasource: Union[
             LegacyDatasource, BaseDatasource
         ] = context.save_datasource(datasource_to_save)
@@ -95,10 +96,10 @@ def test_save_datasource_empty_store(datasource_config_with_names: DatasourceCon
     )
 
     # Make sure the datasource got into the cache
-    assert len(context._cached_datasources) == 1
+    assert len(context.datasources) == 1
 
     # Make sure the stored and returned datasource is the same one as the cached datasource
-    cached_datasource = context._cached_datasources[datasource_to_save.name]
+    cached_datasource = context.datasources[datasource_to_save.name]
     assert saved_datasource == cached_datasource
 
 
@@ -106,7 +107,6 @@ def test_save_datasource_empty_store(datasource_config_with_names: DatasourceCon
 def test_save_datasource_overwrites_on_name_collision(
     datasource_config_with_names: DatasourceConfig,
 ):
-
     context = FakeAbstractDataContext()
     # Make sure the fixture has the right configuration
     assert len(context.list_datasources()) == 0
@@ -121,18 +121,17 @@ def test_save_datasource_overwrites_on_name_collision(
         autospec=True,
         return_value=datasource_config_with_names,
     ) as mock_set, pytest.deprecated_call():
-
         context.save_datasource(datasource_to_save)
 
         assert len(context.list_datasources()) == 1
-        assert len(context._cached_datasources) == 1
+        assert len(context.datasources) == 1
 
         # Let's re-save
         context.save_datasource(datasource_to_save)
 
         # Make sure we still only have 1 datasource
         assert len(context.list_datasources()) == 1
-        assert len(context._cached_datasources) == 1
+        assert len(context.datasources) == 1
 
     assert mock_set.call_count == 2
 

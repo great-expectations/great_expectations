@@ -11,7 +11,9 @@ class EmailRenderer(Renderer):
     def __init__(self) -> None:
         super().__init__()
 
-    def render(self, validation_result=None, data_docs_pages=None, notify_with=None):
+    def render(  # noqa: PLR0912
+        self, validation_result=None, data_docs_pages=None, notify_with=None
+    ):
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
         )
@@ -70,7 +72,7 @@ class EmailRenderer(Renderer):
                         else:
                             report_element = str(
                                 f"<strong>ERROR</strong>: The email is trying to provide a link to the following DataDocs: "
-                                f"`{str(docs_link_key)}`, but it is not configured under data_docs_sites "
+                                f"`{docs_link_key!s}`, but it is not configured under data_docs_sites "
                                 "in the great_expectations.yml</br>"
                             )
                             logger.critical(report_element)

@@ -20,13 +20,11 @@ from functools import reduce
 from typing import List, Tuple
 
 # Import the necessary modules for the examples, and initialize a Data Context.
-# <snippet name="filesystem_datasource_config_gx_imports">
-from ruamel import yaml
-
 import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
 
+yaml = YAMLHandler()
 data_context: gx.DataContext = gx.get_context()
-# </snippet>
 
 # The following methods are used to verify that the example configuration snippets are consistent with each other.
 # Users can disregard them.
@@ -1161,7 +1159,9 @@ def test_pandas_inferred_single_batch_full_configuration():
         ].keys()
     )
     # Assert that the data assets' data references consist of a list of a single .csv file.
-    assert ["yellow_tripdata_sample_2020-01.csv",] in [
+    assert [
+        "yellow_tripdata_sample_2020-01.csv",
+    ] in [
         _["example_data_references"]
         for _ in datasource_check["data_connectors"][
             "name_of_my_inferred_data_connector"
@@ -1231,7 +1231,9 @@ def test_pandas_configured_single_batch_full_configuration():
         ].keys()
     )
     # Assert that the data assets' data references consist of a list of a single .csv file.
-    assert ["yellow_tripdata_sample_2020-01.csv",] in [
+    assert [
+        "yellow_tripdata_sample_2020-01.csv",
+    ] in [
         _["example_data_references"]
         for _ in datasource_check["data_connectors"][
             "name_of_my_configured_data_connector"

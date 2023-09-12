@@ -1,38 +1,30 @@
+from __future__ import annotations
+
 import logging
 import os
 import random
 from typing import Optional, Union
 
+import pandas as pd
 import pytest
-from ruamel.yaml import YAML
+from cryptography.hazmat.primitives import serialization as crypto_serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import FileDataContext
+from great_expectations.data_context.util import (
+    file_relative_path,
+    instantiate_class_from_config,
+)
 from great_expectations.datasource import (
     BaseDatasource,
     LegacyDatasource,
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.exceptions.exceptions import ExecutionEngineError
-
-logger = logging.getLogger(__name__)
-
-
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
-    logger.debug(
-        "Unable to load pandas; install optional pandas dependency for support."
-    )
-
-import great_expectations.exceptions as gx_exceptions
-from great_expectations import DataContext
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.data_context.util import (
-    file_relative_path,
-    instantiate_class_from_config,
-)
 from great_expectations.validator.validator import Validator
 
 try:
@@ -40,15 +32,25 @@ try:
 except ImportError:
     sqlalchemy = None
 
-try:
-    import sqlalchemy_bigquery as sqla_bigquery
-except ImportError:
-    try:
-        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
-    except ImportError:
-        sqla_bigquery = None
+from great_expectations.compatibility.bigquery import (
+    sqlalchemy_bigquery as sqla_bigquery,
+)
 
-yaml = YAML()
+yaml = YAMLHandler()
+
+
+logger = logging.getLogger(__name__)
+
+
+@pytest.fixture
+def fake_private_key() -> bytes:
+    # We pick the smallest public_exponent and key_size to do the least amount of work in tests.
+    key = rsa.generate_private_key(public_exponent=3, key_size=512)
+    return key.private_bytes(
+        crypto_serialization.Encoding.PEM,
+        crypto_serialization.PrivateFormat.PKCS8,
+        crypto_serialization.NoEncryption(),
+    )
 
 
 @pytest.fixture
@@ -57,7 +59,7 @@ def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
     empty_data_context,
     test_db_connection_string,
 ):
-    context: DataContext = empty_data_context
+    context: FileDataContext = empty_data_context
 
     sqlite_engine: sa.engine.base.Engine = sa.create_engine(test_db_connection_string)
     # noinspection PyUnusedLocal
@@ -108,7 +110,7 @@ def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
     return context
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_basic_instantiation_with_ConfiguredAssetSqlDataConnector_splitting(sa):
     random.seed(0)
 
@@ -191,14 +193,14 @@ data_connectors:
     }
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config_splitting_and_sampling(
     sa, empty_data_context
 ):
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
     # It tests that splitter configurations can be saved and loaded to great_expectations.yml by performing a
     # round-trip to the configuration.
-    context: DataContext = empty_data_context
+    context: FileDataContext = empty_data_context
     db_file: Union[bytes, str] = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
@@ -261,7 +263,7 @@ def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config
     }
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_basic_instantiation_with_InferredAssetSqlDataConnector_splitting(sa):
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
     # It tests that splitter configurations can be saved and loaded to great_expectations.yml by performing a
@@ -354,14 +356,14 @@ data_connectors:
     }
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_splitting_and_sampling(
     sa, empty_data_context
 ):
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
     # It tests that splitter configurations can be saved and loaded to great_expectations.yml by performing a
     # round-trip to the configuration.
-    context: DataContext = empty_data_context
+    context: FileDataContext = empty_data_context
     db_file: Union[bytes, str] = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
@@ -444,7 +446,7 @@ def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_s
     }
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_SimpleSqlalchemyDatasource(empty_data_context):
     context = empty_data_context
     # This test mirrors the likely path to configure a SimpleSqlalchemyDatasource
@@ -744,21 +746,20 @@ tables:
 
 
 @pytest.mark.skipif(
-    sqla_bigquery is None,
-    reason="sqlalchemy_bigquery/pybigquery is not installed",
+    not sqla_bigquery,
+    reason="sqlalchemy_bigquery is not installed",
 )
-@pytest.mark.integration
-def test_basic_instantiation_with_bigquery_creds(sa):
+@pytest.mark.big
+def test_basic_instantiation_with_bigquery_creds(sa, fake_private_key):
     # bigquery driver is invoked upon datasource instantiation, and validates credentials_info
     instantiate_class_from_config(
-        # private key is valid but useless
         config={
             "connection_string": "bigquery://project-1353/dataset",
             "credentials_info": {
                 "type": "service_account",
                 "project_id": "project-1353",
                 "private_key_id": "df87033061fd7c27dcc953e235fe099a7017f9c4",
-                "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDJGtBAt//4Mro3\n58HfA8JfoX1KtTtCCsvGqVhXY5Z74q7knLJUm3cy6pheIUrJ7qvTSuzQZrguI+x5\n/J3+iosjgEhtkHfkDwPreW/K5TL/JXh1xjr/qMro4P10csVmmiAtVDypFIj2Tl4f\n6oJ5qGJJ6WBtFmswgHZeSZCis3FYIpho9Dqzj/Uahji4/ApaY4s/O463ymr4VhFW\n3ieIiepUB/XBBYzJOa5xAmo5HA6aSw7SJX+HUdxqHyhdsIz6kNV+3ej/YF4hgzVF\n2vn2+/+71GqSaZKK12frdfFU4VkWMzgvr2tO9XYX49tPOHTlZdEmi1UV2VuS2M39\nsuHHpaOTAgMBAAECggEARRGg+cFYN/nQLDg8RSiI3whbPEffSNDlaN8rmKP7AKR7\ntce9lcJpX4Lj/txHT/BZcjG3AOJummY7JzBkYRJbND+wYHTwQFMJ4Rttkk1CxQ+s\n/iItjDYALphrZE2wz4rax0a5qMaFPbbvq92Cn17+Fu2A8SZ0fQ152etBMigYIxDu\nzvmT4Fb67zJF5BOt8ay75a50H2sxtJcOWiaFX4Esil7+9gJft04MHSsZXBh8GgQK\nKo8xFlBe37tT1vE6Np0igxJIm+HjqObOpQ0pkaE1H2/rWt7k+HfuEWxKYva2t8C2\neexSupeTj1AkwgzKhk7sbyKMieTWg8+Tc3UODxZEMQKBgQDm4Slc8g5e59xw/Wg2\neyM/Gv2Syh1NLDChuFph4A0SBZhNYG7v5BZE4hVIHfZrrLzqSq7KQ2RojDIQzB7u\nUnrtdblvjZcwc1eepgbB9yjcUifaANZg8k9ukN2V0glPvYtIE1yHX6p8kvrIOlEb\n+WxTWXecmq8FL5QnUvboByFogwKBgQDe/FCneKBmaQPEJWa1cx2izA3JFyViRKx5\nWMv3CqEAL96YuL2JOnEvZFGeG+Bup8nohA8YD58TaED58vKjs9j0WFxw9T2V5d9M\n24fT0AwcZMnnrMKslC6ShyWMzntqHL3FvLh4jBthcJ+fsJbLN+vs/7qhU0qWht26\nvCzqAPpLsQKBgAmmMWdcCnO29wSV4qwcO13gz+Y5oj3ece3gWY6roYA2UaYyOJC4\nFKIuXLtV3T2ky4RzOJjldiXUbic7kLNfKRoRiH18CmyQ9YGA6NlkbgW/PUEkNdF5\nbw5s6YXgcFkvz8lkXcKeoe5w6iBCJ6+mnfthytj1sgjicyutkPojiibnAoGAKBEu\nbOk/6Sb1hkkyK2iD6ry/vWJrVT0BwMwz2jAOvfncBZUseXwG2n0sLTzVFw0POrh/\n/dLQwqv5APCmqMOoOD+oXKO0bTrg5O6NeYHoqzFxFi/0yw3VUH74QFTZ2DdR4jYG\n76I9SUTzab5RWjKyMePBpTtSK7oQHX2ylFmYoAECgYBmkwKQkj1b0WZ3+lbb79Jc\nZayAGUgg/W1Fh0V1m8on8wzGOoBoYSbmriyUlUycEivnJaskxCU1Yac2hNQS8KaU\nnm/gd3D0/8ghNW9szvvvRKc99dpgU6OYHvESq4+vG5gdIDHm2C5jMQGQgf1l2VOV\n0z7hg6e3jgecJweN7Yzfnw==\n-----END PRIVATE KEY-----\n",
+                "private_key": fake_private_key,
                 "client_email": "testme@project-1353.iam.gserviceaccount.com",
                 "client_id": "100945395817716260007",
                 "auth_uri": "https://accounts.google.com/o/oauth2/auth",
@@ -775,10 +776,9 @@ def test_basic_instantiation_with_bigquery_creds(sa):
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_basic_instantiation_with_bigquery_creds_failure_pkey(sa):
     with pytest.raises(ExecutionEngineError):
-        # private key is valid but useless so an exception should be raised.
         instantiate_class_from_config(
             config={
                 "connection_string": "bigquery://project-1353/dataset",
@@ -803,7 +803,7 @@ def test_basic_instantiation_with_bigquery_creds_failure_pkey(sa):
         )
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_skip_inapplicable_tables(empty_data_context):
     context = empty_data_context
     # This test mirrors the likely path to configure a SimpleSqlalchemyDatasource
@@ -856,11 +856,11 @@ introspection:
         )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_batch_request_sql_with_schema(
     data_context_with_sql_data_connectors_including_schema_for_testing_get_batch,
 ):
-    context: DataContext = (
+    context: FileDataContext = (
         data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
     )
 

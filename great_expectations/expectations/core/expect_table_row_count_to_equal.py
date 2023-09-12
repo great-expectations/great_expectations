@@ -1,14 +1,15 @@
 from typing import Dict, List, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
+    BatchExpectation,
     InvalidExpectationConfigurationError,
-    TableExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -20,11 +21,11 @@ from great_expectations.render.renderer_configuration import (
 from great_expectations.render.util import substitute_none_for_missing
 
 
-class ExpectTableRowCountToEqual(TableExpectation):
+class ExpectTableRowCountToEqual(BatchExpectation):
     """Expect the number of rows to equal a value.
 
     expect_table_row_count_to_equal is a \
-    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
+    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     Args:
         value (int): \
@@ -75,6 +76,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
     args_keys = ("value",)
 
     @public_api
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -118,6 +120,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -131,6 +134,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -165,6 +169,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
             )
         ]
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,

@@ -1,0 +1,1 @@
+databricks-sql-connector>=2.0.0

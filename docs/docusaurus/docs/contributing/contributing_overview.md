@@ -1,38 +1,19 @@
 ---
-title: Contributing
+title: Contribute
 id: contributing
 ---
 
-Welcome to the Great Expectations project! We’re very glad you want to help out by contributing.
+To contribute to Great Expectations documentation or code, see one of the following resources:
 
-Our goal is to make your experience as great as possible. Please follow these steps to contribute:
+- To request a documentation change, or a change that doesn't require local testing, see the [README](https://github.com/great-expectations/great_expectations/tree/develop/docs) in the `docs` repository.
 
-#### 1. Join the community on Slack
+- To submit a code change to Great Expectations for consideration, see [CONTRIBUTING_CODE](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md) in the `great_expectations` repository.
 
-* Go to [greatexpectations.io/slack](https://greatexpectations.io/slack) and introduce yourself in the `#contributors-contributing` channel.
+- To create and submit a Custom Expectation to Great Expectations for consideration, see [CONTRIBUTING_EXPECTATIONS](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) in the `great_expectations` repository.
 
-#### 2. Contribute small changes directly through GitHub 
+- To submit a custom package to Great Expectations for consideration, see [CONTRIBUTING_PACKAGES](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_PACKAGES.md) in the `great_expectations` repository.
 
-* For small changes that don’t need to be tested locally, such as documentation changes, you can [make changes directly through GitHub](https://docs.greatexpectations.io/docs/contributing/contributing_github).
 
-#### 3. Set up your development environment to contribute large changes
-* Follow these instructions to [set up your dev environment](./contributing_setup.md).
+If you're not sure where to start, or you want to learn what other contributors are doing, go to the [Great Expectations Slack community](https://greatexpectations.io/slack) and introduce yourself in the [#contributing channel](https://greatexpectationstalk.slack.com/archives/CV828B2UX).
 
-Alternatively, for small changes that don’t need to be tested locally (e.g. documentation changes), you can [make changes directly through GitHub](https://docs.greatexpectations.io/docs/contributing/contributing_github).
-
-#### 4. Identify the type of contribution that you want to make
-
-* [Issues in GitHub](https://github.com/great-expectations/great_expectations/issues) are a great place to start. Check out the help wanted and good first issue labels. Comment to let everyone know you’re working on it.
-
-* If there’s no issue for what you want to work on, please create one. Add a comment to let everyone know that you’re working on it. We prefer small, incremental commits, because it makes the thought process behind changes easier to review.
-
-* Our [Levels of maturity grid](./contributing_maturity.md) provides guidelines for how the maintainers of Great Expectations evaluate levels of maturity of a feature.
-
-#### 5. Start developing
-* Make sure to reference the style guides for [code](./style_guides/code_style.md) and
-[docs](./style_guides/docs_style.md) and instructions on [Testing](./contributing_test.md) when developing your code.  When your changes are ready, run through our
-[Contribution checklist](./contributing_checklist.md) for pull requests.
-
-Note that if it’s your first contribution, there is a standard Contributor license agreement (CLA) you will need to sign :
-* [Individual Contributor License Agreement v1.0](https://docs.google.com/forms/d/e/1FAIpQLSdA-aWKQ15yBzp8wKcFPpuxIyGwohGU1Hx-6Pa4hfaEbbb3fg/viewform?usp=sf_link)
-* [Software Grant and Corporate Contributor License Agreement v1.0](https://docs.google.com/forms/d/e/1FAIpQLSf3RZ_ZRWOdymT8OnTxRh5FeIadfANLWUrhaSHadg_E20zBAQ/viewform?usp=sf_link)
+If you're interested in helping out, review the [GitHub issues list](https://github.com/great-expectations/great_expectations/issues) and self-assign a help wanted issue labels. If you can't find an issue that interests you, and you want to add an improvement or change, create a new issue. If you're working on an existing or new issue, add a comment to introduce yourself and to let everyone know you’re working on the issue.

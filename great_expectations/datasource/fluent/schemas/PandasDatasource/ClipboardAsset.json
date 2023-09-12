@@ -28,9 +28,14 @@
                 "$ref": "#/definitions/Sorter"
             }
         },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
         "sep": {
             "title": "Sep",
-            "default": "\\s+"
+            "default": "\\s+",
+            "type": "string"
         },
         "kwargs": {
             "title": "Kwargs",

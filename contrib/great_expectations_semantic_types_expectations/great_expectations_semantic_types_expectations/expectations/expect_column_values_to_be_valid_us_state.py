@@ -19,7 +19,7 @@ def is_valid_state(state: str, dc_statehood: bool):
         pass
     if len(state) > 20:
         return False
-    elif type(state) != str:
+    elif type(state) != str:  # noqa: E721
         return False
     elif state in list_of_states:
         return True
@@ -30,7 +30,6 @@ def is_valid_state(state: str, dc_statehood: bool):
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidUSState(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_us_state"
 

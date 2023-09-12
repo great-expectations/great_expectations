@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnMedianToBeBetween(ColumnExpectation):
+class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
     """Expect the column median to be between a minimum value and a maximum value.
 
     expect_column_median_to_be_between is a \

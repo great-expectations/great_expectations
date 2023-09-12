@@ -15,7 +15,11 @@ from great_expectations.expectations.metrics import (
 )
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
+from great_expectations.render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 
 class ColumnValuesEqualThree(ColumnMapMetricProvider):
@@ -29,7 +33,6 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
 
 class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
-
     map_metric = "column_values.equal_three"
     success_keys = ("mostly",)
     # default_kwarg_values = ColumnMapExpectation.default_kwarg_values
@@ -40,6 +43,7 @@ class ExpectColumnValuesToEqualThree__SecondIteration(ExpectColumnValuesToEqualT
 
     examples = [
         {
+            "dataset_name": "mostly_threes_second_iteration",
             "data": {
                 "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
             },
@@ -123,7 +127,7 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
                 return (
                     f'Less than {mostly * 100}% of values in column "{column}" equal 3.'
                 )
-        else:
+        else:  # noqa: PLR5501
             if result.success:
                 return f'All of the values in column "{column}" equal 3.'
             else:
@@ -187,9 +191,9 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
 class ExpectColumnValuesToEqualThree__BrokenIteration(
     ExpectColumnValuesToEqualThree__SecondIteration
 ):
-
     examples = [
         {
+            "dataset_name": "mostly_threes_third_broken_iteration",
             "data": {
                 "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
                 "broken_column": [3, 3, 3, 3, 3, 3, 2, -1, "b", "b"],

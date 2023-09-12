@@ -1,10 +1,10 @@
 import pytest
 from moto import mock_glue
-from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import (
@@ -13,7 +13,10 @@ from great_expectations.datasource.data_connector import (
 from great_expectations.exceptions import DataConnectorError
 from great_expectations.validator.validator import Validator
 
-yaml = YAML(typ="safe")
+yaml = YAMLHandler()
+
+# module level markers
+pytestmark = pytest.mark.big
 
 
 def test_instantiation_with_partitions_in_connector(glue_titanic_catalog):

@@ -39,6 +39,7 @@ def test_execution_engine():
     return TestExecutionEngine()
 
 
+@pytest.mark.unit
 def test_add_column_row_condition_filter_null_row_condition_not_present(
     test_execution_engine,
 ):
@@ -69,6 +70,7 @@ def test_add_column_row_condition_filter_null_row_condition_not_present(
     }
 
 
+@pytest.mark.unit
 def test_add_column_row_condition_filter_null_false_row_condition_not_present(
     test_execution_engine,
 ):
@@ -83,6 +85,7 @@ def test_add_column_row_condition_filter_null_false_row_condition_not_present(
     assert new_domain_kwargs == domain_kwargs
 
 
+@pytest.mark.unit
 def test_add_column_row_condition_filter_null_false_row_condition_present(
     test_execution_engine,
 ):
@@ -97,6 +100,7 @@ def test_add_column_row_condition_filter_null_false_row_condition_present(
     assert new_domain_kwargs == domain_kwargs
 
 
+@pytest.mark.unit
 def test_add_column_row_condition_filter_null_row_condition_present(
     test_execution_engine,
 ):
@@ -131,6 +135,7 @@ def test_add_column_row_condition_filter_null_row_condition_present(
     }
 
 
+@pytest.mark.unit
 def test_add_column_row_condition_filter_null_row_condition_none(test_execution_engine):
     e = test_execution_engine
 
@@ -150,6 +155,7 @@ def test_add_column_row_condition_filter_null_row_condition_none(test_execution_
 
 
 # Edge cases
+@pytest.mark.unit
 def test_add_column_row_condition_with_unsupported_filter_nan_true(
     test_execution_engine,
 ):
@@ -164,6 +170,7 @@ def test_add_column_row_condition_with_unsupported_filter_nan_true(
     )
 
 
+@pytest.mark.unit
 def test_add_column_row_condition_with_unsupported_no_column_provided(
     test_execution_engine,
 ):
@@ -174,6 +181,7 @@ def test_add_column_row_condition_with_unsupported_no_column_provided(
         _ = e.add_column_row_condition({})
 
 
+@pytest.mark.unit
 def test_resolve_metrics_with_aggregates_and_column_map():
     # Testing resolve metric function for a variety of cases - test from test_core used
     df = pd.DataFrame({"a": [1, 2, 3, None]})
@@ -184,7 +192,7 @@ def test_resolve_metrics_with_aggregates_and_column_map():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
 
     metrics.update(results)
 
@@ -259,6 +267,7 @@ def test_resolve_metrics_with_aggregates_and_column_map():
     assert results[desired_metric.id] == 0
 
 
+@pytest.mark.unit
 def test_resolve_metrics_with_extraneous_value_key():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
@@ -268,7 +277,7 @@ def test_resolve_metrics_with_extraneous_value_key():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
 
     metrics.update(results)
 
@@ -304,6 +313,7 @@ def test_resolve_metrics_with_extraneous_value_key():
 
 
 # Testing that metric resolution also works with metric partial function
+@pytest.mark.unit
 def test_resolve_metrics_with_incomplete_metric_input():
     engine = PandasExecutionEngine()
 
@@ -329,5 +339,5 @@ def test_resolve_metrics_with_incomplete_metric_input():
     }
 
     # Ensuring that incomplete metrics given raises a GreatExpectationsError
-    with pytest.raises(gx_exceptions.GreatExpectationsError) as error:
+    with pytest.raises(gx_exceptions.GreatExpectationsError):
         engine.resolve_metrics(metrics_to_resolve=(desired_metric,), metrics={})

@@ -3,12 +3,11 @@ import os
 from ruamel import yaml
 
 import great_expectations as gx
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import RuntimeBatchRequest
 
 
 def test_ge():
-
-    CONNECTION_STRING = os.environ.get("DB_URL")
+    CONNECTION_STRING = os.environ.get("DB_URL")  # noqa: TID251
 
     context = gx.get_context()
 

@@ -7,9 +7,17 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.batch_spec import PathBatchSpec, RuntimeDataBatchSpec
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
+from great_expectations.data_context import get_context
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    FilesystemStoreBackendDefaults,
+)
 from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.expectations.row_conditions import (
     RowCondition,
@@ -21,58 +29,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import create_files_in_directory
 
-try:
-    pyspark = pytest.importorskip("pyspark")
-    # noinspection PyPep8Naming
-    import pyspark.sql.functions as F
-    from pyspark.sql.types import (
-        DoubleType,
-        IntegerType,
-        LongType,
-        Row,
-        StringType,
-        StructField,
-        StructType,
-    )
-except ImportError:
-    pyspark = None
-    F = None
-    IntegerType = None
-    LongType = None
-    StringType = None
-    Row = None
-    DoubleType = None
-    StructType = None
-    StructField = None
-
-
-@pytest.fixture
-def spark_df_from_pandas_df():
-    """
-    Construct a spark dataframe from pandas dataframe.
-    Returns:
-        Function that can be used in your test e.g.:
-        spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
-    """
-
-    def _construct_spark_df_from_pandas(
-        spark_session,
-        pandas_df,
-    ):
-
-        spark_df = spark_session.createDataFrame(
-            [
-                tuple(
-                    None if isinstance(x, (float, int)) and np.isnan(x) else x
-                    for x in record.tolist()
-                )
-                for record in pandas_df.to_records(index=False)
-            ],
-            pandas_df.columns.tolist(),
-        )
-        return spark_df
-
-    return _construct_spark_df_from_pandas
+pytestmark = pytest.mark.spark
 
 
 def test_reader_fn(spark_session, basic_spark_df_execution_engine):
@@ -86,7 +43,6 @@ def test_reader_fn(spark_session, basic_spark_df_execution_engine):
     assert "<bound method DataFrameReader.csv" in str(fn_new)
 
 
-@pytest.mark.integration
 def test_reader_fn_parameters(
     spark_session, basic_spark_df_execution_engine, tmp_path_factory
 ):
@@ -105,7 +61,7 @@ def test_reader_fn_parameters(
     test_sparkdf_with_no_header_param = basic_spark_df_execution_engine.get_batch_data(
         PathBatchSpec(path=test_df_small_csv_path, data_asset_name="DATA_ASSET")
     ).dataframe
-    assert test_sparkdf_with_no_header_param.head() == Row(_c0="x", _c1="y")
+    assert test_sparkdf_with_no_header_param.head() == pyspark.Row(_c0="x", _c1="y")
 
     test_sparkdf_with_header_param = basic_spark_df_execution_engine.get_batch_data(
         PathBatchSpec(
@@ -114,18 +70,18 @@ def test_reader_fn_parameters(
             reader_options={"header": True},
         )
     ).dataframe
-    assert test_sparkdf_with_header_param.head() == Row(x="1", y="2")
+    assert test_sparkdf_with_header_param.head() == pyspark.Row(x="1", y="2")
 
     test_sparkdf_with_no_header_param = basic_spark_df_execution_engine.get_batch_data(
         PathBatchSpec(path=test_df_small_csv_path, data_asset_name="DATA_ASSET")
     ).dataframe
-    assert test_sparkdf_with_no_header_param.head() == Row(_c0="x", _c1="y")
+    assert test_sparkdf_with_no_header_param.head() == pyspark.Row(_c0="x", _c1="y")
 
     # defining schema
-    schema: pyspark.sql.types.StructType = StructType(
+    schema: pyspark.types.StructType = pyspark.types.StructType(
         [
-            StructField("x", IntegerType(), True),
-            StructField("y", IntegerType(), True),
+            pyspark.types.StructField("x", pyspark.types.IntegerType(), True),
+            pyspark.types.StructField("y", pyspark.types.IntegerType(), True),
         ]
     )
     schema_dict: dict = schema
@@ -139,7 +95,7 @@ def test_reader_fn_parameters(
             )
         ).dataframe
     )
-    assert test_sparkdf_with_header_param_and_schema.head() == Row(x=1, y=2)
+    assert test_sparkdf_with_header_param_and_schema.head() == pyspark.Row(x=1, y=2)
     assert test_sparkdf_with_header_param_and_schema.schema == schema_dict
 
 
@@ -319,7 +275,9 @@ def test_get_domain_records_with_column_pair_domain(
         }
     )
     for column_name in data.columns:
-        data = data.withColumn(column_name, data[column_name].cast(LongType()))
+        data = data.withColumn(
+            column_name, data[column_name].cast(pyspark.types.LongType())
+        )
 
     expected_column_pair_pd_df = pd.DataFrame(
         {"a": [2, 3, 4], "b": [3, 4, 5], "c": [2, 3, 4]}
@@ -390,7 +348,9 @@ def test_get_domain_records_with_multicolumn_domain(
         }
     )
     for column_name in data.columns:
-        data = data.withColumn(column_name, data[column_name].cast(LongType()))
+        data = data.withColumn(
+            column_name, data[column_name].cast(pyspark.types.LongType())
+        )
 
     expected_multicolumn_pd_df = pd.DataFrame(
         {"a": [2, 3, 4, 5], "b": [3, 4, 5, 7], "c": [2, 3, 4, 6]}, index=[0, 1, 2, 4]
@@ -425,7 +385,9 @@ def test_get_domain_records_with_multicolumn_domain(
         }
     )
     for column_name in data.columns:
-        data = data.withColumn(column_name, data[column_name].cast(LongType()))
+        data = data.withColumn(
+            column_name, data[column_name].cast(pyspark.types.LongType())
+        )
 
     expected_multicolumn_pd_df = pd.DataFrame(
         {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}, index=[0, 1, 2, 3]
@@ -729,7 +691,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
 
     metrics.update(results)
 
@@ -1004,7 +966,7 @@ def test_get_domain_records_with_unmeetable_row_condition_alt(spark_session):
             },
             domain_type="column",
         )
-    with pytest.raises(gx_exceptions.GreatExpectationsError) as g:
+    with pytest.raises(gx_exceptions.GreatExpectationsError):
         # noinspection PyUnusedLocal
         data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
             domain_kwargs={
@@ -1082,7 +1044,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser(spark_session):
     # Expect GreatExpectationsError because parser doesn't exist
     with pytest.raises(gx_exceptions.GreatExpectationsError):
         # noinspection PyUnusedLocal
-        data = engine.get_domain_records(
+        engine.get_domain_records(
             domain_kwargs={
                 "row_condition": "b > 24",
                 "condition_parser": "nonexistent",
@@ -1124,7 +1086,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric(spark_session):
     # Ensuring a metric provider error is raised if metric does not exist
     with pytest.raises(gx_exceptions.MetricProviderError) as e:
         # noinspection PyUnusedLocal
-        res = engine.resolve_metrics(
+        engine.resolve_metrics(
             metrics_to_resolve=(
                 desired_metric_1,
                 desired_metric_2,
@@ -1165,7 +1127,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
@@ -1220,12 +1182,10 @@ def test_dataframe_property_given_loaded_batch(spark_session):
     assert engine.dataframe == df
 
 
-@pytest.mark.integration
 def test_schema_properly_added(spark_session):
-
-    schema: pyspark.sql.types.StructType = StructType(
+    schema: pyspark.types.StructType = pyspark.types.StructType(
         [
-            StructField("a", IntegerType(), True),
+            pyspark.types.StructField("a", pyspark.types.IntegerType(), True),
         ]
     )
     engine: SparkDFExecutionEngine = build_spark_engine(
@@ -1238,3 +1198,90 @@ def test_schema_properly_added(spark_session):
     )
     df = engine.dataframe
     assert df.schema == schema
+
+
+@pytest.mark.spark
+def test_explicit_string_identifiers_should_work_with_validator(spark_session):
+    """
+    Integration test taken from: https://github.com/great-expectations/great_expectations/issues/7628
+    Ensures that the expectations can be used with a string identifier, resolves to the correct column
+    in SQL and a result is returned.
+    """
+    metastore_dir = "/tmp/great_expectations_v3"
+
+    data_context_config = DataContextConfig(
+        store_backend_defaults=FilesystemStoreBackendDefaults(
+            root_directory=metastore_dir
+        ),
+    )
+    context = get_context(project_config=data_context_config)
+    batch_identifiers = [
+        "customer",
+    ]
+    my_spark_datasource_config = {
+        "name": "test_dataset",
+        "class_name": "Datasource",
+        "execution_engine": {"class_name": "SparkDFExecutionEngine"},
+        "data_connectors": {
+            "runtimedataconnector_test_dataset": {
+                "module_name": "great_expectations.datasource.data_connector",
+                "class_name": "RuntimeDataConnector",
+                "batch_identifiers": batch_identifiers,
+            }
+        },
+    }
+
+    context.add_datasource(**my_spark_datasource_config)
+
+    data2 = [
+        ("James", 100),
+        ("Michael", 101),
+        ("Robert", 102),
+        ("Maria", 103),
+        ("Jen", 104),
+    ]
+
+    schema = pyspark.types.StructType(
+        [
+            pyspark.types.StructField("customer", pyspark.types.StringType(), True),
+            pyspark.types.StructField(
+                "order number", pyspark.types.IntegerType(), True
+            ),
+        ]
+    )
+    df = spark_session.createDataFrame(data=data2, schema=schema)
+
+    batch_request = RuntimeBatchRequest(
+        datasource_name="test_dataset",
+        data_connector_name="runtimedataconnector_test_dataset",
+        data_asset_name="test_dataset",
+        batch_identifiers={
+            "customer": "test",
+        },
+        runtime_parameters={"batch_data": df},  # Your dataframe goes here
+    )
+
+    context.add_or_update_expectation_suite(
+        expectation_suite_name="test_ge_unique_record"
+    )
+
+    validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name="test_ge_unique_record",
+    )
+
+    col_name = "`order number`"
+    result = validator.expect_column_values_to_be_unique(column=col_name)
+
+    assert result["success"]
+    assert result["expectation_config"]["kwargs"]["column"] == col_name
+    assert result["result"] == {
+        "element_count": 5,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 0.0,
+        "unexpected_percent_nonmissing": 0.0,
+    }

@@ -65,7 +65,7 @@ def spark_dbfs_datasource(fs: FakeFilesystem, test_backends) -> SparkDBFSDatasou
         ],
     )
 
-    return SparkDBFSDatasource(  # type: ignore[call-arg]
+    return SparkDBFSDatasource(
         name="spark_dbfs_datasource",
         base_directory=pathlib.Path(base_directory),
     )
@@ -92,25 +92,28 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     return regex, test_connection_error_message
 
 
-@pytest.mark.integration
+@pytest.mark.spark
 def test_construct_spark_dbfs_datasource(spark_dbfs_datasource: SparkDBFSDatasource):
     assert spark_dbfs_datasource.name == "spark_dbfs_datasource"
 
 
-@pytest.mark.integration
+@pytest.mark.spark
 def test_add_csv_asset_to_datasource(spark_dbfs_datasource: SparkDBFSDatasource):
+    asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_dbfs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
+        batch_metadata=asset_specified_metadata,
     )
     assert asset.name == "csv_asset"
     assert asset.batching_regex.match("random string") is None
     assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
     m1 = asset.batching_regex.match("alex_20200819_1300.csv")
     assert m1 is not None
+    assert asset.batch_metadata == asset_specified_metadata
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_construct_csv_asset_directly():
     # noinspection PyTypeChecker
     asset = CSVAsset(
@@ -124,16 +127,18 @@ def test_construct_csv_asset_directly():
     assert m1 is not None
 
 
-@pytest.mark.integration
+@pytest.mark.spark
 @pytest.mark.xfail(
     reason="Accessing objects on pyfakefs.fake_filesystem.FakeFilesystem using Spark is not working (this test is conducted using Jupyter notebook manually)."
 )
 def test_get_batch_list_from_fully_specified_batch_request(
     spark_dbfs_datasource: SparkDBFSDatasource,
 ):
+    asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_dbfs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
+        batch_metadata=asset_specified_metadata,
     )
 
     request = asset.build_batch_request(
@@ -155,6 +160,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         "name": "alex",
         "timestamp": "20200819",
         "price": "1300",
+        **asset_specified_metadata,
     }
     assert (
         batch.id
@@ -166,18 +172,20 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert len(batches) == 2
 
 
-@pytest.mark.integration
+@pytest.mark.spark
 def test_test_connection_failures(
     spark_dbfs_datasource: SparkDBFSDatasource,
     bad_regex_config: tuple[re.Pattern, str],
 ):
     regex, test_connection_error_message = bad_regex_config
-    csv_asset = CSVAsset(
+    csv_asset = CSVAsset(  # type: ignore[call-arg] # missing args
         name="csv_asset",
         batching_regex=regex,
     )
     csv_asset._datasource = spark_dbfs_datasource
-    spark_dbfs_datasource.assets = {"csv_asset": csv_asset}
+    spark_dbfs_datasource.assets = [
+        csv_asset,
+    ]
     csv_asset._data_connector = DBFSDataConnector(
         datasource_name=spark_dbfs_datasource.name,
         data_asset_name=csv_asset.name,

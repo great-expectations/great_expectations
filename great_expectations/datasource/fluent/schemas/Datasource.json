@@ -19,9 +19,9 @@
         },
         "assets": {
             "title": "Assets",
-            "default": {},
-            "type": "object",
-            "additionalProperties": {
+            "default": [],
+            "type": "array",
+            "items": {
                 "$ref": "#/definitions/DataAsset"
             }
         }
@@ -75,6 +75,10 @@
                     "items": {
                         "$ref": "#/definitions/Sorter"
                     }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
                 }
             },
             "required": [

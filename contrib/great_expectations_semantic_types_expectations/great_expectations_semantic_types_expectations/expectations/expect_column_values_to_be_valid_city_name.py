@@ -18,7 +18,7 @@ def is_valid_city_name(city: str):
     list_of_city_names = [item["name"] for item in list_of_cities]
     if len(city) > 54:
         return False
-    elif type(city) != str:
+    elif type(city) != str:  # noqa: E721
         return False
     elif city in list_of_city_names:
         return True
@@ -29,7 +29,6 @@ def is_valid_city_name(city: str):
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidCityName(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_city_name"
 

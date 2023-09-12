@@ -6,7 +6,7 @@ from shapely.geometry import Point, Polygon
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
@@ -16,7 +16,6 @@ from great_expectations.expectations.metrics import (
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToCheckOverlap(ColumnAggregateMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     metric_name = "column_values.geometry_overlap"
 
@@ -45,7 +44,7 @@ class ColumnValuesToCheckOverlap(ColumnAggregateMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesGeometryToOverlap(ColumnExpectation):
+class ExpectColumnValuesGeometryToOverlap(ColumnAggregateExpectation):
     """Expect geometries in this column to overlap with each other. If any two geometries do overlap, expectation will return True.
 
     For more information look here \
@@ -132,7 +131,6 @@ class ExpectColumnValuesGeometryToOverlap(ColumnExpectation):
         runtime_configuration: dict = None,
         execution_engine=None,
     ):
-
         success = metrics.get("column_values.geometry_overlap").get("success")
         indices = metrics.get("column_values.geometry_overlap").get("indices")
 

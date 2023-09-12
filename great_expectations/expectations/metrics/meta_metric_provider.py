@@ -36,7 +36,7 @@ class DeprecatedMetaMetricProvider(MetaMetricProvider):
         if alias is not None:
 
             def new(cls, *args, **kwargs):
-                alias = getattr(cls, "_DeprecatedMetaMetricProvider__alias")
+                alias = cls._DeprecatedMetaMetricProvider__alias
 
                 if alias is not None:
                     # deprecated-v0.13.12
@@ -69,7 +69,7 @@ as of v0.13.12 and will be removed in v0.16.
                 )
 
             # Avoid duplicate base classes.
-            b = alias or b
+            b = alias or b  # noqa: PLW2901
             if b not in fixed_bases:
                 fixed_bases.append(b)
 
@@ -79,13 +79,11 @@ as of v0.13.12 and will be removed in v0.16.
 
     def __instancecheck__(cls, instance):
         return any(
-            cls.__subclasscheck__(c) for c in {type(instance), instance.__class__}
+            cls.__subclasscheck__(c) for c in (type(instance), instance.__class__)
         )
 
     def __subclasscheck__(cls, subclass):
         if subclass is cls:
             return True
         else:
-            return issubclass(
-                subclass, getattr(cls, "_DeprecatedMetaMetricProvider__alias")
-            )
+            return issubclass(subclass, cls._DeprecatedMetaMetricProvider__alias)

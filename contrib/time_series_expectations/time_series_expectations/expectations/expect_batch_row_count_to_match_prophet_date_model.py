@@ -7,16 +7,16 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import (
     ExecutionEngine,
 )
-from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.expectations.expectation import BatchExpectation
 from time_series_expectations.expectations.prophet_model_deserializer import (
     ProphetModelDeserializer,
 )
 
 
-class ExpectBatchRowCountToMatchProphetDateModel(TableExpectation):
-    """This Expectation checks to see if the number of rows in a Batch matches the predictions of a prophet model for a given date.
+class ExpectBatchRowCountToMatchProphetDateModel(BatchExpectation):
+    """Expect the number of rows in a batch to match the predictions of a prophet model for a given date.
 
-    expect_batch_row_count_to_match_prophet_date_model is a [TableExpectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations)
+    expect_batch_row_count_to_match_prophet_date_model is a [BatchExpectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations)
 
     Args:
         date (str):
@@ -55,6 +55,7 @@ class ExpectBatchRowCountToMatchProphetDateModel(TableExpectation):
     examples = [
         {
             "data": {"foo": range(100)},
+            "only_for": ["pandas"],
             "tests": [
                 {
                     "title": "positive_test",
@@ -70,15 +71,10 @@ class ExpectBatchRowCountToMatchProphetDateModel(TableExpectation):
                     },
                 }
             ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-            ],
         },
         {
             "data": {"foo": range(50)},
+            "only_for": ["pandas"],
             "tests": [
                 {
                     "title": "negative_test",
@@ -93,12 +89,6 @@ class ExpectBatchRowCountToMatchProphetDateModel(TableExpectation):
                         "observed_value": 50,
                     },
                 }
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
             ],
         },
     ]
@@ -170,10 +160,11 @@ class ExpectBatchRowCountToMatchProphetDateModel(TableExpectation):
         }
 
     library_metadata = {
-        "tags": [],  # Tags for this Expectation in the Gallery
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            "@your_name_here",  # Don't forget to add your github handle here!
+        "tags": [],
+        "contributors": [
+            "@abegong",
         ],
+        "requirements": ["prophet"],
     }
 
 

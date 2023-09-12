@@ -54,7 +54,7 @@ from great_expectations.render import RenderedTabsContent as RenderedTabsContent
 from great_expectations.render import TextContent as TextContentRender
 from great_expectations.render import ValueListContent as ValueListContentRender
 from great_expectations.render.renderer_configuration import (
-    RendererTableValue as RendererTableValueRender,  # noqa: TCH001
+    RendererTableValue as RendererTableValueRender,
 )
 
 
@@ -87,7 +87,7 @@ class CollapseContent(CollapseContentRender):
         inline_link: Whether to include a link inline.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         collapse: Union[RenderedContentRender, list],
         collapse_toggle_link: Optional[Union[RenderedContentRender, dict]] = None,
@@ -142,7 +142,7 @@ class RenderedAtomicContentSchema(RenderedAtomicContentSchemaRender):
 
 class RenderedAtomicValue(RenderedAtomicValueRender):
     # deprecated-v0.15.32
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         schema: Optional[dict] = None,
         header: Optional[RenderedAtomicValueRender] = None,
@@ -193,7 +193,7 @@ class RenderedAtomicValueSchema(RenderedAtomicValueSchemaRender):
 
 class RenderedBootstrapTableContent(RenderedBootstrapTableContentRender):
     # deprecated-v0.15.32
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         table_data,
         table_columns,
@@ -222,7 +222,7 @@ class RenderedBootstrapTableContent(RenderedBootstrapTableContentRender):
 
 class RenderedBulletListContent(RenderedBulletListContentRender):
     # deprecated-v0.15.32
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         bullet_list,
         header=None,
@@ -283,7 +283,7 @@ class RenderedContentBlockContainer(RenderedContentBlockContainerRender):
 
 class RenderedDocumentContent(RenderedDocumentContentRender):
     # deprecated-v0.15.32
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         sections,
         data_asset_name=None,
@@ -318,7 +318,7 @@ class RenderedDocumentContent(RenderedDocumentContentRender):
 
 class RenderedGraphContent(RenderedGraphContentRender):
     # deprecated-v0.15.32
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         graph,
         header=None,
@@ -341,7 +341,7 @@ class RenderedGraphContent(RenderedGraphContentRender):
 
 class RenderedHeaderContent(RenderedHeaderContentRender):
     # deprecated-v0.15.32
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         header,
         subheader=None,
@@ -455,7 +455,7 @@ class RenderedTableContent(RenderedTableContentRender):
             sortable: A boolean indicating whether the column is sortable.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         table,
         header=None,
@@ -484,7 +484,7 @@ class RenderedTableContent(RenderedTableContentRender):
 
 class RenderedTabsContent(RenderedTabsContentRender):
     # deprecated-v0.15.32
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self, tabs, header=None, subheader=None, styling=None, content_block_type="tabs"
     ):
         warnings.warn(
@@ -502,7 +502,7 @@ class RenderedTabsContent(RenderedTabsContentRender):
 
 class TextContent(TextContentRender):
     # deprecated-v0.15.32
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self, text, header=None, subheader=None, styling=None, content_block_type="text"
     ):
         warnings.warn(
@@ -520,7 +520,7 @@ class TextContent(TextContentRender):
 
 class ValueListContent(ValueListContentRender):
     # deprecated-v0.15.32
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         value_list,
         header=None,

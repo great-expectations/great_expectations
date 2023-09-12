@@ -2,12 +2,13 @@ import logging
 from dataclasses import asdict, dataclass
 from enum import Enum
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,  # noqa: TCH001
+    ParameterContainer,
 )
 from great_expectations.types import SerializableDictDot
 
@@ -30,9 +31,11 @@ class ReconciliationDirectives(SerializableDictDot):
         ReconciliationStrategy.UPDATE
     )
 
+    @override
     def to_dict(self) -> dict:
         return asdict(self)
 
+    @override
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())
 

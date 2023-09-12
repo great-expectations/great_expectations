@@ -2,6 +2,8 @@ fluent_datasources:
   my_pg_ds:
     type: postgres
     connection_string: "postgresql://userName:@hostname/dbName"
+    kwargs:
+      echo: True
     assets:
       my_table_asset_wo_splitters:
         type: table
@@ -25,6 +27,176 @@ fluent_datasources:
         order_by:
           - year
           - -month
+  sql_taxi:
+    type: sql
+    connection_string: "sqlite:///./tests/test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
+    assets:
+      my_asset:
+        type: table
+        table_name: yellow_tripdata_sample_2019_01
+        splitter:
+            column_name: pickup_datetime
+            method_name: split_on_year_and_month
+        order_by:
+            - key: year
+            - key: month
+  sqlite_taxi:
+    type: sqlite
+    connection_string: "sqlite:///./tests/test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
+    assets:
+      my_asset:
+        type: table
+        table_name: yellow_tripdata_sample_2019_01
+        splitter:
+            column_name: pickup_datetime
+            method_name: split_on_year_and_month
+        order_by:
+            - key: year
+            - key: month
   my_sqlite_ds_w_subs:
     type: sqlite
     connection_string: "${MY_CONN_STR}"
+  my_pandas_fs_ds:
+    type: pandas_filesystem
+    base_directory: "."
+    assets:
+      my_csv_asset_w_custom_connect_options:
+        type: csv
+        sep: ","
+        connect_options:
+          glob_directive: "**/*.csv"
+      my_csv_asset_with_default_connect_options:
+        type: csv
+        sep: ","
+  my_pandas_s3_ds:
+    type: pandas_s3
+    bucket: "test_bucket"
+    boto3_options:
+      endpoint_url: "${MY_URL}"
+    assets:
+      my_csv_asset_w_custom_connect_options:
+        type: csv
+        delimiter: ","
+        connect_options:
+          s3_delimiter: "/"
+          s3_prefix: ""
+          s3_max_keys: 99
+      my_csv_asset_with_default_connect_options:
+        type: csv
+        delimiter: ","
+  my_pandas_gcs_ds:
+    type: pandas_gcs
+    bucket_or_name: "test_bucket"
+    gcs_options:
+      filename: "${MY_FILE}"
+    assets:
+      my_csv_asset_w_custom_connect_options:
+        type: csv
+        delimiter: ","
+        connect_options:
+          gcs_delimiter: "/"
+          gcs_prefix: ""
+          gcs_max_results: 99
+      my_csv_asset_with_default_connect_options:
+        type: csv
+        delimiter: ","
+  my_pandas_abs_ds:
+    type: pandas_abs
+    azure_options:
+      account_url: "${MY_URL}"
+    assets:
+      my_csv_asset_w_custom_connect_options:
+        type: csv
+        delimiter: ","
+        connect_options:
+          abs_container: "test"
+          abs_name_starts_with: ""
+          abs_delimiter: "/"
+      my_csv_asset_with_default_connect_options:
+        type: csv
+        delimiter: ","
+        connect_options:
+          abs_container: "this_is_always_required"
+  my_spark_fs_ds:
+    type: spark_filesystem
+    base_directory: "."
+    assets:
+      my_csv_asset_w_custom_connect_options:
+        type: csv
+        inferSchema: True
+        connect_options:
+          glob_directive: "**/*.csv"
+      my_csv_asset_with_default_connect_options:
+        type: csv
+        infer_schema: False
+  my_spark_s3_ds:
+    type: spark_s3
+    bucket: "test_bucket"
+    boto3_options:
+      endpoint_url: "${MY_URL}"
+    assets:
+      my_csv_asset_w_custom_connect_options:
+        type: csv
+        connect_options:
+          s3_delimiter: "/"
+          s3_prefix: ""
+          s3_max_keys: 99
+      my_csv_asset_with_default_connect_options:
+        type: csv
+  my_spark_gcs_ds:
+    type: spark_gcs
+    bucket_or_name: "test_bucket"
+    gcs_options:
+      filename: "${MY_FILE}"
+    assets:
+      my_csv_asset_w_custom_connect_options:
+        type: csv
+        connect_options:
+          gcs_delimiter: "/"
+          gcs_prefix: ""
+          gcs_max_results: 99
+      my_csv_asset_with_default_connect_options:
+        type: csv
+  my_spark_abs_ds:
+    type: spark_abs
+    azure_options:
+      account_url: "${MY_URL}"
+    assets:
+      my_csv_asset_w_custom_connect_options:
+        type: csv
+        connect_options:
+          abs_container: "test"
+          abs_name_starts_with: ""
+          abs_delimiter: "/"
+      my_csv_asset_with_default_connect_options:
+        type: csv
+        connect_options:
+          abs_container: "this_is_always_required"
+  my_snowflake_ds:
+    type: snowflake
+    connection_string: "snowflake://user_login_name:password@account_identifier"
+    assets:
+      my_table_asset_wo_splitters:
+        type: table
+        table_name: my_table
+  my_snowflake_ds_with_connect_args:
+    type: snowflake
+    account: "myorganization"
+    user: "testuser1"
+    password: "foobarbaz"
+    database: "testdb"
+    schema: "public"
+    warehouse: "testwh"
+    role: "admin"
+    numpy: true
+    assets:
+      my_table_asset_wo_splitters:
+        type: table
+        table_name: my_table
+  my_databricks_sql_ds:
+    type: databricks_sql
+    connection_string: "databricks://token:dapi123@abc-123.cloud.databricks.com:123/default_db?http_path=/sql/1.0/warehouses/abc123&catalog=default&schema=dev"
+    assets:
+      my_table_asset_wo_splitters:
+        type: table
+        table_name: my_table

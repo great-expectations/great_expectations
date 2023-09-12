@@ -12,7 +12,7 @@ You may provide the following key/value pairs in your Data Asset configuration t
 - **`schema_name`:** An optional string that defines the `schema` for the Data Asset.
 - **`include_schema_name`:** A boolean value that determines whether the `schema_name` should be included as a prefix to the Data Asset's name.
 
-For example, imagine that you have a copy of the NYC taxi data from the getting started tutorial in a table called `yellow_tripdata_sample_2020`, along with a public schema.  You could access this data by defining an entry in the `assets` dictionary like:
+For example, imagine that you have a copy of the 2020 NYC taxi data in a table called `yellow_tripdata_sample_2020`, along with a public schema.  You could access this data by defining an entry in the `assets` dictionary like:
 
 ```python name="configured sql data asset single batch"
 ```
@@ -33,7 +33,7 @@ Alternatively, you could define a Data Asset that is split into Batches based on
 
 If you included both of these Data Assets, your complete configuration would look like:
 
-```python name="full configuration for sql configured Datasource"
+```python name="full configuration for sql configured Data Source"
 ```
 
 :::note Reminder

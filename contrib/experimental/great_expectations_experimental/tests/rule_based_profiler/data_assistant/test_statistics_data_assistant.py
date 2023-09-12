@@ -81,7 +81,7 @@ def test_statistics_data_assistant_result_serialization(
     assert len(bobby_statistics_data_assistant_result.profiler_config.rules) == 5
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_statistics_data_assistant_metrics_count(
     bobby_statistics_data_assistant_result: StatisticsDataAssistantResult,
 ) -> None:
@@ -113,7 +113,7 @@ def test_statistics_data_assistant_metrics_count(
     assert num_metrics == 153
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_statistics_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_statistics_data_assistant_result: StatisticsDataAssistantResult,
 ):
@@ -139,7 +139,7 @@ def test_statistics_data_assistant_result_batch_id_to_batch_identifier_display_n
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_statistics_data_assistant_result_normalized_metrics_vector_output(
     bobby_statistics_data_assistant_result: StatisticsDataAssistantResult,
 ):
@@ -219,7 +219,7 @@ def test_statistics_data_assistant_result_normalized_metrics_vector_output(
     assert np.allclose(normalized_metrics_vector_magnitude, 1.0)
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 19s
 def test_pandas_happy_path_statistics_data_assistant(empty_data_context) -> None:
     """
@@ -291,7 +291,7 @@ def test_pandas_happy_path_statistics_data_assistant(empty_data_context) -> None
     assert len(result.metrics_by_domain) == 35
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 104 seconds
 def test_sql_happy_path_statistics_data_assistant(
     empty_data_context, test_backends, sa
@@ -361,7 +361,7 @@ def test_sql_happy_path_statistics_data_assistant(
     assert len(result.metrics_by_domain) == 35
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 149 seconds
 def test_spark_happy_path_statistics_data_assistant(
     empty_data_context, spark_df_taxi_data_schema
@@ -374,9 +374,9 @@ def test_spark_happy_path_statistics_data_assistant(
     3. Running StatisticsDataAssistant and making sure that StatisticsDataAssistantResult contains relevant fields
     4. Configuring BatchRequest to load 2020 January data
     """
-    from pyspark.sql.types import StructType
+    from great_expectations.compatibility import pyspark
 
-    schema: StructType = spark_df_taxi_data_schema
+    schema: pyspark.types.StructType = spark_df_taxi_data_schema
     data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,

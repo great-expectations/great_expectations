@@ -28,6 +28,10 @@
                 "$ref": "#/definitions/Sorter"
             }
         },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
         "filepath_or_buffer": {
             "title": "Filepath Or Buffer",
             "anyOf": [
@@ -49,6 +53,15 @@
             "default": "infer",
             "anyOf": [
                 {
+                    "enum": [
+                        "infer",
+                        "gzip",
+                        "bz2",
+                        "zip",
+                        "xz",
+                        "zstd",
+                        "tar"
+                    ],
                     "type": "string"
                 },
                 {

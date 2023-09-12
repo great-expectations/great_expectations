@@ -38,7 +38,7 @@ class PandasDatasource(LegacyDatasource):
     }
 
     @classmethod
-    def build_configuration(
+    def build_configuration(  # noqa: PLR0913
         cls,
         data_asset_type=None,
         batch_kwargs_generators=None,
@@ -105,7 +105,7 @@ class PandasDatasource(LegacyDatasource):
 
         return configuration
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name="pandas",
         data_context=None,
@@ -215,9 +215,9 @@ class PandasDatasource(LegacyDatasource):
                 DeprecationWarning,
             )
             try:
-                import boto3
+                from great_expectations.compatibility import aws
 
-                s3 = boto3.client("s3", **self._boto3_options)
+                s3 = aws.boto3.client("s3", **self._boto3_options)
             except ImportError:
                 raise BatchKwargsError(
                     "Unable to load boto3 client to read s3 asset.", batch_kwargs
@@ -267,7 +267,7 @@ class PandasDatasource(LegacyDatasource):
         )
 
     @staticmethod
-    def guess_reader_method_from_path(path: str):
+    def guess_reader_method_from_path(path: str):  # noqa: PLR0911
         path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}

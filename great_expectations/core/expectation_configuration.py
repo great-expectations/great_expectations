@@ -18,10 +18,10 @@ from typing import (
 
 import jsonpatch
 from marshmallow import Schema, ValidationError, fields, post_dump, post_load
-from pyparsing import ParseResults
 from typing_extensions import TypedDict
 
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import new_argument, public_api
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
@@ -48,6 +48,8 @@ from great_expectations.render import RenderedAtomicContent, RenderedAtomicConte
 from great_expectations.types import SerializableDictDot
 
 if TYPE_CHECKING:
+    from pyparsing import ParseResults
+
     from great_expectations.core import ExpectationValidationResult
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.execution_engine import ExecutionEngine
@@ -324,7 +326,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "max_value",
                 "strict_min",
                 "strict_max",
-                "allow_cross_type_comparisons",
                 "parse_strings_as_datetimes",
                 "output_strftime_format",
                 "mostly",
@@ -336,7 +337,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "max_value": None,
                 "strict_min": False,
                 "strict_max": False,
-                "allow_cross_type_comparisons": None,
                 "parse_strings_as_datetimes": None,
                 "output_strftime_format": None,
                 "mostly": None,
@@ -788,7 +788,6 @@ class ExpectationConfiguration(SerializableDictDot):
             "success_kwargs": (
                 "or_equal",
                 "parse_strings_as_datetimes",
-                "allow_cross_type_comparisons",
                 "ignore_row_if",
             ),
             "default_kwarg_values": {
@@ -796,7 +795,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "or_equal": None,
                 "parse_strings_as_datetimes": None,
-                "allow_cross_type_comparisons": None,
                 "ignore_row_if": "both_values_are_missing",
                 "result_format": "BASIC",
                 "include_config": True,
@@ -1005,7 +1003,7 @@ class ExpectationConfiguration(SerializableDictDot):
         "catch_exceptions",
     )
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         expectation_type: str,
         kwargs: dict,
@@ -1221,6 +1219,9 @@ class ExpectationConfiguration(SerializableDictDot):
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
+        default_kwarg_values: Mapping[
+            str, str | bool | float | RuleBasedProfilerConfig | object | None
+        ]
         if expectation_kwargs_dict is None:
             try:
                 impl = get_expectation_impl(self.expectation_type)
@@ -1253,6 +1254,9 @@ class ExpectationConfiguration(SerializableDictDot):
             self.expectation_type, None
         )
         runtime_keys: tuple[str, ...]
+        default_kwarg_values: Mapping[
+            str, str | bool | float | RuleBasedProfilerConfig | object | None
+        ]
         if expectation_kwargs_dict is None:
             try:
                 impl = get_expectation_impl(self.expectation_type)
@@ -1376,6 +1380,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return json.dumps(self.to_json_dict(), indent=2)
 
     @public_api
+    @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this ExpectationConfiguration.
 

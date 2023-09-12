@@ -3,44 +3,10 @@
 # Build API docs then build docusaurus docs.
 # Currently used in our netlify pipeline.
 
-ORANGE='\033[0;33m'
-NC='\033[0m' # No Color
+source ../logging.sh
 
-CURRENT_COMMIT=$(git rev-parse HEAD)
-# git pull to get the latest tags
-git pull
+print_orange_header "Preparing to build docs..."
+../prepare_to_build_docs.sh
 
-# Get latest released version from tag, check out to build API docs.
-# Only if not PR deploy preview.
-if [ "$PULL_REQUEST" == "false" ]
-then
-  GX_LATEST=$(git tag | grep -E "(^[0-9]{1,}\.)+[0-9]{1,}" | sort -V | tail -1)
-  echo -e "${ORANGE}Not in a pull request. Using latest released version ${GX_LATEST} at $(git rev-parse HEAD) to build API docs.${NC}"
-  git checkout "$GX_LATEST"
-  git pull
-else
-  echo -e "${ORANGE}Building from within a pull request, using the latest commit to build API docs so changes can be viewed in the Netlify deploy preview.${NC}"
-fi
-
-echo -e "${ORANGE}Installing Great Expectations library dev dependencies.${NC}"
-(cd ../../; pip install -c constraints-dev.txt -e ".[test]")
-
-echo -e "${ORANGE}Installing api docs dependencies.${NC}"
-(cd ../sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
-
-echo -e "${ORANGE}Building API docs.${NC}"
-(cd ../../; invoke docs)
-
-if [ "$PULL_REQUEST" == "false" ]
-then
-  echo -e "${ORANGE}Not in a pull request. Checking back out current commit ${CURRENT_COMMIT} to build the rest of the docs.${NC}"
-  git checkout "$CURRENT_COMMIT"
-  git pull
-fi
-
-echo -e "${ORANGE}Copying previous versions${NC}"
-curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip" -o "oss_docs_versions.zip"
-unzip -oq oss_docs_versions.zip -d .
-
-echo -e "${ORANGE}Building docusaurus docs.${NC}"
+print_orange_header "Building docusaurus docs..."
 yarn build

@@ -2,6 +2,8 @@ from typing import Optional
 
 import pandas as pd
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import (
@@ -9,7 +11,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnPairMapExpectation
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,
@@ -20,7 +21,6 @@ from time_series_expectations.expectations.prophet_model_deserializer import (
 
 
 class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
-
     condition_metric_name = "column_pair_values.match_prophet_forecast"
 
     condition_domain_keys = (
@@ -75,7 +75,7 @@ class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
             return bool(in_bounds)
 
         check_if_value_is_in_model_forecast_bounds_udf = F.udf(
-            check_if_value_is_in_model_forecast_bounds, sparktypes.BooleanType()
+            check_if_value_is_in_model_forecast_bounds, pyspark.types.BooleanType()
         )
 
         result = check_if_value_is_in_model_forecast_bounds_udf(
@@ -86,7 +86,7 @@ class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
 
 
 class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
-    """This Expectation is used to compare the values in a column to a Prophet forecast, based on a timestamp in a second column.
+    """Expect the values in column A to match the predictions of a prophet model based on the timestamp in column B.
 
     expect_column_pair_values_to_match_prophet_date_model is a [ColumnPairMapExpectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations)
 
@@ -134,6 +134,7 @@ class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
     examples = [
         {
             "data": example_data,
+            "only_for": ["pandas", "spark"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -176,20 +177,6 @@ class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
                     "out": {
                         "success": False,
                     },
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                # {
-                #     "backend": "sqlalchemy",
-                #     "dialects": ["sqlite", "postgresql"],
-                # },
-                {
-                    "backend": "spark",
-                    "dialects": None,
                 },
             ],
         }
@@ -235,10 +222,11 @@ class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
         #     raise InvalidExpectationConfigurationError(str(e))
 
     library_metadata = {
-        "tags": [],  # Tags for this Expectation in the Gallery
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            "@your_name_here",  # Don't forget to add your github handle here!
+        "tags": [],
+        "contributors": [
+            "@abegong",
         ],
+        "requirements": ["prophet"],
     }
 
 

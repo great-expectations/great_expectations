@@ -4,6 +4,10 @@ from typing import Dict, List, cast
 import pandas as pd
 import pytest
 
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -27,38 +31,24 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.expectations.metrics.util import column_reflection_fallback
 from great_expectations.render import RenderedStringTemplateContent
-from great_expectations.self_check.util import build_sa_validator_with_data
 from great_expectations.self_check.util import (
-    build_test_backends_list as build_test_backends_list_v3,
-)
-from great_expectations.self_check.util import (
+    build_sa_validator_with_data,
     generate_expectation_tests,
     generate_test_table_name,
     should_we_generate_this_test,
+)
+from great_expectations.self_check.util import (
+    build_test_backends_list as build_test_backends_list_v3,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy as sqlalchemy
-    from sqlalchemy import create_engine
 
-    # noinspection PyProtectedMember
-    from sqlalchemy.engine import Engine
-    from sqlalchemy.exc import SQLAlchemyError
-    from sqlalchemy.sql import Select
-except ImportError:
-    sqlalchemy = None
-    create_engine = None
-    Engine = None
-    Select = None
-    SQLAlchemyError = None
-    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
-
-
-def get_table_columns_metric(engine: ExecutionEngine) -> [MetricConfiguration, dict]:
+def get_table_columns_metric(
+    execution_engine: ExecutionEngine,
+) -> [MetricConfiguration, dict]:
     resolved_metrics: dict = {}
 
     results: dict
@@ -70,7 +60,9 @@ def get_table_columns_metric(engine: ExecutionEngine) -> [MetricConfiguration, d
             "include_nested": True,
         },
     )
-    results = engine.resolve_metrics(metrics_to_resolve=(table_column_types_metric,))
+    results = execution_engine.resolve_metrics(
+        metrics_to_resolve=(table_column_types_metric,)
+    )
     resolved_metrics.update(results)
 
     table_columns_metric: MetricConfiguration = MetricConfiguration(
@@ -81,7 +73,7 @@ def get_table_columns_metric(engine: ExecutionEngine) -> [MetricConfiguration, d
     table_columns_metric.metric_dependencies = {
         "table.column_types": table_column_types_metric,
     }
-    results = engine.resolve_metrics(
+    results = execution_engine.resolve_metrics(
         metrics_to_resolve=(table_columns_metric,), metrics=resolved_metrics
     )
     resolved_metrics.update(results)
@@ -113,6 +105,7 @@ def expectation_and_runtime_configuration_with_evaluation_parameters():
     return configuration, runtime_configuration_with_eval
 
 
+@pytest.mark.unit
 def test_prescriptive_renderer_no_decorator(
     expectation_and_runtime_configuration_with_evaluation_parameters,
 ):
@@ -181,6 +174,7 @@ def test_prescriptive_renderer_no_decorator(
     }
 
 
+@pytest.mark.big
 def test_prescriptive_renderer_with_decorator(
     expectation_and_runtime_configuration_with_evaluation_parameters,
 ):
@@ -337,6 +331,7 @@ def test_prescriptive_renderer_with_decorator(
 
 
 # noinspection PyUnusedLocal
+@pytest.mark.all_backends
 def test_table_column_reflection_fallback(test_backends, sa):
     include_sqlalchemy: bool = "sqlite" in test_backends
     include_postgresql: bool = "postgresql" in test_backends
@@ -344,8 +339,9 @@ def test_table_column_reflection_fallback(test_backends, sa):
     include_mssql: bool = "mssql" in test_backends
     include_bigquery: bool = "bigquery" in test_backends
     include_trino: bool = "trino" in test_backends
+    include_clickhouse: bool = "clickhouse" in test_backends
 
-    if not create_engine:
+    if not sa.create_engine:
         pytest.skip("Unable to import sqlalchemy.create_engine() -- skipping.")
 
     test_backend_names: List[str] = build_test_backends_list_v3(
@@ -357,6 +353,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
         include_mssql=include_mssql,
         include_bigquery=include_bigquery,
         include_trino=include_trino,
+        include_clickhouse=include_clickhouse,
     )
 
     df: pd.DataFrame = pd.DataFrame(
@@ -385,7 +382,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
             if validator is not None:
                 validators_config[table_name] = validator
 
-    engine: Engine
+    engine: sqlalchemy.Engine
 
     metrics: dict = {}
 
@@ -402,13 +399,13 @@ def test_table_column_reflection_fallback(test_backends, sa):
 
     for table_name, validator in validators_config.items():
         table_columns_metric, results = get_table_columns_metric(
-            engine=validator.execution_engine
+            execution_engine=validator.execution_engine
         )
         metrics.update(results)
         assert set(metrics[table_columns_metric.id]) == {"name", "age", "pet"}
-        selectable: Select = sqlalchemy.Table(
+        selectable: sqlalchemy.Select = sa.Table(
             table_name,
-            sqlalchemy.MetaData(),
+            sa.MetaData(),
             schema=None,
         )
         sqlalchemy_engine = cast(SqlAlchemyExecutionEngine, validator.execution_engine)
@@ -439,110 +436,15 @@ def test_table_column_reflection_fallback(test_backends, sa):
         assert not validation_result.success
 
 
-@pytest.mark.skipif(
-    sqlalchemy is None,
-    reason="sqlalchemy is not installed",
-)
-def test__generate_expectation_tests__with_test_backends():
-    expectation_type = "whatever"
-    data = TestData(stuff=[1, 2, 3, 4, 5])
-    test_case = ExpectationTestCase(
-        title="",
-        input={},
-        output={},
-        exact_match_out=False,
-        include_in_gallery=False,
-        suppress_test_for=[],
-        only_for=[],
-    )
-    test_backends = [
-        TestBackend(
-            backend="sqlalchemy",
-            dialects=["sqlite"],
-        ),
-    ]
-    test_data_cases = [
-        ExpectationTestDataCases(
-            data=data,
-            tests=[test_case],
-            test_backends=test_backends,
-        )
-    ]
-    engines = ExpectationExecutionEngineDiagnostics(
-        PandasExecutionEngine=True,
-        SqlAlchemyExecutionEngine=True,
-        SparkDFExecutionEngine=False,
-    )
-
-    results = generate_expectation_tests(
-        expectation_type=expectation_type,
-        test_data_cases=test_data_cases,
-        execution_engine_diagnostics=engines,
-        raise_exceptions_for_backends=False,
-    )
-    backends_to_use = [r["backend"] for r in results]
-    assert backends_to_use == ["sqlite"] or backends_to_use == []
-
-
-@pytest.mark.skipif(
-    sqlalchemy is None,
-    reason="sqlalchemy is not installed",
-)
-def test__generate_expectation_tests__with_test_backends2():
-    expectation_type = "whatever"
-    data = TestData(stuff=[1, 2, 3, 4, 5])
-    test_case = ExpectationTestCase(
-        title="",
-        input={},
-        output={},
-        exact_match_out=False,
-        include_in_gallery=False,
-        suppress_test_for=[],
-        only_for=[],
-    )
-    test_backends = [
-        TestBackend(
-            backend="sqlalchemy",
-            dialects=["sqlite"],
-        ),
-        TestBackend(
-            backend="pandas",
-            dialects=None,
-        ),
-    ]
-    test_data_cases = [
-        ExpectationTestDataCases(
-            data=data,
-            tests=[test_case],
-            test_backends=test_backends,
-        )
-    ]
-    engines = ExpectationExecutionEngineDiagnostics(
-        PandasExecutionEngine=True,
-        SqlAlchemyExecutionEngine=True,
-        SparkDFExecutionEngine=False,
-    )
-
-    results = generate_expectation_tests(
-        expectation_type=expectation_type,
-        test_data_cases=test_data_cases,
-        execution_engine_diagnostics=engines,
-        raise_exceptions_for_backends=False,
-    )
-    backends_to_use = [r["backend"] for r in results]
-    assert sorted(backends_to_use) == ["pandas", "sqlite"] or backends_to_use == [
-        "pandas"
-    ]
-
-
 @pytest.mark.skip(
     reason="Timeout of 30 seconds reached trying to connect to localhost:8088 (trino port)"
 )
 @pytest.mark.skipif(
-    sqlalchemy is None,
+    sa is None,
     reason="sqlalchemy is not installed",
 )
-def test__generate_expectation_tests__with_no_test_backends():
+@pytest.mark.all_backends
+def test__generate_expectation_tests():
     expectation_type = "whatever"
     data = TestData(stuff=[1, 2, 3, 4, 5])
     test_case = ExpectationTestCase(
@@ -581,6 +483,7 @@ def test__generate_expectation_tests__with_no_test_backends():
     assert "spark" not in backends_to_use
 
 
+@pytest.mark.unit
 def test__TestBackend__bad_backends():
     with pytest.raises(AssertionError):
         TestBackend(
@@ -589,6 +492,7 @@ def test__TestBackend__bad_backends():
         )
 
 
+@pytest.mark.unit
 def test__TestBackend__bad_dialects():
     with pytest.raises(AssertionError):
         TestBackend(
@@ -632,23 +536,25 @@ def test__TestBackend__bad_dialects():
     )
 
 
+@pytest.mark.unit
 def test__TestBackend__good_backends_and_dialects():
-    tb1 = TestBackend(
+    tb1 = TestBackend(  # noqa: F841
         backend="pandas",
         dialects=None,
     )
 
-    tb2 = TestBackend(
+    tb2 = TestBackend(  # noqa: F841
         backend="spark",
         dialects=None,
     )
 
-    tb3 = TestBackend(
+    tb3 = TestBackend(  # noqa: F841
         backend="sqlalchemy",
         dialects=["sqlite", "postgresql", "mysql"],
     )
 
 
+@pytest.mark.unit
 def test__should_we_generate_this_test__obvious():
     test_case = ExpectationTestCase(
         title="",
@@ -661,7 +567,7 @@ def test__should_we_generate_this_test__obvious():
     )
     backend = "spark"
 
-    assert should_we_generate_this_test(backend, test_case) == True
+    assert should_we_generate_this_test(backend, test_case) is True
 
     test_case2 = ExpectationTestCase(
         title="",
@@ -674,7 +580,7 @@ def test__should_we_generate_this_test__obvious():
     )
     backend2 = "sqlite"
 
-    assert should_we_generate_this_test(backend2, test_case2) == False
+    assert should_we_generate_this_test(backend2, test_case2) is False
 
     test_case3 = ExpectationTestCase(
         title="",
@@ -687,7 +593,7 @@ def test__should_we_generate_this_test__obvious():
     )
     backend3 = "sqlite"
 
-    assert should_we_generate_this_test(backend3, test_case3) == True
+    assert should_we_generate_this_test(backend3, test_case3) is True
 
     test_case4 = ExpectationTestCase(
         title="",
@@ -700,7 +606,7 @@ def test__should_we_generate_this_test__obvious():
     )
     backend4 = "sqlite"
 
-    assert should_we_generate_this_test(backend4, test_case4) == False
+    assert should_we_generate_this_test(backend4, test_case4) is False
 
     test_case5 = ExpectationTestCase(
         title="",
@@ -713,9 +619,11 @@ def test__should_we_generate_this_test__obvious():
     )
     backend5 = "pandas"
 
-    assert should_we_generate_this_test(backend5, test_case5) == True
+    assert should_we_generate_this_test(backend5, test_case5) is True
 
 
+# this is really a series of unit tests
+@pytest.mark.unit
 def test__should_we_generate_this_test__sqlalchemy():
     test_case = ExpectationTestCase(
         title="",
@@ -728,7 +636,7 @@ def test__should_we_generate_this_test__sqlalchemy():
     )
     backend = "mysql"
 
-    assert should_we_generate_this_test(backend, test_case) == True
+    assert should_we_generate_this_test(backend, test_case) is True
 
     test_case2 = ExpectationTestCase(
         title="",
@@ -741,7 +649,7 @@ def test__should_we_generate_this_test__sqlalchemy():
     )
     backend2 = "postgresql"
 
-    assert should_we_generate_this_test(backend2, test_case2) == True
+    assert should_we_generate_this_test(backend2, test_case2) is True
 
     test_case3 = ExpectationTestCase(
         title="",
@@ -754,7 +662,7 @@ def test__should_we_generate_this_test__sqlalchemy():
     )
     backend3 = "mysql"
 
-    assert should_we_generate_this_test(backend3, test_case3) == False
+    assert should_we_generate_this_test(backend3, test_case3) is False
 
     test_case4 = ExpectationTestCase(
         title="",
@@ -767,7 +675,7 @@ def test__should_we_generate_this_test__sqlalchemy():
     )
     backend4 = "sqlite"
 
-    assert should_we_generate_this_test(backend4, test_case4) == False
+    assert should_we_generate_this_test(backend4, test_case4) is False
 
     test_case5 = ExpectationTestCase(
         title="",
@@ -780,9 +688,10 @@ def test__should_we_generate_this_test__sqlalchemy():
     )
     backend5 = "spark"
 
-    assert should_we_generate_this_test(backend5, test_case5) == True
+    assert should_we_generate_this_test(backend5, test_case5) is True
 
 
+@pytest.mark.unit
 def test__should_we_generate_this_test__pandas():
     """
     Our CI/CD runs tests against pandas versions 0.23.4, 0.25.3, and latest (1.x currently)
@@ -802,7 +711,7 @@ def test__should_we_generate_this_test__pandas():
     )
     backend = "pandas"
 
-    assert should_we_generate_this_test(backend, test_case) == True
+    assert should_we_generate_this_test(backend, test_case) is True
 
     test_case2 = ExpectationTestCase(
         title="",
@@ -815,7 +724,7 @@ def test__should_we_generate_this_test__pandas():
     )
     backend2 = "pandas"
 
-    assert should_we_generate_this_test(backend2, test_case2) == True
+    assert should_we_generate_this_test(backend2, test_case2) is True
 
     test_case3 = ExpectationTestCase(
         title="",
@@ -862,4 +771,4 @@ def test__should_we_generate_this_test__pandas():
     )
     backend5 = "pandas"
 
-    assert should_we_generate_this_test(backend5, test_case5) == False
+    assert should_we_generate_this_test(backend5, test_case5) is False

@@ -6,6 +6,7 @@ from collections import defaultdict
 from dataclasses import asdict, dataclass
 from typing import List, Sequence, Tuple, Union
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationTestDataCases,  # noqa: TCH001
@@ -63,6 +64,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     maturity_checklist: ExpectationDiagnosticMaturityMessages
     coverage_score: float
 
+    @override
     def to_json_dict(self) -> dict:
         result = convert_to_json_serializable(data=asdict(self))
         result["execution_engines_list"] = sorted(
@@ -111,12 +113,19 @@ class ExpectationDiagnostics(SerializableDictDot):
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether the Expectation has an informative docstring"""
 
-        message = "Has a docstring, including a one-line short description"
+        message = 'Has a docstring, including a one-line short description that begins with "Expect" and ends with a period'
         if "short_description" in description:
             short_description = description["short_description"]
         else:
             short_description = None
-        if short_description not in {"", "\n", "TODO: Add a docstring here", None}:
+        if short_description in {"", "\n", "TODO: Add a docstring here", None}:
+            return ExpectationDiagnosticCheckMessage(
+                message=message,
+                passed=False,
+            )
+        elif short_description.startswith("Expect ") and short_description.endswith(
+            "."
+        ):
             return ExpectationDiagnosticCheckMessage(
                 message=message,
                 sub_messages=[
@@ -127,10 +136,15 @@ class ExpectationDiagnostics(SerializableDictDot):
                 ],
                 passed=True,
             )
-
         else:
             return ExpectationDiagnosticCheckMessage(
                 message=message,
+                sub_messages=[
+                    {
+                        "message": f'"{short_description}"',
+                        "passed": False,
+                    }
+                ],
                 passed=False,
             )
 

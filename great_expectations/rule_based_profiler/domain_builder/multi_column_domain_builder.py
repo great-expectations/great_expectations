@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
 
 class MultiColumnDomainBuilder(ColumnDomainBuilder):
     """
-    This DomainBuilder uses relative tolerance of specified map metric to identify domains.
+    This DomainBuilder uses "include_column_names" property of its parent class to specify "column_list" (order-non-preserving).
     """
 
     exclude_field_names: ClassVar[
@@ -61,16 +62,18 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
         )
 
     @property
+    @override
     def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.MULTICOLUMN
 
+    @override
     def _get_domains(
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
-        """Return domains matching the specified tolerance limits.
+        """Obtains and returns Domain object, whose domain_kwargs consists of "column_list" (order-non-preserving).
 
         Args:
             rule_name: name of Rule object, for which "Domain" objects are obtained.
@@ -80,7 +83,7 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
         Returns:
             List of domains that match the desired tolerance limits.
         """
-        batch_ids: List[str] = self.get_batch_ids(variables=variables)  # type: ignore[assignment] # could None
+        batch_ids: List[str] = self.get_batch_ids(variables=variables)  # type: ignore[assignment] # could be None
 
         validator: Validator = self.get_validator(variables=variables)  # type: ignore[assignment] # could be None
 

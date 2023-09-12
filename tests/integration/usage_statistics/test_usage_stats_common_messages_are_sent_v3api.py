@@ -7,8 +7,8 @@ import pytest
 
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import get_context
 from great_expectations.data_context.types.base import DataContextConfig
-from great_expectations.util import get_context
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,
@@ -25,7 +25,6 @@ DATA_CONTEXT_ID = "00000000-0000-0000-0000-000000000001"
 
 @pytest.fixture
 def in_memory_data_context_config_usage_stats_enabled():
-
     return DataContextConfig(
         **{
             "commented_map": {},
@@ -68,6 +67,7 @@ def in_memory_data_context_config_usage_stats_enabled():
 
 
 @pytest.mark.slow  # 1.34s
+@pytest.mark.big
 def test_common_usage_stats_are_sent_no_mocking(
     caplog, in_memory_data_context_config_usage_stats_enabled, monkeypatch
 ):

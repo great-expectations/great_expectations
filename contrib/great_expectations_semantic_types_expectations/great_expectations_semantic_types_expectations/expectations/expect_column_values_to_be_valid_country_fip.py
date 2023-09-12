@@ -21,7 +21,7 @@ def is_valid_country_fip(country_fip: str):
     ]
     if len(country_fip) > 2:
         return False
-    elif type(country_fip) != str:
+    elif type(country_fip) != str:  # noqa: E721
         return False
     elif country_fip in cleaned_list_of_country_fips:
         return True
@@ -32,7 +32,6 @@ def is_valid_country_fip(country_fip: str):
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidCountryFip(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_country_fip"
 

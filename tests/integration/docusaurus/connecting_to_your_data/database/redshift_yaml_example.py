@@ -1,12 +1,10 @@
 import os
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py imports">
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 
-# </snippet>
+yaml = YAMLHandler()
 
 redshift_username = os.environ.get("REDSHIFT_USERNAME")
 redshift_password = os.environ.get("REDSHIFT_PASSWORD")
@@ -26,11 +24,8 @@ load_data_into_test_database(
     connection_string=CONNECTION_STRING,
 )
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py get_context">
 context = gx.get_context()
-# </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py datasource_yaml">
 datasource_yaml = f"""
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py datasource config">
 name: my_redshift_datasource
@@ -48,7 +43,6 @@ data_connectors:
        include_schema_name: true
 # </snippet>
 """
-# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.

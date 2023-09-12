@@ -58,14 +58,6 @@ class BatchKwargsGenerator:
                     sep: "
                   base_directory: /data
 
-            my_datasource_3:
-              class_name: SqlalchemyDatasource
-              batch_kwargs_generators:
-                # This generator will search for a file named with the name of the requested data asset and the
-                # .sql suffix to open with a query to use to generate data
-                 default:
-                    class_name: QueryBatchKwargsGenerator
-
     --ge-feature-maturity-info--
 
         id: batch_kwargs_generator_manual
@@ -240,7 +232,7 @@ class BatchKwargsGenerator:
         )
         if not param_keys <= recognized_params:
             logger.warning(
-                f"Unrecognized batch_parameter(s): {str(param_keys - recognized_params)}"
+                f"Unrecognized batch_parameter(s): {param_keys - recognized_params!s}"
             )
 
         batch_kwargs = self._build_batch_kwargs(batch_parameters)

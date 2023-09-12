@@ -1,8 +1,7 @@
 import datetime
-from typing import Dict, List, Union
+from typing import TYPE_CHECKING, Dict, List, Union
 
 import numpy as np
-import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
@@ -29,6 +28,9 @@ from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
 )
 
+if TYPE_CHECKING:
+    import pandas as pd
+
 EFFICACY_TOLERANCE: float = 1.0e-2
 
 # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
@@ -37,7 +39,7 @@ RTOL: float = 1.0e-7
 ATOL: float = 1.0e-2
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 6.20s
 def test_bootstrap_point_estimate_efficacy(
     bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive,
@@ -93,6 +95,7 @@ def test_bootstrap_point_estimate_efficacy(
         )
 
 
+@pytest.mark.unit
 def test_sanitize_parameter_name(
     table_row_count_metric_config,
     table_row_count_aggregate_fn_metric_config,

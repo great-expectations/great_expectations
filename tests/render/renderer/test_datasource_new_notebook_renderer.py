@@ -1,4 +1,5 @@
-import nbformat
+from typing import TYPE_CHECKING
+
 import pytest
 
 from great_expectations import DataContext
@@ -7,6 +8,11 @@ from great_expectations.render.renderer.datasource_new_notebook_renderer import 
     DatasourceNewNotebookRenderer,
 )
 
+if TYPE_CHECKING:
+    import nbformat
+
+pytestmark = pytest.mark.filesystem
+
 
 @pytest.fixture
 def construct_datasource_new_notebook_assets():
@@ -14,7 +20,6 @@ def construct_datasource_new_notebook_assets():
         datasource_name: str,
         datasource_yaml: str,
     ):
-
         pandas_header = [
             {
                 "cell_type": "markdown",

@@ -28,6 +28,8 @@ data_context_run_validation_operator_events: List[dict] = [
         "event_time": "2020-08-03T23:36:26.422Z",
         "data_context_id": "00000000-0000-0000-0000-000000000002",
         "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+        "mac_address": "0000000000000000000000000000000000000000000000000000000000000000",
+        "oss_id": "00000000-0000-0000-0000-000000000000",
         "ge_version": "0.10.0.manual_testing",
     }
 ]

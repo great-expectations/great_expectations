@@ -10,6 +10,7 @@ from dateutil.parser import parse
 from ruamel.yaml import yaml_object
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 
 yaml = ruamel.yaml.YAML()
 
@@ -26,11 +27,13 @@ class DatePart(enum.Enum):
     MINUTE = "minute"
     SECOND = "second"
 
+    @override
     def __eq__(self, other: str | DatePart):  # type: ignore[override] # expects `object`
         if isinstance(other, str):
             return self.value.lower() == other.lower()
         return self.value.lower() == other.value.lower()
 
+    @override
     def __hash__(self: DatePart):
         return hash(self.value)
 
@@ -59,11 +62,13 @@ class SplitterMethod(enum.Enum):
     SPLIT_ON_MULTI_COLUMN_VALUES = "split_on_multi_column_values"
     SPLIT_ON_HASHED_COLUMN = "split_on_hashed_column"
 
+    @override
     def __eq__(self, other: str | SplitterMethod):  # type: ignore[override] # expects `object`
         if isinstance(other, str):
             return self.value.lower() == other.lower()
         return self.value.lower() == other.value.lower()
 
+    @override
     def __hash__(self: SplitterMethod):
         return hash(self.value)
 
@@ -135,7 +140,8 @@ class DataSplitter(abc.ABC):
                 "date_parts are required when using split_on_date_parts."
             )
         if not all(
-            (isinstance(dp, DatePart)) or (isinstance(dp, str)) for dp in date_parts
+            (isinstance(dp, DatePart)) or (isinstance(dp, str))  # noqa: PLR1701
+            for dp in date_parts
         ):
             raise gx_exceptions.InvalidConfigError(
                 "date_parts should be of type DatePart or str."

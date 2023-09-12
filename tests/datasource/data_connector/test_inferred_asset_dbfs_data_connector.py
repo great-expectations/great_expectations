@@ -18,8 +18,11 @@ from tests.test_utils import create_files_in_directory
 if TYPE_CHECKING:
     from pyfakefs.fake_filesystem import FakeFilesystem
 
+# module level markers
+pytestmark = pytest.mark.big
 
-@pytest.mark.integration
+
+@pytest.mark.big
 def test__get_full_file_path_pandas(fs: FakeFilesystem):
     """
     What does this test and why?
@@ -91,7 +94,7 @@ def test__get_full_file_path_pandas(fs: FakeFilesystem):
     assert batch_spec.path == f"{base_directory}/path/A-100.csv"
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test__get_full_file_path_spark(basic_spark_df_execution_engine, fs):
     """
     What does this test and why?

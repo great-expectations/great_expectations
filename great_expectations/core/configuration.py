@@ -1,10 +1,12 @@
 """Contains general abstract or base classes used across configuration objects."""
 from abc import ABC
+from pprint import pformat as pf
 from typing import Optional
 
 from marshmallow.decorators import post_dump
 from marshmallow.schema import Schema
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.types import SerializableDictDot
 
 
@@ -15,6 +17,10 @@ class AbstractConfig(ABC, SerializableDictDot):
         self.id = id
         self.name = name
         super().__init__()
+
+    @override
+    def __repr__(self) -> str:
+        return pf(self.to_dict(), indent=2, sort_dicts=True)
 
     @classmethod
     def _dict_round_trip(cls, schema: Schema, target: dict) -> dict:

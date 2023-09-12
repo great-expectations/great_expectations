@@ -12,14 +12,6 @@ connecting_to_your_data = [
         backend_dependencies=[BackendDependencies.SNOWFLAKE],
         util_script="tests/test_utils.py",
     ),
-    IntegrationTestFixture(
-        name="snowflake_yaml_example",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.SNOWFLAKE],
-        util_script="tests/test_utils.py",
-    ),
 ]
 
 split_data = [

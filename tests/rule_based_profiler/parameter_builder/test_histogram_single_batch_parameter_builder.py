@@ -5,9 +5,9 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import DataContext
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.data_context import AbstractDataContext
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -20,25 +20,25 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 
+# module level markers
+pytestmark = pytest.mark.big
 
-@pytest.mark.integration
+
 def test_instantiation_histogram_single_batch_parameter_builder(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
-    # noinspection PyUnusedLocal
-    parameter_builder_0: ParameterBuilder = HistogramSingleBatchParameterBuilder(
+    _: ParameterBuilder = HistogramSingleBatchParameterBuilder(
         name="my_name_0",
         data_context=data_context,
     )
 
 
-@pytest.mark.integration
 def test_histogram_single_batch_parameter_builder_alice(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -103,11 +103,10 @@ def test_histogram_single_batch_parameter_builder_alice(
     assert parameter_node == expected_parameter_node_as_dict
 
 
-@pytest.mark.integration
 def test_histogram_single_batch_parameter_builder_alice_null_bins(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -157,11 +156,10 @@ def test_histogram_single_batch_parameter_builder_alice_null_bins(
         )
 
 
-@pytest.mark.integration
 def test_histogram_single_batch_parameter_builder_alice_nan_valued_bins(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -237,11 +235,10 @@ def test_histogram_single_batch_parameter_builder_alice_nan_valued_bins(
         assert parameter_node == expected_parameter_node_as_dict
 
 
-@pytest.mark.integration
 def test_histogram_single_batch_parameter_builder_alice_wrong_type_bins(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -317,13 +314,12 @@ def test_histogram_single_batch_parameter_builder_alice_wrong_type_bins(
         ),
     ],
 )
-@pytest.mark.integration
 def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
     column_values,
     bins,
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -399,11 +395,10 @@ def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
         assert parameter_node == expected_parameter_node_as_dict
 
 
-@pytest.mark.integration
 def test_histogram_single_batch_parameter_builder_alice_check_serialized_keys(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     parameter_builder: ParameterBuilder = HistogramSingleBatchParameterBuilder(
         name="my_name",

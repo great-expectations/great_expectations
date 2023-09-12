@@ -1,4 +1,3 @@
-# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns_great_expectations.yaml">
 config_version: 3.0
 datasources:
   spark_s3:
@@ -70,4 +69,3 @@ data_docs_sites:
 
 anonymous_usage_statistics:
   enabled: True
-# </snippet>

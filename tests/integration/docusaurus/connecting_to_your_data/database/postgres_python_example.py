@@ -1,9 +1,9 @@
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from tests.test_utils import load_data_into_test_database
 
+yaml = YAMLHandler()
 CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 
 # This utility is not for general use. It is only to support testing.
@@ -13,9 +13,7 @@ load_data_into_test_database(
     connection_string=CONNECTION_STRING,
 )
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py get_context">
 context = gx.get_context()
-# </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py datasource_config">
 datasource_config = {

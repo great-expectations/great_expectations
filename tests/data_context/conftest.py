@@ -1,6 +1,11 @@
+from __future__ import annotations
+
 import copy
+import datetime as dt
 import json
 import os
+import pathlib
+import re
 import shutil
 import unittest.mock
 from typing import Any, Callable, Dict, Optional, Union, cast
@@ -11,14 +16,27 @@ import requests
 
 import great_expectations as gx
 from great_expectations import DataContext
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+)
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     AnyPayload,
     GXCloudStoreBackend,
 )
 from great_expectations.data_context.types.base import (
+    CheckpointConfig,
     DataContextConfig,
     DatasourceConfig,
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import file_relative_path
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
@@ -32,8 +50,8 @@ yaml = YAMLHandler()
 def data_context_without_config_variables_filepath_configured(tmp_path_factory):
     # This data_context is *manually* created to have the config we want, vs created with DataContext.create
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
 
     create_data_context_files(
         context_path,
@@ -51,8 +69,8 @@ def data_context_with_variables_in_config(tmp_path_factory, monkeypatch):
     monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", "ive_been_$--replaced")
     # This data_context is *manually* created to have the config we want, vs created with DataContext.create
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
 
     create_data_context_files(
         context_path,
@@ -71,49 +89,63 @@ def create_data_context_files(
     config_variables_fixture_filename=None,
 ):
     if config_variables_fixture_filename:
-        os.makedirs(context_path, exist_ok=True)
-        os.makedirs(os.path.join(context_path, "uncommitted"), exist_ok=True)
+        os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
+        os.makedirs(  # noqa: PTH103
+            os.path.join(context_path, "uncommitted"), exist_ok=True  # noqa: PTH118
+        )
         copy_relative_path(
             f"../test_fixtures/{config_variables_fixture_filename}",
-            str(os.path.join(context_path, "uncommitted/config_variables.yml")),
+            str(
+                os.path.join(  # noqa: PTH118
+                    context_path, "uncommitted/config_variables.yml"
+                )
+            ),
         )
         copy_relative_path(
             f"../test_fixtures/{ge_config_fixture_filename}",
-            str(os.path.join(context_path, "great_expectations.yml")),
+            str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
         )
     else:
-        os.makedirs(context_path, exist_ok=True)
+        os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
         copy_relative_path(
             f"../test_fixtures/{ge_config_fixture_filename}",
-            str(os.path.join(context_path, "great_expectations.yml")),
+            str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
         )
     create_common_data_context_files(context_path, asset_config_path)
 
 
 def create_common_data_context_files(context_path, asset_config_path):
-    os.makedirs(
-        os.path.join(asset_config_path, "mydatasource/mygenerator/my_dag_node"),
+    os.makedirs(  # noqa: PTH103
+        os.path.join(  # noqa: PTH118
+            asset_config_path, "mydatasource/mygenerator/my_dag_node"
+        ),
         exist_ok=True,
     )
     copy_relative_path(
         "../test_fixtures/"
         "expectation_suites/parameterized_expectation_suite_fixture.json",
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             asset_config_path, "mydatasource/mygenerator/my_dag_node/default.json"
         ),
     )
-    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
-    copy_relative_path(
-        "../test_fixtures/custom_pandas_dataset.py",
-        str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
     )
     copy_relative_path(
-        "../test_fixtures/custom_sqlalchemy_dataset.py",
-        str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")),
+        "../test_fixtures/custom_pandas_dataset.py",
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "plugins", "custom_pandas_dataset.py"
+            )
+        ),
     )
     copy_relative_path(
         "../test_fixtures/custom_sparkdf_dataset.py",
-        str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "plugins", "custom_sparkdf_dataset.py"
+            )
+        ),
     )
 
 
@@ -463,16 +495,15 @@ class MockResponse:
             raise requests.exceptions.HTTPError(
                 f"Mock {self.status_code} HTTPError", response=self
             )
-        return None
 
     def __repr__(self):
         return f"<Response [{self.status_code}]>"
 
 
 @pytest.fixture
-def mock_response_factory() -> Callable[
-    [JSONData, int, Optional[RequestError]], MockResponse
-]:
+def mock_response_factory() -> (
+    Callable[[JSONData, int, Optional[RequestError]], MockResponse]
+):
     def _make_mock_response(
         json_data: JSONData,
         status_code: int,
@@ -485,8 +516,7 @@ def mock_response_factory() -> Callable[
     return _make_mock_response
 
 
-@pytest.fixture
-def datasource_config() -> DatasourceConfig:
+def basic_block_config_datasource_config() -> DatasourceConfig:
     return DatasourceConfig(
         class_name="Datasource",
         execution_engine={
@@ -509,6 +539,45 @@ def datasource_config() -> DatasourceConfig:
             }
         },
     )
+
+
+@pytest.fixture
+def block_config_datasource_config() -> DatasourceConfig:
+    return basic_block_config_datasource_config()
+
+
+def basic_fluent_datasource_config() -> dict:
+    return {
+        "type": "pandas_filesystem",
+        "name": "my_fluent_pandas_filesystem_datasource",
+        "assets": [
+            {
+                "name": "my_csv",
+                "type": "csv",
+                "batching_regex": re.compile(
+                    r"yellow_tripdata_(\d{4})-(\d{2})\.csv$", re.UNICODE
+                ),
+            }
+        ],
+        "base_directory": pathlib.PosixPath("/path/to/trip_data"),
+    }
+
+
+@pytest.fixture
+def fluent_datasource_config() -> dict:
+    return basic_fluent_datasource_config()
+
+
+@pytest.fixture(
+    params=[
+        basic_block_config_datasource_config,
+        basic_fluent_datasource_config,
+    ]
+)
+def parametrized_datasource_configs(
+    request,
+) -> DatasourceConfig | dict:
+    return request.param()
 
 
 @pytest.fixture
@@ -540,7 +609,6 @@ def mock_http_unavailable(mock_response_factory: Callable):
     """Mock all request http calls to return a 503 Unavailable response."""
 
     def mocked_response(*args, **kwargs):
-
         return MockResponse(
             {"code": 503, "detail": "API is unavailable"},
             503,
@@ -572,9 +640,17 @@ def checkpoint_config() -> dict:
         "expectation_suite_name": "oss_test_expectation_suite",
         "validations": [
             {
+                "name": None,
+                "id": None,
                 "expectation_suite_name": "taxi.demo_pass",
+                "expectation_suite_ge_cloud_id": None,
+                "batch_request": None,
             },
             {
+                "name": None,
+                "id": None,
+                "expectation_suite_name": None,
+                "expectation_suite_ge_cloud_id": None,
                 "batch_request": {
                     "datasource_name": "oss_test_datasource",
                     "data_connector_name": "oss_test_data_connector",
@@ -582,8 +658,45 @@ def checkpoint_config() -> dict:
                 },
             },
         ],
+        "action_list": [
+            {
+                "action": {"class_name": "StoreValidationResultAction"},
+                "name": "store_validation_result",
+            },
+            {
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+                "name": "store_evaluation_params",
+            },
+        ],
     }
     return checkpoint_config
+
+
+@pytest.fixture
+def checkpoint_result(checkpoint_config: dict) -> CheckpointResult:
+    timestamp = dt.datetime(1996, 6, 1)
+    run_id = RunIdentifier(run_time=timestamp)
+    run_results = {
+        ValidationResultIdentifier(
+            expectation_suite_identifier=ExpectationSuiteIdentifier("my_suite"),
+            run_id=RunIdentifier(run_time=timestamp),
+            batch_identifier="default_pandas_datasource-#ephemeral_pandas_asset",
+        ): {
+            "validation_result": ExpectationSuiteValidationResult(),
+            "actions_results": {"my_action": {"class": "StoreValidationResultAction"}},
+        }
+    }
+
+    config = CheckpointConfig(**checkpoint_config)
+
+    validation_result_url = "https://my.cloud.app/validation-result/123"
+
+    return CheckpointResult(
+        run_id=run_id,
+        run_results=run_results,
+        checkpoint_config=config,
+        validation_result_url=validation_result_url,
+    )
 
 
 @pytest.fixture
@@ -649,7 +762,7 @@ def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
 ):
     context: DataContext = empty_data_context_in_cloud_mode
     config = yaml.load(
-        f"""
+        """
     class_name: Datasource
     execution_engine:
         class_name: PandasExecutionEngine
@@ -668,7 +781,7 @@ def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
         "requests.Session.get",
         autospec=True,
         side_effect=mocked_datasource_get_response,
-    ):
+    ), pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
         context.add_datasource(
             "my_datasource",
             **config,

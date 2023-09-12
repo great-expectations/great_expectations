@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 @pytest.mark.slow  # 1.05s
 def test__get_full_file_path_pandas(fs: FakeFilesystem):
     """
@@ -87,7 +87,7 @@ def test__get_full_file_path_pandas(fs: FakeFilesystem):
     assert my_data_connector.get_unmatched_data_reference_count() == 0
 
 
-@pytest.mark.integration
+@pytest.mark.spark
 def test__get_full_file_path_spark(basic_spark_df_execution_engine, fs):
     """
     What does this test and why?

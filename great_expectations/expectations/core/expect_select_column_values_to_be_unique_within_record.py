@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
@@ -127,7 +127,7 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
 
         params = renderer_configuration.params
 
-        if params.mostly and params.mostly.value < 1.0:
+        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
@@ -178,7 +178,7 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
             ],
         )
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:
+        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -187,12 +187,12 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
             template_str = "Values must always be unique across columns: "
 
         for idx in range(len(params["column_list"]) - 1):
-            template_str += f"$column_list_{str(idx)}, "
-            params[f"column_list_{str(idx)}"] = params["column_list"][idx]
+            template_str += f"$column_list_{idx!s}, "
+            params[f"column_list_{idx!s}"] = params["column_list"][idx]
 
         last_idx = len(params["column_list"]) - 1
-        template_str += f"$column_list_{str(last_idx)}"
-        params[f"column_list_{str(last_idx)}"] = params["column_list"][last_idx]
+        template_str += f"$column_list_{last_idx!s}"
+        params[f"column_list_{last_idx!s}"] = params["column_list"][last_idx]
 
         if params["row_condition"] is not None:
             (

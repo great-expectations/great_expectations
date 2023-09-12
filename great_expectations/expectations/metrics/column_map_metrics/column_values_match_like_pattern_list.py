@@ -1,9 +1,9 @@
 import logging
 
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -37,7 +37,7 @@ class ColumnValuesMatchLikePatternList(ColumnMapMetricProvider):
         )
         if like_pattern_expression is None:
             logger.warning(
-                f"Like patterns are not supported for dialect {str(_dialect.dialect.name)}"
+                f"Like patterns are not supported for dialect {_dialect.dialect.name!s}"
             )
             raise NotImplementedError
 

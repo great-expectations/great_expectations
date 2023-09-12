@@ -1,12 +1,22 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Type,
+    Union,
+    cast,
+)
 
-import pydantic
-from typing_extensions import Literal, Self
-
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.datasource.fluent.config_str import ConfigStr  # noqa: TCH001
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import (
     QueryAsset as SqlQueryAsset,
 )
@@ -20,7 +30,11 @@ from great_expectations.datasource.fluent.sql_datasource import (
 )
 
 if TYPE_CHECKING:
+    # min version of typing_extension missing `Self`, so it can't be imported at runtime
+    from typing_extensions import Self
+
     from great_expectations.datasource.fluent.interfaces import (
+        BatchMetadata,
         BatchRequestOptions,
         DataAsset,
         SortersDefinition,
@@ -48,12 +62,15 @@ class SplitterHashedColumn(_SplitterOneColumnOneParam):
     method_name: Literal["split_on_hashed_column"] = "split_on_hashed_column"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         return ["hash"]
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name, "hash_digits": self.hash_digits}
 
+    @override
     def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
@@ -80,17 +97,20 @@ class SplitterConvertedDateTime(_SplitterOneColumnOneParam):
     method_name: Literal["split_on_converted_datetime"] = "split_on_converted_datetime"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         # The datetime parameter will be a string representing a datetime in the format
         # given by self.date_format_string.
         return ["datetime"]
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {
             "column_name": self.column_name,
             "date_format_string": self.date_format_string,
         }
 
+    @override
     def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
@@ -115,9 +135,17 @@ SqliteSplitter = Union[Splitter, SplitterHashedColumn, SplitterConvertedDateTime
 
 
 class _SQLiteAssetMixin:
+    @public_api
     def add_splitter_hashed_column(
         self: Self, column_name: str, hash_digits: int
     ) -> Self:
+        """Associates a hashed column splitter with this sqlite data asset.
+        Args:
+            column_name: The column name of the date column where year and month will be parsed out.
+            hash_digits: Number of digits to truncate output of hashing function (to limit length of hashed result).
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
             SplitterHashedColumn(
                 method_name="split_on_hashed_column",
@@ -126,9 +154,17 @@ class _SQLiteAssetMixin:
             )
         )
 
+    @public_api
     def add_splitter_converted_datetime(
         self: Self, column_name: str, date_format_string: str
     ) -> Self:
+        """Associates a converted datetime splitter with this sqlite data asset.
+        Args:
+            column_name: The column name of the date column where year and month will be parsed out.
+            date_format_string: Format for converting string representation of datetime to actual datetime object.
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
             SplitterConvertedDateTime(
                 method_name="split_on_converted_datetime",
@@ -139,12 +175,12 @@ class _SQLiteAssetMixin:
 
 
 class SqliteTableAsset(_SQLiteAssetMixin, SqlTableAsset):
-    type: Literal["sqlite_table"] = "sqlite_table"  # type: ignore[assignment]  # override superclass value
+    type: Literal["table"] = "table"
     splitter: Optional[SqliteSplitter] = None  # type: ignore[assignment]  # override superclass type
 
 
 class SqliteQueryAsset(_SQLiteAssetMixin, SqlQueryAsset):
-    type: Literal["sqlite_query"] = "sqlite_query"  # type: ignore[assignment]  # override superclass value
+    type: Literal["query"] = "query"
     splitter: Optional[SqliteSplitter] = None  # type: ignore[assignment]  # override superclass type
 
 
@@ -156,6 +192,7 @@ class SqliteDatasource(SQLDatasource):
         name: The name of this sqlite datasource.
         connection_string: The SQLAlchemy connection string used to connect to the sqlite database.
             For example: "sqlite:///path/to/file.db"
+        create_temp_table: Whether to leverage temporary tables during metric computation.
         assets: An optional dictionary whose keys are TableAsset names and whose values
             are TableAsset objects.
     """
@@ -173,33 +210,42 @@ class SqliteDatasource(SQLDatasource):
     _QueryAsset: Type[SqlQueryAsset] = pydantic.PrivateAttr(SqliteQueryAsset)
 
     @public_api
-    def add_table_asset(
+    @override
+    def add_table_asset(  # noqa: PLR0913
         self,
         name: str,
-        table_name: str,
+        table_name: str = "",
         schema_name: Optional[str] = None,
         order_by: Optional[SortersDefinition] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> SqliteTableAsset:
         return cast(
             SqliteTableAsset,
-            super().add_table_asset(name, table_name, schema_name, order_by),
+            super().add_table_asset(
+                name=name,
+                table_name=table_name,
+                schema_name=schema_name,
+                order_by=order_by,
+                batch_metadata=batch_metadata,
+            ),
         )
 
     add_table_asset.__doc__ = SQLDatasource.add_table_asset.__doc__
 
     @public_api
+    @override
     def add_query_asset(
         self,
         name: str,
         query: str,
         order_by: Optional[SortersDefinition] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> SqliteQueryAsset:
-        return cast(SqliteQueryAsset, super().add_query_asset(name, query, order_by))
+        return cast(
+            SqliteQueryAsset,
+            super().add_query_asset(
+                name=name, query=query, order_by=order_by, batch_metadata=batch_metadata
+            ),
+        )
 
     add_query_asset.__doc__ = SQLDatasource.add_query_asset.__doc__
-
-
-# Removed automatically added add_*_asset methods we don't want.
-# TODO: Prevent these from being created.
-delattr(SqliteDatasource, "add_sqlite_table_asset")
-delattr(SqliteDatasource, "add_sqlite_query_asset")

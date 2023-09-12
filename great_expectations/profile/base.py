@@ -6,6 +6,7 @@ import time
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.core.run_identifier import RunIdentifier
@@ -69,19 +70,19 @@ class OrderedProfilerCardinality(OrderedEnum):
         Returns:
             The column cardinality
         """
-        if pct_unique == 1.0:
+        if pct_unique == 1.0:  # noqa: PLR2004
             cardinality = cls.UNIQUE
         elif num_unique == 1:
             cardinality = cls.ONE
-        elif num_unique == 2:
+        elif num_unique == 2:  # noqa: PLR2004
             cardinality = cls.TWO
-        elif 0 < num_unique < 20:
+        elif 0 < num_unique < 20:  # noqa: PLR2004
             cardinality = cls.VERY_FEW
-        elif 0 < num_unique < 60:
+        elif 0 < num_unique < 60:  # noqa: PLR2004
             cardinality = cls.FEW
         elif num_unique is None or num_unique == 0 or pct_unique is None:
             cardinality = cls.NONE
-        elif pct_unique > 0.1:
+        elif pct_unique > 0.1:  # noqa: PLR2004
             cardinality = cls.VERY_MANY
         else:
             cardinality = cls.MANY
@@ -151,8 +152,10 @@ class Profiler(metaclass=abc.ABCMeta):
     def __init__(self, configuration: Optional[dict] = None) -> None:
         self.configuration = configuration
 
-    @public_api
-    def validate(self, item_to_validate: Any) -> None:
+    @public_api  # noqa: B027
+    def validate(  # empty-method-without-abstract-decorator
+        self, item_to_validate: Any
+    ) -> None:
         """Raise an exception if `item_to_validate` cannot be profiled.
 
         Args:
@@ -182,6 +185,7 @@ class DataAssetProfiler:
 
 class DatasetProfiler(DataAssetProfiler):
     @classmethod
+    @override
     def validate(cls, dataset) -> bool:
         return isinstance(dataset, (Dataset, Validator))
 
@@ -219,7 +223,7 @@ class DatasetProfiler(DataAssetProfiler):
         return expectation_suite
 
     @classmethod
-    def profile(
+    def profile(  # noqa: PLR0913
         cls,
         data_asset,
         run_id=None,
@@ -249,7 +253,7 @@ class DatasetProfiler(DataAssetProfiler):
             expectation_suite, run_id=run_id, result_format="SUMMARY"
         )
         expectation_suite.add_citation(
-            comment=f"{str(cls.__name__)} added a citation based on the current batch.",
+            comment=f"{cls.__name__!s} added a citation based on the current batch.",
             batch_kwargs=data_asset.batch_kwargs,
             batch_markers=data_asset.batch_markers,
             batch_parameters=data_asset.batch_parameters,

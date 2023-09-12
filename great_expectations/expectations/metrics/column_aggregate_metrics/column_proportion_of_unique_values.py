@@ -1,6 +1,7 @@
 from typing import Optional
 
-from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
@@ -48,6 +49,7 @@ class ColumnUniqueProportion(ColumnAggregateMetricProvider):
         return unique_proportion(metrics)
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,

@@ -167,7 +167,6 @@ class SphinxInvokeDocsBuilder:
         for html_file_path in self._get_generated_html_file_paths():
             logger.debug(f"Processing: {str(html_file_path.absolute())}")
             with open(html_file_path.absolute()) as f:
-
                 html_file_contents = f.read()
                 doc_str = self._parse_and_process_html_to_mdx(
                     html_file_path, html_file_contents
@@ -221,7 +220,7 @@ class SphinxInvokeDocsBuilder:
 
         sidebar_entry = self._get_sidebar_entry(html_file_path=html_file_path)
 
-        # Add .py to module titles
+        # Add .py suffix to module titles
         if sidebar_entry.type == SidebarEntryType.MODULE:
             stem_path = pathlib.Path(
                 self._get_mdx_file_path(sidebar_entry=sidebar_entry).stem
@@ -354,7 +353,8 @@ class SphinxInvokeDocsBuilder:
         else:
             definition_path = definition.filepath
 
-        return definition_path.with_suffix(".py.mdx")
+        # We don't want the .py suffix in the URL so we only add the .mdx suffix.
+        return definition_path.with_suffix(".mdx")
 
     def _get_base_url(self) -> str:
         """The base url for use in generating absolute links.
@@ -424,7 +424,6 @@ class SphinxInvokeDocsBuilder:
         definitions = get_public_api_module_level_function_definitions()
 
         for definition in definitions:
-
             self.definitions[definition.name] = definition
 
             sidebar_entry = SidebarEntry(

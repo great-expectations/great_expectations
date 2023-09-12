@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import logging
 import os
+import pathlib
 import re
 import tempfile
 from mimetypes import guess_type
@@ -291,9 +294,7 @@ class HtmlSiteStore:
             key = resource_identifier.to_tuple()
         else:
             # this method does not support getting the URL of static assets
-            raise ValueError(
-                f"Cannot get URL for resource {str(resource_identifier):s}"
-            )
+            raise ValueError(f"Cannot get URL for resource {resource_identifier!s:s}")
 
         # <WILL> : this is a hack for Taylor. Change this back. 20200924
         # if only_if_exists:
@@ -308,16 +309,16 @@ class HtmlSiteStore:
             if only_if_exists:
                 return (
                     store_backend.get_public_url_for_key(key)
-                    if store_backend.has_key(key)  # noqa: W601
+                    if store_backend.has_key(key)
                     else None
                 )
             else:
                 return store_backend.get_public_url_for_key(key)
-        else:
+        else:  # noqa: PLR5501
             if only_if_exists:
                 return (
                     store_backend.get_url_for_key(key)
-                    if store_backend.has_key(key)  # noqa: W601
+                    if store_backend.has_key(key)
                     else None
                 )
             else:
@@ -378,13 +379,13 @@ class HtmlSiteStore:
             for key in keys:
                 target_store_backend.remove_key(key)
 
-    def copy_static_assets(self, static_assets_source_dir=None):
+    def copy_static_assets(self, static_assets_source_dir: str | None = None):
         """
         Copies static assets, using a special "static_assets" backend store that accepts variable-length tuples as
         keys, with no filepath_template.
         """
-        file_exclusions = [".DS_Store"]
-        dir_exclusions = []
+        file_exclusions: list[str] = [".DS_Store"]
+        dir_exclusions: list[str] = []
 
         if not static_assets_source_dir:
             static_assets_source_dir = file_relative_path(
@@ -423,7 +424,7 @@ class HtmlSiteStore:
                 )
                 with open(source_name, "rb") as f:
                     # Only use path elements starting from static/ for key
-                    store_key = tuple(os.path.normpath(source_name).split(os.sep))
+                    store_key: tuple[str, ...] = pathlib.Path(source_name).parts
                     store_key = store_key[store_key.index("static") :]
                     content_type, content_encoding = guess_type(item, strict=False)
 

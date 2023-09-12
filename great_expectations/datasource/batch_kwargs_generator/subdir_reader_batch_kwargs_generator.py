@@ -26,6 +26,7 @@ KNOWN_EXTENSIONS = [
 ]
 
 
+# 20230830 - Chetan - Is open for deletion but is used in a number of tests; once decoupled, we should remove this
 class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
     """The SubdirReaderBatchKwargsGenerator inspects a filesystem and produces path-based batch_kwargs.
 
@@ -43,7 +44,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
     _default_reader_options: Dict = {}
     recognized_batch_parameters = {"data_asset_name", "partition_id"}
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name="default",
         datasource=None,

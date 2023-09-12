@@ -18,6 +18,7 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -35,13 +36,12 @@ from great_expectations.validator.metric_configuration import (
 )
 
 if TYPE_CHECKING:
-    # noinspection PyPep8Naming
-    import pyspark.sql.functions as F
-    import sqlalchemy as sa
-
+    from great_expectations.compatibility.pyspark import functions as F
+    from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
     from great_expectations.core.batch import (
         BatchData,
         BatchDataType,
+        BatchDataUnion,
         BatchMarkers,
         BatchSpec,
     )
@@ -49,16 +49,6 @@ if TYPE_CHECKING:
     from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
-
-
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
-    logger.debug(
-        "Unable to load pandas; install optional pandas dependency for support."
-    )
 
 
 class NoOpDict:
@@ -86,6 +76,7 @@ class MetricComputationConfiguration(DictDot):
     accessor_domain_kwargs: Optional[dict] = None
 
     @public_api
+    @override
     def to_dict(self) -> dict:
         """Returns: this MetricComputationConfiguration as a Python dictionary
 
@@ -149,7 +140,7 @@ class ExecutionEngine(ABC):
 
     recognized_batch_spec_defaults: Set[str] = set()
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: Optional[str] = None,
         caching: bool = True,
@@ -176,7 +167,7 @@ class ExecutionEngine(ABC):
         if not batch_spec_defaults_keys <= self.recognized_batch_spec_defaults:
             logger.warning(
                 f"""Unrecognized batch_spec_default(s): \
-{str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)}
+{batch_spec_defaults_keys - self.recognized_batch_spec_defaults!s}
 """
             )
 
@@ -206,7 +197,9 @@ class ExecutionEngine(ABC):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def configure_validator(self, validator) -> None:
+    def configure_validator(  # noqa: B027 # empty-method-without-abstract-decorator
+        self, validator
+    ) -> None:
         """Optionally configure the validator as appropriate for the execution engine."""
         pass
 
@@ -234,7 +227,7 @@ class ExecutionEngine(ABC):
         for batch_id, batch_data in batch_data_dict.items():
             self.load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
-    def load_batch_data(self, batch_id: str, batch_data: BatchDataType) -> None:
+    def load_batch_data(self, batch_id: str, batch_data: BatchDataUnion) -> None:
         self._batch_manager.save_batch_data(batch_id=batch_id, batch_data=batch_data)
 
     def get_batch_data(
@@ -462,7 +455,7 @@ class ExecutionEngine(ABC):
                     )
                 except KeyError as e:
                     raise gx_exceptions.MetricError(
-                        message=f'Missing metric dependency: {str(e)} for metric "{metric_to_resolve.metric_name}".'
+                        message=f'Missing metric dependency: {e!s} for metric "{metric_to_resolve.metric_name}".'
                     )
 
                 metric_fn_bundle_configurations.append(
@@ -795,7 +788,7 @@ class ExecutionEngine(ABC):
 
         column_list = compute_domain_kwargs.pop("column_list")
 
-        if len(column_list) < 2:
+        if len(column_list) < 2:  # noqa: PLR2004
             raise gx_exceptions.GreatExpectationsError(
                 "column_list must contain at least 2 columns"
             )

@@ -17,7 +17,7 @@ def is_valid_us_county_name(county: str):
     list_of_counties = [d["name"] for d in dict_of_counties if "name" in d]
     if len(county) > 33:
         return False
-    elif type(county) != str:
+    elif type(county) != str:  # noqa: E721
         return False
     if county in list_of_counties:
         return True
@@ -28,7 +28,6 @@ def is_valid_us_county_name(county: str):
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidUSCountyName(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_us_county_name"
 

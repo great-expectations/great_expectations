@@ -6,7 +6,7 @@ import { useBaseUrlUtils } from '@docusaurus/useBaseUrl'
 import Link from '@docusaurus/Link'
 import Head from '@docusaurus/Head'
 import { isRegexpStringMatch } from '@docusaurus/theme-common'
-import { useSearchPage } from '@docusaurus/theme-common/internal'
+import { useSearchLinkCreator } from '@docusaurus/theme-common'
 import { DocSearchButton, useDocSearchKeyboardEvents } from '@docsearch/react'
 import { useAlgoliaContextualFacetFilters } from '@docusaurus/theme-search-algolia/client'
 import Translate from '@docusaurus/Translate'
@@ -15,26 +15,26 @@ let DocSearchModal = null
 const aa = require('search-insights')
 
 aa('init', {
-  appId: 'B4HD9FJQCB',
-  apiKey: 'b910554b878b1ad33ec7eb6afb6714c1',
-  useCookie: true,  
+  appId: 'PFK639M3JK',
+  apiKey: 'fc3e3b1588b46d8d476aca9c1cadd53f',
+  useCookie: true,
 })
 function Hit ({ hit, children }) {
   return <Link to={hit.url}>{children}</Link>
 }
 function ResultsFooter ({ state, onClose }) {
-  const { generateSearchPageLink } = useSearchPage()
+  const makeLink = useSearchLinkCreator(state.query)
   return (
-    <Link to={generateSearchPageLink(state.query)} onClick={onClose}>
-      <Translate
-        id='theme.SearchBar.seeAll'
-        values={{ count: state.context.nbHits }}
-      >
-        {'See all {count} results'}
-      </Translate>
-    </Link>
-  )
-}
+     <Link to={makeLink(state.query)} onClick={onClose}>
+       <Translate
+         id='theme.SearchBar.seeAll'
+         values={{ count: state.context.nbHits }}
+       >
+         {'See all {count} results'}
+       </Translate>
+     </Link>
+   )
+  }
 function mergeFacetFilters (f1, f2) {
   const normalize = (f) => (typeof f === 'string' ? [f] : f)
   return [...normalize(f1), ...normalize(f2)]
@@ -178,9 +178,11 @@ function DocSearch ({ contextualSearch, externalUrlRegex, ...props }) {
             transformItems={transformItems}
             hitComponent={Hit}
             transformSearchClient={transformSearchClient}
-            {...(props.searchPagePath && {
+            {...(props.searchPagePath
+               && {
               resultsFooterComponent
-            })}
+            }
+            )}
             {...props}
             searchParameters={searchParameters}
             placeholder={translations.placeholder}

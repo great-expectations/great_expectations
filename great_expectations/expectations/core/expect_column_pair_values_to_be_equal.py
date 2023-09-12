@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
@@ -142,7 +142,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         if not params.column_A or not params.column_B:
             template_str += "Unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column. "
 
-        if not params.mostly or params.mostly.value == 1.0:
+        if not params.mostly or params.mostly.value == 1.0:  # noqa: PLR2004
             template_str += "Values in $column_A and $column_B must always be equal."
         else:
             renderer_configuration = cls._add_mostly_pct_param(
@@ -185,7 +185,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
             template_str = " unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column."
             params["row_condition"] = None
 
-        if params["mostly"] is None or params["mostly"] == 1.0:
+        if params["mostly"] is None or params["mostly"] == 1.0:  # noqa: PLR2004
             template_str = "Values in $column_A and $column_B must always be equal."
         else:
             params["mostly_pct"] = num_to_str(

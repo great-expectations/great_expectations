@@ -1,9 +1,8 @@
 import re
 import sys
-from typing import List, Optional, Tuple
+from typing import Final, List, Optional, Tuple
 
 import click
-from typing_extensions import Final
 
 SUPPORTED_CLI_COLORS: Final[Tuple[str, ...]] = (
     "blue",
@@ -100,7 +99,7 @@ def cli_message_dict(
                 recursion_flag=True,
             )
         else:
-            message = f"{' ' * indent}<cyan>{key}:</cyan> {str(dict_[key])}"
+            message = f"{' ' * indent}<cyan>{key}:</cyan> {dict_[key]!s}"
             message_list.append(message)
     if not recursion_flag:
         if bullet_char and indent > 1:

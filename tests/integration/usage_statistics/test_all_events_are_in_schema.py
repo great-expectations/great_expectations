@@ -29,6 +29,7 @@ def all_events_from_anonymized_usage_statistics_record_schema() -> List[str]:
     return unique_events
 
 
+@pytest.mark.unit
 def test_all_events_are_in_event_validation_schema(
     all_events_from_anonymized_usage_statistics_record_schema,
 ):

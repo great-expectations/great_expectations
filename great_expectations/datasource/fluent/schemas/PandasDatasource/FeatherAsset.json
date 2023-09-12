@@ -28,6 +28,10 @@
                 "$ref": "#/definitions/Sorter"
             }
         },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
         "path": {
             "title": "Path",
             "anyOf": [
@@ -45,7 +49,11 @@
             ]
         },
         "columns": {
-            "title": "Columns"
+            "title": "Columns",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
         },
         "use_threads": {
             "title": "Use Threads",

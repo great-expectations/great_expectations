@@ -132,7 +132,7 @@ class DefaultJinjaView:
         return url
 
     @contextfilter
-    def render_content_block(
+    def render_content_block(  # noqa: PLR0911, PLR0913, PLR0912
         self,
         jinja_context,
         content_block,
@@ -164,18 +164,18 @@ class DefaultJinjaView:
                 ):
                     new_content_block_id = None
                     if content_block_id:
-                        new_content_block_id = f"{content_block_id}-{str(idx)}"
+                        new_content_block_id = f"{content_block_id}-{idx!s}"
                     rendered_block += self.render_content_block(
                         jinja_context,
                         content_block_el,
                         idx,
                         content_block_id=new_content_block_id,
                     )
-                else:
+                else:  # noqa: PLR5501
                     if render_to_markdown:
                         rendered_block += str(content_block_el)
                     else:
-                        rendered_block += f"<span>{str(content_block_el)}</span>"
+                        rendered_block += f"<span>{content_block_el!s}</span>"
             return rendered_block
         elif not isinstance(content_block, dict):
             return content_block
@@ -230,7 +230,6 @@ class DefaultJinjaView:
         return attributes_string
 
     def render_styling(self, styling):
-
         """Adds styling information suitable for an html tag.
 
         Example styling block::
@@ -261,7 +260,7 @@ class DefaultJinjaView:
         if class_list is None:
             class_str = ""
         else:
-            if type(class_list) == str:
+            if type(class_list) == str:  # noqa: E721
                 raise TypeError("classes must be a list, not a string.")
             class_str = f"class=\"{' '.join(class_list)}\" "
 
@@ -315,7 +314,7 @@ class DefaultJinjaView:
         except OSError:
             return markdown
 
-    def render_string_template(self, template):
+    def render_string_template(self, template):  # noqa: PLR0912
         # NOTE: Using this line for debugging. This should probably be logged...?
         # print(template)
 
@@ -348,24 +347,20 @@ class DefaultJinjaView:
             tooltip_content = template["tooltip"]["content"]
             tooltip_content.replace("\n", "<br>")
             placement = template["tooltip"].get("placement", "top")
-            base_template_string = """
+            base_template_string = f"""
                 <{tag} $styling>
                     $template
                     <span class={placement}>
                         {tooltip_content}
                     </span>
                 </{tag}>
-            """.format(
-                placement=placement, tooltip_content=tooltip_content, tag=tag
-            )
+            """
         else:
-            base_template_string = """
+            base_template_string = f"""
                 <{tag} $styling>
                     $template
                 </{tag}>
-            """.format(
-                tag=tag
-            )
+            """
 
         if "styling" in template:
             params = template.get("params", {})
@@ -375,13 +370,10 @@ class DefaultJinjaView:
                 default_parameter_styling = template["styling"]["default"]
                 default_param_tag = default_parameter_styling.get("tag", "span")
                 base_param_template_string = (
-                    "<{param_tag} $styling>$content</{param_tag}>".format(
-                        param_tag=default_param_tag
-                    )
+                    f"<{default_param_tag} $styling>$content</{default_param_tag}>"
                 )
 
                 for parameter in template["params"].keys():
-
                     # If this param has styling that over-rides the default, skip it here and get it in the next loop.
                     if "params" in template["styling"]:
                         if parameter in template["styling"]["params"]:
@@ -406,9 +398,7 @@ class DefaultJinjaView:
                         continue
                     param_tag = parameter_styling.get("tag", "span")
                     param_template_string = (
-                        "<{param_tag} $styling>$content</{param_tag}>".format(
-                            param_tag=param_tag
-                        )
+                        f"<{param_tag} $styling>$content</{param_tag}>"
                     )
                     params[parameter] = pTemplate(
                         param_template_string
@@ -562,7 +552,7 @@ class DefaultMarkdownPageView(DefaultJinjaView):
         )
 
     @contextfilter
-    def render_content_block(
+    def render_content_block(  # noqa: PLR0913
         self,
         jinja_context,
         content_block,

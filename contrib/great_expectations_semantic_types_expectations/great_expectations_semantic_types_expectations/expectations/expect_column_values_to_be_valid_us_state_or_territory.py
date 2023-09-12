@@ -19,7 +19,7 @@ def is_valid_state_or_territory(state: str, dc_statehood: bool):
         pass
     if len(state) > 24:
         return False
-    elif type(state) != str:
+    elif type(state) != str:  # noqa: E721
         return False
     elif state in list_of_states_and_territories:
         return True
@@ -30,7 +30,6 @@ def is_valid_state_or_territory(state: str, dc_statehood: bool):
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidUSState(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_us_state_or_territory"
 

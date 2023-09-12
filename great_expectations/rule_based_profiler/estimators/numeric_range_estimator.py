@@ -4,16 +4,17 @@ from typing import Dict, Optional
 
 import numpy as np
 
-from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.domain import Domain
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
-    NumericRangeEstimationResult,  # noqa: TCH001
+    NumericRangeEstimationResult,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,  # noqa: TCH001
+    ParameterContainer,
 )
 from great_expectations.types import SerializableDictDot
-from great_expectations.types.attributes import Attributes  # noqa: TCH001
+from great_expectations.types.attributes import Attributes
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -90,6 +91,7 @@ class NumericRangeEstimator(ABC, SerializableDictDot):
         """
         pass
 
+    @override
     def to_dict(self) -> dict:
         """
         Returns dictionary equivalent of this object.
@@ -100,6 +102,7 @@ class NumericRangeEstimator(ABC, SerializableDictDot):
         dict_obj.update({"name": self._name})
         return dict_obj
 
+    @override
     def to_json_dict(self) -> dict:
         """
         Returns JSON dictionary equivalent of this object.

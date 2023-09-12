@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import SemanticDomainTypes
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
@@ -37,7 +38,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     VARIABLES_KEY,
 )
 from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.validator.validator import Validator  # noqa: TCH001
+from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
     from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
@@ -76,6 +77,7 @@ class OnboardingDataAssistant(DataAssistant):
             validator=validator,
         )
 
+    @override
     def get_variables(self) -> Optional[Dict[str, Any]]:
         """
         Returns:
@@ -83,6 +85,7 @@ class OnboardingDataAssistant(DataAssistant):
         """
         return None
 
+    @override
     def get_rules(self) -> Optional[List[Rule]]:
         """
         Returns:
@@ -164,6 +167,7 @@ class OnboardingDataAssistant(DataAssistant):
             categorical_columns_rule,
         ]
 
+    @override
     def _build_data_assistant_result(
         self, data_assistant_result: DataAssistantResult
     ) -> DataAssistantResult:
@@ -173,6 +177,7 @@ class OnboardingDataAssistant(DataAssistant):
             profiler_execution_time=data_assistant_result.profiler_execution_time,
             rule_domain_builder_execution_time=data_assistant_result.rule_domain_builder_execution_time,
             rule_execution_time=data_assistant_result.rule_execution_time,
+            rule_exception_tracebacks=data_assistant_result.rule_exception_tracebacks,
             metrics_by_domain=data_assistant_result.metrics_by_domain,
             expectation_configurations=data_assistant_result.expectation_configurations,
             citation=data_assistant_result.citation,
@@ -195,8 +200,8 @@ class OnboardingDataAssistant(DataAssistant):
         table_row_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
             DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
         )
-        table_columns_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
-            DataAssistant.commonly_used_parameter_builders.get_table_columns_metric_multi_batch_parameter_builder()
+        table_columns_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_table_columns_metric_multi_batch_parameter_builder(
+            include_nested=True
         )
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
@@ -302,7 +307,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting numeric columns (but not "ID-type" columns).
 
-        numeric_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
+        numeric_column_type_domain_builder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,
@@ -779,6 +784,9 @@ class OnboardingDataAssistant(DataAssistant):
 
     @staticmethod
     def _build_text_columns_rule() -> Rule:
+        """
+        This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for text columns.
+        """
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting proper text columns.
 

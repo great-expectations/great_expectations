@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 import pathlib
+from typing import TYPE_CHECKING
 from unittest import mock
 
 import pytest
 
-from great_expectations.data_context.data_context.data_context import DataContext
+import great_expectations as gx
+from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
@@ -17,9 +21,12 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
     GXCloudConfig,
+    InMemoryStoreBackendDefaults,
 )
 from great_expectations.datasource import Datasource
-from great_expectations.util import get_context
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import CloudDataContext
 
 
 @pytest.fixture
@@ -49,10 +56,9 @@ def pandas_enabled_datasource_config() -> dict:
     return config
 
 
-@pytest.mark.integration
 @pytest.mark.cloud
 def test_data_context_instantiates_gx_cloud_store_backend_with_cloud_config(
-    tmp_path: pathlib,
+    tmp_path: pathlib.Path,
     data_context_config_with_datasources: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
 ) -> None:
@@ -74,9 +80,9 @@ def test_data_context_instantiates_gx_cloud_store_backend_with_cloud_config(
     assert isinstance(context._datasource_store.store_backend, GXCloudStoreBackend)
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_data_context_instantiates_inline_store_backend_with_filesystem_config(
-    tmp_path: pathlib,
+    tmp_path: pathlib.Path,
     data_context_config_with_datasources: DataContextConfig,
 ) -> None:
     project_path = tmp_path / "my_data_context"
@@ -94,35 +100,16 @@ def test_data_context_instantiates_inline_store_backend_with_filesystem_config(
     assert isinstance(context._datasource_store.store_backend, InlineStoreBackend)
 
 
-@pytest.mark.parametrize(
-    "data_context_fixture_name",
-    [
-        # In order to leverage existing fixtures in parametrization, we provide
-        # their string names and dynamically retrieve them using pytest's built-in
-        # `request` fixture.
-        # Source: https://stackoverflow.com/a/64348247
-        pytest.param(
-            "in_memory_runtime_context",
-            id="BaseDataContext",
-        ),
-        pytest.param(
-            "cloud_data_context_in_cloud_mode_with_datasource_pandas_engine",
-            id="DataContext",
-        ),
-    ],
-)
 @pytest.mark.unit
 def test_get_datasource_retrieves_from_cache(
-    data_context_fixture_name: str,
-    request,
+    in_memory_runtime_context,
 ) -> None:
     """
     What does this test and why?
 
-    For both persistence-enabled and disabled contexts, we should always be looking at the
-    cache for object retrieval.
+    For non-Cloud contexts, we should always be looking at the cache for object retrieval.
     """
-    context = request.getfixturevalue(data_context_fixture_name)
+    context = in_memory_runtime_context
 
     name = context.list_datasources()[0]["name"]
 
@@ -135,47 +122,21 @@ def test_get_datasource_retrieves_from_cache(
     assert not mock_get.called
 
 
-@pytest.mark.parametrize(
-    "data_context_fixture_name",
-    [
-        # In order to leverage existing fixtures in parametrization, we provide
-        # their string names and dynamically retrieve them using pytest's built-in
-        # `request` fixture.
-        # Source: https://stackoverflow.com/a/64348247
-        pytest.param(
-            "in_memory_runtime_context",
-            id="BaseDataContext",
-        ),
-        pytest.param(
-            "cloud_data_context_in_cloud_mode_with_datasource_pandas_engine",
-            id="DataContext",
-        ),
-    ],
-)
 @pytest.mark.unit
-def test_get_datasource_cache_miss(
-    data_context_fixture_name: str,
-    request,
-) -> None:
+def test_get_datasource_cache_miss(in_memory_runtime_context) -> None:
     """
     What does this test and why?
 
-    For all contexts, we should leverage the underlying store in the case
+    For all non-Cloud contexts, we should leverage the underlying store in the case
     of a cache miss.
     """
-    context = request.getfixturevalue(data_context_fixture_name)
+    context = in_memory_runtime_context
 
     name = "my_fake_datasource_name"
 
     # Initial GET will miss the cache, necessitating store retrieval
     with mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.has_key"
-    ), mock.patch(
-        "great_expectations.data_context.data_context.AbstractDataContext._instantiate_datasource_from_config"
-    ), mock.patch(
-        "great_expectations.data_context.types.base.datasourceConfigSchema.load",
-    ), mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.get"
+        "great_expectations.core.datasource_dict.DatasourceDict.__getitem__"
     ) as mock_get:
         context.get_datasource(name)
 
@@ -190,10 +151,9 @@ def test_get_datasource_cache_miss(
     assert not mock_get.called
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_DataContext_add_datasource_updates_cache_and_store(
-    cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: DataContext,
+    cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: CloudDataContext,
     datasource_config_with_names: DatasourceConfig,
 ) -> None:
     """
@@ -216,17 +176,16 @@ def test_DataContext_add_datasource_updates_cache_and_store(
         "great_expectations.data_context.store.DatasourceStore.set",
         autospec=True,
         return_value=datasource_config_with_names,
-    ) as mock_set:
+    ) as mock_set, pytest.deprecated_call():  # non-FDS datasources are discouraged in Cloud
         context.add_datasource(**datasource_config_with_names.to_json_dict())
 
     mock_set.assert_called_once()
     assert name in context.datasources
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_DataContext_update_datasource_updates_existing_value_in_cache_and_store(
-    cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: DataContext,
+    cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: CloudDataContext,
     pandas_enabled_datasource_config: dict,
 ) -> None:
     """
@@ -265,10 +224,9 @@ def test_DataContext_update_datasource_updates_existing_value_in_cache_and_store
     assert retrieved_datasource.data_connectors.keys() == data_connectors.keys()
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_DataContext_update_datasource_creates_new_value_in_cache_and_store(
-    cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: DataContext,
+    cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: CloudDataContext,
     pandas_enabled_datasource_config: dict,
 ) -> None:
     """
@@ -295,31 +253,6 @@ def test_DataContext_update_datasource_creates_new_value_in_cache_and_store(
 
     mock_update.assert_called_once()
     assert name in context.datasources
-
-
-@pytest.mark.unit
-@pytest.mark.cloud
-def test_DataContext_delete_datasource_updates_cache(
-    cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: DataContext,
-) -> None:
-    """
-    What does this test and why?
-
-    For persistence-enabled contexts, we should delete values in both the cache and the
-    underlying store.
-    """
-    context = cloud_data_context_in_cloud_mode_with_datasource_pandas_engine
-
-    name = context.list_datasources()[0]["name"]
-
-    # If the value is in the cache, no store methods should be invoked
-    with mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.remove_key"
-    ) as mock_delete:
-        context.delete_datasource(name)
-
-    mock_delete.assert_called_once()
-    assert name not in context.datasources
 
 
 @pytest.mark.unit
@@ -406,7 +339,7 @@ def test_BaseDataContext_update_datasource_creates_new_value_in_cache(
 
 
 @pytest.mark.unit
-def test_BaseDataContext_delete_datasource_updates_cache(
+def test_delete_datasource(
     in_memory_runtime_context: EphemeralDataContext,
 ) -> None:
     """
@@ -418,12 +351,48 @@ def test_BaseDataContext_delete_datasource_updates_cache(
     context = in_memory_runtime_context
 
     name = context.list_datasources()[0]["name"]
+    context.delete_datasource(name)
 
-    # If the value is in the cache, no store methods should be invoked
-    with mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.remove_key"
-    ) as mock_delete, pytest.deprecated_call():
-        context.delete_datasource(name, save_changes=False)
-
-    assert not mock_delete.called
     assert name not in context.datasources
+
+
+@pytest.mark.unit
+def test_list_datasources() -> None:
+    project_config = DataContextConfig(
+        store_backend_defaults=InMemoryStoreBackendDefaults()
+    )
+    project_config.datasources = {
+        "my_datasource_name": {
+            "class_name": "Datasource",
+            "data_connectors": {},
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "module_name": "great_expectations.datasource",
+        }
+    }
+    context = gx.get_context(project_config=project_config)
+
+    datasource_name = "my_experimental_datasource_awaiting_migration"
+    context.sources.add_pandas(datasource_name)
+
+    assert len(context.list_datasources()) == 2
+
+
+@pytest.mark.filesystem
+def test_get_available_data_assets_names(empty_data_context) -> None:
+    datasource_name = "my_fluent_pandas_datasource"
+    datasource = empty_data_context.sources.add_pandas(datasource_name)
+    asset_name = "test_data_frame"
+    datasource.add_dataframe_asset(name=asset_name)
+
+    assert len(empty_data_context.get_available_data_asset_names()) == 1
+
+    data_asset_names = dict(
+        empty_data_context.get_available_data_asset_names(
+            datasource_names=datasource_name
+        )
+    )
+
+    assert asset_name in data_asset_names[datasource_name]

@@ -1,18 +1,21 @@
 import random
 
 import pytest
-from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import Batch, BatchDefinition
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import (
     InferredAssetAWSGlueDataCatalogDataConnector,
 )
 from great_expectations.validator.validator import Validator
 
-yaml = YAML(typ="safe")
+yaml = YAMLHandler()
+
+# module level markers
+pytestmark = pytest.mark.big
 
 
 def test_basic_instantiation(glue_titanic_catalog):

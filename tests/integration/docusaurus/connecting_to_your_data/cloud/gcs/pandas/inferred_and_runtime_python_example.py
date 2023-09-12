@@ -1,10 +1,10 @@
 from typing import List
 
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 
+yaml = YAMLHandler()
 context = gx.get_context()
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py datasource_config">

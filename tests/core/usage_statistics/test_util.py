@@ -9,8 +9,9 @@ from tests.core.usage_statistics.util import (
 )
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
-    "test_input,test_output",
+    "test_input, test_output",
     [
         pytest.param(
             ["just", "some", "logger", "messages"], False, id="list_without_exceptions"
@@ -44,8 +45,9 @@ def test_assert_no_usage_stats_exceptions_passing(test_input, test_output):
     assert usage_stats_exceptions_exist(messages=test_input) == test_output
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
-    "test_input,test_output",
+    "test_input, test_output",
     [
         pytest.param(
             ["just", "some", "logger", "messages"],

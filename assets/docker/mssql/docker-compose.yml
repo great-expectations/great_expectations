@@ -1,6 +1,6 @@
 version: '3.2'
 services:
-  mssql_db:
+  mssql-db:
     image: mcr.microsoft.com/mssql/server:2019-latest
     environment:
       ACCEPT_EULA: Y
@@ -11,6 +11,10 @@ services:
       - dbnet
     ports:
       - "1433:1433"
+  load-db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    command: sh -c 'sleep 10 && /opt/mssql-tools/bin/sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;"'
+    network_mode: service:mssql-db
 
 networks:
   dbnet:

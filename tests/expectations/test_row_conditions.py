@@ -1,8 +1,13 @@
+import pytest
+
 from great_expectations.expectations.row_conditions import (
     _parse_great_expectations_condition,
     parse_condition_to_spark,
     parse_condition_to_sqlalchemy,
 )
+
+# module level markers
+pytestmark = pytest.mark.unit
 
 
 def test_notnull_parser():

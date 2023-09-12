@@ -1,9 +1,10 @@
 import pandas as pd
-from ruamel import yaml
 
 import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 
+yaml = YAMLHandler()
 context = gx.get_context()
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py datasource_config">

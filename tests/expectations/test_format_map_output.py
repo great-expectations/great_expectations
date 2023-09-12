@@ -1,11 +1,15 @@
+import pytest
+
 from great_expectations.expectations.expectation import _format_map_output
+
+# module level markers
+pytestmark = pytest.mark.unit
 
 
 def test_format_map_output_with_numbers():
     success = False
     element_count = 5
     nonnull_count = 5
-    success_count = 0
     unexpected_list = [
         {"foreign_key_1": 1, "foreign_key_2": 2},
         {"foreign_key_1": 1, "foreign_key_2": 2},
@@ -55,7 +59,6 @@ def test_format_map_output_with_strings():
     success = False
     element_count = 5
     nonnull_count = 5
-    success_count = 0
     unexpected_list = [
         {"foreign_key_1": "a", "foreign_key_2": 2},
         {"foreign_key_1": "a", "foreign_key_2": 2},
@@ -105,7 +108,6 @@ def test_format_map_output_with_strings_two_matches():
     success = False
     element_count = 5
     nonnull_count = 5
-    success_count = 0
     unexpected_list = [
         {"foreign_key_1": "a", "foreign_key_2": 2},
         {"foreign_key_1": "a", "foreign_key_2": 2},

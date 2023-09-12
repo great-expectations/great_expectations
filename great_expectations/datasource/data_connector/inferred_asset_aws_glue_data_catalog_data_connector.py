@@ -1,12 +1,13 @@
 import logging
 from typing import Iterator, List, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.configured_asset_aws_glue_data_catalog_data_connector import (
     ConfiguredAssetAWSGlueDataCatalogDataConnector,
 )
 from great_expectations.exceptions import DataConnectorError
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +41,7 @@ class InferredAssetAWSGlueDataCatalogDataConnector(
         id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -98,6 +99,7 @@ class InferredAssetAWSGlueDataCatalogDataConnector(
     def glue_introspection_directives(self) -> dict:
         return self._glue_introspection_directives
 
+    @override
     def _refresh_data_references_cache(self) -> None:
         self._refresh_introspected_assets_cache()
         super()._refresh_data_references_cache()

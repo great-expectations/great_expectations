@@ -81,7 +81,7 @@ class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
                 "success": False,
                 "result": {
                     "info": "The column values are not unique, under the condition",
-                    "observed_value": query_result,
+                    "observed_value": query_result[:10],
                 },
             }
 
@@ -89,7 +89,6 @@ class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
         {
             "data": [
                 {
-                    "dataset_name": "test",
                     "data": {
                         "uuid": [1, 2, 2, 3, 4, 4],
                         "is_open": [True, False, True, True, True, True],

@@ -1,13 +1,14 @@
 from typing import TYPE_CHECKING, Dict, List, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -38,7 +39,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnSumToBeBetween(ColumnExpectation):
+class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
     """Expect the column to sum to be between a minimum value and a maximum value.
 
     expect_column_sum_to_be_between is a \
@@ -193,6 +194,7 @@ class ExpectColumnSumToBeBetween(ColumnExpectation):
     """ A Column Map Metric Decorator for the Sum"""
 
     @public_api
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -210,6 +212,7 @@ class ExpectColumnSumToBeBetween(ColumnExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls, renderer_configuration: RendererConfiguration
     ) -> RendererConfiguration:
@@ -256,6 +259,7 @@ class ExpectColumnSumToBeBetween(ColumnExpectation):
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -317,6 +321,7 @@ class ExpectColumnSumToBeBetween(ColumnExpectation):
             )
         ]
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,

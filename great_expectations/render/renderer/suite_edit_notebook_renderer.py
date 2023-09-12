@@ -33,7 +33,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     - Make it easy to edit a suite where only JSON exists.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         custom_templates_module: Optional[str] = None,
         header_markdown: Optional[NotebookTemplateConfig] = None,
@@ -174,7 +174,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
             suite_notes=suite_notes,
             suite_name=suite_name,
             batch_kwargs=batch_kwargs,
-            env=os.environ,
+            env=os.environ,  # noqa: TID251
         )
         self.add_code_cell(code, lint=True)
 

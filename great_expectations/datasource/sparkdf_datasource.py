@@ -2,6 +2,7 @@ import datetime
 import logging
 import uuid
 
+from great_expectations.compatibility import pyspark
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.dataset import SparkDFDataset
@@ -12,16 +13,6 @@ from great_expectations.types.configurations import classConfigSchema
 
 logger = logging.getLogger(__name__)
 
-try:
-    from pyspark.sql import DataFrame, SparkSession
-except ImportError:
-    DataFrame = None  # type: ignore[assignment,misc]
-    SparkSession = None  # type: ignore[assignment,misc]
-    # TODO: review logging more detail here
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency for support."
-    )
-
 
 class SparkDFDatasource(LegacyDatasource):
     """The SparkDFDatasource produces SparkDFDatasets and supports generators capable of interacting with local
@@ -30,7 +21,6 @@ class SparkDFDatasource(LegacyDatasource):
         Accepted Batch Kwargs:
             - PathBatchKwargs ("path" or "s3" keys)
             - InMemoryBatchKwargs ("dataset" key)
-            - QueryBatchKwargs ("query" key)
 
     --ge-feature-maturity-info--
 
@@ -60,12 +50,13 @@ class SparkDFDatasource(LegacyDatasource):
     }
 
     @classmethod
-    def build_configuration(
+    def build_configuration(  # noqa: PLR0913
         cls,
         data_asset_type=None,
         batch_kwargs_generators=None,
         spark_config=None,
-        force_reuse_spark_context=False,
+        force_reuse_spark_context=True,
+        persist=True,
         **kwargs,
     ):
         """
@@ -75,6 +66,8 @@ class SparkDFDatasource(LegacyDatasource):
             data_asset_type: A ClassConfig dictionary
             batch_kwargs_generators: Generator configuration dictionary
             spark_config: dictionary of key-value pairs to pass to the spark builder
+            force_reuse_spark_context: If True then utilize existing SparkSession if it exists and is active
+            persist: Whether to persist the Spark Dataframe or not.
             **kwargs: Additional kwargs to be part of the datasource constructor's initialization
 
         Returns:
@@ -99,6 +92,7 @@ class SparkDFDatasource(LegacyDatasource):
                 "data_asset_type": data_asset_type,
                 "spark_config": spark_config,
                 "force_reuse_spark_context": force_reuse_spark_context,
+                "persist": persist,
             }
         )
 
@@ -107,14 +101,15 @@ class SparkDFDatasource(LegacyDatasource):
 
         return configuration
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name="default",
         data_context=None,
         data_asset_type=None,
         batch_kwargs_generators=None,
         spark_config=None,
-        force_reuse_spark_context=False,
+        force_reuse_spark_context=True,
+        persist=True,
         **kwargs,
     ) -> None:
         """Build a new SparkDFDatasource instance.
@@ -125,6 +120,8 @@ class SparkDFDatasource(LegacyDatasource):
             data_asset_type: ClassConfig describing the data_asset type to be constructed by this datasource
             batch_kwargs_generators: generator configuration
             spark_config: dictionary of key-value pairs to be set on the spark session builder
+            force_reuse_spark_context: If True then utilize existing SparkSession if it exists and is active
+            persist: Whether to persist the Spark Dataframe or not.
             **kwargs: Additional
         """
         configuration_with_defaults = SparkDFDatasource.build_configuration(
@@ -132,6 +129,7 @@ class SparkDFDatasource(LegacyDatasource):
             batch_kwargs_generators,
             spark_config,
             force_reuse_spark_context,
+            persist,
             **kwargs,
         )
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
@@ -206,8 +204,12 @@ class SparkDFDatasource(LegacyDatasource):
         elif "query" in batch_kwargs:
             df = self.spark.sql(batch_kwargs["query"])
 
-        elif "dataset" in batch_kwargs and isinstance(
-            batch_kwargs["dataset"], (DataFrame, SparkDFDataset)
+        elif "dataset" in batch_kwargs and (
+            (
+                pyspark.DataFrame  # type: ignore[truthy-function]
+                and isinstance(batch_kwargs["dataset"], pyspark.DataFrame)
+            )
+            or isinstance(batch_kwargs["dataset"], SparkDFDataset)
         ):
             df = batch_kwargs.get("dataset")
             # We don't want to store the actual dataframe in kwargs; copy the remaining batch_kwargs

@@ -1,11 +1,12 @@
 from typing import Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.expectations.expectation import (
-    TableExpectation,
+    BatchExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyDiagnosticRendererType, LegacyRendererType
@@ -13,7 +14,7 @@ from great_expectations.render.renderer.renderer import renderer
 
 
 class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
-    TableExpectation
+    BatchExpectation
 ):
     # This expectation is a stub - it needs migration to the modular expectation API
 
@@ -37,6 +38,7 @@ class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
+    @override
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -48,6 +50,7 @@ class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
 
     @classmethod
     @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
+    @override
     def _diagnostic_observed_value_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,

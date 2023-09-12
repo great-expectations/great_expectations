@@ -1,16 +1,12 @@
 from typing import List
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py imports">
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 
-# </snippet>
+yaml = YAMLHandler()
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py get_context">
 context = gx.get_context()
-# </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py datasource_yaml">
 datasource_yaml = rf"""

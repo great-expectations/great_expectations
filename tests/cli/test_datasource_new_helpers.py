@@ -19,8 +19,9 @@ from great_expectations.cli.datasource import (
 )
 from great_expectations.datasource.types import DatasourceTypes
 
+pytestmark = pytest.mark.cli
 
-@pytest.mark.unit
+
 def test_SQLCredentialYamlHelper_defaults(empty_data_context):
     helper = SQLCredentialYamlHelper(usage_stats_payload={"foo": "bar"})
     expected_credentials_snippet = '''\
@@ -70,7 +71,6 @@ data_connectors:
     assert renderer.sql_credentials_code_snippet == expected_credentials_snippet
 
 
-@pytest.mark.unit
 def test_SQLCredentialYamlHelper_driver(empty_data_context):
     helper = SQLCredentialYamlHelper(usage_stats_payload={"foo": "bar"}, driver="stuff")
     expected_credentials_snippet = '''\
@@ -773,7 +773,6 @@ data_connectors:
 def test_check_if_datasource_name_exists(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     assert [d["name"] for d in context.list_datasources()] == [
         "my_datasource",

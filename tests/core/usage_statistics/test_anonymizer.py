@@ -41,6 +41,7 @@ class MyCustomMultipleInheritanceClass(ExpectationSuite, BatchRequest):
     pass
 
 
+@pytest.mark.unit
 def test_anonymizer_no_salt():
     # No salt will generate a random one.
     anonymizer1 = Anonymizer()
@@ -67,6 +68,7 @@ def test_anonymizer_no_salt():
     assert len(anon_name_2) == 32
 
 
+@pytest.mark.unit
 def test_anonymizer_consistent_salt():
     # Provided same salt will produce same results
     data_context_id = str(uuid.uuid4())
@@ -82,10 +84,14 @@ def test_anonymizer_consistent_salt():
     assert len(anon_name_2) == 32
 
 
+@pytest.mark.unit
 def test_anonymizer_get_parent_class():
     """
     What does this test and why?
-    The method Anonymizer.get_parent_class() should return the name of the parent class if it is or is a subclass of one of the classes_to_check. If not, it should return None. It should do so regardless of the parameter used to pass in the object definition (object_, object_class, object_config). It should also return the first matching class in classes_to_check, even if a later class also matches.
+    The method Anonymizer.get_parent_class() should return the name of the parent class if it is or is a subclass of one
+    of the classes_to_check. If not, it should return None. It should do so regardless of the parameter used to pass in
+    the object definition (object_, object_class, object_config). It should also return the first matching class in
+    classes_to_check, even if a later class also matches.
     """
     anonymizer = Anonymizer()
 
@@ -171,6 +177,7 @@ def test_anonymizer_get_parent_class():
     )
 
 
+@pytest.mark.unit
 def test_anonymize_object_info_with_core_ge_object(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
@@ -182,6 +189,7 @@ def test_anonymize_object_info_with_core_ge_object(
     assert anonymized_result == {"parent_class": "ExpectationSuite"}
 
 
+@pytest.mark.unit
 def test_anonymize_object_info_with_custom_user_defined_object_with_single_parent(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
@@ -196,6 +204,7 @@ def test_anonymize_object_info_with_custom_user_defined_object_with_single_paren
     }
 
 
+@pytest.mark.unit
 def test_anonymize_object_info_with_custom_user_defined_object_with_no_parent(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
@@ -209,6 +218,7 @@ def test_anonymize_object_info_with_custom_user_defined_object_with_no_parent(
     }
 
 
+@pytest.mark.unit
 def test_anonymize_object_info_with_custom_user_defined_object_with_multiple_parents(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
@@ -223,6 +233,7 @@ def test_anonymize_object_info_with_custom_user_defined_object_with_multiple_par
     }
 
 
+@pytest.mark.unit
 def test_anonymize_object_info_with_missing_args_raises_error(
     anonymizer_with_consistent_salt: Anonymizer,
 ):

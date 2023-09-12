@@ -1,3 +1,5 @@
+import pytest
+
 from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
     ExpectationDiagnostics,
 )
@@ -16,7 +18,11 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     RendererTestDiagnostics,
 )
 
+# module level markers
+pytestmark = pytest.mark.unit
+
 expectation_test_data_case = ExpectationTestDataCases(
+    dataset_name="expectation_diagnostics_test_data",
     data=TestData(
         **{
             "a": ["aaa", "abb", "acc", "add", "bee"],
@@ -356,6 +362,7 @@ def test__check_example_cases__with_enough_test_cases_and_no_failing():
 
 def test__check_example_cases__with_enough_not_enough_test_cases_but_no_failing():
     expectation_test_data_case = ExpectationTestDataCases(
+        dataset_name="expectation_diagnostics_example_test_case",
         data=TestData(
             **{
                 "a": ["aaa", "abb", "acc", "add", "bee"],

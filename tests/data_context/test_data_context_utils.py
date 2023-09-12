@@ -12,42 +12,49 @@ from great_expectations.types import safe_deep_copy
 from great_expectations.util import load_class
 
 
+@pytest.mark.unit
 def test_load_class_raises_error_when_module_not_found():
     with pytest.raises(gx_exceptions.PluginModuleNotFoundError):
         load_class("foo", "bar")
 
 
+@pytest.mark.unit
 def test_load_class_raises_error_when_class_not_found():
     with pytest.raises(gx_exceptions.PluginClassNotFoundError):
         load_class("TotallyNotARealClass", "great_expectations.datasource")
 
 
+@pytest.mark.unit
 def test_load_class_raises_error_when_class_name_is_None():
     with pytest.raises(TypeError):
         load_class(None, "great_expectations.datasource")
 
 
+@pytest.mark.unit
 def test_load_class_raises_error_when_class_name_is_not_string():
     for bad_input in [1, 1.3, ["a"], {"foo": "bar"}]:
         with pytest.raises(TypeError):
             load_class(bad_input, "great_expectations.datasource")
 
 
+@pytest.mark.unit
 def test_load_class_raises_error_when_module_name_is_None():
     with pytest.raises(TypeError):
         load_class("foo", None)
 
 
+@pytest.mark.unit
 def test_load_class_raises_error_when_module_name_is_not_string():
     for bad_input in [1, 1.3, ["a"], {"foo": "bar"}]:
         with pytest.raises(TypeError):
             load_class(bad_input, "great_expectations.datasource")
 
 
+@pytest.mark.filesystem
 @pytest.mark.filterwarnings(
     "ignore:SQLAlchemy is not installed*:UserWarning:great_expectations.data_context.util"
 )
-def test_password_masker_mask_db_url(monkeypatch, tmp_path):
+def test_password_masker_mask_db_url(monkeypatch, tmp_path):  # noqa: PLR0912, PLR0915
     """
     What does this test and why?
     The PasswordMasker.mask_db_url() should mask passwords consistently in database urls. The output of mask_db_url should be the same whether user_urlparse is set to True or False.
@@ -284,6 +291,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
     assert PasswordMasker.mask_db_url("sqlite://", use_urlparse=True) == "sqlite://"
 
 
+@pytest.mark.unit
 def test_sanitize_config_azure_blob_store():
     azure_url: str = "DefaultEndpointsProtocol=https;AccountName=iamname;AccountKey=i_am_account_key;EndpointSuffix=core.windows.net"
     assert (
@@ -300,19 +308,19 @@ def test_sanitize_config_azure_blob_store():
         PasswordMasker.mask_db_url(azure_missing_fields)
 
 
+@pytest.mark.unit
 def test_sanitize_config_raises_exception_with_bad_input(
     basic_data_context_config,
 ):
-
     # expect that an Exception is raised if something other than a dict is passed
     with pytest.raises(TypeError):
         PasswordMasker.sanitize_config(basic_data_context_config)
 
 
+@pytest.mark.unit
 def test_sanitize_config_doesnt_change_config_without_datasources(
     basic_data_context_config_dict,
 ):
-
     # expect no change without datasources
     config_without_creds = PasswordMasker.sanitize_config(
         basic_data_context_config_dict
@@ -324,13 +332,11 @@ def test_sanitize_config_doesnt_change_config_without_datasources(
 def test_sanitize_config_masks_cloud_store_backend_access_tokens(
     data_context_config_dict_with_cloud_backed_stores, ge_cloud_access_token
 ):
-
     # test that cloud store backend tokens have been properly masked
     config_with_creds_in_stores = PasswordMasker.sanitize_config(
         data_context_config_dict_with_cloud_backed_stores
     )
     for name, store_config in config_with_creds_in_stores["stores"].items():
-
         if (
             not store_config.get("store_backend")
             or not store_config["store_backend"].get("ge_cloud_credentials")
@@ -359,10 +365,10 @@ def test_sanitize_config_masks_cloud_store_backend_access_tokens(
             )
 
 
+@pytest.mark.unit
 def test_sanitize_config_masks_execution_engine_connection_strings(
     data_context_config_dict_with_datasources, conn_string_password
 ):
-
     # test that datasource credentials have been properly masked
     unaltered_datasources = data_context_config_dict_with_datasources["datasources"]
     config_with_creds_masked = PasswordMasker.sanitize_config(
@@ -372,12 +378,10 @@ def test_sanitize_config_masks_execution_engine_connection_strings(
 
     # iterate through the processed datasources and check for correctness
     for name, processed_config in masked_datasources.items():
-
         # check if processed_config["execution_engine"]["connection_string"] exists
         if processed_config.get("execution_engine") and processed_config[
             "execution_engine"
         ].get("connection_string"):
-
             # check if the connection string contains a password
             if (
                 conn_string_password
@@ -399,8 +403,8 @@ def test_sanitize_config_masks_execution_engine_connection_strings(
             assert processed_config == unaltered_datasources[name]
 
 
+@pytest.mark.unit
 def test_sanitize_config_with_arbitrarily_nested_sensitive_keys():
-
     # base case - this config should pass through unaffected
     config = {
         "some_field": "and a value",
@@ -412,8 +416,8 @@ def test_sanitize_config_with_arbitrarily_nested_sensitive_keys():
     assert res["some_other_field"]["password"] == PasswordMasker.MASKED_PASSWORD_STRING
 
 
+@pytest.mark.unit
 def test_sanitize_config_with_password_field():
-
     # this case has a password field inside a credentials dict - expect it to be masked
     config = {"credentials": {"password": "my-super-duper-secure-passphrase-123"}}
     config_copy = safe_deep_copy(config)
@@ -422,10 +426,10 @@ def test_sanitize_config_with_password_field():
     assert res["credentials"]["password"] == PasswordMasker.MASKED_PASSWORD_STRING
 
 
+@pytest.mark.unit
 def test_sanitize_config_with_url_field(
     conn_string_with_embedded_password, conn_string_password
 ):
-
     # this case has a url field inside a credentials dict - expect the password inside
     # of it to be masked
     config = {"credentials": {"url": conn_string_with_embedded_password}}
@@ -436,10 +440,10 @@ def test_sanitize_config_with_url_field(
     assert PasswordMasker.MASKED_PASSWORD_STRING in res["credentials"]["url"]
 
 
+@pytest.mark.unit
 def test_sanitize_config_with_nested_url_field(
     conn_string_password, conn_string_with_embedded_password
 ):
-
     # this case has a connection string in an execution_engine dict
     config = {
         "execution_engine": {"connection_string": conn_string_with_embedded_password}
@@ -454,8 +458,8 @@ def test_sanitize_config_with_nested_url_field(
     )
 
 
+@pytest.mark.unit
 def test_sanitize_config_regardless_of_parent_key():
-
     # expect this config still be masked
     config = {
         "some_field": "and a value",
@@ -471,7 +475,6 @@ def test_sanitize_config_regardless_of_parent_key():
 
 @pytest.mark.cloud
 def test_sanitize_config_masks_cloud_access_token(ge_cloud_access_token):
-
     # expect the access token to be found and masked
     config = {
         "store_backend": {
@@ -487,6 +490,7 @@ def test_sanitize_config_masks_cloud_access_token(ge_cloud_access_token):
     )
 
 
+@pytest.mark.unit
 def test_sanitize_config_works_with_list():
     config = {"some_key": [{"access_token": "12345"}]}
     config_copy = safe_deep_copy(config)
@@ -495,6 +499,7 @@ def test_sanitize_config_works_with_list():
     assert res["some_key"][0]["access_token"] == PasswordMasker.MASKED_PASSWORD_STRING
 
 
+@pytest.mark.unit
 def test_parse_substitution_variable():
     """
     What does this test and why?

@@ -4,7 +4,7 @@ In an Inferred Asset Data Connector for SQL data, all the behaviour for how Data
 
 #### Optional Data Connector configuration keys for inferring Data Assets
 
-A Data Asset in an Inferred Asset Data Connector for SQL data will consist of a single table in the database you have connected to.  You can modify the way that the Data Connector infers which tables to utilize as Data Assets by defining the following key/value pairs in your Data Connector's dictionary in the Datasource configuration:
+A Data Asset in an Inferred Asset Data Connector for SQL data will consist of a single table in the database you have connected to.  You can modify the way that the Data Connector infers which tables to utilize as Data Assets by defining the following key/value pairs in your Data Connector's dictionary in the Data Source configuration:
 
 <NoteOptionalDataConnectorKeys inferred={true} />
 
@@ -14,7 +14,7 @@ Next is the matter of how (or even if) your Data Connector splits Data Assets in
 
 <NoteOptionalDataConnectorKeys splitting={true} />
 
-For example, imagine that you have one or more tables containing the NYC taxi data from the getting started tutorial in your database.  You could instruct your Data Connector to infer Data Assets that return each table as a single Batch by simply not including a `splitter_method`.  Such a configuration would be identical to the data connector `name_of_my_inferred_data_connector` that was defined in the example at the end of step 7, so let's rename that `data_connector` entry `inferred_data_connector_single_batch_asset` since that is more meaningful.  Your configuration for a single Batch Data Asset would now look like:
+For example, imagine that you have one or more tables containing the NYC taxi data in your database.  You could instruct your Data Connector to infer Data Assets that return each table as a single Batch by simply not including a `splitter_method`.  Such a configuration would be identical to the data connector `name_of_my_inferred_data_connector` that was defined in the example at the end of step 7, so let's rename that `data_connector` entry `inferred_data_connector_single_batch_asset` since that is more meaningful.  Your configuration for a single Batch Data Asset would now look like:
 
 ```python name="inferred sql data asset single batch"
 ```
@@ -26,7 +26,7 @@ Alternatively, you could define a Data Asset that is split into Batches based on
 
 If you included both of these Data Assets, your complete configuration would look like:
 
-```python name="full configuration for sql inferred Datasource"
+```python name="full configuration for sql inferred Data Source"
 ```
 
 :::note Reminder
