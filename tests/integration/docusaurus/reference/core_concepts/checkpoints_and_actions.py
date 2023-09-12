@@ -31,31 +31,34 @@ context.add_or_update_expectation_suite("my_expectation_suite")
 context.add_or_update_expectation_suite("my_other_expectation_suite")
 
 # Add a Checkpoint
-checkpoint_yaml = """
-name: test_checkpoint
-config_version: 1
-class_name: Checkpoint
-run_name_template: "%Y-%M-foo-bar-template"
-validations:
-  - batch_request:
-      datasource_name: taxi_datasource
-      data_asset_name: taxi_asset
-      options:
-        year: "2019"
-        month: "01"
-    expectation_suite_name: my_expectation_suite
-    action_list:
-      - name: <ACTION NAME FOR STORING VALIDATION RESULTS>
-        action:
-          class_name: StoreValidationResultAction
-      - name: <ACTION NAME FOR STORING EVALUATION PARAMETERS>
-        action:
-          class_name: StoreEvaluationParametersAction
-      - name: <ACTION NAME FOR UPDATING DATA DOCS>
-        action:
-          class_name: UpdateDataDocsAction
-"""
-context.add_or_update_checkpoint(**yaml.load(checkpoint_yaml))
+context.add_or_update_checkpoint(
+    name="test_checkpoint",
+    run_name_template="%Y-%M-foo-bar-template",
+    validations=[
+        {
+            "batch_request": {
+                "datasource_name": "taxi_datasource",
+                "data_asset_name": "taxi_asset",
+                "options": {"year": "2019", "month": "01"},
+            },
+            "expectation_suite_name": "my_expectation_suite",
+            "action_list": [
+                {
+                    "name": "<ACTION NAME FOR STORING VALIDATION RESULTS>",
+                    "action": {"class_name": "StoreValidationResultAction"},
+                },
+                {
+                    "name": "<ACTION NAME FOR STORING EVALUATION PARAMETERS>",
+                    "action": {"class_name": "StoreEvaluationParametersAction"},
+                },
+                {
+                    "name": "<ACTION NAME FOR UPDATING DATA DOCS>",
+                    "action": {"class_name": "UpdateDataDocsAction"},
+                },
+            ],
+        }
+    ],
+)
 assert context.list_checkpoints() == ["test_checkpoint"]
 
 results = context.run_checkpoint(checkpoint_name="test_checkpoint")
