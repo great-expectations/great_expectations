@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections import UserDict
-from typing import TYPE_CHECKING, Literal, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
@@ -11,6 +11,7 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
+from great_expectations.datasource.fluent.constants import _IN_MEMORY_DATA_ASSET_TYPE
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -31,11 +32,6 @@ class SupportsInMemoryDataAssets(Protocol):
 
     def add_dataframe_asset(self, **kwargs) -> DataAsset:
         ...
-
-
-@runtime_checkable
-class InMemoryDataAsset(Protocol):
-    type: Literal["dataframe"] = "dataframe"
 
 
 class DatasourceDict(UserDict):
@@ -102,7 +98,7 @@ class DatasourceDict(UserDict):
         if isinstance(ds, FluentDatasource):
             if isinstance(ds, SupportsInMemoryDataAssets):
                 for asset in ds.assets:
-                    if isinstance(asset, InMemoryDataAsset):
+                    if asset.type == _IN_MEMORY_DATA_ASSET_TYPE:
                         in_memory_asset_name: str = (
                             DatasourceDict._get_in_memory_data_asset_name(
                                 datasource_name=name,
@@ -144,7 +140,7 @@ class DatasourceDict(UserDict):
             hydrated_ds = self._init_fluent_datasource(ds)
             if isinstance(hydrated_ds, SupportsInMemoryDataAssets):
                 for asset in hydrated_ds.assets:
-                    if isinstance(asset, InMemoryDataAsset):
+                    if asset.type == _IN_MEMORY_DATA_ASSET_TYPE:
                         in_memory_asset_name: str = (
                             DatasourceDict._get_in_memory_data_asset_name(
                                 datasource_name=name,
