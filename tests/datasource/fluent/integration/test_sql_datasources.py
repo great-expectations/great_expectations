@@ -380,7 +380,9 @@ class TestTableIdentifiers:
         if not table_name:
             pytest.skip(f"no '{asset_name}' table_name for postgres")
         # create table
-        table_factory(engine=postgres_ds.get_engine(), table_names={table_name})
+        table_factory(
+            gx_engine=postgres_ds.get_execution_engine(), table_names={table_name}
+        )
 
         table_names: list[str] = inspect(postgres_ds.get_engine()).get_table_names()
         print(f"postgres tables:\n{pf(table_names)}))")
@@ -399,7 +401,7 @@ class TestTableIdentifiers:
             pytest.skip(f"no '{asset_name}' table_name for databricks")
         # create table
         table_factory(
-            engine=databricks_sql_ds.get_engine(),
+            gx_engine=databricks_sql_ds.get_execution_engine(),
             table_names={table_name},
             schema=RAND_SCHEMA,
         )
@@ -428,7 +430,7 @@ class TestTableIdentifiers:
         # create table
         schema = get_random_identifier_name()
         table_factory(
-            engine=snowflake_ds.get_engine(),
+            gx_engine=snowflake_ds.get_execution_engine(),
             table_names={table_name},
             schema=schema,
         )
@@ -452,7 +454,7 @@ class TestTableIdentifiers:
         table_name = TABLE_NAME_MAPPING["sqlite"][asset_name]
         # create table
         table_factory(
-            engine=sqlite_ds.get_engine(),
+            gx_engine=sqlite_ds.get_execution_engine(),
             table_names={table_name},
         )
 
@@ -492,7 +494,9 @@ class TestTableIdentifiers:
 
         # create table
         table_factory(
-            engine=datasource.get_engine(), table_names={table_name}, schema=schema
+            gx_engine=datasource.get_execution_engine(),
+            table_names={table_name},
+            schema=schema,
         )
 
         asset = datasource.add_table_asset(
