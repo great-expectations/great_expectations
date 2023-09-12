@@ -607,6 +607,7 @@ def column_reflection_fallback(  # noqa: PLR0915
                 else:
                     logger.warning(f"2. \tselectable {type(selectable)} - {selectable}")
                     try:
+                        # TODO: conditional sa.text()
                         query = (
                             sa.select(sa.text("*"))
                             .select_from(sa.text(selectable))
