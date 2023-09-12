@@ -119,7 +119,7 @@ def test_onboarding_data_assistant_runner_using_validator(
             "total_spend": [131.24, 42.21, 516.55, 0.00, 12351.92, 0.52],
         }
     )
-
+    # Using validator, we can run data assistant without creating a batch request
     validator = context.sources.pandas_default.read_dataframe(
         dataframe=df, asset_name="users_df"
     )
