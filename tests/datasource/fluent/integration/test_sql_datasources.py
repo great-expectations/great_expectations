@@ -51,6 +51,8 @@ from great_expectations.expectations.expectation import (
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
+    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+
 TERMINAL_WIDTH: Final = shutil.get_terminal_size().columns
 STAR_SEPARATOR: Final = "*" * TERMINAL_WIDTH
 
@@ -145,7 +147,7 @@ def context() -> EphemeralDataContext:
 class TableFactory(Protocol):
     def __call__(
         self,
-        engine: engine.Engine,
+        gx_engine: SqlAlchemyExecutionEngine,
         table_names: set[str],
         schema: str | None = None,
         data: Sequence[Row] = ...,
@@ -188,23 +190,25 @@ def table_factory(
     engines: dict[str, engine.Engine] = {}
 
     def _table_factory(
-        engine: engine.Engine,
+        gx_engine: SqlAlchemyExecutionEngine,
         table_names: set[str],
         schema: str | None = None,
         data: Sequence[Row] = tuple(),
     ) -> None:
-        if engine.dialect.name in DO_NOT_CREATE_TABLES:
+        sa_engine = gx_engine.engine
+        if sa_engine.dialect.name in DO_NOT_CREATE_TABLES:
             LOGGER.info(
-                f"Skipping table creation for {table_names} for {engine.dialect.name}"
+                f"Skipping table creation for {table_names} for {sa_engine.dialect.name}"
             )
             return
         LOGGER.info(
-            f"SQLA:{SQLA_VERSION} - Creating `{engine.dialect.name}` table for {table_names} if it does not exist"
+            f"SQLA:{SQLA_VERSION} - Creating `{sa_engine.dialect.name}` table for {table_names} if it does not exist"
         )
         created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
-        with engine.connect() as conn:
-            upper: str = quote_str("UPPER", dialect=engine.dialect.name)
-            lower: str = quote_str("lower", dialect=engine.dialect.name)
+
+        with gx_engine.get_connection() as conn:
+            upper: str = quote_str("UPPER", dialect=sa_engine.dialect.name)
+            lower: str = quote_str("lower", dialect=sa_engine.dialect.name)
             transaction = conn.begin()
             if schema:
                 conn.execute(TextClause(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
@@ -219,8 +223,8 @@ def table_factory(
 
                 created_tables.append(dict(table_name=name, schema=schema))
             transaction.commit()
-        all_created_tables[engine.dialect.name] = created_tables
-        engines[engine.dialect.name] = engine
+        all_created_tables[sa_engine.dialect.name] = created_tables
+        engines[sa_engine.dialect.name] = sa_engine
 
     yield _table_factory
 
@@ -704,7 +708,7 @@ class TestColumnIdentifiers:
         )
 
         table_factory(
-            engine=datasource.get_engine(),
+            gx_engine=datasource.get_execution_engine(),
             table_names={TEST_TABLE_NAME},
             schema=schema,
             data=[
@@ -723,9 +727,12 @@ class TestColumnIdentifiers:
             ],
         )
 
+        qualified_table_name: str = (
+            f"{schema}.{TEST_TABLE_NAME}" if schema else TEST_TABLE_NAME
+        )
         # examine columns
-        with datasource.get_engine().connect() as conn:
-            result = conn.execute(TextClause(f"SELECT * FROM {TEST_TABLE_NAME}"))
+        with datasource.get_execution_engine().get_connection() as conn:
+            result = conn.execute(TextClause(f"SELECT * FROM {qualified_table_name}"))
             assert result
             print(f"{TEST_TABLE_NAME} Columns:\n  {result.keys()}\n")
 
