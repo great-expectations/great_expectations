@@ -42,27 +42,21 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         return column_list
 
     def _get_table_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
-        computed_metrics, batch_id = self._compute_table_metrics(batch_request)
+        table_metric_names = ["table.row_count", "table.columns", "table.column_types"]
+        computed_metrics, batch_id = self._compute_table_metrics(
+            table_metric_names, batch_request
+        )
 
         # Convert computed_metrics
         metrics: list[Metric] = []
-        metric_name = "table.row_count"
         TableMetric.update_forward_refs()
 
-        metric_lookup_key: _MetricKey = (
-            metric_name,
-            tuple(),
-            tuple(),
+        metric_name = "table.row_count"
+        value, exception = self._get_table_metric_from_computed_metrics(
+            metric_name=metric_name,
+            metric_lookup_key=None,
+            computed_metrics=computed_metrics,
         )
-
-        value = None
-        exception = None
-        if metric_lookup_key in computed_metrics:
-            value = computed_metrics[metric_lookup_key]
-        else:
-            exception = MetricException(
-                type="TBD", message="TBD"
-            )  # TODO: Fill in type and message if an exception is thrown
 
         metrics.append(
             TableMetric[int](
@@ -74,7 +68,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         )
 
         metric_name = "table.columns"
-        metric_lookup_key = (metric_name, tuple(), tuple())
+        metric_lookup_key: _MetricKey = (metric_name, tuple(), tuple())
         metrics.append(
             TableMetric[List[str]](
                 batch_id=batch_id,
@@ -104,9 +98,8 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         return metrics
 
     def _compute_table_metrics(
-        self, batch_request: BatchRequest
+        self, table_metric_names: list[str], batch_request: BatchRequest
     ) -> tuple[dict[_MetricKey, Any], str | tuple]:
-        table_metric_names = ["table.row_count", "table.columns", "table.column_types"]
         table_metric_configs = [
             MetricConfiguration(
                 metric_name=metric_name, metric_domain_kwargs={}, metric_value_kwargs={}
@@ -126,6 +119,29 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             )
         batch_id = validator.active_batch.id
         return computed_metrics, batch_id
+
+    def _get_table_metric_from_computed_metrics(
+        self,
+        metric_name: str,
+        metric_lookup_key: _MetricKey | None,
+        computed_metrics: dict[_MetricKey, Any],
+    ):
+        if metric_lookup_key is None:
+            metric_lookup_key: _MetricKey = (
+                metric_name,
+                tuple(),
+                tuple(),
+            )
+        value = None
+        exception = None
+        if metric_lookup_key in computed_metrics:
+            value = computed_metrics[metric_lookup_key]
+        else:
+            exception = MetricException(
+                type="TBD", message="TBD"
+            )  # TODO: Fill in type and message if an exception is thrown
+
+        return value, exception
 
     def _get_column_metrics(
         self, batch_request: BatchRequest, column_list: List[str]
