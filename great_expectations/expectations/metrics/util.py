@@ -72,7 +72,9 @@ def check_dialect_subclass(dialect, dialect_class):
 
 def get_sql_alchemy_binary_expression(column, regex, custom_op):
     return sqlalchemy.BinaryExpression(
-        column, sqlalchemy.literal(regex), sqlalchemy.custom_op(custom_op))
+        column, sqlalchemy.literal(regex), sqlalchemy.custom_op(custom_op)
+    )
+
 
 def get_sqlalchemy_regex_like(sa, column, regex):
     return sa.func.regexp_like(column, sqlalchemy.literal(regex))
@@ -167,9 +169,9 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
         # sqlite
         # regex_match for sqlite introduced in sqlalchemy v1.4
-        if check_dialect_subclass(dialect, sa.dialects.sqlite.dialect) and version.parse(
-            sa.__version__
-        ) >= version.parse("1.4"):
+        if check_dialect_subclass(
+            dialect, sa.dialects.sqlite.dialect
+        ) and version.parse(sa.__version__) >= version.parse("1.4"):
             if positive:
                 return column.regexp_match(sqlalchemy.literal(regex))
             else:
