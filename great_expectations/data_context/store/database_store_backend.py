@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import uuid
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Any, Dict, Tuple
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -254,6 +254,9 @@ class DatabaseStoreBackend(StoreBackend):
         except (IndexError, SQLAlchemyError) as e:
             logger.debug(f"Error fetching value: {e!s}")
             raise gx_exceptions.StoreError(f"Unable to fetch value for key: {key!s}")
+
+    def _get_all(self) -> list[Any]:
+        raise NotImplementedError
 
     @override
     def _set(self, key, value, allow_update=True, **kwargs) -> None:
