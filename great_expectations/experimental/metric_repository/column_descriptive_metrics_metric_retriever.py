@@ -54,7 +54,6 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         metric_name = "table.row_count"
         value, exception = self._get_metric_from_computed_metrics(
             metric_name=metric_name,
-            metric_lookup_key=None,
             computed_metrics=computed_metrics,
         )
         metrics.append(
@@ -69,7 +68,6 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         metric_name = "table.columns"
         value, exception = self._get_metric_from_computed_metrics(
             metric_name=metric_name,
-            metric_lookup_key=None,
             computed_metrics=computed_metrics,
         )
         metrics.append(
@@ -137,8 +135,8 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
     def _get_metric_from_computed_metrics(
         self,
         metric_name: str,
-        metric_lookup_key: _MetricKey | None,
         computed_metrics: dict[_MetricKey, Any],
+        metric_lookup_key: _MetricKey | None = None,
     ):
         if metric_lookup_key is None:
             metric_lookup_key: _MetricKey = (
