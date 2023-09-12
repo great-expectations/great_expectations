@@ -36,20 +36,14 @@ def test_table_column_introspection(sa, capsys):
         "event_type",
         "favorite_color",
     ]
-    std, err = capsys.readouterr()
-
-    assert std
-    assert not err
+    assert capsys.readouterr().out
 
     # Assert that using the same inspector again does not cause a query
     columns = insp.get_columns(
         batch_data.selectable.name, schema=batch_data.selectable.schema
     )
 
-    std, err = capsys.readouterr()
-
-    assert not std
-    assert not err
+    assert not capsys.readouterr().out
 
 
 @pytest.mark.sqlite
@@ -69,7 +63,6 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capsys):
     assert batch_data.selectable.schema is None
 
     table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
-    std, err = capsys.readouterr()
 
     assert results[("table.columns", (), ())] == [
         "index",
@@ -79,11 +72,9 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capsys):
         "favorite_color",
     ]
 
-    assert std
-    assert not err
+    assert capsys.readouterr().out
 
     table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
-    std, err = capsys.readouterr()
 
     assert results[("table.columns", (), ())] == [
         "index",
@@ -94,8 +85,7 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capsys):
     ]
 
     # Should not have to re-inspect
-    assert not std
-    assert not err
+    assert not capsys.readouterr().out
 
     # Add another batch
     batch_data = SqlAlchemyBatchData(
@@ -111,7 +101,6 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capsys):
     assert batch_data.selectable.schema is None
 
     table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
-    std, err = capsys.readouterr()
 
     assert results[("table.columns", (), ())] == [
         "index",
@@ -121,8 +110,7 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capsys):
     ]
 
     # Should have to re-inspect due to new batch
-    assert std
-    assert not err
+    assert capsys.readouterr().out
 
 
 @pytest.mark.sqlite
