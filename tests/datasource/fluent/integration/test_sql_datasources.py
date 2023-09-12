@@ -732,6 +732,7 @@ class TestColumnIdentifiers:
         asset = datasource.add_table_asset(
             "my_asset", table_name=TEST_TABLE_NAME, schema_name=schema
         )
+        print(f"asset:\n{asset!r}\n")
 
         suite = context.add_expectation_suite(
             expectation_suite_name=f"{datasource.name}-{asset.name}"
@@ -778,16 +779,20 @@ class TestColumnIdentifiers:
         ]
 
         print(f"validation_result.results:\n{pf(validation_results, depth=2)}\n")
-        exc_msgs = [
-            r["exception_info"]["exception_message"]
+        exc_details: list[
+            dict[Literal["exception_message", "exception_traceback"], str]
+        ] = [
+            r["exception_info"]
             for r in validation_results
-            if r["exception_info"].get("exception_message")
+            if r["exception_info"]["raised_exception"]
         ]
-        if exc_msgs:
-            print(f"{len(exc_msgs)} exception_message(s):\n{STAR_SEPARATOR}")
-            for i, msg in enumerate(exc_msgs, start=1):
-                print(f"  {i}: {msg}\n{STAR_SEPARATOR}")
-        assert not exc_msgs, exc_msgs
+        if exc_details:
+            print(f"{len(exc_details)} exception_info(s):\n{STAR_SEPARATOR}")
+            for i, exc_info in enumerate(exc_details, start=1):
+                print(
+                    f"  {i}: {exc_info['exception_message']}\n\n{exc_info['exception_traceback']}\n{STAR_SEPARATOR}"
+                )
+        assert not exc_details, exc_details[0]["exception_message"]
 
         assert validation_results[-1]["success"] is True, "validation failed"
 
