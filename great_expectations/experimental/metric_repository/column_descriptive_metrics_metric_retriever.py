@@ -52,7 +52,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         TableMetric.update_forward_refs()
 
         metric_name = "table.row_count"
-        value, exception = self._get_table_metric_from_computed_metrics(
+        value, exception = self._get_metric_from_computed_metrics(
             metric_name=metric_name,
             metric_lookup_key=None,
             computed_metrics=computed_metrics,
@@ -67,7 +67,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         )
 
         metric_name = "table.columns"
-        value, exception = self._get_table_metric_from_computed_metrics(
+        value, exception = self._get_metric_from_computed_metrics(
             metric_name=metric_name,
             metric_lookup_key=None,
             computed_metrics=computed_metrics,
@@ -84,7 +84,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         metric_name = "table.column_types"
         metric_lookup_key: _MetricKey = (metric_name, tuple(), "include_nested=True")
 
-        value, exception = self._get_table_metric_from_computed_metrics(
+        value, exception = self._get_metric_from_computed_metrics(
             metric_name=metric_name,
             metric_lookup_key=metric_lookup_key,
             computed_metrics=computed_metrics,
@@ -134,7 +134,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         batch_id = validator.active_batch.id
         return computed_metrics, batch_id
 
-    def _get_table_metric_from_computed_metrics(
+    def _get_metric_from_computed_metrics(
         self,
         metric_name: str,
         metric_lookup_key: _MetricKey | None,
@@ -203,13 +203,18 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                 value_type = int
             for column in column_list:
                 metric_lookup_key = (metric_name, f"column={column}", tuple())
+                value, exception = self._get_metric_from_computed_metrics(
+                    metric_name=metric_name,
+                    metric_lookup_key=metric_lookup_key,
+                    computed_metrics=computed_metrics,
+                )
                 metrics.append(
                     ColumnMetric[value_type](  # type: ignore[valid-type]  # Will be refactored in upcoming PR
                         batch_id=validator.active_batch.id,
                         metric_name=metric_name,
                         column=column,
-                        value=computed_metrics[metric_lookup_key],
-                        exception=None,  # TODO: Pass through a MetricException() if an exception is thrown
+                        value=value,
+                        exception=exception,
                     )
                 )
 

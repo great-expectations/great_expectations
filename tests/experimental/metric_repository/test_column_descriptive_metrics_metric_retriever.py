@@ -157,7 +157,7 @@ def test_get_metrics_single_metric_missing():
             {"name": "col1", "type": "float"},
             {"name": "col2", "type": "float"},
         ],
-        ("column.min", "column=col1", ()): 2.5,
+        # ("column.min", "column=col1", ()): 2.5, # Missing column.min metric for col1
         ("column.min", "column=col2", ()): 2.7,
         ("column.max", "column=col1", ()): 5.5,
         ("column.max", "column=col2", ()): 5.7,
@@ -203,8 +203,8 @@ def test_get_metrics_single_metric_missing():
             batch_id="batch_id",
             metric_name="column.min",
             column="col1",
-            value=2.5,
-            exception=None,
+            value=None,
+            exception=MetricException(type="TBD", message="TBD"),
         ),
         ColumnMetric[float](
             batch_id="batch_id",
