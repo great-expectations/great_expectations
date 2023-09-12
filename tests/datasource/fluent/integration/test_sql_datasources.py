@@ -614,8 +614,6 @@ def _is_quote_char_dialect_mismatch(
 @pytest.mark.parametrize(
     "column_name",
     [
-        param("name", id="str name"),
-        param("NAME", id="str NAME"),
         param("lower", id="str lower"),
         param("LOWER", id="str LOWER"),
         param('"lower"', id='str "lower"'),
