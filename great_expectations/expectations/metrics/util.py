@@ -312,7 +312,6 @@ def is_column_present_in_table(
     column_name: str,
     schema_name: Optional[str] = None,
 ) -> bool:
-    logger.warning(f"is_column_present_in_table() {column_name}")
     all_columns_metadata: List[Dict[str, Any]] = (
         get_sqlalchemy_column_metadata(
             engine=engine, table_selectable=table_selectable, schema_name=schema_name
@@ -329,7 +328,6 @@ def get_sqlalchemy_column_metadata(
     table_selectable: sqlalchemy.Select,
     schema_name: Optional[str] = None,
 ) -> Optional[List[Dict[str, Any]]]:
-    logger.warning(f"get_sqlalchemy_column_metadata() {type(table_selectable)}")
     try:
         columns: List[Dict[str, Any]]
 
@@ -356,8 +354,11 @@ def get_sqlalchemy_column_metadata(
             sa.exc.NoSuchTableError,
             sa.exc.ProgrammingError,
         ) as exc:
-            logger.error(
-                f"get_sqlalchemy_column_metadata() {table_selectable}", exc_info=exc
+            logger.debug(
+                f"{type(exc).__name__} while introspecting columns", exc_info=exc
+            )
+            logger.info(
+                f"While introspecting columns {exc!r}; attempting reflection fallback"
             )
             # we will get a KeyError for temporary tables, since
             # reflection will not find the temporary schema
@@ -374,10 +375,9 @@ def get_sqlalchemy_column_metadata(
                 dialect=engine.dialect,
                 sqlalchemy_engine=engine,
             )
-
         return columns
     except AttributeError as e:
-        logger.warning(f"Error while introspecting columns: {e!s}", exc_info=e)
+        logger.debug(f"Error while introspecting columns: {e!r}", exc_info=e)
         return None
 
 
@@ -387,7 +387,6 @@ def column_reflection_fallback(  # noqa: PLR0915
     sqlalchemy_engine: sqlalchemy.Engine,
 ) -> List[Dict[str, str]]:
     """If we can't reflect the table, use a query to at least get column names."""
-    logger.warning(f"1. begin column_reflection_fallback() {type(selectable)}")
     if isinstance(sqlalchemy_engine.engine, sqlalchemy.Engine):
         connection = sqlalchemy_engine.engine.connect()
     else:
@@ -605,23 +604,22 @@ def column_reflection_fallback(  # noqa: PLR0915
                         .limit(1)
                     )
                 else:
-                    logger.warning(f"2. \tselectable {type(selectable)} - {selectable}")
                     try:
                         if isinstance(selectable, sqlalchemy.quoted_name):
                             sub_query = sa.text(selectable)
                         else:
                             sub_query = selectable
                         query = sa.select(sa.text("*")).select_from(sub_query).limit(1)
-                    except Exception as e:
-                        logger.error("2.1 \tI died", exc_info=e)
-                        raise e
+                    except Exception as exc:
+                        logger.debug(
+                            "Error during column_reflection_fallback()", exc_info=exc
+                        )
+                        raise
 
-            logger.warning(f"3. \tquery {type(query)}\n{query}")
             result_object = connection.execute(query)
             # noinspection PyProtectedMember
             col_names: List[str] = result_object._metadata.keys
             col_info_dict_list = [{"name": col_name} for col_name in col_names]
-        logger.warning(f"4. end column_reflection_fallback()\n{col_info_dict_list}")
         return col_info_dict_list
 
 
