@@ -116,9 +116,14 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             for metric_name in table_metric_names
         ]
         validator = self._context.get_validator(batch_request=batch_request)
+        # The runtime configuration catch_exceptions is explicitly set to True to catch exceptions
+        # that are thrown when computing metrics. This is so we can capture the error for later
+        # surfacing, and not have the entire metric run fail so that other metrics will still be
+        # computed.
+        # TODO: Get aborted_metrics in addition to computed metrics so they can be plumbed into the MetricException.
         computed_metrics = validator.compute_metrics(
             metric_configurations=table_metric_configs,
-            runtime_configuration={"catch_exceptions": True},  # TODO: Is this needed?
+            runtime_configuration={"catch_exceptions": True},
         )
 
         assert isinstance(validator.active_batch, Batch)
