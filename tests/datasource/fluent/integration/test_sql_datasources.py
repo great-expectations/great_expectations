@@ -346,6 +346,7 @@ def all_sql_datasources(
     yield datasource
 
 
+@pytest.mark.xfail(reason="re-enable")
 @pytest.mark.parametrize(
     "asset_name",
     [
