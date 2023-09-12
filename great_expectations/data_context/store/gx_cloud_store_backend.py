@@ -237,6 +237,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         return self._send_get_request_to_api(url=url, params=params)
 
+    @override
     def _get_all(self) -> ResponsePayload:  # type: ignore[override]
         url = construct_url(
             base_url=self.ge_cloud_base_url,
@@ -246,7 +247,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         return self._send_get_request_to_api(url=url)
 
-    def _send_get_request_to_api(self, url: str, params: dict | None = None) -> dict:
+    def _send_get_request_to_api(
+        self, url: str, params: dict | None = None
+    ) -> ResponsePayload:
         try:
             response = self._session.get(
                 url=url,

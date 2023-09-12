@@ -255,6 +255,7 @@ class DatabaseStoreBackend(StoreBackend):
             logger.debug(f"Error fetching value: {e!s}")
             raise gx_exceptions.StoreError(f"Unable to fetch value for key: {key!s}")
 
+    @override
     def _get_all(self) -> list[Any]:
         raise NotImplementedError
 

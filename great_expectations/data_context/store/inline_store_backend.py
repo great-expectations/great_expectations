@@ -96,6 +96,7 @@ class InlineStoreBackend(StoreBackend):
 
         return variable_config
 
+    @override
     def _get_all(self) -> list[Any]:
         raise NotImplementedError
 

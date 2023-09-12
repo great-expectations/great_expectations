@@ -57,6 +57,7 @@ class InMemoryStoreBackend(StoreBackend):
         except KeyError as e:
             raise InvalidKeyError(f"{e!s}")
 
+    @override
     def _get_all(self) -> list[Any]:
         raise NotImplementedError
 
