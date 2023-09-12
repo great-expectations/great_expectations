@@ -364,31 +364,32 @@ context.add_or_update_expectation_suite("my_expectation_suite")
 context.add_or_update_expectation_suite("my_other_expectation_suite")
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_template">
-using_template = """
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_template just the yaml">
-name: my_checkpoint
-config_version: 1
-class_name: Checkpoint
-template_name: my_base_checkpoint
-validations:
-  - batch_request:
-      datasource_name: taxi_datasource
-      data_asset_name: taxi_asset
-      options:
-        year: "2019"
-        month: "01"
-    expectation_suite_name: my_expectation_suite
-  - batch_request:
-      datasource_name: taxi_datasource
-      data_asset_name: taxi_asset
-      options:
-        year: "2019"
-        month: "02"
-    expectation_suite_name: my_other_expectation_suite
+context.add_or_update_checkpoint(
+    name="my_checkpoint",
+    template_name="my_base_checkpoint",
+    validations=[
+        {
+            "batch_request": {
+                "datasource_name": "taxi_datasource",
+                "data_asset_name": "taxi_asset",
+                "options": {"year": "2019", "month": "01"},
+            },
+            "expectation_suite_name": "my_expectation_suite",
+        },
+        {
+            "batch_request": {
+                "datasource_name": "taxi_datasource",
+                "data_asset_name": "taxi_asset",
+                "options": {"year": "2019", "month": "02"},
+            },
+            "expectation_suite_name": "my_other_expectation_suite",
+        },
+    ],
+)
 # </snippet>
-"""
 # </snippet>
-context.add_or_update_checkpoint(**yaml.load(using_template))
+
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_4">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
