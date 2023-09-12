@@ -191,6 +191,7 @@ assert (
 )
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults">
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults just the yaml">
 context.add_or_update_checkpoint(
     name="my_checkpoint",
     run_name_template="%Y-%M-foo-bar-template-$VAR",
@@ -230,6 +231,7 @@ context.add_or_update_checkpoint(
         "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
     },
 )
+# </snippet>
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_2">
