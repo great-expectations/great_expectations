@@ -11,9 +11,7 @@ Great Expectations (GX) provides the following support levels for integrated app
     }}>
         <li><i class="fas fa-check-circle" style={{color: "#28a745"}}></i> &nbsp; Fully tested and supported by GX</li>
         <li><i class="fas fa-circle" style={{color: "#ffc107"}}></i> &nbsp; Partially tested and supported by GX</li>
-        <li><i class="fas fa-circle" style={{color: "#dc3545"}}></i> &nbsp; Untested and unsupported by GX </li>
-       
-        
+        <li><i class="fas fa-circle" style={{color: "#dc3545"}}></i> &nbsp; Untested and unsupported by GX </li>       
     </ul>
 </div>
 
