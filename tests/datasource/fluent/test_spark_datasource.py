@@ -6,9 +6,9 @@ import logging
 import pathlib
 from typing import TYPE_CHECKING
 
-import pydantic
 import pytest
 
+from great_expectations.compatibility import pydantic
 from great_expectations.datasource.fluent.spark_datasource import (
     DataFrameAsset,
     SparkConfig,

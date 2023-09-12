@@ -271,8 +271,8 @@ def get_parameter_value_and_validate_return_type(
     if expected_return_type is not None:
         if not isinstance(parameter_reference, expected_return_type):
             raise gx_exceptions.ProfilerExecutionError(
-                message=f"""Argument "{parameter_reference}" must be of type "{str(expected_return_type)}" \
-(value of type "{str(type(parameter_reference))}" was encountered).
+                message=f"""Argument "{parameter_reference}" must be of type "{expected_return_type!s}" \
+(value of type "{type(parameter_reference)!s}" was encountered).
 """
             )
 

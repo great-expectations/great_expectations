@@ -77,7 +77,7 @@ def pandas_dbfs_datasource(
         ],
     )
 
-    pandas_dbfs_datasource = PandasDBFSDatasource(  # type: ignore[call-arg]
+    pandas_dbfs_datasource = PandasDBFSDatasource(
         name="pandas_dbfs_datasource",
         base_directory=pathlib.Path(base_directory),
     )

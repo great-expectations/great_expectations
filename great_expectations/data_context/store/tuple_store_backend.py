@@ -198,7 +198,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                 tuple_index = int(
                     re.search(r"\d+", indexed_string_substitutions[i]).group(0)
                 )
-                key_element = matches.group(f"tuple_index_{str(i)}")
+                key_element = matches.group(f"tuple_index_{i!s}")
                 new_key[tuple_index] = key_element
 
             new_key = tuple(new_key)
@@ -321,7 +321,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 contents: str = infile.read().rstrip("\n")
         except FileNotFoundError:
             raise InvalidKeyError(
-                f"Unable to retrieve object from TupleFilesystemStoreBackend with the following Key: {str(filepath)}"
+                f"Unable to retrieve object from TupleFilesystemStoreBackend with the following Key: {filepath!s}"
             )
 
         return contents
@@ -565,7 +565,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
         except (s3.exceptions.NoSuchKey, s3.exceptions.NoSuchBucket):
             raise InvalidKeyError(
-                f"Unable to retrieve object from TupleS3StoreBackend with the following Key: {str(s3_object_key)}"
+                f"Unable to retrieve object from TupleS3StoreBackend with the following Key: {s3_object_key!s}"
             )
 
         return (
@@ -853,7 +853,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         gcs_response_object = bucket.get_blob(gcs_object_key)
         if not gcs_response_object:
             raise InvalidKeyError(
-                f"Unable to retrieve object from TupleGCSStoreBackend with the following Key: {str(key)}"
+                f"Unable to retrieve object from TupleGCSStoreBackend with the following Key: {key!s}"
             )
         else:
             return gcs_response_object.download_as_bytes().decode("utf-8")
@@ -998,6 +998,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         self,
         container,
         connection_string=None,
+        credential=None,
         account_url=None,
         prefix=None,
         filepath_template=None,
@@ -1021,19 +1022,24 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             store_name=store_name,
         )
-        self.connection_string = connection_string or os.environ.get(
+        self.connection_string = connection_string or os.environ.get(  # noqa: TID251
             "AZURE_STORAGE_CONNECTION_STRING"
+        )
+        self.credential = credential or os.environ.get(  # noqa: TID251
+            "AZURE_CREDENTIAL"
         )
         self.prefix = prefix or ""
         self.container = container
-        self.account_url = account_url or os.environ.get("AZURE_STORAGE_ACCOUNT_URL")
+        self.account_url = account_url or os.environ.get(  # noqa: TID251
+            "AZURE_STORAGE_ACCOUNT_URL"
+        )
 
     @property
     @functools.lru_cache  # noqa: B019 # lru_cache on method
     def _container_client(self) -> Any:
         from great_expectations.compatibility import azure
 
-        # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
+        # Validate that "azure" libraries were successfully imported and attempt to create "azure_client" handle.
         if azure.BlobServiceClient:  # type: ignore[truthy-function] # False if NotImported
             try:
                 if self.connection_string:
@@ -1047,6 +1053,10 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
                         account_url=self.account_url,
                         credential=azure.DefaultAzureCredential(),
                     )
+                elif self.credential and self.account_url:
+                    blob_service_client = azure.BlobServiceClient(
+                        account_url=self.account_url, credential=self.credential
+                    )
                 else:
                     raise StoreBackendError(
                         "Unable to initialize ServiceClient, AZURE_STORAGE_CONNECTION_STRING should be set"
@@ -1054,7 +1064,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             except Exception as e:
                 # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
                 raise StoreBackendError(
-                    f'Due to exception: "{str(e)}", "azure_client" could not be created.'
+                    f'Due to exception: "{e!s}", "azure_client" could not be created.'
                 ) from e
         else:
             raise StoreBackendError(

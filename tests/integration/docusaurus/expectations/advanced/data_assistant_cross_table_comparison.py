@@ -85,9 +85,8 @@ expectation_suite = data_assistant_result.get_expectation_suite(
 context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
 # </snippet>
 # <snippet name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py checkpoint_config">
-checkpoint = gx.checkpoint.SimpleCheckpoint(
+checkpoint = context.add_or_update_checkpoint(
     name="comparison_checkpoint",
-    data_context=context,
     validations=[
         {
             "batch_request": pg_batch_request,

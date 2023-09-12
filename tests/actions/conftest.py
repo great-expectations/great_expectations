@@ -5,6 +5,7 @@ import pytest
 from moto import mock_sns
 
 from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
+from great_expectations.data_context import get_context
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.types.resource_identifiers import (
@@ -13,7 +14,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.util import get_context
 
 
 @pytest.fixture(scope="module")

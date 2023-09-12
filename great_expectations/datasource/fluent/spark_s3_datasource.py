@@ -3,9 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Literal, Type, Union
 
-import pydantic
-
-from great_expectations.compatibility import aws
+from great_expectations.compatibility import aws, pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import S3Url
@@ -72,7 +70,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
                 except Exception as e:
                     # Failure to create "s3_client" is most likely due invalid "boto3_options" dictionary.
                     raise SparkS3DatasourceError(
-                        f'Due to exception: "{str(e)}", "s3_client" could not be created.'
+                        f'Due to exception: "{e!s}", "s3_client" could not be created.'
                     ) from e
             else:
                 raise SparkS3DatasourceError(
@@ -98,7 +96,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         except Exception as e:
             raise TestConnectionError(
                 "Attempt to connect to datasource failed with the following error message: "
-                f"{str(e)}"
+                f"{e!s}"
             ) from e
 
         if self.assets and test_assets:

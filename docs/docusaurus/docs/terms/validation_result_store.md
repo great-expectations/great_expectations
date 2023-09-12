@@ -30,11 +30,5 @@ You will not typically need direct access to your Validation Result Store.  Inst
 
 ## Configure
 
-For details on how to configure a Validation Result Store, please reference the relevant how-to guide:
-
-- [How to configure a Validation Result store in Amazon S3](../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3.md)
-- [How to configure a Validation Result store in Azure Blob Storage](../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage.md)
-- [How to configure a Validation Result store in GCS](../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.md)
-- [How to configure a Validation Result store on a filesystem](../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem.md)
-- [How to configure a Validation Result store to PostgreSQL](../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_to_postgresql.md)
+To configure a Validation Result Store, see [Configure Validation Result Stores](../guides/setup/configuring_metadata_stores/configure_result_stores.md).
 

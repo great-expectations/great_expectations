@@ -13,16 +13,19 @@ def make_retrieve_data_context_config_from_cloud(data_dir):
     return retrieve_data_context_config_from_cloud
 
 
-def make_store_get(data_file_name, with_slack):
+def make_store_get(data_file_name, data_dir, with_slack):
     def store_get(self, key):
         # key is a 3-tuple with the form
         # (GXCloudRESTResource, cloud_id as a string uuid, name as string)
         # For example:
         # (<GXCloudRESTResource.CHECKPOINT: 'checkpoint'>, '731dc2a5-45d8-4827-9118-39b77c5cd413', 'my_checkpoint')
-        if key[0] == GXCloudRESTResource.CHECKPOINT:
+        type_ = key[0]
+        if type_ == GXCloudRESTResource.CHECKPOINT:
             return {"data": _checkpoint_config(data_file_name, with_slack)}
-        elif key[0] == GXCloudRESTResource.EXPECTATION_SUITE:
+        elif type_ == GXCloudRESTResource.EXPECTATION_SUITE:
             return {"data": _expectation_suite()}
+        elif type_ == GXCloudRESTResource.DATASOURCE:
+            return {"data": _datasource(data_dir)}
         return None
 
     return store_get
@@ -55,7 +58,8 @@ def store_set(self, key, value, **kwargs):
 
 
 def list_keys(self, prefix: Tuple = ()):
-    if self.ge_cloud_resource_type == GXCloudRESTResource.EXPECTATION_SUITE:
+    type_ = self._ge_cloud_resource_type
+    if type_ == GXCloudRESTResource.EXPECTATION_SUITE:
         return [
             (
                 GXCloudRESTResource.EXPECTATION_SUITE,
@@ -63,6 +67,15 @@ def list_keys(self, prefix: Tuple = ()):
                 "suite_name",
             ),
         ]
+    elif type_ == GXCloudRESTResource.DATASOURCE:
+        return [
+            (
+                GXCloudRESTResource.DATASOURCE,
+                "eb0c729d-9457-43a0-8b40-6ec6c79c0fef",
+                "taxi_datasource",
+            ),
+        ]
+    raise NotImplementedError(f"{type_} is not supported in this mock")
 
 
 class CallCounter:
@@ -314,5 +327,56 @@ def _expectation_suite():
             },
             "id": "1212e79d-f751-4c6e-921d-26de2b1db174",
             "type": "expectation_suite",
+        }
+    ]
+
+
+def _datasource(data_dir):
+    return [
+        {
+            "attributes": {
+                "created_by_id": "934e0898-6a5c-4ffd-9125-89381a46d191",
+                "organization_id": os.environ["GX_CLOUD_ORGANIZATION_ID"],
+                "datasource_config": {
+                    "class_name": "Datasource",
+                    "data_connectors": {
+                        "default_runtime_data_connector_name": {
+                            "assets": {
+                                "taxi_data": {
+                                    "batch_identifiers": [
+                                        "runtime_batch_identifier_name"
+                                    ],
+                                    "class_name": "Asset",
+                                    "module_name": "great_expectations.datasource.data_connector.asset",
+                                }
+                            },
+                            "class_name": "RuntimeDataConnector",
+                            "id": "e0af346c-32ea-44e6-8908-b559c4162a70",
+                            "module_name": "great_expectations.datasource.data_connector",
+                            "name": "default_runtime_data_connector_name",
+                        },
+                        "taxi_data_connector": {
+                            "base_directory": str(data_dir),
+                            "class_name": "InferredAssetFilesystemDataConnector",
+                            "default_regex": {
+                                "group_names": ["data_asset_name"],
+                                "pattern": "(.*)",
+                            },
+                            "id": "997a7842-195b-4374-a71b-e52f192068d1",
+                            "module_name": "great_expectations.datasource.data_connector",
+                            "name": "taxi_data_connector",
+                        },
+                    },
+                    "execution_engine": {
+                        "class_name": "PandasExecutionEngine",
+                        "module_name": "great_expectations.execution_engine",
+                    },
+                    "id": "eb0c729d-9457-43a0-8b40-6ec6c79c0fef",
+                    "module_name": "great_expectations.datasource",
+                    "name": "taxi_datasource",
+                },
+            },
+            "id": "eb0c729d-9457-43a0-8b40-6ec6c79c0fef",
+            "type": "datasource",
         }
     ]

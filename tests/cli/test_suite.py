@@ -26,12 +26,12 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
+from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.util import (
     deep_filter_properties_iterable,
-    get_context,
     lint_code,
 )
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
@@ -1171,10 +1171,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     assert result.exit_code == 1
 
     stdout: str = result.stdout
-    assert (
-        "Unable to load datasource `not_real` -- no configuration found or invalid configuration."
-        in stdout
-    )
+    assert "Could not find a datasource named 'not_real'" in stdout
 
     assert mock_subprocess.call_count == 0
 

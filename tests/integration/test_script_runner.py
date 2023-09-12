@@ -440,6 +440,30 @@ fluent_datasources = [
     ),
 ]
 
+failed_rows_tests = [
+    IntegrationTestFixture(
+        name="failed_rows_pandas",
+        data_context_dir="tests/integration/fixtures/failed_rows/great_expectations",
+        data_dir="tests/test_sets/visits",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/failed_rows_pandas.py",
+        backend_dependencies=[],
+    ),
+    IntegrationTestFixture(
+        name="failed_rows_sqlalchemy",
+        data_context_dir="tests/integration/fixtures/failed_rows/great_expectations",
+        data_dir="tests/test_sets/visits",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/failed_rows_sql.py",
+        backend_dependencies=[BackendDependencies.SQLALCHEMY],
+    ),
+    IntegrationTestFixture(
+        name="failed_rows_spark",
+        data_context_dir="tests/integration/fixtures/failed_rows/great_expectations",
+        data_dir="tests/test_sets/visits",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/failed_rows_spark.py",
+        backend_dependencies=[BackendDependencies.SPARK],
+    ),
+]
+
 
 # populate docs_test_matrix with sub-lists
 docs_test_matrix += local_tests
@@ -460,6 +484,7 @@ docs_test_matrix += s3_integration_tests
 docs_test_matrix += athena_integration_tests
 docs_test_matrix += aws_glue_integration_tests
 docs_test_matrix += multiple_backend
+docs_test_matrix += failed_rows_tests
 
 pandas_integration_tests = [
     IntegrationTestFixture(

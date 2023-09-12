@@ -37,6 +37,7 @@ yaml.default_flow_style = False
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
+    from great_expectations.datasource.fluent import Datasource as FluentDatasource
 
 
 class SerializableDataContext(AbstractDataContext):
@@ -86,7 +87,7 @@ class SerializableDataContext(AbstractDataContext):
 
     @abc.abstractmethod
     @override
-    def _save_project_config(self, _fds_datasource=None) -> None:
+    def _save_project_config(self, _fds_datasource=None) -> FluentDatasource | None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
         Explicitly override base class implementation to retain legacy behavior.
@@ -474,7 +475,7 @@ class SerializableDataContext(AbstractDataContext):
                 )
                 if os.path.isfile(potential_yml):  # noqa: PTH113
                     yml_path = potential_yml
-                    logger.debug(f"Found config file at {str(yml_path)}")
+                    logger.debug(f"Found config file at {yml_path!s}")
                     break
             # move up one directory
             search_start_dir = os.path.dirname(search_start_dir)  # noqa: PTH120

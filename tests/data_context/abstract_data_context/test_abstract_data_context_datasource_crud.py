@@ -43,7 +43,7 @@ class FakeAbstractDataContext(AbstractDataContext):
         """Override __init__ with only the needed attributes."""
         self._datasource_store = StubDatasourceStore()
         self._variables: Optional[DataContextVariables] = None
-        self._cached_datasources: dict = {}
+        self._datasources: dict = {}
         self._usage_statistics_handler = None
         self._config_provider = config_provider
 

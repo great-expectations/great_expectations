@@ -62,7 +62,7 @@ def _build_pandas_gcs_datasource(
     gcs_options: Dict[str, Any] | None = None
 ) -> PandasGoogleCloudStorageDatasource:
     gcs_client: google.Client = cast(google.Client, MockGCSClient())
-    pandas_gcs_datasource = PandasGoogleCloudStorageDatasource(  # type: ignore[call-arg]
+    pandas_gcs_datasource = PandasGoogleCloudStorageDatasource(
         name="pandas_gcs_datasource",
         bucket_or_name="test_bucket",
         gcs_options=gcs_options or {},

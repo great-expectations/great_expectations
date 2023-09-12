@@ -7,13 +7,12 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, List, cast
 
 import pandas as pd
-import pydantic
 import pytest
 from moto import mock_s3
 from pytest import param
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.compatibility import aws
+from great_expectations.compatibility import aws, pydantic
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import PandasS3Datasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -109,7 +108,7 @@ def pandas_s3_datasource(
             Key=key,
         )
 
-    pandas_s3_datasource = PandasS3Datasource(  # type: ignore[call-arg]
+    pandas_s3_datasource = PandasS3Datasource(
         name="pandas_s3_datasource",
         bucket=s3_bucket,
     )
@@ -235,7 +234,7 @@ def test_invalid_connect_options_value(
             **connect_option_kwargs,
         )
 
-    print(f"Exception raised:\n\t{repr(exc_info.value)}")
+    print(f"Exception raised:\n\t{exc_info.value!r}")
     error_dicts = exc_info.value.errors()
     print(pf(error_dicts))
     assert expected_error_dicts == error_dicts
@@ -266,7 +265,7 @@ def test_asset_connect_options_in_repr(
         **connect_options,
     )
 
-    print(f"__repr__\n{repr(asset)}\n")
+    print(f"__repr__\n{asset!r}\n")
     asset_as_str = str(asset)
     print(f"__str__\n{asset_as_str}\n")
 

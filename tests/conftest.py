@@ -44,6 +44,7 @@ from great_expectations.data_context import (
     AbstractDataContext,
     BaseDataContext,
     CloudDataContext,
+    get_context,
 )
 from great_expectations.data_context._version_checker import _VersionChecker
 from great_expectations.data_context.cloud_constants import (
@@ -100,7 +101,6 @@ from great_expectations.self_check.util import (
 )
 from great_expectations.util import (
     build_in_memory_runtime_context,
-    get_context,
     is_library_loadable,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -3604,7 +3604,9 @@ def empty_base_data_context_in_cloud_mode(
             cloud_mode=True,
             cloud_config=ge_cloud_config,
         )
-    assert context.list_datasources() == []
+    context._datasources = (
+        {}
+    )  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
     return context
 
 
@@ -3639,7 +3641,11 @@ def empty_data_context_in_cloud_mode(
         context = CloudDataContext(
             context_root_dir=project_path_name,
         )
-        return context
+
+    context._datasources = (
+        {}
+    )  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
+    return context
 
 
 @pytest.fixture
@@ -3652,14 +3658,18 @@ def empty_cloud_data_context(
     project_path.mkdir()
     project_path_name: str = str(project_path)
 
-    cloud_data_context: CloudDataContext = CloudDataContext(
+    context = CloudDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path_name,
         cloud_base_url=ge_cloud_config.base_url,
         cloud_access_token=ge_cloud_config.access_token,
         cloud_organization_id=ge_cloud_config.organization_id,
     )
-    return cloud_data_context
+
+    context._datasources = (
+        {}
+    )  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
+    return context
 
 
 @pytest.fixture

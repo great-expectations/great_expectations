@@ -3,9 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Literal, Type, Union
 
-import pydantic
-
-from great_expectations.compatibility import aws
+from great_expectations.compatibility import aws, pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import S3Url
@@ -98,7 +96,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         except Exception as e:
             raise TestConnectionError(
                 "Attempt to connect to datasource failed with the following error message: "
-                f"{str(e)}"
+                f"{e!s}"
             ) from e
 
         if self.assets and test_assets:
