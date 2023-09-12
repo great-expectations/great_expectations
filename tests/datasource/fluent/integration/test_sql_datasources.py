@@ -612,43 +612,43 @@ def _is_quote_char_dialect_mismatch(
 @pytest.mark.parametrize(
     "column_name",
     [
-        # param("name", id="str name"),
-        # param("NAME", id="str NAME"),
-        # param("lower", id="str lower"),
-        # param("LOWER", id="str LOWER"),
-        # param('"lower"', id='str "lower"'),
-        # param(
-        #     quoted_name(
-        #         "lower",
-        #         quote=None,
-        #     ),
-        #     id="quoted_name lower quote=None",
-        # ),
-        # param(
-        #     quoted_name(
-        #         "lower",
-        #         quote=True,
-        #     ),
-        #     id="quoted_name lower quote=True",
-        # ),
-        # param(
-        #     quoted_name(
-        #         "lower",
-        #         quote=False,
-        #     ),
-        #     id="quoted_name lower quote=False",
-        # ),
-        # param(
-        #     quoted_name(
-        #         "LOWER",
-        #         quote=None,
-        #     ),
-        #     marks=[pytest.mark.xfail],
-        #     id="quoted_name LOWER quote=None",
-        # ),
-        # param("upper", id="str upper"),
+        param("name", id="str name"),
+        param("NAME", id="str NAME"),
+        param("lower", id="str lower"),
+        param("LOWER", id="str LOWER"),
+        param('"lower"', id='str "lower"'),
+        param(
+            quoted_name(
+                "lower",
+                quote=None,
+            ),
+            id="quoted_name lower quote=None",
+        ),
+        param(
+            quoted_name(
+                "lower",
+                quote=True,
+            ),
+            id="quoted_name lower quote=True",
+        ),
+        param(
+            quoted_name(
+                "lower",
+                quote=False,
+            ),
+            id="quoted_name lower quote=False",
+        ),
+        param(
+            quoted_name(
+                "LOWER",
+                quote=None,
+            ),
+            marks=[pytest.mark.xfail],
+            id="quoted_name LOWER quote=None",
+        ),
+        param("upper", id="str upper"),
         param("UPPER", id="str UPPER"),  # TODO: high priority
-        # param('"UPPER"', id='str "UPPER"'),
+        param('"UPPER"', id='str "UPPER"'),
         param(
             quoted_name(
                 "UPPER",
@@ -670,13 +670,13 @@ def _is_quote_char_dialect_mismatch(
             ),
             id="quoted_name UPPER quote=False",
         ),
-        # param(
-        #     quoted_name(
-        #         "upper",
-        #         quote=None,
-        #     ),
-        #     id="quoted_name upper quote=None",
-        # ),
+        param(
+            quoted_name(
+                "upper",
+                quote=None,
+            ),
+            id="quoted_name upper quote=None",
+        ),
     ],
 )
 class TestColumnIdentifiers:
