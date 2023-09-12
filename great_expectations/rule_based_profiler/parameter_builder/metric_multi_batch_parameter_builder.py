@@ -53,21 +53,30 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
     ) -> None:
         """
         Args:
-            name: the name of this parameter -- this is user-specified parameter name (from configuration);
-            it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
-            and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
-            metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
-            metric_domain_kwargs: used in MetricConfiguration
-            metric_value_kwargs: used in MetricConfiguration
-            single_batch_mode: Facilitates "MetricSingleBatchParameterBuilder" subclasses in leveraging this class.
-            enforce_numeric_metric: used in MetricConfiguration to insure that metric computations return numeric values
-            replace_nan_with_zero: if False (default), then if the computed metric gives NaN, then exception is raised;
-            otherwise, if True, then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
-            reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
-            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
-            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
-            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            data_context: AbstractDataContext associated with this ParameterBuilder
+            name:
+                the name of this parameter -- this is user-specified parameter name (from configuration);
+                it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
+                and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
+            metric_name:
+                the name of a metric used in MetricConfiguration (must be a supported and registered metric)
+            metric_domain_kwargs:
+                used in MetricConfiguration
+            metric_value_kwargs:
+                used in MetricConfiguration
+            single_batch_mode:
+                Facilitates "MetricSingleBatchParameterBuilder" subclasses in leveraging this class.
+            enforce_numeric_metric:
+                used in MetricConfiguration to insure that metric computations return numeric values
+            replace_nan_with_zero:
+                if False (default), then if the computed metric gives NaN, then exception is raised;
+                otherwise, if True, then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
+            reduce_scalar_metric:
+                if True (default), then reduces computation of 1-dimensional metric to scalar value.
+            evaluation_parameter_builder_configs:
+                ParameterBuilder configurations, executing and making whose respective
+                ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+                These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
+                data_context: AbstractDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
