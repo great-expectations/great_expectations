@@ -208,6 +208,7 @@ module.exports = {
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
         'contributing/contributing_maturity',
+        'contributing/application_integration_support',
         'reference/customize_your_deployment',
         'reference/usage_statistics',
         {
