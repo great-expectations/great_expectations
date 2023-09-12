@@ -11,6 +11,7 @@ from great_expectations.experimental.metric_repository.metric_retriever import (
 from great_expectations.experimental.metric_repository.metrics import (
     ColumnMetric,
     Metric,
+    MetricException,
     TableMetric,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -71,12 +72,21 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             tuple(),
         )
 
+        value = None
+        exception = None
+        if metric_lookup_key in computed_metrics:
+            value = computed_metrics[metric_lookup_key]
+        else:
+            exception = MetricException(
+                type="TBD", message="TBD"
+            )  # TODO: Fill in type and message if an exception is thrown
+
         metrics.append(
             TableMetric[int](
                 batch_id=validator.active_batch.id,
                 metric_name=metric_name,
-                value=computed_metrics[metric_lookup_key],
-                exception=None,  # TODO: Pass through a MetricException() if an exception is thrown
+                value=value,
+                exception=exception,
             )
         )
 
