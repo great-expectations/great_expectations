@@ -3,6 +3,8 @@ title: Result format
 ---
 
 
+You can use the `result_format` parameter to define the level of detail for Validation Results in your Data Docs. For example, you can return a success or failure message, a summary of observed values, a list of failing values, or you can add a query or a filter function that returns all failing rows. Typical use cases for this parameter include cleaning data and excluding Validation Result data in published Data Docs.
+
 The `result_format` parameter can be a string or a dictionary which specifies the fields to return in `result`. 
 
 The string values `"BOOLEAN_ONLY"`, `"BASIC"`, `"SUMMARY"`, and `"COMPLETE"` are supported. The default is `"SUMMARY"`. The behavior of each setting is described in [examples](#examples).
