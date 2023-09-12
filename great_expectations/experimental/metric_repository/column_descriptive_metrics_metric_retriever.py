@@ -42,29 +42,12 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         return column_list
 
     def _get_table_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
-        table_metric_names = ["table.row_count", "table.columns", "table.column_types"]
-        table_metric_configs = [
-            MetricConfiguration(
-                metric_name=metric_name, metric_domain_kwargs={}, metric_value_kwargs={}
-            )
-            for metric_name in table_metric_names
-        ]
-        validator = self._context.get_validator(batch_request=batch_request)
-        computed_metrics = validator.compute_metrics(
-            metric_configurations=table_metric_configs,
-            runtime_configuration={"catch_exceptions": True},  # TODO: Is this needed?
-        )
+        computed_metrics, batch_id = self._compute_table_metrics(batch_request)
 
         # Convert computed_metrics
         metrics: list[Metric] = []
         metric_name = "table.row_count"
         TableMetric.update_forward_refs()
-
-        assert isinstance(validator.active_batch, Batch)
-        if not isinstance(validator.active_batch, Batch):
-            raise TypeError(
-                f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
-            )
 
         metric_lookup_key: _MetricKey = (
             metric_name,
@@ -83,7 +66,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
 
         metrics.append(
             TableMetric[int](
-                batch_id=validator.active_batch.id,
+                batch_id=batch_id,
                 metric_name=metric_name,
                 value=value,
                 exception=exception,
@@ -94,7 +77,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         metric_lookup_key = (metric_name, tuple(), tuple())
         metrics.append(
             TableMetric[List[str]](
-                batch_id=validator.active_batch.id,
+                batch_id=batch_id,
                 metric_name=metric_name,
                 value=computed_metrics[metric_lookup_key],
                 exception=None,  # TODO: Pass through a MetricException() if an exception is thrown
@@ -112,13 +95,37 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         ]
         metrics.append(
             TableMetric[List[str]](
-                batch_id=validator.active_batch.id,
+                batch_id=batch_id,
                 metric_name=metric_name,
                 value=column_types_converted_to_str,
                 exception=None,  # TODO: Pass through a MetricException() if an exception is thrown
             )
         )
         return metrics
+
+    def _compute_table_metrics(
+        self, batch_request: BatchRequest
+    ) -> tuple[dict[_MetricKey, Any], str | tuple]:
+        table_metric_names = ["table.row_count", "table.columns", "table.column_types"]
+        table_metric_configs = [
+            MetricConfiguration(
+                metric_name=metric_name, metric_domain_kwargs={}, metric_value_kwargs={}
+            )
+            for metric_name in table_metric_names
+        ]
+        validator = self._context.get_validator(batch_request=batch_request)
+        computed_metrics = validator.compute_metrics(
+            metric_configurations=table_metric_configs,
+            runtime_configuration={"catch_exceptions": True},  # TODO: Is this needed?
+        )
+
+        assert isinstance(validator.active_batch, Batch)
+        if not isinstance(validator.active_batch, Batch):
+            raise TypeError(
+                f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
+            )
+        batch_id = validator.active_batch.id
+        return computed_metrics, batch_id
 
     def _get_column_metrics(
         self, batch_request: BatchRequest, column_list: List[str]
