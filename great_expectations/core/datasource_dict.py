@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections import UserDict
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
@@ -11,15 +11,27 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
+from great_expectations.datasource.fluent.constants import _IN_MEMORY_DATA_ASSET_TYPE
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
     from great_expectations.data_context.store.datasource_store import DatasourceStore
+    from great_expectations.datasource.fluent.interfaces import DataAsset
     from great_expectations.datasource.new_datasource import BaseDatasource
 
 logger = logging.getLogger(__name__)
+
+
+@runtime_checkable
+class SupportsInMemoryDataAssets(Protocol):
+    @property
+    def assets(self) -> list[DataAsset]:
+        ...
+
+    def add_dataframe_asset(self, **kwargs) -> DataAsset:
+        ...
 
 
 class DatasourceDict(UserDict):
@@ -43,12 +55,19 @@ class DatasourceDict(UserDict):
     ):
         self._context = context  # If possible, we should avoid passing the context through - once block-style is removed, we can extract this
         self._datasource_store = datasource_store
+        self._in_memory_data_assets: dict[str, DataAsset] = {}
 
     @property
     def _names(self) -> set[str]:
         # The contents of the store may change between uses so we constantly refresh when requested
         keys = self._datasource_store.list_keys()
         return {key.resource_name for key in keys}  # type: ignore[attr-defined] # list_keys() is annotated with generic DataContextKey instead of subclass
+
+    @staticmethod
+    def _get_in_memory_data_asset_name(
+        datasource_name: str, data_asset_name: str
+    ) -> str:
+        return f"{datasource_name}-{data_asset_name}"
 
     @override
     @property
@@ -77,6 +96,16 @@ class DatasourceDict(UserDict):
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
         config: FluentDatasource | DatasourceConfig
         if isinstance(ds, FluentDatasource):
+            if isinstance(ds, SupportsInMemoryDataAssets):
+                for asset in ds.assets:
+                    if asset.type == _IN_MEMORY_DATA_ASSET_TYPE:
+                        in_memory_asset_name: str = (
+                            DatasourceDict._get_in_memory_data_asset_name(
+                                datasource_name=name,
+                                data_asset_name=asset.name,
+                            )
+                        )
+                        self._in_memory_data_assets[in_memory_asset_name] = asset
             config = ds
         else:
             config = self._prep_legacy_datasource_config(name=name, ds=ds)
@@ -108,7 +137,22 @@ class DatasourceDict(UserDict):
 
         ds = self._datasource_store.retrieve_by_name(name)
         if isinstance(ds, FluentDatasource):
-            return self._init_fluent_datasource(ds)
+            hydrated_ds = self._init_fluent_datasource(ds)
+            if isinstance(hydrated_ds, SupportsInMemoryDataAssets):
+                for asset in hydrated_ds.assets:
+                    if asset.type == _IN_MEMORY_DATA_ASSET_TYPE:
+                        in_memory_asset_name: str = (
+                            DatasourceDict._get_in_memory_data_asset_name(
+                                datasource_name=name,
+                                data_asset_name=asset.name,
+                            )
+                        )
+                        cached_data_asset = self._in_memory_data_assets.get(
+                            in_memory_asset_name
+                        )
+                        if cached_data_asset:
+                            asset.dataframe = cached_data_asset.dataframe
+            return hydrated_ds
         return self._init_block_style_datasource(name=name, config=ds)
 
     def _init_fluent_datasource(self, ds: FluentDatasource) -> FluentDatasource:
