@@ -4,6 +4,7 @@ from itertools import chain
 from typing import TYPE_CHECKING, Any, List, Sequence, Type
 
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.domain import SemanticDomainTypes
 from great_expectations.datasource.fluent.interfaces import Batch
 from great_expectations.experimental.metric_repository.metric_retriever import (
     MetricRetriever,
@@ -14,6 +15,7 @@ from great_expectations.experimental.metric_repository.metrics import (
     MetricException,
     TableMetric,
 )
+from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
@@ -27,11 +29,26 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
     @override
     def get_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
         table_metrics_list = self._get_table_metrics(batch_request)
+
+        numeric_column_names = self._get_numeric_column_names(
+            batch_request=batch_request
+        )
+        numeric_column_metrics_list = self._get_numeric_column_metrics(
+            batch_request=batch_request, column_list=numeric_column_names
+        )
+
         column_list: List[str] = self._get_column_list(table_metrics_list)
-        column_metrics_list = self._get_column_metrics(
+        non_numeric_column_metrics_list = self._get_non_numeric_column_metrics(
             batch_request=batch_request, column_list=column_list
         )
-        bundled_list = list(chain(table_metrics_list, column_metrics_list))
+
+        bundled_list = list(
+            chain(
+                table_metrics_list,
+                numeric_column_metrics_list,
+                non_numeric_column_metrics_list,
+            )
+        )
         return bundled_list
 
     def _get_column_list(self, metrics: Sequence[Metric]) -> List[str]:
@@ -155,7 +172,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
 
         return value, exception
 
-    def _get_column_metrics(
+    def _get_numeric_column_metrics(
         self, batch_request: BatchRequest, column_list: List[str]
     ) -> Sequence[Metric]:
         column_metric_names = [
@@ -163,12 +180,52 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             "column.max",
             "column.mean",
             "column.median",
-            "column_values.null.count",
         ]
 
-        column_metric_configs: List[MetricConfiguration] = list()
-
         # TODO: nested for-loop can be better
+        column_metric_configs = self._generate_column_metric_configurations(
+            column_list, column_metric_names
+        )
+        validator = self._context.get_validator(batch_request=batch_request)
+        computed_metrics = validator.compute_metrics(
+            metric_configurations=column_metric_configs,
+            runtime_configuration={"catch_exceptions": True},  # TODO: Is this needed?
+        )
+        # Convert computed_metrics
+        metrics: list[Metric] = []
+        ColumnMetric.update_forward_refs()
+
+        assert isinstance(validator.active_batch, Batch)
+        if not isinstance(validator.active_batch, Batch):
+            raise TypeError(
+                f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
+            )
+        metric_lookup_key: _MetricKey
+
+        for metric_name in column_metric_names:
+            for column in column_list:
+                metric_lookup_key = (metric_name, f"column={column}", tuple())
+                value, exception = self._get_metric_from_computed_metrics(
+                    metric_name=metric_name,
+                    metric_lookup_key=metric_lookup_key,
+                    computed_metrics=computed_metrics,
+                )
+                metrics.append(
+                    ColumnMetric[float](
+                        batch_id=validator.active_batch.id,
+                        metric_name=metric_name,
+                        column=column,
+                        value=value,
+                        exception=exception,
+                    )
+                )
+
+        return metrics
+
+    def _generate_column_metric_configurations(
+        self, column_list, column_metric_names
+    ) -> list[MetricConfiguration]:
+        column_metric_configs: List[MetricConfiguration] = list()
         for metric_name in column_metric_names:
             for column in column_list:
                 column_metric_configs.append(
@@ -178,6 +235,18 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                         metric_value_kwargs={},
                     )
                 )
+        return column_metric_configs
+
+    def _get_non_numeric_column_metrics(
+        self, batch_request: BatchRequest, column_list: List[str]
+    ) -> Sequence[Metric]:
+        column_metric_names = [
+            "column_values.null.count",
+        ]
+
+        column_metric_configs = self._generate_column_metric_configurations(
+            column_list, column_metric_names
+        )
         validator = self._context.get_validator(batch_request=batch_request)
         computed_metrics = validator.compute_metrics(
             metric_configurations=column_metric_configs,
@@ -217,3 +286,15 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                 )
 
         return metrics
+
+    def _get_numeric_column_names(self, batch_request: BatchRequest) -> list[str]:
+        """Get the names of all numeric columns in the batch."""
+        validator = self._context.get_validator(batch_request=batch_request)
+        domain_builder = ColumnDomainBuilder(
+            include_semantic_types=[SemanticDomainTypes.NUMERIC],
+        )
+        numeric_column_names = domain_builder.get_effective_column_names(
+            validator=validator,
+            batch_ids=[validator.active_batch.id],
+        )
+        return numeric_column_names
