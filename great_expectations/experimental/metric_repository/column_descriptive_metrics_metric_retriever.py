@@ -148,7 +148,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             "column.median",
         ]
 
-        batch_id, computed_metrics = self._compute_numeric_column_metrics(
+        batch_id, computed_metrics = self._compute_column_metrics(
             batch_request, column_list, column_metric_names
         )
 
@@ -176,14 +176,6 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
 
         return metrics
 
-    def _compute_numeric_column_metrics(
-        self, batch_request, column_list, column_metric_names
-    ):
-        batch_id, computed_metrics = self._compute_non_numeric_column_metrics(
-            batch_request, column_list, column_metric_names
-        )
-        return batch_id, computed_metrics
-
     def _get_non_numeric_column_metrics(
         self, batch_request: BatchRequest, column_list: List[str]
     ) -> Sequence[Metric]:
@@ -191,7 +183,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             "column_values.null.count",
         ]
 
-        batch_id, computed_metrics = self._compute_non_numeric_column_metrics(
+        batch_id, computed_metrics = self._compute_column_metrics(
             batch_request, column_list, column_metric_names
         )
 
@@ -223,9 +215,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
 
         return metrics
 
-    def _compute_non_numeric_column_metrics(
-        self, batch_request, column_list, column_metric_names
-    ):
+    def _compute_column_metrics(self, batch_request, column_list, column_metric_names):
         column_metric_configs = self._generate_column_metric_configurations(
             column_list, column_metric_names
         )
