@@ -206,6 +206,8 @@ class Store:
             value = self._store_backend.get(self.key_to_tuple(key))
 
         if value:
+            if isinstance(value, list):
+                return [self.deserialize(v) for v in value]
             return self.deserialize(value)
 
         return None

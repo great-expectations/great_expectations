@@ -134,7 +134,12 @@ class DatasourceStore(Store):
         logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
         data = response_json["data"]
         if isinstance(data, list):
-            return [self._convert_raw_json_to_object_dict(d) for d in data]
+            if len(data) == 1:
+                data = data[
+                    0
+                ]  # If a single datasource is returned in list form, extract and treat as individual
+            else:
+                return [self._convert_raw_json_to_object_dict(d) for d in data]
         return self._convert_raw_json_to_object_dict(data)
 
     @staticmethod
