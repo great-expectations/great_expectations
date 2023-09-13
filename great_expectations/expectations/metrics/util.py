@@ -84,19 +84,22 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
     # redshift
     # noinspection PyUnresolvedReferences
-    if hasattr(dialect, "RedshiftDialect") or (
-        aws.redshiftdialect
-        and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)
-    ):
-        if positive:
-            return sqlalchemy.BinaryExpression(
-                column, sqlalchemy.literal(regex), sqlalchemy.custom_op("~")
-            )
+    try:
+        if hasattr(dialect, "RedshiftDialect") or (
+            aws.redshiftdialect
+            and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)
+        ):
+            if positive:
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("~")
+                )
+            else:
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("!~")
+                )
         else:
-            return sqlalchemy.BinaryExpression(
-                column, sqlalchemy.literal(regex), sqlalchemy.custom_op("!~")
-            )
-    else:
+            pass
+    except AttributeError:
         pass
 
     try:
