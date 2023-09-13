@@ -684,6 +684,55 @@ def _is_quote_char_dialect_mismatch(
     ],
 )
 class TestColumnIdentifiers:
+    def test_raw_queries(
+        self,
+        context: EphemeralDataContext,
+        all_sql_datasources: SQLDatasource,
+        table_factory: TableFactory,
+        column_name: str | quoted_name,
+        request: pytest.FixtureRequest,
+    ):
+        datasource = all_sql_datasources
+        dialect = datasource.get_engine().dialect.name
+
+        if _is_quote_char_dialect_mismatch(dialect, column_name):
+            pytest.skip(reason=f"quote char dialect mismatch: {column_name[0]}")
+
+        if _requires_fix(request.node.callspec.id):
+            pytest.xfail(reason="requires fix")
+
+        schema: str | None = (
+            RAND_SCHEMA
+            if GXSqlDialect(dialect)
+            in (GXSqlDialect.SNOWFLAKE, GXSqlDialect.DATABRICKS)
+            else None
+        )
+
+        table_factory(
+            gx_engine=datasource.get_execution_engine(),
+            table_names={TEST_TABLE_NAME},
+            schema=schema,
+            data=[
+                {"id": 1, "name": "first", "UPPER": "uppercase", "lower": "lowercase"}
+            ],
+        )
+
+        qualified_table_name: str = (
+            f"{schema}.{TEST_TABLE_NAME}" if schema else TEST_TABLE_NAME
+        )
+        # examine columns
+        with datasource.get_execution_engine().get_connection() as conn:
+            result = conn.execute(
+                TextClause(f"SELECT * FROM {qualified_table_name} LIMIT 1")
+            )
+            assert result
+            columns = list(result.keys())
+            print(f"{TEST_TABLE_NAME} Columns:\n  {columns}\n")
+
+        print(f"column_name:\n  {column_name!r}")
+        print(f"type:\n  {type(column_name)}")
+        assert column_name in columns
+
     @pytest.mark.parametrize(
         "expectation_type",
         [
