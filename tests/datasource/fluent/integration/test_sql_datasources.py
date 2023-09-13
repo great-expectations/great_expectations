@@ -132,12 +132,18 @@ TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
     },
 }
 
+# column names
+UNQUOTED_UPPER: Final[Literal["UNQUOTED_UPPER"]] = "UNQUOTED_UPPER"
+UNQUOTED_LOWER: Final[Literal["unquoted_lower"]] = "unquoted_lower"
+
 
 class Row(TypedDict):
     id: int
     name: str
-    UPPER: str
+    upper: str
     lower: str
+    unquoted_upper: str
+    unquoted_lower: str
 
 
 @pytest.fixture
@@ -254,10 +260,17 @@ def table_factory(
             for name in table_names:
                 qualified_table_name = f"{schema}.{name}" if schema else name
                 # TODO: use dialect specific quotes
-                create_tables = f"CREATE TABLE IF NOT EXISTS {qualified_table_name} (id INTEGER, name VARCHAR(255), {upper} VARCHAR(255), {lower} VARCHAR(255))"
+                create_tables: str = (
+                    f"CREATE TABLE IF NOT EXISTS {qualified_table_name}"
+                    f" (id INTEGER, name VARCHAR(255), {upper} VARCHAR(255), {lower} VARCHAR(255),"
+                    f" {UNQUOTED_UPPER} VARCHAR(255), {UNQUOTED_LOWER} VARCHAR(255))"
+                )
                 conn.execute(TextClause(create_tables))
                 if data:
-                    insert_data = f"INSERT INTO {qualified_table_name} (id, name, {upper}, {lower}) VALUES (:id, :name, :UPPER, :lower)"
+                    insert_data = (
+                        f"INSERT INTO {qualified_table_name} (id, name, {upper}, {lower}, {UNQUOTED_UPPER}, {UNQUOTED_LOWER})"
+                        " VALUES (:id, :name, :upper, :lower, :unquoted_upper, :unquoted_lower)"
+                    )
                     conn.execute(TextClause(insert_data), data)
 
                 created_tables.append(dict(table_name=name, schema=schema))
@@ -623,6 +636,8 @@ def _is_quote_char_dialect_mismatch(
 @pytest.mark.parametrize(
     "column_name",
     [
+        param("unquoted_lower", id="str unquoted_lower"),
+        param("UNQUOTED_LOWER", id="str UNQUOTED_LOWER"),
         param("lower", id="str lower"),
         param("LOWER", id="str LOWER"),
         param('"lower"', id='str "lower"'),
@@ -655,6 +670,8 @@ def _is_quote_char_dialect_mismatch(
             marks=[pytest.mark.xfail],
             id="quoted_name LOWER quote=None",
         ),
+        param("unquoted_upper", id="str unquoted_upper"),
+        param("UNQUOTED_UPPER", id="str UNQUOTED_UPPER"),
         param("upper", id="str upper"),
         param("UPPER", id="str UPPER"),  # TODO: high priority
         param('"UPPER"', id='str "UPPER"'),
@@ -718,7 +735,14 @@ class TestColumnIdentifiers:
             table_names={TEST_TABLE_NAME},
             schema=schema,
             data=[
-                {"id": 1, "name": "first", "UPPER": "uppercase", "lower": "lowercase"}
+                {
+                    "id": 1,
+                    "name": "first",
+                    "upper": "uppercase",
+                    "lower": "lowercase",
+                    "unquoted_upper": "uppercase",
+                    "unquoted_lower": "lowercase",
+                }
             ],
         )
 
@@ -777,14 +801,18 @@ class TestColumnIdentifiers:
                 {
                     "id": 1,
                     "name": "first",
-                    "UPPER": "my column is uppercase",
+                    "upper": "my column is uppercase",
                     "lower": "my column is lowercase",
+                    "unquoted_upper": "whatever",
+                    "unquoted_lower": "whatever",
                 },
                 {
                     "id": 2,
                     "name": "second",
-                    "UPPER": "my column is uppercase",
+                    "upper": "my column is uppercase",
                     "lower": "my column is lowercase",
+                    "unquoted_upper": "whatever",
+                    "unquoted_lower": "whatever",
                 },
             ],
         )
