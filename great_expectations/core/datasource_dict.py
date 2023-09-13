@@ -72,18 +72,21 @@ class DatasourceDict(UserDict):
 
         This is generated just-in-time as the contents of the store may have changed.
         """
-        datasources = {}
+        datasources: dict[str, FluentDatasource | BaseDatasource] = {}
 
         configs = self._datasource_store.get_all()
         for config in configs:
             try:
                 if isinstance(config, FluentDatasource):
                     name = config.name
-                    ds = self._init_fluent_datasource(name=name, ds=config)
+                    datasources[name] = self._init_fluent_datasource(
+                        name=name, ds=config
+                    )
                 else:
                     name = config["name"]
-                    ds = self._init_block_style_datasource(name=name, config=config)
-                datasources[name] = ds
+                    datasources[name] = self._init_block_style_datasource(
+                        name=name, config=config
+                    )
             except gx_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {name}: {e}")
 
@@ -122,7 +125,7 @@ class DatasourceDict(UserDict):
         config["class_name"] = ds.__class__.__name__
         return datasourceConfigSchema.load(config)
 
-    def _get_ds_from_store(self, name: str) -> FluentDatasource | BaseDatasource:
+    def _get_ds_from_store(self, name: str) -> FluentDatasource | DatasourceConfig:
         try:
             return self._datasource_store.retrieve_by_name(name)
         except ValueError:
@@ -201,7 +204,7 @@ class CacheableDatasourceDict(DatasourceDict):
             return True
         try:
             # Resort to store only if not in cache
-            _ = self._get_ds_from_store(name)
+            _ = self._get_ds_from_store(str(name))
             return True
         except KeyError:
             return False
