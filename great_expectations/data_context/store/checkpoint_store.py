@@ -40,13 +40,16 @@ class CheckpointStore(ConfigurationStore):
     _configuration_class = CheckpointConfig
 
     @override
-    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
+    def ge_cloud_response_json_to_object_dict(
+        self, response_json: Dict
+    ) -> Union[Dict, List[Dict]]:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
         """
         cp_data: Dict
         if isinstance(response_json["data"], list):
+            # TODO: Need to add support for parsing and converting an entire collection
             cp_data = response_json["data"][0]
         else:
             cp_data = response_json["data"]

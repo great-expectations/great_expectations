@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 import uuid
-from typing import Dict
+from typing import Dict, List, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
@@ -166,7 +166,9 @@ class ExpectationsStore(Store):
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     @override
-    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
+    def ge_cloud_response_json_to_object_dict(
+        self, response_json: Dict
+    ) -> Union[Dict, List[Dict]]:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
@@ -177,6 +179,7 @@ class ExpectationsStore(Store):
             if len(response_json["data"]) == 1:
                 suite_data = response_json["data"][0]
             else:
+                # TODO: Need to add support for parsing and converting an entire collection
                 raise ValueError(
                     "More than one Expectation Suite was found with the expectation_suite_name."
                 )

@@ -126,7 +126,7 @@ class DatasourceStore(Store):
     @override
     def ge_cloud_response_json_to_object_dict(
         self, response_json: CloudResponsePayloadTD  # type: ignore[override]
-    ) -> dict:
+    ) -> dict | list[dict]:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
@@ -134,11 +134,11 @@ class DatasourceStore(Store):
         logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
         data = response_json["data"]
         if isinstance(data, list):
-            return [self._convert_raw_json_to_object_dict(d) for d in data]  # type: ignore[arg-type] # Temp to get CI working
-        return self._convert_raw_json_to_object_dict(data)  # type: ignore[arg-type,return-value] # Temp to get CI working
+            return [self._convert_raw_json_to_object_dict(d) for d in data]
+        return self._convert_raw_json_to_object_dict(data)
 
     @staticmethod
-    def _convert_raw_json_to_object_dict(data: dict) -> dict:
+    def _convert_raw_json_to_object_dict(data: DataPayload) -> dict:
         datasource_ge_cloud_id: str = data["id"]
         datasource_config_dict: dict = data["attributes"]["datasource_config"]
         datasource_config_dict["id"] = datasource_ge_cloud_id

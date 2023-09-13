@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 import uuid
-from typing import ClassVar, Dict, Type
+from typing import ClassVar, Dict, List, Type, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_validation_result import (
@@ -155,11 +155,14 @@ class ValidationsStore(Store):
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     @override
-    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
+    def ge_cloud_response_json_to_object_dict(
+        self, response_json: Dict
+    ) -> Union[Dict, List[Dict]]:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
         """
+        # TODO: Need to add support for parsing and converting an entire collection
         ge_cloud_suite_validation_result_id = response_json["data"]["id"]
         suite_validation_result_dict = response_json["data"]["attributes"]["result"]
         suite_validation_result_dict[
