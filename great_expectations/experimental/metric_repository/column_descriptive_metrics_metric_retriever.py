@@ -108,9 +108,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             metric_lookup_key=metric_lookup_key,
             computed_metrics=computed_metrics,
         )
-        raw_column_types: list[
-            dict[str, Any]
-        ] = value  # type: ignore[assignment] # Metric results from computed_metrics are not typed
+        raw_column_types: list[dict[str, Any]] = value
         column_types_converted_to_str: list[dict[str, str]] = [
             {"name": raw_column_type["name"], "type": str(raw_column_type["type"])}
             for raw_column_type in raw_column_types
