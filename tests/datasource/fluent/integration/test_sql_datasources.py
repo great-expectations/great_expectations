@@ -70,6 +70,8 @@ TRINO_TABLE: Final[str] = "customer"
 # NOTE: can we create tables in trino?
 # some of the trino tests probably don't make sense if we can't create tables
 DO_NOT_CREATE_TABLES: set[str] = {"trino"}
+# sqlite db files should be using fresh tmp_path on every test
+DO_NOT_DROP_TABLES: set[str] = {"sqlite"}
 
 DatabaseType: TypeAlias = Literal[
     "databricks_sql", "postgres", "snowflake", "sqlite", "trino"
@@ -268,6 +270,9 @@ def table_factory(
     # teardown
     print(f"dropping tables\n{pf(all_created_tables)}")
     for dialect, tables in all_created_tables.items():
+        if dialect in DO_NOT_DROP_TABLES:
+            print(f"skipping drop for {dialect}")
+            continue
         engine = engines[dialect]
         with engine.connect() as conn:
             transaction = conn.begin()
