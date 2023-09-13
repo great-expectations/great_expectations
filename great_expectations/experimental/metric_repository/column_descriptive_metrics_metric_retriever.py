@@ -28,35 +28,28 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
 
     @override
     def get_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
-        table_metrics_list = self._get_table_metrics(batch_request)
+        table_metrics = self._get_table_metrics(batch_request)
 
         numeric_column_names = self._get_numeric_column_names(
             batch_request=batch_request
         )
-        numeric_column_metrics_list = self._get_numeric_column_metrics(
+        numeric_column_metrics = self._get_numeric_column_metrics(
             batch_request=batch_request, column_list=numeric_column_names
         )
 
-        column_list: List[str] = self._get_column_list(table_metrics_list)
-        non_numeric_column_metrics_list = self._get_non_numeric_column_metrics(
-            batch_request=batch_request, column_list=column_list
+        all_column_names: List[str] = self._get_all_column_names(table_metrics)
+        non_numeric_column_metrics = self._get_non_numeric_column_metrics(
+            batch_request=batch_request, column_list=all_column_names
         )
 
         bundled_list = list(
             chain(
-                table_metrics_list,
-                numeric_column_metrics_list,
-                non_numeric_column_metrics_list,
+                table_metrics,
+                numeric_column_metrics,
+                non_numeric_column_metrics,
             )
         )
         return bundled_list
-
-    def _get_column_list(self, metrics: Sequence[Metric]) -> List[str]:
-        column_list: List[str] = []
-        for metric in metrics:
-            if metric.metric_name == "table.columns":
-                column_list = metric.value
-        return column_list
 
     def _get_table_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
         table_metric_names = ["table.row_count", "table.columns", "table.column_types"]
@@ -286,6 +279,13 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                 )
 
         return metrics
+
+    def _get_all_column_names(self, metrics: Sequence[Metric]) -> List[str]:
+        column_list: List[str] = []
+        for metric in metrics:
+            if metric.metric_name == "table.columns":
+                column_list = metric.value
+        return column_list
 
     def _get_numeric_column_names(self, batch_request: BatchRequest) -> list[str]:
         """Get the names of all numeric columns in the batch."""
