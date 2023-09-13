@@ -57,12 +57,6 @@ class DatasourceDict(UserDict):
         self._datasource_store = datasource_store
         self._in_memory_data_assets: dict[str, DataAsset] = {}
 
-    @property
-    def _names(self) -> set[str]:
-        # The contents of the store may change between uses so we constantly refresh when requested
-        keys = self._datasource_store.list_keys()
-        return {key.resource_name for key in keys}  # type: ignore[attr-defined] # list_keys() is annotated with generic DataContextKey instead of subclass
-
     @staticmethod
     def _get_in_memory_data_asset_name(
         datasource_name: str, data_asset_name: str
@@ -79,18 +73,21 @@ class DatasourceDict(UserDict):
         This is generated just-in-time as the contents of the store may have changed.
         """
         datasources = {}
-        for name in self._names:
+
+        configs = self._datasource_store.get_all()
+        for config in configs:
             try:
-                datasources[name] = self.__getitem__(name)
+                if isinstance(config, FluentDatasource):
+                    name = config.name
+                    ds = self._init_fluent_datasource(name=name, ds=config)
+                else:
+                    name = config["name"]
+                    ds = self._init_block_style_datasource(name=name, config=config)
+                datasources[name] = ds
             except gx_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {name}: {e}")
 
         return datasources
-
-    @override
-    def __contains__(self, name: object) -> bool:
-        # Minor optimization - only pulls names instead of building all datasources in self.data
-        return name in self._names
 
     @override
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
@@ -122,42 +119,44 @@ class DatasourceDict(UserDict):
         config["class_name"] = ds.__class__.__name__
         return datasourceConfigSchema.load(config)
 
-    @override
-    def __delitem__(self, name: str) -> None:
-        if not self.__contains__(name):
+    def _get_ds_from_store(self, name: str) -> FluentDatasource | BaseDatasource:
+        try:
+            return self._datasource_store.retrieve_by_name(name)
+        except ValueError:
             raise KeyError(f"Could not find a datasource named '{name}'")
 
-        ds = self._datasource_store.retrieve_by_name(name)
+    @override
+    def __delitem__(self, name: str) -> None:
+        ds = self._get_ds_from_store(name)
         self._datasource_store.delete(ds)
 
     @override
     def __getitem__(self, name: str) -> FluentDatasource | BaseDatasource:
-        if not self.__contains__(name):
-            raise KeyError(f"Could not find a datasource named '{name}'")
+        ds = self._get_ds_from_store(name)
 
-        ds = self._datasource_store.retrieve_by_name(name)
         if isinstance(ds, FluentDatasource):
-            hydrated_ds = self._init_fluent_datasource(ds)
-            if isinstance(hydrated_ds, SupportsInMemoryDataAssets):
-                for asset in hydrated_ds.assets:
-                    if asset.type == _IN_MEMORY_DATA_ASSET_TYPE:
-                        in_memory_asset_name: str = (
-                            DatasourceDict._get_in_memory_data_asset_name(
-                                datasource_name=name,
-                                data_asset_name=asset.name,
-                            )
-                        )
-                        cached_data_asset = self._in_memory_data_assets.get(
-                            in_memory_asset_name
-                        )
-                        if cached_data_asset:
-                            asset.dataframe = cached_data_asset.dataframe
-            return hydrated_ds
+            return self._init_fluent_datasource(name=name, ds=ds)
         return self._init_block_style_datasource(name=name, config=ds)
 
-    def _init_fluent_datasource(self, ds: FluentDatasource) -> FluentDatasource:
+    def _init_fluent_datasource(
+        self, name: str, ds: FluentDatasource
+    ) -> FluentDatasource:
         ds._data_context = self._context
         ds._rebuild_asset_data_connectors()
+        if isinstance(ds, SupportsInMemoryDataAssets):
+            for asset in ds.assets:
+                if asset.type == _IN_MEMORY_DATA_ASSET_TYPE:
+                    in_memory_asset_name: str = (
+                        DatasourceDict._get_in_memory_data_asset_name(
+                            datasource_name=name,
+                            data_asset_name=asset.name,
+                        )
+                    )
+                    cached_data_asset = self._in_memory_data_assets.get(
+                        in_memory_asset_name
+                    )
+                    if cached_data_asset:
+                        asset.dataframe = cached_data_asset.dataframe
         return ds
 
     # To be removed once block-style is fully removed (deprecated as of v0.17.2)
@@ -198,7 +197,7 @@ class CacheableDatasourceDict(DatasourceDict):
         if name in self.data:
             return True
         try:
-            return super().__contains__(name)
+            return self._get_ds_from_store(name)
         except KeyError:
             return False
 

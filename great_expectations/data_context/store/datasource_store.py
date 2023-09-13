@@ -134,16 +134,14 @@ class DatasourceStore(Store):
         logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
         data = response_json["data"]
         if isinstance(data, list):
-            if len(data) > 1:
-                # TODO: handle larger arrays of Datasources
-                raise TypeError(
-                    f"GX Cloud returned {len(data)} Datasources but expected 1"
-                )
-            data = data[0]
+            return [self._convert_raw_json_to_object_dict(d) for d in data]
+        return self._convert_raw_json_to_object_dict(data)
+
+    @staticmethod
+    def _convert_raw_json_to_object_dict(data: dict) -> dict:
         datasource_ge_cloud_id: str = data["id"]
         datasource_config_dict: dict = data["attributes"]["datasource_config"]
         datasource_config_dict["id"] = datasource_ge_cloud_id
-
         return datasource_config_dict
 
     def retrieve_by_name(
