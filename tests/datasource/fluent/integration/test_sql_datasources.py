@@ -51,6 +51,7 @@ from great_expectations.expectations.expectation import (
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
+    from great_expectations.checkpoint.checkpoint import CheckpointResult
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 TERMINAL_WIDTH: Final = shutil.get_terminal_size().columns
@@ -161,6 +162,38 @@ def get_random_identifier_name() -> str:
 
 
 RAND_SCHEMA: Final[str] = f"{PYTHON_VERSION}_{get_random_identifier_name()}"
+
+
+def _get_exception_details(
+    result: CheckpointResult,
+    prettyprint: bool = False,
+) -> list[dict[Literal["exception_message", "exception_traceback"], str,]]:
+    """Extract a list of exception_info dicts from a CheckpointResult."""
+    validation_results: list[
+        dict[
+            Literal[
+                "exception_info", "expectation_config", "meta", "result", "success"
+            ],
+            dict,
+        ]
+    ] = next(iter(result.to_json_dict()["run_results"].values()))["validation_result"][
+        "results"
+    ]
+    if prettyprint:
+        print(f"validation_result.results:\n{pf(validation_results, depth=2)}\n")
+
+    exc_details = [
+        r["exception_info"]
+        for r in validation_results
+        if r["exception_info"]["raised_exception"]
+    ]
+    if exc_details and prettyprint:
+        print(f"{len(exc_details)} exception_info(s):\n{STAR_SEPARATOR}")
+        for i, exc_info in enumerate(exc_details, start=1):
+            print(
+                f"  {i}: {exc_info['exception_message']}\n\n{exc_info['exception_traceback']}\n{STAR_SEPARATOR}"
+            )
+    return exc_details
 
 
 @pytest.fixture(scope="function")
@@ -535,7 +568,7 @@ class TestTableIdentifiers:
         )
         result = checkpoint.run()
 
-        print(f"result:\n{pf(result)}")
+        _ = _get_exception_details(result, prettyprint=True)
         assert result.success is True
 
 
@@ -776,36 +809,10 @@ class TestColumnIdentifiers:
         )
         result = checkpoint.run()
 
-        validation_results: list[
-            dict[
-                Literal[
-                    "exception_info", "expectation_config", "meta", "result", "success"
-                ],
-                dict,
-            ]
-        ] = next(iter(result.to_json_dict()["run_results"].values()))[
-            "validation_result"
-        ][
-            "results"
-        ]
-
-        print(f"validation_result.results:\n{pf(validation_results, depth=2)}\n")
-        exc_details: list[
-            dict[Literal["exception_message", "exception_traceback"], str]
-        ] = [
-            r["exception_info"]
-            for r in validation_results
-            if r["exception_info"]["raised_exception"]
-        ]
-        if exc_details:
-            print(f"{len(exc_details)} exception_info(s):\n{STAR_SEPARATOR}")
-            for i, exc_info in enumerate(exc_details, start=1):
-                print(
-                    f"  {i}: {exc_info['exception_message']}\n\n{exc_info['exception_traceback']}\n{STAR_SEPARATOR}"
-                )
+        exc_details = _get_exception_details(result, prettyprint=True)
         assert not exc_details, exc_details[0]["exception_message"]
 
-        assert validation_results[-1]["success"] is True, "validation failed"
+        assert result.success is True, "validation failed"
 
 
 if __name__ == "__main__":
