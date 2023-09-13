@@ -96,5 +96,5 @@ The following table defines the applications that are not supported by GX or the
 
 | Application                             |
 |-----------------------------------------|
-| <i class="fas fa-circle" style={{color: "#dc3545"}}></i> Acryl Datahub<br/><i class="fas fa-circle" style={{color: "#dc3545"}}></i> Atlan<br/><i class="fas fa-circle" style={{color: "#dc3545"}}></i> Amundsen<br/><i class="fas fa-circle" style={{color: "#ffc107"}}></i> AWS Databricks<br/><i class="fas fa-circle" style={{color: "#dc3545"}}></i> Azure Databricks<br/><i class="fas fa-circle" style={{color: "#dc3545"}}></i> Meltano<br/><i class="fas fa-circle" style={{color: "#dc3545"}}></i> dbt<br/><i class="fas fa-circle" style={{color: "#dc3545"}}></i> Capital One Data Profile  |
+| <i class="fas fa-circle" style={{color: "#dc3545"}}></i> Acryl Datahub<br/><i class="fas fa-circle" style={{color: "#dc3545"}}></i> Atlan<br/><i class="fas fa-circle" style={{color: "#dc3545"}}></i> Amundsen<br/><i class="fas fa-circle" style={{color: "#dc3545"}}></i> Azure Databricks<br/><i class="fas fa-circle" style={{color: "#dc3545"}}></i> Meltano<br/><i class="fas fa-circle" style={{color: "#dc3545"}}></i> dbt<br/><i class="fas fa-circle" style={{color: "#dc3545"}}></i> Capital One Data Profile<br/><i class="fas fa-circle" style={{color: "#ffc107"}}></i> AWS Databricks  |
 
