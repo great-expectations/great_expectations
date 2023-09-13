@@ -68,7 +68,9 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
 
         return metrics
 
-    def _get_table_row_count(self, batch_id, computed_metrics) -> Metric:
+    def _get_table_row_count(
+        self, batch_id: str, computed_metrics: dict[_MetricKey, Any]
+    ) -> Metric:
         metric_name = "table.row_count"
         value, exception = self._get_metric_from_computed_metrics(
             metric_name=metric_name,
@@ -81,7 +83,9 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             exception=exception,
         )
 
-    def _get_table_columns(self, batch_id, computed_metrics) -> Metric:
+    def _get_table_columns(
+        self, batch_id: str, computed_metrics: dict[_MetricKey, Any]
+    ) -> Metric:
         metric_name = "table.columns"
         value, exception = self._get_metric_from_computed_metrics(
             metric_name=metric_name,
@@ -94,7 +98,9 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             exception=exception,
         )
 
-    def _get_table_column_types(self, batch_id, computed_metrics) -> Metric:
+    def _get_table_column_types(
+        self, batch_id: str, computed_metrics: dict[_MetricKey, Any]
+    ) -> Metric:
         metric_name = "table.column_types"
         metric_lookup_key: _MetricKey = (metric_name, tuple(), "include_nested=True")
         value, exception = self._get_metric_from_computed_metrics(
@@ -209,13 +215,21 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         domain_builder = ColumnDomainBuilder(
             include_semantic_types=[SemanticDomainTypes.NUMERIC],
         )
+        assert isinstance(validator.active_batch, Batch)
+        if not isinstance(validator.active_batch, Batch):
+            raise TypeError(
+                f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
+            )
+        batch_id = validator.active_batch.id
         numeric_column_names = domain_builder.get_effective_column_names(
             validator=validator,
-            batch_ids=[validator.active_batch.id],
+            batch_ids=[batch_id],
         )
         return numeric_column_names
 
-    def _generate_table_metric_configurations(self, table_metric_names):
+    def _generate_table_metric_configurations(
+        self, table_metric_names: list[str]
+    ) -> list[MetricConfiguration]:
         table_metric_configs = [
             MetricConfiguration(
                 metric_name=metric_name, metric_domain_kwargs={}, metric_value_kwargs={}
@@ -225,7 +239,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         return table_metric_configs
 
     def _generate_column_metric_configurations(
-        self, column_list, column_metric_names
+        self, column_list: list[str], column_metric_names: list[str]
     ) -> list[MetricConfiguration]:
         column_metric_configs: List[MetricConfiguration] = list()
         for metric_name in column_metric_names:
@@ -239,7 +253,9 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                 )
         return column_metric_configs
 
-    def _compute_metrics(self, batch_request, metric_configs):
+    def _compute_metrics(
+        self, batch_request: BatchRequest, metric_configs: list[MetricConfiguration]
+    ):
         validator = self._context.get_validator(batch_request=batch_request)
         # The runtime configuration catch_exceptions is explicitly set to True to catch exceptions
         # that are thrown when computing metrics. This is so we can capture the error for later
@@ -265,7 +281,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         metric_lookup_key: _MetricKey | None = None,
     ):
         if metric_lookup_key is None:
-            metric_lookup_key: _MetricKey = (
+            metric_lookup_key = (
                 metric_name,
                 tuple(),
                 tuple(),
