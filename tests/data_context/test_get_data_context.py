@@ -371,8 +371,10 @@ def test_get_context_scaffolds_gx_dir(tmp_path: pathlib.Path):
 def test_get_context_finds_legacy_great_expectations_dir(
     tmp_path: pathlib.Path,
 ):
+    working_dir = tmp_path / "a" / "b" / "c" / "d" / "working_dir"
+
     # Scaffold great_expectations
-    context_root_dir = tmp_path / FileDataContext._LEGACY_GX_DIR
+    context_root_dir = working_dir / FileDataContext._LEGACY_GX_DIR
     context_root_dir.mkdir(parents=True)
 
     # Scaffold great_expectations.yml
@@ -385,7 +387,7 @@ def test_get_context_finds_legacy_great_expectations_dir(
     assert yml_fixture.exists()
     shutil.copy(yml_fixture, gx_yml)
 
-    with working_directory(tmp_path):
+    with working_directory(working_dir):
         context = gx.get_context()
     assert isinstance(context, FileDataContext)
 
