@@ -338,10 +338,10 @@ def snowflake_creds_populated() -> bool:
 @pytest.fixture
 def snowflake_ds(
     context: EphemeralDataContext,
-    # snowflake_creds_populated: bool,
+    snowflake_creds_populated: bool,
 ) -> SnowflakeDatasource:
-    # if not snowflake_creds_populated:
-    #     pytest.skip("no snowflake credentials")
+    if not snowflake_creds_populated:
+        pytest.skip("no snowflake credentials")
     ds = context.sources.add_snowflake(
         "snowflake",
         connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
