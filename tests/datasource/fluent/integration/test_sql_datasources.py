@@ -176,8 +176,12 @@ def _get_exception_details(
             ],
             dict,
         ]
-    ] = next(iter(result.to_json_dict()["run_results"].values()))["validation_result"][
-        "results"
+    ] = next(  # type: ignore[index, assignment]
+        iter(result.to_json_dict()["run_results"].values())  # type: ignore[call-overload,union-attr]
+    )[
+        "validation_result"  # type: ignore[index]
+    ][
+        "results"  # type: ignore[index]
     ]
     if prettyprint:
         print(f"validation_result.results:\n{pf(validation_results, depth=2)}\n")
