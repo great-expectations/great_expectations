@@ -27,6 +27,8 @@ from typing import (
     cast,
 )
 
+from packaging import version
+
 from great_expectations.compatibility.typing_extensions import override
 
 from great_expectations._version import get_versions  # isort:skip
@@ -324,6 +326,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # (e.g. for accessing temporary tables), if we don't keep a reference
         # then we get errors like sqlite3.ProgrammingError: Cannot operate on a closed database.
         self._connection = None
+
+        # Use a single instance of SQLAlchemy engine to avoid creating multiple engine instances
+        # for the same SQLAlchemy engine. This allows us to take advantage of SQLAlchemy's
+        # built-in caching.
+        self._inspector = None
 
         if engine is not None:
             if credentials is not None:
@@ -1387,6 +1394,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         return batch_data, batch_markers
+
+    def get_inspector(self) -> sqlalchemy.engine.reflection.Inspector:
+        if self._inspector is None:
+            if version.parse(sa.__version__) < version.parse("1.4"):
+                # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
+                self._inspector = sqlalchemy.reflection.Inspector.from_engine(
+                    self.engine
+                )
+            else:
+                self._inspector = sa.inspect(self.engine)
+
+        return self._inspector
 
     @contextmanager
     def get_connection(self) -> sqlalchemy.Connection:  # noqa: C901 # TODO: simplify
