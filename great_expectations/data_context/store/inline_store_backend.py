@@ -97,6 +97,10 @@ class InlineStoreBackend(StoreBackend):
         return variable_config
 
     @override
+    def _get_all(self) -> list[Any]:
+        raise NotImplementedError
+
+    @override
     def _set(self, key: tuple[str, ...], value: Any, **kwargs: dict) -> None:
         resource_name = InlineStoreBackend._determine_resource_name(key)
         project_config: DataContextConfig = self._data_context.config
