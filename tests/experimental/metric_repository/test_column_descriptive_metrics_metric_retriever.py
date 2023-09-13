@@ -56,102 +56,103 @@ def test_get_metrics():
         return_value=["col1", "col2"],
     ):
         metrics = metric_retriever.get_metrics(batch_request=mock_batch_request)
-        assert metrics == [
-            TableMetric[int](
-                batch_id="batch_id",
-                metric_name="table.row_count",
-                value=2,
-                exception=None,
-            ),
-            TableMetric[List[str]](
-                batch_id="batch_id",
-                metric_name="table.columns",
-                value=["col1", "col2"],
-                exception=None,
-            ),
-            TableMetric[List[str]](
-                batch_id="batch_id",
-                metric_name="table.column_types",
-                value=[
-                    {"name": "col1", "type": "float"},
-                    {"name": "col2", "type": "float"},
-                ],
-                exception=None,
-            ),
-            ColumnMetric[float](
-                batch_id="batch_id",
-                metric_name="column.min",
-                column="col1",
-                value=2.5,
-                exception=None,
-            ),
-            ColumnMetric[float](
-                batch_id="batch_id",
-                metric_name="column.min",
-                column="col2",
-                value=2.7,
-                exception=None,
-            ),
-            ColumnMetric[float](
-                batch_id="batch_id",
-                metric_name="column.max",
-                column="col1",
-                value=5.5,
-                exception=None,
-            ),
-            ColumnMetric[float](
-                batch_id="batch_id",
-                metric_name="column.max",
-                column="col2",
-                value=5.7,
-                exception=None,
-            ),
-            ColumnMetric[float](
-                batch_id="batch_id",
-                metric_name="column.mean",
-                value=2.5,
-                exception=None,
-                column="col1",
-            ),
-            ColumnMetric[float](
-                batch_id="batch_id",
-                metric_name="column.mean",
-                value=2.7,
-                exception=None,
-                column="col2",
-            ),
-            ColumnMetric[float](
-                batch_id="batch_id",
-                metric_name="column.median",
-                value=2.5,
-                exception=None,
-                column="col1",
-            ),
-            ColumnMetric[float](
-                batch_id="batch_id",
-                metric_name="column.median",
-                value=2.7,
-                exception=None,
-                column="col2",
-            ),
-            ColumnMetric[int](
-                batch_id="batch_id",
-                metric_name="column_values.null.count",
-                value=1,
-                exception=None,
-                column="col1",
-            ),
-            ColumnMetric[int](
-                batch_id="batch_id",
-                metric_name="column_values.null.count",
-                value=1,
-                exception=None,
-                column="col2",
-            ),
-        ]
+
+    assert metrics == [
+        TableMetric[int](
+            batch_id="batch_id",
+            metric_name="table.row_count",
+            value=2,
+            exception=None,
+        ),
+        TableMetric[List[str]](
+            batch_id="batch_id",
+            metric_name="table.columns",
+            value=["col1", "col2"],
+            exception=None,
+        ),
+        TableMetric[List[str]](
+            batch_id="batch_id",
+            metric_name="table.column_types",
+            value=[
+                {"name": "col1", "type": "float"},
+                {"name": "col2", "type": "float"},
+            ],
+            exception=None,
+        ),
+        ColumnMetric[float](
+            batch_id="batch_id",
+            metric_name="column.min",
+            column="col1",
+            value=2.5,
+            exception=None,
+        ),
+        ColumnMetric[float](
+            batch_id="batch_id",
+            metric_name="column.min",
+            column="col2",
+            value=2.7,
+            exception=None,
+        ),
+        ColumnMetric[float](
+            batch_id="batch_id",
+            metric_name="column.max",
+            column="col1",
+            value=5.5,
+            exception=None,
+        ),
+        ColumnMetric[float](
+            batch_id="batch_id",
+            metric_name="column.max",
+            column="col2",
+            value=5.7,
+            exception=None,
+        ),
+        ColumnMetric[float](
+            batch_id="batch_id",
+            metric_name="column.mean",
+            value=2.5,
+            exception=None,
+            column="col1",
+        ),
+        ColumnMetric[float](
+            batch_id="batch_id",
+            metric_name="column.mean",
+            value=2.7,
+            exception=None,
+            column="col2",
+        ),
+        ColumnMetric[float](
+            batch_id="batch_id",
+            metric_name="column.median",
+            value=2.5,
+            exception=None,
+            column="col1",
+        ),
+        ColumnMetric[float](
+            batch_id="batch_id",
+            metric_name="column.median",
+            value=2.7,
+            exception=None,
+            column="col2",
+        ),
+        ColumnMetric[int](
+            batch_id="batch_id",
+            metric_name="column_values.null.count",
+            value=1,
+            exception=None,
+            column="col1",
+        ),
+        ColumnMetric[int](
+            batch_id="batch_id",
+            metric_name="column_values.null.count",
+            value=1,
+            exception=None,
+            column="col2",
+        ),
+    ]
 
 
-def test_get_metrics_single_metric_missing():
+def test_get_metrics_metrics_missing():
     """This test is meant to simulate a single metric missing from the computed metrics."""
     mock_context = Mock(spec=CloudDataContext)
     mock_validator = Mock(spec=Validator)
@@ -182,7 +183,12 @@ def test_get_metrics_single_metric_missing():
 
     mock_batch_request = Mock(spec=BatchRequest)
 
-    metrics = metric_retriever.get_metrics(batch_request=mock_batch_request)
+    with mock.patch(
+        f"{ColumnDomainBuilder.__module__}.{ColumnDomainBuilder.__name__}.get_effective_column_names",
+        return_value=["col1", "col2"],
+    ):
+        metrics = metric_retriever.get_metrics(batch_request=mock_batch_request)
+
     assert metrics == [
         TableMetric[int](
             batch_id="batch_id",
