@@ -36,6 +36,12 @@ def cloud_context_and_batch_request_with_simple_dataframe(
         "numeric_with_nulls_2": [3, 4, None],
         "string": ["a", "b", "c"],
         "string_with_nulls": ["a", "b", None],
+        "boolean": [True, False, True],
+        "datetime": [
+            pd.to_datetime("2020-01-01"),
+            pd.to_datetime("2020-01-02"),
+            pd.to_datetime("2020-01-03"),
+        ],
     }
     df = pd.DataFrame(data=d)
 
@@ -74,6 +80,8 @@ def test_get_metrics(
                 "numeric_with_nulls_2",
                 "string",
                 "string_with_nulls",
+                "boolean",
+                "datetime",
             ],
             exception=None,
         ),
@@ -141,6 +149,8 @@ def test_get_metrics(
                 {"name": "numeric_with_nulls_2", "type": "float64"},
                 {"name": "string", "type": "object"},
                 {"name": "string_with_nulls", "type": "object"},
+                {"name": "boolean", "type": "bool"},
+                {"name": "datetime", "type": "datetime64[ns]"},
             ],
             exception=None,
         ),
@@ -170,6 +180,20 @@ def test_get_metrics(
             metric_name="column_values.null.count",
             column="string_with_nulls",
             value=1,
+            exception=None,
+        ),
+        ColumnMetric[int](
+            batch_id=batch_id,
+            metric_name="column_values.null.count",
+            column="boolean",
+            value=0,
+            exception=None,
+        ),
+        ColumnMetric[int](
+            batch_id=batch_id,
+            metric_name="column_values.null.count",
+            column="datetime",
+            value=0,
             exception=None,
         ),
     ]
