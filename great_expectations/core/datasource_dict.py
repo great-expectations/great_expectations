@@ -93,21 +93,24 @@ class DatasourceDict(UserDict):
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
         config: FluentDatasource | DatasourceConfig
         if isinstance(ds, FluentDatasource):
-            if isinstance(ds, SupportsInMemoryDataAssets):
-                for asset in ds.assets:
-                    if asset.type == _IN_MEMORY_DATA_ASSET_TYPE:
-                        in_memory_asset_name: str = (
-                            DatasourceDict._get_in_memory_data_asset_name(
-                                datasource_name=name,
-                                data_asset_name=asset.name,
-                            )
-                        )
-                        self._in_memory_data_assets[in_memory_asset_name] = asset
-            config = ds
+            config = self._prep_fds_config(name=name, ds=ds)
         else:
             config = self._prep_legacy_datasource_config(name=name, ds=ds)
 
         self._datasource_store.set(key=None, value=config)
+
+    def _prep_fds_config(self, name: str, ds: FluentDatasource) -> FluentDatasource:
+        if isinstance(ds, SupportsInMemoryDataAssets):
+            for asset in ds.assets:
+                if asset.type == _IN_MEMORY_DATA_ASSET_TYPE:
+                    in_memory_asset_name: str = (
+                        DatasourceDict._get_in_memory_data_asset_name(
+                            datasource_name=name,
+                            data_asset_name=asset.name,
+                        )
+                    )
+                    self._in_memory_data_assets[in_memory_asset_name] = asset
+        return ds
 
     def _prep_legacy_datasource_config(
         self, name: str, ds: BaseDatasource
@@ -197,7 +200,9 @@ class CacheableDatasourceDict(DatasourceDict):
         if name in self.data:
             return True
         try:
-            return self._get_ds_from_store(name)
+            # Resort to store only if not in cache
+            _ = self._get_ds_from_store(name)
+            return True
         except KeyError:
             return False
 
