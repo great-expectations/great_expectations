@@ -201,7 +201,7 @@ class Store:
     def get_all(self) -> list[Any]:
         objs = self._store_backend.get_all()
         if self.cloud_mode:
-            objs = list(map(self.ge_cloud_response_json_to_object_dict, objs))
+            objs = self.ge_cloud_response_json_to_object_dict(objs)
 
         return list(map(self.deserialize, objs))
 
