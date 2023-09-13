@@ -57,12 +57,12 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             table_metric_names, batch_request
         )
 
-        # Convert computed_metrics
-        metrics: list[Metric] = []
+        metrics = [
+            self._get_table_row_count(batch_id, computed_metrics),
+            self._get_table_columns(batch_id, computed_metrics),
+            self._get_table_column_types(batch_id, computed_metrics),
+        ]
 
-        metrics.append(self._get_table_row_count(batch_id, computed_metrics))
-        metrics.append(self._get_table_columns(batch_id, computed_metrics))
-        metrics.append(self._get_table_column_types(batch_id, computed_metrics))
         return metrics
 
     def _get_table_row_count(self, batch_id, computed_metrics) -> Metric:
