@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import urllib
 import uuid
@@ -121,6 +123,9 @@ class StoreBackend(metaclass=ABCMeta):
         value = self._get(key, **kwargs)
         return value
 
+    def get_all(self):
+        return self._get_all()
+
     def set(self, key, value, **kwargs):
         self._validate_key(key)
         self._validate_value(value)
@@ -214,6 +219,10 @@ class StoreBackend(metaclass=ABCMeta):
 
     @abstractmethod
     def _get(self, key) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def _get_all(self) -> list[Any]:
         raise NotImplementedError
 
     @abstractmethod
