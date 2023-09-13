@@ -53,7 +53,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
 
     def _get_table_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
         table_metric_names = ["table.row_count", "table.columns", "table.column_types"]
-        computed_metrics, batch_id = self._compute_table_metrics(
+        batch_id, computed_metrics = self._compute_table_metrics(
             table_metric_names, batch_request
         )
 
@@ -115,7 +115,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
 
     def _compute_table_metrics(
         self, table_metric_names: list[str], batch_request: BatchRequest
-    ) -> tuple[dict[_MetricKey, Any], str | tuple]:
+    ) -> tuple[str | tuple, dict[_MetricKey, Any]]:
         table_metric_configs = self._generate_table_metric_configurations(
             table_metric_names
         )
@@ -136,7 +136,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                 f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
             )
         batch_id = validator.active_batch.id
-        return computed_metrics, batch_id
+        return batch_id, computed_metrics
 
     def _get_numeric_column_metrics(
         self, batch_request: BatchRequest, column_list: List[str]
@@ -148,7 +148,37 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             "column.median",
         ]
 
-        # TODO: nested for-loop can be better
+        batch_id, computed_metrics = self._compute_numeric_column_metrics(
+            batch_request, column_list, column_metric_names
+        )
+
+        # Convert computed_metrics
+        metrics: list[Metric] = []
+        metric_lookup_key: _MetricKey
+
+        for metric_name in column_metric_names:
+            for column in column_list:
+                metric_lookup_key = (metric_name, f"column={column}", tuple())
+                value, exception = self._get_metric_from_computed_metrics(
+                    metric_name=metric_name,
+                    metric_lookup_key=metric_lookup_key,
+                    computed_metrics=computed_metrics,
+                )
+                metrics.append(
+                    ColumnMetric[float](
+                        batch_id=batch_id,
+                        metric_name=metric_name,
+                        column=column,
+                        value=value,
+                        exception=exception,
+                    )
+                )
+
+        return metrics
+
+    def _compute_numeric_column_metrics(
+        self, batch_request, column_list, column_metric_names
+    ):
         column_metric_configs = self._generate_column_metric_configurations(
             column_list, column_metric_names
         )
@@ -162,36 +192,13 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             metric_configurations=column_metric_configs,
             runtime_configuration={"catch_exceptions": True},
         )
-        # Convert computed_metrics
-        metrics: list[Metric] = []
-        ColumnMetric.update_forward_refs()
-
         assert isinstance(validator.active_batch, Batch)
         if not isinstance(validator.active_batch, Batch):
             raise TypeError(
                 f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
             )
-        metric_lookup_key: _MetricKey
-
-        for metric_name in column_metric_names:
-            for column in column_list:
-                metric_lookup_key = (metric_name, f"column={column}", tuple())
-                value, exception = self._get_metric_from_computed_metrics(
-                    metric_name=metric_name,
-                    metric_lookup_key=metric_lookup_key,
-                    computed_metrics=computed_metrics,
-                )
-                metrics.append(
-                    ColumnMetric[float](
-                        batch_id=validator.active_batch.id,
-                        metric_name=metric_name,
-                        column=column,
-                        value=value,
-                        exception=exception,
-                    )
-                )
-
-        return metrics
+        batch_id = validator.active_batch.id
+        return batch_id, computed_metrics
 
     def _get_non_numeric_column_metrics(
         self, batch_request: BatchRequest, column_list: List[str]
@@ -224,7 +231,6 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             )
         metric_lookup_key: _MetricKey
 
-        # TODO: nested for-loop can be better
         value_type: Type[int] | Type[float] = float
         for metric_name in column_metric_names:
             if metric_name == "column_values.null.count":
