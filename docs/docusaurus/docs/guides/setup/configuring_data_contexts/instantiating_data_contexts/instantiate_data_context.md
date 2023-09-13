@@ -150,7 +150,7 @@ Your context root is the directory that contains all your GX config while your p
 ```bash
 # The overall directory is your project root
 data/
-gx/ # The GX folder with your config is your context root
+great_expectations/ # The GX folder with your config is your context root
   great_expectations.yml
   ...
 ...

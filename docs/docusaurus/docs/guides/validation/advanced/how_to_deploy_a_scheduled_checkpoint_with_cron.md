@@ -40,12 +40,12 @@ A text editor can be used to open the cron schedule. On most operating systems, 
 To run the Checkpoint ``my_checkpoint`` every morning at 0300, add the following line in the text editor that opens:
 
 ```bash
-0  3  *  *  *    /full/path/to/your/environment/bin/great_expectations checkpoint run ratings --directory /full/path/to/my_project/gx/
+0  3  *  *  *    /full/path/to/your/environment/bin/great_expectations checkpoint run ratings --directory /full/path/to/my_project/great_expectations/
 ```
 
 :::note
 - The five fields at the start of your cron schedule correspond to the minute, hour, day of the month, month, and day of the week.
-- It is critical that you use full paths to both the ``great_expectations`` executable in your project's environment and the full path to the project's ``gx/`` directory.
+- It is critical that you use full paths to both the ``great_expectations`` executable in your project's environment and the full path to the project's ``great_expectations/`` directory.
 :::
 
 ## Save your changes to the cron schedule

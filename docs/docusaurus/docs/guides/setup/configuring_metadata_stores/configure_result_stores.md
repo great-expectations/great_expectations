@@ -18,7 +18,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-A Validation Results Store is a connector that is used to store and retrieve information about objects generated when data is Validated against an Expectation. By default, Validation Results are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``gx/`` folder. Use the information provided here to configure a store for your Validation Results.
+A Validation Results Store is a connector that is used to store and retrieve information about objects generated when data is Validated against an Expectation. By default, Validation Results are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder. Use the information provided here to configure a store for your Validation Results.
 
 :::caution
 
@@ -138,7 +138,7 @@ You can use the ``az storage blob upload`` command to copy Validation Results in
 export AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
 az storage blob upload -f <local/path/to/validation.json> -c <GREAT-EXPECTATION-DEDICATED-AZURE-BLOB-CONTAINER-NAME> -n <PREFIX>/<validation.json>
 example with a validation related to the exp1 expectation:
-az storage blob upload -f gx/uncommitted/validations/exp1/20210306T104406.877327Z/20210306T104406.877327Z/8313fb37ca59375eb843adf388d4f882.json -c <blob-container> -n validations/exp1/20210306T104406.877327Z/20210306T104406.877327Z/8313fb37ca59375eb843adf388d4f882.json
+az storage blob upload -f great_expectations/uncommitted/validations/exp1/20210306T104406.877327Z/20210306T104406.877327Z/8313fb37ca59375eb843adf388d4f882.json -c <blob-container> -n validations/exp1/20210306T104406.877327Z/20210306T104406.877327Z/8313fb37ca59375eb843adf388d4f882.json
 Finished[#############################################################]  100.0000%
 {
 "etag": "\"0x8D8E09F894650C7\"",
@@ -248,7 +248,7 @@ Use the information provided here to configure a new storage location for Valida
 Run the following command to create a new folder for your Validation Results and move your existing Validation Results to the new folder:
 
 ```bash
-# in the gx/ folder
+# in the great_expectations/ folder
 mkdir shared_validations
 mv uncommitted/validations/npi_validations/ uncommitted/shared_validations/
 ```
