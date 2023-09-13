@@ -142,29 +142,6 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         batch_id = validator.active_batch.id
         return computed_metrics, batch_id
 
-    def _get_metric_from_computed_metrics(
-        self,
-        metric_name: str,
-        computed_metrics: dict[_MetricKey, Any],
-        metric_lookup_key: _MetricKey | None = None,
-    ):
-        if metric_lookup_key is None:
-            metric_lookup_key: _MetricKey = (
-                metric_name,
-                tuple(),
-                tuple(),
-            )
-        value = None
-        exception = None
-        if metric_lookup_key in computed_metrics:
-            value = computed_metrics[metric_lookup_key]
-        else:
-            exception = MetricException(
-                type="TBD", message="TBD"
-            )  # TODO: Fill in type and message if an exception is thrown
-
-        return value, exception
-
     def _get_numeric_column_metrics(
         self, batch_request: BatchRequest, column_list: List[str]
     ) -> Sequence[Metric]:
@@ -219,21 +196,6 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                 )
 
         return metrics
-
-    def _generate_column_metric_configurations(
-        self, column_list, column_metric_names
-    ) -> list[MetricConfiguration]:
-        column_metric_configs: List[MetricConfiguration] = list()
-        for metric_name in column_metric_names:
-            for column in column_list:
-                column_metric_configs.append(
-                    MetricConfiguration(
-                        metric_name=metric_name,
-                        metric_domain_kwargs={"column": column},
-                        metric_value_kwargs={},
-                    )
-                )
-        return column_metric_configs
 
     def _get_non_numeric_column_metrics(
         self, batch_request: BatchRequest, column_list: List[str]
@@ -308,3 +270,41 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             batch_ids=[validator.active_batch.id],
         )
         return numeric_column_names
+
+    def _generate_column_metric_configurations(
+        self, column_list, column_metric_names
+    ) -> list[MetricConfiguration]:
+        column_metric_configs: List[MetricConfiguration] = list()
+        for metric_name in column_metric_names:
+            for column in column_list:
+                column_metric_configs.append(
+                    MetricConfiguration(
+                        metric_name=metric_name,
+                        metric_domain_kwargs={"column": column},
+                        metric_value_kwargs={},
+                    )
+                )
+        return column_metric_configs
+
+    def _get_metric_from_computed_metrics(
+        self,
+        metric_name: str,
+        computed_metrics: dict[_MetricKey, Any],
+        metric_lookup_key: _MetricKey | None = None,
+    ):
+        if metric_lookup_key is None:
+            metric_lookup_key: _MetricKey = (
+                metric_name,
+                tuple(),
+                tuple(),
+            )
+        value = None
+        exception = None
+        if metric_lookup_key in computed_metrics:
+            value = computed_metrics[metric_lookup_key]
+        else:
+            exception = MetricException(
+                type="TBD", message="TBD"
+            )  # TODO: Fill in type and message if an exception is thrown
+
+        return value, exception
