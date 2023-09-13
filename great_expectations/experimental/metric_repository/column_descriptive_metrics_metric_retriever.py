@@ -179,6 +179,53 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
     def _compute_numeric_column_metrics(
         self, batch_request, column_list, column_metric_names
     ):
+        batch_id, computed_metrics = self._compute_non_numeric_column_metrics(
+            batch_request, column_list, column_metric_names
+        )
+        return batch_id, computed_metrics
+
+    def _get_non_numeric_column_metrics(
+        self, batch_request: BatchRequest, column_list: List[str]
+    ) -> Sequence[Metric]:
+        column_metric_names = [
+            "column_values.null.count",
+        ]
+
+        batch_id, computed_metrics = self._compute_non_numeric_column_metrics(
+            batch_request, column_list, column_metric_names
+        )
+
+        # Convert computed_metrics
+        metrics: list[Metric] = []
+        ColumnMetric.update_forward_refs()
+        metric_lookup_key: _MetricKey
+
+        value_type: Type[int] | Type[float] = float
+        for metric_name in column_metric_names:
+            if metric_name == "column_values.null.count":
+                value_type = int
+            for column in column_list:
+                metric_lookup_key = (metric_name, f"column={column}", tuple())
+                value, exception = self._get_metric_from_computed_metrics(
+                    metric_name=metric_name,
+                    metric_lookup_key=metric_lookup_key,
+                    computed_metrics=computed_metrics,
+                )
+                metrics.append(
+                    ColumnMetric[value_type](  # type: ignore[valid-type]  # Will be refactored in upcoming PR
+                        batch_id=batch_id,
+                        metric_name=metric_name,
+                        column=column,
+                        value=value,
+                        exception=exception,
+                    )
+                )
+
+        return metrics
+
+    def _compute_non_numeric_column_metrics(
+        self, batch_request, column_list, column_metric_names
+    ):
         column_metric_configs = self._generate_column_metric_configurations(
             column_list, column_metric_names
         )
@@ -199,60 +246,6 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             )
         batch_id = validator.active_batch.id
         return batch_id, computed_metrics
-
-    def _get_non_numeric_column_metrics(
-        self, batch_request: BatchRequest, column_list: List[str]
-    ) -> Sequence[Metric]:
-        column_metric_names = [
-            "column_values.null.count",
-        ]
-
-        column_metric_configs = self._generate_column_metric_configurations(
-            column_list, column_metric_names
-        )
-        validator = self._context.get_validator(batch_request=batch_request)
-        # The runtime configuration catch_exceptions is explicitly set to True to catch exceptions
-        # that are thrown when computing metrics. This is so we can capture the error for later
-        # surfacing, and not have the entire metric run fail so that other metrics will still be
-        # computed.
-        # TODO: Get aborted_metrics in addition to computed metrics so they can be plumbed into the MetricException.
-        computed_metrics = validator.compute_metrics(
-            metric_configurations=column_metric_configs,
-            runtime_configuration={"catch_exceptions": True},
-        )
-        # Convert computed_metrics
-        metrics: list[Metric] = []
-        ColumnMetric.update_forward_refs()
-
-        assert isinstance(validator.active_batch, Batch)
-        if not isinstance(validator.active_batch, Batch):
-            raise TypeError(
-                f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
-            )
-        metric_lookup_key: _MetricKey
-
-        value_type: Type[int] | Type[float] = float
-        for metric_name in column_metric_names:
-            if metric_name == "column_values.null.count":
-                value_type = int
-            for column in column_list:
-                metric_lookup_key = (metric_name, f"column={column}", tuple())
-                value, exception = self._get_metric_from_computed_metrics(
-                    metric_name=metric_name,
-                    metric_lookup_key=metric_lookup_key,
-                    computed_metrics=computed_metrics,
-                )
-                metrics.append(
-                    ColumnMetric[value_type](  # type: ignore[valid-type]  # Will be refactored in upcoming PR
-                        batch_id=validator.active_batch.id,
-                        metric_name=metric_name,
-                        column=column,
-                        value=value,
-                        exception=exception,
-                    )
-                )
-
-        return metrics
 
     def _get_all_column_names(self, metrics: Sequence[Metric]) -> List[str]:
         column_list: List[str] = []
