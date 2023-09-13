@@ -577,42 +577,11 @@ class TestTableIdentifiers:
 
 # TODO: remove items from this lookup when working on fixes
 REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
-    'expect_column_values_to_not_be_null-str "lower"': ["postgres", "snowflake"],
-    "expect_column_values_to_not_be_null-str LOWER": [
-        "databricks_sql",
-        "postgres",
-        "snowflake",
-        "sqlite",
-    ],
-    "expect_column_values_to_not_be_null-str upper": [
-        "databricks_sql",
-        "postgres",
-        "snowflake",
-        "sqlite",
-    ],
-    'expect_column_values_to_not_be_null-str "UPPER"': ["postgres", "snowflake"],
-    "expect_column_values_to_not_be_null-quoted_name upper quote=None": [
-        "databricks_sql",
-        "postgres",
-        "snowflake",
-        "sqlite",
-    ],
-    "expect_column_to_exist-str LOWER": [
-        "databricks_sql",
-        "postgres",
-        "snowflake",
-        "sqlite",
-    ],
-    "expect_column_to_exist-str upper": [
-        "databricks_sql",
-        "postgres",
-        "snowflake",
-        "sqlite",
-    ],
-    'expect_column_to_exist-str "lower"': ["postgres", "snowflake", "sqlite"],
-    'expect_column_to_exist-str "UPPER"': ["postgres", "snowflake", "sqlite"],
-    "expect_column_to_exist-quoted_name UPPER quote=None": ["postgres", "snowflake"],
-    "expect_column_to_exist-quoted_name upper quote=None": [
+    'str "lower"': ["postgres", "snowflake"],
+    "str LOWER": ["databricks_sql", "postgres", "snowflake", "sqlite"],
+    "str upper": ["databricks_sql", "postgres", "snowflake", "sqlite"],
+    'str "UPPER"': ["postgres", "snowflake"],
+    "quoted_name upper quote=None": [
         "databricks_sql",
         "postgres",
         "snowflake",
@@ -622,9 +591,8 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
 
 
 def _requires_fix(param_id: str) -> bool:
-    dialect, expectation_type, column_name = param_id.split("-")
-    test_id = f"{expectation_type}-{column_name}"
-    dialects_need_fixes: list[DatabaseType] = REQUIRE_FIXES.get(test_id, [])
+    dialect, *_, column_name = param_id.split("-")
+    dialects_need_fixes: list[DatabaseType] = REQUIRE_FIXES.get(column_name, [])
     return dialect in dialects_need_fixes
 
 
