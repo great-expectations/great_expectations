@@ -198,6 +198,13 @@ class Store:
 
         return None
 
+    def get_all(self) -> list[Any]:
+        objs = self._store_backend.get_all()
+        if self.cloud_mode:
+            objs = self.ge_cloud_response_json_to_object_dict(objs)
+
+        return list(map(self.deserialize, objs))
+
     def set(self, key: DataContextKey, value: Any, **kwargs) -> None:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.set(key, value, **kwargs)

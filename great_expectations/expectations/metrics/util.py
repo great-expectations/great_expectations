@@ -22,7 +22,6 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.util import check_sql_engine_dialect
-from great_expectations.util import get_sqlalchemy_inspector
 
 try:
     import psycopg2  # noqa: F401
@@ -85,19 +84,22 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
     # redshift
     # noinspection PyUnresolvedReferences
-    if hasattr(dialect, "RedshiftDialect") or (
-        aws.redshiftdialect
-        and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)
-    ):
-        if positive:
-            return sqlalchemy.BinaryExpression(
-                column, sqlalchemy.literal(regex), sqlalchemy.custom_op("~")
-            )
+    try:
+        if hasattr(dialect, "RedshiftDialect") or (
+            aws.redshiftdialect
+            and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)
+        ):
+            if positive:
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("~")
+                )
+            else:
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("!~")
+                )
         else:
-            return sqlalchemy.BinaryExpression(
-                column, sqlalchemy.literal(regex), sqlalchemy.custom_op("!~")
-            )
-    else:
+            pass
+    except AttributeError:
         pass
 
     try:
@@ -306,41 +308,28 @@ def attempt_allowing_relative_error(dialect):
     return detected_redshift or detected_psycopg2
 
 
-def is_column_present_in_table(
-    engine: sqlalchemy.Engine,
-    table_selectable: sqlalchemy.Select,
-    column_name: str,
-    schema_name: Optional[str] = None,
-) -> bool:
-    all_columns_metadata: List[Dict[str, Any]] = (
-        get_sqlalchemy_column_metadata(
-            engine=engine, table_selectable=table_selectable, schema_name=schema_name
-        )
-        or []
-    )
-    # Purposefully do not check for a NULL "all_columns_metadata" to insure that it must never happen.
-    column_names: List[str] = [col_md["name"] for col_md in all_columns_metadata]
-    return column_name in column_names
-
-
 def get_sqlalchemy_column_metadata(
-    engine: sqlalchemy.Engine,
+    execution_engine: SqlAlchemyExecutionEngine,
     table_selectable: sqlalchemy.Select,
     schema_name: Optional[str] = None,
 ) -> Optional[List[Dict[str, Any]]]:
     try:
         columns: List[Dict[str, Any]]
 
-        inspector: sqlalchemy.reflection.Inspector = get_sqlalchemy_inspector(engine)
+        engine = execution_engine.engine
+        inspector = execution_engine.get_inspector()
         try:
             # if a custom query was passed
             if sqlalchemy.TextClause and isinstance(
                 table_selectable, sqlalchemy.TextClause
             ):
                 if hasattr(table_selectable, "selected_columns"):
+                    # New in version 1.4.
                     columns = table_selectable.selected_columns.columns
                 else:
-                    columns = table_selectable.columns().columns
+                    # Implicit subquery for columns().column was deprecated in SQLAlchemy 1.4
+                    # We must explicitly create a subquery
+                    columns = table_selectable.columns().subquery().columns
             else:
                 columns = inspector.get_columns(
                     str(
@@ -590,6 +579,8 @@ def column_reflection_fallback(  # noqa: PLR0915
             # if a custom query was passed
             if sqlalchemy.TextClause and isinstance(selectable, sqlalchemy.TextClause):
                 query: sqlalchemy.TextClause = selectable
+            elif sqlalchemy.Table and isinstance(selectable, sqlalchemy.Table):
+                query = sa.select(sa.text("*")).select_from(selectable).limit(1)
             else:  # noqa: PLR5501
                 # noinspection PyUnresolvedReferences
                 if dialect.name.lower() == GXSqlDialect.REDSHIFT:
@@ -600,7 +591,11 @@ def column_reflection_fallback(  # noqa: PLR0915
                         .limit(1)
                     )
                 else:
-                    query = sa.select(sa.text("*")).select_from(selectable).limit(1)
+                    query = (
+                        sa.select(sa.text("*"))
+                        .select_from(sa.text(selectable))
+                        .limit(1)
+                    )
 
             result_object = connection.execute(query)
             # noinspection PyProtectedMember
