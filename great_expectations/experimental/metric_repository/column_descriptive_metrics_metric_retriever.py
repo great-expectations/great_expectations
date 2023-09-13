@@ -117,12 +117,9 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
     def _compute_table_metrics(
         self, table_metric_names: list[str], batch_request: BatchRequest
     ) -> tuple[dict[_MetricKey, Any], str | tuple]:
-        table_metric_configs = [
-            MetricConfiguration(
-                metric_name=metric_name, metric_domain_kwargs={}, metric_value_kwargs={}
-            )
-            for metric_name in table_metric_names
-        ]
+        table_metric_configs = self._generate_table_metric_configurations(
+            table_metric_names
+        )
         validator = self._context.get_validator(batch_request=batch_request)
         # The runtime configuration catch_exceptions is explicitly set to True to catch exceptions
         # that are thrown when computing metrics. This is so we can capture the error for later
@@ -270,6 +267,15 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             batch_ids=[validator.active_batch.id],
         )
         return numeric_column_names
+
+    def _generate_table_metric_configurations(self, table_metric_names):
+        table_metric_configs = [
+            MetricConfiguration(
+                metric_name=metric_name, metric_domain_kwargs={}, metric_value_kwargs={}
+            )
+            for metric_name in table_metric_names
+        ]
+        return table_metric_configs
 
     def _generate_column_metric_configurations(
         self, column_list, column_metric_names
