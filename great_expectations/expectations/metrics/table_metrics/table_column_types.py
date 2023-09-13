@@ -70,7 +70,7 @@ class ColumnTypes(TableMetricProvider):
                 "the requested batch is not available; please load the batch into the execution engine."
             )
 
-        return _get_sqlalchemy_column_metadata(execution_engine.engine, batch_data)
+        return _get_sqlalchemy_column_metadata(execution_engine, batch_data)
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(  # noqa: PLR0913
@@ -90,7 +90,9 @@ class ColumnTypes(TableMetricProvider):
         return spark_column_metadata
 
 
-def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
+def _get_sqlalchemy_column_metadata(
+    execution_engine: SqlAlchemyExecutionEngine, batch_data: SqlAlchemyBatchData
+):
     table_selectable: str | sqlalchemy.TextClause
 
     if sqlalchemy.Table and isinstance(batch_data.selectable, sqlalchemy.Table):
@@ -108,7 +110,7 @@ def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
         schema_name = batch_data.source_schema_name or batch_data.selectable.schema
 
     return get_sqlalchemy_column_metadata(
-        engine=engine,
+        execution_engine=execution_engine,
         table_selectable=table_selectable,
         schema_name=schema_name,
     )
