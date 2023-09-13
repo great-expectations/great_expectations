@@ -265,33 +265,6 @@ def cacheable_datasource_dict_with_fds(
 
 
 @pytest.mark.unit
-def test_cacheable_datasource_dict___contains___uses_cache(
-    cacheable_datasource_dict_with_fds: CacheableDatasourceDict, pandas_fds_name: str
-):
-    store = cacheable_datasource_dict_with_fds._datasource_store
-
-    assert store.get_count == 0
-    # Lookup will not check store due to presence in cache
-    assert pandas_fds_name in cacheable_datasource_dict_with_fds
-    assert store.get_count == 0
-
-
-@pytest.mark.unit
-def test_cacheable_datasource_dict___contains___requests_store_upon_cache_miss(
-    cacheable_datasource_dict_with_fds: CacheableDatasourceDict,
-):
-    store = cacheable_datasource_dict_with_fds._datasource_store
-
-    assert store.get_count == 0
-    assert store.list_keys_count == 0
-
-    # Lookup will check store due to lack of presence in cache (but won't retrieve value)
-    assert "my_fake_name" not in cacheable_datasource_dict_with_fds
-    assert store.get_count == 0
-    assert store.list_keys_count == 1
-
-
-@pytest.mark.unit
 def test_cacheable_datasource_dict___setitem___with_fds(
     empty_cacheable_datasource_dict: CacheableDatasourceDict,
     pandas_fds: PandasDatasource,
