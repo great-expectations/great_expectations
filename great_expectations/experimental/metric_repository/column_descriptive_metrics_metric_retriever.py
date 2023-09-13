@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from typing import TYPE_CHECKING, Any, List, Sequence, Type
+from typing import TYPE_CHECKING, Any, List, Sequence
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import SemanticDomainTypes
@@ -53,8 +53,11 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
 
     def _get_table_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
         table_metric_names = ["table.row_count", "table.columns", "table.column_types"]
-        batch_id, computed_metrics = self._compute_table_metrics(
-            table_metric_names, batch_request
+        table_metric_configs = self._generate_table_metric_configurations(
+            table_metric_names
+        )
+        batch_id, computed_metrics = self._compute_metrics(
+            batch_request, table_metric_configs
         )
 
         metrics = [
@@ -113,31 +116,6 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             exception=exception,
         )
 
-    def _compute_table_metrics(
-        self, table_metric_names: list[str], batch_request: BatchRequest
-    ) -> tuple[str | tuple, dict[_MetricKey, Any]]:
-        table_metric_configs = self._generate_table_metric_configurations(
-            table_metric_names
-        )
-        validator = self._context.get_validator(batch_request=batch_request)
-        # The runtime configuration catch_exceptions is explicitly set to True to catch exceptions
-        # that are thrown when computing metrics. This is so we can capture the error for later
-        # surfacing, and not have the entire metric run fail so that other metrics will still be
-        # computed.
-        # TODO: Get aborted_metrics in addition to computed metrics so they can be plumbed into the MetricException.
-        computed_metrics = validator.compute_metrics(
-            metric_configurations=table_metric_configs,
-            runtime_configuration={"catch_exceptions": True},
-        )
-
-        assert isinstance(validator.active_batch, Batch)
-        if not isinstance(validator.active_batch, Batch):
-            raise TypeError(
-                f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
-            )
-        batch_id = validator.active_batch.id
-        return batch_id, computed_metrics
-
     def _get_numeric_column_metrics(
         self, batch_request: BatchRequest, column_list: List[str]
     ) -> Sequence[Metric]:
@@ -148,8 +126,11 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             "column.median",
         ]
 
-        batch_id, computed_metrics = self._compute_column_metrics(
-            batch_request, column_list, column_metric_names
+        column_metric_configs = self._generate_column_metric_configurations(
+            column_list, column_metric_names
+        )
+        batch_id, computed_metrics = self._compute_metrics(
+            batch_request, column_metric_configs
         )
 
         # Convert computed_metrics
@@ -183,8 +164,11 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             "column_values.null.count",
         ]
 
-        batch_id, computed_metrics = self._compute_column_metrics(
-            batch_request, column_list, column_metric_names
+        column_metric_configs = self._generate_column_metric_configurations(
+            column_list, column_metric_names
+        )
+        batch_id, computed_metrics = self._compute_metrics(
+            batch_request, column_metric_configs
         )
 
         # Convert computed_metrics
@@ -192,10 +176,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         ColumnMetric.update_forward_refs()
         metric_lookup_key: _MetricKey
 
-        value_type: Type[int] | Type[float] = float
         for metric_name in column_metric_names:
-            if metric_name == "column_values.null.count":
-                value_type = int
             for column in column_list:
                 metric_lookup_key = (metric_name, f"column={column}", tuple())
                 value, exception = self._get_metric_from_computed_metrics(
@@ -204,7 +185,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                     computed_metrics=computed_metrics,
                 )
                 metrics.append(
-                    ColumnMetric[value_type](  # type: ignore[valid-type]  # Will be refactored in upcoming PR
+                    ColumnMetric[int](
                         batch_id=batch_id,
                         metric_name=metric_name,
                         column=column,
@@ -214,28 +195,6 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                 )
 
         return metrics
-
-    def _compute_column_metrics(self, batch_request, column_list, column_metric_names):
-        column_metric_configs = self._generate_column_metric_configurations(
-            column_list, column_metric_names
-        )
-        validator = self._context.get_validator(batch_request=batch_request)
-        # The runtime configuration catch_exceptions is explicitly set to True to catch exceptions
-        # that are thrown when computing metrics. This is so we can capture the error for later
-        # surfacing, and not have the entire metric run fail so that other metrics will still be
-        # computed.
-        # TODO: Get aborted_metrics in addition to computed metrics so they can be plumbed into the MetricException.
-        computed_metrics = validator.compute_metrics(
-            metric_configurations=column_metric_configs,
-            runtime_configuration={"catch_exceptions": True},
-        )
-        assert isinstance(validator.active_batch, Batch)
-        if not isinstance(validator.active_batch, Batch):
-            raise TypeError(
-                f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
-            )
-        batch_id = validator.active_batch.id
-        return batch_id, computed_metrics
 
     def _get_all_column_names(self, metrics: Sequence[Metric]) -> List[str]:
         column_list: List[str] = []
@@ -279,6 +238,25 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                     )
                 )
         return column_metric_configs
+
+    def _compute_metrics(self, batch_request, metric_configs):
+        validator = self._context.get_validator(batch_request=batch_request)
+        # The runtime configuration catch_exceptions is explicitly set to True to catch exceptions
+        # that are thrown when computing metrics. This is so we can capture the error for later
+        # surfacing, and not have the entire metric run fail so that other metrics will still be
+        # computed.
+        # TODO: Get aborted_metrics in addition to computed metrics so they can be plumbed into the MetricException.
+        computed_metrics = validator.compute_metrics(
+            metric_configurations=metric_configs,
+            runtime_configuration={"catch_exceptions": True},
+        )
+        assert isinstance(validator.active_batch, Batch)
+        if not isinstance(validator.active_batch, Batch):
+            raise TypeError(
+                f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
+            )
+        batch_id = validator.active_batch.id
+        return batch_id, computed_metrics
 
     def _get_metric_from_computed_metrics(
         self,
