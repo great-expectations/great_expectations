@@ -237,15 +237,14 @@ def get_datasource_by_id_cb(request: PreparedRequest) -> CallbackResult:
 
     datasource: dict | None = _CLOUD_API_FAKE_DB["datasources"].get(datasource_id)
 
-    datasource_json_schema = {
-        "data": {
-            "attributes": {"datasource_config": datasource},
-            "id": datasource["id"],
-            "type": "datasource",
-        }
-    }
-
     if datasource:
+        datasource_json_schema = {
+            "data": {
+                "attributes": {"datasource_config": datasource},
+                "id": datasource["id"],
+                "type": "datasource",
+            }
+        }
         result = CallbackResult(
             200, headers=DEFAULT_HEADERS, body=json.dumps(datasource_json_schema)
         )
