@@ -340,9 +340,9 @@ def snowflake_ds(
     #     pytest.skip("no snowflake credentials")
     ds = context.sources.add_snowflake(
         "snowflake",
-        connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
+        # connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
         # NOTE: uncomment this and set SNOWFLAKE_USER to run tests against your own snowflake account
-        # connection_string="snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB/RESTAURANTS?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
+        connection_string="snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB/RESTAURANTS?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
     )
     return ds
 
@@ -379,7 +379,6 @@ def all_sql_datasources(
     yield datasource
 
 
-@pytest.mark.xfail(reason="re-enable")
 @pytest.mark.parametrize(
     "asset_name",
     [
