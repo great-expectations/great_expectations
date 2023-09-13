@@ -81,7 +81,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
                 )
     except AttributeError:
         pass
-    
+
     # redshift
     # noinspection PyUnresolvedReferences
     try:
