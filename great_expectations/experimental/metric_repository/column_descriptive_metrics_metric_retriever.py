@@ -59,60 +59,59 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
 
         # Convert computed_metrics
         metrics: list[Metric] = []
-        TableMetric.update_forward_refs()
 
+        metrics.append(self._get_table_row_count(batch_id, computed_metrics))
+        metrics.append(self._get_table_columns(batch_id, computed_metrics))
+        metrics.append(self._get_table_column_types(batch_id, computed_metrics))
+        return metrics
+
+    def _get_table_row_count(self, batch_id, computed_metrics) -> Metric:
         metric_name = "table.row_count"
         value, exception = self._get_metric_from_computed_metrics(
             metric_name=metric_name,
             computed_metrics=computed_metrics,
         )
-        metrics.append(
-            TableMetric[int](
-                batch_id=batch_id,
-                metric_name=metric_name,
-                value=value,
-                exception=exception,
-            )
+        return TableMetric[int](
+            batch_id=batch_id,
+            metric_name=metric_name,
+            value=value,
+            exception=exception,
         )
 
+    def _get_table_columns(self, batch_id, computed_metrics) -> Metric:
         metric_name = "table.columns"
         value, exception = self._get_metric_from_computed_metrics(
             metric_name=metric_name,
             computed_metrics=computed_metrics,
         )
-        metrics.append(
-            TableMetric[List[str]](
-                batch_id=batch_id,
-                metric_name=metric_name,
-                value=value,
-                exception=exception,
-            )
+        return TableMetric[List[str]](
+            batch_id=batch_id,
+            metric_name=metric_name,
+            value=value,
+            exception=exception,
         )
 
+    def _get_table_column_types(self, batch_id, computed_metrics) -> Metric:
         metric_name = "table.column_types"
         metric_lookup_key: _MetricKey = (metric_name, tuple(), "include_nested=True")
-
         value, exception = self._get_metric_from_computed_metrics(
             metric_name=metric_name,
             metric_lookup_key=metric_lookup_key,
             computed_metrics=computed_metrics,
         )
-
-        raw_column_types: list[dict[str, Any]] = value  # type: ignore[assignment] # Metric results from computed_metrics are not typed
-
+        raw_column_types: list[
+            dict[str, Any]
+        ] = value  # type: ignore[assignment] # Metric results from computed_metrics are not typed
         column_types_converted_to_str: list[dict[str, str]] = [
             {"name": raw_column_type["name"], "type": str(raw_column_type["type"])}
             for raw_column_type in raw_column_types
         ]
-        metrics.append(
-            TableMetric[List[str]](
-                batch_id=batch_id,
-                metric_name=metric_name,
-                value=column_types_converted_to_str,
-                exception=exception,
-            )
+        return TableMetric[List[str]](
+            batch_id=batch_id,
+            metric_name=metric_name,
+            value=column_types_converted_to_str,
+            exception=exception,
         )
-        return metrics
 
     def _compute_table_metrics(
         self, table_metric_names: list[str], batch_request: BatchRequest
