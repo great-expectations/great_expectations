@@ -81,9 +81,9 @@ def delay_rerun(*args):
     """Delay for flaky tests
 
     Returns:
-        True: After sleeping for 1 second.
+        True: After sleeping for 5 seconds.
     """
-    time.sleep(1)
+    time.sleep(5)
     return True
 
 
@@ -440,6 +440,30 @@ fluent_datasources = [
     ),
 ]
 
+failed_rows_tests = [
+    IntegrationTestFixture(
+        name="failed_rows_pandas",
+        data_context_dir="tests/integration/fixtures/failed_rows/great_expectations",
+        data_dir="tests/test_sets/visits",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/failed_rows_pandas.py",
+        backend_dependencies=[],
+    ),
+    IntegrationTestFixture(
+        name="failed_rows_sqlalchemy",
+        data_context_dir="tests/integration/fixtures/failed_rows/great_expectations",
+        data_dir="tests/test_sets/visits",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/failed_rows_sql.py",
+        backend_dependencies=[BackendDependencies.SQLALCHEMY],
+    ),
+    IntegrationTestFixture(
+        name="failed_rows_spark",
+        data_context_dir="tests/integration/fixtures/failed_rows/great_expectations",
+        data_dir="tests/test_sets/visits",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/failed_rows_spark.py",
+        backend_dependencies=[BackendDependencies.SPARK],
+    ),
+]
+
 
 # populate docs_test_matrix with sub-lists
 docs_test_matrix += local_tests
@@ -460,6 +484,7 @@ docs_test_matrix += s3_integration_tests
 docs_test_matrix += athena_integration_tests
 docs_test_matrix += aws_glue_integration_tests
 docs_test_matrix += multiple_backend
+docs_test_matrix += failed_rows_tests
 
 pandas_integration_tests = [
     IntegrationTestFixture(
@@ -519,7 +544,7 @@ def pytest_parsed_arguments(request):
     return request.config.option
 
 
-@flaky(rerun_filter=delay_rerun)
+@flaky(rerun_filter=delay_rerun, max_runs=3, min_passes=1)
 @pytest.mark.parametrize("integration_test_fixture", docs_test_matrix, ids=idfn)
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 def test_docs(integration_test_fixture, tmp_path, pytest_parsed_arguments):

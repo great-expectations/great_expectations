@@ -7,6 +7,7 @@ from great_expectations.core.expectation_suite import (
     ExpectationConfiguration,
     ExpectationSuite,
 )
+from great_expectations.data_context import get_context
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -18,7 +19,6 @@ from great_expectations.data_context.types.base import DataContextConfig, GXClou
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
-from great_expectations.util import get_context
 from tests.data_context.conftest import MockResponse
 
 
@@ -447,7 +447,7 @@ def test_get_expectation_suite_nonexistent_suite_raises_error(
 
     suite_id = "abc123"
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(DataContextError) as e:
         with mock.patch(
             "requests.Session.get", autospec=True, side_effect=mocked_404_response
         ):
@@ -590,7 +590,8 @@ def test_add_or_update_expectation_suite_adds_new_obj(
         f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.has_key",
         return_value=False,
     ), mock.patch(
-        "requests.Session.get", autospec=True, side_effect=DataContextError("not found")
+        "great_expectations.data_context.data_context.cloud_data_context.CloudDataContext.get_expectation_suite",
+        side_effect=DataContextError("not found"),
     ) as mock_get, mock.patch(
         "requests.Session.post",
         autospec=True,

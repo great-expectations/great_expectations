@@ -3,6 +3,7 @@ import traceback
 import warnings
 from copy import deepcopy
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -58,6 +59,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         return sorted(custom_columns)
 
     @classmethod
+    @override
     def _process_content_block(
         cls, content_block, has_failed_evr, render_object=None
     ) -> None:
@@ -149,7 +151,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 exception_traceback = traceback.format_exc()
                 exception_message = (
                     data_docs_exception_message
-                    + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                    + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                 )
                 logger.error(exception_message)
             try:
@@ -166,7 +168,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 exception_traceback = traceback.format_exc()
                 exception_message = (
                     data_docs_exception_message
-                    + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                    + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                 )
                 logger.error(exception_message)
             try:
@@ -188,7 +190,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 exception_traceback = traceback.format_exc()
                 exception_message = (
                     data_docs_exception_message
-                    + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                    + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                 )
                 logger.error(exception_message)
 

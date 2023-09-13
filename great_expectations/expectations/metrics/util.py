@@ -22,7 +22,6 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.util import check_sql_engine_dialect
-from great_expectations.util import get_sqlalchemy_inspector
 
 try:
     import psycopg2  # noqa: F401
@@ -306,44 +305,33 @@ def attempt_allowing_relative_error(dialect):
     return detected_redshift or detected_psycopg2
 
 
-def is_column_present_in_table(
-    engine: sqlalchemy.Engine,
-    table_selectable: sqlalchemy.Select,
-    column_name: str,
-    schema_name: Optional[str] = None,
-) -> bool:
-    all_columns_metadata: List[Dict[str, Any]] = (
-        get_sqlalchemy_column_metadata(
-            engine=engine, table_selectable=table_selectable, schema_name=schema_name
-        )
-        or []
-    )
-    # Purposefully do not check for a NULL "all_columns_metadata" to insure that it must never happen.
-    column_names: List[str] = [col_md["name"] for col_md in all_columns_metadata]
-    return column_name in column_names
-
-
 def get_sqlalchemy_column_metadata(
-    engine: sqlalchemy.Engine,
+    execution_engine: SqlAlchemyExecutionEngine,
     table_selectable: sqlalchemy.Select,
     schema_name: Optional[str] = None,
 ) -> Optional[List[Dict[str, Any]]]:
     try:
         columns: List[Dict[str, Any]]
 
-        inspector: sqlalchemy.reflection.Inspector = get_sqlalchemy_inspector(engine)
+        engine = execution_engine.engine
+        inspector = execution_engine.get_inspector()
         try:
             # if a custom query was passed
             if sqlalchemy.TextClause and isinstance(
                 table_selectable, sqlalchemy.TextClause
             ):
                 if hasattr(table_selectable, "selected_columns"):
+                    # New in version 1.4.
                     columns = table_selectable.selected_columns.columns
                 else:
-                    columns = table_selectable.columns().columns
+                    # Implicit subquery for columns().column was deprecated in SQLAlchemy 1.4
+                    # We must explicitly create a subquery
+                    columns = table_selectable.columns().subquery().columns
             else:
                 columns = inspector.get_columns(
-                    table_selectable,
+                    str(
+                        table_selectable
+                    ),  # TODO: remove cast to a string once [this](https://github.com/snowflakedb/snowflake-sqlalchemy/issues/157) issue is resovled
                     schema=schema_name,
                 )
         except (
@@ -370,7 +358,7 @@ def get_sqlalchemy_column_metadata(
 
         return columns
     except AttributeError as e:
-        logger.debug(f"Error while introspecting columns: {str(e)}")
+        logger.debug(f"Error while introspecting columns: {e!s}")
         return None
 
 
@@ -588,6 +576,8 @@ def column_reflection_fallback(  # noqa: PLR0915
             # if a custom query was passed
             if sqlalchemy.TextClause and isinstance(selectable, sqlalchemy.TextClause):
                 query: sqlalchemy.TextClause = selectable
+            elif sqlalchemy.Table and isinstance(selectable, sqlalchemy.Table):
+                query = sa.select(sa.text("*")).select_from(selectable).limit(1)
             else:  # noqa: PLR5501
                 # noinspection PyUnresolvedReferences
                 if dialect.name.lower() == GXSqlDialect.REDSHIFT:
@@ -598,7 +588,11 @@ def column_reflection_fallback(  # noqa: PLR0915
                         .limit(1)
                     )
                 else:
-                    query = sa.select(sa.text("*")).select_from(selectable).limit(1)
+                    query = (
+                        sa.select(sa.text("*"))
+                        .select_from(sa.text(selectable))
+                        .limit(1)
+                    )
 
             result_object = connection.execute(query)
             # noinspection PyProtectedMember
@@ -759,10 +753,27 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
         typed_column_name_cursor: str | sqlalchemy.quoted_name
         for typed_column_name_cursor in batch_columns_list:
             if (
-                (type(typed_column_name_cursor) == str)
+                (type(typed_column_name_cursor) == str)  # noqa: E721
                 and (column_name.casefold() == typed_column_name_cursor.casefold())
             ) or (column_name == str(typed_column_name_cursor)):
                 return column_name, typed_column_name_cursor
+
+            # use explicit identifier if passed in by user
+            if isinstance(typed_column_name_cursor, str) and (
+                (
+                    column_name.casefold().strip('"')
+                    == typed_column_name_cursor.casefold()
+                )
+                or (
+                    column_name.casefold().strip("[]")
+                    == typed_column_name_cursor.casefold()
+                )
+                or (
+                    column_name.casefold().strip("`")
+                    == typed_column_name_cursor.casefold()
+                )
+            ):
+                return column_name, column_name
 
         return None
 

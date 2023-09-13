@@ -598,7 +598,7 @@ def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
             spark_df = spark.createDataFrame(data_reshaped, columns)
         return SparkDFDataset(spark_df, profiler=profiler, caching=caching)
     else:
-        warnings.warn(f"Unknown dataset_type {str(dataset_type)}")
+        warnings.warn(f"Unknown dataset_type {dataset_type!s}")
 
 
 def get_test_validator_with_data(  # noqa: PLR0913
@@ -650,7 +650,7 @@ def get_test_validator_with_data(  # noqa: PLR0913
             pk_column=pk_column,
         )
     else:
-        raise ValueError(f"Unknown dataset_type {str(execution_engine)}")
+        raise ValueError(f"Unknown dataset_type {execution_engine!s}")
 
 
 def _get_test_validator_with_data_pandas(
@@ -1117,7 +1117,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    context.datasources["my_test_datasource"]._execution_engine = execution_engine  # type: ignore[union-attr]
+    context.datasources["my_test_datasource"]._execution_engine = execution_engine
     my_data_connector: ConfiguredAssetSqlDataConnector = (
         ConfiguredAssetSqlDataConnector(
             name="my_sql_data_connector",
@@ -1664,7 +1664,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     ) from e
                 else:
                     logger.warning(
-                        f"bigquery tests are requested, but unable to connect; {repr(e)}"
+                        f"bigquery tests are requested, but unable to connect; {e!r}"
                     )
             else:
                 test_backends += ["bigquery"]
@@ -1707,7 +1707,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     ) from e
                 else:
                     logger.warning(
-                        f"clickhouse tests are requested, but unable to connect; {repr(e)}"
+                        f"clickhouse tests are requested, but unable to connect; {e!r}"
                     )
             else:
                 test_backends += ["clickhouse"]
@@ -1725,15 +1725,22 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     ) from e
                 else:
                     logger.warning(
-                        f"trino tests are requested, but unable to connect; {repr(e)}"
+                        f"trino tests are requested, but unable to connect; {e!r}"
                     )
             else:
                 test_backends += ["trino"]
 
         if include_azure:
+            azure_connection_string: Optional[str] = os.getenv(
+                "AZURE_CONNECTION_STRING"
+            )
             azure_credential: Optional[str] = os.getenv("AZURE_CREDENTIAL")
             azure_access_key: Optional[str] = os.getenv("AZURE_ACCESS_KEY")
-            if not azure_access_key and not azure_credential:
+            if (
+                not azure_access_key
+                and not azure_connection_string
+                and not azure_credential
+            ):
                 if raise_exceptions_for_backends is True:
                     raise ImportError(
                         "Azure tests are requested, but credentials were not set up"
@@ -1757,7 +1764,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     ) from e
                 else:
                     logger.warning(
-                        f"redshift tests are requested, but unable to connect; {repr(e)}"
+                        f"redshift tests are requested, but unable to connect; {e!r}"
                     )
             else:
                 test_backends += ["redshift"]
@@ -1775,7 +1782,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     ) from e
                 else:
                     logger.warning(
-                        f"athena tests are requested, but unable to connect; {repr(e)}"
+                        f"athena tests are requested, but unable to connect; {e!r}"
                     )
             else:
                 test_backends += ["athena"]
@@ -1793,7 +1800,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     ) from e
                 else:
                     logger.warning(
-                        f"snowflake tests are requested, but unable to connect; {repr(e)}"
+                        f"snowflake tests are requested, but unable to connect; {e!r}"
                     )
             else:
                 test_backends += ["snowflake"]
@@ -2792,7 +2799,7 @@ def _create_clickhouse_engine(
     with engine.begin() as conn:
         try:
             schemas = conn.execute(
-                text(f"show schemas from memory like {repr(schema_name)}")
+                text(f"show schemas from memory like {schema_name!r}")
             ).fetchall()
             if (schema_name,) not in schemas:
                 conn.execute(text(f"create schema {schema_name}"))
@@ -2812,7 +2819,7 @@ def _create_trino_engine(
     with engine.begin() as conn:
         try:
             schemas = conn.execute(
-                sa.text(f"show schemas from memory like {repr(schema_name)}")
+                sa.text(f"show schemas from memory like {schema_name!r}")
             ).fetchall()
             if (schema_name,) not in schemas:
                 conn.execute(sa.text(f"create schema {schema_name}"))
@@ -2863,12 +2870,12 @@ def _get_redshift_connection_string() -> str:
     """
     Copied get_redshift_connection_url func from tests/test_utils.py
     """
-    host = os.environ.get("REDSHIFT_HOST")
-    port = os.environ.get("REDSHIFT_PORT")
-    user = os.environ.get("REDSHIFT_USERNAME")
-    pswd = os.environ.get("REDSHIFT_PASSWORD")
-    db = os.environ.get("REDSHIFT_DATABASE")
-    ssl = os.environ.get("REDSHIFT_SSLMODE")
+    host = os.environ.get("REDSHIFT_HOST")  # noqa: TID251
+    port = os.environ.get("REDSHIFT_PORT")  # noqa: TID251
+    user = os.environ.get("REDSHIFT_USERNAME")  # noqa: TID251
+    pswd = os.environ.get("REDSHIFT_PASSWORD")  # noqa: TID251
+    db = os.environ.get("REDSHIFT_DATABASE")  # noqa: TID251
+    ssl = os.environ.get("REDSHIFT_SSLMODE")  # noqa: TID251
 
     if not host:
         raise ValueError(
@@ -2939,13 +2946,13 @@ def _get_snowflake_connection_string() -> str:
     """
     Copied get_snowflake_connection_url func from tests/test_utils.py
     """
-    sfUser = os.environ.get("SNOWFLAKE_USER")
-    sfPswd = os.environ.get("SNOWFLAKE_PW")
-    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
-    sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
-    sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
-    sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
-    sfRole = os.environ.get("SNOWFLAKE_ROLE") or "PUBLIC"
+    sfUser = os.environ.get("SNOWFLAKE_USER")  # noqa: TID251
+    sfPswd = os.environ.get("SNOWFLAKE_PW")  # noqa: TID251
+    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")  # noqa: TID251
+    sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")  # noqa: TID251
+    sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")  # noqa: TID251
+    sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")  # noqa: TID251
+    sfRole = os.environ.get("SNOWFLAKE_ROLE") or "PUBLIC"  # noqa: TID251
 
     url = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}&role={sfRole}"
 

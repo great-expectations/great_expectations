@@ -10,8 +10,8 @@ from typing import (
     Union,
 )
 
-import pydantic
-
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
 
 
-class _Splitter(Protocol):
+class _Splitter(Protocol):  # noqa: PYI046
     @property
     def columns(self) -> list[str]:
         """The names of the column used to split the data"""
@@ -118,9 +118,11 @@ class SplitterYear(_SplitterDatetime):
     method_name: Literal["split_on_year"] = "split_on_year"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         return ["year"]
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name}
 
@@ -130,9 +132,11 @@ class SplitterYearAndMonth(_SplitterDatetime):
     method_name: Literal["split_on_year_and_month"] = "split_on_year_and_month"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         return ["year", "month"]
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name}
 
@@ -144,9 +148,11 @@ class SplitterYearAndMonthAndDay(_SplitterDatetime):
     ] = "split_on_year_and_month_and_day"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         return ["year", "month", "day"]
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name}
 
@@ -157,9 +163,11 @@ class SplitterDatetimePart(_SplitterDatetime):
     method_name: Literal["split_on_date_parts"] = "split_on_date_parts"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         return self.datetime_parts
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name, "date_parts": self.param_names}
 
@@ -199,12 +207,15 @@ class SplitterDividedInteger(_SplitterOneColumnOneParam):
     method_name: Literal["split_on_divided_integer"] = "split_on_divided_integer"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         return ["quotient"]
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name, "divisor": self.divisor}
 
+    @override
     def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
@@ -221,12 +232,15 @@ class SplitterModInteger(_SplitterOneColumnOneParam):
     method_name: Literal["split_on_mod_integer"] = "split_on_mod_integer"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         return ["remainder"]
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name, "mod": self.mod}
 
+    @override
     def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
@@ -242,12 +256,15 @@ class SplitterColumnValue(_SplitterOneColumnOneParam):
     method_name: Literal["split_on_column_value"] = "split_on_column_value"
 
     @property
+    @override
     def param_names(self) -> List[str]:
         return [self.column_name]
 
+    @override
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name}
 
+    @override
     def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:

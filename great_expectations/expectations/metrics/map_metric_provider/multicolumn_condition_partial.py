@@ -41,7 +41,7 @@ if TYPE_CHECKING:
 
 def multicolumn_condition_partial(  # noqa: C901 - 16
     engine: Type[ExecutionEngine],
-    partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,
+    partial_fn_type: Optional[MetricPartialFunctionTypes] = None,
     **kwargs,
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature. A

@@ -8,7 +8,7 @@ import json
 import logging
 import traceback
 import warnings
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from collections.abc import Hashable
 from dataclasses import dataclass, field
 from typing import (
@@ -17,6 +17,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    NamedTuple,
     Optional,
     Sequence,
     Set,
@@ -28,6 +29,7 @@ import pandas as pd
 from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
@@ -152,16 +154,12 @@ class ValidationDependencies:
         return list(self.metric_configurations.values())
 
 
-ValidationStatistics = namedtuple(
-    "ValidationStatistics",
-    [
-        "evaluated_expectations",
-        "successful_expectations",
-        "unsuccessful_expectations",
-        "success_percent",
-        "success",
-    ],
-)
+class ValidationStatistics(NamedTuple):
+    evaluated_expectations: int
+    successful_expectations: int
+    unsuccessful_expectations: int
+    success_percent: float | None
+    success: bool
 
 
 @public_api
@@ -225,11 +223,6 @@ class Validator:
         # This special state variable tracks whether a validation run is going on, which will disable
         # saving expectation config objects
         self._active_validation: bool = False
-        if self._data_context and hasattr(
-            self._data_context, "_expectation_explorer_manager"
-        ):
-            # TODO: verify flow of default expectation arguments
-            self.set_default_expectation_argument("include_config", True)
 
         self._include_rendered_content: Optional[bool] = include_rendered_content
 
@@ -414,6 +407,7 @@ class Validator:
             n_rows=n_rows, domain_kwargs=domain_kwargs, fetch_all=fetch_all
         )
 
+    @override
     def __dir__(self) -> List[str]:
         """
         This custom magic method is used to enable expectation tab completion on Validator objects.
@@ -586,7 +580,7 @@ class Validator:
             except Exception as err:
                 if basic_runtime_configuration.get("catch_exceptions"):
                     exception_traceback = traceback.format_exc()
-                    exception_message = f"{type(err).__name__}: {str(err)}"
+                    exception_message = f"{type(err).__name__}: {err!s}"
                     exception_info = ExceptionInfo(
                         exception_traceback=exception_traceback,
                         exception_message=exception_message,

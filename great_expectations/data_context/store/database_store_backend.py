@@ -10,6 +10,7 @@ from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.util import (
     filter_properties_dict,
@@ -112,7 +113,7 @@ class DatabaseStoreBackend(StoreBackend):
                 meta.create_all(self.engine)
             except SQLAlchemyError as e:
                 raise gx_exceptions.StoreBackendError(
-                    f"Unable to connect to table {table_name} because of an error. It is possible your table needs to be migrated to a new schema.  SqlAlchemyError: {str(e)}"
+                    f"Unable to connect to table {table_name} because of an error. It is possible your table needs to be migrated to a new schema.  SqlAlchemyError: {e!s}"
                 )
         self._table = table
         # Initialize with store_backend_id
@@ -139,6 +140,7 @@ class DatabaseStoreBackend(StoreBackend):
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     @property
+    @override
     def store_backend_id(self) -> str:
         """
         Create a store_backend_id if one does not exist, and return it if it exists
@@ -250,9 +252,10 @@ class DatabaseStoreBackend(StoreBackend):
                 row = connection.execute(sel).fetchone()[0]
             return row
         except (IndexError, SQLAlchemyError) as e:
-            logger.debug(f"Error fetching value: {str(e)}")
-            raise gx_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
+            logger.debug(f"Error fetching value: {e!s}")
+            raise gx_exceptions.StoreError(f"Unable to fetch value for key: {key!s}")
 
+    @override
     def _set(self, key, value, allow_update=True, **kwargs) -> None:
         cols = {k: v for (k, v) in zip(self.key_columns, key)}
         cols["value"] = value
@@ -274,12 +277,13 @@ class DatabaseStoreBackend(StoreBackend):
                 connection.execute(ins)
         except sqlalchemy.IntegrityError as e:
             if self._get(key) == value:
-                logger.info(f"Key {str(key)} already exists with the same value.")
+                logger.info(f"Key {key!s} already exists with the same value.")
             else:
                 raise gx_exceptions.StoreBackendError(
-                    f"Integrity error {str(e)} while trying to store key"
+                    f"Integrity error {e!s} while trying to store key"
                 )
 
+    @override
     def _move(self) -> None:  # type: ignore[override]
         raise NotImplementedError
 
@@ -299,7 +303,7 @@ class DatabaseStoreBackend(StoreBackend):
         full_url = str(self.engine.url)
         engine_name = full_url.split("://")[0]
         db_name = full_url.split("/")[-1]
-        return f"{engine_name}://{db_name}/{str(key[0])}"
+        return f"{engine_name}://{db_name}/{key[0]!s}"
 
     def _has_key(self, key):
         sel = (
@@ -318,7 +322,7 @@ class DatabaseStoreBackend(StoreBackend):
             with self.engine.begin() as connection:
                 return connection.execute(sel).fetchone()[0] == 1
         except (IndexError, SQLAlchemyError) as e:
-            logger.debug(f"Error checking for value: {str(e)}")
+            logger.debug(f"Error checking for value: {e!s}")
             return False
 
     def list_keys(self, prefix=()):
@@ -354,9 +358,10 @@ class DatabaseStoreBackend(StoreBackend):
                 return connection.execute(delete_statement)
         except SQLAlchemyError as e:
             raise gx_exceptions.StoreBackendError(
-                f"Unable to delete key: got sqlalchemy error {str(e)}"
+                f"Unable to delete key: got sqlalchemy error {e!s}"
             )
 
     @property
+    @override
     def config(self) -> dict:
         return self._config

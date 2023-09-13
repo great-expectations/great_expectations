@@ -27,6 +27,10 @@ from typing import (
     cast,
 )
 
+from packaging import version
+
+from great_expectations.compatibility.typing_extensions import override
+
 from great_expectations._version import get_versions  # isort:skip
 
 
@@ -304,7 +308,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         batch_data_dict: Optional[dict] = None,
         create_temp_table: bool = True,
         concurrency: Optional[ConcurrencyConfig] = None,
-        **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
+        # kwargs will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
+        **kwargs,
     ) -> None:
         super().__init__(name=name, batch_data_dict=batch_data_dict)
         self._name = name
@@ -313,7 +318,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._connection_string = connection_string
         self._url = url
         self._create_temp_table = create_temp_table
-        os.environ["SF_PARTNER"] = "great_expectations_oss"
+        os.environ["SF_PARTNER"] = "great_expectations_oss"  # noqa: TID251
 
         # sqlite/mssql temp tables only persist within a connection, so we need to keep the connection alive by
         # keeping a reference to it.
@@ -321,6 +326,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # (e.g. for accessing temporary tables), if we don't keep a reference
         # then we get errors like sqlite3.ProgrammingError: Cannot operate on a closed database.
         self._connection = None
+
+        # Use a single instance of SQLAlchemy engine to avoid creating multiple engine instances
+        # for the same SQLAlchemy engine. This allows us to take advantage of SQLAlchemy's
+        # built-in caching.
+        self._inspector = None
 
         if engine is not None:
             if credentials is not None:
@@ -530,6 +540,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return self._url
 
     @property
+    @override
     def dialect(self) -> sqlalchemy.Dialect:
         return self.engine.dialect
 
@@ -631,6 +642,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         )
 
     @public_api
+    @override
     def get_domain_records(  # noqa: C901, PLR0912, PLR0915
         self,
         domain_kwargs: dict,
@@ -856,6 +868,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return selectable
 
     @public_api
+    @override
     def get_compute_domain(
         self,
         domain_kwargs: dict,
@@ -886,6 +899,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return selectable, split_domain_kwargs.compute, split_domain_kwargs.accessor
 
+    @override
     def _split_column_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
         self,
         domain_kwargs: dict,
@@ -926,6 +940,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
+    @override
     def _split_column_pair_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
         self,
         domain_kwargs: dict,
@@ -972,6 +987,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
+    @override
     def _split_multi_column_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
         self,
         domain_kwargs: dict,
@@ -1016,6 +1032,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
+    @override
     def resolve_metric_bundle(
         self,
         metric_fn_bundle: Iterable[MetricComputationConfiguration],
@@ -1113,7 +1130,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         selectable
                     )
 
-                logger.debug(f"Attempting query {str(sa_query_object)}")
+                logger.debug(f"Attempting query {sa_query_object!s}")
                 res = self.execute_query(sa_query_object).fetchall()
 
                 logger.debug(
@@ -1123,7 +1140,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             except sqlalchemy.OperationalError as oe:
                 exception_message: str = "An SQL execution Exception occurred.  "
                 exception_traceback: str = traceback.format_exc()
-                exception_message += f'{type(oe).__name__}: "{str(oe)}".  Traceback: "{exception_traceback}".'
+                exception_message += f'{type(oe).__name__}: "{oe!s}".  Traceback: "{exception_traceback}".'
                 logger.error(exception_message)
                 raise ExecutionEngineError(message=exception_message)
 
@@ -1303,6 +1320,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return selectable
 
+    @override
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:
@@ -1311,7 +1329,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         ):
             raise InvalidBatchSpecError(
                 f"""SqlAlchemyExecutionEngine accepts batch_spec only of type SqlAlchemyDatasourceBatchSpec or
-        RuntimeQueryBatchSpec (illegal type "{str(type(batch_spec))}" was received).
+        RuntimeQueryBatchSpec (illegal type "{type(batch_spec)!s}" was received).
                         """
             )
         if (
@@ -1376,6 +1394,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         return batch_data, batch_markers
+
+    def get_inspector(self) -> sqlalchemy.engine.reflection.Inspector:
+        if self._inspector is None:
+            if version.parse(sa.__version__) < version.parse("1.4"):
+                # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
+                self._inspector = sqlalchemy.reflection.Inspector.from_engine(
+                    self.engine
+                )
+            else:
+                self._inspector = sa.inspect(self.engine)
+
+        return self._inspector
 
     @contextmanager
     def get_connection(self) -> sqlalchemy.Connection:

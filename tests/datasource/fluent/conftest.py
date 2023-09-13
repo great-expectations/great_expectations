@@ -3,6 +3,7 @@ from __future__ import annotations
 import functools
 import logging
 import pathlib
+import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -19,6 +20,7 @@ from typing import (
 
 import pytest
 from pytest import MonkeyPatch
+from typing_extensions import override
 
 import great_expectations as gx
 from great_expectations.core.batch import BatchData
@@ -90,6 +92,7 @@ def sqlachemy_execution_engine_mock_cls(
             self.engine = MockSaEngine(dialect=Dialect(dialect))
             self._create_temp_table = create_temp_table
 
+        @override
         def get_batch_data_and_markers(  # type: ignore[override]
             self, batch_spec: SqlAlchemyDatasourceBatchSpec
         ) -> tuple[BatchData, BatchMarkers]:
@@ -118,6 +121,7 @@ class ExecutionEngineDouble(ExecutionEngine):
     def __init__(self, *args, **kwargs):
         pass
 
+    @override
     def get_batch_data_and_markers(self, batch_spec) -> tuple[BatchData, BatchMarkers]:  # type: ignore[override]
         return BatchData(self), BatchMarkers(ge_load_time=None)
 
@@ -209,6 +213,9 @@ def empty_cloud_context_fluent(
         cloud_base_url=cloud_details.base_url,
         cloud_mode=True,
     )
+    context._datasources = (
+        {}  # type: ignore[assignment]
+    )  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
     return context
 
 
@@ -325,6 +332,13 @@ def cloud_storage_get_client_doubles(
 
 
 @pytest.fixture
+def filter_data_connector_build_warning():
+    with warnings.catch_warnings() as w:
+        warnings.simplefilter("ignore", RuntimeWarning)
+        yield w
+
+
+@pytest.fixture
 def fluent_only_config(
     fluent_gx_config_yml_str: str, seed_ds_env_vars: tuple
 ) -> GxConfig:
@@ -359,7 +373,7 @@ def fluent_yaml_config_file(
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
 def seeded_file_context(
-    cloud_storage_get_client_doubles,
+    filter_data_connector_build_warning,
     fluent_yaml_config_file: pathlib.Path,
     seed_ds_env_vars: tuple,
 ) -> FileDataContext:
@@ -372,7 +386,7 @@ def seeded_file_context(
 
 @pytest.fixture
 def seed_cloud(
-    cloud_storage_get_client_doubles,
+    filter_data_connector_build_warning,
     cloud_api_fake: responses.RequestsMock,
     fluent_only_config: GxConfig,
 ):
@@ -383,7 +397,7 @@ def seed_cloud(
     org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
 
     fake_db_data = create_fake_db_seed_data(fds_config=fluent_only_config)
-    _CLOUD_API_FAKE_DB.update(fake_db_data)  # type: ignore[typeddict-item]
+    _CLOUD_API_FAKE_DB.update(fake_db_data)
 
     seeded_datasources = _CLOUD_API_FAKE_DB["data-context-configuration"]["datasources"]
     logger.info(f"Seeded Datasources ->\n{pf(seeded_datasources, depth=2)}")
@@ -404,8 +418,8 @@ def seeded_cloud_context(
 
 @pytest.fixture(
     params=[
-        pytest.param("seeded_file_context", marks=pytest.mark.filesystem),
-        pytest.param("seeded_cloud_context", marks=pytest.mark.cloud),
+        pytest.param("seeded_file_context", marks=[pytest.mark.filesystem]),
+        pytest.param("seeded_cloud_context", marks=[pytest.mark.cloud]),
     ]
 )
 def seeded_contexts(

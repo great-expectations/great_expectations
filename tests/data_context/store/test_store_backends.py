@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+from typing import Optional
 from unittest import mock
 
 import boto3
@@ -12,7 +13,7 @@ from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import DataContext
+from great_expectations.data_context import DataContext, get_context
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
@@ -37,7 +38,6 @@ from great_expectations.exceptions import InvalidKeyError, StoreBackendError, St
 from great_expectations.self_check.util import expectationSuiteSchema
 from great_expectations.util import (
     gen_directory_tree_str,
-    get_context,
     is_library_loadable,
 )
 from tests import test_utils
@@ -122,7 +122,7 @@ def validation_operators_data_context(
     )
     data_context.add_expectation_suite("f1.foo")
 
-    df = data_context.get_batch(
+    df = data_context._get_batch_v2(
         batch_kwargs=data_context.build_batch_kwargs(
             "my_datasource", "subdir_reader", "f1"
         ),
@@ -176,7 +176,7 @@ def test_StoreBackendValidation():
 
 
 def check_store_backend_store_backend_id_functionality(
-    store_backend: StoreBackend, store_backend_id: str = None
+    store_backend: StoreBackend, store_backend_id: Optional[str] = None
 ) -> None:
     """
     Assertions to check if a store backend is handling reading and writing a store_backend_id appropriately.
@@ -206,9 +206,9 @@ def check_store_backend_store_backend_id_functionality(
     assert test_utils.validate_uuid4(parsed_store_backend_id[1])
 
 
-@pytest.mark.big
+@pytest.mark.aws_deps
 @mock_s3
-def test_StoreBackend_id_initialization(tmp_path_factory):
+def test_StoreBackend_id_initialization(tmp_path_factory, aws_credentials):
     """
     What does this test and why?
 
@@ -350,8 +350,8 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
 
 
 @mock_s3
-@pytest.mark.big
-def test_TupleS3StoreBackend_store_backend_id():
+@pytest.mark.aws_deps
+def test_TupleS3StoreBackend_store_backend_id(aws_credentials):
     # TupleS3StoreBackend
     # Initialize without store_backend_id and check that it is generated correctly
     bucket = "leakybucket2"
@@ -549,8 +549,8 @@ def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
 
 
 @mock_s3
-@pytest.mark.big
-def test_TupleS3StoreBackend_with_prefix():
+@pytest.mark.aws_deps
+def test_TupleS3StoreBackend_with_prefix(aws_credentials):
     """
     What does this test test and why?
 
@@ -750,8 +750,8 @@ def test_TupleS3StoreBackend_with_prefix():
 
 
 @mock_s3
-@pytest.mark.big
-def test_tuple_s3_store_backend_slash_conditions():  # noqa: PLR0915
+@pytest.mark.aws_deps
+def test_tuple_s3_store_backend_slash_conditions(aws_credentials):  # noqa: PLR0915
     bucket = "my_bucket"
     prefix = None
     conn = boto3.resource("s3", region_name="us-east-1")
@@ -939,8 +939,8 @@ def test_tuple_s3_store_backend_slash_conditions():  # noqa: PLR0915
 
 
 @mock_s3
-@pytest.mark.big
-def test_TupleS3StoreBackend_with_empty_prefixes():
+@pytest.mark.aws_deps
+def test_TupleS3StoreBackend_with_empty_prefixes(aws_credentials):
     """
     What does this test test and why?
 
@@ -997,8 +997,8 @@ def test_TupleS3StoreBackend_with_empty_prefixes():
 
 
 @mock_s3
-@pytest.mark.big
-def test_TupleS3StoreBackend_with_s3_put_options():
+@pytest.mark.aws_deps
+def test_TupleS3StoreBackend_with_s3_put_options(aws_credentials):
     bucket = "leakybucket"
     conn = boto3.client("s3", region_name="us-east-1")
     conn.create_bucket(Bucket=bucket)
@@ -1204,7 +1204,50 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
     )
 
 
-@pytest.mark.big
+@pytest.mark.unit
+def test_TupleAzureBlobStoreBackend_credential():
+    pytest.importorskip("azure.storage.blob")
+    pytest.importorskip("azure.identity")
+    """
+    What does this test test and why?
+    Since no package like moto exists for Azure-Blob services, we mock the Azure-blob client
+    and assert that the store backend makes the right calls for set, get, and list.
+    """
+    credential = "this_is_a_test_credential_string"
+    account_url = "this_is_a_test_account_url"
+    prefix = "this_is_a_test_prefix"
+    container = "dummy-container"
+
+    my_store = TupleAzureBlobStoreBackend(
+        credential=credential,
+        account_url=account_url,
+        prefix=prefix,
+        container=container,
+    )
+    with mock.patch(
+        "great_expectations.compatibility.azure.BlobServiceClient", autospec=True
+    ):
+        mock_container_client = my_store._container_client
+        my_store.set(("AAA",), "aaa")
+        mock_container_client.upload_blob.assert_called_once_with(
+            name="this_is_a_test_prefix/AAA",
+            data="aaa",
+            encoding="utf-8",
+            overwrite=True,
+        )
+
+        my_store.get(("BBB",))
+        mock_container_client.download_blob.assert_called_once_with(
+            "this_is_a_test_prefix/BBB"
+        )
+
+        my_store.list_keys()
+        mock_container_client.list_blobs.assert_called_once_with(
+            name_starts_with="this_is_a_test_prefix"
+        )
+
+
+@pytest.mark.unit
 def test_TupleAzureBlobStoreBackend_connection_string():
     pytest.importorskip("azure.storage.blob")
     pytest.importorskip("azure.identity")
@@ -1246,7 +1289,7 @@ def test_TupleAzureBlobStoreBackend_connection_string():
         )
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_TupleAzureBlobStoreBackend_account_url():
     pytest.importorskip("azure.storage.blob")
     pytest.importorskip("azure.identity")
@@ -1282,8 +1325,8 @@ def test_TupleAzureBlobStoreBackend_account_url():
 
 @mock_s3
 @pytest.mark.slow  # 14.36s
-@pytest.mark.big
-def test_TupleS3StoreBackend_list_over_1000_keys():
+@pytest.mark.aws_deps
+def test_TupleS3StoreBackend_list_over_1000_keys(aws_credentials):
     """
     What does this test test and why?
 

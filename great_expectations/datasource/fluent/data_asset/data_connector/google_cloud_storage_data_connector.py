@@ -4,8 +4,8 @@ import logging
 import re
 from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
 
-import pydantic
-
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.util import (
     list_gcs_keys,
@@ -192,6 +192,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
             }
         )
 
+    @override
     def build_batch_spec(self, batch_definition: BatchDefinition) -> GCSBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
@@ -208,6 +209,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         return GCSBatchSpec(batch_spec)
 
     # Interface Method
+    @override
     def get_data_references(self) -> List[str]:
         query_options: dict = {
             "bucket_or_name": self._bucket_or_name,
@@ -223,6 +225,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         return path_list
 
     # Interface Method
+    @override
     def _get_full_file_path(self, path: str) -> str:
         if self._file_path_template_map_fn is None:
             raise ValueError(

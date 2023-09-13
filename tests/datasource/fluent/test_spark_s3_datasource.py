@@ -46,6 +46,7 @@ def aws_credentials() -> None:
     os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
     os.environ["AWS_SECURITY_TOKEN"] = "testing"
     os.environ["AWS_SESSION_TOKEN"] = "testing"
+    os.environ["AWS_DEFAULT_REGION"] = "testing"
 
 
 @pytest.mark.skipif(not aws.boto3)
@@ -280,7 +281,7 @@ def test_test_connection_failures(
     bad_regex_config: tuple[re.Pattern, str],
 ):
     regex, test_connection_error_message = bad_regex_config
-    csv_asset = CSVAsset(
+    csv_asset = CSVAsset(  # type: ignore[call-arg] # missing args
         name="csv_asset",
         batching_regex=regex,
     )

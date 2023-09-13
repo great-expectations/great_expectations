@@ -5,6 +5,7 @@ from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import Any, Dict, Optional, TypeVar, Union
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
@@ -36,9 +37,11 @@ class InferredSemanticDomainType(SerializableDictDot):
     semantic_domain_type: Optional[Union[str, SemanticDomainTypes]] = None
     details: Optional[Dict[str, Any]] = None
 
+    @override
     def to_dict(self) -> dict:
         return asdict(self)
 
+    @override
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())
 
@@ -47,6 +50,7 @@ class DomainKwargs(SerializableDotDict):
     def to_dict(self) -> dict:
         return dict(self)
 
+    @override
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())
 
@@ -65,13 +69,13 @@ class Domain(SerializableDotDict):
                 domain_type = MetricDomainTypes(domain_type.lower())
             except (TypeError, KeyError) as e:
                 raise ValueError(
-                    f""" {e}: Cannot instantiate Domain (domain_type "{str(domain_type)}" of type \
-"{str(type(domain_type))}" is not supported).
+                    f""" {e}: Cannot instantiate Domain (domain_type "{domain_type!s}" of type \
+"{type(domain_type)!s}" is not supported).
 """
                 )
         elif not isinstance(domain_type, MetricDomainTypes):
             raise ValueError(
-                f"""Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(domain_type))}" is \
+                f"""Cannot instantiate Domain (domain_type "{domain_type!s}" of type "{type(domain_type)!s}" is \
 not supported).
 """
             )
@@ -111,8 +115,8 @@ not supported).
 
                 if not is_consistent:
                     raise ValueError(
-                        f"""Cannot instantiate Domain (domain_type "{str(domain_type)}" of type \
-"{str(type(domain_type))}" -- key "{semantic_domain_key}", detected in "{INFERRED_SEMANTIC_TYPE_KEY}" dictionary, does \
+                        f"""Cannot instantiate Domain (domain_type "{domain_type!s}" of type \
+"{type(domain_type)!s}" -- key "{semantic_domain_key}", detected in "{INFERRED_SEMANTIC_TYPE_KEY}" dictionary, does \
 not exist as value of appropriate key in "domain_kwargs" dictionary.
 """
                     )
@@ -149,6 +153,7 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
     def __ne__(self, other):
         return not self.__eq__(other=other)
 
+    @override
     def __hash__(self) -> int:  # type: ignore[override]
         """Overrides the default implementation"""
         _result_hash: int = hash(self.id)
@@ -178,6 +183,7 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
     def id(self) -> str:
         return IDDict(self.to_json_dict()).to_id()
 
+    @override
     def to_json_dict(self) -> dict:
         details: dict = {}
 

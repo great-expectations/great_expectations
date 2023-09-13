@@ -120,7 +120,7 @@ If you're using GX for multiple projects, you might want to use a different Data
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- A previously initialized Filesystem Data Context. See [How to initialize a Filesystem Data Context in Python](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python).
+- A previously initialized Filesystem Data Context.
 
 </Prerequisites>
 
@@ -132,18 +132,35 @@ If you're using GX for multiple projects, you might want to use a different Data
 
 Each Filesystem Data Context has a root folder in which it was initialized.  This root folder identifies the specific Filesystem Data Context to instantiate.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_instantiate_a_specific_filesystem_data_context.py path_to_context_root_folder"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_instantiate_a_specific_filesystem_data_context.py path_to_project_root"
 ```
 
 ### Run the `get_context(...)` method
 
-You provide the path for your empty folder to the GX library's `get_context(...)` method as the `context_root_dir` parameter. Because you are providing a path to an empty folder, the `get_context(...)` method instantiates and return the Data Context at that location.
+You provide the path for your empty folder to the GX library's `get_context(...)` method as the `project_root_dir` parameter. Because you are providing a path to an empty folder, the `get_context(...)` method instantiates and return the Data Context at that location.
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_instantiate_a_specific_filesystem_data_context.py get_filesystem_data_context"
 ```
 
+:::info Project root vs context root
+Note that there is a subtle distinction between the `project_root_dir` and `context_root_dir` arguments accepted by `get_context(...)`.
+
+Your context root is the directory that contains all your GX config while your project root refers to your actual working directory (and therefore contains the context root).
+
+```bash
+# The overall directory is your project root
+data/
+great_expectations/ # The GX folder with your config is your context root
+  great_expectations.yml
+  ...
+...
+```
+
+Both are functionally equivalent for purposes of working with a file-backed project. 
+:::
+
 :::info What if the folder does not contain a Data Context?
-If the `context_root_dir` provided to the `get_context(...)` method points to a folder that does not already have a Data Context, the `get_context(...)` method initializes a new Filesystem Data Context in that location.
+If the root directory provided to the `get_context(...)` method points to a folder that does not already have a Data Context, the `get_context(...)` method initializes a new Filesystem Data Context in that location.
 
 The `get_context(...)` method instantiates and returns the newly initialized Data Context.
 :::
@@ -215,18 +232,16 @@ Now that you have an Ephemeral Data Context you can connect GX to your data. See
 ## Next steps
 
 To customize a Data Context configuration for Metadata Stores and Data Docs, see:
-- [How to configure an Expectation Store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem)
-- [How to configure a Validation Result Store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem)
-- [How to configure and use a Metric Store](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore)
-- [How to host and share Data Docs on a filesystem](/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem)
 
-To connecting GX to your source data:
+- [Configure Expectation Stores](/docs/guides/setup/configuring_metadata_stores/configure_expectation_stores)
+- [Configure Validation Result Stores](/docs/guides/setup/configuring_metadata_stores/configure_result_stores)
+- [How to configure and use a Metric Store](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore)
+- [How to host and share Data Docs on a filesystem](/docs/guides/setup/configuring_data_docs/host_and_share_data_docs)
+
+To connect GX to source data:
+
 - [How to configure a Pandas Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
 - [How to configure a Spark Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
 - [How to configure a SQL Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
-
-## Related documentation
-
-- To initialize and instantiate a temporary Data Context, see [Instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
 
 

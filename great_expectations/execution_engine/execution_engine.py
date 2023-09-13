@@ -18,6 +18,7 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -75,6 +76,7 @@ class MetricComputationConfiguration(DictDot):
     accessor_domain_kwargs: Optional[dict] = None
 
     @public_api
+    @override
     def to_dict(self) -> dict:
         """Returns: this MetricComputationConfiguration as a Python dictionary
 
@@ -165,7 +167,7 @@ class ExecutionEngine(ABC):
         if not batch_spec_defaults_keys <= self.recognized_batch_spec_defaults:
             logger.warning(
                 f"""Unrecognized batch_spec_default(s): \
-{str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)}
+{batch_spec_defaults_keys - self.recognized_batch_spec_defaults!s}
 """
             )
 
@@ -453,7 +455,7 @@ class ExecutionEngine(ABC):
                     )
                 except KeyError as e:
                     raise gx_exceptions.MetricError(
-                        message=f'Missing metric dependency: {str(e)} for metric "{metric_to_resolve.metric_name}".'
+                        message=f'Missing metric dependency: {e!s} for metric "{metric_to_resolve.metric_name}".'
                     )
 
                 metric_fn_bundle_configurations.append(

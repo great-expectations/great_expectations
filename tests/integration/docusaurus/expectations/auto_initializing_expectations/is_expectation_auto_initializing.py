@@ -12,22 +12,22 @@ the snippets that are specified for use in documentation are maintained.  These 
 --documentation--
     https://docs.greatexpectations.io/docs/
 """
-# <snippet name="tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py is_expectation_self_initializing False">
+# <snippet name="tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py is_expectation_auto_initializing False">
 from great_expectations.expectations.expectation import Expectation
 
-Expectation.is_expectation_self_initializing(name="expect_column_to_exist")
+Expectation.is_expectation_auto_initializing(name="expect_column_to_exist")
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py is_expectation_self_initializing True">
-Expectation.is_expectation_self_initializing(name="expect_column_mean_to_be_between")
+# <snippet name="tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py is_expectation_auto_initializing True">
+Expectation.is_expectation_auto_initializing(name="expect_column_mean_to_be_between")
 # </snippet>
 
 # NOTE: The following assertions are only for testing and can be ignored by users.
 assert (
-    Expectation.is_expectation_self_initializing(name="expect_column_to_exist") is False
+    Expectation.is_expectation_auto_initializing(name="expect_column_to_exist") is False
 )
 assert (
-    Expectation.is_expectation_self_initializing(
+    Expectation.is_expectation_auto_initializing(
         name="expect_column_mean_to_be_between"
     )
     is True

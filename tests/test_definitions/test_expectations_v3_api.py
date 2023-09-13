@@ -52,7 +52,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
     validator_with_data = None
 
     for expectation_category in expectation_dirs:
-        test_configuration_files = glob.glob(
+        test_configuration_files = glob.glob(  # noqa: PTH207
             dir_path + "/" + expectation_category + "/*.json"
         )
         for backend in backends:
@@ -109,11 +109,8 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                             table_name=dataset_name,
                                             schemas=dataset.get("schemas"),
                                             sqlite_db_path=sqlite_db_path,
-                                            context=cast(
-                                                DataContext,
-                                                build_in_memory_runtime_context(),
-                                            ),
-                                        )
+                                            context=build_in_memory_runtime_context(),
+                                        ),
                                     )
                                 validator_with_data = datasets[0]
                             else:
