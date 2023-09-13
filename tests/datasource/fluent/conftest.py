@@ -213,9 +213,6 @@ def empty_cloud_context_fluent(
         cloud_base_url=cloud_details.base_url,
         cloud_mode=True,
     )
-    context._datasources = (
-        {}  # type: ignore[assignment]
-    )  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
     return context
 
 
