@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 class DatasourceStoreSpy(DatasourceStore):
     def __init__(self, datasource_configs: list[dict] | None = None) -> None:
         self.list_keys_count = 0
+        self.has_key_count = 0
         self.set_count = 0
         self.get_count = 0
         self.remove_key_count = 0
@@ -38,6 +39,7 @@ class DatasourceStoreSpy(DatasourceStore):
 
         # Reset counters
         self.list_keys_count = 0
+        self.has_key_count = 0
         self.set_count = 0
         self.get_count = 0
         self.remove_key_count = 0
@@ -53,6 +55,10 @@ class DatasourceStoreSpy(DatasourceStore):
     def list_keys(self):
         self.list_keys_count += 1
         return super().list_keys()
+
+    def has_key(self, key) -> bool:
+        self.has_key_count += 1
+        return super().has_key(key)
 
     def remove_key(self, key):
         self.remove_key_count += 1
@@ -238,11 +244,19 @@ def build_cacheable_datasource_dict_with_store_spy(
 ) -> Callable:
     def _build_cacheable_datasource_dict_with_store_spy(
         datasource_configs: list[dict] | None = None,
+        populate_cache: bool = True,
     ) -> CacheableDatasourceDict:
-        return CacheableDatasourceDict(
+        datasource_dict = CacheableDatasourceDict(
             context=in_memory_runtime_context,
             datasource_store=DatasourceStoreSpy(datasource_configs=datasource_configs),
         )
+
+        # Populate cache
+        if populate_cache and datasource_configs:
+            for ds in datasource_configs:
+                datasource_dict.data[ds.name] = ds
+
+        return datasource_dict
 
     return _build_cacheable_datasource_dict_with_store_spy
 
@@ -259,9 +273,37 @@ def cacheable_datasource_dict_with_fds(
     build_cacheable_datasource_dict_with_store_spy: Callable,
     pandas_fds: PandasDatasource,
 ) -> CacheableDatasourceDict:
-    return build_cacheable_datasource_dict_with_store_spy(
+    datasource_dict = build_cacheable_datasource_dict_with_store_spy(
         datasource_configs=[pandas_fds]
     )
+    return datasource_dict
+
+
+@pytest.mark.unit
+def test_cacheable_datasource_dict___contains___uses_cache(
+    cacheable_datasource_dict_with_fds: CacheableDatasourceDict, pandas_fds_name: str
+):
+    store = cacheable_datasource_dict_with_fds._datasource_store
+
+    assert store.get_count == 0
+    # Lookup will not check store due to presence in cache
+    assert pandas_fds_name in cacheable_datasource_dict_with_fds
+    assert store.get_count == 0
+
+
+@pytest.mark.unit
+def test_cacheable_datasource_dict___contains___requests_store_upon_cache_miss(
+    cacheable_datasource_dict_with_fds: CacheableDatasourceDict,
+):
+    store = cacheable_datasource_dict_with_fds._datasource_store
+
+    assert store.get_count == 0
+    assert store.has_key_count == 0
+
+    # Lookup will check store due to lack of presence in cache (but won't retrieve value)
+    assert "my_fake_name" not in cacheable_datasource_dict_with_fds
+    assert store.get_count == 0
+    assert store.has_key_count == 1
 
 
 @pytest.mark.unit
@@ -293,17 +335,22 @@ def test_cacheable_datasource_dict___setitem___with_block_datasource(
 
 @pytest.mark.unit
 def test_cacheable_datasource_dict___delitem__updates_both_cache_and_store(
-    cacheable_datasource_dict_with_fds: CacheableDatasourceDict, pandas_fds_name: str
+    build_cacheable_datasource_dict_with_store_spy: Callable,
+    pandas_block_datasource_config: dict,
 ):
-    store = cacheable_datasource_dict_with_fds._datasource_store
+    datasource_dict = build_cacheable_datasource_dict_with_store_spy(
+        datasource_configs=[pandas_block_datasource_config], populate_cache=True
+    )
+    store = datasource_dict._datasource_store
+    name = pandas_block_datasource_config["name"]
     assert store.remove_key_count == 0
 
     # Deletion will go down to the store level
-    del cacheable_datasource_dict_with_fds[pandas_fds_name]
+    del datasource_dict[name]
     assert store.remove_key_count == 1
 
     # Should also impact the cache
-    assert pandas_fds_name not in cacheable_datasource_dict_with_fds.data
+    assert name not in datasource_dict.data
 
 
 @pytest.mark.unit
@@ -336,7 +383,8 @@ def test_cacheable_datasource_dict___getitem___with_fds(
     pandas_fds: PandasDatasource,
 ):
     datasource_dict = build_cacheable_datasource_dict_with_store_spy(
-        datasource_configs=[pandas_fds]
+        datasource_configs=[pandas_fds],
+        populate_cache=False,
     )
     store = datasource_dict._datasource_store
     assert store.get_count == 0
@@ -352,7 +400,7 @@ def test_cacheable_datasource_dict___getitem___with_block_datasource(
     pandas_block_datasource_config: dict,
 ):
     datasource_dict = build_cacheable_datasource_dict_with_store_spy(
-        datasource_configs=[pandas_block_datasource_config]
+        datasource_configs=[pandas_block_datasource_config], populate_cache=False
     )
     store = datasource_dict._datasource_store
     assert store.get_count == 0
