@@ -68,7 +68,7 @@ ruff <PATH/TO/YOUR/CHANGES> --fix
 
 Our CI system will perform static type-checking using [mypy](https://mypy.readthedocs.io/en/stable/index.html#).
 
-`contrib` and other select `great_expectations/` packages are excluded from type-checking.
+`contrib` and other select `great_expectations` packages are excluded from type-checking.
 See the `mypy` section in [`pyproject.toml`](https://github.com/great-expectations/great_expectations/blob/develop/pyproject.toml) for more details.
 
 To verify your code will pass the CI type-checker, run `invoke type-check --install-types`.
