@@ -32,6 +32,9 @@ module.exports = {
       apiKey: 'fc3e3b1588b46d8d476aca9c1cadd53f',
       indexName: 'greatexpectations',
       searchPagePath: 'search',
+      customFields: {
+        gxCard: `gxCard`
+      },
       contextualSearch: true,
       searchParameters: {
         facetFilters: ['version:current'],
