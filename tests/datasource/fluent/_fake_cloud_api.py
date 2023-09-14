@@ -236,17 +236,9 @@ def get_datasource_by_id_cb(request: PreparedRequest) -> CallbackResult:
     datasource_id = parsed_url.path.split("/")[-1]
 
     datasource: dict | None = _CLOUD_API_FAKE_DB["datasources"].get(datasource_id)
-
     if datasource:
-        datasource_json_schema = {
-            "data": {
-                "attributes": {"datasource_config": datasource},
-                "id": datasource["id"],
-                "type": "datasource",
-            }
-        }
         result = CallbackResult(
-            200, headers=DEFAULT_HEADERS, body=json.dumps(datasource_json_schema)
+            200, headers=DEFAULT_HEADERS, body=json.dumps(datasource)
         )
     else:
         result = CallbackResult(
@@ -278,7 +270,7 @@ def delete_datasources_cb(
     deleted_ds = datasources.pop(datasource_id, None)
     print(pf(deleted_ds, depth=5))
     if deleted_ds:
-        ds_name = deleted_ds["name"]
+        ds_name = deleted_ds["data"]["attributes"]["datasource_config"]["name"]
         _CLOUD_API_FAKE_DB["DATASOURCE_NAMES"].remove(ds_name)
         LOGGER.debug(f"Deleted datasource '{ds_name}'")
         result = CallbackResult(204, headers={}, body="")
@@ -417,11 +409,12 @@ def put_datasource_cb(request: PreparedRequest) -> CallbackResult:
 
     old_datasource: dict | None = _CLOUD_API_FAKE_DB["datasources"].get(datasource_id)
     if old_datasource:
-        if payload.data.name != old_datasource["name"]:
+        if (
+            payload.data.name
+            != old_datasource["data"]["attributes"]["datasource_config"]["name"]
+        ):
             raise NotImplementedError("Unsure how to handle name change")
-        _CLOUD_API_FAKE_DB["datasources"][datasource_id] = payload.dict()["data"][
-            "attributes"
-        ]["datasource_config"]
+        _CLOUD_API_FAKE_DB["datasources"][datasource_id] = payload.dict()
         result = CallbackResult(200, headers=DEFAULT_HEADERS, body=payload.json())
     else:
         result = CallbackResult(404, headers=DEFAULT_HEADERS, body="")
@@ -447,16 +440,7 @@ def get_datasources_cb(
             if datasource_config["name"] in queried_names
         ]
 
-    datasources_list_json_schema = [
-        {
-            "attributes": {"datasource_config": ds_config},
-            "id": ds_config["id"],
-            "type": "datasource",
-        }
-        for ds_config in datasources_list
-    ]
-
-    resp_body = {"data": datasources_list_json_schema}
+    resp_body = {"data": datasources_list}
     result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(resp_body))
     LOGGER.debug(f"Response {result.status}")
     return result
