@@ -1,0 +1,73 @@
+.GXCard {
+    background-color: var(--mint-100);
+    padding: 1.5rem;
+    font-size: 15px;
+    line-height: 1.6;
+    border-radius: 6px;
+    margin: 2rem 0;
+  }
+  
+  .astroCard__title {
+    font-size: 15px;
+  }
+  
+  .astroCard__buttons {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  
+  html[data-theme="dark"] .GXCard {
+    background-color: var(--mint-700);
+  }
+  
+  .button {
+    display: inline-block;
+    position: relative;
+    text-decoration: none;
+    padding: 9px 1rem 9px 1rem !important;
+    font-size: 12px;
+    font-weight: 600;
+    background-color: var(--mint-300);
+    color: var(--gray-800);
+    border-radius: 50rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-width: 86px;
+    background: var(--mint-300);
+    border: 1px solid transparent;
+    text-align: center;
+  }
+  
+  .button:hover {
+    color: var(--gray-800);
+    text-decoration: none;
+    background: var(--mint-500);
+  }
+  
+  .button:visited {
+    color: var(--gray-800);
+  }
+  
+  .button__outline {
+    color: var(--blue-600);
+    border-color: var(--blue-600);
+    background: none;
+  }
+  
+  html[data-theme="dark"] .button__outline {
+    border-color: var(--blue-300);
+    color: var(--blue-300);
+  }
+  
+  .button__outline:hover {
+    color: var(--blue-600);
+    border-color: var(--blue-300);
+    background: var(--blue-300);
+  }
+  
+  html[data-theme="dark"] .button__outline:hover {
+    border-color: var(--blue-400);
+    color: var(--blue-800);
+    background: var(--blue-400);
+  }

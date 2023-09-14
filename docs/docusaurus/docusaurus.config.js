@@ -230,7 +230,20 @@ module.exports = {
       copyright: `Copyright © ${new Date().getFullYear()} Great Expectations. All Rights Reserved.`
     }
   },
-
+  GXCard: {
+    title: "What is GX Cloud?",
+    description: "GX Cloud is a cloud solution that helps you focus on data validation and reduces the time required to configure Expectation Suites.",
+    buttons: {
+      primary: {
+        label: "Try GX Cloud",
+        href: "https://greatexpectations.io/cloud"
+      },
+      secondary: {
+        label: "Learn about Great Expectations",
+        href: "https://greatexpectations.io/company"
+      }
+    }
+  },
   // themes:[ ],
   presets: [
     [
