@@ -13,9 +13,6 @@ module.exports = {
   favicon: '/img/gx-mark.png',
   organizationName: 'great-expectations',
   projectName: 'great_expectations',
-  customFields: {
-    gxCard: 'gxCard',
-  },
   plugins: [
     require.resolve('@cmfcmf/docusaurus-search-local'),
     '@docusaurus-terminology/parser',
