@@ -2,7 +2,17 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple, overload
+from collections import UserDict
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    overload,
+)
 
 import numpy as np
 from dateutil.parser import parse
@@ -13,6 +23,7 @@ from great_expectations.compatibility import aws, sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.execution_engine import (
     PandasExecutionEngine,  # noqa: TCH001
     SqlAlchemyExecutionEngine,  # noqa: TCH001
@@ -20,7 +31,9 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import (
+    GXSqlDialect,
+)
 from great_expectations.execution_engine.util import check_sql_engine_dialect
 
 try:
@@ -305,6 +318,42 @@ def attempt_allowing_relative_error(dialect):
     return detected_redshift or detected_psycopg2
 
 
+class _CaseInsensitiveString(str):
+    def __init__(self, string: str):
+        self._original = string
+        self._lower = string.lower()
+        self._quote_string = '"'
+
+    def __eq__(self, other):
+        if self.is_quoted():
+            return self._original == str(other)
+        if isinstance(other, _CaseInsensitiveString):
+            return self._lower == other._lower
+        elif isinstance(other, str):
+            return self._lower == other.lower()
+        else:
+            return False
+
+    def __hash__(self):
+        return hash(self._lower)
+
+    def is_quoted(self):
+        return self._original.startswith(self._quote_string)
+
+
+class SmartColumnLookup(UserDict):
+    def __init__(self, data: Dict[str, Any]):
+        self.data = data
+
+    @override
+    def __getitem__(self, key: Any) -> Any:
+        item = self.data[key]
+        if key == "name":
+            logger.debug(f"SmartColumnLookup - {key}:{item}")
+            return _CaseInsensitiveString(item)
+        return item
+
+
 def get_sqlalchemy_column_metadata(
     execution_engine: SqlAlchemyExecutionEngine,
     table_selectable: sqlalchemy.Select,
@@ -361,6 +410,15 @@ def get_sqlalchemy_column_metadata(
                 dialect=engine.dialect,
                 sqlalchemy_engine=engine,
             )
+
+        dialect_name = execution_engine.dialect.name
+        if dialect_name == "snowflake":
+            return [
+                # TODO: SmartColumn should know the dialect and do lookups based on that
+                SmartColumnLookup(column)  # type: ignore[misc]
+                for column in columns
+            ]
+
         return columns
     except AttributeError as e:
         logger.debug(f"Error while introspecting columns: {e!r}", exc_info=e)
