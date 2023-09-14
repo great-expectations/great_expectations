@@ -601,10 +601,10 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     "str UNQUOTED_LOWER": ["postgres", "sqlite"],
     "str unquoted_upper": ["sqlite"],
     "str UNQUOTED_UPPER": ["postgres", "sqlite"],
-    'str "lower"': ["postgres", "snowflake"],
+    'str "lower"': ["postgres", "snowflake", "sqlite"],
     "str LOWER": ["databricks_sql", "postgres", "snowflake", "sqlite"],
     "str upper": ["databricks_sql", "postgres", "snowflake", "sqlite"],
-    'str "UPPER"': ["postgres", "snowflake"],
+    'str "UPPER"': ["postgres", "snowflake", "sqlite"],
     "quoted_name upper quote=None": [
         "databricks_sql",
         "postgres",
@@ -646,69 +646,69 @@ def _is_quote_char_dialect_mismatch(
         param("UNQUOTED_LOWER", id="str UNQUOTED_LOWER"),
         param("unquoted_upper", id="str unquoted_upper"),
         param("UNQUOTED_UPPER", id="str UNQUOTED_UPPER"),
-        # param("lower", id="str lower"),
-        # param("LOWER", id="str LOWER"),
-        # param('"lower"', id='str "lower"'),
-        # param(
-        #     quoted_name(
-        #         "lower",
-        #         quote=None,
-        #     ),
-        #     id="quoted_name lower quote=None",
-        # ),
-        # param(
-        #     quoted_name(
-        #         "lower",
-        #         quote=True,
-        #     ),
-        #     id="quoted_name lower quote=True",
-        # ),
-        # param(
-        #     quoted_name(
-        #         "lower",
-        #         quote=False,
-        #     ),
-        #     id="quoted_name lower quote=False",
-        # ),
-        # param(
-        #     quoted_name(
-        #         "LOWER",
-        #         quote=None,
-        #     ),
-        #     marks=[pytest.mark.xfail],
-        #     id="quoted_name LOWER quote=None",
-        # ),
-        # param("upper", id="str upper"),
-        # param("UPPER", id="str UPPER"),
-        # param('"UPPER"', id='str "UPPER"'),
-        # param(
-        #     quoted_name(
-        #         "UPPER",
-        #         quote=None,
-        #     ),
-        #     id="quoted_name UPPER quote=None",
-        # ),
-        # param(
-        #     quoted_name(
-        #         "UPPER",
-        #         quote=True,
-        #     ),
-        #     id="quoted_name UPPER quote=True",
-        # ),
-        # param(
-        #     quoted_name(
-        #         "UPPER",
-        #         quote=False,
-        #     ),
-        #     id="quoted_name UPPER quote=False",
-        # ),
-        # param(
-        #     quoted_name(
-        #         "upper",
-        #         quote=None,
-        #     ),
-        #     id="quoted_name upper quote=None",
-        # ),
+        param("lower", id="str lower"),
+        param("LOWER", id="str LOWER"),
+        param('"lower"', id='str "lower"'),
+        param(
+            quoted_name(
+                "lower",
+                quote=None,
+            ),
+            id="quoted_name lower quote=None",
+        ),
+        param(
+            quoted_name(
+                "lower",
+                quote=True,
+            ),
+            id="quoted_name lower quote=True",
+        ),
+        param(
+            quoted_name(
+                "lower",
+                quote=False,
+            ),
+            id="quoted_name lower quote=False",
+        ),
+        param(
+            quoted_name(
+                "LOWER",
+                quote=None,
+            ),
+            marks=[pytest.mark.xfail],
+            id="quoted_name LOWER quote=None",
+        ),
+        param("upper", id="str upper"),
+        param("UPPER", id="str UPPER"),
+        param('"UPPER"', id='str "UPPER"'),
+        param(
+            quoted_name(
+                "UPPER",
+                quote=None,
+            ),
+            id="quoted_name UPPER quote=None",
+        ),
+        param(
+            quoted_name(
+                "UPPER",
+                quote=True,
+            ),
+            id="quoted_name UPPER quote=True",
+        ),
+        param(
+            quoted_name(
+                "UPPER",
+                quote=False,
+            ),
+            id="quoted_name UPPER quote=False",
+        ),
+        param(
+            quoted_name(
+                "upper",
+                quote=None,
+            ),
+            id="quoted_name upper quote=None",
+        ),
     ],
 )
 class TestColumnIdentifiers:
