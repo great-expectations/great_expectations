@@ -435,9 +435,9 @@ def get_datasources_cb(
     datasources_list: list[dict] = list(all_datasources.values())
     if queried_names:
         datasources_list = [
-            datasource_config
-            for datasource_config in datasources_list
-            if datasource_config["name"] in queried_names
+            d["data"]
+            for d in datasources_list
+            if d["data"]["attributes"]["datasource_config"]["name"] in queried_names
         ]
 
     resp_body = {"data": datasources_list}
