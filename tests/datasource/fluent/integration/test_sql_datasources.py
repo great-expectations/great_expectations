@@ -842,6 +842,9 @@ class TestColumnIdentifiers:
             else None
         )
 
+        print(f"\ncolumn_name:\n  {column_name!r}")
+        print(f"type:\n  {type(column_name)}\n")
+
         table_factory(
             gx_engine=datasource.get_execution_engine(),
             table_names={TEST_TABLE_NAME},
