@@ -175,7 +175,9 @@ def test_delete_asset_with_cloud_data_context(
 
     asset_names = [
         asset["name"]
-        for asset in cloud_api_fake_db["datasources"][str(datasource.id)]["assets"]
+        for asset in cloud_api_fake_db["datasources"][str(datasource.id)]["data"][
+            "attributes"
+        ]["datasource_config"]["assets"]
     ]
     assert asset_name not in asset_names
 
