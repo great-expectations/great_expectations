@@ -600,10 +600,9 @@ class TestTableIdentifiers:
 
 # TODO: remove items from this lookup when working on fixes
 REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
-    "str unquoted_lower": ["sqlite"],
     "str UNQUOTED_LOWER": ["databricks_sql", "postgres", "sqlite"],
     "str unquoted_upper": ["sqlite"],
-    "str UNQUOTED_UPPER": ["databricks_sql", "postgres", "sqlite"],
+    "str UNQUOTED_UPPER": ["databricks_sql", "postgres"],
     'str "lower"': ["postgres", "snowflake", "sqlite"],
     "str LOWER": ["databricks_sql", "postgres", "snowflake", "sqlite"],
     "str upper": ["databricks_sql", "postgres", "snowflake", "sqlite"],
