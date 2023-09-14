@@ -439,6 +439,8 @@ def get_datasources_cb(
             for d in datasources_list
             if d["data"]["attributes"]["datasource_config"]["name"] in queried_names
         ]
+    else:
+        datasources_list = [d["data"] for d in datasources_list]
 
     resp_body = {"data": datasources_list}
     result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(resp_body))
