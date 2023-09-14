@@ -351,7 +351,7 @@ class PagerdutyAlertAction(ValidationAction):
         severity: The PagerDuty severity levels determine the level of urgency. One of "critical", "error", "warning", or "info".
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         data_context: AbstractDataContext,
         api_key: str,
