@@ -9,6 +9,8 @@ from typing import (
     Union,
 )
 
+from packaging import version
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_metric_domain_kwargs,
@@ -271,7 +273,10 @@ def _sqlalchemy_column_map_condition_values(
         unexpected_condition
     )
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
-        query = query.select_from(selectable)
+        if version.parse(sa.__version__) >= version.parse("1.4"):
+            query = query.select_from(selectable.subquery())
+        else:
+            query = query.select_from(selectable)
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
