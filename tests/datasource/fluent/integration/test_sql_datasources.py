@@ -23,6 +23,9 @@ from pytest import param
 
 from great_expectations import get_context
 from great_expectations.compatibility.sqlalchemy import (
+    ProgrammingError as SqlAlchemyProgrammingError,
+)
+from great_expectations.compatibility.sqlalchemy import (
     TextClause,
     engine,
     inspect,
@@ -42,6 +45,7 @@ from great_expectations.datasource.fluent import (
 from great_expectations.execution_engine.sqlalchemy_dialect import (
     DIALECT_IDENTIFIER_QUOTE_STRINGS,
     GXSqlDialect,
+    _strip_quotes,
     quote_str,
 )
 from great_expectations.expectations.expectation import (
@@ -730,6 +734,9 @@ class TestColumnIdentifiers:
             else None
         )
 
+        print(f"\ncolumn_name:\n  {column_name!r}")
+        print(f"type:\n  {type(column_name)}\n")
+
         table_factory(
             gx_engine=datasource.get_execution_engine(),
             table_names={TEST_TABLE_NAME},
@@ -751,16 +758,36 @@ class TestColumnIdentifiers:
         )
         # examine columns
         with datasource.get_execution_engine().get_connection() as conn:
-            result = conn.execute(
-                TextClause(f"SELECT * FROM {qualified_table_name} LIMIT 1")
-            )
-            assert result
-            columns = list(result.keys())
-            print(f"{TEST_TABLE_NAME} Columns:\n  {columns}\n")
+            try:
+                # query table
+                result = conn.execute(
+                    TextClause(
+                        f"SELECT {column_name} FROM {qualified_table_name} LIMIT 1"
+                    )
+                )
+                assert result
+                columns = result.keys()
+                print(f"{TEST_TABLE_NAME} Columns:\n  {columns}\n")
+            except SqlAlchemyProgrammingError:
+                print(f"Column {column_name} does not exist in {qualified_table_name}")
+                raise
 
-        print(f"column_name:\n  {column_name!r}")
-        print(f"type:\n  {type(column_name)}")
-        assert column_name in columns
+            # query information_schema
+            col_exist_check = conn.execute(
+                TextClause(
+                    """SELECT column_name FROM information_schema.columns WHERE table_name = :table_name AND column_name = :column_name""",
+                ),
+                table_name=TEST_TABLE_NAME,
+                column_name=quoted_name(column_name, quote=False),
+            )
+            print(f"INFORMATION_SCHEMA.COLUMNS check:\n  {col_exist_check.keys()}")
+            col_exist_result = col_exist_check.fetchone()
+            print(f"  Result: {col_exist_result}")
+
+        # normalize names, casing issues will be caught by the query itself
+        assert list(columns)[0].lower() == _strip_quotes(
+            column_name.lower(), dialect=dialect
+        ), "column name mismatch"
 
     @pytest.mark.parametrize(
         "expectation_type",
