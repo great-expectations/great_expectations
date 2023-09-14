@@ -127,7 +127,7 @@ FakeDBTypedDict = TypedDict(
 def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTypedDict:
     fds_config = fds_config or GxConfig(fluent_datasources=[])
     datasource_names: set[str] = set()
-    datasource_config: dict[str, dict] = {}
+    datasource_config: dict[str, dict | str] = {}
     datasources_by_id: dict[str, dict] = {}
 
     for ds in fds_config._json_dict()["fluent_datasources"]:
@@ -137,8 +137,16 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
         id: str = str(uuid.uuid4())
         ds["id"] = id
 
-        datasource_config[name] = ds
-        datasources_by_id[id] = ds
+        ds_response_json = {
+            "data": {
+                "attributes": {"datasource_config": ds},
+                "id": id,
+                "type": "datasource",
+            }
+        }
+
+        datasource_config[name] = name
+        datasources_by_id[id] = ds_response_json
 
     return {
         "DATASOURCE_NAMES": datasource_names,
