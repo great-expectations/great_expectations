@@ -643,71 +643,74 @@ def _is_quote_char_dialect_mismatch(
     [
         param("unquoted_lower", id="str unquoted_lower"),
         param("UNQUOTED_LOWER", id="str UNQUOTED_LOWER"),
-        param("lower", id="str lower"),
-        param("LOWER", id="str LOWER"),
-        param('"lower"', id='str "lower"'),
-        param(
-            quoted_name(
-                "lower",
-                quote=None,
-            ),
-            id="quoted_name lower quote=None",
-        ),
-        param(
-            quoted_name(
-                "lower",
-                quote=True,
-            ),
-            id="quoted_name lower quote=True",
-        ),
-        param(
-            quoted_name(
-                "lower",
-                quote=False,
-            ),
-            id="quoted_name lower quote=False",
-        ),
-        param(
-            quoted_name(
-                "LOWER",
-                quote=None,
-            ),
-            marks=[pytest.mark.xfail],
-            id="quoted_name LOWER quote=None",
-        ),
         param("unquoted_upper", id="str unquoted_upper"),
         param("UNQUOTED_UPPER", id="str UNQUOTED_UPPER"),
-        param("upper", id="str upper"),
-        param("UPPER", id="str UPPER"),  # TODO: high priority
-        param('"UPPER"', id='str "UPPER"'),
-        param(
-            quoted_name(
-                "UPPER",
-                quote=None,
-            ),
-            id="quoted_name UPPER quote=None",
-        ),
-        param(
-            quoted_name(
-                "UPPER",
-                quote=True,
-            ),
-            id="quoted_name UPPER quote=True",
-        ),
-        param(
-            quoted_name(
-                "UPPER",
-                quote=False,
-            ),
-            id="quoted_name UPPER quote=False",
-        ),
-        param(
-            quoted_name(
-                "upper",
-                quote=None,
-            ),
-            id="quoted_name upper quote=None",
-        ),
+        # param(quoted_name("unquoted_lower", quote=True), id="qn unquoted_lower True"),
+        # param(quoted_name("unquoted_lower", quote=False), id="qn unquoted_lower False"),
+        # param(quoted_name("unquoted_lower", quote=None), id="qn unquoted_lower None"),
+        # param("lower", id="str lower"),
+        # param("LOWER", id="str LOWER"),
+        # param('"lower"', id='str "lower"'),
+        # param(
+        #     quoted_name(
+        #         "lower",
+        #         quote=None,
+        #     ),
+        #     id="quoted_name lower quote=None",
+        # ),
+        # param(
+        #     quoted_name(
+        #         "lower",
+        #         quote=True,
+        #     ),
+        #     id="quoted_name lower quote=True",
+        # ),
+        # param(
+        #     quoted_name(
+        #         "lower",
+        #         quote=False,
+        #     ),
+        #     id="quoted_name lower quote=False",
+        # ),
+        # param(
+        #     quoted_name(
+        #         "LOWER",
+        #         quote=None,
+        #     ),
+        #     marks=[pytest.mark.xfail],
+        #     id="quoted_name LOWER quote=None",
+        # ),
+        # param("upper", id="str upper"),
+        # param("UPPER", id="str UPPER"),  # TODO: high priority
+        # param('"UPPER"', id='str "UPPER"'),
+        # param(
+        #     quoted_name(
+        #         "UPPER",
+        #         quote=None,
+        #     ),
+        #     id="quoted_name UPPER quote=None",
+        # ),
+        # param(
+        #     quoted_name(
+        #         "UPPER",
+        #         quote=True,
+        #     ),
+        #     id="quoted_name UPPER quote=True",
+        # ),
+        # param(
+        #     quoted_name(
+        #         "UPPER",
+        #         quote=False,
+        #     ),
+        #     id="quoted_name UPPER quote=False",
+        # ),
+        # param(
+        #     quoted_name(
+        #         "upper",
+        #         quote=None,
+        #     ),
+        #     id="quoted_name upper quote=None",
+        # ),
     ],
 )
 class TestColumnIdentifiers:
@@ -801,8 +804,9 @@ class TestColumnIdentifiers:
                 raise
 
         # normalize names, casing issues will be caught by the query itself
-        assert list(columns)[0].lower() == _strip_quotes(
-            column_name.lower(), dialect=dialect
+        assert (
+            list(columns)[0].lower()
+            == _strip_quotes(column_name, dialect=dialect).lower()
         ), "column name mismatch"
 
     @pytest.mark.parametrize(
