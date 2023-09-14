@@ -158,17 +158,6 @@ def context() -> EphemeralDataContext:
     return ctx
 
 
-class TableFactory(Protocol):
-    def __call__(
-        self,
-        gx_engine: SqlAlchemyExecutionEngine,
-        table_names: set[str],
-        schema: str | None = None,
-        data: Sequence[Row] = ...,
-    ) -> None:
-        ...
-
-
 def get_random_identifier_name() -> str:
     guid = uuid.uuid4()
     return f"i{guid.hex}"
@@ -223,6 +212,17 @@ def capture_engine_logs(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFi
 @pytest.fixture
 def silence_sqla_warnings(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("SQLALCHEMY_SILENCE_UBER_WARNING", "1")
+
+
+class TableFactory(Protocol):
+    def __call__(
+        self,
+        gx_engine: SqlAlchemyExecutionEngine,
+        table_names: set[str],
+        schema: str | None = None,
+        data: Sequence[Row] = ...,
+    ) -> None:
+        ...
 
 
 @pytest.fixture(scope="function")
@@ -360,13 +360,16 @@ def snowflake_creds_populated() -> bool:
 
 @pytest.fixture
 def snowflake_ds(
-    context: EphemeralDataContext, snowflake_creds_populated: bool
+    context: EphemeralDataContext,
+    snowflake_creds_populated: bool,
 ) -> SnowflakeDatasource:
     if not snowflake_creds_populated:
         pytest.skip("no snowflake credentials")
     ds = context.sources.add_snowflake(
         "snowflake",
         connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
+        # NOTE: uncomment this and set SNOWFLAKE_USER to run tests against your own snowflake account
+        # connection_string="snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB/RESTAURANTS?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
     )
     return ds
 
