@@ -106,7 +106,7 @@ local_tests = [
     ),
     IntegrationTestFixture(
         name="getting_started",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/gx",
+        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         user_flow_script="tests/integration/docusaurus/tutorials/getting-started/getting_started.py",
         backend_dependencies=[],
@@ -114,7 +114,7 @@ local_tests = [
     IntegrationTestFixture(
         name="how_to_get_one_or_more_batches_of_data_from_a_configured_datasource",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/gx",
+        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         backend_dependencies=[],
     ),
@@ -298,7 +298,7 @@ fluent_datasources = [
     ),
     IntegrationTestFixture(
         name="rule_base_profiler_multi_batch_example",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/gx",
+        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         user_flow_script="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
         backend_dependencies=[BackendDependencies.PANDAS],
@@ -326,7 +326,7 @@ fluent_datasources = [
     ),
     IntegrationTestFixture(
         name="how_to_configure_a_new_checkpoint_using_test_yaml_config",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/gx",
+        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.py",
         backend_dependencies=[BackendDependencies.PANDAS],
@@ -489,35 +489,35 @@ docs_test_matrix += failed_rows_tests
 pandas_integration_tests = [
     IntegrationTestFixture(
         name="pandas_one_multi_batch_request_one_validator",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/gx",
+        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/fixtures/yellow_tripdata_pandas_fixture/one_multi_batch_request_one_validator.py",
         backend_dependencies=[BackendDependencies.PANDAS],
     ),
     IntegrationTestFixture(
         name="pandas_two_batch_requests_two_validators",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/gx",
+        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/fixtures/yellow_tripdata_pandas_fixture/two_batch_requests_two_validators.py",
         backend_dependencies=[BackendDependencies.PANDAS],
     ),
     IntegrationTestFixture(
         name="pandas_multiple_batch_requests_one_validator_multiple_steps",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/gx",
+        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/fixtures/yellow_tripdata_pandas_fixture/multiple_batch_requests_one_validator_multiple_steps.py",
         backend_dependencies=[BackendDependencies.PANDAS],
     ),
     IntegrationTestFixture(
         name="pandas_multiple_batch_requests_one_validator_one_step",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/gx",
+        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/fixtures/yellow_tripdata_pandas_fixture/multiple_batch_requests_one_validator_one_step.py",
         backend_dependencies=[BackendDependencies.PANDAS],
     ),
     IntegrationTestFixture(
         name="pandas_execution_engine_with_gcp_installed",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/gx",
+        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/common_workflows/pandas_execution_engine_with_gcp_installed.py",
         other_files=(
