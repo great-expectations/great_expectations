@@ -88,6 +88,11 @@ class SnowflakeDatasource(SQLDatasource):
     warehouse: Optional[str] = None
     role: Optional[str] = None
     numpy: bool = False
+    quoted_identifiers_ignore_case: Optional[bool] = pydantic.Field(
+        default=None,
+        description="Specifies whether letters in double-quoted object identifiers are"
+        " stored and resolved as uppercase letters.",
+    )
 
     _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
         "role",
@@ -98,6 +103,7 @@ class SnowflakeDatasource(SQLDatasource):
         "password",
         "numpy",
         "warehouse",
+        "quoted_identifiers_ignore_case",
     }
 
     @pydantic.root_validator
@@ -132,9 +138,22 @@ class SnowflakeDatasource(SQLDatasource):
                 kwargs = model_dict.pop("kwargs", {})
                 connection_string = model_dict.pop("connection_string")
 
+                if self.quoted_identifiers_ignore_case is not None:
+                    # ensure we don't drop any existing connect_args or session_parameters
+                    connect_args = kwargs.get("connect_args", {})
+                    session_parameters: dict[str, str | bool] = connect_args.get(
+                        "session_parameters", {}
+                    )
+                    session_parameters[
+                        "quoted_identifiers_ignore_case"
+                    ] = self.quoted_identifiers_ignore_case
+                    connect_args["session_parameters"] = session_parameters
+                    kwargs["connect_args"] = connect_args
+
                 if connection_string:
                     self._engine = sa.create_engine(connection_string, **kwargs)
                 else:
+                    # TODO: this path should accept other kwargs (e.g. connect_args)
                     self._engine = self._build_engine_with_connect_args(**kwargs)
 
             except Exception as e:
@@ -151,6 +170,7 @@ class SnowflakeDatasource(SQLDatasource):
         return self._engine
 
     def _build_engine_with_connect_args(self, **kwargs) -> sqlalchemy.Engine:
+        # TODO: rename this method `connect_args` has a special meaning in sqlalchemy
         connect_args = self._get_connect_args()
         connect_args.update(kwargs)
         url = URL(**connect_args)

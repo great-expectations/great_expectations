@@ -588,6 +588,7 @@ class _SourceFactories:
         warehouse: None = ...,
         role: None = ...,
         numpy: bool = ...,
+        quoted_identifiers_ignore_case: bool | None = ...,
     ) -> SnowflakeDatasource: ...
     @overload
     def add_snowflake(  # noqa: PLR0913
@@ -606,6 +607,7 @@ class _SourceFactories:
         warehouse: Optional[str] = ...,
         role: Optional[str] = ...,
         numpy: bool = ...,
+        quoted_identifiers_ignore_case: bool | None = ...,
     ) -> SnowflakeDatasource: ...
     @overload
     def update_snowflake(  # noqa: PLR0913
@@ -624,6 +626,7 @@ class _SourceFactories:
         warehouse: None = ...,
         role: None = ...,
         numpy: bool = ...,
+        quoted_identifiers_ignore_case: bool | None = ...,
     ) -> SnowflakeDatasource: ...
     @overload
     def update_snowflake(  # noqa: PLR0913
@@ -642,6 +645,7 @@ class _SourceFactories:
         warehouse: Optional[str] = ...,
         role: Optional[str] = ...,
         numpy: bool = ...,
+        quoted_identifiers_ignore_case: bool | None = ...,
     ) -> SnowflakeDatasource: ...
     @overload
     def add_or_update_snowflake(  # noqa: PLR0913
@@ -660,6 +664,7 @@ class _SourceFactories:
         warehouse: None = ...,
         role: None = ...,
         numpy: bool = ...,
+        quoted_identifiers_ignore_case: bool | None = ...,
     ) -> SnowflakeDatasource: ...
     @overload
     def add_or_update_snowflake(  # noqa: PLR0913
@@ -678,6 +683,7 @@ class _SourceFactories:
         warehouse: Optional[str] = ...,
         role: Optional[str] = ...,
         numpy: bool = ...,
+        quoted_identifiers_ignore_case: bool | None = ...,
     ) -> SnowflakeDatasource: ...
     def delete_snowflake(
         self,
