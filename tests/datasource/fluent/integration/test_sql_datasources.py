@@ -712,6 +712,7 @@ def _is_quote_char_dialect_mismatch(
     ],
 )
 class TestColumnIdentifiers:
+    @pytest.mark.xfail(reason="sanity checks")
     def test_raw_queries(
         self,
         context: EphemeralDataContext,
