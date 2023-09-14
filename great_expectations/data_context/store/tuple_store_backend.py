@@ -326,6 +326,10 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         return contents
 
+    @override
+    def _get_all(self) -> list[Any]:
+        raise NotImplementedError
+
     def _set(self, key, value, **kwargs):
         if not isinstance(key, tuple):
             key = key.to_tuple()
@@ -573,6 +577,10 @@ class TupleS3StoreBackend(TupleStoreBackend):
             .read()
             .decode(s3_response_object.get("ContentEncoding", "utf-8"))
         )
+
+    @override
+    def _get_all(self) -> list[Any]:
+        raise NotImplementedError
 
     def _set(
         self,
@@ -858,6 +866,10 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         else:
             return gcs_response_object.download_as_bytes().decode("utf-8")
 
+    @override
+    def _get_all(self) -> list[Any]:
+        raise NotImplementedError
+
     def _set(
         self,
         key,
@@ -1080,6 +1092,10 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         return (
             self._container_client.download_blob(az_blob_key).readall().decode("utf-8")
         )
+
+    @override
+    def _get_all(self) -> list[Any]:
+        raise NotImplementedError
 
     def _set(self, key, value, content_encoding="utf-8", **kwargs):
         from great_expectations.compatibility.azure import ContentSettings

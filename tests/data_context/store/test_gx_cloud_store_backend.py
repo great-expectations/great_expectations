@@ -271,7 +271,24 @@ def test_list_keys(
         store_backend.list_keys()
         mock_get.assert_called_with(
             mock.ANY,  # requests.Session object
-            f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
+            url=f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
+            params=None,
+        )
+
+
+def test_get_all(
+    construct_ge_cloud_store_backend: Callable[
+        [GXCloudRESTResource], GXCloudStoreBackend
+    ],
+) -> None:
+    store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.DATASOURCE)
+
+    with mock.patch("requests.Session.get", autospec=True) as mock_get:
+        store_backend.get_all()
+        mock_get.assert_called_with(
+            mock.ANY,  # requests.Session object
+            url=f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/datasources",
+            params=None,
         )
 
 
