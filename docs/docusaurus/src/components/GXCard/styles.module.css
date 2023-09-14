@@ -1,4 +1,4 @@
-.GXCard {
+.gxCard {
     background-color: var(--mint-100);
     padding: 1.5rem;
     font-size: 15px;
@@ -7,17 +7,17 @@
     margin: 2rem 0;
   }
   
-  .astroCard__title {
+  .gxCard__title {
     font-size: 15px;
   }
   
-  .astroCard__buttons {
+  .gxCard__buttons {
     display: flex;
     gap: 0.75rem;
     flex-wrap: wrap;
   }
   
-  html[data-theme="dark"] .GXCard {
+  html[data-theme="dark"] .gxCard {
     background-color: var(--mint-700);
   }
   
