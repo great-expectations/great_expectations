@@ -18,6 +18,7 @@ from typing import (
 )
 
 import pytest
+import sqlalchemy as sa
 from packaging.version import Version
 from pytest import param
 
@@ -758,19 +759,7 @@ class TestColumnIdentifiers:
         )
         # examine columns
         with datasource.get_execution_engine().get_connection() as conn:
-            try:
-                # query table
-                result = conn.execute(
-                    TextClause(
-                        f"SELECT {column_name} FROM {qualified_table_name} LIMIT 1"
-                    )
-                )
-                assert result
-                columns = result.keys()
-                print(f"{TEST_TABLE_NAME} Columns:\n  {columns}\n")
-            except SqlAlchemyProgrammingError:
-                print(f"Column {column_name} does not exist in {qualified_table_name}")
-                raise
+            # TODO: remove one or all of these methods for checking for columns
 
             # query information_schema
             col_exist_check = conn.execute(
@@ -782,7 +771,34 @@ class TestColumnIdentifiers:
             )
             print(f"INFORMATION_SCHEMA.COLUMNS check:\n  {col_exist_check.keys()}")
             col_exist_result = col_exist_check.fetchone()
-            print(f"  Result: {col_exist_result}")
+            print(f"  Result: {col_exist_result}\n")
+
+            try:
+                query_builder_result = conn.execute(
+                    sa.sql.select(
+                        sa.column(column_name),
+                        # sa.text(column_name),
+                    )
+                    .select_from(sa.table(qualified_table_name))
+                    .limit(1)
+                )
+                print(f"query_builder_result:\n  {query_builder_result.keys()}\n")
+            except SqlAlchemyProgrammingError as e:
+                print(f"query_builder_result:\n  {e!r}\n")
+
+            try:
+                # query table
+                txt_result = conn.execute(
+                    TextClause(
+                        f"SELECT {column_name} FROM {qualified_table_name} LIMIT 1"
+                    )
+                )
+                assert txt_result
+                columns = txt_result.keys()
+                print(f"{TEST_TABLE_NAME} Columns:\n  {columns}\n")
+            except SqlAlchemyProgrammingError:
+                print(f"Column {column_name} does not exist in {qualified_table_name}")
+                raise
 
         # normalize names, casing issues will be caught by the query itself
         assert list(columns)[0].lower() == _strip_quotes(
