@@ -159,6 +159,21 @@ def expectation_config_expect_column_values_to_be_in_set() -> ExpectationConfigu
 
 
 @pytest.fixture()
+def expectation_config_expect_column_values_to_be_in_set_row_condition() -> (
+    ExpectationConfiguration
+):
+    return ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
+            "condition_parser": "great_expectations__experimental__",
+            "row_condition": 'col("animals") != "dog"',
+        },
+    )
+
+
+@pytest.fixture()
 def expectation_config_expect_column_values_to_not_be_in_set() -> (
     ExpectationConfiguration
 ):
@@ -3658,3 +3673,96 @@ def test_rendered_content_bool_only_respected(
         validation_result_identifier
     ]["validation_result"]["results"][0]
     assert expectation_validation_result.result == {}
+
+
+def test_bigquery_row_condition():
+    import os
+
+    import great_expectations as gx
+
+    my_connection_string = os.getenv("BIGQUERY_CONNECTION_STRING")
+    context = gx.get_context()
+    datasource_name = "my_datasource"
+    datasource = context.sources.add_or_update_sql(
+        name=datasource_name, connection_string=my_connection_string
+    )
+
+    asset_name = "my_asset"
+
+    # taxi_data is the name of a table in GX's test database. Please replace with a table that can be accessed by using the connection string above.
+    asset_table_name = "taxi_data"
+    table_asset = datasource.add_table_asset(
+        name=asset_name, table_name=asset_table_name
+    )
+    batch_request = table_asset.build_batch_request()
+
+    expectation_suite_name = "my_new_expectation_suite"
+    context.add_or_update_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+
+    validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name=expectation_suite_name,
+    )
+    print(validator.head())
+
+    # validator.expect_column_values_to_be_between(column="fare_amount", min_value=0.01, max_value=100.0,
+    #                                              condition_parser="great_expectations__experimental__",
+    #                                              #row_condition="\"total_amount\"==0.0")
+    #                                              row_condition="col(\"total_amount\")>=0.0")
+
+    validator.expect_column_values_to_be_between(
+        column="fare_amount",
+        min_value=0.01,
+        max_value=100.0,
+        condition_parser="great_expectations__experimental__",
+        # row_condition="\"total_amount\"==0.0")
+        row_condition='col("total_amount")!=0.0',
+    )
+
+    validator.save_expectation_suite(discard_failed_expectations=False)
+    checkpoint = context.add_or_update_checkpoint(
+        name="my_quickstart_checkpoint",
+        validator=validator,
+    )
+    checkpoint_result = checkpoint.run(
+        result_format={
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["pickup_datetime"],
+        }
+    )
+
+    print(f"checkpoint_result:{checkpoint_result}")
+
+
+@pytest.mark.filesystem
+def test_spark_row_condition(
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set_row_condition: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
+    expected_spark_query_output: str,
+):
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["pk_1"],
+        }
+    }
+    context = _add_expectations_and_checkpoint(
+        data_context=in_memory_runtime_context,
+        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[
+            expectation_config_expect_column_values_to_be_in_set_row_condition
+        ],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        expectation_suite_name="metrics_exp",
+        batch_request=batch_request_for_spark_unexpected_rows_and_index,
+        runtime_configuration={"catch_exceptions": False},
+    )
+    print(result)
