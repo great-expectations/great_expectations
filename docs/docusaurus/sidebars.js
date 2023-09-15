@@ -1,6 +1,6 @@
 module.exports = {
   cloud: [
-    `gx_welcome`
+    `cloud/gx_welcome`
   ], 
   docs: [
     'intro',
