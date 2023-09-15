@@ -213,11 +213,9 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         domain_builder = ColumnDomainBuilder(
             include_semantic_types=[SemanticDomainTypes.NUMERIC],
         )
-        assert isinstance(validator.active_batch, Batch)
-        if not isinstance(validator.active_batch, Batch):
-            raise TypeError(
-                f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
-            )
+        assert isinstance(
+            validator.active_batch, Batch
+        ), f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
         batch_id = validator.active_batch.id
         numeric_column_names = domain_builder.get_effective_column_names(
             validator=validator,
@@ -264,11 +262,9 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             metric_configurations=metric_configs,
             runtime_configuration={"catch_exceptions": True},
         )
-        assert isinstance(validator.active_batch, Batch)
-        if not isinstance(validator.active_batch, Batch):
-            raise TypeError(
-                f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
-            )
+        assert isinstance(
+            validator.active_batch, Batch
+        ), f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
         batch_id = validator.active_batch.id
         return batch_id, computed_metrics
 
