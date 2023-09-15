@@ -192,8 +192,7 @@ def test_docs_build_happy_paths_build_site_on_single_site_context(
     assert len(obs_urls) == 1
     if not cli_input == "n\n":
         assert (
-            "great_expectations/uncommitted/data_docs/local_site/index.html"
-            in obs_urls[0]["site_url"]
+            "gx/uncommitted/data_docs/local_site/index.html" in obs_urls[0]["site_url"]
         )
         site_dir = os.path.join(  # noqa: PTH118
             root_dir, context.GX_UNCOMMITTED_DIR, "data_docs", "local_site"
