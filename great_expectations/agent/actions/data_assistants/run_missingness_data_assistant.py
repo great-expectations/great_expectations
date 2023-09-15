@@ -25,7 +25,7 @@ class RunMissingnessDataAssistantAction(AgentAction[RunMissingnessDataAssistantE
         )
         return build_action_result(
             context=self._context,
-            data_assistant_name="M issingness",
+            data_assistant_name="Missingness",
             event=event,
             data_assistant_result=data_assistant_result,
             id=id,
