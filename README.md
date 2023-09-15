@@ -468,7 +468,7 @@ Great Expectations OSS is under active development by GX Labs and the Great Expe
 What's the best way to get in touch with the Great Expectations team?
 --------------------------------------------------------------------------------
 
-If you have questions, comments, or just want to have a good old-fashioned chat about data quality, please hop on our public [Slack channel](https://greatexpectations.io/slack) or post in our [GitHub Discussions](https://github.com/great-expectations/great_expectations/discussions).
+If you have questions, comments, or just want to have a good old-fashioned chat about data quality, please hop on our public [Slack channel](https://greatexpectations.io/slack) or post in our [Discourse](https://discourse.greatexpectations.io/).
 
 
 Can I contribute to the library?
