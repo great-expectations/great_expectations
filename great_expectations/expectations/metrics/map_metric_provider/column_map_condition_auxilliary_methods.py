@@ -277,7 +277,6 @@ def _sqlalchemy_column_map_condition_values(
         ):
             query = query.select_from(selectable.subquery())
         else:
-            # if table
             query = query.select_from(selectable)
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
