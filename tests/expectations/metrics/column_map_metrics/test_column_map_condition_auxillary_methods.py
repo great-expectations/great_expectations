@@ -108,29 +108,72 @@ def execution_engine_with_mini_taxi_selectable(
 
 
 @pytest.mark.parametrize(
-    "execution_engine_fixture_name",
+    "execution_engine_fixture_name, metric_domain_kwargs, expected_result",
     [
         # fixture name passed as string
-        ("execution_engine_with_mini_taxi_table_name"),
-        ("execution_engine_with_mini_taxi_query"),
-        ("execution_engine_with_mini_taxi_selectable"),
+        (
+            "execution_engine_with_mini_taxi_table_name",
+            {
+                "column": "total_amount",
+                "row_condition": 'col("pk_1")==0',
+                "condition_parser": "great_expectations__experimental__",
+            },
+            [],
+        ),
+        (
+            "execution_engine_with_mini_taxi_table_name",
+            {
+                "column": "total_amount",
+                "row_condition": 'col("pk_1")!=0',
+                "condition_parser": "great_expectations__experimental__",
+            },
+            [14.8],
+        ),
+        (
+            "execution_engine_with_mini_taxi_query",
+            {
+                "column": "total_amount",
+                "row_condition": 'col("pk_1")==0',
+                "condition_parser": "great_expectations__experimental__",
+            },
+            [],
+        ),
+        (
+            "execution_engine_with_mini_taxi_query",
+            {
+                "column": "total_amount",
+                "row_condition": 'col("pk_1")!=0',
+                "condition_parser": "great_expectations__experimental__",
+            },
+            [14.8],
+        ),
+        (
+            "execution_engine_with_mini_taxi_selectable",
+            {
+                "column": "total_amount",
+                "row_condition": 'col("pk_1")==0',
+                "condition_parser": "great_expectations__experimental__",
+            },
+            [],
+        ),
+        (
+            "execution_engine_with_mini_taxi_selectable",
+            {
+                "column": "total_amount",
+                "row_condition": 'col("pk_1")!=0',
+                "condition_parser": "great_expectations__experimental__",
+            },
+            [14.8],
+        ),
     ],
 )
-def test_column_map_condition_values_with_able(
-    execution_engine_fixture_name, request, sa
+def test_column_map_condition_values_row_condition(
+    execution_engine_fixture_name, metric_domain_kwargs, expected_result, request, sa
 ):
     execution_engine = request.getfixturevalue(execution_engine_fixture_name)
-    metric_domain_kwargs = {
-        "batch_id": "__",
-        "table": "test_table",
-        "column": "total_amount",
-        "row_condition": 'col("pk_1")!=0',
-        "condition_parser": "great_expectations__experimental__",
-    }
-
     metric_value_kwargs = {
         "min_value": 0.01,
-        "max_value": 100.0,
+        "max_value": 10.0,
         "strict_min": False,
         "strict_max": False,
         "parse_strings_as_datetimes": False,
@@ -147,8 +190,8 @@ def test_column_map_condition_values_with_able(
     )
     desired_metric = MetricConfiguration(
         metric_name="column_values.between.condition",
-        metric_domain_kwargs={"column": "total_amount"},
-        metric_value_kwargs={"min_value": 0.0, "max_value": 10.0},
+        metric_domain_kwargs=metric_domain_kwargs,
+        metric_value_kwargs=metric_value_kwargs,
     )
     desired_metric.metric_dependencies = {"table.columns": table_columns_metric}
     results = execution_engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
@@ -165,5 +208,5 @@ def test_column_map_condition_values_with_able(
         metric_value_kwargs=metric_value_kwargs,
         metrics=metrics,
     )
-    # one value is out of the range
-    assert res == [14.8]
+    # one value is out of range with row condition
+    assert res == expected_result
