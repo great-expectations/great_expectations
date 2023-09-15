@@ -8,6 +8,7 @@ from typing import (
     Any,
     Dict,
     List,
+    Mapping,
     Optional,
     Sequence,
     Tuple,
@@ -358,7 +359,7 @@ class _CaseInsensitiveString(str):
 class CaseInsensitiveNameDict(UserDict):
     """Normal dict except it returns a case-insensitive string for any `name` key values."""
 
-    def __init__(self, data: Dict[str, Any]):
+    def __init__(self, data: dict[str, Any]):
         self.data = data
 
     @override
@@ -374,9 +375,9 @@ def get_sqlalchemy_column_metadata(
     execution_engine: SqlAlchemyExecutionEngine,
     table_selectable: sqlalchemy.Select,
     schema_name: Optional[str] = None,
-) -> Optional[List[Dict[str, Any]]]:
+) -> Sequence[Mapping[str, Any]] | None:
     try:
-        columns: List[Dict[str, Any]]
+        columns: Sequence[Dict[str, Any]]
 
         engine = execution_engine.engine
         inspector = execution_engine.get_inspector()
@@ -431,7 +432,7 @@ def get_sqlalchemy_column_metadata(
         if dialect_name == "snowflake":
             return [
                 # TODO: SmartColumn should know the dialect and do lookups based on that
-                CaseInsensitiveNameDict(column)  # type: ignore[misc]
+                CaseInsensitiveNameDict(column)
                 for column in columns
             ]
 
