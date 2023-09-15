@@ -138,8 +138,8 @@ TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
 }
 
 # column names
-UNQUOTED_UPPER: Final[Literal["UNQUOTED_UPPER"]] = "UNQUOTED_UPPER"
-UNQUOTED_LOWER: Final[Literal["unquoted_lower"]] = "unquoted_lower"
+UNQUOTED_UPPER_COL: Final[Literal["UNQUOTED_UPPER_COL"]] = "UNQUOTED_UPPER_COL"
+UNQUOTED_LOWER_COL: Final[Literal["unquoted_lower_col"]] = "unquoted_lower_col"
 
 
 class Row(TypedDict):
@@ -147,8 +147,8 @@ class Row(TypedDict):
     name: str
     upper: str
     lower: str
-    unquoted_upper: str
-    unquoted_lower: str
+    unquoted_upper_col: str
+    unquoted_lower_col: str
 
 
 @pytest.fixture
@@ -268,13 +268,13 @@ def table_factory(
                 create_tables: str = (
                     f"CREATE TABLE IF NOT EXISTS {qualified_table_name}"
                     f" (id INTEGER, name VARCHAR(255), {upper} VARCHAR(255), {lower} VARCHAR(255),"
-                    f" {UNQUOTED_UPPER} VARCHAR(255), {UNQUOTED_LOWER} VARCHAR(255))"
+                    f" {UNQUOTED_UPPER_COL} VARCHAR(255), {UNQUOTED_LOWER_COL} VARCHAR(255))"
                 )
                 conn.execute(TextClause(create_tables))
                 if data:
                     insert_data = (
-                        f"INSERT INTO {qualified_table_name} (id, name, {upper}, {lower}, {UNQUOTED_UPPER}, {UNQUOTED_LOWER})"
-                        " VALUES (:id, :name, :upper, :lower, :unquoted_upper, :unquoted_lower)"
+                        f"INSERT INTO {qualified_table_name} (id, name, {upper}, {lower}, {UNQUOTED_UPPER_COL}, {UNQUOTED_LOWER_COL})"
+                        " VALUES (:id, :name, :upper, :lower, :unquoted_upper_col, :unquoted_lower_col)"
                     )
                     conn.execute(TextClause(insert_data), data)
 
@@ -600,9 +600,9 @@ class TestTableIdentifiers:
 
 # TODO: remove items from this lookup when working on fixes
 REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
-    "str UNQUOTED_LOWER": ["databricks_sql", "postgres", "sqlite"],
-    "str unquoted_upper": ["databricks_sql", "sqlite"],
-    "str UNQUOTED_UPPER": ["databricks_sql", "postgres"],
+    "str UNQUOTED_LOWER_COL": ["databricks_sql", "postgres", "sqlite"],
+    "str unquoted_upper_col": ["databricks_sql", "sqlite"],
+    "str UNQUOTED_UPPER_COL": ["databricks_sql", "postgres"],
     'str "lower"': ["postgres", "snowflake", "sqlite"],
     "str lower": ["snowflake"],
     "str LOWER": ["databricks_sql", "postgres", "snowflake", "sqlite"],
@@ -645,10 +645,10 @@ def _is_quote_char_dialect_mismatch(
 @pytest.mark.parametrize(
     "column_name",
     [
-        param("unquoted_lower", id="str unquoted_lower"),
-        param("UNQUOTED_LOWER", id="str UNQUOTED_LOWER"),
-        param("unquoted_upper", id="str unquoted_upper"),
-        param("UNQUOTED_UPPER", id="str UNQUOTED_UPPER"),
+        param("unquoted_lower_col", id="str unquoted_lower_col"),
+        param("UNQUOTED_LOWER_COL", id="str UNQUOTED_LOWER_COL"),
+        param("unquoted_upper_col", id="str unquoted_upper_col"),
+        param("UNQUOTED_UPPER_COL", id="str UNQUOTED_UPPER_COL"),
         param("lower", id="str lower"),
         param("LOWER", id="str LOWER"),
         param('"lower"', id='str "lower"'),
@@ -754,8 +754,8 @@ class TestColumnIdentifiers:
                     "name": "first",
                     "upper": "uppercase",
                     "lower": "lowercase",
-                    "unquoted_upper": "uppercase",
-                    "unquoted_lower": "lowercase",
+                    "unquoted_upper_col": "uppercase",
+                    "unquoted_lower_col": "lowercase",
                 }
             ],
         )
@@ -856,16 +856,16 @@ class TestColumnIdentifiers:
                     "name": "first",
                     "upper": "my column is uppercase",
                     "lower": "my column is lowercase",
-                    "unquoted_upper": "whatever",
-                    "unquoted_lower": "whatever",
+                    "unquoted_upper_col": "whatever",
+                    "unquoted_lower_col": "whatever",
                 },
                 {
                     "id": 2,
                     "name": "second",
                     "upper": "my column is uppercase",
                     "lower": "my column is lowercase",
-                    "unquoted_upper": "whatever",
-                    "unquoted_lower": "whatever",
+                    "unquoted_upper_col": "whatever",
+                    "unquoted_lower_col": "whatever",
                 },
             ],
         )
