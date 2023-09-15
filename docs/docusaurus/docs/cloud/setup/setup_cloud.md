@@ -1,6 +1,6 @@
 ---
-sidebar_label: 'Set up GX Cloud'
-title: 'Set up GX Cloud'
+sidebar_label: Set up GX Cloud
+title: Set up GX Cloud
 id: setup_cloud
 description: An end-to-end reference to help new users set up GX Cloud.
 ---
