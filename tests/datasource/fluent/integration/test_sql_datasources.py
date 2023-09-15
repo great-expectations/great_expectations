@@ -140,15 +140,8 @@ TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
 # column names
 UNQUOTED_UPPER_COL: Final[Literal["UNQUOTED_UPPER_COL"]] = "UNQUOTED_UPPER_COL"
 UNQUOTED_LOWER_COL: Final[Literal["unquoted_lower_col"]] = "unquoted_lower_col"
-
-
-class Row(TypedDict):
-    id: int
-    name: str
-    upper: str
-    lower: str
-    unquoted_upper_col: str
-    unquoted_lower_col: str
+QUOTED_UPPER_COL: Final[Literal["QUOTED_UPPER_COL"]] = "QUOTED_UPPER_COL"
+QUOTED_LOWER_COL: Final[Literal["quoted_lower_col"]] = "quoted_lower_col"
 
 
 @pytest.fixture
@@ -214,6 +207,15 @@ def silence_sqla_warnings(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("SQLALCHEMY_SILENCE_UBER_WARNING", "1")
 
 
+class Row(TypedDict):
+    id: int
+    name: str
+    quoted_upper_col: str
+    quoted_lower_col: str
+    unquoted_upper_col: str
+    unquoted_lower_col: str
+
+
 class TableFactory(Protocol):
     def __call__(
         self,
@@ -257,8 +259,12 @@ def table_factory(
         created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
 
         with gx_engine.get_connection() as conn:
-            upper: str = quote_str("UPPER", dialect=sa_engine.dialect.name)
-            lower: str = quote_str("lower", dialect=sa_engine.dialect.name)
+            quoted_upper_col: str = quote_str(
+                QUOTED_UPPER_COL, dialect=sa_engine.dialect.name
+            )
+            quoted_lower_col: str = quote_str(
+                QUOTED_LOWER_COL, dialect=sa_engine.dialect.name
+            )
             transaction = conn.begin()
             if schema:
                 conn.execute(TextClause(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
@@ -267,14 +273,14 @@ def table_factory(
                 # TODO: use dialect specific quotes
                 create_tables: str = (
                     f"CREATE TABLE IF NOT EXISTS {qualified_table_name}"
-                    f" (id INTEGER, name VARCHAR(255), {upper} VARCHAR(255), {lower} VARCHAR(255),"
+                    f" (id INTEGER, name VARCHAR(255), {quoted_upper_col} VARCHAR(255), {quoted_lower_col} VARCHAR(255),"
                     f" {UNQUOTED_UPPER_COL} VARCHAR(255), {UNQUOTED_LOWER_COL} VARCHAR(255))"
                 )
                 conn.execute(TextClause(create_tables))
                 if data:
                     insert_data = (
-                        f"INSERT INTO {qualified_table_name} (id, name, {upper}, {lower}, {UNQUOTED_UPPER_COL}, {UNQUOTED_LOWER_COL})"
-                        " VALUES (:id, :name, :upper, :lower, :unquoted_upper_col, :unquoted_lower_col)"
+                        f"INSERT INTO {qualified_table_name} (id, name, {quoted_upper_col}, {quoted_lower_col}, {UNQUOTED_UPPER_COL}, {UNQUOTED_LOWER_COL})"
+                        " VALUES (:id, :name, :quoted_upper_col, :quoted_lower_col, :unquoted_upper_col, :unquoted_lower_col)"
                     )
                     conn.execute(TextClause(insert_data), data)
 
@@ -603,12 +609,18 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     "str UNQUOTED_LOWER_COL": ["databricks_sql", "postgres", "sqlite"],
     "str unquoted_upper_col": ["databricks_sql", "sqlite"],
     "str UNQUOTED_UPPER_COL": ["databricks_sql", "postgres"],
-    'str "lower"': ["postgres", "snowflake", "sqlite"],
-    "str lower": ["snowflake"],
-    "str LOWER": ["databricks_sql", "postgres", "snowflake", "sqlite"],
-    "str upper": ["databricks_sql", "postgres", "snowflake", "sqlite"],
-    'str "UPPER"': ["postgres", "snowflake", "sqlite"],
-    "quoted_name upper quote=None": [
+    'str "quoted_lower_col"': ["postgres", "snowflake", "sqlite"],
+    "str quoted_lower_col": ["snowflake"],
+    "str QUOTED_LOWER_COL": ["databricks_sql", "postgres", "snowflake", "sqlite"],
+    "str quoted_upper_col": ["databricks_sql", "postgres", "snowflake", "sqlite"],
+    'str "QUOTED_UPPER_COL"': ["postgres", "snowflake", "sqlite"],
+    "quoted_name quoted_upper_col quote=None": [
+        "databricks_sql",
+        "postgres",
+        "snowflake",
+        "sqlite",
+    ],
+    "quoted_name QUOTED_LOWER_COL quote=None": [
         "databricks_sql",
         "postgres",
         "snowflake",
@@ -649,68 +661,67 @@ def _is_quote_char_dialect_mismatch(
         param("UNQUOTED_LOWER_COL", id="str UNQUOTED_LOWER_COL"),
         param("unquoted_upper_col", id="str unquoted_upper_col"),
         param("UNQUOTED_UPPER_COL", id="str UNQUOTED_UPPER_COL"),
-        param("lower", id="str lower"),
-        param("LOWER", id="str LOWER"),
-        param('"lower"', id='str "lower"'),
+        param("quoted_lower_col", id="str quoted_lower_col"),
+        param("QUOTED_LOWER_COL", id="str QUOTED_LOWER_COL"),
+        param('"quoted_lower_col"', id='str "quoted_lower_col"'),
         param(
             quoted_name(
-                "lower",
+                "quoted_lower_col",
                 quote=None,
             ),
-            id="quoted_name lower quote=None",
+            id="quoted_name quoted_lower_col quote=None",
         ),
         param(
             quoted_name(
-                "lower",
+                "quoted_lower_col",
                 quote=True,
             ),
-            id="quoted_name lower quote=True",
+            id="quoted_name quoted_lower_col quote=True",
         ),
         param(
             quoted_name(
-                "lower",
+                "quoted_lower_col",
                 quote=False,
             ),
-            id="quoted_name lower quote=False",
+            id="quoted_name quoted_lower_col quote=False",
         ),
         param(
             quoted_name(
-                "LOWER",
+                "QUOTED_LOWER_COL",
                 quote=None,
             ),
-            marks=[pytest.mark.xfail],
-            id="quoted_name LOWER quote=None",
+            id="quoted_name QUOTED_LOWER_COL quote=None",
         ),
-        param("upper", id="str upper"),
-        param("UPPER", id="str UPPER"),
-        param('"UPPER"', id='str "UPPER"'),
+        param("quoted_upper_col", id="str quoted_upper_col"),
+        param("QUOTED_UPPER_COL", id="str QUOTED_UPPER_COL"),
+        param('"QUOTED_UPPER_COL"', id='str "QUOTED_UPPER_COL"'),
         param(
             quoted_name(
-                "UPPER",
+                "QUOTED_UPPER_COL",
                 quote=None,
             ),
-            id="quoted_name UPPER quote=None",
+            id="quoted_name QUOTED_UPPER_COL quote=None",
         ),
         param(
             quoted_name(
-                "UPPER",
+                "QUOTED_UPPER_COL",
                 quote=True,
             ),
-            id="quoted_name UPPER quote=True",
+            id="quoted_name QUOTED_UPPER_COL quote=True",
         ),
         param(
             quoted_name(
-                "UPPER",
+                "QUOTED_UPPER_COL",
                 quote=False,
             ),
-            id="quoted_name UPPER quote=False",
+            id="quoted_name QUOTED_UPPER_COL quote=False",
         ),
         param(
             quoted_name(
-                "upper",
+                "quoted_upper_col",
                 quote=None,
             ),
-            id="quoted_name upper quote=None",
+            id="quoted_name quoted_upper_col quote=None",
         ),
     ],
 )
@@ -752,8 +763,8 @@ class TestColumnIdentifiers:
                 {
                     "id": 1,
                     "name": "first",
-                    "upper": "uppercase",
-                    "lower": "lowercase",
+                    "quoted_upper_col": "uppercase",
+                    "quoted_lower_col": "lowercase",
                     "unquoted_upper_col": "uppercase",
                     "unquoted_lower_col": "lowercase",
                 }
@@ -854,16 +865,16 @@ class TestColumnIdentifiers:
                 {
                     "id": 1,
                     "name": "first",
-                    "upper": "my column is uppercase",
-                    "lower": "my column is lowercase",
+                    "quoted_upper_col": "my column is uppercase",
+                    "quoted_lower_col": "my column is lowercase",
                     "unquoted_upper_col": "whatever",
                     "unquoted_lower_col": "whatever",
                 },
                 {
                     "id": 2,
                     "name": "second",
-                    "upper": "my column is uppercase",
-                    "lower": "my column is lowercase",
+                    "quoted_upper_col": "my column is uppercase",
+                    "quoted_lower_col": "my column is lowercase",
                     "unquoted_upper_col": "whatever",
                     "unquoted_lower_col": "whatever",
                 },
