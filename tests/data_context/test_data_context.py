@@ -521,7 +521,7 @@ project_path/
             f2.csv
         titanic/
             Titanic.csv
-    great_expectations/
+    gx/
         .gitignore
         great_expectations.yml
         checkpoints/
@@ -573,7 +573,7 @@ project_path/
     ).to_id()
 
     data_docs_dir = os.path.join(  # noqa: PTH118
-        project_dir, "great_expectations/uncommitted/data_docs"
+        project_dir, "gx/uncommitted/data_docs"
     )
     observed = gen_directory_tree_str(data_docs_dir)
     assert (
@@ -1044,9 +1044,7 @@ def test_data_context_create_raises_warning_and_leaves_existing_yml_untouched(
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
     FileDataContext.create(project_path)
-    ge_yml = os.path.join(  # noqa: PTH118
-        project_path, "great_expectations/great_expectations.yml"
-    )
+    ge_yml = os.path.join(project_path, "gx/great_expectations.yml")  # noqa: PTH118
     with open(ge_yml, "a") as ff:
         ff.write("# LOOK I WAS MODIFIED")
 
@@ -1083,7 +1081,7 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
     assert (
         obs
         == """\
-great_expectations/
+gx/
     .gitignore
     great_expectations.yml
     checkpoints/
@@ -1110,7 +1108,7 @@ def test_data_context_create_does_nothing_if_all_uncommitted_dirs_exist(
     tmp_path_factory,
 ):
     expected = """\
-great_expectations/
+gx/
     .gitignore
     great_expectations.yml
     checkpoints/
@@ -1219,6 +1217,7 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
 @pytest.mark.filesystem
 def test_scaffold_directories(tmp_path_factory):
     empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories"))
+    empty_directory = pathlib.Path(empty_directory)
     FileDataContext._scaffold_directories(empty_directory)
 
     assert set(os.listdir(empty_directory)) == {
