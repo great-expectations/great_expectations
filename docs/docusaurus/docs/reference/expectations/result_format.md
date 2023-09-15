@@ -32,11 +32,7 @@ the configuration is not persisted, and you'll receive a `UserWarning`. GX recom
 
 ### Expectation-level configuration
 
-To apply `result_format` to an Expectation, you pass it into the Expectation. 
-
-1. Run `$ great_expectations suite new` to obtain a Validator object instance.
-
-2. Run the following code to pass `result_format` into the Expectation:
+To apply `result_format` to an Expectation, you pass it into the Expectation configuration on your Validator:
 
     ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_set"
     ```
@@ -69,7 +65,7 @@ Regardless of how Result Format is configured, `unexpected_list` is never render
 ----------------------------------------|------------------------------------|----------------|----------------|-----------------
 |    details (dictionary)               | Defined on a per-Expectation basis |
 
-## Column map Expectations result format values and fields
+## Column Map Expectations result format values and fields
 
 | Fields within `result`                |BOOLEAN_ONLY    |BASIC           |SUMMARY         |COMPLETE        |
 ----------------------------------------|----------------|----------------|----------------|-----------------
@@ -86,7 +82,7 @@ Regardless of how Result Format is configured, `unexpected_list` is never render
 |    unexpected_index_query             |no              |no              |no              |yes             |
 |    unexpected_list                    |no              |no              |no              |yes             |
 
-## Column aggregate Expectations result format values and fields
+## Column Aggregate Expectations result format values and fields
 
 | Fields within `result`                |BOOLEAN_ONLY    |BASIC           |SUMMARY         |COMPLETE        |
 ----------------------------------------|----------------|----------------|----------------|-----------------
