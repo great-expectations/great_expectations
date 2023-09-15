@@ -1,5 +1,4 @@
 ---
-title: 'GX Docs'
 id: gx_welcome
 description: 'Learn everything you need to know about GX'
 hide_table_of_contents: true
