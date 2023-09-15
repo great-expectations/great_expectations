@@ -110,7 +110,9 @@ def execution_engine_with_mini_taxi_selectable(
 @pytest.mark.parametrize(
     "execution_engine_fixture_name, metric_domain_kwargs, expected_result",
     [
-        # fixture name passed as string
+        # We calculate the column_values.between.condition with min value 0.0 and max value 10.0.
+        # when row_condition is col("pk_1")!=0 _sqlalchemy_column_map_condition_values() method will return [14.8] because it will run against all rows and find the values that out of range (0 < x < 10.0).
+        # when row_condition is col("pk_1")==0 _sqlalchemy_column_map_condition_values() method will return [] because it will only run against a single row (where pk_1==0), and that value is within our range (9.75).
         (
             "execution_engine_with_mini_taxi_table_name",
             {
@@ -172,7 +174,7 @@ def test_column_map_condition_values_row_condition(
 ):
     execution_engine = request.getfixturevalue(execution_engine_fixture_name)
     metric_value_kwargs = {
-        "min_value": 0.01,
+        "min_value": 0,
         "max_value": 10.0,
         "strict_min": False,
         "strict_max": False,
