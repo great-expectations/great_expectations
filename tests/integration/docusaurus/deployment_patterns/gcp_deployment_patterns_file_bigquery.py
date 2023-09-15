@@ -29,7 +29,7 @@ BIGQUERY_DATASET = "demo"
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = pathlib.Path(
-    full_path_to_project_directory, "great_expectations/great_expectations.yml"
+    full_path_to_project_directory, FileDataContext.GX_DIR, FileDataContext.GX_YML
 )
 great_expectations_yaml = yaml.load(great_expectations_yaml_file_path.read_text())
 
