@@ -322,12 +322,19 @@ def attempt_allowing_relative_error(dialect):
 
 
 class _CaseInsensitiveString(str):
+    """
+    A string that compares equal to another string regardless of case,
+    unless it is quoted.
+    """
+
     def __init__(self, string: str):
+        # TODO: check if string is already a _CaseInsensitiveString?
         self._original = string
         self._lower = string.lower()
         self._quote_string = '"'
 
-    def __eq__(self, other):
+    @override
+    def __eq__(self, other: _CaseInsensitiveString | str | object):
         if self.is_quoted():
             return self._original == str(other)
         if isinstance(other, _CaseInsensitiveString):
@@ -340,11 +347,17 @@ class _CaseInsensitiveString(str):
     def __hash__(self):
         return hash(self._lower)
 
+    @override
+    def __str__(self) -> str:
+        return self._original
+
     def is_quoted(self):
         return self._original.startswith(self._quote_string)
 
 
-class SmartColumnLookup(UserDict):
+class CaseInsensitiveNameDict(UserDict):
+    """Normal dict except it returns a case-insensitive string for any `name` key values."""
+
     def __init__(self, data: Dict[str, Any]):
         self.data = data
 
@@ -352,7 +365,7 @@ class SmartColumnLookup(UserDict):
     def __getitem__(self, key: Any) -> Any:
         item = self.data[key]
         if key == "name":
-            logger.debug(f"SmartColumnLookup - {key}:{item}")
+            logger.debug(f"CaseInsensitiveNameDict.__getitem__ - {key}:{item}")
             return _CaseInsensitiveString(item)
         return item
 
@@ -418,7 +431,7 @@ def get_sqlalchemy_column_metadata(
         if dialect_name == "snowflake":
             return [
                 # TODO: SmartColumn should know the dialect and do lookups based on that
-                SmartColumnLookup(column)  # type: ignore[misc]
+                CaseInsensitiveNameDict(column)  # type: ignore[misc]
                 for column in columns
             ]
 
