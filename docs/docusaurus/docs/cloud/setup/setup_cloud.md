@@ -1,6 +1,6 @@
 ---
-sidebar_label: Set up GX Cloud
-title: Set up GX Cloud
+sidebar_label: Try GX Cloud
+title: Try GX Cloud
 id: setup_cloud
 description: An end-to-end reference to help new users set up GX Cloud.
 ---
@@ -14,11 +14,13 @@ import Prerequisites from '/docs/components/_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-If you're new to GX Cloud, the information provided here is intended to help you get started and demonstrate features and functionality. You'll connect to a Datasource, build an Expectation using sample Batch data, validate data with the Expectation, and review validation results in a Data Doc.
+If you're new to GX Cloud, the information provided here is intended to demonstrate GX Cloud features and functionality. You'll connect to a Datasource, build an Expectation using sample Batch data, validate data with the Expectation, and review validation results in a Data Doc.
 
-After you've completed the initial set up and testing, you can use your own data to suit your specific business requirements.
+After you've ctested GX Cloud features and functionality, you can connect to your own data and create Expectations that are specific to your business needs. If you're already familiar with GX Cloud, or you prefer to use your own data for testing, see.
 
 Although you can use any Python Interpreter or script file to run Python code, GX recommends using Jupyter Notebook. Jupyter Notebook is included with OSS GX and is the best option for composing script files and running code.
+
+The example code is available in the [onboarding script repository](https://github.com/great-expectations/great_expectations/blob/develop/assets/scripts/gx_cloud/experimental/onboarding_script.py).
 
 ## Prerequisites
 
@@ -72,7 +74,7 @@ import pandas as pd
 import os
 ```
 
-#### 1.3 Create Data Context
+## Create a Data Context
 
 Paste this snippet into the next notebook cell to instantiate Cloud <TechnicalTag tag="data_context" text="Data Context"/>.
 
@@ -88,7 +90,7 @@ os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<organization_id_from_the_app>"
 context = gx.get_context()
 ```
 
-### 2. Create Data Source
+## Connect to a Data Source
 
 Modify the following snippet code to connect to your <TechnicalTag tag="datasource" text="Data Source"/>.
 In case you don't have some data handy to test in this guide, we can use the [NYC taxi data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page). This is an open data set which is updated every month. Each record in the data corresponds to one taxi ride. You can find a link to it in the snippet below.
@@ -115,9 +117,7 @@ batch_request = asset.build_batch_request()
 
 In case you need more details on how to connect to your specific data system, we have step by step how-to guides that cover many common cases. [Start here](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview)
 
-### 3. Create Expectations
-
-#### 3.1 Create Expectation Suite
+## Create an Expectation Suite
 
 An <TechnicalTag tag="expectation_suite" text="Expectation Suite"/> is a collection of verifiable assertions about data. Run this snippet to create a new, empty <TechnicalTag tag="expectation_suite" text="Expectation Suite"/>:
 
@@ -130,7 +130,7 @@ expectation_suite = context.add_expectation_suite(
 )
 ```
 
-#### 3.2 Add Expectation
+## Add an Expectation to an Expectation Suite
 
 Modify and run this snippet to add an <TechnicalTag tag="expectation" text="Expectation"/> to the <TechnicalTag tag="expectation_suite" text="Expectation Suite"/> you just created:
 
@@ -163,9 +163,7 @@ context.save_expectation_suite(expectation_suite=expectation_suite)
 With the Expectation defined above, we are stating that we _expect_ the column of your choice to always be populated. That is: none of the column's values should be null.
 
 
-### 4. Validate data
-
-#### 4.1 Create and run Checkpoint
+## Create and run Checkpoint
 
 Now that we have connected to data and defined an <TechnicalTag tag="expectation" text="Expectation"/>, it is time to validate whether our data meets the Expectation. To do this, we define a <TechnicalTag tag="checkpoint" text="Checkpoint"/>, which will allow us to repeat the <TechnicalTag tag="validation" text="Validation"/> in the future.
 
@@ -195,14 +193,14 @@ checkpoint = context.get_checkpoint(checkpoint_name)
 checkpoint.run()
 ```
 
-#### 4.2 Review your results
+## Review Validation Results
 
 After you run the <TechnicalTag tag="checkpoint" text="Checkpoint"/>, you should see a `validation_result_url` in the result, that takes you directly to GX Cloud, so you can see your <TechnicalTag tag="expectation" text="Expectations"/> and <TechnicalTag tag="validation_result" text="Validation Results"/> in the GX Cloud UI.
 
 Alternatively, you can visit the [Checkpoints page](https://app.greatexpectations.io/checkpoints) and filter by the Checkpoint, Expectation Suite, or Data Asset you want to see the results for.
 
 
-#### 4.3 (Optional) Add Slack notifications
+## Add a Slack notifications (Optional)
 
 Add the `send_slack_notification_on_validation_result` Action to the <TechnicalTag tag="checkpoint" text="Checkpoint" /> configuration.
 
@@ -216,7 +214,7 @@ Add the `send_slack_notification_on_validation_result` Action to the <TechnicalT
 
 <TabItem value="webhook">
 
-#### Webhook config
+### Webhook config
 
 ```python title="Jupyter Notebook"
 slack_webhook = None # put the actual webhook URL
@@ -257,7 +255,7 @@ checkpoint_config = {
 
 <TabItem value="app">
 
-#### Slack bot config
+### Slack bot config
 
 ```python title="Jupyter Notebook"
 bot_token = None # put the actual bot token
@@ -306,11 +304,7 @@ Find additional information [here](https://docs.greatexpectations.io/docs/guides
 
 ## Next Steps
 
-Now that you've seen how to implement the GX workflow, it is time to customize the workflow to suit your specific use cases! To help with this we have prepared more detailed guides tailored to specific environments and resources.
-
-To get all the snippets above in one script, visit [GX OSS repository](https://github.com/great-expectations/great_expectations/blob/develop/assets/scripts/gx_cloud/experimental/onboarding_script.py)
-
-To invite additional team members to the app visit [“Settings” > “Users”](https://app.greatexpectations.io/users).
+Invite team members to GX Cloud [“Settings” > “Users”](https://app.greatexpectations.io/users).
 
 For more details on installing GX for use with local filesystems, please see:
 
@@ -324,6 +318,6 @@ For information on installing GX for use with SQL databases, see:
 
 <SetupAndInstallForSqlData />
 
-And for instructions on installing GX for use with hosted data systems, read:
+Install GX for use with hosted data systems, read:
 
 <SetupAndInstallForHostedData />

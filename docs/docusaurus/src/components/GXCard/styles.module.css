@@ -50,24 +50,24 @@
   }
   
   .button__outline {
-    color: var(--blue-600);
-    border-color: var(--blue-600);
+    color: var(--black-600);
+    border-color: var(--black-600);
     background: none;
   }
   
   html[data-theme="dark"] .button__outline {
-    border-color: var(--blue-300);
-    color: var(--blue-300);
+    border-color: var(--black-300);
+    color: var(--black-300);
   }
   
   .button__outline:hover {
-    color: var(--blue-600);
-    border-color: var(--blue-300);
-    background: var(--blue-300);
+    color: var(--orange-600);
+    border-color: var(--black-300);
+    background: var(--orange-300);
   }
   
   html[data-theme="dark"] .button__outline:hover {
-    border-color: var(--blue-400);
-    color: var(--blue-800);
-    background: var(--blue-400);
+    border-color: var(--black-400);
+    color: var(--black-800);
+    background: var(--orange-400);
   }
