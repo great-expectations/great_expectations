@@ -15,7 +15,7 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import MetricResolutionError
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.expectations.metrics.util import (
-    _CaseInsensitiveString,
+    CaseInsensitiveString,
     get_dbms_compatible_metric_domain_kwargs,
     get_unexpected_indices_for_multiple_pandas_named_indices,
     get_unexpected_indices_for_single_pandas_named_index,
@@ -500,16 +500,16 @@ class TestCaseInsensitiveString:
         input_str: str,
         other: str,
     ):
-        other_case_insensitive = _CaseInsensitiveString(other)
-        input_case_insensitive = _CaseInsensitiveString(input_str)
+        other_case_insensitive = CaseInsensitiveString(other)
+        input_case_insensitive = CaseInsensitiveString(input_str)
 
         # if either string is quoted, they must be exact match
         if input_case_insensitive.is_quoted() or other_case_insensitive.is_quoted():
             if input == other:
                 assert input_case_insensitive == other_case_insensitive
-            assert input_case_insensitive != _CaseInsensitiveString(other.swapcase())
+            assert input_case_insensitive != CaseInsensitiveString(other.swapcase())
         elif input_str.lower() == other.lower():
-            assert input_case_insensitive == _CaseInsensitiveString(other.swapcase())
+            assert input_case_insensitive == CaseInsensitiveString(other.swapcase())
         else:
             assert input_case_insensitive != other_case_insensitive
 

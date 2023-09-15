@@ -322,23 +322,23 @@ def attempt_allowing_relative_error(dialect):
     return detected_redshift or detected_psycopg2
 
 
-class _CaseInsensitiveString(str):
+class CaseInsensitiveString(str):
     """
     A string that compares equal to another string regardless of case,
     unless it is quoted.
     """
 
     def __init__(self, string: str):
-        # TODO: check if string is already a _CaseInsensitiveString?
+        # TODO: check if string is already a CaseInsensitiveString?
         self._original = string
         self._lower = string.lower()
         self._quote_string = '"'
 
     @override
-    def __eq__(self, other: _CaseInsensitiveString | str | object):
+    def __eq__(self, other: CaseInsensitiveString | str | object):
         if self.is_quoted():
             return self._original == str(other)
-        if isinstance(other, _CaseInsensitiveString):
+        if isinstance(other, CaseInsensitiveString):
             return self._lower == other._lower
         elif isinstance(other, str):
             return self._lower == other.lower()
@@ -367,7 +367,7 @@ class CaseInsensitiveNameDict(UserDict):
         item = self.data[key]
         if key == "name":
             logger.debug(f"CaseInsensitiveNameDict.__getitem__ - {key}:{item}")
-            return _CaseInsensitiveString(item)
+            return CaseInsensitiveString(item)
         return item
 
 
