@@ -101,9 +101,10 @@ def data_context_with_runtime_sql_datasource_for_testing_get_batch(
                     - airflow_run_id
     """
 
-    context.test_yaml_config(
-        name="my_runtime_sql_datasource", yaml_config=datasource_config
-    )
+    with pytest.deprecated_call():
+        context.test_yaml_config(
+            name="my_runtime_sql_datasource", yaml_config=datasource_config
+        )
 
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -292,11 +293,12 @@ data_connectors:
             A:
 """
     # noinspection PyUnusedLocal
-    context.test_yaml_config(
-        name="my_directory_datasource",
-        yaml_config=yaml_config,
-        return_mode="report_object",
-    )
+    with pytest.deprecated_call():
+        context.test_yaml_config(
+            name="my_directory_datasource",
+            yaml_config=yaml_config,
+            return_mode="report_object",
+        )
     # print(json.dumps(report_object, indent=2))
     # print(context.datasources)
 
@@ -401,10 +403,11 @@ data_connectors:
                 - name
                 - number
 """
-    my_datasource = context.test_yaml_config(
-        name="my_directory_datasource",
-        yaml_config=yaml_config,
-    )
+    with pytest.deprecated_call():
+        my_datasource = context.test_yaml_config(
+            name="my_directory_datasource",
+            yaml_config=yaml_config,
+        )
     assert (
         my_datasource.data_connectors["my_filesystem_data_connector"].base_directory
         == f"{context.root_directory}/test_dir_0/A"

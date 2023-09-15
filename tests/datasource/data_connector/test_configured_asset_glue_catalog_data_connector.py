@@ -227,44 +227,45 @@ def test_instantiation_from_a_config(
     empty_data_context_stats_enabled, glue_titanic_catalog
 ):
     context: DataContext = empty_data_context_stats_enabled
-    report_object = context.test_yaml_config(
-        """
-    module_name: great_expectations.datasource.data_connector
-    class_name: ConfiguredAssetAWSGlueDataCatalogDataConnector
-    name: my_glue_catalog_data_connector
-    datasource_name: FAKE_Datasource_NAME
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            """
+        module_name: great_expectations.datasource.data_connector
+        class_name: ConfiguredAssetAWSGlueDataCatalogDataConnector
+        name: my_glue_catalog_data_connector
+        datasource_name: FAKE_Datasource_NAME
 
-    assets:
-        db_test.tb_titanic:
-            table_name: tb_titanic_with_partitions
-            database_name: db_test
-            splitter_method: split_on_column_value
-            splitter_kwargs:
-                column_name: PClass
-        asset2:
-            table_name: tb_titanic_without_partitions
-            database_name: db_test
-            sampling_method: _sample_using_random
-            sampling_kwargs:
-                p: 0.5
-                seed: 0
-        asset3:
-            table_name: tb_titanic_with_partitions
-            database_name: db_test
-            partitions:
-                - PClass
-        asset4:
-            table_name: tb_titanic_with_partitions
-            database_name: db_test
-            partitions:
-                - PClass
-                - SexCode
-    """,
-        runtime_environment={
-            "execution_engine": "execution_engine",
-        },
-        return_mode="report_object",
-    )
+        assets:
+            db_test.tb_titanic:
+                table_name: tb_titanic_with_partitions
+                database_name: db_test
+                splitter_method: split_on_column_value
+                splitter_kwargs:
+                    column_name: PClass
+            asset2:
+                table_name: tb_titanic_without_partitions
+                database_name: db_test
+                sampling_method: _sample_using_random
+                sampling_kwargs:
+                    p: 0.5
+                    seed: 0
+            asset3:
+                table_name: tb_titanic_with_partitions
+                database_name: db_test
+                partitions:
+                    - PClass
+            asset4:
+                table_name: tb_titanic_with_partitions
+                database_name: db_test
+                partitions:
+                    - PClass
+                    - SexCode
+        """,
+            runtime_environment={
+                "execution_engine": "execution_engine",
+            },
+            return_mode="report_object",
+        )
 
     assert report_object == {
         "class_name": "ConfiguredAssetAWSGlueDataCatalogDataConnector",

@@ -87,24 +87,25 @@ def test_instantiation_from_a_config(
     glue_titanic_catalog, empty_data_context_stats_enabled
 ):
     random.seed(0)
-    report_object = empty_data_context_stats_enabled.test_yaml_config(
-        f"""
-        module_name: great_expectations.datasource.data_connector
-        class_name: InferredAssetAWSGlueDataCatalogDataConnector
-        name: my_data_connector
-        datasource_name: FAKE_Datasource_NAME
-        data_asset_name_prefix: prefix__
-        data_asset_name_suffix: __suffix
-        excluded_tables:
-            - db_test.tb_titanic_without_partitions
-        glue_introspection_directives:
-            database_name: db_test
-        """,  # noqa: F541
-        runtime_environment={
-            "execution_engine": "execution_engine",
-        },
-        return_mode="report_object",
-    )
+    with pytest.deprecated_call():
+        report_object = empty_data_context_stats_enabled.test_yaml_config(
+            f"""
+            module_name: great_expectations.datasource.data_connector
+            class_name: InferredAssetAWSGlueDataCatalogDataConnector
+            name: my_data_connector
+            datasource_name: FAKE_Datasource_NAME
+            data_asset_name_prefix: prefix__
+            data_asset_name_suffix: __suffix
+            excluded_tables:
+                - db_test.tb_titanic_without_partitions
+            glue_introspection_directives:
+                database_name: db_test
+            """,  # noqa: F541
+            runtime_environment={
+                "execution_engine": "execution_engine",
+            },
+            return_mode="report_object",
+        )
 
     assert report_object == {
         "class_name": "InferredAssetAWSGlueDataCatalogDataConnector",

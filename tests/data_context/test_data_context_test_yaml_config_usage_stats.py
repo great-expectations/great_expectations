@@ -47,7 +47,9 @@ if TYPE_CHECKING:
 def test_test_yaml_config_usage_stats_substitution_error(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
-    with pytest.raises(gx_exceptions.MissingConfigVariableError):
+    with pytest.raises(
+        gx_exceptions.MissingConfigVariableError
+    ), pytest.deprecated_call():
         _ = empty_data_context_stats_enabled.test_yaml_config(
             yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
@@ -87,15 +89,16 @@ def test_test_yaml_config_usage_stats_custom_type(
     a useful usage stats event message.
     """
     data_context: FileDataContext = empty_data_context_stats_enabled
-    _ = data_context.test_yaml_config(
-        yaml_config="""
-module_name: tests.data_context.fixtures.plugins
-class_name: MyCustomExpectationsStore
-store_backend:
-    module_name: great_expectations.data_context.store.store_backend
-    class_name: InMemoryStoreBackend
-"""
-    )
+    with pytest.deprecated_call():
+        _ = data_context.test_yaml_config(
+            yaml_config="""
+    module_name: tests.data_context.fixtures.plugins
+    class_name: MyCustomExpectationsStore
+    store_backend:
+        module_name: great_expectations.data_context.store.store_backend
+        class_name: InMemoryStoreBackend
+    """
+        )
     assert mock_emit.call_count == 1
     # Substitute anonymized name & class since it changes for each run
     anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
@@ -137,7 +140,7 @@ def test_test_yaml_config_usage_stats_class_name_not_provided(
     What does this test and why?
     If a class_name is not provided, and we have run into an error state in test_yaml_config() (likely because of the missing class_name) then we should report descriptive diagnostic info.
     """
-    with pytest.raises((MarkedYAMLError, KeyError)):
+    with pytest.raises((MarkedYAMLError, KeyError)), pytest.deprecated_call():
         # noinspection PyUnusedLocal
         empty_data_context_stats_enabled.test_yaml_config(
             yaml_config="""
@@ -174,7 +177,7 @@ def test_test_yaml_config_usage_stats_custom_config_class_name_not_provided(
     This should be the case even if we are passing in a custom config.
     """
     data_context: FileDataContext = empty_data_context_stats_enabled
-    with pytest.raises((MarkedYAMLError, KeyError)):
+    with pytest.raises((MarkedYAMLError, KeyError)), pytest.deprecated_call():
         _ = data_context.test_yaml_config(
             yaml_config="""
 module_name: tests.data_context.fixtures.plugins.my_custom_expectations_store
@@ -214,12 +217,13 @@ def test_test_yaml_config_usage_stats_custom_type_not_ge_subclass(
     a useful usage stats event message.
     """
     data_context: FileDataContext = empty_data_context_stats_enabled
-    _ = data_context.test_yaml_config(
-        yaml_config="""
-module_name: tests.data_context.fixtures.plugins
-class_name: MyCustomNonCoreGeClass
-"""
-    )
+    with pytest.deprecated_call():
+        _ = data_context.test_yaml_config(
+            yaml_config="""
+    module_name: tests.data_context.fixtures.plugins
+    class_name: MyCustomNonCoreGeClass
+    """
+        )
     assert mock_emit.call_count == 1
     assert mock_emit.call_args_list == [
         mock.call(
@@ -257,23 +261,24 @@ def test_test_yaml_config_usage_stats_simple_sqlalchemy_datasource_subclass(
         )
 
     data_context: FileDataContext = empty_data_context_stats_enabled
-    _ = data_context.test_yaml_config(
-        yaml_config="""
-module_name: tests.data_context.fixtures.plugins.my_custom_simple_sqlalchemy_datasource_class
-class_name: MyCustomSimpleSqlalchemyDatasource
-name: some_name
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-credentials:
-  drivername: postgresql
-  host: localhost
-  port: '5432'
-  username: postgres
-  password: ''
-  database: postgres
-"""
-    )
+    with pytest.deprecated_call():
+        _ = data_context.test_yaml_config(
+            yaml_config="""
+    module_name: tests.data_context.fixtures.plugins.my_custom_simple_sqlalchemy_datasource_class
+    class_name: MyCustomSimpleSqlalchemyDatasource
+    name: some_name
+    introspection:
+    whole_table:
+        data_asset_name_suffix: __whole_table
+    credentials:
+    drivername: postgresql
+    host: localhost
+    port: '5432'
+    username: postgres
+    password: ''
+    database: postgres
+    """
+        )
     assert mock_emit.call_count == 1
     # Substitute anonymized name & class since it changes for each run
     anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
@@ -339,9 +344,10 @@ def test_rule_based_profiler_emits_valid_usage_stats(
           - expectation_type: expect_column_values_to_be_of_type
             class_name: DefaultExpectationConfigurationBuilder
     """
-    context.test_yaml_config(
-        yaml_config=yaml_config, name="my_profiler", class_name="Profiler"
-    )
+    with pytest.deprecated_call():
+        context.test_yaml_config(
+            yaml_config=yaml_config, name="my_profiler", class_name="Profiler"
+        )
 
     # Substitute anonymized name since it changes for each run
     anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][

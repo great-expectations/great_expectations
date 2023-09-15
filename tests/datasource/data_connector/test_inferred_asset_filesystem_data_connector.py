@@ -315,26 +315,27 @@ def test_test_yaml_config(
         ],
     )
 
-    report_object = context.test_yaml_config(
-        f"""
-module_name: great_expectations.datasource.data_connector
-class_name: InferredAssetFilesystemDataConnector
-datasource_name: FAKE_DATASOURCE
-name: TEST_DATA_CONNECTOR
-base_directory: {base_directory}/
-glob_directive: "*/*/*.csv"
-default_regex:
-    pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
-    group_names:
-        - year_dir
-        - month_dir
-        - data_asset_name
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            f"""
+    module_name: great_expectations.datasource.data_connector
+    class_name: InferredAssetFilesystemDataConnector
+    datasource_name: FAKE_DATASOURCE
+    name: TEST_DATA_CONNECTOR
+    base_directory: {base_directory}/
+    glob_directive: "*/*/*.csv"
+    default_regex:
+        pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+        group_names:
+            - year_dir
+            - month_dir
+            - data_asset_name
+        """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
 
     assert report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
@@ -411,28 +412,29 @@ def test_yaml_config_excluding_non_regex_matching_files(
     # gamma-202001.csv and gamma-202002.csv do not match regex (which includes 2020/month directory).  They are not
     # considered as unmatched data references, because glob_directive causes these data references to not be listed.
 
-    report_object = context.test_yaml_config(
-        f"""
-module_name: great_expectations.datasource.data_connector
-class_name: InferredAssetFilesystemDataConnector
-datasource_name: FAKE_DATASOURCE
-name: TEST_DATA_CONNECTOR
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            f"""
+    module_name: great_expectations.datasource.data_connector
+    class_name: InferredAssetFilesystemDataConnector
+    datasource_name: FAKE_DATASOURCE
+    name: TEST_DATA_CONNECTOR
 
-base_directory: {base_directory}/
-glob_directive: "*/*/*.csv"
+    base_directory: {base_directory}/
+    glob_directive: "*/*/*.csv"
 
-default_regex:
-    pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
-    group_names:
-        - year_dir
-        - month_dir
-        - data_asset_name
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+    default_regex:
+        pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+        group_names:
+            - year_dir
+            - month_dir
+            - data_asset_name
+        """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
 
     assert report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
@@ -506,26 +508,27 @@ def test_nested_directory_data_asset_name_in_folder(
         ],
     )
 
-    report_object = context.test_yaml_config(
-        f"""
-    module_name: great_expectations.datasource.data_connector
-    class_name: InferredAssetFilesystemDataConnector
-    datasource_name: FAKE_DATASOURCE
-    name: TEST_DATA_CONNECTOR
-    base_directory: {base_directory}/
-    glob_directive: "*/*.csv"
-    default_regex:
-        group_names:
-            - data_asset_name
-            - letter
-            - number
-        pattern: (\\w{{1}})\\/(\\w{{1}})-(\\d{{1}})\\.csv
-        """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            f"""
+        module_name: great_expectations.datasource.data_connector
+        class_name: InferredAssetFilesystemDataConnector
+        datasource_name: FAKE_DATASOURCE
+        name: TEST_DATA_CONNECTOR
+        base_directory: {base_directory}/
+        glob_directive: "*/*.csv"
+        default_regex:
+            group_names:
+                - data_asset_name
+                - letter
+                - number
+            pattern: (\\w{{1}})\\/(\\w{{1}})-(\\d{{1}})\\.csv
+            """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
 
     assert report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
@@ -571,28 +574,29 @@ def test_redundant_information_in_naming_convention_random_hash(
         ],
     )
 
-    report_object = context.test_yaml_config(
-        f"""
-          module_name: great_expectations.datasource.data_connector
-          class_name: InferredAssetFilesystemDataConnector
-          datasource_name: FAKE_DATASOURCE
-          name: TEST_DATA_CONNECTOR
-          base_directory: {base_directory}/
-          glob_directive: "*/*/*/*.txt.gz"
-          default_regex:
-              group_names:
-                - year
-                - month
-                - day
-                - data_asset_name
-              pattern: (\\d{{4}})/(\\d{{2}})/(\\d{{2}})/(log_file)-.*\\.txt\\.gz
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            f"""
+            module_name: great_expectations.datasource.data_connector
+            class_name: InferredAssetFilesystemDataConnector
+            datasource_name: FAKE_DATASOURCE
+            name: TEST_DATA_CONNECTOR
+            base_directory: {base_directory}/
+            glob_directive: "*/*/*/*.txt.gz"
+            default_regex:
+                group_names:
+                    - year
+                    - month
+                    - day
+                    - data_asset_name
+                pattern: (\\d{{4}})/(\\d{{2}})/(\\d{{2}})/(log_file)-.*\\.txt\\.gz
 
-              """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+                """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
 
     assert report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
@@ -634,27 +638,28 @@ def test_redundant_information_in_naming_convention_timestamp(
         ],
     )
 
-    report_object = context.test_yaml_config(
-        f"""
-          module_name: great_expectations.datasource.data_connector
-          class_name: InferredAssetFilesystemDataConnector
-          datasource_name: FAKE_DATASOURCE
-          name: TEST_DATA_CONNECTOR
-          base_directory: {base_directory}/
-          glob_directive: "*.txt.gz"
-          default_regex:
-              group_names:
-                - data_asset_name
-                - year
-                - month
-                - day
-              pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
-      """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            f"""
+            module_name: great_expectations.datasource.data_connector
+            class_name: InferredAssetFilesystemDataConnector
+            datasource_name: FAKE_DATASOURCE
+            name: TEST_DATA_CONNECTOR
+            base_directory: {base_directory}/
+            glob_directive: "*.txt.gz"
+            default_regex:
+                group_names:
+                    - data_asset_name
+                    - year
+                    - month
+                    - day
+                pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
+        """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
     assert report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
         "data_asset_count": 1,
@@ -695,27 +700,28 @@ def test_redundant_information_in_naming_convention_bucket(
         ],
     )
 
-    report_object = context.test_yaml_config(
-        f"""
-          module_name: great_expectations.datasource.data_connector
-          class_name: InferredAssetFilesystemDataConnector
-          datasource_name: FAKE_DATASOURCE
-          name: TEST_DATA_CONNECTOR
-          base_directory: {base_directory}/
-          glob_directive: "*/*/*/*/*.txt.gz"
-          default_regex:
-              group_names:
-                  - data_asset_name
-                  - year
-                  - month
-                  - day
-              pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-.*\\.txt\\.gz
-              """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            f"""
+            module_name: great_expectations.datasource.data_connector
+            class_name: InferredAssetFilesystemDataConnector
+            datasource_name: FAKE_DATASOURCE
+            name: TEST_DATA_CONNECTOR
+            base_directory: {base_directory}/
+            glob_directive: "*/*/*/*/*.txt.gz"
+            default_regex:
+                group_names:
+                    - data_asset_name
+                    - year
+                    - month
+                    - day
+                pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-.*\\.txt\\.gz
+                """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
 
     assert report_object == {
         "class_name": "InferredAssetFilesystemDataConnector",
@@ -1017,7 +1023,8 @@ def test_one_year_as_12_data_assets_1_batch_each(empty_data_context, tmp_path_fa
                 - data_asset_name
               pattern: (.*_2018-.*)\\.csv
     """
-    context.test_yaml_config(datasource_yaml)
+    with pytest.deprecated_call():
+        context.test_yaml_config(datasource_yaml)
     context.add_datasource(**yaml.load(datasource_yaml))
     datasource: Datasource = context.get_datasource(datasource_name="taxi_datasource")
     data_asset_names: dict = datasource.get_available_data_asset_names(
@@ -1081,7 +1088,8 @@ def test_one_year_as_1_data_asset_12_batches(empty_data_context, tmp_path_factor
                     - month
                   pattern: (report_2018)-(\\d.*)\\.csv
         """
-    context.test_yaml_config(datasource_yaml)
+    with pytest.deprecated_call():
+        context.test_yaml_config(datasource_yaml)
     context.add_datasource(**yaml.load(datasource_yaml))
     datasource: Datasource = context.get_datasource(datasource_name="taxi_datasource")
     data_asset_names: dict = datasource.get_available_data_asset_names(

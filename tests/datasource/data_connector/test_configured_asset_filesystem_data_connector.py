@@ -109,29 +109,30 @@ def test_instantiation_from_a_config(
         ],
     )
 
-    report_object = context.test_yaml_config(
-        f"""
-module_name: great_expectations.datasource.data_connector
-class_name: ConfiguredAssetFilesystemDataConnector
-datasource_name: FAKE_DATASOURCE
-name: TEST_DATA_CONNECTOR
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            f"""
+    module_name: great_expectations.datasource.data_connector
+    class_name: ConfiguredAssetFilesystemDataConnector
+    datasource_name: FAKE_DATASOURCE
+    name: TEST_DATA_CONNECTOR
 
-base_directory: {base_directory}
-# glob_directive: "*.csv"
+    base_directory: {base_directory}
+    # glob_directive: "*.csv"
 
-default_regex:
-    pattern: alpha-(.*)\\.csv
-    group_names:
-        - index
+    default_regex:
+        pattern: alpha-(.*)\\.csv
+        group_names:
+            - index
 
-assets:
-    alpha:
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+    assets:
+        alpha:
+        """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
 
     assert report_object == {
         "class_name": "ConfiguredAssetFilesystemDataConnector",
@@ -196,30 +197,31 @@ def test_instantiation_from_a_config_regex_does_not_match_paths(
         ],
     )
 
-    report_object = context.test_yaml_config(
-        f"""
-module_name: great_expectations.datasource.data_connector
-class_name: ConfiguredAssetFilesystemDataConnector
-datasource_name: FAKE_DATASOURCE
-name: TEST_DATA_CONNECTOR
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            f"""
+    module_name: great_expectations.datasource.data_connector
+    class_name: ConfiguredAssetFilesystemDataConnector
+    datasource_name: FAKE_DATASOURCE
+    name: TEST_DATA_CONNECTOR
 
-base_directory: {base_directory}
-# glob_directive: "*.csv"
+    base_directory: {base_directory}
+    # glob_directive: "*.csv"
 
-default_regex:
-    pattern: beta-(.*)\\.csv
-    group_names:
-        - index
+    default_regex:
+        pattern: beta-(.*)\\.csv
+        group_names:
+            - index
 
-assets:
-    alpha:
+    assets:
+        alpha:
 
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+        """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
 
     assert report_object == {
         "class_name": "ConfiguredAssetFilesystemDataConnector",
@@ -1498,7 +1500,8 @@ def test_one_half_year_as_6_data_assets_1_batch_each(
                     - year
                     - month
     """
-    context.test_yaml_config(datasource_yaml)
+    with pytest.deprecated_call():
+        context.test_yaml_config(datasource_yaml)
     context.add_datasource(**yaml.load(datasource_yaml))
     datasource: Datasource = context.get_datasource(datasource_name="taxi_datasource")
     data_asset_names: dict = datasource.get_available_data_asset_names(
@@ -1559,7 +1562,8 @@ def test_one_year_as_1_data_asset_12_batches(empty_data_context, tmp_path_factor
                         - year
                         - month
         """
-    context.test_yaml_config(datasource_yaml)
+    with pytest.deprecated_call():
+        context.test_yaml_config(datasource_yaml)
     context.add_datasource(**yaml.load(datasource_yaml))
     datasource: Datasource = context.get_datasource(datasource_name="taxi_datasource")
     data_asset_names: dict = datasource.get_available_data_asset_names(
