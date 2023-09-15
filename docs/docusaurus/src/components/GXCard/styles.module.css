@@ -34,7 +34,7 @@
     transition: all 0.3s ease;
     cursor: pointer;
     min-width: 86px;
-    background: var(--mint-300);
+    background: var(--orange-300);
     border: 1px solid transparent;
     text-align: center;
   }
