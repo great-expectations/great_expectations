@@ -429,7 +429,7 @@ def get_sqlalchemy_column_metadata(
             )
 
         dialect_name = execution_engine.dialect.name
-        if dialect_name == "snowflake":
+        if dialect_name == GXSqlDialect.SNOWFLAKE:
             return [
                 # TODO: SmartColumn should know the dialect and do lookups based on that
                 CaseInsensitiveNameDict(column)
