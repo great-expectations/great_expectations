@@ -614,6 +614,9 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     "str QUOTED_LOWER_COL": ["databricks_sql", "postgres", "snowflake", "sqlite"],
     "str quoted_upper_col": ["databricks_sql", "postgres", "snowflake", "sqlite"],
     'str "QUOTED_UPPER_COL"': ["postgres", "snowflake", "sqlite"],
+    "quoted_name quoted_lower_col quote=None": ["snowflake"],
+    "quoted_lower_col quote=True": ["snowflake"],
+    "quoted_name quoted_lower_col quote=False]": ["snowflake"],
     "quoted_name quoted_upper_col quote=None": [
         "databricks_sql",
         "postgres",
