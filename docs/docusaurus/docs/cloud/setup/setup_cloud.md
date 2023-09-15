@@ -16,7 +16,7 @@ import TabItem from '@theme/TabItem';
 
 If you're new to GX Cloud, the information provided here is intended to demonstrate GX Cloud features and functionality. You'll connect to a Datasource, build an Expectation using sample Batch data, validate data with the Expectation, and review validation results in a Data Doc.
 
-After you've ctested GX Cloud features and functionality, you can connect to your own data and create Expectations that are specific to your business needs. If you're already familiar with GX Cloud, or you prefer to use your own data for testing, see.
+After you've tested GX Cloud features and functionality, you can connect to your own data and create Expectations that are specific to your business needs. If you're already familiar with GX Cloud, or you prefer to use your own data for testing, see.
 
 Although you can use any Python Interpreter or script file to run Python code, GX recommends using Jupyter Notebook. Jupyter Notebook is included with OSS GX and is the best option for composing script files and running code.
 
