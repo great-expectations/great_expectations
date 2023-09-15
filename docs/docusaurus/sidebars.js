@@ -1,6 +1,7 @@
 module.exports = {
   cloud: [
-    `gx_welcome`
+    `gx_welcome`,
+    `cloud/setup/setup_cloud`,
   ],
   oss: [
     'intro',
