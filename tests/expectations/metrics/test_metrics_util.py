@@ -506,12 +506,15 @@ class TestCaseInsensitiveString:
         # if either string is quoted, they must be exact match
         if input_case_insensitive.is_quoted() or other_case_insensitive.is_quoted():
             if input == other:
+                assert input_case_insensitive == other
                 assert input_case_insensitive == other_case_insensitive
             assert input_case_insensitive != CaseInsensitiveString(other.swapcase())
         elif input_str.lower() == other.lower():
+            assert input_case_insensitive == other.swapcase()
             assert input_case_insensitive == CaseInsensitiveString(other.swapcase())
         else:
             assert input_case_insensitive != other_case_insensitive
+            assert input_case_insensitive != other
 
 
 if __name__ == "__main__":
