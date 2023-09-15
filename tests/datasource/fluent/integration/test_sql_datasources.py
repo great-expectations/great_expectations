@@ -650,13 +650,6 @@ def _is_quote_char_dialect_mismatch(
     return False
 
 
-# TODO: simplify these parametrizations
-# quoted_upper_str
-# unquoted_upper_str
-# quoted_lower_str
-# unquoted_lower_str
-# upper_quoted_name
-# lower_quoted_name
 @pytest.mark.parametrize(
     "column_name",
     [
@@ -666,6 +659,9 @@ def _is_quote_char_dialect_mismatch(
         param("UNQUOTED_UPPER_COL", id="str UNQUOTED_UPPER_COL"),
         param("quoted_lower_col", id="str quoted_lower_col"),
         param("QUOTED_LOWER_COL", id="str QUOTED_LOWER_COL"),
+        param("quoted_upper_col", id="str quoted_upper_col"),
+        param("QUOTED_UPPER_COL", id="str QUOTED_UPPER_COL"),
+        param('"QUOTED_UPPER_COL"', id='str "QUOTED_UPPER_COL"'),
         param('"quoted_lower_col"', id='str "quoted_lower_col"'),
         param(
             quoted_name(
@@ -695,9 +691,6 @@ def _is_quote_char_dialect_mismatch(
             ),
             id="quoted_name QUOTED_LOWER_COL quote=None",
         ),
-        param("quoted_upper_col", id="str quoted_upper_col"),
-        param("QUOTED_UPPER_COL", id="str QUOTED_UPPER_COL"),
-        param('"QUOTED_UPPER_COL"', id='str "QUOTED_UPPER_COL"'),
         param(
             quoted_name(
                 "QUOTED_UPPER_COL",
