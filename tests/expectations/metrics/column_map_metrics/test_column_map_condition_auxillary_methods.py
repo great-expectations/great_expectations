@@ -107,6 +107,7 @@ def execution_engine_with_mini_taxi_selectable(
     return execution_engine
 
 
+@pytest.mark.big
 @pytest.mark.parametrize(
     "execution_engine_fixture_name, metric_domain_kwargs, expected_result",
     [
