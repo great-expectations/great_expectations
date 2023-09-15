@@ -440,28 +440,29 @@ def test_instantiation_with_test_yaml_config(
 ):
     context: DataContext = empty_data_context_stats_enabled
 
-    report_object = context.test_yaml_config(
-        """
-        module_name: great_expectations.datasource.data_connector
-        class_name: InferredAssetAzureDataConnector
-        datasource_name: FAKE_DATASOURCE
-        name: TEST_DATA_CONNECTOR
-        default_regex:
-            pattern: (alpha)-(.*)\\.csv
-            group_names:
-                - data_asset_name
-                - index
-        container: my_container
-        name_starts_with: ""
-        azure_options:
-            account_url: my_account_url.blob.core.windows.net
-            credential: my_credential
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            """
+            module_name: great_expectations.datasource.data_connector
+            class_name: InferredAssetAzureDataConnector
+            datasource_name: FAKE_DATASOURCE
+            name: TEST_DATA_CONNECTOR
+            default_regex:
+                pattern: (alpha)-(.*)\\.csv
+                group_names:
+                    - data_asset_name
+                    - index
+            container: my_container
+            name_starts_with: ""
+            azure_options:
+                account_url: my_account_url.blob.core.windows.net
+                credential: my_credential
+        """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
 
     assert report_object == expected_config_dict
 
@@ -482,28 +483,29 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
 ):
     context: DataContext = empty_data_context_stats_enabled
 
-    report_object = context.test_yaml_config(  # noqa: F841
-        """
-        module_name: great_expectations.datasource.data_connector
-        class_name: InferredAssetAzureDataConnector
-        datasource_name: FAKE_DATASOURCE
-        name: TEST_DATA_CONNECTOR
-        default_regex:
-            pattern: (alpha)-(.*)\\.csv
-            group_names:
-                - data_asset_name
-                - index
-        container: my_container
-        name_starts_with: ""
-        azure_options:
-            account_url: my_account_url.blob.core.windows.net
-            credential: my_credential
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(  # noqa: F841
+            """
+            module_name: great_expectations.datasource.data_connector
+            class_name: InferredAssetAzureDataConnector
+            datasource_name: FAKE_DATASOURCE
+            name: TEST_DATA_CONNECTOR
+            default_regex:
+                pattern: (alpha)-(.*)\\.csv
+                group_names:
+                    - data_asset_name
+                    - index
+            container: my_container
+            name_starts_with: ""
+            azure_options:
+                account_url: my_account_url.blob.core.windows.net
+                credential: my_credential
+        """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
     assert mock_emit.call_count == 1
 
     anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
@@ -540,28 +542,29 @@ def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_re
 ):
     context: DataContext = empty_data_context_stats_enabled
 
-    report_object = context.test_yaml_config(
-        """
-        module_name: great_expectations.datasource.data_connector
-        class_name: InferredAssetAzureDataConnector
-        datasource_name: FAKE_DATASOURCE
-        name: TEST_DATA_CONNECTOR
-        default_regex:
-            pattern: ^beta-(.*)\\.csv$
-            group_names:
-                - data_asset_name
-                - index
-        container: my_container
-        name_starts_with: ""
-        azure_options:
-            account_url: my_account_url.blob.core.windows.net
-            credential: my_credential
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            """
+            module_name: great_expectations.datasource.data_connector
+            class_name: InferredAssetAzureDataConnector
+            datasource_name: FAKE_DATASOURCE
+            name: TEST_DATA_CONNECTOR
+            default_regex:
+                pattern: ^beta-(.*)\\.csv$
+                group_names:
+                    - data_asset_name
+                    - index
+            container: my_container
+            name_starts_with: ""
+            azure_options:
+                account_url: my_account_url.blob.core.windows.net
+                credential: my_credential
+        """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
 
     assert report_object == {
         "class_name": "InferredAssetAzureDataConnector",

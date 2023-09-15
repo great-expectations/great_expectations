@@ -470,26 +470,27 @@ def test_test_yaml_config(
 ):
     context: DataContext = empty_data_context_stats_enabled
 
-    report_object = context.test_yaml_config(
-        """
-module_name: great_expectations.datasource.data_connector
-class_name: InferredAssetGCSDataConnector
-datasource_name: FAKE_DATASOURCE
-name: TEST_DATA_CONNECTOR
-bucket_or_name: test_bucket
-prefix: ""
-default_regex:
-    pattern: (\\d{4})/(\\d{2})/(.*)-.*\\.csv
-    group_names:
-        - year_dir
-        - month_dir
-        - data_asset_name
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            """
+    module_name: great_expectations.datasource.data_connector
+    class_name: InferredAssetGCSDataConnector
+    datasource_name: FAKE_DATASOURCE
+    name: TEST_DATA_CONNECTOR
+    bucket_or_name: test_bucket
+    prefix: ""
+    default_regex:
+        pattern: (\\d{4})/(\\d{2})/(.*)-.*\\.csv
+        group_names:
+            - year_dir
+            - month_dir
+            - data_asset_name
+        """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
 
     assert report_object == {
         "class_name": "InferredAssetGCSDataConnector",
@@ -542,26 +543,27 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
 ):
     context: DataContext = empty_data_context_stats_enabled
 
-    context.test_yaml_config(
-        """
-module_name: great_expectations.datasource.data_connector
-class_name: InferredAssetGCSDataConnector
-datasource_name: FAKE_DATASOURCE
-name: TEST_DATA_CONNECTOR
-bucket_or_name: test_bucket
-prefix: ""
-default_regex:
-    pattern: (\\d{4})/(\\d{2})/(.*)-.*\\.csv
-    group_names:
-        - year_dir
-        - month_dir
-        - data_asset_name
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+    with pytest.deprecated_call():
+        context.test_yaml_config(
+            """
+    module_name: great_expectations.datasource.data_connector
+    class_name: InferredAssetGCSDataConnector
+    datasource_name: FAKE_DATASOURCE
+    name: TEST_DATA_CONNECTOR
+    bucket_or_name: test_bucket
+    prefix: ""
+    default_regex:
+        pattern: (\\d{4})/(\\d{2})/(.*)-.*\\.csv
+        group_names:
+            - year_dir
+            - month_dir
+            - data_asset_name
+        """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
 
     assert mock_emit.call_count == 1
     anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
@@ -608,28 +610,29 @@ def test_yaml_config_excluding_non_regex_matching_files(
 ):
     context: DataContext = empty_data_context_stats_enabled
 
-    report_object = context.test_yaml_config(
-        """
-module_name: great_expectations.datasource.data_connector
-class_name: InferredAssetGCSDataConnector
-datasource_name: FAKE_DATASOURCE
-name: TEST_DATA_CONNECTOR
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            """
+    module_name: great_expectations.datasource.data_connector
+    class_name: InferredAssetGCSDataConnector
+    datasource_name: FAKE_DATASOURCE
+    name: TEST_DATA_CONNECTOR
 
-bucket_or_name: test_bucket
-prefix: ""
+    bucket_or_name: test_bucket
+    prefix: ""
 
-default_regex:
-    pattern: (\\d{4})/(\\d{2})/(.*)-.*\\.csv
-    group_names:
-        - year_dir
-        - month_dir
-        - data_asset_name
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+    default_regex:
+        pattern: (\\d{4})/(\\d{2})/(.*)-.*\\.csv
+        group_names:
+            - year_dir
+            - month_dir
+            - data_asset_name
+        """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
 
     assert report_object == {
         "class_name": "InferredAssetGCSDataConnector",
@@ -687,26 +690,27 @@ def test_nested_directory_data_asset_name_in_folder(
 ):
     context = empty_data_context
 
-    report_object = context.test_yaml_config(
-        """
-    module_name: great_expectations.datasource.data_connector
-    class_name: InferredAssetGCSDataConnector
-    datasource_name: FAKE_DATASOURCE
-    name: TEST_DATA_CONNECTOR
-    bucket_or_name: test_bucket
-    prefix: ""
-    default_regex:
-        group_names:
-            - data_asset_name
-            - letter
-            - number
-        pattern: (\\w{1})\\/(\\w{1})-(\\d{1})\\.csv
-        """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            """
+        module_name: great_expectations.datasource.data_connector
+        class_name: InferredAssetGCSDataConnector
+        datasource_name: FAKE_DATASOURCE
+        name: TEST_DATA_CONNECTOR
+        bucket_or_name: test_bucket
+        prefix: ""
+        default_regex:
+            group_names:
+                - data_asset_name
+                - letter
+                - number
+            pattern: (\\w{1})\\/(\\w{1})-(\\d{1})\\.csv
+            """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
 
     assert report_object == {
         "class_name": "InferredAssetGCSDataConnector",
@@ -755,27 +759,28 @@ def test_redundant_information_in_naming_convention_random_hash(
 ):
     context = empty_data_context
 
-    report_object = context.test_yaml_config(
-        """
-          module_name: great_expectations.datasource.data_connector
-          class_name: InferredAssetGCSDataConnector
-          datasource_name: FAKE_DATASOURCE
-          name: TEST_DATA_CONNECTOR
-          bucket_or_name: test_bucket
-          prefix: ""
-          default_regex:
-              group_names:
-                - year
-                - month
-                - day
-                - data_asset_name
-              pattern: (\\d{4})/(\\d{2})/(\\d{2})/(log_file)-.*\\.txt\\.gz
-              """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            """
+            module_name: great_expectations.datasource.data_connector
+            class_name: InferredAssetGCSDataConnector
+            datasource_name: FAKE_DATASOURCE
+            name: TEST_DATA_CONNECTOR
+            bucket_or_name: test_bucket
+            prefix: ""
+            default_regex:
+                group_names:
+                    - year
+                    - month
+                    - day
+                    - data_asset_name
+                pattern: (\\d{4})/(\\d{2})/(\\d{2})/(log_file)-.*\\.txt\\.gz
+                """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
 
     assert report_object == {
         "class_name": "InferredAssetGCSDataConnector",
@@ -820,27 +825,28 @@ def test_redundant_information_in_naming_convention_timestamp(
 ):
     context = empty_data_context
 
-    report_object = context.test_yaml_config(
-        """
-          module_name: great_expectations.datasource.data_connector
-          class_name: InferredAssetGCSDataConnector
-          datasource_name: FAKE_DATASOURCE
-          name: TEST_DATA_CONNECTOR
-          bucket_or_name: test_bucket
-          prefix: ""
-          default_regex:
-              group_names:
-                - data_asset_name
-                - year
-                - month
-                - day
-              pattern: (log_file)-(\\d{4})-(\\d{2})-(\\d{2})-.*\\.*\\.txt\\.gz
-      """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            """
+            module_name: great_expectations.datasource.data_connector
+            class_name: InferredAssetGCSDataConnector
+            datasource_name: FAKE_DATASOURCE
+            name: TEST_DATA_CONNECTOR
+            bucket_or_name: test_bucket
+            prefix: ""
+            default_regex:
+                group_names:
+                    - data_asset_name
+                    - year
+                    - month
+                    - day
+                pattern: (log_file)-(\\d{4})-(\\d{2})-(\\d{2})-.*\\.*\\.txt\\.gz
+        """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
     assert report_object == {
         "class_name": "InferredAssetGCSDataConnector",
         "data_asset_count": 1,
@@ -884,27 +890,28 @@ def test_redundant_information_in_naming_convention_bucket(
 ):
     context = empty_data_context
 
-    report_object = context.test_yaml_config(
-        """
-          module_name: great_expectations.datasource.data_connector
-          class_name: InferredAssetGCSDataConnector
-          datasource_name: FAKE_DATASOURCE
-          name: TEST_DATA_CONNECTOR
-          bucket_or_name: test_bucket
-          prefix: ""
-          default_regex:
-              group_names:
-                  - data_asset_name
-                  - year
-                  - month
-                  - day
-              pattern: (\\w{11})/(\\d{4})/(\\d{2})/(\\d{2})/log_file-.*\\.txt\\.gz
-              """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            """
+            module_name: great_expectations.datasource.data_connector
+            class_name: InferredAssetGCSDataConnector
+            datasource_name: FAKE_DATASOURCE
+            name: TEST_DATA_CONNECTOR
+            bucket_or_name: test_bucket
+            prefix: ""
+            default_regex:
+                group_names:
+                    - data_asset_name
+                    - year
+                    - month
+                    - day
+                pattern: (\\w{11})/(\\d{4})/(\\d{2})/(\\d{2})/log_file-.*\\.txt\\.gz
+                """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
 
     assert report_object == {
         "class_name": "InferredAssetGCSDataConnector",

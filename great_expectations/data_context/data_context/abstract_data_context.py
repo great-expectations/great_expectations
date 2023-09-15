@@ -5121,6 +5121,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return True
 
     @public_api
+    @deprecated_method_or_class(
+        version="0.17.17",
+        message="Legacy method for object creation; please use context CRUD instead",
+    )
     def test_yaml_config(  # noqa: PLR0913
         self,
         yaml_config: str,
@@ -5169,6 +5173,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             The returned object is determined by return_mode.
 
         """
+        # deprecated-v0.17.17
+        warnings.warn(
+            "test_yaml_config is deprecated as of v0.17.17 and will be removed in v0.20. "
+            "Please use the CRUD methods on the context to modify GX domain objects moving forward.",
+            DeprecationWarning,
+        )  # NOTE: Ensure that _YamlConfigValidator is deleted with this method once the deprecation period has elapsed
+
         yaml_config_validator = _YamlConfigValidator(
             data_context=self,
         )

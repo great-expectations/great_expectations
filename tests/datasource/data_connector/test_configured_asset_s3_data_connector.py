@@ -128,26 +128,27 @@ def test_instantiation_from_a_config(mock_emit, empty_data_context_stats_enabled
         client.put_object(
             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
-    report_object = context.test_yaml_config(
-        f"""
-        module_name: great_expectations.datasource.data_connector
-        class_name: ConfiguredAssetS3DataConnector
-        datasource_name: FAKE_DATASOURCE
-        name: TEST_DATA_CONNECTOR
-        default_regex:
-            pattern: alpha-(.*)\\.csv
-            group_names:
-                - index
-        bucket: {bucket}
-        prefix: ""
-        assets:
-            alpha:
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            f"""
+            module_name: great_expectations.datasource.data_connector
+            class_name: ConfiguredAssetS3DataConnector
+            datasource_name: FAKE_DATASOURCE
+            name: TEST_DATA_CONNECTOR
+            default_regex:
+                pattern: alpha-(.*)\\.csv
+                group_names:
+                    - index
+            bucket: {bucket}
+            prefix: ""
+            assets:
+                alpha:
+        """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
 
     assert report_object == {
         "class_name": "ConfiguredAssetS3DataConnector",
@@ -216,30 +217,31 @@ def test_instantiation_from_a_config_regex_does_not_match_paths(
             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
-    report_object = context.test_yaml_config(
-        f"""
-module_name: great_expectations.datasource.data_connector
-class_name: ConfiguredAssetS3DataConnector
-datasource_name: FAKE_DATASOURCE
-name: TEST_DATA_CONNECTOR
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            f"""
+    module_name: great_expectations.datasource.data_connector
+    class_name: ConfiguredAssetS3DataConnector
+    datasource_name: FAKE_DATASOURCE
+    name: TEST_DATA_CONNECTOR
 
-bucket: {bucket}
-prefix: ""
+    bucket: {bucket}
+    prefix: ""
 
-default_regex:
-    pattern: beta-(.*)\\.csv
-    group_names:
-        - index
+    default_regex:
+        pattern: beta-(.*)\\.csv
+        group_names:
+            - index
 
-assets:
-    alpha:
+    assets:
+        alpha:
 
-    """,
-        runtime_environment={
-            "execution_engine": PandasExecutionEngine(),
-        },
-        return_mode="report_object",
-    )
+        """,
+            runtime_environment={
+                "execution_engine": PandasExecutionEngine(),
+            },
+            return_mode="report_object",
+        )
 
     assert report_object == {
         "class_name": "ConfiguredAssetS3DataConnector",

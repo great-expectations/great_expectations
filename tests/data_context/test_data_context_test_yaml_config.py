@@ -83,7 +83,7 @@ SELECT EXISTS (
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_config_with_yaml_error(mock_emit, caplog, empty_data_context_stats_enabled):
-    with pytest.raises(MarkedYAMLError):
+    with pytest.raises(MarkedYAMLError), pytest.deprecated_call():
         # noinspection PyUnusedLocal
         empty_data_context_stats_enabled.test_yaml_config(
             yaml_config="""
@@ -126,16 +126,17 @@ def test_expectations_store_with_filesystem_store_backend(
         f_.write("\n")
 
     # noinspection PyUnusedLocal
-    empty_data_context_stats_enabled.test_yaml_config(
-        yaml_config=f"""
-module_name: great_expectations.data_context.store
-class_name: ExpectationsStore
-store_backend:
-    module_name: "great_expectations.data_context.store"
-    class_name: TupleFilesystemStoreBackend
-    base_directory: {tmp_dir}
-"""
-    )
+    with pytest.deprecated_call():
+        empty_data_context_stats_enabled.test_yaml_config(
+            yaml_config=f"""
+    module_name: great_expectations.data_context.store
+    class_name: ExpectationsStore
+    store_backend:
+        module_name: "great_expectations.data_context.store"
+        class_name: TupleFilesystemStoreBackend
+        base_directory: {tmp_dir}
+    """
+        )
     assert mock_emit.call_count == 1
     # Substitute current anonymized name since it changes for each run
     anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
@@ -184,10 +185,11 @@ def test_checkpoint_store_with_filesystem_store_backend(
         base_directory: {tmp_dir}/checkpoints
     """
 
-    my_checkpoint_store: CheckpointStore = context.test_yaml_config(
-        yaml_config=yaml_config,
-        return_mode="instantiated_class",
-    )
+    with pytest.deprecated_call():
+        my_checkpoint_store: CheckpointStore = context.test_yaml_config(
+            yaml_config=yaml_config,
+            return_mode="instantiated_class",
+        )
     assert mock_emit.call_count == 1
     # Substitute anonymized_name since it changes for each run
     anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
@@ -209,10 +211,11 @@ def test_checkpoint_store_with_filesystem_store_backend(
         ),
     ]
 
-    report_object: dict = context.test_yaml_config(
-        yaml_config=yaml_config,
-        return_mode="report_object",
-    )
+    with pytest.deprecated_call():
+        report_object: dict = context.test_yaml_config(
+            yaml_config=yaml_config,
+            return_mode="report_object",
+        )
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
         mock.call(
@@ -310,15 +313,16 @@ def test_checkpoint_store_with_filesystem_store_backend(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_empty_store2(mock_emit, caplog, empty_data_context_stats_enabled):
-    empty_data_context_stats_enabled.test_yaml_config(
-        yaml_config="""
-class_name: ValidationsStore
-store_backend:
+    with pytest.deprecated_call():
+        empty_data_context_stats_enabled.test_yaml_config(
+            yaml_config="""
+    class_name: ValidationsStore
+    store_backend:
 
-    module_name: "great_expectations.data_context.store.store_backend"
-    class_name: InMemoryStoreBackend
-"""
-    )
+        module_name: "great_expectations.data_context.store.store_backend"
+        class_name: InMemoryStoreBackend
+    """
+        )
     assert mock_emit.call_count == 1
     # Substitute anonymized_name since it changes for each run
     anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
@@ -368,27 +372,28 @@ def test_datasource_config(mock_emit, caplog, empty_data_context_stats_enabled):
     )
     print(temp_dir)
 
-    return_obj = empty_data_context_stats_enabled.test_yaml_config(
-        yaml_config=f"""
-class_name: Datasource
+    with pytest.deprecated_call():
+        return_obj = empty_data_context_stats_enabled.test_yaml_config(
+            yaml_config=f"""
+    class_name: Datasource
 
-execution_engine:
-    class_name: PandasExecutionEngine
+    execution_engine:
+        class_name: PandasExecutionEngine
 
-data_connectors:
-    my_filesystem_data_connector:
-        # class_name: ConfiguredAssetFilesystemDataConnector
-        class_name: InferredAssetFilesystemDataConnector
-        base_directory: {temp_dir}
-        glob_directive: '*.csv'
-        default_regex:
-            pattern: (.+)_(\\d+)\\.csv
-            group_names:
-            - letter
-            - number
-""",
-        return_mode="report_object",
-    )
+    data_connectors:
+        my_filesystem_data_connector:
+            # class_name: ConfiguredAssetFilesystemDataConnector
+            class_name: InferredAssetFilesystemDataConnector
+            base_directory: {temp_dir}
+            glob_directive: '*.csv'
+            default_regex:
+                pattern: (.+)_(\\d+)\\.csv
+                group_names:
+                - letter
+                - number
+    """,
+            return_mode="report_object",
+        )
 
     # Test usage stats messages
     assert mock_emit.call_count == 1
@@ -468,7 +473,9 @@ execution_engine:
     class_name: NOT_A_REAL_CLASS_NAME
 """
 
-    with pytest.raises(gx_exceptions.DatasourceInitializationError):
+    with pytest.raises(
+        gx_exceptions.DatasourceInitializationError
+    ), pytest.deprecated_call():
         empty_data_context_stats_enabled.test_yaml_config(yaml_config=first_config)
         # print(excinfo.value.message)
         # shortened_message_len = len(excinfo.value.message)
@@ -488,10 +495,12 @@ execution_engine:
 
     # Set shorten_tracebacks=True and verify that no error is thrown, even though the config is the same as before.
     # Note: a more thorough test could also verify that the traceback is indeed short.
-    empty_data_context_stats_enabled.test_yaml_config(
-        yaml_config=first_config,
-        shorten_tracebacks=True,
-    )
+
+    with pytest.deprecated_call():
+        empty_data_context_stats_enabled.test_yaml_config(
+            yaml_config=first_config,
+            shorten_tracebacks=True,
+        )
     assert mock_emit.call_count == 2
     expected_call_args_list.append(
         mock.call(
@@ -527,9 +536,10 @@ data_connectors:
         NOT_A_REAL_KEY: nothing
 """
 
-    datasource = empty_data_context_stats_enabled.test_yaml_config(
-        yaml_config=second_config
-    )
+    with pytest.deprecated_call():
+        datasource = empty_data_context_stats_enabled.test_yaml_config(
+            yaml_config=second_config
+        )
     assert (
         "NOT_A_REAL_KEY"
         not in datasource.config["data_connectors"]["my_filesystem_data_connector"]
@@ -611,7 +621,8 @@ introspection:
             n: ${sampling_n}
 """
 
-    my_datasource = context.test_yaml_config(first_config)
+    with pytest.deprecated_call():
+        my_datasource = context.test_yaml_config(first_config)
     assert (
         "test_cases_for_sql_data_connector.db"
         in my_datasource.execution_engine.connection_string
@@ -647,7 +658,10 @@ introspection:
     ]
     assert mock_emit.call_args_list == expected_call_args_list
 
-    report_object = context.test_yaml_config(first_config, return_mode="report_object")
+    with pytest.deprecated_call():
+        report_object = context.test_yaml_config(
+            first_config, return_mode="report_object"
+        )
     print(json.dumps(report_object, indent=2))
     assert report_object["data_connectors"]["count"] == 1
     assert set(report_object["data_connectors"].keys()) == {
@@ -721,11 +735,12 @@ def test_golden_path_sql_datasource_configuration(
                 n: 10
     """
         # noinspection PyUnusedLocal
-        report_object = context.test_yaml_config(
-            name="my_datasource",
-            yaml_config=yaml_config,
-            return_mode="report_object",
-        )
+        with pytest.deprecated_call():
+            report_object = context.test_yaml_config(
+                name="my_datasource",
+                yaml_config=yaml_config,
+                return_mode="report_object",
+            )
         assert mock_emit.call_count == 2
         # Substitute anonymized names since it changes for each run
         anonymized_datasource_name = mock_emit.call_args_list[1][0][0]["event_payload"][
@@ -869,11 +884,12 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
     """
 
         # noinspection PyUnusedLocal
-        context.test_yaml_config(
-            name="my_directory_datasource",
-            yaml_config=yaml_config,
-            return_mode="report_object",
-        )
+        with pytest.deprecated_call():
+            context.test_yaml_config(
+                name="my_directory_datasource",
+                yaml_config=yaml_config,
+                return_mode="report_object",
+            )
         # print(json.dumps(report_object, indent=2))
         # print(context.datasources)
         assert mock_emit.call_count == 1
@@ -1083,11 +1099,12 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
     """
 
         # noinspection PyUnusedLocal
-        context.test_yaml_config(
-            name="my_directory_datasource",
-            yaml_config=yaml_config,
-            return_mode="report_object",
-        )
+        with pytest.deprecated_call():
+            context.test_yaml_config(
+                name="my_directory_datasource",
+                yaml_config=yaml_config,
+                return_mode="report_object",
+            )
         # print(json.dumps(report_object, indent=2))
         # print(context.datasources)
         assert mock_emit.call_count == 1
@@ -1256,11 +1273,12 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
            """
 
         # noinspection PyUnusedLocal
-        report_object = context.test_yaml_config(
-            name="my_directory_datasource",
-            yaml_config=yaml_config,
-            return_mode="report_object",
-        )
+        with pytest.deprecated_call():
+            report_object = context.test_yaml_config(
+                name="my_directory_datasource",
+                yaml_config=yaml_config,
+                return_mode="report_object",
+            )
 
         assert report_object["execution_engine"] == {
             "caching": True,
@@ -1369,11 +1387,12 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
         """
 
         # noinspection PyUnusedLocal
-        report_object = context.test_yaml_config(
-            name="my_directory_datasource",
-            yaml_config=yaml_config,
-            return_mode="report_object",
-        )
+        with pytest.deprecated_call():
+            report_object = context.test_yaml_config(
+                name="my_directory_datasource",
+                yaml_config=yaml_config,
+                return_mode="report_object",
+            )
 
         assert report_object["execution_engine"] == {
             "caching": True,
@@ -1452,9 +1471,10 @@ def test_rule_based_profiler_integration(
           - expectation_type: expect_column_values_to_be_of_type
             class_name: DefaultExpectationConfigurationBuilder
     """
-    instantiated_class = context.test_yaml_config(
-        yaml_config=yaml_config, name="my_profiler", class_name="Profiler"
-    )
+    with pytest.deprecated_call():
+        instantiated_class = context.test_yaml_config(
+            yaml_config=yaml_config, name="my_profiler", class_name="Profiler"
+        )
 
     # Ensure valid return type and content
     assert isinstance(instantiated_class, RuleBasedProfiler)
@@ -1530,7 +1550,8 @@ data_connectors:
     class_name: InferredAssetFilesystemDataConnector
     base_directory: ${variable}
 """
-    instantiated_class = validator.test_yaml_config(yaml_config=yaml_config)
+    with pytest.deprecated_call():
+        instantiated_class = validator.test_yaml_config(yaml_config=yaml_config)
 
     # Runtime object should have the substituted value for downstream usage
     assert instantiated_class.data_connectors[
@@ -1583,6 +1604,7 @@ def test_test_yaml_config_on_datasources_persists_object_id(
                         - load_id
     """
 
-    datasource = context.test_yaml_config(datasource_yaml)
+    with pytest.deprecated_call():
+        datasource = context.test_yaml_config(datasource_yaml)
 
     assert datasource.id == id

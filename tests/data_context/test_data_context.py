@@ -1775,9 +1775,10 @@ validations:
     expectation_suite_name: newsuite
     """
 
-    checkpoint_from_test_yaml_config = context.test_yaml_config(
-        checkpoint_yaml_config, name=checkpoint_name
-    )
+    with pytest.deprecated_call():
+        checkpoint_from_test_yaml_config = context.test_yaml_config(
+            checkpoint_yaml_config, name=checkpoint_name
+        )
     assert mock_emit.call_count == 1
     # Substitute anonymized name since it changes for each run
     anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
@@ -1981,7 +1982,7 @@ validations:
     expectation_suite_name: newsuite
     """
 
-    with pytest.raises(KeyError):
+    with pytest.raises(KeyError), pytest.deprecated_call():
         context.test_yaml_config(checkpoint_yaml_config, name=checkpoint_name)
 
     with pytest.raises(AttributeError):
@@ -2034,9 +2035,10 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
           group_names: data_asset_name
           pattern: (.*)
     """
-    datasource_from_test_yaml_config = context.test_yaml_config(
-        example_yaml, name=datasource_name
-    )
+    with pytest.deprecated_call():
+        datasource_from_test_yaml_config = context.test_yaml_config(
+            example_yaml, name=datasource_name
+        )
     assert mock_emit.call_count == 1
     # Substitute anonymized names since it changes for each run
     anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
@@ -2180,9 +2182,10 @@ def test_add_datasource_from_yaml_sql_datasource(  # noqa: PLR0915
       database: postgres
     """
 
-    datasource_from_test_yaml_config = context.test_yaml_config(
-        example_yaml, name=datasource_name
-    )
+    with pytest.deprecated_call():
+        datasource_from_test_yaml_config = context.test_yaml_config(
+            example_yaml, name=datasource_name
+        )
     assert mock_emit.call_count == 1
     # Substitute anonymized name since it changes for each run
     anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
@@ -2383,9 +2386,10 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
           - default_identifier_name
     """
 
-    datasource_from_test_yaml_config = context.test_yaml_config(
-        example_yaml, name=datasource_name
-    )
+    with pytest.deprecated_call():
+        datasource_from_test_yaml_config = context.test_yaml_config(
+            example_yaml, name=datasource_name
+        )
     assert mock_emit.call_count == 1
     # Substitute anonymized name since it changes for each run
     anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
@@ -2579,9 +2583,10 @@ def test_add_datasource_from_yaml_with_substitution_variables(
               group_names: data_asset_name
               pattern: (.*)
         """
-    datasource_from_test_yaml_config = context.test_yaml_config(
-        example_yaml, name=datasource_name
-    )
+    with pytest.deprecated_call():
+        datasource_from_test_yaml_config = context.test_yaml_config(
+            example_yaml, name=datasource_name
+        )
 
     assert mock_emit.call_count == 1
     # Substitute anonymized names since it changes for each run
