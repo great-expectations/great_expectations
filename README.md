@@ -468,10 +468,15 @@ Great Expectations OSS is under active development by GX Labs and the Great Expe
 What's the best way to get in touch with the Great Expectations team?
 --------------------------------------------------------------------------------
 
-If you have questions, comments, or just want to have a good old-fashioned chat about data quality, please hop on our public [Slack channel](https://greatexpectations.io/slack) channel or post in our [GitHub Discussions](https://github.com/great-expectations/great_expectations/discussions).
+If you have questions, comments, or just want to have a good old-fashioned chat about data quality, please hop on our public [Slack channel](https://greatexpectations.io/slack) or post in our [GitHub Discussions](https://github.com/great-expectations/great_expectations/discussions).
 
 
 Can I contribute to the library?
 --------------------------------------------------------------------------------
 
 Absolutely. Yes, please. See [Contributing code](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md), [Contributing Expectations](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md), [Contributing packages](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_PACKAGES.md), or [Contribute to Great Expectations documentation](https://github.com/great-expectations/great_expectations/tree/develop/docs), and please don't be shy with questions.
+
+How do I stay up to date with Great Expectations?
+--------------------------------------------------------------------------------
+
+You can get updates on everything GX with our email newsletter. [Subscribe here!](https://greatexpectations.io/newsletter?utm_source=github&utm_medium=social&utm_campaign=newsletter&utm_content=form)
