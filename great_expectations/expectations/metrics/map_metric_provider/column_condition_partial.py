@@ -166,10 +166,10 @@ def column_condition_partial(  # noqa: C901, PLR0915
                 metrics: Dict[str, Any],
                 runtime_configuration: dict,
             ):
-                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
-                    metric_domain_kwargs=metric_domain_kwargs,
-                    batch_columns_list=metrics["table.columns"],
-                )
+                # metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                #     metric_domain_kwargs=metric_domain_kwargs,
+                #     batch_columns_list=metrics["table.columns"],
+                # )
 
                 (
                     selectable,
