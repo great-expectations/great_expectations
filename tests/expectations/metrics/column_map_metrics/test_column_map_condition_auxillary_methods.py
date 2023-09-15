@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
@@ -17,6 +18,37 @@ from great_expectations.expectations.metrics.map_metric_provider.column_map_cond
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
+
+
+@pytest.fixture
+def mini_taxi_df() -> pd.DataFrame:
+    """
+    Returns: pandas dataframe that contains a small selection of columns and rows from taxi_data, for unittesting.
+    """
+    df = pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4],
+            "vendor_id": [1, 1, 1, 1, 1],
+            "pickup_datetime": [
+                "2019-01-15 3:36:12",
+                "2019-01-25 18:20:32",
+                "2019-01-05 6:47:31",
+                "2019-01-09 15:08:02",
+                "2019-01-25 18:49:51",
+            ],
+            "dropoff_datetime": [
+                "2019-01-15 3:42:19",
+                "2019-01-25 18:26:55",
+                "2019-01-05 6:52:19",
+                "2019-01-09 15:20:17",
+                "2019-01-25 18:56:44",
+            ],
+            "trip_distance": [1, 0.8, 1.1, 2.5, 0.8],
+            "tip_amount": [1.95, 1.55, 0, 3, 1.65],
+            "total_amount": [9.75, 9.35, 6.8, 14.8, 9.95],
+        }
+    )
+    return df
 
 
 @pytest.fixture

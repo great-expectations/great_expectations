@@ -1,5 +1,6 @@
-from typing import TYPE_CHECKING, Dict, Tuple
+from typing import Dict, Tuple
 
+import pandas as pd
 import pytest
 
 from great_expectations.core.metric_function_types import (
@@ -20,8 +21,44 @@ from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
-if TYPE_CHECKING:
-    import pandas as pd
+
+@pytest.fixture
+def animal_table_df() -> pd.DataFrame:
+    """
+    Returns: pandas dataframe that contains example data for unexpected_index_column_names metric tests
+    """
+    df = pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "animals": [
+                "cat",
+                "fish",
+                "dog",
+                "giraffe",
+                "lion",
+                "zebra",
+            ],
+        }
+    )
+    return df
+
+
+@pytest.fixture
+def metric_value_kwargs_complete() -> dict:
+    """
+    Test configuration for metric_value_kwargs. Contains `unexpected_index_column_names` key
+    """
+    return {
+        "value_set": ["cat", "fish", "dog"],
+        "parse_strings_as_datetimes": False,
+        "result_format": {
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["pk_1"],
+            "partial_unexpected_count": 20,
+            "include_unexpected_rows": False,
+        },
+    }
 
 
 def _build_table_columns_and_unexpected(
@@ -426,6 +463,7 @@ def test_spark_unexpected_index_query_metric_with_id_pk(
     spark_session, animal_table_df, metric_value_kwargs_complete
 ):
     metric_value_kwargs: dict = metric_value_kwargs_complete
+
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session, df=animal_table_df, batch_id="my_id"
     )
@@ -434,13 +472,11 @@ def test_spark_unexpected_index_query_metric_with_id_pk(
         unexpected_columns_metric,
         metrics,
     ) = _build_table_columns_and_unexpected(engine, metric_value_kwargs_complete)
-
     unexpected_index_query: MetricConfiguration = MetricConfiguration(
-        metric_name="column_values.in_set",
+        metric_name=f"column_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
         metric_domain_kwargs={"column": "animals"},
         metric_value_kwargs=metric_value_kwargs,
     )
-
     unexpected_index_query.metric_dependencies = {
         "unexpected_condition": unexpected_columns_metric,
         "table.columns": table_columns_metric,
