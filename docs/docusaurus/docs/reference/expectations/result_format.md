@@ -59,12 +59,6 @@ To suppress this output, set the `return_unexpected_index_query` parameter to `F
 Regardless of how Result Format is configured, `unexpected_list` is never rendered in Data Docs.
 :::
 
-## Expectations result format values and fields
-
-| Fields within `result`                | BOOLEAN_ONLY                       |BASIC           |SUMMARY         |COMPLETE        |
-----------------------------------------|------------------------------------|----------------|----------------|-----------------
-|    details (dictionary)               | Defined on a per-Expectation basis |
-
 ## Column Map Expectations result format values and fields
 
 | Fields within `result`                |BOOLEAN_ONLY    |BASIC           |SUMMARY         |COMPLETE        |
