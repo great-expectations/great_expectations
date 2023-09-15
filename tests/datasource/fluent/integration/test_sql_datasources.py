@@ -18,10 +18,14 @@ from typing import (
 )
 
 import pytest
+import sqlalchemy as sa
 from packaging.version import Version
 from pytest import param
 
 from great_expectations import get_context
+from great_expectations.compatibility.sqlalchemy import (
+    ProgrammingError as SqlAlchemyProgrammingError,
+)
 from great_expectations.compatibility.sqlalchemy import (
     TextClause,
     engine,
@@ -42,6 +46,7 @@ from great_expectations.datasource.fluent import (
 from great_expectations.execution_engine.sqlalchemy_dialect import (
     DIALECT_IDENTIFIER_QUOTE_STRINGS,
     GXSqlDialect,
+    _strip_quotes,
     quote_str,
 )
 from great_expectations.expectations.expectation import (
@@ -50,6 +55,9 @@ from great_expectations.expectations.expectation import (
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
+
+    from great_expectations.checkpoint.checkpoint import CheckpointResult
+    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 TERMINAL_WIDTH: Final = shutil.get_terminal_size().columns
 STAR_SEPARATOR: Final = "*" * TERMINAL_WIDTH
@@ -67,6 +75,8 @@ TRINO_TABLE: Final[str] = "customer"
 # NOTE: can we create tables in trino?
 # some of the trino tests probably don't make sense if we can't create tables
 DO_NOT_CREATE_TABLES: set[str] = {"trino"}
+# sqlite db files should be using fresh tmp_path on every test
+DO_NOT_DROP_TABLES: set[str] = {"sqlite"}
 
 DatabaseType: TypeAlias = Literal[
     "databricks_sql", "postgres", "snowflake", "sqlite", "trino"
@@ -127,12 +137,11 @@ TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
     },
 }
 
-
-class Row(TypedDict):
-    id: int
-    name: str
-    UPPER: str
-    lower: str
+# column names
+UNQUOTED_UPPER_COL: Final[Literal["UNQUOTED_UPPER_COL"]] = "UNQUOTED_UPPER_COL"
+UNQUOTED_LOWER_COL: Final[Literal["unquoted_lower_col"]] = "unquoted_lower_col"
+QUOTED_UPPER_COL: Final[Literal["QUOTED_UPPER_COL"]] = "QUOTED_UPPER_COL"
+QUOTED_LOWER_COL: Final[Literal["quoted_lower_col"]] = "quoted_lower_col"
 
 
 @pytest.fixture
@@ -142,23 +151,48 @@ def context() -> EphemeralDataContext:
     return ctx
 
 
-class TableFactory(Protocol):
-    def __call__(
-        self,
-        engine: engine.Engine,
-        table_names: set[str],
-        schema: str | None = None,
-        data: Sequence[Row] = ...,
-    ) -> None:
-        ...
-
-
 def get_random_identifier_name() -> str:
     guid = uuid.uuid4()
     return f"i{guid.hex}"
 
 
 RAND_SCHEMA: Final[str] = f"{PYTHON_VERSION}_{get_random_identifier_name()}"
+
+
+def _get_exception_details(
+    result: CheckpointResult,
+    prettyprint: bool = False,
+) -> list[dict[Literal["exception_message", "exception_traceback"], str,]]:
+    """Extract a list of exception_info dicts from a CheckpointResult."""
+    validation_results: list[
+        dict[
+            Literal[
+                "exception_info", "expectation_config", "meta", "result", "success"
+            ],
+            dict,
+        ]
+    ] = next(  # type: ignore[index, assignment]
+        iter(result.to_json_dict()["run_results"].values())  # type: ignore[call-overload,union-attr]
+    )[
+        "validation_result"  # type: ignore[index]
+    ][
+        "results"  # type: ignore[index]
+    ]
+    if prettyprint:
+        print(f"validation_result.results:\n{pf(validation_results, depth=2)}\n")
+
+    exc_details = [
+        r["exception_info"]
+        for r in validation_results
+        if r["exception_info"]["raised_exception"]
+    ]
+    if exc_details and prettyprint:
+        print(f"{len(exc_details)} exception_info(s):\n{STAR_SEPARATOR}")
+        for i, exc_info in enumerate(exc_details, start=1):
+            print(
+                f"  {i}: {exc_info['exception_message']}\n\n{exc_info['exception_traceback']}\n{STAR_SEPARATOR}"
+            )
+    return exc_details
 
 
 @pytest.fixture(scope="function")
@@ -171,6 +205,26 @@ def capture_engine_logs(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFi
 @pytest.fixture
 def silence_sqla_warnings(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("SQLALCHEMY_SILENCE_UBER_WARNING", "1")
+
+
+class Row(TypedDict):
+    id: int
+    name: str
+    quoted_upper_col: str
+    quoted_lower_col: str
+    unquoted_upper_col: str
+    unquoted_lower_col: str
+
+
+class TableFactory(Protocol):
+    def __call__(
+        self,
+        gx_engine: SqlAlchemyExecutionEngine,
+        table_names: set[str],
+        schema: str | None = None,
+        data: Sequence[Row] = ...,
+    ) -> None:
+        ...
 
 
 @pytest.fixture(scope="function")
@@ -188,44 +242,61 @@ def table_factory(
     engines: dict[str, engine.Engine] = {}
 
     def _table_factory(
-        engine: engine.Engine,
+        gx_engine: SqlAlchemyExecutionEngine,
         table_names: set[str],
         schema: str | None = None,
         data: Sequence[Row] = tuple(),
     ) -> None:
-        if engine.dialect.name in DO_NOT_CREATE_TABLES:
+        sa_engine = gx_engine.engine
+        if sa_engine.dialect.name in DO_NOT_CREATE_TABLES:
             LOGGER.info(
-                f"Skipping table creation for {table_names} for {engine.dialect.name}"
+                f"Skipping table creation for {table_names} for {sa_engine.dialect.name}"
             )
             return
         LOGGER.info(
-            f"SQLA:{SQLA_VERSION} - Creating `{engine.dialect.name}` table for {table_names} if it does not exist"
+            f"SQLA:{SQLA_VERSION} - Creating `{sa_engine.dialect.name}` table for {table_names} if it does not exist"
         )
         created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
-        with engine.connect() as conn:
-            upper: str = quote_str("UPPER", dialect=engine.dialect.name)
-            lower: str = quote_str("lower", dialect=engine.dialect.name)
+
+        with gx_engine.get_connection() as conn:
+            quoted_upper_col: str = quote_str(
+                QUOTED_UPPER_COL, dialect=sa_engine.dialect.name
+            )
+            quoted_lower_col: str = quote_str(
+                QUOTED_LOWER_COL, dialect=sa_engine.dialect.name
+            )
             transaction = conn.begin()
             if schema:
                 conn.execute(TextClause(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
             for name in table_names:
                 qualified_table_name = f"{schema}.{name}" if schema else name
-                create_tables = f"CREATE TABLE IF NOT EXISTS {qualified_table_name} (id INTEGER, name VARCHAR(255), {upper} VARCHAR(255), {lower} VARCHAR(255))"
+                # TODO: use dialect specific quotes
+                create_tables: str = (
+                    f"CREATE TABLE IF NOT EXISTS {qualified_table_name}"
+                    f" (id INTEGER, name VARCHAR(255), {quoted_upper_col} VARCHAR(255), {quoted_lower_col} VARCHAR(255),"
+                    f" {UNQUOTED_UPPER_COL} VARCHAR(255), {UNQUOTED_LOWER_COL} VARCHAR(255))"
+                )
                 conn.execute(TextClause(create_tables))
                 if data:
-                    insert_data = f"INSERT INTO {qualified_table_name} (id, name, {upper}, {lower}) VALUES (:id, :name, :UPPER, :lower)"
+                    insert_data = (
+                        f"INSERT INTO {qualified_table_name} (id, name, {quoted_upper_col}, {quoted_lower_col}, {UNQUOTED_UPPER_COL}, {UNQUOTED_LOWER_COL})"
+                        " VALUES (:id, :name, :quoted_upper_col, :quoted_lower_col, :unquoted_upper_col, :unquoted_lower_col)"
+                    )
                     conn.execute(TextClause(insert_data), data)
 
                 created_tables.append(dict(table_name=name, schema=schema))
             transaction.commit()
-        all_created_tables[engine.dialect.name] = created_tables
-        engines[engine.dialect.name] = engine
+        all_created_tables[sa_engine.dialect.name] = created_tables
+        engines[sa_engine.dialect.name] = sa_engine
 
     yield _table_factory
 
     # teardown
     print(f"dropping tables\n{pf(all_created_tables)}")
     for dialect, tables in all_created_tables.items():
+        if dialect in DO_NOT_DROP_TABLES:
+            print(f"skipping drop for {dialect}")
+            continue
         engine = engines[dialect]
         with engine.connect() as conn:
             transaction = conn.begin()
@@ -295,13 +366,16 @@ def snowflake_creds_populated() -> bool:
 
 @pytest.fixture
 def snowflake_ds(
-    context: EphemeralDataContext, snowflake_creds_populated: bool
+    context: EphemeralDataContext,
+    snowflake_creds_populated: bool,
 ) -> SnowflakeDatasource:
     if not snowflake_creds_populated:
         pytest.skip("no snowflake credentials")
     ds = context.sources.add_snowflake(
         "snowflake",
         connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
+        # NOTE: uncomment this and set SNOWFLAKE_USER to run tests against your own snowflake account
+        # connection_string="snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB/RESTAURANTS?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
     )
     return ds
 
@@ -372,7 +446,9 @@ class TestTableIdentifiers:
         if not table_name:
             pytest.skip(f"no '{asset_name}' table_name for postgres")
         # create table
-        table_factory(engine=postgres_ds.get_engine(), table_names={table_name})
+        table_factory(
+            gx_engine=postgres_ds.get_execution_engine(), table_names={table_name}
+        )
 
         table_names: list[str] = inspect(postgres_ds.get_engine()).get_table_names()
         print(f"postgres tables:\n{pf(table_names)}))")
@@ -391,7 +467,7 @@ class TestTableIdentifiers:
             pytest.skip(f"no '{asset_name}' table_name for databricks")
         # create table
         table_factory(
-            engine=databricks_sql_ds.get_engine(),
+            gx_engine=databricks_sql_ds.get_execution_engine(),
             table_names={table_name},
             schema=RAND_SCHEMA,
         )
@@ -420,7 +496,7 @@ class TestTableIdentifiers:
         # create table
         schema = get_random_identifier_name()
         table_factory(
-            engine=snowflake_ds.get_engine(),
+            gx_engine=snowflake_ds.get_execution_engine(),
             table_names={table_name},
             schema=schema,
         )
@@ -444,7 +520,7 @@ class TestTableIdentifiers:
         table_name = TABLE_NAME_MAPPING["sqlite"][asset_name]
         # create table
         table_factory(
-            engine=sqlite_ds.get_engine(),
+            gx_engine=sqlite_ds.get_execution_engine(),
             table_names={table_name},
         )
 
@@ -484,7 +560,9 @@ class TestTableIdentifiers:
 
         # create table
         table_factory(
-            engine=datasource.get_engine(), table_names={table_name}, schema=schema
+            gx_engine=datasource.get_execution_engine(),
+            table_names={table_name},
+            schema=schema,
         )
 
         asset = datasource.add_table_asset(
@@ -522,59 +600,41 @@ class TestTableIdentifiers:
         )
         result = checkpoint.run()
 
-        print(f"result:\n{pf(result)}")
+        _ = _get_exception_details(result, prettyprint=True)
         assert result.success is True
 
 
 # TODO: remove items from this lookup when working on fixes
 REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
-    'expect_column_values_to_not_be_null-str "lower"': ["postgres", "snowflake"],
-    "expect_column_values_to_not_be_null-str LOWER": [
+    "str UNQUOTED_LOWER_COL": ["databricks_sql", "postgres", "sqlite"],
+    "str unquoted_upper_col": ["databricks_sql", "sqlite"],
+    "str UNQUOTED_UPPER_COL": ["databricks_sql", "postgres"],
+    'str "quoted_lower_col"': ["postgres", "snowflake", "sqlite"],
+    "str quoted_lower_col": ["snowflake"],
+    "str QUOTED_LOWER_COL": ["databricks_sql", "postgres", "snowflake", "sqlite"],
+    "str quoted_upper_col": ["databricks_sql", "postgres", "snowflake", "sqlite"],
+    'str "QUOTED_UPPER_COL"': ["postgres", "snowflake", "sqlite"],
+    "quoted_name quoted_lower_col quote=None": ["snowflake"],
+    "quoted_name quoted_lower_col quote=True": ["snowflake"],
+    "quoted_name quoted_lower_col quote=False": ["snowflake"],
+    "quoted_name quoted_upper_col quote=None": [
         "databricks_sql",
         "postgres",
         "snowflake",
         "sqlite",
     ],
-    "expect_column_values_to_not_be_null-str upper": [
-        "databricks_sql",
-        "postgres",
-        "sqlite",
-    ],
-    'expect_column_values_to_not_be_null-str "UPPER"': ["postgres", "snowflake"],
-    "expect_column_values_to_not_be_null-str UPPER": ["snowflake"],
-    "expect_column_values_to_not_be_null-quoted_name UPPER quote=None": ["snowflake"],
-    "expect_column_values_to_not_be_null-quoted_name UPPER quote=True": ["snowflake"],
-    "expect_column_values_to_not_be_null-quoted_name UPPER quote=False": ["snowflake"],
-    "expect_column_values_to_not_be_null-quoted_name upper quote=None": [
-        "databricks_sql",
-        "postgres",
-        "sqlite",
-    ],
-    "expect_column_to_exist-str LOWER": [
+    "quoted_name QUOTED_LOWER_COL quote=None": [
         "databricks_sql",
         "postgres",
         "snowflake",
-        "sqlite",
-    ],
-    "expect_column_to_exist-str upper": ["databricks_sql", "postgres", "sqlite"],
-    "expect_column_to_exist-str UPPER": ["snowflake"],
-    'expect_column_to_exist-str "lower"': ["postgres", "snowflake", "sqlite"],
-    'expect_column_to_exist-str "UPPER"': ["postgres", "snowflake", "sqlite"],
-    "expect_column_to_exist-quoted_name UPPER quote=False": ["snowflake"],
-    "expect_column_to_exist-quoted_name UPPER quote=True": ["snowflake"],
-    "expect_column_to_exist-quoted_name UPPER quote=None": ["postgres", "snowflake"],
-    "expect_column_to_exist-quoted_name upper quote=None": [
-        "databricks_sql",
-        "postgres",
         "sqlite",
     ],
 }
 
 
 def _requires_fix(param_id: str) -> bool:
-    dialect, expectation_type, column_name = param_id.split("-")
-    test_id = f"{expectation_type}-{column_name}"
-    dialects_need_fixes: list[DatabaseType] = REQUIRE_FIXES.get(test_id, [])
+    dialect, *_, column_name = param_id.split("-")
+    dialects_need_fixes: list[DatabaseType] = REQUIRE_FIXES.get(column_name, [])
     return dialect in dialects_need_fixes
 
 
@@ -590,84 +650,175 @@ def _is_quote_char_dialect_mismatch(
     return False
 
 
-# TODO: simplify these parametrizations
-# quoted_upper_str
-# unquoted_upper_str
-# quoted_lower_str
-# unquoted_lower_str
-# upper_quoted_name
-# lower_quoted_name
 @pytest.mark.parametrize(
     "column_name",
     [
-        param("lower", id="str lower"),
-        param("LOWER", id="str LOWER"),
-        param("'lower'", id="str 'lower'"),
-        param('"lower"', id='str "lower"'),
+        param("unquoted_lower_col", id="str unquoted_lower_col"),
+        param("UNQUOTED_LOWER_COL", id="str UNQUOTED_LOWER_COL"),
+        param("unquoted_upper_col", id="str unquoted_upper_col"),
+        param("UNQUOTED_UPPER_COL", id="str UNQUOTED_UPPER_COL"),
+        param("quoted_lower_col", id="str quoted_lower_col"),
+        param("QUOTED_LOWER_COL", id="str QUOTED_LOWER_COL"),
+        param("quoted_upper_col", id="str quoted_upper_col"),
+        param("QUOTED_UPPER_COL", id="str QUOTED_UPPER_COL"),
+        param('"QUOTED_UPPER_COL"', id='str "QUOTED_UPPER_COL"'),
+        param('"quoted_lower_col"', id='str "quoted_lower_col"'),
         param(
             quoted_name(
-                "lower",
+                "quoted_lower_col",
                 quote=None,
             ),
-            id="quoted_name lower quote=None",
+            id="quoted_name quoted_lower_col quote=None",
         ),
         param(
             quoted_name(
-                "lower",
+                "quoted_lower_col",
                 quote=True,
             ),
-            id="quoted_name lower quote=True",
+            id="quoted_name quoted_lower_col quote=True",
         ),
         param(
             quoted_name(
-                "lower",
+                "quoted_lower_col",
                 quote=False,
             ),
-            id="quoted_name lower quote=False",
+            id="quoted_name quoted_lower_col quote=False",
         ),
         param(
             quoted_name(
-                "LOWER",
+                "QUOTED_LOWER_COL",
                 quote=None,
             ),
-            marks=[pytest.mark.xfail],
-            id="quoted_name LOWER quote=None",
+            id="quoted_name QUOTED_LOWER_COL quote=None",
         ),
-        param("upper", id="str upper"),
-        param("UPPER", id="str UPPER"),
-        param("'UPPER'", id="str 'UPPER'"),
-        param('"UPPER"', id='str "UPPER"'),
         param(
             quoted_name(
-                "UPPER",
+                "QUOTED_UPPER_COL",
                 quote=None,
             ),
-            id="quoted_name UPPER quote=None",
+            id="quoted_name QUOTED_UPPER_COL quote=None",
         ),
         param(
             quoted_name(
-                "UPPER",
+                "QUOTED_UPPER_COL",
                 quote=True,
             ),
-            id="quoted_name UPPER quote=True",
+            id="quoted_name QUOTED_UPPER_COL quote=True",
         ),
         param(
             quoted_name(
-                "UPPER",
+                "QUOTED_UPPER_COL",
                 quote=False,
             ),
-            id="quoted_name UPPER quote=False",
+            id="quoted_name QUOTED_UPPER_COL quote=False",
         ),
         param(
             quoted_name(
-                "upper",
+                "quoted_upper_col",
                 quote=None,
             ),
-            id="quoted_name upper quote=None",
+            id="quoted_name quoted_upper_col quote=None",
         ),
     ],
 )
 class TestColumnIdentifiers:
+    # unskip to help debug `test_column_expectation` failures
+    @pytest.mark.skip(reason="sanity checks for helping debug issues")
+    def test_raw_queries(
+        self,
+        context: EphemeralDataContext,
+        all_sql_datasources: SQLDatasource,
+        table_factory: TableFactory,
+        column_name: str | quoted_name,
+        request: pytest.FixtureRequest,
+    ):
+        datasource = all_sql_datasources
+        dialect = datasource.get_engine().dialect.name
+
+        if _is_quote_char_dialect_mismatch(dialect, column_name):
+            pytest.skip(reason=f"quote char dialect mismatch: {column_name[0]}")
+
+        if _requires_fix(request.node.callspec.id):
+            pytest.xfail(reason="requires fix")
+
+        schema: str | None = (
+            RAND_SCHEMA
+            if GXSqlDialect(dialect)
+            in (GXSqlDialect.SNOWFLAKE, GXSqlDialect.DATABRICKS)
+            else None
+        )
+
+        print(f"\ncolumn_name:\n  {column_name!r}")
+        print(f"type:\n  {type(column_name)}\n")
+
+        table_factory(
+            gx_engine=datasource.get_execution_engine(),
+            table_names={TEST_TABLE_NAME},
+            schema=schema,
+            data=[
+                {
+                    "id": 1,
+                    "name": "first",
+                    "quoted_upper_col": "uppercase",
+                    "quoted_lower_col": "lowercase",
+                    "unquoted_upper_col": "uppercase",
+                    "unquoted_lower_col": "lowercase",
+                }
+            ],
+        )
+
+        qualified_table_name: str = (
+            f"{schema}.{TEST_TABLE_NAME}" if schema else TEST_TABLE_NAME
+        )
+        # examine columns
+        with datasource.get_execution_engine().get_connection() as conn:
+            # TODO: remove one or all of these methods for checking for columns
+
+            # query information_schema
+            col_exist_check = conn.execute(
+                TextClause(
+                    """SELECT column_name FROM information_schema.columns WHERE table_name = :table_name AND column_name = :column_name""",
+                ),
+                table_name=TEST_TABLE_NAME,
+                column_name=quoted_name(column_name, quote=False),
+            )
+            print(f"INFORMATION_SCHEMA.COLUMNS check:\n  {col_exist_check.keys()}")
+            col_exist_result = col_exist_check.fetchone()
+            print(f"  Result: {col_exist_result}\n")
+
+            try:
+                query_builder_result = conn.execute(
+                    sa.sql.select(
+                        sa.column(column_name),
+                        # sa.text(column_name),
+                    )
+                    .select_from(sa.table(qualified_table_name))
+                    .limit(1)
+                )
+                print(f"query_builder_result:\n  {query_builder_result.keys()}\n")
+            except SqlAlchemyProgrammingError as e:
+                print(f"query_builder_result:\n  {e!r}\n")
+
+            try:
+                # query table
+                txt_result = conn.execute(
+                    TextClause(
+                        f"SELECT {column_name} FROM {qualified_table_name} LIMIT 1"
+                    )
+                )
+                assert txt_result
+                columns = txt_result.keys()
+                print(f"{TEST_TABLE_NAME} Columns:\n  {columns}\n")
+            except SqlAlchemyProgrammingError:
+                print(f"Column {column_name} does not exist in {qualified_table_name}")
+                raise
+
+        # normalize names, casing issues will be caught by the query itself
+        assert (
+            list(columns)[0].lower()
+            == _strip_quotes(column_name, dialect=dialect).lower()
+        ), "column name mismatch"
+
     @pytest.mark.parametrize(
         "expectation_type",
         [
@@ -699,35 +850,46 @@ class TestColumnIdentifiers:
             else None
         )
 
+        print(f"\ncolumn_name:\n  {column_name!r}")
+        print(f"type:\n  {type(column_name)}\n")
+
         table_factory(
-            engine=datasource.get_engine(),
+            gx_engine=datasource.get_execution_engine(),
             table_names={TEST_TABLE_NAME},
             schema=schema,
             data=[
                 {
                     "id": 1,
                     "name": "first",
-                    "UPPER": "my column is uppercase",
-                    "lower": "my column is lowercase",
+                    "quoted_upper_col": "my column is uppercase",
+                    "quoted_lower_col": "my column is lowercase",
+                    "unquoted_upper_col": "whatever",
+                    "unquoted_lower_col": "whatever",
                 },
                 {
                     "id": 2,
                     "name": "second",
-                    "UPPER": "my column is uppercase",
-                    "lower": "my column is lowercase",
+                    "quoted_upper_col": "my column is uppercase",
+                    "quoted_lower_col": "my column is lowercase",
+                    "unquoted_upper_col": "whatever",
+                    "unquoted_lower_col": "whatever",
                 },
             ],
         )
 
+        qualified_table_name: str = (
+            f"{schema}.{TEST_TABLE_NAME}" if schema else TEST_TABLE_NAME
+        )
         # examine columns
-        with datasource.get_engine().connect() as conn:
-            result = conn.execute(TextClause(f"SELECT * FROM {TEST_TABLE_NAME}"))
+        with datasource.get_execution_engine().get_connection() as conn:
+            result = conn.execute(TextClause(f"SELECT * FROM {qualified_table_name}"))
             assert result
             print(f"{TEST_TABLE_NAME} Columns:\n  {result.keys()}\n")
 
         asset = datasource.add_table_asset(
             "my_asset", table_name=TEST_TABLE_NAME, schema_name=schema
         )
+        print(f"asset:\n{asset!r}\n")
 
         suite = context.add_expectation_suite(
             expectation_suite_name=f"{datasource.name}-{asset.name}"
@@ -760,32 +922,10 @@ class TestColumnIdentifiers:
         )
         result = checkpoint.run()
 
-        validation_results: list[
-            dict[
-                Literal[
-                    "exception_info", "expectation_config", "meta", "result", "success"
-                ],
-                dict,
-            ]
-        ] = next(iter(result.to_json_dict()["run_results"].values()))[
-            "validation_result"
-        ][
-            "results"
-        ]
+        exc_details = _get_exception_details(result, prettyprint=True)
+        assert not exc_details, exc_details[0]["exception_message"]
 
-        print(f"validation_result.results:\n{pf(validation_results, depth=2)}\n")
-        exc_msgs = [
-            r["exception_info"]["exception_message"]
-            for r in validation_results
-            if r["exception_info"].get("exception_message")
-        ]
-        if exc_msgs:
-            print(f"{len(exc_msgs)} exception_message(s):\n{STAR_SEPARATOR}")
-            for i, msg in enumerate(exc_msgs, start=1):
-                print(f"  {i}: {msg}\n{STAR_SEPARATOR}")
-        assert not exc_msgs, exc_msgs
-
-        assert validation_results[-1]["success"] is True, "validation failed"
+        assert result.success is True, "validation failed"
 
 
 if __name__ == "__main__":

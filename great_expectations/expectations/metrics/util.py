@@ -2,7 +2,18 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple, overload
+from collections import UserDict
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    overload,
+)
 
 import numpy as np
 from dateutil.parser import parse
@@ -13,6 +24,7 @@ from great_expectations.compatibility import aws, sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.execution_engine import (
     PandasExecutionEngine,  # noqa: TCH001
     SqlAlchemyExecutionEngine,  # noqa: TCH001
@@ -20,7 +32,9 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import (
+    GXSqlDialect,
+)
 from great_expectations.execution_engine.util import check_sql_engine_dialect
 
 try:
@@ -308,13 +322,62 @@ def attempt_allowing_relative_error(dialect):
     return detected_redshift or detected_psycopg2
 
 
+class CaseInsensitiveString(str):
+    """
+    A string that compares equal to another string regardless of case,
+    unless it is quoted.
+    """
+
+    def __init__(self, string: str):
+        # TODO: check if string is already a CaseInsensitiveString?
+        self._original = string
+        self._lower = string.lower()
+        self._quote_string = '"'
+
+    @override
+    def __eq__(self, other: CaseInsensitiveString | str | object):
+        if self.is_quoted():
+            return self._original == str(other)
+        if isinstance(other, CaseInsensitiveString):
+            return self._lower == other._lower
+        elif isinstance(other, str):
+            return self._lower == other.lower()
+        else:
+            return False
+
+    def __hash__(self):
+        return hash(self._lower)
+
+    @override
+    def __str__(self) -> str:
+        return self._original
+
+    def is_quoted(self):
+        return self._original.startswith(self._quote_string)
+
+
+class CaseInsensitiveNameDict(UserDict):
+    """Normal dict except it returns a case-insensitive string for any `name` key values."""
+
+    def __init__(self, data: dict[str, Any]):
+        self.data = data
+
+    @override
+    def __getitem__(self, key: Any) -> Any:
+        item = self.data[key]
+        if key == "name":
+            logger.debug(f"CaseInsensitiveNameDict.__getitem__ - {key}:{item}")
+            return CaseInsensitiveString(item)
+        return item
+
+
 def get_sqlalchemy_column_metadata(
     execution_engine: SqlAlchemyExecutionEngine,
     table_selectable: sqlalchemy.Select,
     schema_name: Optional[str] = None,
-) -> Optional[List[Dict[str, Any]]]:
+) -> Sequence[Mapping[str, Any]] | None:
     try:
-        columns: List[Dict[str, Any]]
+        columns: Sequence[Dict[str, Any]]
 
         engine = execution_engine.engine
         inspector = execution_engine.get_inspector()
@@ -342,7 +405,13 @@ def get_sqlalchemy_column_metadata(
             AttributeError,
             sa.exc.NoSuchTableError,
             sa.exc.ProgrammingError,
-        ):
+        ) as exc:
+            logger.debug(
+                f"{type(exc).__name__} while introspecting columns", exc_info=exc
+            )
+            logger.info(
+                f"While introspecting columns {exc!r}; attempting reflection fallback"
+            )
             # we will get a KeyError for temporary tables, since
             # reflection will not find the temporary schema
             columns = column_reflection_fallback(
@@ -359,9 +428,17 @@ def get_sqlalchemy_column_metadata(
                 sqlalchemy_engine=engine,
             )
 
+        dialect_name = execution_engine.dialect.name
+        if dialect_name == GXSqlDialect.SNOWFLAKE:
+            return [
+                # TODO: SmartColumn should know the dialect and do lookups based on that
+                CaseInsensitiveNameDict(column)
+                for column in columns
+            ]
+
         return columns
     except AttributeError as e:
-        logger.debug(f"Error while introspecting columns: {e!s}")
+        logger.debug(f"Error while introspecting columns: {e!r}", exc_info=e)
         return None
 
 
