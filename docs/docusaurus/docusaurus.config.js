@@ -28,7 +28,7 @@ module.exports = {
   themeConfig: {
     gxCard: {
       title: "What is GX Cloud?",
-      description: "GX Cloud is a cloud solution that helps you focus on data validation and reduces the time required to configure Expectation Suites.",
+      description: "GX Cloud is a fully-managed SaaS solution that simplifies deployment, scaling, and collaboration and lets you focus on data validation.",
       buttons: {
         primary: {
           label: "Try GX Cloud",
