@@ -111,8 +111,8 @@ def execution_engine_with_mini_taxi_selectable(
     "execution_engine_fixture_name, metric_domain_kwargs, expected_result",
     [
         # We calculate the column_values.between.condition with min value 0.0 and max value 10.0.
-        # when row_condition is col("pk_1")!=0 _sqlalchemy_column_map_condition_values() method will return [14.8] because it will run against all rows and find the values that out of range (0 < x < 10.0).
-        # when row_condition is col("pk_1")==0 _sqlalchemy_column_map_condition_values() method will return [] because it will only run against a single row (where pk_1==0), and that value is within our range (9.75).
+        # when row_condition is col("pk_1")!=0 _sqlalchemy_column_map_condition_values() method will return [14.8] because it will run against all rows of mini_taxi_df and find the total_amount values that out of range (0 < x < 10.0).
+        # when row_condition is col("pk_1")==0 _sqlalchemy_column_map_condition_values() method will return [] because it will only run against a single row of mini_taxi_df (where pk_1==0), and that total_amount value is within our range (9.75).
         (
             "execution_engine_with_mini_taxi_table_name",
             {
