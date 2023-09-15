@@ -1,5 +1,5 @@
 .gxCard {
-    background-color: var(--mint-100);
+    background-color: var(--orange-100);
     padding: 1.5rem;
     font-size: 15px;
     line-height: 1.6;
@@ -18,7 +18,7 @@
   }
   
   html[data-theme="dark"] .gxCard {
-    background-color: var(--mint-700);
+    background-color: var(--orange-100);
   }
   
   .button {
@@ -28,13 +28,13 @@
     padding: 9px 1rem 9px 1rem !important;
     font-size: 12px;
     font-weight: 600;
-    background-color: var(--mint-300);
+    background-color: var(--orange-100);
     color: var(--gray-800);
     border-radius: 50rem;
     transition: all 0.3s ease;
     cursor: pointer;
     min-width: 86px;
-    background: var(--mint-300);
+    background: var(--orange-100);
     border: 1px solid transparent;
     text-align: center;
   }
@@ -42,7 +42,7 @@
   .button:hover {
     color: var(--gray-800);
     text-decoration: none;
-    background: var(--mint-500);
+    background: var(--orange-500);
   }
   
   .button:visited {
