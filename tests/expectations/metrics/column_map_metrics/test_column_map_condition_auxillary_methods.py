@@ -195,7 +195,6 @@ def test_column_map_condition_values_row_condition(
     )
     desired_metric.metric_dependencies = {"table.columns": table_columns_metric}
     results = execution_engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    metrics = dict()
     metrics = {
         "unexpected_condition": results[desired_metric.id],
         "table.columns": table_column_metrics_results[table_columns_metric.id],
