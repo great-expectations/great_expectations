@@ -1013,9 +1013,10 @@ def data_context_with_connection_to_metrics_db(
                         table_name: multi_column_sums
                         class_name: Asset
     """
-    _: Datasource = context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
+    with pytest.deprecated_call():
+        _: Datasource = context.test_yaml_config(
+            name="my_datasource", yaml_config=datasource_config, pretty_print=False
+        )
     # noinspection PyProtectedMember
     context._save_project_config()
     return context
@@ -1164,9 +1165,10 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
                     - airflow_run_id
     """
 
-    _: Datasource = context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
+    with pytest.deprecated_call():
+        _: Datasource = context.test_yaml_config(
+            name="my_datasource", yaml_config=datasource_config, pretty_print=False
+        )
     # noinspection PyProtectedMember
     context._save_project_config()
 
@@ -1634,9 +1636,10 @@ def deterministic_asset_data_connector_context(
                     users: {{}}
         """
 
-    context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
+    with pytest.deprecated_call():
+        context.test_yaml_config(
+            name="my_datasource", yaml_config=datasource_config, pretty_print=False
+        )
     # noinspection PyProtectedMember
     context._save_project_config()
     return context

@@ -125,10 +125,11 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
         "profilers": [],
     }
 
-    checkpoint: Checkpoint = data_context.test_yaml_config(
-        yaml_config=yaml_config,
-        name="my_fancy_checkpoint",
-    )
+    with pytest.deprecated_call():
+        checkpoint: Checkpoint = data_context.test_yaml_config(
+            yaml_config=yaml_config,
+            name="my_fancy_checkpoint",
+        )
     assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
@@ -256,10 +257,11 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
         "profilers": [],
     }
 
-    checkpoint: Checkpoint = data_context.test_yaml_config(
-        yaml_config=yaml_config,
-        name="my_fancy_checkpoint",
-    )
+    with pytest.deprecated_call():
+        checkpoint: Checkpoint = data_context.test_yaml_config(
+            yaml_config=yaml_config,
+            name="my_fancy_checkpoint",
+        )
     assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
@@ -382,10 +384,11 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
         "profilers": [],
     }
 
-    checkpoint: Checkpoint = data_context.test_yaml_config(
-        yaml_config=yaml_config,
-        name="airflow_users_node_3",
-    )
+    with pytest.deprecated_call():
+        checkpoint: Checkpoint = data_context.test_yaml_config(
+            yaml_config=yaml_config,
+            name="airflow_users_node_3",
+        )
     assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
@@ -471,10 +474,11 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         "profilers": [],
     }
 
-    checkpoint: Checkpoint = data_context.test_yaml_config(
-        yaml_config=yaml_config,
-        name="my_base_checkpoint",
-    )
+    with pytest.deprecated_call():
+        checkpoint: Checkpoint = data_context.test_yaml_config(
+            yaml_config=yaml_config,
+            name="my_base_checkpoint",
+        )
     assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
@@ -556,10 +560,11 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         "profilers": [],
     }
 
-    checkpoint: Checkpoint = data_context.test_yaml_config(
-        yaml_config=yaml_config,
-        name="my_fancy_checkpoint",
-    )
+    with pytest.deprecated_call():
+        checkpoint: Checkpoint = data_context.test_yaml_config(
+            yaml_config=yaml_config,
+            name="my_fancy_checkpoint",
+        )
     assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
