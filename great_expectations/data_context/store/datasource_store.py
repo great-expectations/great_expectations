@@ -126,21 +126,26 @@ class DatasourceStore(Store):
     @override
     def ge_cloud_response_json_to_object_dict(
         self, response_json: CloudResponsePayloadTD  # type: ignore[override]
-    ) -> dict | list[dict]:
+    ) -> dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
         """
         logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
         data = response_json["data"]
-        if isinstance(data, list):
-            if len(data) == 1:
-                data = data[
-                    0
-                ]  # If a single datasource is returned in list form, extract and treat as individual
-            else:
-                return [self._convert_raw_json_to_object_dict(d) for d in data]
         return self._convert_raw_json_to_object_dict(data)
+
+    @override
+    def ge_cloud_response_json_to_object_collection(
+        self, response_json: CloudResponsePayloadTD  # type: ignore[override]
+    ) -> list[dict]:
+        """
+        This method takes full json response from GX cloud and outputs a list of dicts appropriate for
+        deserialization into a collection of GX objects
+        """
+        logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
+        data = response_json["data"]
+        return [self._convert_raw_json_to_object_dict(d) for d in data]
 
     @staticmethod
     def _convert_raw_json_to_object_dict(data: DataPayload) -> dict:

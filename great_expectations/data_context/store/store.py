@@ -15,7 +15,6 @@ from typing import (
 from typing_extensions import TypedDict
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core._docs_decorators import deprecated_method_or_class
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
@@ -110,7 +109,7 @@ class Store:
         """
         return response_json
 
-    def ge_cloud_response_json_to_object_colleciton(
+    def ge_cloud_response_json_to_object_collection(
         self, response_json: Dict
     ) -> List[Dict]:
         """
@@ -213,8 +212,6 @@ class Store:
             value = self._store_backend.get(self.key_to_tuple(key))
 
         if value:
-            if isinstance(value, list):
-                return [self.deserialize(v) for v in value]
             return self.deserialize(value)
 
         return None
@@ -222,7 +219,7 @@ class Store:
     def get_all(self) -> list[Any]:
         objs = self._store_backend.get_all()
         if self.cloud_mode:
-            objs = self.ge_cloud_response_json_to_object_dict(objs)
+            objs = self.ge_cloud_response_json_to_object_collection(objs)
 
         return list(map(self.deserialize, objs))
 
@@ -287,10 +284,6 @@ class Store:
                 return self._store_backend.has_key(key.to_fixed_length_tuple())
             return self._store_backend.has_key(key.to_tuple())
 
-    @deprecated_method_or_class(
-        version="0.17.17",
-        message="test_yaml_config and related workflows are no longer supported",
-    )
     def self_check(self, pretty_print: bool) -> None:
         NotImplementedError(
             f"The test method is not implemented for Store class {self.__class__.__name__}."

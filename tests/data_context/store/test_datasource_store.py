@@ -529,9 +529,10 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
 
 @pytest.mark.cloud
 @pytest.mark.parametrize(
-    "response_json, expected_object_dict",
+    "parsing_method_name, response_json, expected_object_dict",
     [
         pytest.param(
+            "ge_cloud_response_json_to_object_dict",
             {
                 "data": {
                     "attributes": {
@@ -595,6 +596,7 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
             id="single_datasource",
         ),
         pytest.param(
+            "ge_cloud_response_json_to_object_collection",
             {
                 "data": [
                     {
@@ -707,12 +709,14 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
         ),
     ],
 )
-def test_ge_cloud_response_json_to_object_dict(
+def test_ge_cloud_response_json_parsing(
     empty_datasource_store: DatasourceStore,
+    parsing_method_name: str,
     response_json: dict,
     expected_object_dict: dict,
 ):
-    actual_object_dict = empty_datasource_store.ge_cloud_response_json_to_object_dict(
-        response_json
-    )
+    parsing_method = getattr(empty_datasource_store, parsing_method_name)
+    print(f"Parsing Method: {parsing_method.__name__}")
+
+    actual_object_dict = parsing_method(response_json)
     assert actual_object_dict == expected_object_dict
