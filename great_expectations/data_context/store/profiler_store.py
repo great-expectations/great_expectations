@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import random
 import uuid
 from typing import Union
@@ -68,14 +66,11 @@ class ProfilerStore(ConfigurationStore):
             )
 
     @override
-    def ge_cloud_response_json_to_object_dict(
-        self, response_json: dict
-    ) -> dict | list[dict]:
+    def ge_cloud_response_json_to_object_dict(self, response_json: dict) -> dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
         """
-        # TODO: Need to add support for parsing and converting an entire collection
         ge_cloud_profiler_id = response_json["data"]["id"]
         profiler_config_dict = response_json["data"]["attributes"]["profiler"]
         profiler_config_dict["id"] = ge_cloud_profiler_id

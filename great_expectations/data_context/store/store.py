@@ -10,12 +10,12 @@ from typing import (
     Optional,
     Tuple,
     Type,
-    Union,
 )
 
 from typing_extensions import TypedDict
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import deprecated_method_or_class
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
@@ -103,14 +103,21 @@ class Store:
             )
         self._use_fixed_length_key = self._store_backend.fixed_length_key
 
-    def ge_cloud_response_json_to_object_dict(
-        self, response_json: Dict
-    ) -> Union[Dict, List[Dict]]:
+    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
         """
         return response_json
+
+    def ge_cloud_response_json_to_object_colleciton(
+        self, response_json: Dict
+    ) -> List[Dict]:
+        """
+        This method takes full json response from GX cloud and outputs a list of dicts appropriate for
+        deserialization into a collection of GX objects
+        """
+        raise NotImplementedError
 
     def _validate_key(self, key: DataContextKey) -> None:
         # STORE_BACKEND_ID_KEY always validated
@@ -280,6 +287,10 @@ class Store:
                 return self._store_backend.has_key(key.to_fixed_length_tuple())
             return self._store_backend.has_key(key.to_tuple())
 
+    @deprecated_method_or_class(
+        version="0.17.17",
+        message="test_yaml_config and related workflows are no longer supported",
+    )
     def self_check(self, pretty_print: bool) -> None:
         NotImplementedError(
             f"The test method is not implemented for Store class {self.__class__.__name__}."
