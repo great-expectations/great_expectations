@@ -70,10 +70,10 @@ You'll need your user and organization access tokens when you connect to a Datas
 
     - Click **Settings** > **Tokens**.
 
-    - Copy the value in the **Organization ID** field and save it in the same location with your user access token
+    - Copy the value in the **Organization ID** field and save it in the same location with your user access token.
 
 
-#### Import modules
+## Import modules
 
 In Jupyter Notebook, run the following Python code to import the modules you'll use to test functionality:
 
