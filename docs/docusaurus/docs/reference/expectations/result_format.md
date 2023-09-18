@@ -235,7 +235,7 @@ Returns the following output:
 
 A `result` is generated with all available justification for why an Expectation was successful or unsuccessful. The format is intended for debugging pipelines or developing detailed regression tests.
 
-Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and `ColumnAggregateExpectation` Expectations.
+Great Expectations implements standard behaviors to support describing the results of `column_map_expectation` and `ColumnAggregateExpectation` Expectations.
 
 `column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of unexpected values to justify the Expectation result.
 
