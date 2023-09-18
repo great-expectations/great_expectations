@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import functools
 import logging
+import os
 import pathlib
 import warnings
 from pprint import pformat as pf
@@ -417,10 +418,29 @@ def seeded_cloud_context(
     return empty_cloud_context_fluent
 
 
+@pytest.fixture
+def integration_cloud_context() -> Generator[CloudDataContext, None, None]:
+    context = gx.get_context(
+        mode="cloud",
+        cloud_access_token=os.environ["GX_CLOUD_ACCESS_TOKEN"],
+        cloud_organization_id=os.environ["GX_CLOUD_ORG_ID"],
+    )
+    starting_datasources = set(context.datasources.keys())
+
+    # TODO: create datasources that are not in the seeded config
+
+    yield context
+
+    # TODO: cleanup seeded datasources
+    new_datasources = set(context.datasources.keys()) - starting_datasources
+    logger.warning(f"Datasources created during tests -> \n{new_datasources}")
+
+
 @pytest.fixture(
     params=[
         pytest.param("seeded_file_context", marks=[pytest.mark.filesystem]),
         pytest.param("seeded_cloud_context", marks=[pytest.mark.cloud]),
+        pytest.param("integration_cloud_context", marks=[pytest.mark.cloud]),
     ]
 )
 def seeded_contexts(
