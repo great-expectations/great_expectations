@@ -15,6 +15,7 @@ from typing import Callable, Optional, Set, Union
 from unittest import mock
 
 import pytest
+import responses
 
 from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
@@ -274,6 +275,25 @@ def test_list_keys(
             url=f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
             params=None,
         )
+
+
+@responses.activate
+def test_list_keys_with_empty_payload_from_backend(
+    construct_ge_cloud_store_backend: Callable[
+        [GXCloudRESTResource], GXCloudStoreBackend
+    ],
+):
+    store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.DATASOURCE)
+
+    responses.add(
+        responses.GET,
+        f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/datasources",
+        json={"data": []},
+        status=200,
+    )
+
+    assert store_backend.list_keys() == []
+    assert len(responses.calls) == 1
 
 
 def test_get_all(
