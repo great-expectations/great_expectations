@@ -4,6 +4,12 @@
 Changelog
 #########
 
+0.17.17
+-----------------
+* [BUGFIX] Resolve issue around listing keys with empty state in `GXCloudStoreBackend` ([#8728](https://github.com/great-expectations/great_expectations/pull/8728))
+* [DOCS] Clarify How to Use Custom Expectations Without a Filesystem ([#8700](https://github.com/great-expectations/great_expectations/pull/8700))
+* [DOCS] Update Result Format Topic ([#8674](https://github.com/great-expectations/great_expectations/pull/8674))
+
 0.17.16
 -----------------
 * [FEATURE] update data assistant run to take in validator ([#8560](https://github.com/great-expectations/great_expectations/pull/8560))
