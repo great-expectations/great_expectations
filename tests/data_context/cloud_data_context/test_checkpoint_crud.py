@@ -416,7 +416,6 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds_when_id_not_pre
     validation_ids: Tuple[str, str],
     checkpoint_config: dict,
     mocked_post_response: Callable[[], MockResponse],
-    mocked_get_by_name_response_0_results: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
 ) -> None:
@@ -431,9 +430,8 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds_when_id_not_pre
     with mock.patch(
         "requests.Session.post", autospec=True, side_effect=mocked_post_response
     ) as mock_post, mock.patch(
-        "requests.Session.get",
-        autospec=True,
-        side_effect=mocked_get_by_name_response_0_results,
+        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.has_key",
+        side_effect=False,
     ):
         checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
 
