@@ -10,9 +10,6 @@ import SetupAndInstallForSqlData from '/docs/components/setup/link_lists/_setup_
 import SetupAndInstallForFilesystemData from '/docs/components/setup/link_lists/_setup_and_install_for_filesystem_data.md'
 import SetupAndInstallForHostedData from '/docs/components/setup/link_lists/_setup_and_install_for_hosted_data.md'
 import SetupAndInstallForCloudData from '/docs/components/setup/link_lists/_setup_and_install_for_cloud_data.md'
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
 
 If you're new to GX Cloud, the information provided here is intended to demonstrate GX Cloud features and functionality. You'll connect to a Datasource, build an Expectation using sample Batch data, validate data with the Expectation, and review validation results in a Data Doc.
 
@@ -24,16 +21,13 @@ The example code is available in the [onboarding script repository](https://gith
 
 ## Prerequisites
 
-<Prerequisites>
+- An active [GX Cloud Beta Account](https://greatexpectations.io/cloud).
 
-- Followed invitation email instructions from the GX team after signing up for Early Access.
-- Successfully logged in to GX Cloud at [https://app.greatexpectations.io](https://app.greatexpectations.io).
+## Install pip and GX
 
-</Prerequisites>
+1. Download and install pip. See the [pip documentation](https://pip.pypa.io/en/stable/cli/pip/).
 
-## Install GX
-
-1. Run the following command in an empty base directory inside a Python virtual environment:
+2. Run the following command in an empty base directory inside a Python virtual environment:
 
     ```bash title="Terminal input"
     pip install great_expectations
@@ -41,16 +35,24 @@ The example code is available in the [onboarding script repository](https://gith
 
     It can take several minutes for the installation to complete.
 
-2. In Jupyter Notebook, run the following Python code to import the `great_expectations` module:
+    If you've previously installed GX, run the following command to upgrade to the latest version:
+
+    ```bash title="Terminal input"
+    pip install great_expectations --upgrade
+    ```
+
+3. In Jupyter Notebook, run the following Python code to import the `great_expectations` module:
 
     ```python name="tutorials/quickstart/quickstart.py import_gx"
     ```
 
 ## Generate a user access token
 
+You'll need your user and organization access tokens when you connect to a Datasource. Access tokens shouldn't be committed to version control software.
+
 1. In GX Cloud, click **Settings** > **Tokens**.
 
-2. In the Access tokens pane, click {**Create user access token**.
+2. In the Access tokens pane, click **Create user access token**.
 
 3. Complete the following fields:
 
@@ -64,6 +66,13 @@ The example code is available in the [onboarding script repository](https://gith
 
 6. Click **Close**.
 
+7. Locate and copy your organization ID:
+
+    - Click **Settings** > **Tokens**.
+
+    - Copy the value in the **Organization ID** field and save it in the same location with your user access token
+
+
 #### Import modules
 
 In Jupyter Notebook, run the following Python code to import the modules you'll use to test functionality:
@@ -76,53 +85,38 @@ import os
 
 ## Create a Data Context
 
-Paste this snippet into the next notebook cell to instantiate Cloud <TechnicalTag tag="data_context" text="Data Context"/>.
+1. In Jupyter Notebook, copy this code into a cell to instantiate the GX Cloud <TechnicalTag tag="data_context" text="Data Context"/>.
 
-:::caution
-Please note that access tokens are sensitive information and should not be committed to version control software. Alternatively, add these as [Data Context config variables](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials/)
-:::
+    ```python title="Jupyter Notebook"
+    os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<user_access_token>"
+    os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<organization_id>"
+    context = gx.get_context()
+    ```
+2. Replace `user_access_token` and `organization_id` with the values you created and saved previously. See [Generate a user access token](#generate-a-user-access-token).
 
-```python title="Jupyter Notebook"
-os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<your_gx_cloud_access_token>"
-# your organization_id is indicated on https://app.greatexpectations.io/tokens page
-os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<organization_id_from_the_app>"
+3. Run the code.
 
-context = gx.get_context()
-```
+## Connect to a Datasource
 
-## Connect to a Data Source
-
-Modify the following snippet code to connect to your <TechnicalTag tag="datasource" text="Data Source"/>.
-In case you don't have some data handy to test in this guide, we can use the [NYC taxi data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page). This is an open data set which is updated every month. Each record in the data corresponds to one taxi ride. You can find a link to it in the snippet below.
-
-:::caution
-Please note you should not include sensitive info/credentials directly in the config while connecting to your Data Source, since this would be persisted in plain text in the database and presented in Cloud UI. If credentials/full connection string is required, you should use a [config variables file](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials/).
-:::
+In Jupyter Notebook, run the following code to connect to existing `.csv` NYC taxi trip data stored in the `great_expectations` GitHub repository:
 
 ```python title="Jupyter Notebook"
-# Give your datasource a name
-datasource_name = None
+datasource_name = "Test"
 datasource = context.sources.add_pandas(datasource_name)
-
-# Give your first Asset a name
-asset_name = None
-path_to_data = None
-# to use sample data uncomment next line
-# path_to_data = "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
+asset_name = "Test"
+path_to_data = "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 asset = datasource.add_csv_asset(asset_name, filepath_or_buffer=path_to_data)
-
-# Build batch request
 batch_request = asset.build_batch_request()
 ```
 
-In case you need more details on how to connect to your specific data system, we have step by step how-to guides that cover many common cases. [Start here](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview)
-
 ## Create an Expectation Suite
 
-An <TechnicalTag tag="expectation_suite" text="Expectation Suite"/> is a collection of verifiable assertions about data. Run this snippet to create a new, empty <TechnicalTag tag="expectation_suite" text="Expectation Suite"/>:
+An Expectation Suite is a collection of verifiable assertions about data. 
+
+In Jupyter Notebook, run the following code to create a new, empty Expectation Suite:
 
 ```python title="Jupyter Notebook"
-expectation_suite_name = None
+expectation_suite_name = "Test"
 assert expectation_suite_name is not None, "Please set expectation_suite_name."
 
 expectation_suite = context.add_expectation_suite(
@@ -132,47 +126,36 @@ expectation_suite = context.add_expectation_suite(
 
 ## Add an Expectation to an Expectation Suite
 
-Modify and run this snippet to add an <TechnicalTag tag="expectation" text="Expectation"/> to the <TechnicalTag tag="expectation_suite" text="Expectation Suite"/> you just created:
+1. In Jupyter Notebook, run the following code to add an Expectation to the Test Expectation Suite and display the Expectation settings:
+
+    ```python title="Jupyter Notebook"
+    expectation_suite_id = expectation_suite.ge_cloud_id
+    expectation_suite = context.get_expectation_suite(ge_cloud_id=expectation_suite_id)
+    column_name = "vendor_id"
+    expectation_configuration = gx.core.ExpectationConfiguration(**{
+    "expectation_type": "expect_column_min_to_be_between",
+    "kwargs": {
+        "column": column_name,
+        "min_value": 0.1
+    },
+    "meta":{},
+    })
+    expectation_suite.add_expectation(
+        expectation_configuration=expectation_configuration
+    )
+    print(expectation_suite)
+    ```
+2. Run the following code to save the Expectation Suite:
+
+    ```python title="Jupyter Notebook"
+    context.save_expectation_suite(expectation_suite=expectation_suite)
+    ```
+## Create and run a Checkpoint
+
+In Jupyter Notebook, run the following code to create and then run a Checkpoint to validate the data meets the defined Expectation.
 
 ```python title="Jupyter Notebook"
-# Get an existing Expectation Suite
-expectation_suite_id = expectation_suite.ge_cloud_id
-expectation_suite = context.get_expectation_suite(ge_cloud_id=expectation_suite_id)
-column_name = None # set column name you want to test here
-assert column_name is not None, "Please set column_name."
-
-# Look up all expectations types here - https://greatexpectations.io/expectations/
-expectation_configuration = gx.core.ExpectationConfiguration(**{
-  "expectation_type": "expect_column_min_to_be_between",
-  "kwargs": {
-    "column": column_name,
-    "min_value": 0.1
-  },
-  "meta":{},
-})
-
-expectation_suite.add_expectation(
-    expectation_configuration=expectation_configuration
-)
-print(expectation_suite)
-
-# Save the Expectation Suite
-context.save_expectation_suite(expectation_suite=expectation_suite)
-```
-
-With the Expectation defined above, we are stating that we _expect_ the column of your choice to always be populated. That is: none of the column's values should be null.
-
-
-## Create and run Checkpoint
-
-Now that we have connected to data and defined an <TechnicalTag tag="expectation" text="Expectation"/>, it is time to validate whether our data meets the Expectation. To do this, we define a <TechnicalTag tag="checkpoint" text="Checkpoint"/>, which will allow us to repeat the <TechnicalTag tag="validation" text="Validation"/> in the future.
-
-Once we have created the <TechnicalTag tag="checkpoint" text="Checkpoint"/>, we will run it and get back the results from our <TechnicalTag tag="validation" text="Validation"/>.
-
-```python title="Jupyter Notebook"
-checkpoint_name = None # name your checkpoint here
-assert checkpoint_name is not None, "Please set checkpoint_name."
-
+checkpoint_name = "Test""
 checkpoint_config = {
   "name": checkpoint_name,
   "validations": [{
@@ -195,129 +178,6 @@ checkpoint.run()
 
 ## Review Validation Results
 
-After you run the <TechnicalTag tag="checkpoint" text="Checkpoint"/>, you should see a `validation_result_url` in the result, that takes you directly to GX Cloud, so you can see your <TechnicalTag tag="expectation" text="Expectations"/> and <TechnicalTag tag="validation_result" text="Validation Results"/> in the GX Cloud UI.
+1. In GX Cloud, click **Checkpoints**.
 
-Alternatively, you can visit the [Checkpoints page](https://app.greatexpectations.io/checkpoints) and filter by the Checkpoint, Expectation Suite, or Data Asset you want to see the results for.
-
-
-## Add a Slack notifications (Optional)
-
-Add the `send_slack_notification_on_validation_result` Action to the <TechnicalTag tag="checkpoint" text="Checkpoint" /> configuration.
-
-<Tabs
-  groupId="webhook-or-app-python"
-  defaultValue='webhook'
-  values={[
-  {label: 'For Webhook', value:'webhook'},
-  {label: 'For App', value:'app'},
-  ]}>
-
-<TabItem value="webhook">
-
-### Webhook config
-
-```python title="Jupyter Notebook"
-slack_webhook = None # put the actual webhook URL
-assert slack_webhook is not None, "Please set slack_webhook."
-
-checkpoint_config = {
-    ...
-    "action_list": [
-        {
-            "name": "send_slack_notification_on_validation_result", # name can be set to any value
-            "action": {
-                "class_name": "SlackNotificationAction",
-                "slack_webhook": slack_webhook,
-                "notify_on": "all", # possible values: "all", "failure", "success"
-                "renderer": {
-                    "module_name": "great_expectations.render.renderer.slack_renderer",
-                    "class_name": "SlackRenderer",
-                },
-            },
-        },
-        {
-            "name": "store_validation_result",
-            "action": {
-                "class_name": "StoreValidationResultAction",
-            }
-        },
-        {
-            "name": "store_evaluation_params",
-            "action": {
-                "class_name": "StoreEvaluationParametersAction",
-            }
-        },
-    ],
-}
-```
-
-</TabItem>
-
-<TabItem value="app">
-
-### Slack bot config
-
-```python title="Jupyter Notebook"
-bot_token = None # put the actual bot token
-assert bot_token is not None, "Please set bot_token."
-channel_name = None # put the actual Slack channel name
-assert channel_name is not None, "Please set channel_name."
-
-checkpoint_config = {
-    ...
-    "action_list": [
-        {
-            "name": "send_slack_notification_on_validation_result", # name can be set to any value
-            "action": {
-                "class_name": "SlackNotificationAction",
-                "slack_token": bot_token,
-                "slack_channel": channel_name,
-                "notify_on": "all", # possible values: "all", "failure", "success"
-                "renderer": {
-                    "module_name": "great_expectations.render.renderer.slack_renderer",
-                    "class_name": "SlackRenderer",
-                },
-            },
-        },
-        {
-            "name": "store_validation_result",
-            "action": {
-                "class_name": "StoreValidationResultAction",
-            }
-        },
-        {
-            "name": "store_evaluation_params",
-            "action": {
-                "class_name": "StoreEvaluationParametersAction",
-            }
-        },
-    ],
-}
-```
-
-</TabItem>
-
-</Tabs>
-
-Run your <TechnicalTag tag="checkpoint" text="Checkpoint" /> to validate a <TechnicalTag tag="batch" text="Batch"/> of data and receive Slack notification on the success or failure of the <TechnicalTag tag="expectation_suite" text="Expectation Suite's"/> <TechnicalTag tag="validation" text="Validation"/>. 
-Find additional information [here](https://docs.greatexpectations.io/docs/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action/)
-
-## Next Steps
-
-Invite team members to GX Cloud [“Settings” > “Users”](https://app.greatexpectations.io/users).
-
-For more details on installing GX for use with local filesystems, please see:
-
-<SetupAndInstallForFilesystemData />
-
-For guides on installing GX for use with cloud storage systems, please reference:
-
-<SetupAndInstallForCloudData />
-
-For information on installing GX for use with SQL databases, see:
-
-<SetupAndInstallForSqlData />
-
-Install GX for use with hosted data systems, read:
-
-<SetupAndInstallForHostedData />
+2. Click the **Test** Checkpoint to view the Validation Results.

@@ -2,7 +2,6 @@
 title: Home
 hide_title: true
 description: Learn everything you need to know about GX
-hide_table_of_contents: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
