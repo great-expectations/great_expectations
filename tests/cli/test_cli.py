@@ -179,7 +179,7 @@ def test_cli_works_from_random_directory_with_c_flag_great_expectations_director
     assert "No Checkpoints found" in result.output
 
 
-CONFIG_NOT_FOUND_ERROR_MESSAGE = "No great_expectations directory was found here!"
+CONFIG_NOT_FOUND_ERROR_MESSAGE = "No gx directory was found here!"
 
 
 def test_cli_config_not_found_raises_error_for_datasource_list(
