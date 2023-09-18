@@ -133,6 +133,14 @@ class DatasourceStore(Store):
         """
         logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
         data = response_json["data"]
+        if isinstance(data, list):
+            if len(data) > 1:
+                # Larger arrays of datasources should be handled by `ge_cloud_response_json_to_object_collection`
+                raise TypeError(
+                    f"GX Cloud returned {len(data)} Datasources but expected 1"
+                )
+            data = data[0]
+
         return self._convert_raw_json_to_object_dict(data)
 
     @override
@@ -145,6 +153,7 @@ class DatasourceStore(Store):
         """
         logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
         data = response_json["data"]
+
         return [self._convert_raw_json_to_object_dict(d) for d in data]
 
     @staticmethod
