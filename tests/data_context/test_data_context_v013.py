@@ -216,7 +216,7 @@ def test_get_config(empty_data_context):
     # We can call get_config in several different modes
     assert type(context.get_config()) == DataContextConfig
     assert type(context.get_config(mode=ConfigOutputModes.TYPED)) == DataContextConfig
-    assert type(context.get_config(mode=ConfigOutputModes.DICT)) == dict
+    assert type(context.get_config(mode=ConfigOutputModes.DICT)) == dict  # noqa: E721
     assert type(context.get_config(mode=ConfigOutputModes.YAML)) == str  # noqa: E721
     assert type(context.get_config(mode="yaml")) == str  # noqa: E721
     with pytest.raises(ValueError):
@@ -245,7 +245,7 @@ def test_get_config(empty_data_context):
 @pytest.mark.filesystem
 def test_config_variables(empty_data_context):
     context = empty_data_context
-    assert type(context.config_variables) == dict
+    assert type(context.config_variables) == dict  # noqa: E721
     assert set(context.config_variables.keys()) == {"instance_id"}
 
 
