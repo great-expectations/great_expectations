@@ -22,6 +22,11 @@ Once you have completed this guide you will have a foundation in the basics of u
 <Prerequisites>
 
 - Installed Great Expectations OSS on your machine.
+
+```
+pip install 'great-expectations[cloud]'
+```
+
 - Followed invitation email instructions from the GX team after signing up for Early Access.
 - Successfully logged in to GX Cloud at [https://app.greatexpectations.io](https://app.greatexpectations.io).
 
