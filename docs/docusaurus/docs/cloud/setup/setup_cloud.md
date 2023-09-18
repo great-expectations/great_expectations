@@ -23,7 +23,7 @@ The example code is available in the [onboarding script repository](https://gith
 
 - An active [GX Cloud Beta Account](https://greatexpectations.io/cloud).
 
-## Install pip and GX
+## Prepare your environment
 
 1. Download and install pip. See the [pip documentation](https://pip.pypa.io/en/stable/cli/pip/).
 
@@ -40,10 +40,12 @@ The example code is available in the [onboarding script repository](https://gith
     ```bash title="Terminal input"
     pip install great_expectations --upgrade
     ```
+3. In Jupyter Notebook, run the following Python code to import the modules you'll use to test functionality:
 
-3. In Jupyter Notebook, run the following Python code to import the `great_expectations` module:
-
-    ```python name="tutorials/quickstart/quickstart.py import_gx"
+    ```python title="Jupyter Notebook"
+    import great_expectations as gx
+    import pandas as pd
+    import os
     ```
 
 ## Generate a user access token
@@ -72,16 +74,6 @@ You'll need your user and organization access tokens when you connect to a Datas
 
     - Copy the value in the **Organization ID** field and save it in the same location with your user access token.
 
-
-## Import modules
-
-In Jupyter Notebook, run the following Python code to import the modules you'll use to test functionality:
-
-```python title="Jupyter Notebook"
-import great_expectations as gx
-import pandas as pd
-import os
-```
 
 ## Create a Data Context
 
@@ -155,7 +147,7 @@ expectation_suite = context.add_expectation_suite(
 In Jupyter Notebook, run the following code to create and then run a Checkpoint to validate the data meets the defined Expectation.
 
 ```python title="Jupyter Notebook"
-checkpoint_name = "Test""
+checkpoint_name = "Test"
 checkpoint_config = {
   "name": checkpoint_name,
   "validations": [{
