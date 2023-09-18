@@ -153,6 +153,10 @@ class DatasourceStore(Store):
         """
         logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
         data = response_json["data"]
+        if not isinstance(data, list):
+            raise TypeError(
+                "GX Cloud did not return a collection of Datasources when expected"
+            )
 
         return [self._convert_raw_json_to_object_dict(d) for d in data]
 

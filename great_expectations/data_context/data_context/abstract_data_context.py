@@ -4534,7 +4534,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def fluent_datasources(self) -> Dict[str, FluentDatasource]:
         return {
             name: ds
-            for (name, ds) in self.datasources.items()
+            for (name, ds) in self.datasources.data.items()
             if isinstance(ds, FluentDatasource)
         }
 
