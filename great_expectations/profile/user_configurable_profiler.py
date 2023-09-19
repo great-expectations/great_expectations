@@ -116,6 +116,8 @@ class UserConfigurableProfiler:
     ) -> None:
         """Initialize a UserConfigurableProfiler."""
 
+        raise AssertionError()
+
         self.column_info: Dict = {}
         self.profile_dataset = profile_dataset
         assert isinstance(self.profile_dataset, (Batch, Dataset, Validator))
