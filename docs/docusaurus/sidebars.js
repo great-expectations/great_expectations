@@ -213,15 +213,11 @@ module.exports = {
             'conceptual_guides/metricproviders',
           ]
         },
-        { type: 'doc', id: 'changelog' },
-        { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
-        'contributing/contributing',
         {
           type: 'category',
-          label: 'Concepts',
-          link: { type: 'doc', id: 'conceptual_guides/learn_lp' },
+          label: 'Reference',
+          link: { type: 'doc', id: 'reference/reference_overview' },
           items: [
-            { type: 'doc', id: 'reference/reference_overview' },
             'contributing/contributing_maturity',
             'reference/customize_your_deployment',
             'reference/usage_statistics',
@@ -289,11 +285,14 @@ module.exports = {
                 'terms/supporting_resource',
                 'terms/validator',
                 'terms/validation_result'
-              ],
+              ]
             }
           ]
-        }
+        },
+        { type: 'doc', id: 'changelog' },
+        { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
+        'contributing/contributing',
       ]
-    },
-  ]
+    }
+  ],
 }
