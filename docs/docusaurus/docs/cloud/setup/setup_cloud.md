@@ -25,9 +25,11 @@ The example code is available in the [onboarding script repository](https://gith
 
 ## Prepare your environment
 
-1. Download and install pip. See the [pip documentation](https://pip.pypa.io/en/stable/cli/pip/).
+1. Download and install the latest Python version. See [Active Python Releases](https://www.python.org/downloads/).
 
-2. Run the following command in an empty base directory inside a Python virtual environment:
+2. Download and install pip. See the [pip documentation](https://pip.pypa.io/en/stable/cli/pip/).
+
+3. Run the following command in an empty base directory inside a Python virtual environment:
 
     ```bash title="Terminal input"
     pip install great_expectations
@@ -40,7 +42,7 @@ The example code is available in the [onboarding script repository](https://gith
     ```bash title="Terminal input"
     pip install great_expectations --upgrade
     ```
-3. In Jupyter Notebook, run the following Python code to import the modules you'll use to test functionality:
+4. In Jupyter Notebook, run the following Python code to import the modules you'll use to test functionality:
 
     ```python title="Jupyter Notebook"
     import great_expectations as gx
