@@ -248,7 +248,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             copy.deepcopy(bins)
         )  # take a copy since we are inserting and popping
 
-        if bins[0] == -np.inf or bins[0] == -float("inf"):  # noqa: PLR1714
+        if bins[0] == -np.inf or bins[0] == -float("inf"):
             added_min = False
             bins[0] = -float("inf")
         else:
