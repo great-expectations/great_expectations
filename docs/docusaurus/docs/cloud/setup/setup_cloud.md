@@ -11,11 +11,11 @@ import SetupAndInstallForFilesystemData from '/docs/components/setup/link_lists/
 import SetupAndInstallForHostedData from '/docs/components/setup/link_lists/_setup_and_install_for_hosted_data.md'
 import SetupAndInstallForCloudData from '/docs/components/setup/link_lists/_setup_and_install_for_cloud_data.md'
 
-If you're new to GX Cloud, the information provided here is intended to demonstrate GX Cloud features and functionality. You'll connect to a Datasource, build an Expectation using sample Batch data, validate data with the Expectation, and review validation results in a Data Doc.
+If you're new to GX Cloud, the information provided here is intended to demonstrate GX Cloud features and functionality. You'll connect to a Datasource, build an Expectation using sample Batch data, validate data with the Expectation, and review validation results.
 
-After you've tested GX Cloud features and functionality, you can connect to your own data and create Expectations that are specific to your business needs. If you're already familiar with GX Cloud, or you prefer to use your own data for testing, see.
+After you've tested GX Cloud features and functionality, you can connect to your Data Source and create Expectations that are specific to your business needs.
 
-Although you can use any Python Interpreter or script file to run Python code, GX recommends using Jupyter Notebook. Jupyter Notebook is included with OSS GX and is the best option for composing script files and running code.
+Although you can use any Python Interpreter or script file to run Python code, Great Expectations (GX) recommends using Jupyter Notebook. Jupyter Notebook is included with OSS GX and is the best option for composing script files and running code.
 
 The example code is available in the [onboarding script repository](https://github.com/great-expectations/great_expectations/blob/develop/assets/scripts/gx_cloud/experimental/onboarding_script.py).
 
@@ -48,19 +48,19 @@ The example code is available in the [onboarding script repository](https://gith
     import os
     ```
 
-## Generate your user access token and retrieve your organization ID
+## Generate your user access token and copy your organization ID
 
 You'll need your user access token and organization ID to create your Data Context. Access tokens shouldn't be committed to version control software.
 
 1. In GX Cloud, click **Settings** > **Tokens**.
 
-2. In the Access tokens pane, click **Create user access token**.
+2. In the **Access tokens** pane, click **Create user access token**.
 
 3. Complete the following fields:
 
     - **Token name** - Enter a name for the token that will help you quickly identify it.
 
-    - **Role** - Select **Viewer**, **Editor**, or **Admin**. For more information about these roles, click **?**.
+    - **Role** - Select **Admin**. For more information about the available roles, click **Information** (?) .
 
 4. Click **Create**.
 
@@ -68,16 +68,12 @@ You'll need your user access token and organization ID to create your Data Conte
 
 6. Click **Close**.
 
-7. Locate and copy your organization ID:
-
-    - Click **Settings** > **Tokens**.
-
-    - Copy the value in the **Organization ID** field and save it in the same location with your user access token.
+7. Copy the value in the **Organization ID** field and save it in the same location with your user access token.
 
 
 ## Create a Data Context
 
-A Data Context provides the configurations and methods necessary for GX Cloud components.
+A Data Context provides the configurations and methods for GX Cloud components, including Data Sources, Expectations, Profilers, and Checkpoints.
 
 1. In Jupyter Notebook, copy this code into a cell to instantiate the GX Cloud <TechnicalTag tag="data_context" text="Data Context"/>.
 
@@ -86,7 +82,7 @@ A Data Context provides the configurations and methods necessary for GX Cloud co
     os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<organization_id>"
     context = gx.get_context()
     ```
-2. Replace `user_access_token` and `organization_id` with the values you created and saved previously. See [Generate a user access token](#generate-a-user-access-token).
+2. Replace `user_access_token` and `organization_id` with the values you created and saved previously. See [Generate your user access token and copy your organization ID](#generate-your-user-access-token-and-copy-your-organization-id).
 
 3. Run the code.
 
@@ -113,8 +109,6 @@ In Jupyter Notebook, run the following code to create a new, empty Expectation S
 
 ```python title="Jupyter Notebook"
 expectation_suite_name = "Test"
-assert expectation_suite_name is not None, "Please set expectation_suite_name."
-
 expectation_suite = context.add_expectation_suite(
     expectation_suite_name=expectation_suite_name
 )
@@ -124,7 +118,7 @@ expectation_suite = context.add_expectation_suite(
 
 An Expectation is a verifiable assertion about data. They take implicit assumptions about your data and make them explicit.
 
-1. In Jupyter Notebook, run the following code to add an Expectation to the Test Expectation Suite and display the Expectation settings:
+1. In Jupyter Notebook, run the following code to add an Expectation to the **Test** Expectation Suite and display the Expectation settings:
 
     ```python title="Jupyter Notebook"
     expectation_suite_id = expectation_suite.ge_cloud_id
@@ -181,5 +175,7 @@ checkpoint.run()
 1. In GX Cloud, click **Checkpoints**.
 
 2. Click the **Test** Checkpoint to view the Validation Results.
+
+    The status for the Checkpoint is **All passed** because the Validation Results met the requirements defined in the Expectation. 
 
 
