@@ -1,24 +1,21 @@
-module.exports = {
+const sidebars = {
   cloud: [
-    `gx_welcome`,
-    `cloud/setup/setup_cloud`,
-  ],
-  oss: [
     {
       type: 'category',
       label: 'GX Cloud',
       link: { type: 'doc', id: 'cloud/setup/setup_cloud' },
+      items: [
+        'cloud/setup/setup_cloud',
+      ]
     },
-    {
-      type: 'category',
-      label: 'OSS',
-      link: { type: 'doc', id: 'intro' },
-    },
+  ],
+    cloud: [
       {
         type: 'category',
         label: 'Get started with GX',
         link: { type: 'doc', id: 'guides/setup/get_started_lp' },
         items: [
+          'intro',
           'tutorials/quickstart/quickstart',
           {
             type: 'doc', id: 'conceptual_guides/gx_overview', label: 'GX Overview'
@@ -292,3 +289,4 @@ module.exports = {
         }
       ]
   }
+  module.exports = sidebars;
