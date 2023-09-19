@@ -48,9 +48,9 @@ The example code is available in the [onboarding script repository](https://gith
     import os
     ```
 
-## Generate a user access token
+## Generate your user access token and retrieve your organization ID
 
-You'll need your user and organization access tokens when you connect to a Datasource. Access tokens shouldn't be committed to version control software.
+You'll need your user access token and organization ID to create your Data Context. Access tokens shouldn't be committed to version control software.
 
 1. In GX Cloud, click **Settings** > **Tokens**.
 
@@ -77,6 +77,8 @@ You'll need your user and organization access tokens when you connect to a Datas
 
 ## Create a Data Context
 
+A Data Context provides the configurations and methods necessary for GX Cloud components.
+
 1. In Jupyter Notebook, copy this code into a cell to instantiate the GX Cloud <TechnicalTag tag="data_context" text="Data Context"/>.
 
     ```python title="Jupyter Notebook"
@@ -88,7 +90,9 @@ You'll need your user and organization access tokens when you connect to a Datas
 
 3. Run the code.
 
-## Connect to a Datasource
+## Connect to a Data Source
+
+A Data Source provides a standard API for accessing and interacting with data from a data source system.
 
 In Jupyter Notebook, run the following code to connect to existing `.csv` NYC taxi trip data stored in the `great_expectations` GitHub repository:
 
@@ -118,6 +122,8 @@ expectation_suite = context.add_expectation_suite(
 
 ## Add an Expectation to an Expectation Suite
 
+An Expectation is a verifiable assertion about data. They take implicit assumptions about your data and make them explicit.
+
 1. In Jupyter Notebook, run the following code to add an Expectation to the Test Expectation Suite and display the Expectation settings:
 
     ```python title="Jupyter Notebook"
@@ -143,6 +149,8 @@ expectation_suite = context.add_expectation_suite(
     context.save_expectation_suite(expectation_suite=expectation_suite)
     ```
 ## Create and run a Checkpoint
+
+A Checkpoint validates data.
 
 In Jupyter Notebook, run the following code to create and then run a Checkpoint to validate the data meets the defined Expectation.
 
@@ -173,3 +181,5 @@ checkpoint.run()
 1. In GX Cloud, click **Checkpoints**.
 
 2. Click the **Test** Checkpoint to view the Validation Results.
+
+
