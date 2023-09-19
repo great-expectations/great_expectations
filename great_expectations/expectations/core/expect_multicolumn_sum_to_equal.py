@@ -1,5 +1,6 @@
 from typing import Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -9,8 +10,19 @@ from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
     render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyDiagnosticRendererType, LegacyRendererType
+from great_expectations.render import LegacyRendererType
+from great_expectations.render.components import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    AddParamArgs,
+    RendererConfiguration,
+    RendererValueType,
+)
+from great_expectations.render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 
 class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
@@ -94,6 +106,47 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
+    @override
+    def _prescriptive_template(
+        cls, renderer_configuration: RendererConfiguration
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column_list", RendererValueType.ARRAY),
+            ("sum_total", RendererValueType.NUMBER),
+            ("mostly", RendererValueType.NUMBER),
+            ("ignore_row_if", RendererValueType.STRING),
+        )
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
+
+        params = renderer_configuration.params
+
+        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            renderer_configuration = cls._add_mostly_pct_param(
+                renderer_configuration=renderer_configuration
+            )
+            template_str = "Sum across columns must be $sum_total, at least $mostly_pct % of the time: "
+        else:
+            template_str = "Sum across columns must always be $sum_total: "
+
+        if params.column_list:
+            array_param_name = "column_list"
+            param_prefix = "column_list_"
+            renderer_configuration = cls._add_array_params(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
+            )
+            template_str += cls._get_array_string(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
+            )
+
+        renderer_configuration.template_str = template_str
+        return renderer_configuration
+
+    @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
@@ -103,17 +156,57 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ) -> None:
-        # TODO: Need for prescriptive renderer for Expectation if we want to render in DataDocs.
-        pass
+        runtime_configuration = runtime_configuration or {}
+        _ = False if runtime_configuration.get("include_column_name") is False else True
+        styling = runtime_configuration.get("styling")
 
-    @classmethod
-    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
-    def _diagnostic_observed_value_renderer(
-        cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ) -> None:
-        # TODO: Need for diagnostic renderer for Expectation if we want to render in DataDocs.
-        pass
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            ["column_list", "sum_total", "mostly", "ignore_row_if", "row_condition"],
+        )
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+        mostly_str = (
+            ""
+            if params.get("mostly") is None
+            else ", at least $mostly_pct % of the time"
+        )
+        sum_total = params.get("sum_total")
+
+        template_str = f"Sum across columns must be {sum_total}, {mostly_str}: "
+        for idx in range(len(params["column_list"]) - 1):
+            template_str += f"$column_list_{idx!s}, "
+            params[f"column_list_{idx!s}"] = params["column_list"][idx]
+
+        last_idx = len(params["column_list"]) - 1
+        template_str += f"$column_list_{last_idx!s}"
+        params[f"column_list_{last_idx!s}"] = params["column_list"][last_idx]
+
+        # Spark and SQL is not working
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
