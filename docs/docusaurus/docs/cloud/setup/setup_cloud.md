@@ -11,7 +11,7 @@ import SetupAndInstallForFilesystemData from '/docs/components/setup/link_lists/
 import SetupAndInstallForHostedData from '/docs/components/setup/link_lists/_setup_and_install_for_hosted_data.md'
 import SetupAndInstallForCloudData from '/docs/components/setup/link_lists/_setup_and_install_for_cloud_data.md'
 
-If you're new to GX Cloud, the information provided here is intended to demonstrate GX Cloud features and functionality. You'll connect to a Datasource, build an Expectation using sample Batch data, validate data with the Expectation, and review validation results.
+If you're new to GX Cloud, the information provided here is intended to demonstrate GX Cloud features and functionality. You'll connect to a Data Source, build an Expectation using sample Batch data, validate data with the Expectation, and review Validation Results.
 
 After you've tested GX Cloud features and functionality, you can connect to your Data Source and create Expectations that are specific to your business needs.
 
@@ -75,7 +75,7 @@ You'll need your user access token and organization ID to create your Data Conte
 
 A Data Context provides the configurations and methods for GX Cloud components, including Data Sources, Expectations, Profilers, and Checkpoints.
 
-1. In Jupyter Notebook, copy this code into a cell to instantiate the GX Cloud <TechnicalTag tag="data_context" text="Data Context"/>.
+1. In Jupyter Notebook, copy the following code into a cell to instantiate the GX Cloud Data Context.
 
     ```python title="Jupyter Notebook"
     os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<user_access_token>"
