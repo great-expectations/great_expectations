@@ -11,9 +11,9 @@ import SetupAndInstallForFilesystemData from '/docs/components/setup/link_lists/
 import SetupAndInstallForHostedData from '/docs/components/setup/link_lists/_setup_and_install_for_hosted_data.md'
 import SetupAndInstallForCloudData from '/docs/components/setup/link_lists/_setup_and_install_for_cloud_data.md'
 
-If you're new to GX Cloud, the information provided here is intended to demonstrate GX Cloud features and functionality. You'll connect to a Data Source, build an Expectation using sample Batch data, validate data with the Expectation, and review Validation Results.
+If you're new to GX Cloud, the information provided here is intended to demonstrate GX Cloud features and functionality. You'll connect to a Datasource, build an Expectation using sample Batch data, validate data with the Expectation, and review Validation Results.
 
-After you've tested GX Cloud features and functionality, you can connect to your Data Source and create Expectations that are specific to your business needs.
+After you've tested GX Cloud features and functionality, you can connect to your Datasource and create Expectations that are specific to your business needs.
 
 Although you can use any Python Interpreter or script file to run Python code, Great Expectations (GX) recommends using Jupyter Notebook. Jupyter Notebook is included with OSS GX and is the best option for composing script files and running code.
 
@@ -88,9 +88,9 @@ A Data Context provides the configurations and methods for GX Cloud components, 
 
 3. Run the code.
 
-## Connect to a Data Source
+## Connect to a Datasource
 
-A Data Source provides a standard API for accessing and interacting with data from a data source system.
+A Datasource provides a standard API for accessing and interacting with data from a data source system.
 
 In Jupyter Notebook, run the following code to connect to existing `.csv` NYC taxi trip data stored in the `great_expectations` GitHub repository:
 
