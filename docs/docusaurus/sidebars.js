@@ -11,7 +11,6 @@ module.exports = {
     {
       type: 'category',
       label: 'GX Open Source',
-      link: { type: 'doc', id: 'guides/setup/get_started_lp' },
       items: [
         {
           type: 'category',
