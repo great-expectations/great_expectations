@@ -257,8 +257,8 @@ jobs:
         run: cd docs/docusaurus && yarn install && bash ../build_docs
 
   cloud-tests:
-    needs: [unit-tests, static-analysis, ci-is-on-main-repo]
-    if: github.event.pull_request.draft == false
+    # needs: [unit-tests, static-analysis, ci-is-on-main-repo]
+    # if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
