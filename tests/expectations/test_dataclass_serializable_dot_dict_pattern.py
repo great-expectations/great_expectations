@@ -391,14 +391,14 @@ def test_to_raw_dict_works_recursively():
     C_dict = my_C.to_raw_dict()
 
     # Make sure it's a dictionary, not a DictDot
-    assert type(C_dict) == dict
+    assert type(C_dict) == dict  # noqa: E721
     assert isinstance(C_dict, DictDot) is False
     # Dictionaries don't support dot notation.
     with raises(AttributeError):
         C_dict.A_list  # noqa: B018
 
-    assert type(C_dict["A_list"][0]) == dict
-    assert type(C_dict["B_list"][0]) == dict
+    assert type(C_dict["A_list"][0]) == dict  # noqa: E721
+    assert type(C_dict["B_list"][0]) == dict  # noqa: E721
 
     assert C_dict == {
         "alpha_var": 20,
