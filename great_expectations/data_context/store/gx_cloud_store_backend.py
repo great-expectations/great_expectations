@@ -637,7 +637,6 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except StoreBackendError as e:
             logger.info(f"Could not find object associated with key {key}: {e}")
             return False
-        return True
 
     @property
     @override
