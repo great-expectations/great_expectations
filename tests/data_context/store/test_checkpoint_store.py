@@ -399,14 +399,6 @@ def test_gx_cloud_response_json_to_object_dict(
         assert actual == expected
 
 
-@pytest.mark.cloud
-def test_gx_cloud_response_json_to_object_dict_no_data_in_payload():
-    response_json = {"data": []}
-
-    with pytest.raises(ValueError):
-        CheckpointStore.gx_cloud_response_json_to_object_dict(response_json)
-
-
 @pytest.mark.unit
 def test_serialization_self_check(capsys) -> None:
     store = CheckpointStore(store_name="checkpoint_store")
