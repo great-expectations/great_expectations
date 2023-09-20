@@ -161,7 +161,7 @@ def test_upgrade_helper_intervention_on_cli_command(
     )
 
     expected_project_tree_str: str = """\
-great_expectations/
+gx/
     .gitignore
     great_expectations.yml
     checkpoints/
@@ -225,7 +225,7 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
         assert stdout == expected_stdout
 
     expected_project_tree_str: str = """\
-great_expectations/
+gx/
     .gitignore
     great_expectations.yml
     checkpoints/
@@ -446,7 +446,7 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
         assert stdout == expected_stdout
 
     expected_project_tree_str: str = """\
-great_expectations/
+gx/
     .gitignore
     great_expectations.yml
     checkpoints/
@@ -552,7 +552,7 @@ def test_v2_to_v3_project_upgrade_without_manual_steps(
         assert stdout == expected_stdout
 
     expected_project_tree_str: str = """\
-great_expectations/
+gx/
     .gitignore
     great_expectations.yml
     expectations/

@@ -1782,15 +1782,6 @@ def generate_temporary_table_name(
     return table_name
 
 
-def get_sqlalchemy_inspector(engine):
-    if version.parse(sa.__version__) < version.parse("1.4"):
-        # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
-        insp = sqlalchemy.reflection.Inspector.from_engine(engine)
-    else:
-        insp = sa.inspect(engine)
-    return insp
-
-
 def get_sqlalchemy_url(drivername, **credentials):
     if version.parse(sa.__version__) < version.parse("1.4"):
         # Calling URL() deprecated since 1.4, URL.create() should be used instead

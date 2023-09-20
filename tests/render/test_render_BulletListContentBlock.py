@@ -106,7 +106,7 @@ def test_all_expectations_using_test_definitions():
         for dataset in test_definitions["datasets"]:
             for test in dataset["tests"]:
                 # Construct an expectation from the test.
-                if type(test["in"]) == dict:
+                if type(test["in"]) == dict:  # noqa: E721
                     fake_expectation = ExpectationConfiguration(
                         expectation_type=test_definitions["expectation_type"],
                         kwargs=test["in"],
