@@ -286,7 +286,7 @@ store_backend:
 
 
 @pytest.mark.cloud
-def test_ge_cloud_response_json_to_object_dict() -> None:
+def test_gx_cloud_response_json_to_object_dict() -> None:
     checkpoint_id = "7b5e962c-3c67-4a6d-b311-b48061d52103"
     checkpoint_config = {
         "name": "oss_test_checkpoint",
@@ -324,7 +324,7 @@ def test_ge_cloud_response_json_to_object_dict() -> None:
 
 
 @pytest.mark.cloud
-def test_ge_cloud_response_json_to_object_dict_no_data_in_payload():
+def test_gx_cloud_response_json_to_object_dict_no_data_in_payload():
     response_json = {"data": []}
 
     with pytest.raises(ValueError):

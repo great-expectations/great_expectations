@@ -355,7 +355,7 @@ store_backend:
 
 
 @pytest.mark.cloud
-def test_ge_cloud_response_json_to_object_dict() -> None:
+def test_gx_cloud_response_json_to_object_dict() -> None:
     validation_id = "c1e8f964-ba44-4a13-a9b6-7331a358f12d"
     validation_config = {
         "results": [],

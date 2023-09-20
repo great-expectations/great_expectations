@@ -105,7 +105,7 @@ def test_profiler_store_integration(
 
 
 @pytest.mark.cloud
-def test_ge_cloud_response_json_to_object_dict(
+def test_gx_cloud_response_json_to_object_dict(
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ) -> None:
     profiler_id = "b1445fa5-d034-45d7-a4ae-d6dca19b207b"

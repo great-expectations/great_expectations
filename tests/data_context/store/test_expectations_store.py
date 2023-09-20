@@ -240,7 +240,7 @@ store_backend:
 
 
 @pytest.mark.cloud
-def test_ge_cloud_response_json_to_object_dict() -> None:
+def test_gx_cloud_response_json_to_object_dict() -> None:
     suite_id = "03d61d4e-003f-48e7-a3b2-f9f842384da3"
     suite_config = {
         "expectation_suite_name": "my_suite",
@@ -260,3 +260,8 @@ def test_ge_cloud_response_json_to_object_dict() -> None:
     actual = ExpectationsStore.gx_cloud_response_json_to_object_dict(response_json)
 
     assert actual == expected
+
+
+@pytest.mark.cloud
+def test_gx_cloud_response_json_to_object_dict_data_list() -> None:
+    pass
