@@ -15,7 +15,7 @@ If you're new to GX Cloud, the information provided here is intended to demonstr
 
 After you've tested GX Cloud features and functionality, you can connect to your Data Source and create Expectations that are specific to your business needs.
 
-Although you can use any Python Interpreter or script file to run Python code, Great Expectations (GX) recommends using Jupyter Notebook. Jupyter Notebook is included with OSS GX and is the best option for composing script files and running code.
+Although you can use any Python interpreter or script file to run Python code, Great Expectations (GX) recommends using Jupyter Notebook. Jupyter Notebook is included with OSS GX and is the best option for composing script files and running code.
 
 The example code is available in the [onboarding script repository](https://github.com/great-expectations/great_expectations/blob/develop/assets/scripts/gx_cloud/experimental/onboarding_script.py).
 
@@ -42,13 +42,6 @@ The example code is available in the [onboarding script repository](https://gith
     ```bash title="Terminal input"
     pip install great_expectations --upgrade
     ```
-4. In Jupyter Notebook, run the following Python code to import the modules you'll use to test functionality:
-
-    ```python title="Jupyter Notebook"
-    import great_expectations as gx
-    import pandas as pd
-    import os
-    ```
 
 ## Generate your user access token and copy your organization ID
 
@@ -72,6 +65,17 @@ You'll need your user access token and organization ID to create your Data Conte
 
 7. Copy the value in the **Organization ID** field and save it in the same location with your user access token.
 
+## Install modules
+
+1. Start Jupyter Notebook. See [Running the Notebook](https://docs.jupyter.org/en/latest/running.html).
+
+2. Run the following Python code to import the modules you'll use to test functionality:
+
+    ```python title="Jupyter Notebook"
+        import great_expectations as gx
+        import pandas as pd
+        import os
+    ```
 
 ## Create a Data Context
 
