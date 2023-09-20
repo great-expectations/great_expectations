@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import pathlib
 from typing import Callable, List, Optional, cast
@@ -528,5 +530,99 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
 
 
 @pytest.mark.cloud
-def test_gx_cloud_response_to_object_dict():
-    pass
+@pytest.mark.parametrize(
+    "response_json, expected, error_type",
+    [
+        pytest.param(
+            {
+                "data": {
+                    "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                    "attributes": {
+                        "datasource_config": {
+                            "name": "my_pandas",
+                            "type": "pandas",
+                            "assets": [],
+                        },
+                    },
+                }
+            },
+            {
+                "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                "name": "my_pandas",
+                "type": "pandas",
+                "assets": [],
+            },
+            None,
+            id="single_config",
+        ),
+        pytest.param(
+            {
+                "data": [
+                    {
+                        "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                        "attributes": {
+                            "datasource_config": {
+                                "name": "my_pandas",
+                                "type": "pandas",
+                                "assets": [],
+                            },
+                        },
+                    }
+                ]
+            },
+            {
+                "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                "name": "my_pandas",
+                "type": "pandas",
+                "assets": [],
+            },
+            None,
+            id="single_config_in_list",
+        ),
+        pytest.param(
+            {
+                "data": [
+                    {
+                        "data": [
+                            {
+                                "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                                "attributes": {
+                                    "datasource_config": {
+                                        "name": "my_pandas",
+                                        "type": "pandas",
+                                        "assets": [],
+                                    },
+                                },
+                            }
+                        ]
+                    },
+                    {
+                        "data": [
+                            {
+                                "id": "ffg61d4e-003f-48e7-a3b2-f9f842384da3",
+                                "attributes": {
+                                    "data_asset_config": {
+                                        "name": "my_other_pandas",
+                                        "type": "pandas",
+                                    },
+                                },
+                            }
+                        ]
+                    },
+                ]
+            },
+            None,
+            TypeError,
+            id="multiple_config_in_list",
+        ),
+    ],
+)
+def test_gx_cloud_response_json_to_object_dict(
+    response_json: dict, expected: dict | None, error_type: Exception | None
+) -> None:
+    if error_type:
+        with pytest.raises(error_type):
+            _ = DatasourceStore.gx_cloud_response_json_to_object_dict(response_json)
+    else:
+        actual = DatasourceStore.gx_cloud_response_json_to_object_dict(response_json)
+        assert actual == expected
