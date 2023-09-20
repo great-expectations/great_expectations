@@ -1,4 +1,5 @@
-from typing import Optional
+import logging
+from typing import List, Optional
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
@@ -10,8 +11,9 @@ from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
     render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyRendererType
-from great_expectations.render.components import RenderedStringTemplateContent
+from great_expectations.render.components import (
+    RenderedStringTemplateContent,
+)
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
     AddParamArgs,
@@ -20,9 +22,10 @@ from great_expectations.render.renderer_configuration import (
 )
 from great_expectations.render.util import (
     num_to_str,
-    parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
@@ -147,7 +150,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         return renderer_configuration
 
     @classmethod
-    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
+    @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
@@ -155,7 +158,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ) -> None:
+    ) -> List[RenderedStringTemplateContent]:
         runtime_configuration = runtime_configuration or {}
         _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
@@ -183,20 +186,6 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         last_idx = len(params["column_list"]) - 1
         template_str += f"$column_list_{last_idx!s}"
         params[f"column_list_{last_idx!s}"] = params["column_list"][last_idx]
-
-        # Spark and SQL is not working
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
-            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(
