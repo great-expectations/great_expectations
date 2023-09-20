@@ -2578,7 +2578,7 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                     )
                 except AssertionError:
                     if result["result"]["unexpected_list"]:
-                        if type(result["result"]["unexpected_list"][0]) == list:
+                        if isinstance(result["result"]["unexpected_list"][0], list):
                             unexpected_list_tup = [
                                 tuple(x) for x in result["result"]["unexpected_list"]
                             ]

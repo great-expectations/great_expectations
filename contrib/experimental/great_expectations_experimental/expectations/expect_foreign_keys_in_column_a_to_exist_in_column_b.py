@@ -22,7 +22,7 @@ class ForeignKeysInColumnAExistInColumnB(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, df, column_B, **kwargs):
-        if type(df) == list:
+        if isinstance(df, list):
             df = pd.DataFrame(df)
         value_set = set(df[column_B])
         return column.isin(value_set)
