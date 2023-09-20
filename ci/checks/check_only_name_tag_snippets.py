@@ -56,7 +56,7 @@ def check_dependencies(*deps: str) -> None:
 
 def run_grep(target_dir: pathlib.Path) -> List[str]:
     try:
-        res_positive = subprocess.run(
+        res_positive = subprocess.run(  # noqa: PLW1510
             [
                 "grep",
                 "--recursive",
@@ -70,7 +70,7 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
             text=True,
             capture_output=True,
         )
-        res_negative = subprocess.run(
+        res_negative = subprocess.run(  # noqa: PLW1510
             [
                 "grep",
                 "--recursive",
