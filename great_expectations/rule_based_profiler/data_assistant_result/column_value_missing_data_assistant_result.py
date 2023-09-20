@@ -14,9 +14,16 @@ class ColumnValueMissingDataAssistantResult(DataAssistantResult):
         """
         A mapping is defined for which metrics to plot and their associated expectations.
         """
+        # add this to data_assistant result?
         return {
-            "column_values.nonnull.unexpected_count": "expect_column_values_to_not_be_null",
-            "column_values.null.unexpected_count": "expect_column_values_to_be_null",
+            (
+                "column_values.nonnull.unexpected_count",
+                "column_values.nonnull.unexpected_count_fraction",
+            ): "expect_column_values_to_not_be_null",
+            (
+                "column_values.null.unexpected_count",
+                "column_values.null.unexpected_count_fraction",
+            ): "expect_column_values_to_be_null",
         }
 
     @property
@@ -32,5 +39,11 @@ class ColumnValueMissingDataAssistantResult(DataAssistantResult):
         #     - Temporal: Metric is a time or date value
         return {
             "column_values.nonnull.unexpected_count": AltairDataTypes.QUANTITATIVE,
+            "column_values.nonnull.unexpected_count_fraction": AltairDataTypes.QUANTITATIVE,
             "column_values.null.unexpected_count": AltairDataTypes.QUANTITATIVE,
+            "column_values.null.unexpected_count_fraction": AltairDataTypes.QUANTITATIVE,
         }
+
+    # can we override things?
+    # TODO: see if there is a method that can be overridden
+    # it might be the key

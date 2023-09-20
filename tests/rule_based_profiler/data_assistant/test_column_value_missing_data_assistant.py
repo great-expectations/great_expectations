@@ -17,6 +17,8 @@ from great_expectations.rule_based_profiler.data_assistant_result.plot_result im
 )
 
 
+# missingness assistant is this file
+# do we change the metric?
 @pytest.mark.unit
 def test_column_value_missing_data_assistant_result_plot_expectations_and_metrics_correctly_handle_empty_plot_data() -> (
     None
@@ -76,6 +78,10 @@ def test_single_batch_multiple_columns(ephemeral_context_with_defaults):
         column = expectation.kwargs["column"]
         assert expectation.kwargs["mostly"] == expected_results[column]["mostly"]
         assert expectation.expectation_type == expected_results[column]["expectation"]
+
+    plot_result: PlotResult = result.plot_expectations_and_metrics()
+    [p.to_dict() for p in plot_result.charts[2:]]
+    print("hello")
 
 
 @pytest.mark.unit

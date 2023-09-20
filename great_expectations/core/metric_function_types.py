@@ -109,4 +109,5 @@ class SummarizationMetricNameSuffixes(enum.Enum):
     UNEXPECTED_INDEX_QUERY = "unexpected_index_query"
     UNEXPECTED_ROWS = "unexpected_rows"
     UNEXPECTED_VALUE_COUNTS = "unexpected_value_counts"
+    UNEXPECTED_VALUE_COUNT_FRACTIONS = "unexpected_value_count_fractions"
     UNEXPECTED_VALUES = "unexpected_values"

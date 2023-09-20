@@ -1,0 +1,322 @@
+<test-run id="2" testcasecount="1" result="Passed" start-time="2023-09-18 21:25:32.596439" end-time="2023-09-18 21:25:34.892828" duration="2" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0" clr-version="3.8.18 (default, Aug 25 2023, 02:07:22) &#10;[Clang 14.0.3 (clang-1403.0.22.14.1)]" engine-version="3.6.2"><command-line>/Users/work/Development/ENVs/supercon_ge/bin/pytest -rxAP tests/rule_based_profiler/data_assistant/test_rendering_missingness.py</command-line><filter><test re="0">tests/rule_based_profiler/data_assistant/test_rendering_missingness.py</test></filter><test-suite id="tests/rule_based_profiler/data_assistant/test_rendering_missingness.py" name="tests/rule_based_profiler/data_assistant/test_rendering_missingness.py" fullname="tests/rule_based_profiler/data_assistant/test_rendering_missingness.py" methodname="" classname="" runstate="Runnable" type="Assembly" testcasecount="1" result="Passed" label="" start-time="2023-09-18 21:25:32.634036" end-time="2023-09-18 21:25:34.891924" duration="2.257888" asserts="0" total="1" passed="0" failed="1" warnings="0" inconclusive="0" skipped="0"><properties><property name="python_version" value="3.8.18 (default, Aug 25 2023, 02:07:22) &#10;[Clang 14.0.3 (clang-1403.0.22.14.1)]" /></properties><test-case id="100" name="tests/rule_based_profiler/data_assistant/test_rendering_missingness.py::test_me" fullname="tests/rule_based_profiler/data_assistant/test_rendering_missingness.py::test_me" methodname="test_me" classname="tests/rule_based_profiler/data_assistant/test_rendering_missingness.py" runstate="Runnable" seed="1" result="Failed" label="" start-time="2023-09-18 21:25:32.634036" end-time="2023-09-18 21:25:34.891924" duration="2.257888" asserts="0"><properties><property name="python-version" value="3.8.18 (default, Aug 25 2023, 02:07:22) &#10;[Clang 14.0.3 (clang-1403.0.22.14.1)]" /><property name="fspath" value="tests/rule_based_profiler/data_assistant/test_rendering_missingness.py" /></properties><environment framework-version="3.6.2" clr-version="3.8.18 (default, Aug 25 2023, 02:07:22) &#10;[Clang 14.0.3 (clang-1403.0.22.14.1)]" os-version="22.6.0" platform="Darwin" cwd="/Users/work/Development/great_expectations" machine-name="arm64" user="" user-domain="" culture="en_US" uiculture="en_US" os-architecture="64bit" /><failure><message><![CDATA[def test_me():
+        YAMLHandler()
+        context = gx.get_context()
+        current_path = pathlib.Path(__file__).parents[1]
+        data_path = (
+            current_path
+            / ".."
+            / "test_sets"
+            / "taxi_yellow_tripdata_samples"
+            / "first_ten_trips_in_each_file"
+        )
+        context.sources.add_pandas_filesystem(
+            "taxi_multi_batch_datasource",
+            base_directory=data_path,  # replace with your data directory
+        ).add_csv_asset(
+            "all_years",
+            batching_regex=r"yellow_tripdata_sample_(?P&lt;year&gt;\d{4})-(?P&lt;month&gt;\d{2})\.csv",
+        )
+        expectation_suite_name = "my_missingness_assistant_suite"
+        expectation_suite = context.add_or_update_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+        all_years_asset: DataAsset = context.datasources[
+            "taxi_multi_batch_datasource"
+        ].get_asset("all_years")
+
+        multi_batch_all_years_batch_request: BatchRequest = (
+            all_years_asset.build_batch_request()
+        )
+        exclude_column_names = [
+            "VendorID",
+            "pickup_datetime",
+            "dropoff_datetime",
+            "RatecodeID",
+            "PULocationID",
+            "DOLocationID",
+            "payment_type",
+            "fare_amount",
+            "extra",
+            "mta_tax",
+            "tip_amount",
+            "tolls_amount",
+            "improvement_surcharge",
+            "congestion_surcharge",
+        ]
+        data_assistant_result = context.assistants.missingness.run(
+            batch_request=multi_batch_all_years_batch_request,
+            exclude_column_names=exclude_column_names,
+        )
+        expectation_suite = data_assistant_result.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+        context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
+        checkpoint = context.add_or_update_checkpoint(
+            name=f"yellow_tripdata_sample_{expectation_suite_name}",
+            validations=[
+                {
+                    "batch_request": multi_batch_all_years_batch_request,
+                    "expectation_suite_name": expectation_suite_name,
+                }
+            ],
+        )
+        checkpoint_result = checkpoint.run()
+        print(checkpoint_result)
+        print("hello")
+&gt;       res = data_assistant_result.plot_expectations_and_metrics()
+
+tests/rule_based_profiler/data_assistant/test_rendering_missingness.py:76:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+great_expectations/rule_based_profiler/data_assistant_result/data_assistant_result.py:616: in plot_expectations_and_metrics
+    return self._plot(
+great_expectations/rule_based_profiler/data_assistant_result/data_assistant_result.py:681: in _plot
+    ) = self._plot_column_domain_charts(
+great_expectations/rule_based_profiler/data_assistant_result/data_assistant_result.py:3355: in _plot_column_domain_charts
+    self._create_display_chart_for_column_domain_expectation(
+great_expectations/rule_based_profiler/data_assistant_result/data_assistant_result.py:3610: in _create_display_chart_for_column_domain_expectation
+    return self._chart_column_values(
+great_expectations/rule_based_profiler/data_assistant_result/data_assistant_result.py:3765: in _chart_column_values
+    expectation_plot_impl(
+great_expectations/rule_based_profiler/data_assistant_result/data_assistant_result.py:1717: in _get_interactive_expect_column_values_to_be_between_chart
+    column_dfs = DataAssistantResult._clean_quantitative_metrics_column_dfs(
+great_expectations/rule_based_profiler/data_assistant_result/data_assistant_result.py:4257: in _clean_quantitative_metrics_column_dfs
+    cleaned_column_df = DataAssistantResult._clean_quantitative_metrics_df(
+great_expectations/rule_based_profiler/data_assistant_result/data_assistant_result.py:4274: in _clean_quantitative_metrics_df
+    df[sanitized_metric_names_list] = df[sanitized_metric_names_list].apply(
+../ENVs/supercon_ge/lib/python3.8/site-packages/pandas/core/frame.py:3766: in __getitem__
+    indexer = self.columns._get_indexer_strict(key, "columns")[1]
+../ENVs/supercon_ge/lib/python3.8/site-packages/pandas/core/indexes/base.py:5876: in _get_indexer_strict
+    self._raise_if_missing(keyarr, indexer, axis_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = Index(['column_values_nonnull_unexpected_count', 'batch', 'month', 'path',
+       'year', 'column', 'mostly'],
+      dtype='object'), key = Index(['column_values_nonnull_unexpected_count', 'column_values_nonnull_unexpected_count_fraction'], dtype='object'), indexer = array([ 0, -1]), axis_name = 'columns'
+
+    def _raise_if_missing(self, key, indexer, axis_name: str_t) -&gt; None:
+        """
+        Check that indexer can be used to return a result.
+
+        e.g. at least one element was found,
+        unless the list of keys was actually empty.
+
+        Parameters
+        ----------
+        key : list-like
+            Targeted labels (only used to show correct error message).
+        indexer: array-like of booleans
+            Indices corresponding to the key,
+            (with -1 indicating not found).
+        axis_name : str
+
+        Raises
+        ------
+        KeyError
+            If at least one key was requested but none was found.
+        """
+        if len(key) == 0:
+            return
+
+        # Count missing values
+        missing_mask = indexer &lt; 0
+        nmissing = missing_mask.sum()
+
+        if nmissing:
+            # TODO: remove special-case; this is just to keep exception
+            #  message tests from raising while debugging
+            use_interval_msg = is_interval_dtype(self.dtype) or (
+                is_categorical_dtype(self.dtype)
+                # "Index" has no attribute "categories"  [attr-defined]
+                and is_interval_dtype(
+                    self.categories.dtype  # type: ignore[attr-defined]
+                )
+            )
+
+            if nmissing == len(indexer):
+                if use_interval_msg:
+                    key = list(key)
+                raise KeyError(f"None of [{key}] are in the [{axis_name}]")
+
+            not_found = list(ensure_index(key)[missing_mask.nonzero()[0]].unique())
+&gt;           raise KeyError(f"{not_found} not in index")
+E           KeyError: "['column_values_nonnull_unexpected_count_fraction'] not in index"
+
+../ENVs/supercon_ge/lib/python3.8/site-packages/pandas/core/indexes/base.py:5938: KeyError]]></message><stack-trace><![CDATA[/Users/work/Development/ENVs/supercon_ge/lib/python3.8/site-packages/pandas/core/indexes/base.py:5938: KeyError: "['column_values_nonnull_unexpected_count_fraction'] not in index"]]></stack-trace></failure><reason><message><![CDATA[&#x1b;[32mINFO    &#x1b;[0m tests.conftest:conftest.py:495 Seeding _VersionChecker._LATEST_GX_VERSION_CACHE with 0.17.15+15.g2a332014d.dirty
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.data_context.data_context.context_factory:context_factory.py:375 Could not find local file-backed GX project
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.data_context.types.base:base.py:2149 Created temporary directory '/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/tmpi7jotfo0' for ephemeral docs site
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4341 Usage statistics is disabled globally. Applying override to project_config.
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4372 usage_statistics_url is defined globally. Applying override to project_config.
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:5633 EphemeralDataContext has not implemented `_load_fluent_config()` returning empty `GxConfig`
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.config:config.py:185 Loading 'datasources' -&gt;
+[]
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4580 Usage statistics is disabled; skipping initialization.
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.sources:sources.py:281 'taxi_multi_batch_datasource' PandasFilesystemDatasource uses FilesystemDataConnector
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 PandasFilesystemDatasource.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.data_connector.batch_filter:batch_filter.py:251 batch_slice: None was parsed to: slice(0, None, None)
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.data_connector.batch_filter:batch_filter.py:251 batch_slice: slice(0, None, None) was parsed to: slice(0, None, None)
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 PandasFilesystemDatasource.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.data_connector.batch_filter:batch_filter.py:251 batch_slice: None was parsed to: slice(0, None, None)
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.data_connector.batch_filter:batch_filter.py:251 batch_slice: slice(0, None, None) was parsed to: slice(0, None, None)
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.validator.validator:validator.py:1469 	4 expectation(s) included in expectation_suite.
+&#x1b;[32mINFO    &#x1b;[0m tests.conftest:conftest.py:501 Clearing _VersionChecker._LATEST_GX_VERSION_CACHE]]></message></reason><output><![CDATA[&#x1b;[32mINFO    &#x1b;[0m tests.conftest:conftest.py:495 Seeding _VersionChecker._LATEST_GX_VERSION_CACHE with 0.17.15+15.g2a332014d.dirty
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.data_context.data_context.context_factory:context_factory.py:375 Could not find local file-backed GX project
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.data_context.types.base:base.py:2149 Created temporary directory '/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/tmpi7jotfo0' for ephemeral docs site
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4341 Usage statistics is disabled globally. Applying override to project_config.
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4372 usage_statistics_url is defined globally. Applying override to project_config.
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:5633 EphemeralDataContext has not implemented `_load_fluent_config()` returning empty `GxConfig`
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.config:config.py:185 Loading 'datasources' -&gt;
+[]
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4580 Usage statistics is disabled; skipping initialization.
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.sources:sources.py:281 'taxi_multi_batch_datasource' PandasFilesystemDatasource uses FilesystemDataConnector
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 PandasFilesystemDatasource.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.data_connector.batch_filter:batch_filter.py:251 batch_slice: None was parsed to: slice(0, None, None)
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.data_connector.batch_filter:batch_filter.py:251 batch_slice: slice(0, None, None) was parsed to: slice(0, None, None)
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 PandasFilesystemDatasource.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.data_connector.batch_filter:batch_filter.py:251 batch_slice: None was parsed to: slice(0, None, None)
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.data_connector.batch_filter:batch_filter.py:251 batch_slice: slice(0, None, None) was parsed to: slice(0, None, None)
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+&#x1b;[32mINFO    &#x1b;[0m great_expectations.validator.validator:validator.py:1469 	4 expectation(s) included in expectation_suite.
+&#x1b;[32mINFO    &#x1b;[0m tests.conftest:conftest.py:501 Clearing _VersionChecker._LATEST_GX_VERSION_CACHE]]></output></test-case><environment framework-version="3.6.2" clr-version="3.8.18 (default, Aug 25 2023, 02:07:22) &#10;[Clang 14.0.3 (clang-1403.0.22.14.1)]" os-version="22.6.0" platform="Darwin" cwd="/Users/work/Development/great_expectations" machine-name="arm64" user="" user-domain="" culture="en_US" uiculture="en_US" os-architecture="64bit" /></test-suite></test-run>

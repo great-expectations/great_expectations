@@ -652,6 +652,8 @@ class DataAssistantResult(SerializableDictDot):
                 "You may either use `include_column_names` or `exclude_column_names` (but not both)."
             )
 
+        # here are the charts
+
         display_charts: List[Union[alt.Chart, alt.LayerChart, alt.VConcatChart]] = []
         return_charts: List[Union[alt.Chart, alt.LayerChart]] = []
 
@@ -1621,6 +1623,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         Returns:
             An interactive chart
         """
+        # breakpoint()
         column_dfs = DataAssistantResult._clean_quantitative_metrics_column_dfs(
             column_dfs=column_dfs, sanitized_metric_names=sanitized_metric_names
         )
@@ -1710,6 +1713,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         Returns:
             An interactive expect_column_values_to_be_between chart
         """
+        # breakpoint()
         column_dfs = DataAssistantResult._clean_quantitative_metrics_column_dfs(
             column_dfs=column_dfs, sanitized_metric_names=sanitized_metric_names
         )
@@ -3275,10 +3279,12 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         plot_mode: PlotMode,
         sequential: bool,
     ) -> tuple[List[alt.VConcatChart], List[alt.Chart]]:
+        # here is the column domain chart
         metric_expectation_map: Dict[
             tuple[str, ...], str
         ] = self._get_metric_expectation_map()
 
+        # example of subclassed metric-expectation map
         column_based_expectation_configurations_by_type: Dict[
             str, List[ExpectationConfiguration]
         ] = self._filter_expectation_configurations_by_column_type(
@@ -3296,9 +3302,16 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             include_column_names,
             exclude_column_names,
         )
-
+        # in the result : expectation configurations. this is the metric
+        # {'profiler_details': {'metric_configuration': {'metric_name': 'column_values.nonnull.unexpected_count', 'domain_kwargs': {'column': 'non-null'}, 'metric_value_kwargs': None}, 'num_batches': 1, 'mode': 'single_batch'}}
+        # unexpected_count
+        #
+        # what is attributed_metrics_by_column_domain:
+        #
         if not attributed_metrics_by_column_domain:
             return [], []
+        print("hello")
+        metric_expectation_map.keys()
 
         column_based_metric_names: Set[tuple[str, ...]] = set()
         for metrics in metric_expectation_map.keys():
@@ -3319,9 +3332,18 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         for metric_names in column_based_metric_names:
             expectation_type = metric_expectation_map[metric_names]
             column_based_expectation_configurations = (
+                # the issue is that this variable doesnt contain the metric
+                # the metric that I want is  'column_values.nonnull.unexpected_count_fraction`
+                # the one we have in column_based_expectation_configurations_by_type
+                # defaultdict(<class 'list'>, {'expect_column_values_to_not_be_null': [{"kwargs": {"column": "non-null", "mostly": 1.0},
+                # "meta": {"profiler_details": {"metric_configuration": {"metric_name": "column_values.nonnull.unexpected_count",
+                # "domain_kwargs": {"column": "non-null"}, "metric_value_kwargs": null}, "num_batches": 1, "mode": "single_batch"}},
+                # "expectation_type": "expect_column_values_to_not_be_null"}, {"kwargs": {"column": "low-null", "mostly": 0.6},
+                # "meta": {"profiler_details": {"metric_configuration": {"metric_name": "column_values.nonnull.unexpected_count", "domain_kwargs": {"column": "low-null"}, "metric_value_kwargs": null}, "num_batches": 1, "mode": "single_batch"}}, "expectation_type": "expect_column_values_to_not_be_null"}], 'expect_column_values_to_be_null': [{"kwargs": {"column": "null", "mostly": 1.0}, "meta": {"profiler_details": {"metric_configuration": {"metric_name": "column_values.null.unexpected_count", "domain_kwargs": {"column": "null"}, "metric_value_kwargs": null}, "num_batches": 1, "mode": "single_batch"}}, "expectation_type": "expect_column_values_to_be_null"}]})
                 column_based_expectation_configurations_by_type[expectation_type]
             )
-
+            print("hello")
+            # what is happened to this part?
             filtered_attributed_metrics_by_column_domain = (
                 self._filter_attributed_metrics_by_metric_names(
                     attributed_metrics_by_column_domain,
@@ -3419,6 +3441,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
             return True
 
+        # breakpoint()
         domains: Set[Domain] = set(
             filter(lambda m: _filter(m), list(attributed_metrics.keys()))
         )
@@ -3433,6 +3456,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         attributed_metrics: Dict[Domain, Dict[str, List[ParameterNode]]],
         metric_names: tuple[str, ...],
     ) -> Dict[Domain, Dict[str, List[ParameterNode]]]:
+        # why do we filter again?
+        print("this is where we filter according to name")
         domain: Domain
         filtered_attributed_metrics: Dict[Domain, Dict[str, List[ParameterNode]]] = {}
         for domain, attributed_metric_values in attributed_metrics.items():
@@ -3569,12 +3594,15 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Optional[alt.VConcatChart]]:
+        # here is the place where we actually generate the chart
+        print("stop me here")
         column_dfs: List[ColumnDataFrame] = self._create_column_dfs_for_charting(
             metric_names=metric_names,
             attributed_metrics_by_domain=attributed_metrics_by_domain,
             expectation_configurations=expectation_configurations,
             plot_mode=plot_mode,
         )
+        # breakpoint()
 
         # if all metrics in metric_names failed to resolve, the list will be empty and we return without attempting
         # to chart column values
@@ -3660,6 +3688,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         return return_charts
 
+    # more marker
     def _chart_column_values(  # noqa: PLR0913
         self,
         expectation_type: str,
@@ -3668,6 +3697,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Optional[alt.VConcatChart]]:
+        # metric_names
+        # {'value': [0.0], 'details': {'metric_configuration': {'metric_name': 'column_values.null.unexpected_count', 'domain_kwargs': {'column': 'null'}, 'metric_value_kwargs': None}, 'num_batches': 1, 'mode': 'unexpected_count_fraction_values'}}
         sanitized_metric_names: Set[
             str
         ] = DataAssistantResult._get_sanitized_metric_names_from_metric_names(
@@ -3688,6 +3719,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         temporal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.ORDINAL
         )
+        # print("hello")
 
         if plot_mode is PlotMode.DIAGNOSTIC:
             expectation_plot_impl: Callable[
@@ -3728,8 +3760,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 raise gx_exceptions.DataAssistantResultExecutionError(
                     f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
                 )
-
-            return [
+            print("expectation_lot_impl")
+            res = [
                 expectation_plot_impl(
                     expectation_type=expectation_type,
                     column_dfs=column_dfs,
@@ -3737,6 +3769,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                     sequential=sequential,
                 )
             ]
+            return res
         else:
             plot_impl: Callable[
                 [
@@ -3746,7 +3779,6 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 ],
                 Union[alt.LayerChart, alt.VConcatChart],
             ]
-
             if DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=nominal_metrics
             ):
@@ -3776,115 +3808,152 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
             ]
 
-    def _create_df_for_charting(  # noqa: PLR0912
+    def _create_df_for_charting(  # noqa: PLR0912, C901, PLR0915
         self,
         metric_name: str,
         attributed_values: List[ParameterNode],
         expectation_configuration: Optional[ExpectationConfiguration],
         plot_mode: PlotMode,
     ) -> pd.DataFrame:
-        batch_ids: KeysView[str] = attributed_values[0].keys()
-        metric_values: MetricValues = [
-            value[0] if len(value) == 1 else value
-            for value in attributed_values[0].values()
-        ]
-
-        sanitized_metric_name: str = sanitize_parameter_name(
-            name=metric_name, suffix=None
-        )
-
-        df: pd.DataFrame = pd.DataFrame({sanitized_metric_name: metric_values})
-
-        if (
-            metric_name == "column.quantile_values"
-            and plot_mode == PlotMode.DESCRIPTIVE
-        ):
-            quantiles: Union[List[float], float] = attributed_values[
-                1
-            ].metric_configuration.metric_value_kwargs.quantiles
-            if isinstance(quantiles, list) and len(quantiles) == 1:
-                quantiles = quantiles[0]
-            df["quantiles"] = [quantiles for idx in df.index]
-
-        batch_identifier_list: List[Set[tuple[str, str]]] = []
-        if self._batch_id_to_batch_identifier_display_name_map is not None:
-            batch_identifier_list = [
-                self._batch_id_to_batch_identifier_display_name_map[batch_id]
-                for batch_id in batch_ids
+        # this is where we now have the following error:  AttributeError: 'numpy.ndarray' object has no attribute 'keys'
+        print("stop me here")
+        df = pd.DataFrame()
+        # breakpoint()
+        try:
+            # the issue is this following line:
+            # array([1. , 1. , 1. , 1. , 1. , 1. , 1. , 1. , 1. , 1. , 1. , 1. , 1. ,
+            #        1. , 1. , 1. , 1. , 1. , 1. , 1. , 1. , 1. , 1. , 0.9, 1. , 1. ,
+            #        1. , 0.9, 0.8, 1. , 0.8, 0.7, 0.9, 0.7, 0.9, 1. ])
+            # this is an array
+            # when we should be getting.. somethign else?
+            # this is what we should be getting
+            # [{'taxi_multi_batch_datasource-all_years-year_2018-month_01': [10], 'taxi_multi_batch_datasource-all_years-year_2018-month_02': [10], 'taxi_multi_batch_datasource-all_years-year_2018-month_03': [10], 'taxi_multi_batch_datasource-all_years-year_2018-month_04': [10], 'taxi_multi_batch_datasource-all_years-year_2018-month_05': [10], 'taxi_multi_batch_datasource-all_years-year_2018-month_06': [10], 'taxi_multi_batch_datasource-all_years-year_2018-month_07': [10], 'taxi_multi_batch_datasource-all_years-year_2018-month_08': [10], 'taxi_multi_batch_datasource-all_years-year_2018-month_09': [10], 'taxi_multi_batch_datasource-all_years-year_2018-month_10': [10], 'taxi_multi_batch_datasource-all_years-year_2018-month_11': [10], 'taxi_multi_batch_datasource-all_years-year_2018-month_12': [10], 'taxi_multi_batch_datasource-all_years-year_2019-month_01': [10], 'taxi_multi_batch_datasource-all_years-year_2019-month_02': [10], 'taxi_multi_batch_datasource-all_years-year_2019-month_03': [10], 'taxi_multi_batch_datasource-all_years-year_2019-month_04': [10], 'taxi_multi_batch_datasource-all_years-year_2019-month_05': [10], 'taxi_multi_batch_datasource-all_years-year_2019-month_06': [10], 'taxi_multi_batch_datasource-all_years-year_2019-month_07': [10], 'taxi_multi_batch_datasource-all_years-year_2019-month_08': [10], 'taxi_multi_batch_datasource-all_years-year_2019-month_09': [10], 'taxi_multi_batch_datasource-all_years-year_2019-month_10': [10], 'taxi_multi_batch_datasource-all_years-year_2019-month_11': [10], 'taxi_multi_batch_datasource-all_years-year_2019-month_12': [10], 'taxi_multi_batch_datasource-all_years-year_2020-month_01': [10], 'taxi_multi_batch_datasource-all_years-year_2020-month_02': [10], 'taxi_multi_batch_datasource-all_years-year_2020-month_03': [10], 'taxi_multi_batch_datasource-all_years-year_2020-month_04': [10], 'taxi_multi_batch_datasource-all_years-year_2020-month_05': [10], 'taxi_multi_batch_datasource-all_years-year_2020-month_06': [10], 'taxi_multi_batch_datasource-all_years-year_2020-month_07': [10], 'taxi_multi_batch_datasource-all_years-year_2020-month_08': [10], 'taxi_multi_batch_datasource-all_years-year_2020-month_09': [10], 'taxi_multi_batch_datasource-all_years-year_2020-month_10': [10], 'taxi_multi_batch_datasource-all_years-year_2020-month_11': [10], 'taxi_multi_batch_datasource-all_years-year_2020-month_12': [10]}, {'metric_configuration': {'metric_name': 'column_values.null.unexpected_count', 'domain_kwargs': {'column': 'dropoff_location_id'}, 'metric_value_kwargs': None}, 'num_batches': 36}]
+            # so what we are missing is the adding of these values into the attributed_values dict..?
+            # dict_keys(['taxi_multi_batch_datasource-all_years-year_2018-month_01', 'taxi_multi_batch_datasource-all_years-year_2018-month_02', 'taxi_multi_batch_datasource-all_years-year_2018-month_03', 'taxi_multi_batch_datasource-all_years-year_2018-month_04', 'taxi_multi_batch_datasource-all_years-year_2018-month_05', 'taxi_multi_batch_datasource-all_years-year_2018-month_06', 'taxi_multi_batch_datasource-all_years-year_2018-month_07', 'taxi_multi_batch_datasource-all_years-year_2018-month_08', 'taxi_multi_batch_datasource-all_years-year_2018-month_09', 'taxi_multi_batch_datasource-all_years-year_2018-month_10', 'taxi_multi_batch_datasource-all_years-year_2018-month_11', 'taxi_multi_batch_datasource-all_years-year_2018-month_12', 'taxi_multi_batch_datasource-all_years-year_2019-month_01', 'taxi_multi_batch_datasource-all_years-year_2019-month_02', 'taxi_multi_batch_datasource-all_years-year_2019-month_03', 'taxi_multi_batch_datasource-all_years-year_2019-month_04', 'taxi_multi_batch_datasource-all_years-year_2019-month_05', 'taxi_multi_batch_datasource-all_years-year_2019-month_06', 'taxi_multi_batch_datasource-all_years-year_2019-month_07', 'taxi_multi_batch_datasource-all_years-year_2019-month_08', 'taxi_multi_batch_datasource-all_years-year_2019-month_09', 'taxi_multi_batch_datasource-all_years-year_2019-month_10', 'taxi_multi_batch_datasource-all_years-year_2019-month_11', 'taxi_multi_batch_datasource-all_years-year_2019-month_12', 'taxi_multi_batch_datasource-all_years-year_2020-month_01', 'taxi_multi_batch_datasource-all_years-year_2020-month_02', 'taxi_multi_batch_datasource-all_years-year_2020-month_03', 'taxi_multi_batch_datasource-all_years-year_2020-month_04', 'taxi_multi_batch_datasource-all_years-year_2020-month_05', 'taxi_multi_batch_datasource-all_years-year_2020-month_06', 'taxi_multi_batch_datasource-all_years-year_2020-month_07', 'taxi_multi_batch_datasource-all_years-year_2020-month_08', 'taxi_multi_batch_datasource-all_years-year_2020-month_09', 'taxi_multi_batch_datasource-all_years-year_2020-month_10', 'taxi_multi_batch_datasource-all_years-year_2020-month_11', 'taxi_multi_batch_datasource-all_years-year_2020-month_12'])
+            # the len == 36 meaning this is where we want to be.
+            # if attributed_values[0].keys():
+            #     breakpoint()
+            #     print('stahp')
+            batch_ids: KeysView[str] = attributed_values[0].keys()
+            metric_values: MetricValues = [
+                value[0] if len(value) == 1 else value
+                for value in attributed_values[0].values()
             ]
-
-        batch_identifier_set: Set
-        batch_identifier_list_sorted: List
-        batch_identifier_key: str
-        batch_identifier_value: str
-        batch_identifier_keys: Set[str] = set()
-        batch_identifier_record: List
-        batch_identifier_records: List[List] = []
-        for batch_identifier_set in batch_identifier_list:
-            # make sure batch_identifier keys are sorted the same from batch to batch
-            # e.g. prevent batch 1 from displaying keys "month", "year" and batch 2 from displaying keys "year", "month"
-            batch_identifier_list_sorted = sorted(
-                batch_identifier_set,
-                key=lambda batch_identifier_tuple: batch_identifier_tuple[0].casefold(),
-            )
-            batch_identifier_record = []
-            for (
-                batch_identifier_key,
-                batch_identifier_value,
-            ) in batch_identifier_list_sorted:
-                batch_identifier_keys.add(batch_identifier_key)
-                # if dictionary type batch_identifier values are detected, format them as a string for tooltip display
-                if isinstance(batch_identifier_value, dict):
-                    batch_identifier_value = str(  # noqa: PLW2901
-                        {
-                            str(key).title(): value
-                            for key, value in batch_identifier_value.items()
-                        }
-                    ).replace("'", "")
-                batch_identifier_record.append(batch_identifier_value)
-
-            batch_identifier_records.append(batch_identifier_record)
-
-        batch_identifier_keys_sorted: List[str] = sorted(batch_identifier_keys)
-        batch_identifier_df: pd.DataFrame = pd.DataFrame(
-            batch_identifier_records, columns=batch_identifier_keys_sorted
-        )
-
-        idx: int
-        batch_numbers: List[int] = [idx + 1 for idx in range(len(batch_identifier_df))]
-        df["batch"] = batch_numbers
-
-        df = pd.concat([df, batch_identifier_df], axis=1)
-
-        if plot_mode == PlotMode.DIAGNOSTIC:
-            if expectation_configuration is not None:
-                for kwarg_name in expectation_configuration.kwargs:
-                    if isinstance(expectation_configuration.kwargs[kwarg_name], dict):
-                        for key, value in expectation_configuration.kwargs[
-                            kwarg_name
-                        ].items():
-                            if isinstance(value, list):
-                                df[key] = [value for _ in df.index]
-                            else:
-                                df[key] = value
-
-                    elif isinstance(expectation_configuration.kwargs[kwarg_name], list):
-                        df[kwarg_name] = [
-                            expectation_configuration.kwargs[kwarg_name]
-                            for _ in df.index
-                        ]
-                    else:
-                        df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
-            else:
-                return pd.DataFrame()
-
-        # if there are any lists in the dataframe
-        if (pandas_map(df)(type) == list).any().any():
-            df = DataAssistantResult._transform_column_lists_to_rows(
-                df=df,
+            sanitized_metric_name: str = sanitize_parameter_name(
+                name=metric_name, suffix=None
             )
 
-        df = df.reset_index(drop=True)
+            df: pd.DataFrame = pd.DataFrame({sanitized_metric_name: metric_values})
+            if (
+                metric_name == "column.quantile_values"
+                and plot_mode == PlotMode.DESCRIPTIVE
+            ):
+                quantiles: Union[List[float], float] = attributed_values[
+                    1
+                ].metric_configuration.metric_value_kwargs.quantiles
+                if isinstance(quantiles, list) and len(quantiles) == 1:
+                    quantiles = quantiles[0]
+                df["quantiles"] = [quantiles for idx in df.index]
+
+            elif metric_name in [
+                "column_values.nonnull.unexpected_count_fraction",
+                "column_values.null.unexpected_count_fraction",
+            ]:
+                print("heli ")
+                breakpoint()
+
+            batch_identifier_list: List[Set[tuple[str, str]]] = []
+            if self._batch_id_to_batch_identifier_display_name_map is not None:
+                batch_identifier_list = [
+                    self._batch_id_to_batch_identifier_display_name_map[batch_id]
+                    for batch_id in batch_ids
+                ]
+
+            batch_identifier_set: Set
+            batch_identifier_list_sorted: List
+            batch_identifier_key: str
+            batch_identifier_value: str
+            batch_identifier_keys: Set[str] = set()
+            batch_identifier_record: List
+            batch_identifier_records: List[List] = []
+            for batch_identifier_set in batch_identifier_list:
+                # make sure batch_identifier keys are sorted the same from batch to batch
+                # e.g. prevent batch 1 from displaying keys "month", "year" and batch 2 from displaying keys "year", "month"
+                batch_identifier_list_sorted = sorted(
+                    batch_identifier_set,
+                    key=lambda batch_identifier_tuple: batch_identifier_tuple[
+                        0
+                    ].casefold(),
+                )
+                batch_identifier_record = []
+                for (
+                    batch_identifier_key,
+                    batch_identifier_value,
+                ) in batch_identifier_list_sorted:
+                    batch_identifier_keys.add(batch_identifier_key)
+                    # if dictionary type batch_identifier values are detected, format them as a string for tooltip display
+                    if isinstance(batch_identifier_value, dict):
+                        batch_identifier_value = str(  # noqa: PLW2901
+                            {
+                                str(key).title(): value
+                                for key, value in batch_identifier_value.items()
+                            }
+                        ).replace("'", "")
+                    batch_identifier_record.append(batch_identifier_value)
+
+                batch_identifier_records.append(batch_identifier_record)
+
+            batch_identifier_keys_sorted: List[str] = sorted(batch_identifier_keys)
+            batch_identifier_df: pd.DataFrame = pd.DataFrame(
+                batch_identifier_records, columns=batch_identifier_keys_sorted
+            )
+
+            idx: int
+            batch_numbers: List[int] = [
+                idx + 1 for idx in range(len(batch_identifier_df))
+            ]
+            df["batch"] = batch_numbers
+
+            df = pd.concat([df, batch_identifier_df], axis=1)
+
+            if plot_mode == PlotMode.DIAGNOSTIC:
+                if expectation_configuration is not None:
+                    for kwarg_name in expectation_configuration.kwargs:
+                        if isinstance(
+                            expectation_configuration.kwargs[kwarg_name], dict
+                        ):
+                            for key, value in expectation_configuration.kwargs[
+                                kwarg_name
+                            ].items():
+                                if isinstance(value, list):
+                                    df[key] = [value for _ in df.index]
+                                else:
+                                    df[key] = value
+
+                        elif isinstance(
+                            expectation_configuration.kwargs[kwarg_name], list
+                        ):
+                            df[kwarg_name] = [
+                                expectation_configuration.kwargs[kwarg_name]
+                                for _ in df.index
+                            ]
+                        else:
+                            df[kwarg_name] = expectation_configuration.kwargs[
+                                kwarg_name
+                            ]
+                else:
+                    return pd.DataFrame()
+
+            # if there are any lists in the dataframe
+            if (pandas_map(df)(type) == list).any().any():
+                df = DataAssistantResult._transform_column_lists_to_rows(
+                    df=df,
+                )
+
+            df = df.reset_index(drop=True)
+        except Exception:
+            # breakpoint()
+            print("hello why don't we stop")
 
         return df
 
@@ -3902,7 +3971,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         )
 
         metric_domains: Set[Domain] = set(attributed_metrics_by_domain.keys())
-
+        # here is where we are
         column_name: str
         column_domain: Domain
         metric_df: pd.DataFrame
@@ -3910,6 +3979,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         df: pd.DataFrame
         column_df: ColumnDataFrame
         column_dfs: List[ColumnDataFrame] = []
+        print("this is my chance")
+        # breakpoint()
         for metric_domain in metric_domains:
             attributed_values_by_metric_name: Dict[
                 str, List[ParameterNode]
@@ -3919,6 +3990,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             metric_domain_expectation_configuration: Optional[
                 ExpectationConfiguration
             ] = None
+            # instead of this one, we can try metrics_by_domain
+            # TODO: see if this is a viable option
             for expectation_configuration in expectation_configurations:
                 if expectation_configuration.kwargs["column"] == column_name:
                     metric_domain_expectation_configuration = expectation_configuration
@@ -4029,6 +4102,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         metrics_attributed_values_by_domain: Dict[
             Domain, Dict[str, List[ParameterNode]]
         ] = {}
+        # this is going empty, which means it's where the plot isn't getting generated
+        # print("here")
+        # we do
+
         if self.metrics_by_domain:
             for (
                 domain,
@@ -4039,17 +4116,23 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                     fully_qualified_parameter_name,
                     parameter_node,
                 ) in parameter_values_for_fully_qualified_parameter_names.items():
+                    # print("there")
                     if (
                         FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
                         in parameter_node
                         and FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
                         in parameter_node
                     ):
+                        print(
+                            "this is first. is this what the other thing should look like?"
+                        )
                         metrics_attributed_values_by_domain[domain].update(
                             {
                                 parameter_node[
                                     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
                                 ].metric_configuration.metric_name: [
+                                    # TODO: we want to build this. hOw do you build this?
+                                    # we want to build this
                                     parameter_node[
                                         FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
                                     ],
@@ -4059,6 +4142,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                                 ]
                             }
                         )
+                        print(f"I am here first: {parameter_node}")
+
                     elif (
                         FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
                         in parameter_node
@@ -4070,10 +4155,45 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                                 ].metric_configuration.metric_name: [
                                     parameter_node[
                                         FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-                                    ]
+                                    ],
+                                    # parameter_node[
+                                    #     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                                    # ]
                                 ]
                             }
                         )
+                        print(f"I am here second: {parameter_node}")
+                    elif FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY in parameter_node:
+                        # special case to get the fractional values
+                        if (
+                            parameter_node[
+                                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                            ].get("mode")
+                            == "unexpected_count_fraction_parameter_nodes"
+                        ):
+                            print("will we ever ever ever")
+                            # TODO: Will I think this is the line
+                            # this is the line that we need to change, or ensure hat it works
+                            # what should happen
+                            breakpoint()
+                            # attributed_value
+                            # build attributed value dict
+                            print(f"I am here third: {parameter_node}")
+                            new_name: str = f"{parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY].metric_configuration.metric_name}_fraction"
+                            metrics_attributed_values_by_domain[domain].update(
+                                # here metric name is `column_values.null.unexpected_count`
+                                # and mode is `unexpected_count_fraction_values`
+                                # parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                                {new_name: [parameter_node["value"]]}
+                                # {parameter_node[
+                                #    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                                # ].metric_configuration.metric_name: [
+                                #    parameter_node['value']
+                                #    ]
+                                # }
+                            )
+        # why?
+        print(f"final_result: {metrics_attributed_values_by_domain}")
 
         return metrics_attributed_values_by_domain
 
@@ -4081,6 +4201,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         self, metric_domain_type: MetricDomainTypes
     ) -> Dict[Domain, Dict[str, List[ParameterNode]]]:
         # noinspection PyTypeChecker
+
         attributed_metrics_by_domain: Dict[
             Domain, Dict[str, List[ParameterNode]]
         ] = dict(
@@ -4089,6 +4210,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 self._get_attributed_metrics_by_domain().items(),
             )
         )
+        print("stop here first")
         return attributed_metrics_by_domain
 
     def _get_sanitized_metric_names_from_altair_type(
@@ -4130,6 +4252,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         column_dfs: List[ColumnDataFrame],
         sanitized_metric_names: Set[str],
     ) -> List[ColumnDataFrame]:
+        # breakpoint()
         cleaned_column_dfs: List[ColumnDataFrame] = []
         for idx, (column_name, column_df) in enumerate(column_dfs):
             cleaned_column_df = DataAssistantResult._clean_quantitative_metrics_df(
@@ -4146,6 +4269,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     def _clean_quantitative_metrics_df(
         df: pd.DataFrame, sanitized_metric_names: Set[str]
     ) -> pd.DataFrame:
+        # here this dataframe should have teh index_fraction thing, but it doesn't
+        # breakpoint()
         sanitized_metric_names_list = list(sanitized_metric_names)
         df[sanitized_metric_names_list] = df[sanitized_metric_names_list].apply(
             pd.to_numeric, errors="coerce"

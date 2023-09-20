@@ -43,6 +43,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
 
     RECOGNIZED_UNEXPECTED_RATIO_AGGREGATION_METHODS: set = {
         "unexpected_count_fraction_values",
+        "unexpected_count_fraction_parameter_nodes",
         "single_batch",
         "multi_batch",
     }
@@ -177,7 +178,10 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         fully_qualified_total_count_parameter_builder_name: str = (
             f"{RAW_PARAMETER_KEY}{total_count_parameter_builder_name}"
         )
+
         # Obtain total_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+
+        # THIS IS WHERE WE GENERATE THE PARAMETER NODE STUFF
         total_count_parameter_node: ParameterNode = (
             get_parameter_value_and_validate_return_type(
                 domain=domain,
@@ -193,6 +197,13 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
 
         unexpected_count_fraction_values: np.ndarray = unexpected_count_values / (
             total_count_values + NP_EPSILON
+        )
+        unexpected_count_fraction_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=fully_qualified_unexpected_count_parameter_builder_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
         )
 
         # Obtain mode from "rule state" (i.e., variables and parameters); from instance variable otherwise.
@@ -217,6 +228,8 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
 
         if mode == "unexpected_count_fraction_values":
             result = unexpected_count_fraction_values
+        elif mode == "unexpected_count_fraction_parameter_nodes":
+            result = unexpected_count_fraction_parameter_node
         else:
             result = {
                 "single_batch_mode": mode == "single_batch",

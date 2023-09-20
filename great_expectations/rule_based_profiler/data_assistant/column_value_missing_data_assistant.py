@@ -91,6 +91,9 @@ class ColumnValueMissingDataAssistant(DataAssistant):
     def _build_data_assistant_result(
         self, data_assistant_result: DataAssistantResult
     ) -> DataAssistantResult:
+        # OMG this
+        # we can set the configuration here
+        print("hi")
         return ColumnValueMissingDataAssistantResult(
             _batch_id_to_batch_identifier_display_name_map=data_assistant_result._batch_id_to_batch_identifier_display_name_map,
             profiler_config=data_assistant_result.profiler_config,
@@ -138,8 +141,18 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             DataAssistant.commonly_used_parameter_builders.get_column_values_null_unexpected_count_metric_multi_batch_parameter_builder()
         )
 
+        get_column_values_nonnull_unexpected_fraction_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = (
+            DataAssistant.commonly_used_parameter_builders.get_column_values_nonnull_unexpected_fraction_metric_multi_batch_parameter_builder()
+        )
+        (
+            DataAssistant.commonly_used_parameter_builders.get_column_values_null_unexpected_fraction_metric_multi_batch_parameter_builder()
+        )
+
         column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
         column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
+
+        # add me
+
         total_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = (
             DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
         )
@@ -156,20 +169,35 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         condition: str
 
         map_metric_name = "column_values.nonnull"
+        # this is currently not the right one
         evaluation_parameter_builder_configs = [
             ParameterBuilderConfig(
-                **column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
+                **get_column_values_nonnull_unexpected_fraction_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
             ),
             ParameterBuilderConfig(
                 **total_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
             ),
         ]
 
-        mode = "unexpected_count_fraction_values"
-
+        # mode = "unexpected_count_fraction_values"
+        #
+        # column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
+        #     name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+        #     unexpected_count_parameter_builder_name=get_column_values_nonnull_unexpected_fraction_metric_multi_batch_parameter_builder_for_evaluations.name,
+        #     total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
+        #     mode=mode,
+        #     max_error_rate=None,
+        #     expectation_type=None,
+        #     evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+        #     data_context=None,
+        # )
+        #
+        # generate this other thing too
+        # TODO: Add the counts other thing
+        mode = "unexpected_count_fraction_parameter_nodes"
         column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
-            name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
-            unexpected_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
+            name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUE_COUNT_FRACTIONS.value}",
+            unexpected_count_parameter_builder_name=get_column_values_nonnull_unexpected_fraction_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             mode=mode,
             max_error_rate=None,
@@ -177,6 +205,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=None,
         )
+        # breakpoint()
 
         mode = "multi_batch" if is_multi_batch else "single_batch"
 
@@ -228,7 +257,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
                 **total_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
             ),
         ]
-
+        # fraction values
         mode = "unexpected_count_fraction_values"
 
         column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(

@@ -1,0 +1,179 @@
+<test-run id="2" testcasecount="1" result="Passed" start-time="2023-09-20 17:02:36.185313" end-time="2023-09-20 17:02:47.095490" duration="10" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0" clr-version="3.8.18 (default, Aug 25 2023, 02:07:22) &#10;[Clang 14.0.3 (clang-1403.0.22.14.1)]" engine-version="3.6.2"><command-line>/Applications/PyCharm.app/Contents/plugins/python/helpers/pycharm/_jb_pytest_runner.py test_rendering_missingness.py::test_me</command-line><filter><test re="0">test_rendering_missingness.py::test_me</test></filter><test-suite id="tests/rule_based_profiler/data_assistant/test_rendering_missingness.py" name="tests/rule_based_profiler/data_assistant/test_rendering_missingness.py" fullname="tests/rule_based_profiler/data_assistant/test_rendering_missingness.py" methodname="" classname="" runstate="Runnable" type="Assembly" testcasecount="1" result="Passed" label="" start-time="2023-09-20 17:02:36.240061" end-time="2023-09-20 17:02:47.092200" duration="10.852139" asserts="0" total="1" passed="1" failed="0" warnings="0" inconclusive="0" skipped="0"><properties><property name="python_version" value="3.8.18 (default, Aug 25 2023, 02:07:22) &#10;[Clang 14.0.3 (clang-1403.0.22.14.1)]" /></properties><test-case id="100" name="tests/rule_based_profiler/data_assistant/test_rendering_missingness.py::test_me" fullname="tests/rule_based_profiler/data_assistant/test_rendering_missingness.py::test_me" methodname="test_me" classname="tests/rule_based_profiler/data_assistant/test_rendering_missingness.py" runstate="Runnable" seed="1" result="Passed" label="" start-time="2023-09-20 17:02:36.240061" end-time="2023-09-20 17:02:47.092200" duration="10.852139" asserts="0"><properties><property name="python-version" value="3.8.18 (default, Aug 25 2023, 02:07:22) &#10;[Clang 14.0.3 (clang-1403.0.22.14.1)]" /><property name="fspath" value="tests/rule_based_profiler/data_assistant/test_rendering_missingness.py" /></properties><environment framework-version="3.6.2" clr-version="3.8.18 (default, Aug 25 2023, 02:07:22) &#10;[Clang 14.0.3 (clang-1403.0.22.14.1)]" os-version="22.6.0" platform="Darwin" cwd="/Users/work/Development/great_expectations/tests/rule_based_profiler/data_assistant" machine-name="arm64" user="" user-domain="" culture="en_US" uiculture="en_US" os-architecture="64bit" /><failure><message><![CDATA[]]></message><stack-trace><![CDATA[None]]></stack-trace></failure><reason><message><![CDATA[INFO     tests.conftest:conftest.py:495 Seeding _VersionChecker._LATEST_GX_VERSION_CACHE with 0.17.17+3.g17f47ba8b.dirty
+INFO     great_expectations.data_context.data_context.context_factory:context_factory.py:375 Could not find local file-backed GX project
+INFO     great_expectations.data_context.types.base:base.py:2152 Created temporary directory '/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/tmp9xze2hdm' for ephemeral docs site
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4341 Usage statistics is disabled globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4372 usage_statistics_url is defined globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:5633 EphemeralDataContext has not implemented `_load_fluent_config()` returning empty `GxConfig`
+INFO     great_expectations.datasource.fluent.config:config.py:185 Loading 'datasources' -&gt;
+[]
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4580 Usage statistics is disabled; skipping initialization.
+INFO     great_expectations.datasource.fluent.sources:sources.py:281 'taxi_multi_batch_datasource' PandasFilesystemDatasource uses FilesystemDataConnector
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 PandasFilesystemDatasource.dict() - substituting config values
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:251 batch_slice: None was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:251 batch_slice: slice(0, None, None) was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 PandasFilesystemDatasource.dict() - substituting config values
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:251 batch_slice: None was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:251 batch_slice: slice(0, None, None) was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.validator.validator:validator.py:1469 	0 expectation(s) included in expectation_suite.
+INFO     tests.conftest:conftest.py:501 Clearing _VersionChecker._LATEST_GX_VERSION_CACHE]]></message></reason><output><![CDATA[INFO     tests.conftest:conftest.py:495 Seeding _VersionChecker._LATEST_GX_VERSION_CACHE with 0.17.17+3.g17f47ba8b.dirty
+INFO     great_expectations.data_context.data_context.context_factory:context_factory.py:375 Could not find local file-backed GX project
+INFO     great_expectations.data_context.types.base:base.py:2152 Created temporary directory '/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/tmp9xze2hdm' for ephemeral docs site
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4341 Usage statistics is disabled globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4372 usage_statistics_url is defined globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:5633 EphemeralDataContext has not implemented `_load_fluent_config()` returning empty `GxConfig`
+INFO     great_expectations.datasource.fluent.config:config.py:185 Loading 'datasources' -&gt;
+[]
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4580 Usage statistics is disabled; skipping initialization.
+INFO     great_expectations.datasource.fluent.sources:sources.py:281 'taxi_multi_batch_datasource' PandasFilesystemDatasource uses FilesystemDataConnector
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 PandasFilesystemDatasource.dict() - substituting config values
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:251 batch_slice: None was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:251 batch_slice: slice(0, None, None) was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 PandasFilesystemDatasource.dict() - substituting config values
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:251 batch_slice: None was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.data_connector.batch_filter:batch_filter.py:251 batch_slice: slice(0, None, None) was parsed to: slice(0, None, None)
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.datasource.fluent.fluent_base_model:fluent_base_model.py:264 CSVAsset.dict() - substituting config values
+INFO     great_expectations.validator.validator:validator.py:1469 	0 expectation(s) included in expectation_suite.
+INFO     tests.conftest:conftest.py:501 Clearing _VersionChecker._LATEST_GX_VERSION_CACHE]]></output></test-case><environment framework-version="3.6.2" clr-version="3.8.18 (default, Aug 25 2023, 02:07:22) &#10;[Clang 14.0.3 (clang-1403.0.22.14.1)]" os-version="22.6.0" platform="Darwin" cwd="/Users/work/Development/great_expectations/tests/rule_based_profiler/data_assistant" machine-name="arm64" user="" user-domain="" culture="en_US" uiculture="en_US" os-architecture="64bit" /></test-suite></test-run>
