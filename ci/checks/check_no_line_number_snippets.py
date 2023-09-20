@@ -24,7 +24,7 @@ def check_dependencies(*deps: str) -> None:
 
 def run_grep(target_dir: pathlib.Path) -> List[str]:
     try:
-        res = subprocess.run(
+        res = subprocess.run(  # noqa: PLW1510
             [
                 "grep",
                 "--recursive",

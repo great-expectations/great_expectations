@@ -296,6 +296,28 @@ def test_list_keys_with_empty_payload_from_backend(
     assert len(responses.calls) == 1
 
 
+@responses.activate
+def test_has_key_with_empty_payload_from_backend(
+    construct_ge_cloud_store_backend: Callable[
+        [GXCloudRESTResource], GXCloudStoreBackend
+    ],
+):
+    store_backend = construct_ge_cloud_store_backend(
+        GXCloudRESTResource.EXPECTATION_SUITE
+    )
+
+    name = "my_nonexistent_suite"
+    responses.add(
+        responses.GET,
+        f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/expectation-suites?name={name}",
+        json={"data": []},
+        status=200,
+    )
+
+    key = (GXCloudRESTResource.EXPECTATION_SUITE, None, name)
+    assert store_backend.has_key(key) is False
+
+
 def test_get_all(
     construct_ge_cloud_store_backend: Callable[
         [GXCloudRESTResource], GXCloudStoreBackend
