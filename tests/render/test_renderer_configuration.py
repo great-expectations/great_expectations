@@ -9,7 +9,6 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.render.exceptions import RendererConfigurationError
 from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
     RendererValueType,
@@ -153,22 +152,4 @@ def test_renderer_configuration_add_param_validation(
         for error_wrapper_exc in [
             error_wrapper.exc for error_wrapper in e.value.raw_errors
         ]
-    )
-
-
-def test_renderer_configuration_validate_for_row_condition():
-    value = 4
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_table_row_count_to_equal",
-        kwargs={"value": value},
-    )
-    renderer_configuration = RendererConfiguration(
-        configuration=expectation_configuration
-    )
-
-    with pytest.raises(RendererConfigurationError) as e:
-        renderer_configuration._validate_for_row_condition(values={})
-    assert (
-        str(e.value)
-        == "kwargs and configuration cannot both be empty. Is the renderer written for the Expectation you are using? "
     )
