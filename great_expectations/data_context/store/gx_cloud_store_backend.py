@@ -628,7 +628,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     @override
     def _has_key(self, key: Tuple[GXCloudRESTResource, str | None, str | None]) -> bool:
         try:
-            _ = self._get(key)
+            # Requests using query params may return {"data": []} if the object doesn't exist
+            # We need to validate that even if we have a 200, there are contents to support existence
+            payload = self._get(key)
+            return bool(payload["data"])
         except StoreBackendTransientError:
             raise
         except StoreBackendError as e:
