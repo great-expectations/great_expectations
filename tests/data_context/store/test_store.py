@@ -9,9 +9,8 @@ from great_expectations.exceptions.exceptions import StoreBackendError
 
 @pytest.mark.unit
 def test_ge_cloud_response_json_to_object_dict() -> None:
-    store = Store()
     data = {"foo": "bar", "baz": "qux"}
-    assert store.ge_cloud_response_json_to_object_dict(response_json=data) == data
+    assert Store.ge_cloud_response_json_to_object_dict(response_json=data) == data
 
 
 @pytest.mark.unit

@@ -108,8 +108,6 @@ def test_profiler_store_integration(
 def test_ge_cloud_response_json_to_object_dict(
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ) -> None:
-    store = ProfilerStore(store_name="profiler_store")
-
     profiler_id = "b1445fa5-d034-45d7-a4ae-d6dca19b207b"
 
     profiler_config = profiler_config_with_placeholder_args.to_dict()
@@ -125,7 +123,7 @@ def test_ge_cloud_response_json_to_object_dict(
     expected = profiler_config
     expected["id"] = profiler_id
 
-    actual = store.ge_cloud_response_json_to_object_dict(response_json)
+    actual = ProfilerStore.ge_cloud_response_json_to_object_dict(response_json)
 
     assert actual == expected
 

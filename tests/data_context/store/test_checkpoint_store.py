@@ -287,8 +287,6 @@ store_backend:
 
 @pytest.mark.cloud
 def test_ge_cloud_response_json_to_object_dict() -> None:
-    store = CheckpointStore(store_name="checkpoint_store")
-
     checkpoint_id = "7b5e962c-3c67-4a6d-b311-b48061d52103"
     checkpoint_config = {
         "name": "oss_test_checkpoint",
@@ -320,9 +318,17 @@ def test_ge_cloud_response_json_to_object_dict() -> None:
     expected = checkpoint_config
     expected["ge_cloud_id"] = checkpoint_id
 
-    actual = store.ge_cloud_response_json_to_object_dict(response_json)
+    actual = CheckpointStore.ge_cloud_response_json_to_object_dict(response_json)
 
     assert actual == expected
+
+
+@pytest.mark.cloud
+def test_ge_cloud_response_json_to_object_dict_no_data_in_payload():
+    response_json = {"data": []}
+
+    with pytest.raises(ValueError):
+        CheckpointStore.ge_cloud_response_json_to_object_dict(response_json)
 
 
 @pytest.mark.unit

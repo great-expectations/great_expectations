@@ -93,7 +93,8 @@ class Store:
             )
         self._use_fixed_length_key = self._store_backend.fixed_length_key
 
-    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
+    @staticmethod
+    def ge_cloud_response_json_to_object_dict(response_json: Dict) -> Dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object

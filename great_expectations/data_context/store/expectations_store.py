@@ -166,7 +166,8 @@ class ExpectationsStore(Store):
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     @override
-    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
+    @staticmethod
+    def ge_cloud_response_json_to_object_dict(response_json: Dict) -> Dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
