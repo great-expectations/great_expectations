@@ -4,6 +4,12 @@
 Changelog
 #########
 
+0.17.18
+-----------------
+* [BUGFIX] Patch faulty `GXCloudStoreBackend.has_key` logic ([#8741](https://github.com/great-expectations/great_expectations/pull/8741))
+* [MAINTENANCE] Additional examples of `row_condition` for Spark and SQL ([#8713](https://github.com/great-expectations/great_expectations/pull/8713))
+* [MAINTENANCE] ruff `.0.290` ([#8726](https://github.com/great-expectations/great_expectations/pull/8726))
+
 0.17.17
 -----------------
 * [BUGFIX] Resolve issue around listing keys with empty state in `GXCloudStoreBackend` ([#8728](https://github.com/great-expectations/great_expectations/pull/8728))
