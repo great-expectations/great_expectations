@@ -94,7 +94,7 @@ class Store:
         self._use_fixed_length_key = self._store_backend.fixed_length_key
 
     @staticmethod
-    def ge_cloud_response_json_to_object_dict(response_json: Dict) -> Dict:
+    def gx_cloud_response_json_to_object_dict(response_json: Dict) -> Dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
@@ -189,7 +189,7 @@ class Store:
             value = self._store_backend.get(self.key_to_tuple(key))
             # TODO [Robby] MER-285: Handle non-200 http errors
             if value:
-                value = self.ge_cloud_response_json_to_object_dict(response_json=value)
+                value = self.gx_cloud_response_json_to_object_dict(response_json=value)
         else:
             self._validate_key(key)
             value = self._store_backend.get(self.key_to_tuple(key))
@@ -202,7 +202,7 @@ class Store:
     def get_all(self) -> list[Any]:
         objs = self._store_backend.get_all()
         if self.cloud_mode:
-            objs = self.ge_cloud_response_json_to_object_dict(objs)
+            objs = self.gx_cloud_response_json_to_object_dict(objs)
 
         return list(map(self.deserialize, objs))
 

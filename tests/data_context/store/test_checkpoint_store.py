@@ -318,7 +318,7 @@ def test_ge_cloud_response_json_to_object_dict() -> None:
     expected = checkpoint_config
     expected["ge_cloud_id"] = checkpoint_id
 
-    actual = CheckpointStore.ge_cloud_response_json_to_object_dict(response_json)
+    actual = CheckpointStore.gx_cloud_response_json_to_object_dict(response_json)
 
     assert actual == expected
 
@@ -328,7 +328,7 @@ def test_ge_cloud_response_json_to_object_dict_no_data_in_payload():
     response_json = {"data": []}
 
     with pytest.raises(ValueError):
-        CheckpointStore.ge_cloud_response_json_to_object_dict(response_json)
+        CheckpointStore.gx_cloud_response_json_to_object_dict(response_json)
 
 
 @pytest.mark.unit

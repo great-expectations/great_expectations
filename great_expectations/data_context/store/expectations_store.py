@@ -167,7 +167,7 @@ class ExpectationsStore(Store):
 
     @override
     @staticmethod
-    def ge_cloud_response_json_to_object_dict(response_json: Dict) -> Dict:
+    def gx_cloud_response_json_to_object_dict(response_json: Dict) -> Dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object

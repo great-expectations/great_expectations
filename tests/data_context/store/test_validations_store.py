@@ -379,6 +379,6 @@ def test_ge_cloud_response_json_to_object_dict() -> None:
     expected = validation_config
     expected["ge_cloud_id"] = validation_id
 
-    actual = ValidationsStore.ge_cloud_response_json_to_object_dict(response_json)
+    actual = ValidationsStore.gx_cloud_response_json_to_object_dict(response_json)
 
     assert actual == expected

@@ -257,6 +257,6 @@ def test_ge_cloud_response_json_to_object_dict() -> None:
     expected = suite_config
     expected["ge_cloud_id"] = suite_id
 
-    actual = ExpectationsStore.ge_cloud_response_json_to_object_dict(response_json)
+    actual = ExpectationsStore.gx_cloud_response_json_to_object_dict(response_json)
 
     assert actual == expected

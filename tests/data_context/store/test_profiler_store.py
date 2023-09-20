@@ -123,7 +123,7 @@ def test_ge_cloud_response_json_to_object_dict(
     expected = profiler_config
     expected["id"] = profiler_id
 
-    actual = ProfilerStore.ge_cloud_response_json_to_object_dict(response_json)
+    actual = ProfilerStore.gx_cloud_response_json_to_object_dict(response_json)
 
     assert actual == expected
 
