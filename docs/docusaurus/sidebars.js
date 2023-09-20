@@ -2,14 +2,14 @@ module.exports = {
   docs: [
     {
       type: 'category',
-      label: 'GX Cloud',
+      label: '**GX Cloud**',
       items: [
         `cloud/setup/setup_cloud`,
       ]
     },
     {
       type: 'category',
-      label: 'OSS',
+      label: '**GX Open Source**',
       link: { type: 'doc', id: 'guides/setup/get_started_lp' },
       items: ['intro',
         {
