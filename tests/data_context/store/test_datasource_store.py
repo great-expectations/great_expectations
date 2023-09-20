@@ -525,3 +525,8 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
             "data_connectors"
         ]["tripdata_monthly_configured"]
     )
+
+
+@pytest.mark.cloud
+def test_gx_cloud_response_to_object_dict():
+    pass
