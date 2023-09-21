@@ -213,13 +213,17 @@ Your Checkpoint contained an `UpdateDataDocsAction`, so your <TechnicalTag tag="
 
 Because you used the DBFS for your Data Docs store, you need to download your Data Docs locally to view them. If you use a different store, you can host your data docs in a place where they can be accessed directly by your organization. 
 
-Run the following [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html) command to download your data docs and open the local copy of `index.html` to view your updated Data Docs:
+If you have the [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html) installed and configured on your local machine, you can run the following commands from your local terminal to download your data docs and open the local copy of `index.html` to view your updated Data Docs:
 
 ```bash
 databricks fs cp -r dbfs:/great_expectations/uncommitted/data_docs/local_site/ great_expectations/uncommitted/data_docs/local_site/
+
+cd great_expectations/uncommitted/data_docs/local_site
+
+open -a "<YOUR_PREFERRED_BROWSER_NAME_HERE>" index.html
 ```
 
-The `displayHTML` command is another option for displaying Data Docs in a Databricks notebook. There is a restriction, though, in that clicking a link in the displayed data documents returns an empty page. To view some validation results, use this method. For example:
+The `displayHTML` command is another option for displaying Data Docs from within a Databricks notebook. There is a restriction, though, in that clicking a link in the displayed data documents returns an empty page. To view some validation results, use this method. For example:
 
 ```python 
 html = '/dbfs/great_expectations/uncommitted/data_docs/local_site/index.html'
