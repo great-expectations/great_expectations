@@ -10,7 +10,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'GX Open Source',
+      label: 'GX Core',
       items: [
         {
           type: 'category',
