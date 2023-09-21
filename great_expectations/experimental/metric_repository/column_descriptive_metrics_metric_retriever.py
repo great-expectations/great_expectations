@@ -20,7 +20,11 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent import BatchRequest
-    from great_expectations.validator.metrics_calculator import _MetricKey
+    from great_expectations.validator.metrics_calculator import (
+        _AbortedMetricsInfoDict,
+        _MetricKey,
+        _MetricsDict,
+    )
 
 
 class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
@@ -56,25 +60,29 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         table_metric_configs = self._generate_table_metric_configurations(
             table_metric_names
         )
-        batch_id, computed_metrics = self._compute_metrics(
+        batch_id, computed_metrics, aborted_metrics = self._compute_metrics(
             batch_request, table_metric_configs
         )
 
         metrics = [
-            self._get_table_row_count(batch_id, computed_metrics),
-            self._get_table_columns(batch_id, computed_metrics),
-            self._get_table_column_types(batch_id, computed_metrics),
+            self._get_table_row_count(batch_id, computed_metrics, aborted_metrics),
+            self._get_table_columns(batch_id, computed_metrics, aborted_metrics),
+            self._get_table_column_types(batch_id, computed_metrics, aborted_metrics),
         ]
 
         return metrics
 
     def _get_table_row_count(
-        self, batch_id: str, computed_metrics: dict[_MetricKey, Any]
+        self,
+        batch_id: str,
+        computed_metrics: _MetricsDict,
+        aborted_metrics: _AbortedMetricsInfoDict,
     ) -> Metric:
         metric_name = "table.row_count"
         value, exception = self._get_metric_from_computed_metrics(
             metric_name=metric_name,
             computed_metrics=computed_metrics,
+            aborted_metrics=aborted_metrics,
         )
         return TableMetric[int](
             batch_id=batch_id,
@@ -84,12 +92,16 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         )
 
     def _get_table_columns(
-        self, batch_id: str, computed_metrics: dict[_MetricKey, Any]
+        self,
+        batch_id: str,
+        computed_metrics: _MetricsDict,
+        aborted_metrics: _AbortedMetricsInfoDict,
     ) -> Metric:
         metric_name = "table.columns"
         value, exception = self._get_metric_from_computed_metrics(
             metric_name=metric_name,
             computed_metrics=computed_metrics,
+            aborted_metrics=aborted_metrics,
         )
         return TableMetric[List[str]](
             batch_id=batch_id,
@@ -99,7 +111,10 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         )
 
     def _get_table_column_types(
-        self, batch_id: str, computed_metrics: dict[_MetricKey, Any]
+        self,
+        batch_id: str,
+        computed_metrics: _MetricsDict,
+        aborted_metrics: _AbortedMetricsInfoDict,
     ) -> Metric:
         metric_name = "table.column_types"
         metric_lookup_key: _MetricKey = (metric_name, tuple(), "include_nested=True")
@@ -107,6 +122,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             metric_name=metric_name,
             metric_lookup_key=metric_lookup_key,
             computed_metrics=computed_metrics,
+            aborted_metrics=aborted_metrics,
         )
         raw_column_types: list[dict[str, Any]] = value
         column_types_converted_to_str: list[dict[str, str]] = [
@@ -133,7 +149,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         column_metric_configs = self._generate_column_metric_configurations(
             column_list, column_metric_names
         )
-        batch_id, computed_metrics = self._compute_metrics(
+        batch_id, computed_metrics, aborted_metrics = self._compute_metrics(
             batch_request, column_metric_configs
         )
 
@@ -148,6 +164,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                     metric_name=metric_name,
                     metric_lookup_key=metric_lookup_key,
                     computed_metrics=computed_metrics,
+                    aborted_metrics=aborted_metrics,
                 )
                 metrics.append(
                     ColumnMetric[float](
@@ -171,7 +188,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         column_metric_configs = self._generate_column_metric_configurations(
             column_list, column_metric_names
         )
-        batch_id, computed_metrics = self._compute_metrics(
+        batch_id, computed_metrics, aborted_metrics = self._compute_metrics(
             batch_request, column_metric_configs
         )
 
@@ -187,6 +204,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                     metric_name=metric_name,
                     metric_lookup_key=metric_lookup_key,
                     computed_metrics=computed_metrics,
+                    aborted_metrics=aborted_metrics,
                 )
                 metrics.append(
                     ColumnMetric[int](
@@ -251,14 +269,16 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
 
     def _compute_metrics(
         self, batch_request: BatchRequest, metric_configs: list[MetricConfiguration]
-    ):
+    ) -> tuple[str, _MetricsDict, _AbortedMetricsInfoDict]:
         validator = self._context.get_validator(batch_request=batch_request)
         # The runtime configuration catch_exceptions is explicitly set to True to catch exceptions
         # that are thrown when computing metrics. This is so we can capture the error for later
         # surfacing, and not have the entire metric run fail so that other metrics will still be
         # computed.
-        # TODO: Get aborted_metrics in addition to computed metrics so they can be plumbed into the MetricException.
-        computed_metrics = validator.compute_metrics(
+        (
+            computed_metrics,
+            aborted_metrics,
+        ) = validator.compute_metrics_with_aborted_metrics(
             metric_configurations=metric_configs,
             runtime_configuration={"catch_exceptions": True},
         )
@@ -266,14 +286,15 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             validator.active_batch, Batch
         ), f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
         batch_id = validator.active_batch.id
-        return batch_id, computed_metrics
+        return batch_id, computed_metrics, aborted_metrics
 
     def _get_metric_from_computed_metrics(
         self,
         metric_name: str,
-        computed_metrics: dict[_MetricKey, Any],
+        computed_metrics: _MetricsDict,
+        aborted_metrics: _AbortedMetricsInfoDict,
         metric_lookup_key: _MetricKey | None = None,
-    ):
+    ) -> tuple[Any, MetricException | None]:
         if metric_lookup_key is None:
             metric_lookup_key = (
                 metric_name,
@@ -281,12 +302,24 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                 tuple(),
             )
         value = None
-        exception = None
+        metric_exception = None
         if metric_lookup_key in computed_metrics:
             value = computed_metrics[metric_lookup_key]
+        elif metric_lookup_key in aborted_metrics:
+            exception = aborted_metrics[metric_lookup_key]
+            # Note: Only retrieving the first exception if there are multiple exceptions.
+            exception_info = exception["exception_info"]
+            assert isinstance(exception_info, set)  # Type narrowing for mypy
+            first_exception = list(exception_info)[0]
+            exception_type = "Unknown"  # Note: we currently only capture the message and traceback, not the type
+            exception_message = first_exception.exception_message
+            metric_exception = MetricException(
+                type=exception_type, message=exception_message
+            )
         else:
-            exception = MetricException(
-                type="TBD", message="TBD"
-            )  # TODO: Fill in type and message if an exception is thrown
+            metric_exception = MetricException(
+                type="Not found",
+                message="Metric was not successfully computed but exception was not found.",
+            )
 
-        return value, exception
+        return value, metric_exception

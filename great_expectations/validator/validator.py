@@ -73,6 +73,7 @@ from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metrics_calculator import (
     MetricsCalculator,
+    _AbortedMetricsInfoDict,
     _MetricKey,
     _MetricsDict,
 )
@@ -369,6 +370,32 @@ class Validator:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
         """
         return self._metrics_calculator.compute_metrics(
+            metric_configurations=metric_configurations,
+            runtime_configuration=runtime_configuration,
+            min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
+        )
+
+    def compute_metrics_with_aborted_metrics(
+        self,
+        metric_configurations: List[MetricConfiguration],
+        runtime_configuration: Optional[dict] = None,
+        min_graph_edges_pbar_enable: int = 0,
+        # Set to low number (e.g., 3) to suppress progress bar for small graphs.
+    ) -> tuple[_MetricsDict, _AbortedMetricsInfoDict]:
+        """
+        Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
+
+        Args:
+            metric_configurations: List of desired MetricConfiguration objects to be resolved.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
+            min_graph_edges_pbar_enable: Minumum number of graph edges to warrant showing progress bars.
+
+        Returns:
+            Tuple with two elements. The first is a dictionary with requested metrics resolved, with unique metric
+            ID as key and computed metric as value. The second is a dictionary with information about any metrics
+            that were aborted during computation, using the unique metric ID as key.
+        """
+        return self._metrics_calculator.compute_metrics_with_aborted_metrics(
             metric_configurations=metric_configurations,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
