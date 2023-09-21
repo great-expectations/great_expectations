@@ -223,7 +223,7 @@ cd great_expectations/uncommitted/data_docs/local_site
 open -a "<YOUR_PREFERRED_BROWSER_NAME_HERE>" index.html
 ```
 
-The `displayHTML` command is another option for displaying Data Docs from within a Databricks notebook. There is a restriction, though, in that clicking a link in the displayed data documents returns an empty page. To view some validation results, use this method. For example:
+The `displayHTML` command is another option you can use to display Data Docs in a Databricks notebook. However, when you use this option, an empty page is returned when you click a link in the displayed data documents. To view validation results, use the following method:
 
 ```python 
 html = '/dbfs/great_expectations/uncommitted/data_docs/local_site/index.html'
