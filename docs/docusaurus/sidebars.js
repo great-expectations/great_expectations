@@ -204,6 +204,16 @@ module.exports = {
             'integrations/integration_zenml',
           ]
         },
+        {
+          type: 'category',
+          label: 'Reference',
+          link: { type: 'doc', id: 'reference/reference_overview' },
+          items: [
+            'contributing/contributing_maturity',
+            'reference/customize_your_deployment',
+            'reference/usage_statistics',
+          ]
+        },
         { type: 'doc', id: 'changelog' },
         { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
         'contributing/contributing',
@@ -227,9 +237,6 @@ module.exports = {
       items: [
         'conceptual_guides/expectation_classes',
         'conceptual_guides/metricproviders',
-        'contributing/contributing_maturity',
-        'reference/customize_your_deployment',
-        'reference/usage_statistics',
       ]
     },
     {
