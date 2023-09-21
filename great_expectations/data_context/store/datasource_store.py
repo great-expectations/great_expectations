@@ -136,15 +136,37 @@ class DatasourceStore(Store):
         data = response_json["data"]
         if isinstance(data, list):
             if len(data) > 1:
-                # TODO: handle larger arrays of Datasources
+                # Larger arrays of datasources should be handled by `gx_cloud_response_json_to_object_collection`
                 raise TypeError(
                     f"GX Cloud returned {len(data)} Datasources but expected 1"
                 )
             data = data[0]
+
+        return DatasourceStore._convert_raw_json_to_object_dict(data)
+
+    @override
+    @staticmethod
+    def gx_cloud_response_json_to_object_collection(
+        response_json: CloudResponsePayloadTD,  # type: ignore[override]
+    ) -> list[dict]:
+        """
+        This method takes full json response from GX cloud and outputs a list of dicts appropriate for
+        deserialization into a collection of GX objects
+        """
+        logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
+        data = response_json["data"]
+        if not isinstance(data, list):
+            raise TypeError(
+                "GX Cloud did not return a collection of Datasources when expected"
+            )
+
+        return [DatasourceStore._convert_raw_json_to_object_dict(d) for d in data]
+
+    @staticmethod
+    def _convert_raw_json_to_object_dict(data: DataPayload) -> dict:
         datasource_ge_cloud_id: str = data["id"]
         datasource_config_dict: dict = data["attributes"]["datasource_config"]
         datasource_config_dict["id"] = datasource_ge_cloud_id
-
         return datasource_config_dict
 
     def retrieve_by_name(
