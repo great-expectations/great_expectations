@@ -8,6 +8,7 @@ from typing import (
     TYPE_CHECKING,
     ClassVar,
     Dict,
+    Final,
     List,
     Literal,
     Optional,
@@ -43,6 +44,8 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 SortersDefinition: TypeAlias = List[Union[Sorter, str, dict]]
+
+_REQUIRED_FABRIC_SERVICE: Final[str] = "Microsoft.ProjectArcadia"
 
 
 class _PowerBIAsset(DataAsset):
@@ -389,8 +392,8 @@ class FabricPowerBIDatasource(Datasource):
     @staticmethod
     def _running_on_fabric() -> bool:
         if (
-            os.environ.get("AZURE_SERVICE", None)  # noqa: TID251 # needed for fabric
-            != "Microsoft.ProjectArcadia"
+            os.environ.get("AZURE_SERVICE")  # noqa: TID251 # needed for fabric
+            != _REQUIRED_FABRIC_SERVICE
         ):
             return False
         from pyspark.sql import SparkSession  # noqa: TID251 # needed for fabric
