@@ -206,7 +206,7 @@ def test_get_metrics_metrics_missing():
             metric_name="table.row_count",
             value=None,
             exception=MetricException(
-                type="Unknown",
+                type="Not found",
                 message="Metric was not successfully computed but exception was not found.",
             ),
         ),
@@ -231,7 +231,7 @@ def test_get_metrics_metrics_missing():
             column="col1",
             value=None,
             exception=MetricException(
-                type="Unknown",
+                type="Not found",
                 message="Metric was not successfully computed but exception was not found.",
             ),
         ),
