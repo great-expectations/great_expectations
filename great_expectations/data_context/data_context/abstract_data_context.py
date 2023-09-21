@@ -136,6 +136,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
     usage_statistics_enabled_method,
 )
 from great_expectations.checkpoint import Checkpoint
+from great_expectations.core.datasource_dict import DatasourceDict
 
 SQLAlchemyError = sqlalchemy.SQLAlchemyError
 if not SQLAlchemyError:
@@ -149,7 +150,6 @@ if TYPE_CHECKING:
 
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-    from great_expectations.core.datasource_dict import DatasourceDict
     from great_expectations.core.expectation_configuration import (
         ExpectationConfiguration,
     )

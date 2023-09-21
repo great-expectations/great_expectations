@@ -102,7 +102,7 @@ class DatasourceDict(UserDict):
 
     @override
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
-        self.data[name] = ds
+        self._cache[name] = ds
 
         # FDS do not use stores
         if not isinstance(ds, FluentDatasource):
@@ -148,12 +148,12 @@ class DatasourceDict(UserDict):
 
     @override
     def __getitem__(self, name: str) -> FluentDatasource | BaseDatasource:
-        if name in self.data:
-            return self.data[name]
+        if name in self._cache:
+            return self._cache[name]
 
         # Upon cache miss, retrieve from store and add to cache
         ds = self._get_from_store(name)
-        self.data[name] = ds
+        self._cache[name] = ds
         return ds
 
     def _get_from_store(self, name: str) -> FluentDatasource | BaseDatasource:
@@ -196,16 +196,12 @@ class DatasourceDict(UserDict):
 
     @override
     def __delitem__(self, name: str) -> None:
-        ds = self.data.pop(name, None)
+        ds = self._cache.pop(name, None)
 
         # FDS do not use stores
         if not isinstance(ds, FluentDatasource):
             self._del_from_store(name)
 
     def _del_from_store(self, name: str) -> None:
-        ds = self._get_from_store(name)
-
-        if isinstance(ds, BaseDatasource):
-            self._datasource_store.delete(ds.config)
-        else:
-            self._datasource_store.delete(ds)
+        ds = self._datasource_store.retrieve_by_name(name)
+        self._datasource_store.delete(ds)
