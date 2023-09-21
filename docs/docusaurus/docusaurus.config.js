@@ -239,10 +239,10 @@ module.exports = {
           lastVersion: 'current',
           versions: {
             current: {
-              label: '0.17.18',
-              path: '',
-            },
-          },
+              label: '0.17.19',
+              path: ''
+            }
+          }
         },
         theme: {
           customCss: require.resolve('./src/css/custom.scss'),
