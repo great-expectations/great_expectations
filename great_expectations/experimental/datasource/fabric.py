@@ -1,3 +1,6 @@
+"""
+https://learn.microsoft.com/en-us/python/api/semantic-link-sempy/sempy.fabric?view=semantic-link-python
+"""
 from __future__ import annotations
 
 import logging
