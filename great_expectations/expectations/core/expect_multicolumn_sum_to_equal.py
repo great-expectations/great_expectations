@@ -4,12 +4,10 @@ from typing import List, Optional
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
     ExpectationConfiguration,
-    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
-    render_evaluation_parameter_string,
 )
 from great_expectations.render.components import (
     RenderedStringTemplateContent,
@@ -26,6 +24,7 @@ from great_expectations.render.util import (
 )
 
 logger = logging.getLogger(__name__)
+
 
 
 class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
