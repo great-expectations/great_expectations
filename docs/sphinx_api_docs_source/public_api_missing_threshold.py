@@ -98,4 +98,6 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/util.py Name: get_context",
     "File: great_expectations/util.py Name: read_parquet",
     "File: great_expectations/validator/validation_graph.py Name: resolve",
+    "File: great_expectations/experimental/datasource/fabric.py Name: build_batch_request",
+    "File: great_expectations/experimental/datasource/fabric.py Name: get_batch_list_from_batch_request",
 ]
