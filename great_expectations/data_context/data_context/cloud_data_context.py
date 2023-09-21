@@ -395,7 +395,7 @@ class CloudDataContext(SerializableDataContext):
         self._datasources = DatasourceDict(
             context=self,
             datasource_store=self._datasource_store,
-            cache=TTLCache(maxsize=1000, ttl=3),
+            cache=TTLCache(maxsize=1000, ttl=2),
         )
 
     @override

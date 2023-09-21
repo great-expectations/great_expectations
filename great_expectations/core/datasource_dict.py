@@ -93,11 +93,9 @@ class DatasourceDict(UserDict):
 
     @override
     def __contains__(self, name: object) -> bool:
-        if name in self.data:
-            return True
         try:
             # Resort to store only if not in cache
-            _ = self._get_from_store(str(name))
+            _ = self.__getitem__(str(name))
             return True
         except KeyError:
             return False

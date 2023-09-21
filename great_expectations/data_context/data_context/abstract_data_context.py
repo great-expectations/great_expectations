@@ -31,6 +31,7 @@ from typing import (
     overload,
 )
 
+from cachetools import Cache
 from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
 
@@ -4670,15 +4671,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         self._datasources: DatasourceDict = DatasourceDict(
             context=self,
             datasource_store=self._datasource_store,
-            cache={},
+            cache=Cache(maxsize=1000),
         )
 
         config: DataContextConfig = self.config
-
-        if self._datasource_store.cloud_mode:
-            for fds in config.fluent_datasources.values():
-                datasource = self._add_fluent_datasource(**fds)
-                datasource._rebuild_asset_data_connectors()
 
         datasources: Dict[str, DatasourceConfig] = cast(
             Dict[str, DatasourceConfig], config.datasources
