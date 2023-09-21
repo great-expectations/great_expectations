@@ -58,7 +58,6 @@ from great_expectations.core.config_provider import (
     _EnvironmentConfigurationProvider,
     _RuntimeEnvironmentConfigurationProvider,
 )
-from great_expectations.core.datasource_dict import CacheableDatasourceDict
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
@@ -4668,9 +4667,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
-        self._datasources: DatasourceDict = CacheableDatasourceDict(
+        self._datasources: DatasourceDict = DatasourceDict(
             context=self,
             datasource_store=self._datasource_store,
+            cache={},
         )
 
         config: DataContextConfig = self.config

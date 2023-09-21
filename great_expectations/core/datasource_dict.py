@@ -14,6 +14,8 @@ from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.datasource.fluent.constants import _IN_MEMORY_DATA_ASSET_TYPE
 
 if TYPE_CHECKING:
+    from cachetools import Cache
+
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
@@ -52,16 +54,13 @@ class DatasourceDict(UserDict):
         self,
         context: AbstractDataContext,
         datasource_store: DatasourceStore,
+        cache: Cache[str, FluentDatasource | BaseDatasource],
     ):
         self._context = context  # If possible, we should avoid passing the context through - once block-style is removed, we can extract this
         self._datasource_store = datasource_store
-        self._in_memory_data_assets: dict[str, DataAsset] = {}
+        self._cache = cache
 
-    @staticmethod
-    def _get_in_memory_data_asset_name(
-        datasource_name: str, data_asset_name: str
-    ) -> str:
-        return f"{datasource_name}-{data_asset_name}"
+        self._in_memory_data_assets: dict[str, DataAsset] = {}
 
     @override
     @property
@@ -72,28 +71,46 @@ class DatasourceDict(UserDict):
 
         This is generated just-in-time as the contents of the store may have changed.
         """
-        datasources: dict[str, FluentDatasource | BaseDatasource] = {}
-
         configs = self._datasource_store.get_all()
         for config in configs:
             try:
                 if isinstance(config, FluentDatasource):
                     name = config.name
-                    datasources[name] = self._init_fluent_datasource(
-                        name=name, ds=config
-                    )
+                    if name not in self._cache:
+                        self._cache[name] = self._init_fluent_datasource(
+                            name=name, ds=config
+                        )
                 else:
                     name = config["name"]
-                    datasources[name] = self._init_block_style_datasource(
-                        name=name, config=config
-                    )
+                    if name not in self._cache:
+                        self._cache[name] = self._init_block_style_datasource(
+                            name=name, config=config
+                        )
             except gx_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {name}: {e}")
 
-        return datasources
+        return self._cache
+
+    @override
+    def __contains__(self, name: object) -> bool:
+        if name in self.data:
+            return True
+        try:
+            # Resort to store only if not in cache
+            _ = self._get_from_store(str(name))
+            return True
+        except KeyError:
+            return False
 
     @override
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
+        self.data[name] = ds
+
+        # FDS do not use stores
+        if not isinstance(ds, FluentDatasource):
+            self._set_with_store(name=name, ds=ds)
+
+    def _set_with_store(self, name: str, ds: FluentDatasource | BaseDatasource):
         config: FluentDatasource | DatasourceConfig
         if isinstance(ds, FluentDatasource):
             config = self._prep_fds_config(name=name, ds=ds)
@@ -115,6 +132,12 @@ class DatasourceDict(UserDict):
                     self._in_memory_data_assets[in_memory_asset_name] = asset
         return ds
 
+    @staticmethod
+    def _get_in_memory_data_asset_name(
+        datasource_name: str, data_asset_name: str
+    ) -> str:
+        return f"{datasource_name}-{data_asset_name}"
+
     def _prep_legacy_datasource_config(
         self, name: str, ds: BaseDatasource
     ) -> DatasourceConfig:
@@ -125,24 +148,24 @@ class DatasourceDict(UserDict):
         config["class_name"] = ds.__class__.__name__
         return datasourceConfigSchema.load(config)
 
-    def _get_ds_from_store(self, name: str) -> FluentDatasource | DatasourceConfig:
-        try:
-            return self._datasource_store.retrieve_by_name(name)
-        except ValueError:
-            raise KeyError(f"Could not find a datasource named '{name}'")
-
-    @override
-    def __delitem__(self, name: str) -> None:
-        ds = self._get_ds_from_store(name)
-        self._datasource_store.delete(ds)
-
     @override
     def __getitem__(self, name: str) -> FluentDatasource | BaseDatasource:
-        ds = self._get_ds_from_store(name)
+        if name in self.data:
+            return self.data[name]
 
-        if isinstance(ds, FluentDatasource):
-            return self._init_fluent_datasource(name=name, ds=ds)
-        return self._init_block_style_datasource(name=name, config=ds)
+        # Upon cache miss, retrieve from store and add to cache
+        ds = self._get_from_store(name)
+        self.data[name] = ds
+        return ds
+
+    def _get_from_store(self, name: str) -> FluentDatasource | BaseDatasource:
+        try:
+            ds = self._datasource_store.retrieve_by_name(name)
+            if isinstance(ds, FluentDatasource):
+                return self._init_fluent_datasource(name=name, ds=ds)
+            return self._init_block_style_datasource(name=name, config=ds)
+        except ValueError:
+            raise KeyError(f"Could not find a datasource named '{name}'")
 
     def _init_fluent_datasource(
         self, name: str, ds: FluentDatasource
@@ -173,64 +196,14 @@ class DatasourceDict(UserDict):
             datasource_name=name, datasource_config=config
         )
 
-
-class CacheableDatasourceDict(DatasourceDict):
-    """
-    Extends the capabilites of the DatasourceDict by placing a caching layer in front of the underlying store.
-
-    Any retrievals will firstly check an in-memory dictionary before requesting from the store. Other CRUD methods will ensure that
-    both cache and store are kept in sync.
-    """
-
-    def __init__(
-        self,
-        context: AbstractDataContext,
-        datasource_store: DatasourceStore,
-    ):
-        super().__init__(
-            context=context,
-            datasource_store=datasource_store,
-        )
-        self._cache: dict[str, FluentDatasource | BaseDatasource] = {}
-
-    @override
-    @property
-    def data(self) -> dict[str, FluentDatasource | BaseDatasource]:  # type: ignore[override] # `data` is meant to be a writeable attr (not a read-only property)
-        return self._cache
-
-    @override
-    def __contains__(self, name: object) -> bool:
-        if name in self.data:
-            return True
-        try:
-            # Resort to store only if not in cache
-            _ = self._get_ds_from_store(str(name))
-            return True
-        except KeyError:
-            return False
-
-    @override
-    def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
-        self.data[name] = ds
-
-        # FDS do not use stores
-        if not isinstance(ds, FluentDatasource):
-            super().__setitem__(name, ds)
-
     @override
     def __delitem__(self, name: str) -> None:
         ds = self.data.pop(name, None)
 
         # FDS do not use stores
         if not isinstance(ds, FluentDatasource):
-            super().__delitem__(name)
+            self._del_from_store(name)
 
-    @override
-    def __getitem__(self, name: str) -> FluentDatasource | BaseDatasource:
-        if name in self.data:
-            return self.data[name]
-
-        # Upon cache miss, retrieve from store and add to cache
-        ds = super().__getitem__(name)
-        self.data[name] = ds
-        return ds
+    def _del_from_store(self, name: str):
+        ds = self._get_from_store(name)
+        self._datasource_store.delete(ds)

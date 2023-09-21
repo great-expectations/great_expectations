@@ -16,6 +16,8 @@ from typing import (
     overload,
 )
 
+from cachetools import TTLCache
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
 from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -393,6 +395,7 @@ class CloudDataContext(SerializableDataContext):
         self._datasources = DatasourceDict(
             context=self,
             datasource_store=self._datasource_store,
+            cache=TTLCache(maxsize=1000, ttl=3),
         )
 
     @override
