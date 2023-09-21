@@ -101,8 +101,8 @@ class TestFabricPowerBI:
                     "measure": "my_measure",
                     "groupby_columns": [("foo", "bar"), ("fizz", "buzz")],
                     "filters": {
-                        "foo.bar": "foobar",
-                        "fizz.buzz": "fizzbuzz",
+                        "State[Region]": ["East", "Central"],
+                        "State[State]": ["WA", "CA"],
                     },
                     "fully_qualified_columns": True,
                     "num_rows": 100,
