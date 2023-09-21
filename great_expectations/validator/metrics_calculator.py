@@ -196,20 +196,11 @@ class MetricsCalculator:
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
         """
-        graph: ValidationGraph = self.build_metric_dependency_graph(
+
+        # Note: Dropping aborted metrics for backward compatibility.
+        # This is a temporary solution until we can change all the callers to handle aborted metrics.
+        resolved_metrics, _ = self.compute_metrics_with_aborted_metrics(
             metric_configurations=metric_configurations,
-            runtime_configuration=runtime_configuration,
-        )
-        resolved_metrics: _MetricsDict
-        aborted_metrics_info: Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ]
-        (
-            resolved_metrics,
-            aborted_metrics_info,
-        ) = self.resolve_validation_graph_and_handle_aborted_metrics_info(
-            graph=graph,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
         )
