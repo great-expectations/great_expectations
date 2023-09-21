@@ -236,6 +236,14 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             params = None
 
         payload = self._send_get_request_to_api(url=url, params=params)
+
+        # Requests using query params may return {"data": []} if the object doesn't exist
+        # We need to validate that even if we have a 200, there are contents to support existence
+        if not bool(payload.get("data")):
+            raise StoreBackendError(
+                "Unable to get object in GX Cloud Store Backend: Object does not exist."
+            )
+
         return cast(ResponsePayload, payload)
 
     @override
@@ -629,12 +637,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _has_key(self, key: Tuple[GXCloudRESTResource, str | None, str | None]) -> bool:
         try:
             _ = self._get(key)
+            return True
         except StoreBackendTransientError:
             raise
         except StoreBackendError as e:
             logger.info(f"Could not find object associated with key {key}: {e}")
             return False
-        return True
 
     @property
     @override
