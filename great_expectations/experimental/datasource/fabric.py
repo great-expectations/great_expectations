@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 import uuid
 from pprint import pformat as pf
@@ -39,6 +40,8 @@ if TYPE_CHECKING:
     )
     from great_expectations.execution_engine import PandasExecutionEngine
 
+LOGGER = logging.getLogger(__name__)
+
 SortersDefinition: TypeAlias = List[Union[Sorter, str, dict]]
 
 
@@ -60,7 +63,9 @@ class _PowerBIAsset(DataAsset):
         Whatever is needed to test the connection to and/or validity of the asset.
         This could be a noop.
         """
-        pass
+        LOGGER.debug(
+            f"Testing connection to {self.__class__.__name__} has not been implemented"
+        )
 
     @override
     def get_batch_list_from_batch_request(
