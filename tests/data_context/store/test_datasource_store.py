@@ -628,6 +628,7 @@ def test_gx_cloud_response_json_to_object_dict(
         assert actual == expected
 
 
+@pytest.mark.clodu
 def test_gx_cloud_response_json_to_object_collection():
     response_json = {
         "data": [
