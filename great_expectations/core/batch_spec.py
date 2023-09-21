@@ -142,10 +142,15 @@ class FabricBatchSpec(PandasBatchSpecProtocol):
         }
 
     def get_reader_function(self) -> Callable[..., pd.DataFrame]:
-        # lazy import of fabric module which cotains the reader functions
+        # lazy import of fabric module which contains the reader functions
         from sempy import fabric
 
-        return getattr(fabric, self.reader_method)
+        try:
+            return getattr(fabric, self.reader_method)
+        except AttributeError:
+            raise AttributeError(
+                f"FabricBatchSpec reader_method {self.reader_method} not found in sempy.fabric module"
+            )
 
 
 class S3BatchSpec(PathBatchSpec):
