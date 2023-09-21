@@ -39,12 +39,19 @@ def orjson_dumps(v, *, default):
     ).decode()
 
 
+def orjson_loads(v, *args, **kwargs):
+    import orjson  # Import here since this is only installed in the cloud environment
+
+    return orjson.loads(v)
+
+
 class Payload(BaseModel):
     data: PayloadData
 
     class Config:
         extra = Extra.forbid
         json_dumps = orjson_dumps
+        json_loads = orjson_loads
 
 
 class CloudDataStore(DataStore[StorableTypes]):
