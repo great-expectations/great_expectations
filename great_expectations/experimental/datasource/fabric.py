@@ -269,7 +269,7 @@ class FabricPowerBIDatasource(Datasource):
             from sempy import fabric  # noqa: F401 # test if fabric is installed
         except Exception as import_err:
             raise TestConnectionError(
-                "Could not import `sempy.fabric`\npip install semantic-link"
+                "Could not import `sempy.fabric`\npip install semantic-link-sempy"
             ) from import_err
 
         if self.assets and test_assets:
