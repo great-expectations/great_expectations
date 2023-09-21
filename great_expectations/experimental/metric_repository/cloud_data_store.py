@@ -28,11 +28,30 @@ class PayloadData(BaseModel):
         extra = Extra.forbid
 
 
+def orjson_dumps(v, *, default):
+    import orjson  # Import here since this is only installed in the cloud environment
+
+    # orjson.dumps returns bytes, to match standard json.dumps we need to decode
+    return orjson.dumps(
+        v,
+        default=default,
+        option=orjson.OPT_SERIALIZE_NUMPY,
+    ).decode()
+
+
+def orjson_loads(v, *args, **kwargs):
+    import orjson  # Import here since this is only installed in the cloud environment
+
+    return orjson.loads(v)
+
+
 class Payload(BaseModel):
     data: PayloadData
 
     class Config:
         extra = Extra.forbid
+        json_dumps = orjson_dumps
+        json_loads = orjson_loads
 
 
 class CloudDataStore(DataStore[StorableTypes]):
