@@ -347,7 +347,7 @@ def check_dependencies(*deps: str) -> None:
 
 def get_snippet_definitions(target_dir: pathlib.Path) -> List[str]:
     try:
-        res_snippets = subprocess.run(
+        res_snippets = subprocess.run(  # noqa: PLW1510
             [
                 "grep",
                 "--recursive",
@@ -362,7 +362,7 @@ def get_snippet_definitions(target_dir: pathlib.Path) -> List[str]:
             text=True,
             capture_output=True,
         )
-        res_snippet_names = subprocess.run(
+        res_snippet_names = subprocess.run(  # noqa: PLW1510
             ["sed", 's/.*name="//; s/">//; s/version-[0-9\\.]* //'],
             text=True,
             input=res_snippets.stdout,
@@ -377,7 +377,7 @@ def get_snippet_definitions(target_dir: pathlib.Path) -> List[str]:
 
 def get_snippets_used(target_dir: pathlib.Path) -> List[str]:
     try:
-        res_snippet_usages = subprocess.run(
+        res_snippet_usages = subprocess.run(  # noqa: PLW1510
             [
                 "grep",
                 "--recursive",
@@ -394,7 +394,7 @@ def get_snippets_used(target_dir: pathlib.Path) -> List[str]:
             text=True,
             capture_output=True,
         )
-        res_snippet_used_names = subprocess.run(
+        res_snippet_used_names = subprocess.run(  # noqa: PLW1510
             ["sed", 's/.*="//; s/".*//; s/version-[0-9\\.]* //'],
             text=True,
             input=res_snippet_usages.stdout,

@@ -124,8 +124,9 @@ class DatasourceStore(Store):
             return self._schema.loads(value)
 
     @override
-    def ge_cloud_response_json_to_object_dict(
-        self, response_json: CloudResponsePayloadTD  # type: ignore[override]
+    @staticmethod
+    def gx_cloud_response_json_to_object_dict(
+        response_json: CloudResponsePayloadTD,  # type: ignore[override]
     ) -> dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
@@ -141,11 +142,12 @@ class DatasourceStore(Store):
                 )
             data = data[0]
 
-        return self._convert_raw_json_to_object_dict(data)
+        return DatasourceStore._convert_raw_json_to_object_dict(data)
 
     @override
+    @staticmethod
     def ge_cloud_response_json_to_object_collection(
-        self, response_json: CloudResponsePayloadTD  # type: ignore[override]
+        response_json: CloudResponsePayloadTD,  # type: ignore[override]
     ) -> list[dict]:
         """
         This method takes full json response from GX cloud and outputs a list of dicts appropriate for
@@ -158,7 +160,7 @@ class DatasourceStore(Store):
                 "GX Cloud did not return a collection of Datasources when expected"
             )
 
-        return [self._convert_raw_json_to_object_dict(d) for d in data]
+        return [DatasourceStore._convert_raw_json_to_object_dict(d) for d in data]
 
     @staticmethod
     def _convert_raw_json_to_object_dict(data: DataPayload) -> dict:

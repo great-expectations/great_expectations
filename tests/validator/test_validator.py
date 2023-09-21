@@ -68,7 +68,7 @@ def yellow_trip_pandas_data_context(
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
-                FileDataContext.GX_DIR,
+                FileDataContext._LEGACY_GX_DIR,
                 FileDataContext.GX_YML,
             ),
         ),
@@ -498,7 +498,7 @@ def test_validator_batch_filter(
 
     jan_march_batch_filter: BatchFilter = build_batch_filter(
         data_connector_query_dict={
-            "custom_filter_function": lambda batch_identifiers: batch_identifiers[  # noqa: PLR1714
+            "custom_filter_function": lambda batch_identifiers: batch_identifiers[
                 "month"
             ]
             == "01"

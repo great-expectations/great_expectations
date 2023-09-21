@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import random
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, Final, List, Union
 
 import pytest
 from _pytest import monkeypatch
@@ -15,6 +15,7 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import MetricResolutionError
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.expectations.metrics.util import (
+    CaseInsensitiveString,
     get_dbms_compatible_metric_domain_kwargs,
     get_unexpected_indices_for_multiple_pandas_named_indices,
     get_unexpected_indices_for_single_pandas_named_index,
@@ -478,3 +479,43 @@ def test_get_dbms_compatible_metric_domain_column_list_kwargs(
         batch_columns_list=test_column_names,
     )
     assert sorted(metric_domain_kwargs["column_list"]) == sorted(output_column_list)
+
+
+_CASE_PARAMS: Final[list[str]] = [
+    "mixedCase",
+    "UPPERCASE",
+    "lowercase",
+    '"quotedMixedCase"',
+    '"QUOTED_UPPERCASE"',
+    '"quoted_lowercase"',
+]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("input_str", _CASE_PARAMS)
+class TestCaseInsensitiveString:
+    @pytest.mark.parametrize("other", _CASE_PARAMS)
+    def test__eq__(
+        self,
+        input_str: str,
+        other: str,
+    ):
+        other_case_insensitive = CaseInsensitiveString(other)
+        input_case_insensitive = CaseInsensitiveString(input_str)
+
+        # if either string is quoted, they must be exact match
+        if input_case_insensitive.is_quoted() or other_case_insensitive.is_quoted():
+            if input == other:
+                assert input_case_insensitive == other
+                assert input_case_insensitive == other_case_insensitive
+            assert input_case_insensitive != CaseInsensitiveString(other.swapcase())
+        elif input_str.lower() == other.lower():
+            assert input_case_insensitive == other.swapcase()
+            assert input_case_insensitive == CaseInsensitiveString(other.swapcase())
+        else:
+            assert input_case_insensitive != other_case_insensitive
+            assert input_case_insensitive != other
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-vv"])

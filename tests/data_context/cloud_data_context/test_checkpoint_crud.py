@@ -5,6 +5,7 @@ from unittest import mock
 import pandas as pd
 import pytest
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context import get_context
@@ -416,7 +417,6 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds_when_id_not_pre
     validation_ids: Tuple[str, str],
     checkpoint_config: dict,
     mocked_post_response: Callable[[], MockResponse],
-    mocked_get_by_name_response_0_results: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
 ) -> None:
@@ -433,7 +433,9 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds_when_id_not_pre
     ) as mock_post, mock.patch(
         "requests.Session.get",
         autospec=True,
-        side_effect=mocked_get_by_name_response_0_results,
+        side_effect=gx_exceptions.StoreBackendError(
+            "Unable to get object in GX Cloud Store Backend"
+        ),
     ):
         checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
 

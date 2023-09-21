@@ -4,6 +4,42 @@
 Changelog
 #########
 
+0.17.18
+-----------------
+* [BUGFIX] Patch faulty `GXCloudStoreBackend.has_key` logic ([#8741](https://github.com/great-expectations/great_expectations/pull/8741))
+* [MAINTENANCE] Additional examples of `row_condition` for Spark and SQL ([#8713](https://github.com/great-expectations/great_expectations/pull/8713))
+* [MAINTENANCE] ruff `.0.290` ([#8726](https://github.com/great-expectations/great_expectations/pull/8726))
+
+0.17.17
+-----------------
+* [BUGFIX] Resolve issue around listing keys with empty state in `GXCloudStoreBackend` ([#8728](https://github.com/great-expectations/great_expectations/pull/8728))
+* [DOCS] Clarify How to Use Custom Expectations Without a Filesystem ([#8700](https://github.com/great-expectations/great_expectations/pull/8700))
+* [DOCS] Update Result Format Topic ([#8674](https://github.com/great-expectations/great_expectations/pull/8674))
+
+0.17.16
+-----------------
+* [FEATURE] update data assistant run to take in validator ([#8560](https://github.com/great-expectations/great_expectations/pull/8560))
+* [FEATURE] Add `DataAssetStore` ([#8601](https://github.com/great-expectations/great_expectations/pull/8601))
+* [BUGFIX] Missing DataFrame for in-memory Data Assets using GX Cloud ([#8682](https://github.com/great-expectations/great_expectations/pull/8682))
+* [BUGFIX] Fix FDS auto-complete for Conda installs ([#8698](https://github.com/great-expectations/great_expectations/pull/8698))
+* [BUGFIX] Assets with persisted data don't get added to in-memory cache ([#8699](https://github.com/great-expectations/great_expectations/pull/8699))
+* [BUGFIX] Use one inspector for the same engine/execution_engine ([#8534](https://github.com/great-expectations/great_expectations/pull/8534))
+* [BUGFIX] add try except to redshift regexp resolver ([#8707](https://github.com/great-expectations/great_expectations/pull/8707)) (thanks @itaise)
+* [BUGFIX] Patch `docs_integration` tests failures resulting from context root dir rename ([#8720](https://github.com/great-expectations/great_expectations/pull/8720))
+* [BUGFIX] Snowflake column name case sensitivity ([#8719](https://github.com/great-expectations/great_expectations/pull/8719))
+* [DOCS] Relocate Use Great Expectations with Google Cloud Platform and BigQuery ([#8696](https://github.com/great-expectations/great_expectations/pull/8696))
+* [MAINTENANCE] only build-docs on doc-changes ([#8685](https://github.com/great-expectations/great_expectations/pull/8685))
+* [MAINTENANCE] Azure Blob Stores `TupleStoreBackend` now supports `credential` string ([#8683](https://github.com/great-expectations/great_expectations/pull/8683))
+* [MAINTENANCE] Column Descriptive Metrics: Add column types metric ([#8687](https://github.com/great-expectations/great_expectations/pull/8687))
+* [MAINTENANCE] Column Descriptive Metrics: Add Null Count ([#8692](https://github.com/great-expectations/great_expectations/pull/8692))
+* [MAINTENANCE] Bump gitpython from 3.1.33 to 3.1.35 in /docs_rtd ([#8686](https://github.com/great-expectations/great_expectations/pull/8686))
+* [MAINTENANCE] Comprehensive SQL column identifier tests ([#8673](https://github.com/great-expectations/great_expectations/pull/8673))
+* [MAINTENANCE] Add test case for trino datatypes in onboarding assitant ([#8507](https://github.com/great-expectations/great_expectations/pull/8507))
+* [MAINTENANCE] Add `get_all` method to Store and StoreBackend APIs ([#8702](https://github.com/great-expectations/great_expectations/pull/8702))
+* [MAINTENANCE] Change default context root to `gx/` over `great_expectations/` ([#8423](https://github.com/great-expectations/great_expectations/pull/8423))
+* [MAINTENANCE] Parameterize severity in PagerdutyAction ([#8714](https://github.com/great-expectations/great_expectations/pull/8714)) (thanks @Sonchaegeon)
+* [MAINTENANCE] Column Descriptive Metrics: Make the retriever more resilient to metric failures ([#8712](https://github.com/great-expectations/great_expectations/pull/8712))
+
 0.17.15
 -----------------
 * [BUGFIX] Databricks tests skipped for Forks ([#8662](https://github.com/great-expectations/great_expectations/pull/8662))
