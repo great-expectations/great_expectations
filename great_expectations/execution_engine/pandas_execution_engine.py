@@ -361,7 +361,7 @@ Bucket: {error}"""
 
         else:
             raise gx_exceptions.BatchSpecError(
-                f"""batch_spec must be of type RuntimeDataBatchSpec, PandasBatchSpec, PathBatchSpec, S3BatchSpec, or AzureBatchSpec, \
+                f"""batch_spec must be of type RuntimeDataBatchSpec, PandasBatchSpec, PathBatchSpec, S3BatchSpec, AzureBatchSpec or FabricBatchSpec \
 not {batch_spec.__class__.__name__}"""
             )
 
