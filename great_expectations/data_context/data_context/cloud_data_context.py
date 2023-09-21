@@ -391,11 +391,12 @@ class CloudDataContext(SerializableDataContext):
     @override
     def _init_datasources(self) -> None:
         # Note that Cloud does NOT populate self._datasources with existing objects on init.
-        # Objects are retrieved only when requested and are NOT cached (this differs in ephemeral/file-backed contexts).
         self._datasources = DatasourceDict(
             context=self,
             datasource_store=self._datasource_store,
-            cache=TTLCache(maxsize=1000, ttl=2),
+            cache=TTLCache(
+                maxsize=1000, ttl=2
+            ),  # Short TTL to ensure latest datasources are pulled from Cloud
         )
 
     @override

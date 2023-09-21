@@ -4671,7 +4671,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         self._datasources: DatasourceDict = DatasourceDict(
             context=self,
             datasource_store=self._datasource_store,
-            cache=Cache(maxsize=1000),
+            cache=Cache(maxsize=1000),  # Does not have an eviction policy
         )
 
         config: DataContextConfig = self.config

@@ -45,8 +45,8 @@ class DatasourceDict(UserDict):
     ```
     d = DatasourceDict(...)
 
-    d["my_fds"] = pandas_fds # Underlying DatasourceStore makes a `set()` call
-    pandas_fds = d["my_fds"] # Underlying DatasourceStore makes a `get()` call
+    d["my_fds"] = pandas_fds # Underlying DatasourceStore makes a `set()` call if not present in cache.
+    pandas_fds = d["my_fds"] # Underlying DatasourceStore makes a `get()` call if not present in cache.
     ```
     """
 
@@ -202,6 +202,10 @@ class DatasourceDict(UserDict):
         if not isinstance(ds, FluentDatasource):
             self._del_from_store(name)
 
-    def _del_from_store(self, name: str):
+    def _del_from_store(self, name: str) -> None:
         ds = self._get_from_store(name)
-        self._datasource_store.delete(ds)
+
+        if isinstance(ds, BaseDatasource):
+            self._datasource_store.delete(ds.config)
+        else:
+            self._datasource_store.delete(ds)
