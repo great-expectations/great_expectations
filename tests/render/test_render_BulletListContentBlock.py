@@ -64,16 +64,6 @@ def test_parse_row_condition_string_pandas_engine():
 @pytest.mark.filesystem
 @pytest.mark.slow  # 1.52s
 def test_all_expectations_using_test_definitions():
-    # Chetan - 20220129 - During v0.14.4, it was revealed that this test was broken.
-    # The `glob` statement did not pick up any relevant tests, resulting in `test_files` being empty.
-    # Without anything to iterate over, the test gave the impression of passing (when in actuality, it never tested anything).
-    #
-    # After some research, it seems as though this has been broken since the v0.13.0 release.
-    # The 5 Expectations noted below are implemented or updated after v0.13.0 and are incompatible with this test fixture due to
-    # having incomplete render methods.
-    #
-    # As this behavior is implemented, the `UNSUPPORTED_EXPECTATIONS` list will be updated to reflect GX's current capabilities.
-
     dir_path = os.path.dirname(os.path.abspath(__file__))  # noqa: PTH120, PTH100
     pattern = os.path.join(  # noqa: PTH118
         dir_path, "..", "..", "tests", "test_definitions", "*", "expect*.json"
@@ -85,23 +75,10 @@ def test_all_expectations_using_test_definitions():
         len(test_files) == 61
     ), "Something went wrong when collecting JSON Expectation test fixtures"
 
-    # The following do not work with this parameterized test due to incomplete render methods.
-    UNSUPPORTED_EXPECTATIONS = {
-        "expect_column_values_to_match_like_pattern",
-        "expect_column_values_to_match_like_pattern_list",
-        "expect_column_values_to_not_match_like_pattern",
-        "expect_column_values_to_not_match_like_pattern_list",
-        "expect_multicolumn_sum_to_equal",
-    }
-
     # Loop over all test_files, datasets, and tests:
     test_results = defaultdict(list)
     for filename in test_files:
         test_definitions = json.load(open(filename))
-
-        # Chetan -20220129 - To be removed once all expectations are supported
-        if test_definitions["expectation_type"] in UNSUPPORTED_EXPECTATIONS:
-            continue
 
         for dataset in test_definitions["datasets"]:
             for test in dataset["tests"]:
@@ -116,7 +93,6 @@ def test_all_expectations_using_test_definitions():
                     continue
 
                 # Attempt to render it
-                print(fake_expectation)
                 render_result = ExpectationSuiteBulletListContentBlockRenderer.render(
                     [fake_expectation]
                 )
@@ -141,9 +117,6 @@ def test_all_expectations_using_test_definitions():
                 )
 
     # TODO: accommodate case where multiple datasets exist within one expectation test definition
-
-    # We encountered unicode coding errors on Python 2, but since this is just a smoke test, review the smoke test results in python 3.
-
     with open(
         file_relative_path(
             __file__,

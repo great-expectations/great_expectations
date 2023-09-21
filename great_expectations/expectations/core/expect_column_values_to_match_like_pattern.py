@@ -2,16 +2,11 @@ from typing import Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
-    ExpectationValidationResult,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
-    render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyRendererType
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import substitute_none_for_missing
 
 try:
     import sqlalchemy as sa  # noqa: F401, TID251
@@ -122,21 +117,3 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-
-    @classmethod
-    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
-        cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ) -> None:
-        runtime_configuration = runtime_configuration or {}
-        _ = False if runtime_configuration.get("include_column_name") is False else True
-        _ = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(  # noqa: F841 # unused
-            configuration.kwargs,
-            ["column", "mostly", "row_condition", "condition_parser"],
-        )
