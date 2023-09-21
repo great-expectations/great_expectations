@@ -738,5 +738,5 @@ def test_gx_cloud_response_json_to_object_collection():
         },
     ]
 
-    actual = DatasourceStore.ge_cloud_response_json_to_object_collection(response_json)
+    actual = DatasourceStore.gx_cloud_response_json_to_object_collection(response_json)
     assert actual == expected

@@ -111,7 +111,7 @@ class Store:
         return response_json
 
     @staticmethod
-    def ge_cloud_response_json_to_object_collection(
+    def gx_cloud_response_json_to_object_collection(
         self, response_json: Dict
     ) -> List[Dict]:
         """
@@ -221,7 +221,7 @@ class Store:
     def get_all(self) -> list[Any]:
         objs = self._store_backend.get_all()
         if self.cloud_mode:
-            objs = self.ge_cloud_response_json_to_object_collection(objs)
+            objs = self.gx_cloud_response_json_to_object_collection(objs)
 
         return list(map(self.deserialize, objs))
 

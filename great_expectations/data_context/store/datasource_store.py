@@ -146,7 +146,7 @@ class DatasourceStore(Store):
 
     @override
     @staticmethod
-    def ge_cloud_response_json_to_object_collection(
+    def gx_cloud_response_json_to_object_collection(
         response_json: CloudResponsePayloadTD,  # type: ignore[override]
     ) -> list[dict]:
         """
