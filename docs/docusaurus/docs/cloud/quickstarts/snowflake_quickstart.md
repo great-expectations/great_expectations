@@ -55,19 +55,71 @@ You'll need your user access token and organization ID to set your environment v
 
 7. Copy the value in the **Organization ID** field and save it in the same location with your user access token.
 
-## Set the environment variables and run the GX CLoud Agent
+## Set the environment variables and run the GX Cloud Agent
 
 1. Set the following environment variables:
 
-    - GX_CLOUD_ORGANIZATION_ID - Set this value to the Organization ID you copied previously.
+    - `GX_CLOUD_ORGANIZATION_ID` - The Organization ID you copied previously.
 
-    - GX_CLOUD_ACCESS_TOKEN - Set this value to the user access token you generated previously.
+    - `GX_CLOUD_ACCESS_TOKEN` - The user access token you generated previously.
 
-    - GX_CLOUD_SNOWFLAKE_PASSWORD - Set this value to the password you use to access your Snowflake account.
+    - `GX_CLOUD_SNOWFLAKE_PASSWORD` - The password you use to access your Snowflake account.
 
     To set the environment variables, see the documentation specific to your operating system.
 
 2. In Jupyter Notebook, run the following code to start the GX Cloud Agent:
+    
+    ```python title="Jupyter Notebook"
+       gx-agent
+    ```
+
+## Create the Snowflake Data Asset
+
+1. In GX Cloud, click **Data Assets** > **New Asset**.
+
+2. Complete the following mandatory fields:
+
+    - **Datasource name**: Enter a meaningful name for the Data Asset.
+
+    - **Username**: Enter your Snowflake username.
+
+    - **Password variable**: Enter `GX_CLOUD_SNOWFLAKE_PASSWORD`.
+
+    - **Account or locator**: Enter your Snowflake account or locator information.
+
+3. (Optional) Complete the following fields:
+
+    - **Database**: Enter the name of the Snowflake database where the data you want to validate is stored.
+ 
+    - **Schema**: Enter the name of the schema for the Snowflake database here the data you want to validate is stored.
+
+    - **Warehouse**: Enter the name of the Snowflake database warehouse.
+
+    - **Role**: Enter your Snowflake role.
+
+    - **Authenticator**: Enter the Snowflake database authenticator. 
+
+4. (Optional) Clear **Create temp table** if you don't want to create a temporary database table.
+
+5. (Optional) Clear **Test connection** if you don't want to test the Data Asset connection.
+
+6. Select **Table Asset** or **Query Asset** and complete the following fields:
+
+    - **Asset name**: Enter a name for the Data Asset.
+
+    - **Table name** (Optional) : When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
+
+    - **Query**: Enter a query. 
+
+7. (Optional) Select **Add table/query** to add additional tables or queries and repeat step 6.
+
+8. Click **Finish**.
+
+## Add Expectations
+
+
+
+
 
 
 
