@@ -307,18 +307,15 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             value = computed_metrics[metric_lookup_key]
         elif metric_lookup_key in aborted_metrics:
             exception = aborted_metrics[metric_lookup_key]
-            # TODO: How to get the exception type and message from the exception?
-            # Note: Only retrieving the first exception if there are multiple exceptions from retries.
-            exception_type = exception["exception_info"]["raised_exception"][
-                "exception_type"
-            ]
-            exception_message = exception["exception_info"]["raised_exception"][
-                "exception_message"
-            ]
+            # Note: Only retrieving the first exception if there are multiple exceptions.
+            exception_info = exception["exception_info"]
+            first_exception = list(exception_info)[0]
+            exception_type = "Unknown"  # Note: we currently only capture the message and traceback, not the type
+            exception_message = first_exception.exception_message
             exception = MetricException(type=exception_type, message=exception_message)
         else:
             exception = MetricException(
-                type="Unknown",
+                type="Not found",
                 message="Metric was not successfully computed but exception was not found.",
             )
 
