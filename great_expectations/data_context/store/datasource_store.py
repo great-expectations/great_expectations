@@ -136,7 +136,7 @@ class DatasourceStore(Store):
         data = response_json["data"]
         if isinstance(data, list):
             if len(data) > 1:
-                # Larger arrays of datasources should be handled by `ge_cloud_response_json_to_object_collection`
+                # Larger arrays of datasources should be handled by `gx_cloud_response_json_to_object_collection`
                 raise TypeError(
                     f"GX Cloud returned {len(data)} Datasources but expected 1"
                 )
