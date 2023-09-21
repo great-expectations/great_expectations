@@ -2,15 +2,11 @@ from typing import Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
-    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
-    render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyDiagnosticRendererType, LegacyRendererType
-from great_expectations.render.renderer.renderer import renderer
 
 
 class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
@@ -92,28 +88,3 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
-
-    @classmethod
-    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
-        cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ) -> None:
-        # TODO: Need for prescriptive renderer for Expectation if we want to render in DataDocs.
-        pass
-
-    @classmethod
-    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
-    def _diagnostic_observed_value_renderer(
-        cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ) -> None:
-        # TODO: Need for diagnostic renderer for Expectation if we want to render in DataDocs.
-        pass
