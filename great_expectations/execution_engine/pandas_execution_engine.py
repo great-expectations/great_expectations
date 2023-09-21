@@ -378,6 +378,7 @@ not {batch_spec.__class__.__name__}"""
         batch_spec: BatchSpec | PandasBatchSpecProtocol,
         batch_data: PandasBatchData,
     ):
+        # splitting and sampling not supported for FabricBatchSpec
         if isinstance(batch_spec, BatchSpec):
             splitter_method_name: Optional[str] = batch_spec.get("splitter_method")
             if splitter_method_name:
