@@ -195,16 +195,11 @@ def _get_exception_details(
     return exc_details
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def capture_engine_logs(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFixture:
     """Capture SQLAlchemy engine logs and display them if the test fails."""
     caplog.set_level(logging.INFO, logger="sqlalchemy.engine")
     return caplog
-
-
-@pytest.fixture
-def silence_sqla_warnings(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("SQLALCHEMY_SILENCE_UBER_WARNING", "1")
 
 
 class Row(TypedDict):
@@ -227,11 +222,11 @@ class TableFactory(Protocol):
         ...
 
 
-@pytest.fixture(scope="function")
-def table_factory(
-    capture_engine_logs: pytest.LogCaptureFixture,
-    silence_sqla_warnings: None,  # TODO: remove this
-) -> Generator[TableFactory, None, None]:
+@pytest.fixture(
+    # scope="function",
+    scope="class",
+)
+def table_factory() -> Generator[TableFactory, None, None]:
     """
     Given a SQLALchemy engine, table_name and schema,
     create the table if it does not exist and drop it after the test.
@@ -407,6 +402,7 @@ def sqlite_ds(
 )
 def all_sql_datasources(
     request: pytest.FixtureRequest,
+    capture_engine_logs: pytest.LogCaptureFixture,
 ) -> Generator[SQLDatasource, None, None]:
     datasource = request.getfixturevalue(f"{request.param}_ds")
     yield datasource
