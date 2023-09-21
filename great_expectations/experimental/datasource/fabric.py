@@ -57,7 +57,7 @@ class _PowerBIAsset(DataAsset):
     @override
     def test_connection(self) -> None:
         """
-        Whatever is needed to test the connection to and/or validatitly of the asset.
+        Whatever is needed to test the connection to and/or validity of the asset.
         This could be a noop.
         """
         pass
