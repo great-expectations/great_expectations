@@ -67,10 +67,7 @@
             "title": "Filters",
             "type": "object",
             "additionalProperties": {
-                "type": "array",
-                "items": {
-                    "type": "string"
-                }
+                "type": "string"
             }
         },
         "fully_qualified_columns": {

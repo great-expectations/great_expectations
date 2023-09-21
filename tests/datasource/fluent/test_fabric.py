@@ -100,11 +100,10 @@ class TestFabricPowerBI:
                 {
                     "measure": "my_measure",
                     "groupby_columns": [("foo", "bar"), ("fizz", "buzz")],
-                    # TODO: require custom serde for keys that are tuples
-                    # "filters": {
-                    #     ("foo", "bar"): ["foobar"],
-                    #     ("fizz", "buzz"): ["fizzbuzz"],
-                    # },
+                    "filters": {
+                        "foo.bar": "foobar",
+                        "fizz.buzz": "fizzbuzz",
+                    },
                     "fully_qualified_columns": True,
                     "num_rows": 100,
                     "use_xmla": True,

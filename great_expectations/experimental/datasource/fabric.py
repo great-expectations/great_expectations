@@ -185,7 +185,7 @@ class PowerBIMeasure(_PowerBIAsset):
     type: Literal["powerbi_measure"] = "powerbi_measure"
     measure: Union[str, List[str]]
     groupby_columns: Optional[List[Tuple[str, str]]] = None
-    filters: Optional[Dict[Tuple[str, str], List[str]]] = None
+    filters: Optional[Dict[str, str]] = None
     fully_qualified_columns: Optional[bool] = None
     num_rows: Optional[int] = None
     pandas_convert_dtypes: bool = True
@@ -313,7 +313,7 @@ class FabricPowerBIDatasource(Datasource):
         order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         groupby_columns: Optional[List[Tuple[str, str]]] = None,
-        filters: Optional[Dict[Tuple[str, str], List[str]]] = None,
+        filters: Optional[Dict[str, str]] = None,
         fully_qualified_columns: Optional[bool] = None,
         num_rows: Optional[int] = None,
         pandas_convert_dtypes: bool = True,
