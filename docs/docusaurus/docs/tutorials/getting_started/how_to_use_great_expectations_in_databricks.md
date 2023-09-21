@@ -77,7 +77,7 @@ DBFS is a distributed file system mounted in a Databricks workspace and availabl
   ]}>
   <TabItem value="file">
 
-Run the following command with [dbutils](https://docs.databricks.com/dev-tools/databricks-utils.html) to copy existing example csv taxi data to your DBFS folder:
+Run the following command with [dbutils](https://docs.databricks.com/dev-tools/databricks-utils.html) to copy existing example `.csv` taxi data to your DBFS folder:
 
 ```python
 # Copy 3 months of data
