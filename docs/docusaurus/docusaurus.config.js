@@ -125,7 +125,7 @@ module.exports = {
               to: 'https://docs.greatexpectations.io/docs/',
             },
             {
-              label: 'EXPECTATIONS GALLERY',
+              label: 'EXPECTATION GALLERY',
               to: 'https://greatexpectations.io/expectations',
             },
             {
