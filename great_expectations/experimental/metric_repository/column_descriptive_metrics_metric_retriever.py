@@ -291,10 +291,10 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
     def _get_metric_from_computed_metrics(
         self,
         metric_name: str,
-        computed_metrics: dict[_MetricKey, Any],
+        computed_metrics: _MetricsDict,
         aborted_metrics: _AbortedMetricsInfoDict,
         metric_lookup_key: _MetricKey | None = None,
-    ):
+    ) -> tuple[Any, MetricException | None]:
         if metric_lookup_key is None:
             metric_lookup_key = (
                 metric_name,
@@ -302,21 +302,24 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                 tuple(),
             )
         value = None
-        exception = None
+        metric_exception = None
         if metric_lookup_key in computed_metrics:
             value = computed_metrics[metric_lookup_key]
         elif metric_lookup_key in aborted_metrics:
             exception = aborted_metrics[metric_lookup_key]
             # Note: Only retrieving the first exception if there are multiple exceptions.
             exception_info = exception["exception_info"]
+            assert isinstance(exception_info, set)  # Type narrowing for mypy
             first_exception = list(exception_info)[0]
             exception_type = "Unknown"  # Note: we currently only capture the message and traceback, not the type
             exception_message = first_exception.exception_message
-            exception = MetricException(type=exception_type, message=exception_message)
+            metric_exception = MetricException(
+                type=exception_type, message=exception_message
+            )
         else:
-            exception = MetricException(
+            metric_exception = MetricException(
                 type="Not found",
                 message="Metric was not successfully computed but exception was not found.",
             )
 
-        return value, exception
+        return value, metric_exception
