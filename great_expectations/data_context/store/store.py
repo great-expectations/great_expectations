@@ -111,9 +111,7 @@ class Store:
         return response_json
 
     @staticmethod
-    def gx_cloud_response_json_to_object_collection(
-        self, response_json: Dict
-    ) -> List[Dict]:
+    def gx_cloud_response_json_to_object_collection(response_json: Dict) -> List[Dict]:
         """
         This method takes full json response from GX cloud and outputs a list of dicts appropriate for
         deserialization into a collection of GX objects
