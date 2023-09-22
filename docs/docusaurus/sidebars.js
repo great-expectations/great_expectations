@@ -18,7 +18,7 @@ module.exports = {
       type: 'category',
       label: 'GX Cloud',
       items: [
-        `cloud/quickstart/snowflake_quickstart`,
+        `cloud/quickstarts/snowflake_quickstart`,
       ]
     },
     {
