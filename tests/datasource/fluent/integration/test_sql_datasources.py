@@ -658,11 +658,10 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     'expect_column_to_exist-str "QUOTED_LOWER_COL"': ["sqlite"],
     "expect_column_to_exist-str quoted_upper_col": [
         "databricks_sql",
-        "snowflake",
         "sqlite",
     ],
     'expect_column_to_exist-str "quoted_upper_col"': ["sqlite"],
-    "expect_column_to_exist-str QUOTED_UPPER_COL": ["postgres", "snowflake"],
+    "expect_column_to_exist-str QUOTED_UPPER_COL": ["postgres"],
     'expect_column_to_exist-str "QUOTED_UPPER_COL"': [
         "postgres",
         "snowflake",
@@ -719,7 +718,6 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     "expect_column_values_to_not_be_null-str quoted_upper_col": [
         "databricks_sql",
         "postgres",
-        "snowflake",
         "sqlite",
     ],
     'expect_column_values_to_not_be_null-str "quoted_upper_col"': [
@@ -728,7 +726,6 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     ],
     "expect_column_values_to_not_be_null-str QUOTED_UPPER_COL": [
         "postgres",
-        "snowflake",
     ],
     'expect_column_values_to_not_be_null-str "QUOTED_UPPER_COL"': [
         "postgres",
@@ -751,9 +748,9 @@ EXPECTED_FAILURE: Final[dict[ColNameParamId, list[DatabaseType]]] = {
     "str QUOTED_LOWER_COL": ["postgres", "snowflake"],
     'str "QUOTED_LOWER_COL"': ["postgres", "snowflake"],
     # -------------------------------------
-    "str quoted_upper_col": ["postgres", "snowflake"],
+    "str quoted_upper_col": ["postgres"],
     'str "quoted_upper_col"': ["postgres", "snowflake"],
-    "str QUOTED_UPPER_COL": ["postgres", "snowflake"],
+    "str QUOTED_UPPER_COL": ["postgres"],
 }
 
 
@@ -859,9 +856,9 @@ class TestColumnIdentifiers:
                 {
                     "id": 1,
                     "name": param_id,
-                    "quoted_upper_col": "uppercase",
-                    "quoted_lower_col": "lowercase",
-                    "unquoted_upper_col": "uppercase",
+                    "quoted_upper_col": '"UPPERCASE"',
+                    "quoted_lower_col": '"lowercase"',
+                    "unquoted_upper_col": "UPPERCASE",
                     "unquoted_lower_col": "lowercase",
                 }
             ],
@@ -883,7 +880,7 @@ class TestColumnIdentifiers:
                 col_exist_result = col_exist_check.fetchone()
                 print(f"  Values: {col_exist_result}\n")
             except SqlAlchemyProgrammingError as sql_err:
-                LOGGER.exception(sql_err)
+                LOGGER.warning("SQLAlchemy Error", exc_info=sql_err)
                 print(f"{column_name} does not exist")
                 assert should_fail is True
             else:
