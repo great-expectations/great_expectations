@@ -112,7 +112,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
-            ["column_list", "sum_total", "mostly", "ignore_row_if"],
+            ["column_list", "sum_total", "mostly"],
         )
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(
@@ -132,7 +132,6 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         last_idx = len(params["column_list"]) - 1
         column_list_str += f"$column_list_{last_idx!s}"
         params[f"column_list_{last_idx!s}"] = params["column_list"][last_idx]
-        # breakpoint()
         template_str = (
             f"Sum across columns {column_list_str} must be $sum_total{mostly_str}."
         )

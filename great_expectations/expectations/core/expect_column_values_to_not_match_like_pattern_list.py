@@ -145,7 +145,7 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
 
         params = substitute_none_for_missing(
             configuration.kwargs,
-            ["column", "like_pattern_list", "mostly", "ignore_row_if"],
+            ["column", "like_pattern_list", "mostly"],
         )
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(

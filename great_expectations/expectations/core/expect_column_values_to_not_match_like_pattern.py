@@ -14,11 +14,6 @@ from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
-try:
-    import sqlalchemy as sa  # noqa: F401, TID251
-except ImportError:
-    pass
-
 
 class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
     """Expect the column entries to be strings that do NOT match a given like pattern expression.
@@ -142,7 +137,7 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
 
         params = substitute_none_for_missing(
             configuration.kwargs,
-            ["column", "like_pattern", "mostly", "ignore_row_if"],
+            ["column", "like_pattern", "mostly"],
         )
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(
