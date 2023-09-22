@@ -4,6 +4,7 @@ from typing import List, Optional
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
     ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
@@ -24,7 +25,6 @@ from great_expectations.render.util import (
 )
 
 logger = logging.getLogger(__name__)
-
 
 
 class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
@@ -150,7 +150,6 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -177,7 +176,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         )
         sum_total = params.get("sum_total")
 
-        template_str = f"Sum across columns must be {sum_total}, {mostly_str}: "
+        template_str = f"Sum across columns must be {sum_total} {mostly_str}: "
         for idx in range(len(params["column_list"]) - 1):
             template_str += f"$column_list_{idx!s}, "
             params[f"column_list_{idx!s}"] = params["column_list"][idx]
