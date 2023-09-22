@@ -23,6 +23,9 @@ from pytest import param
 
 from great_expectations import get_context
 from great_expectations.compatibility.sqlalchemy import (
+    ProgrammingError as SqlAlchemyProgrammingError,
+)
+from great_expectations.compatibility.sqlalchemy import (
     TextClause,
     engine,
     inspect,
@@ -622,6 +625,11 @@ ColNameParamId: TypeAlias = Literal[
     'str "QUOTED_UPPER_COL"',
     # ----------------------
 ]
+RAW_QUERY_REQUIRE_FIXES: Final[dict[ColNameParamId, list[DatabaseType]]] = {
+    "str quoted_lower_col": ["postgres"],
+    "str QUOTED_LOWER_COL": ["postgres"],
+}
+
 
 # TODO: remove items from this lookup when working on fixes
 REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
@@ -749,6 +757,15 @@ EXPECTED_FAILURE: Final[dict[ColNameParamId, list[DatabaseType]]] = {
 }
 
 
+def _raw_query_requires_fix(param_id: str) -> bool:
+    column_name: ColNameParamId
+    dialect, *_, column_name = param_id.split("-")  # type: ignore[assignment]
+    dialects_raw_query_requires_fix: list[DatabaseType] = RAW_QUERY_REQUIRE_FIXES.get(
+        column_name, []
+    )
+    return dialect in dialects_raw_query_requires_fix
+
+
 def _requires_fix(param_id: str) -> bool:
     column_name: ColNameParamId
     dialect, expectation, column_name = param_id.split("-")  # type: ignore[assignment]
@@ -802,6 +819,79 @@ def _is_quote_char_dialect_mismatch(
     ],
 )
 class TestColumnIdentifiers:
+    def test_raw_queries(
+        self,
+        context: EphemeralDataContext,
+        all_sql_datasources: SQLDatasource,
+        table_factory: TableFactory,
+        column_name: str | quoted_name,
+        request: pytest.FixtureRequest,
+    ):
+        param_id = request.node.callspec.id
+        datasource = all_sql_datasources
+        dialect = datasource.get_engine().dialect.name
+
+        if _is_quote_char_dialect_mismatch(dialect, column_name):
+            pytest.skip(reason=f"quote char dialect mismatch: {column_name[0]}")
+
+        if _raw_query_requires_fix(param_id):
+            # apply marker this way so that xpasses can be seen in the report
+            request.applymarker(pytest.mark.xfail)
+
+        should_fail: bool = _is_expected_to_fail(param_id)
+
+        schema: str | None = (
+            RAND_SCHEMA
+            if GXSqlDialect(dialect)
+            in (GXSqlDialect.SNOWFLAKE, GXSqlDialect.DATABRICKS)
+            else None
+        )
+
+        print(f"\ndialect:\n  {dialect}")
+        print(f"column_name:\n  {column_name!r}")
+        print(f"type:\n  {type(column_name)}\n")
+
+        table_factory(
+            gx_engine=datasource.get_execution_engine(),
+            table_names={TEST_TABLE_NAME},
+            schema=schema,
+            data=[
+                {
+                    "id": 1,
+                    "name": param_id,
+                    "quoted_upper_col": "uppercase",
+                    "quoted_lower_col": "lowercase",
+                    "unquoted_upper_col": "uppercase",
+                    "unquoted_lower_col": "lowercase",
+                }
+            ],
+        )
+
+        qualified_table_name: str = (
+            f"{schema}.{TEST_TABLE_NAME}" if schema else TEST_TABLE_NAME
+        )
+        # examine columns
+        with datasource.get_execution_engine().get_connection() as conn:
+            query = f"""SELECT {column_name} FROM {qualified_table_name} LIMIT 1;"""
+            print(f"query:\n  {query}")
+            # an exception will be raised if the column does not exist
+            try:
+                col_exist_check = conn.execute(
+                    TextClause(query),
+                )
+                print(f"\nResults:\n  {col_exist_check.keys()}")
+                col_exist_result = col_exist_check.fetchone()
+                print(f"  Values: {col_exist_result}\n")
+            except SqlAlchemyProgrammingError as sql_err:
+                LOGGER.exception(sql_err)
+                print(f"{column_name} does not exist")
+                assert should_fail is True
+            else:
+                if should_fail is True:
+                    assert not col_exist_result, f"{column_name} should not exist"
+                else:
+                    assert col_exist_result, f"{column_name} should exist"
+
     @pytest.mark.parametrize(
         "expectation_type",
         [
