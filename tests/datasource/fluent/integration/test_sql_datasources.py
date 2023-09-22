@@ -620,17 +620,82 @@ ColNameParamId: TypeAlias = Literal[
     # ----------------------
 ]
 
-REQUIRE_FIXES: Final[dict[ColNameParamId, list[DatabaseType]]] = {
-    "str UNQUOTED_LOWER_COL": ["databricks_sql", "postgres", "sqlite"],
-    "str unquoted_upper_col": ["databricks_sql", "sqlite"],
-    "str UNQUOTED_UPPER_COL": ["databricks_sql", "postgres"],
-    'str "quoted_lower_col"': ["postgres", "snowflake", "sqlite"],
-    "str QUOTED_LOWER_COL": ["databricks_sql", "postgres", "snowflake", "sqlite"],
-    "str quoted_upper_col": ["databricks_sql", "postgres", "snowflake", "sqlite"],
-    'str "QUOTED_UPPER_COL"': ["postgres", "snowflake", "sqlite"],
+REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
+    # TODO: remove items from this lookup if expectation should fail
+    'expect_column_to_exist-str "unquoted_lower_col"': ["sqlite"],
+    "expect_column_to_exist-str UNQUOTED_LOWER_COL": [
+        "databricks_sql",
+        "postgres",
+        "sqlite",
+    ],
+    'expect_column_to_exist-str "UNQUOTED_LOWER_COL"': ["sqlite"],
+    "expect_column_to_exist-str unquoted_upper_col": ["databricks_sql", "sqlite"],
+    'expect_column_to_exist-str "unquoted_upper_col"': ["sqlite"],
+    "expect_column_to_exist-str UNQUOTED_UPPER_COL": ["databricks_sql", "postgres"],
+    'expect_column_to_exist-str "UNQUOTED_UPPER_COL"': ["sqlite"],
+    'expect_column_to_exist-str "quoted_lower_col"': [
+        "postgres",
+        "snowflake",
+        "sqlite",
+    ],
+    "expect_column_to_exist-str QUOTED_LOWER_COL": [
+        "databricks_sql",
+        "postgres",
+        "snowflake",
+        "sqlite",
+    ],
+    'expect_column_to_exist-str "QUOTED_LOWER_COL"': ["sqlite"],
+    "expect_column_to_exist-str quoted_upper_col": [
+        "databricks_sql",
+        "postgres",
+        "snowflake",
+        "sqlite",
+    ],
+    'expect_column_to_exist-str "quoted_upper_col"': ["sqlite"],
+    'expect_column_to_exist-str "QUOTED_UPPER_COL"': [
+        "postgres",
+        "snowflake",
+        "sqlite",
+    ],
+    "expect_column_values_to_not_be_null-str UNQUOTED_LOWER_COL": [
+        "databricks_sql",
+        "postgres",
+        "sqlite",
+    ],
+    "expect_column_values_to_not_be_null-str unquoted_upper_col": [
+        "databricks_sql",
+        "sqlite",
+    ],
+    "expect_column_values_to_not_be_null-str UNQUOTED_UPPER_COL": [
+        "databricks_sql",
+        "postgres",
+    ],
+    'expect_column_values_to_not_be_null-str "quoted_lower_col"': [
+        "postgres",
+        "snowflake",
+        "sqlite",
+    ],
+    "expect_column_values_to_not_be_null-str QUOTED_LOWER_COL": [
+        "databricks_sql",
+        "postgres",
+        "snowflake",
+        "sqlite",
+    ],
+    "expect_column_values_to_not_be_null-str quoted_upper_col": [
+        "databricks_sql",
+        "postgres",
+        "snowflake",
+        "sqlite",
+    ],
+    'expect_column_values_to_not_be_null-str "QUOTED_UPPER_COL"': [
+        "postgres",
+        "snowflake",
+        "sqlite",
+    ],
 }
 
 # expect failures for these column names
+# NOTE: the expectation must fail without a raised_exception
 EXPECTED_FAILURE: Final[dict[ColNameParamId, list[DatabaseType]]] = {
     # TODO: add these for postgres, sqlite and databricks
     'str "unquoted_lower_col"': ["snowflake"],
@@ -649,8 +714,10 @@ EXPECTED_FAILURE: Final[dict[ColNameParamId, list[DatabaseType]]] = {
 
 def _requires_fix(param_id: str) -> bool:
     column_name: ColNameParamId
-    dialect, *_, column_name = param_id.split("-")  # type: ignore[assignment]
-    dialects_need_fixes: list[DatabaseType] = REQUIRE_FIXES.get(column_name, [])
+    dialect, expectation, column_name = param_id.split("-")  # type: ignore[assignment]
+    key = f"{expectation}-{column_name}"
+    dialects_need_fixes: list[DatabaseType] = REQUIRE_FIXES.get(key, [])
+    print(key, dialects_need_fixes)
     return dialect in dialects_need_fixes
 
 
@@ -702,8 +769,8 @@ class TestColumnIdentifiers:
     @pytest.mark.parametrize(
         "expectation_type",
         [
-            "expect_column_values_to_not_be_null",
             "expect_column_to_exist",
+            "expect_column_values_to_not_be_null",
         ],
     )
     def test_column_expectation(
