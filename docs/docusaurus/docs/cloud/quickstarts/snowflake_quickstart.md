@@ -30,7 +30,7 @@ In this quickstart, you'll learn how to connect GX Cloud to Snowflake Data Asset
     If you've previously installed GX Cloud, run the following command to upgrade to the latest version:
 
     ```bash title="Terminal input"
-    pip install great_expectations --upgrade
+    pip install great_expectations[cloud] --upgrade
     ```
 
 ## Generate your user access token and copy your organization ID
