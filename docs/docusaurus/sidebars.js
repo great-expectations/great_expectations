@@ -16,6 +16,13 @@ module.exports = {
     },
     {
       type: 'category',
+      label: 'GX Cloud',
+      items: [
+        `cloud/quickstart/snowflake_quickstart`,
+      ]
+    },
+    {
+      type: 'category',
       label: 'Configure your GX environment',
       link: { type: 'doc', id: 'guides/setup/setup_overview_lp' },
       items: [

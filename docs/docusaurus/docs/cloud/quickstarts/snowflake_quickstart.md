@@ -55,7 +55,7 @@ You'll need your user access token and organization ID to set your environment v
 
 7. Copy the value in the **Organization ID** field and save it in the same location with your user access token.
 
-## Set the environment variables and run the GX Cloud Agent
+## Set the environment variables and start the GX Cloud Agent
 
 1. Set the following environment variables:
 
@@ -65,13 +65,17 @@ You'll need your user access token and organization ID to set your environment v
 
     - `GX_CLOUD_SNOWFLAKE_PASSWORD` - The password you use to access your Snowflake account.
 
-    To set the environment variables, see the documentation specific to your operating system.
+    To set the environment variables, see the documentation specific to your operating system. 
 
 2. In Jupyter Notebook, run the following code to start the GX Cloud Agent:
     
     ```python title="Jupyter Notebook"
        gx-agent
     ```
+
+    If you stop the GX Cloud Agent, close the terminal, and open a new terminal you'll need to set the environment variables again.
+
+    To edit an environment variable, stop the GX Cloud Agent, edit the environment variable, save the change, and then restart the GX Cloud Agent.
 
 ## Create the Snowflake Data Asset
 
@@ -85,19 +89,19 @@ You'll need your user access token and organization ID to set your environment v
 
     - **Password variable**: Enter `GX_CLOUD_SNOWFLAKE_PASSWORD`.
 
-    - **Account or locator**: Enter your Snowflake account or locator information.
+    - **Account or locator**: Enter your Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
 3. (Optional) Complete the following fields:
 
     - **Database**: Enter the name of the Snowflake database where the data you want to validate is stored.
  
-    - **Schema**: Enter the name of the schema for the Snowflake database here the data you want to validate is stored.
+    - **Schema**: Enter the name of the schema for the Snowflake database where the data you want to validate is stored.
 
     - **Warehouse**: Enter the name of the Snowflake database warehouse.
 
     - **Role**: Enter your Snowflake role.
 
-    - **Authenticator**: Enter the Snowflake database authenticator. 
+    - **Authenticator**: Enter the Snowflake database authenticator that you want to use to verify your Snowflake connection. 
 
 4. (Optional) Clear **Create temp table** if you don't want to create a temporary database table.
 
@@ -109,21 +113,29 @@ You'll need your user access token and organization ID to set your environment v
 
     - **Table name** (Optional) : When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
 
-    - **Query**: Enter a query. 
+    - **Query**: Enter the query that you want to run on the table. 
 
 7. (Optional) Select **Add table/query** to add additional tables or queries and repeat step 6.
 
 8. Click **Finish**.
 
-## Add Expectations
+## Add an Expectation
 
+1. In the **Data Assets** list, click the Snowflake Data Asset name.
 
+2. Click **New Expectation**.
 
+3. Select an Expectation type, enter the column name, and then complete the optional fields.
 
+    If you prefer to work in a code editor, click the **JSON Editor** tab and define your Expectation parameters in the code pane.
 
+4. Click **Save**.
 
+5. (Optional) Repeat steps 1 to 4 to add additional Expectations.
 
+## Validate Expectations
 
+1. Click **Validate**.
 
-
+2. When the confirmation message appears, click **See results**, or click the **Validations** tab.
 
