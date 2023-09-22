@@ -4,6 +4,16 @@
 Changelog
 #########
 
+0.17.19
+-----------------
+* [FEATURE] Microsoft FabricPowerBIDatasource ([#8605](https://github.com/great-expectations/great_expectations/pull/8605))
+* [BUGFIX] Ensure renderers use parent class renderers instead of using non-implemented override methods ([#8745](https://github.com/great-expectations/great_expectations/pull/8745))
+* [BUGFIX] Column Descriptive Metrics: Support numpy metrics ([#8746](https://github.com/great-expectations/great_expectations/pull/8746))
+* [BUGFIX] Column Descriptive Metrics: Add `id` to excluded list ([#8750](https://github.com/great-expectations/great_expectations/pull/8750))
+* [DOCS] Update README.md to include newsletter and a typo fix. ([#8721](https://github.com/great-expectations/great_expectations/pull/8721))
+* [MAINTENANCE] Improve test coverage around `GXCloudStoreBackend.gx_cloud_response_json_to_object_dict` ([#8744](https://github.com/great-expectations/great_expectations/pull/8744))
+* [MAINTENANCE] Improve `DatasourceDict` performance ([#8711](https://github.com/great-expectations/great_expectations/pull/8711))
+
 0.17.18
 -----------------
 * [BUGFIX] Patch faulty `GXCloudStoreBackend.has_key` logic ([#8741](https://github.com/great-expectations/great_expectations/pull/8741))
