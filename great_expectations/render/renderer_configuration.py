@@ -354,11 +354,6 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
     @root_validator()
     def _validate_for_row_condition(cls, values: dict) -> dict:
         kwargs: Dict[str, Any]
-        if not values.get("kwargs") and not values.get("configuration"):
-            raise RendererConfigurationError(
-                "kwargs and configuration cannot both be empty. Is the renderer written for the Expectation you are using? "
-            )
-
         if (
             "result" in values
             and values["result"] is not None
