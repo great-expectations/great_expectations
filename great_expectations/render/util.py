@@ -15,7 +15,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.exceptions import RenderingError
 
-DEFAULT_PRECISION = 4
+DEFAULT_PRECISION = 15
 # create a new context for this task
 ctx = decimal.Context()
 # Lowering precision from the system default (28) can allow additional control over display
