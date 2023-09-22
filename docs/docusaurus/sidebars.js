@@ -3,6 +3,13 @@ module.exports = {
     'intro',
     {
       type: 'category',
+      label: 'GX Cloud',
+      items: [
+        `cloud/quickstarts/snowflake_quickstart`,
+      ]
+    },
+    {
+      type: 'category',
       label: 'Get started with GX',
       link: { type: 'doc', id: 'guides/setup/get_started_lp' },
       items: [
@@ -12,13 +19,6 @@ module.exports = {
         },
         'tutorials/getting_started/how_to_use_great_expectations_in_databricks',
         'tutorials/getting_started/how_to_use_great_expectations_with_sql',
-      ]
-    },
-    {
-      type: 'category',
-      label: 'GX Cloud',
-      items: [
-        `cloud/quickstarts/snowflake_quickstart`,
       ]
     },
     {

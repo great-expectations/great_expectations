@@ -1,6 +1,6 @@
 ---
-sidebar_label: 'Snowflake quickstart'
-title: 'Snowflake quickstart'
+sidebar_label: 'Quickstart for GX Cloud and Snowflake'
+title: 'Quickstart for GX Cloud and Snowflake'
 id: snowflake_quickstart
 description: Connect Great Expectations to Snowflake Data Assets.
 ---
