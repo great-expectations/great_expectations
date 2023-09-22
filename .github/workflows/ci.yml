@@ -7,7 +7,7 @@ name: ci
 #   3. When we push a tag with a pattern x.y.z (for example 0.0.1) which is the pattern we use for releases.
 
 on:
-
+  merge_group:
   pull_request:
   schedule:
     # https://crontab.guru/every-3-hours
