@@ -11,6 +11,7 @@ from great_expectations.expectations.expectation import (
     InvalidExpectationConfigurationError,
 )
 from great_expectations.render import RenderedStringTemplateContent
+from great_expectations.render.components import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
@@ -123,7 +124,7 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,

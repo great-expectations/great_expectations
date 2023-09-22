@@ -10,6 +10,7 @@ from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
 )
 from great_expectations.render import RenderedStringTemplateContent
+from great_expectations.render.components import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import (
     num_to_str,
@@ -100,6 +101,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @renderer(renderer_type="renderer.prescriptive")
     def _prescriptive_renderer(
         cls,

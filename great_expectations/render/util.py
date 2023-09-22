@@ -57,7 +57,12 @@ def num_to_str(
     s = repr(f)
     if not isinstance(f, float):
         s += f"{locale.localeconv().get('decimal_point')}0"
-    d = local_context.create_decimal(s)
+    try:
+        d = local_context.create_decimal(s)
+    except decimal.InvalidOperation:
+        raise TypeError(
+            f"num_to_str received an invalid value: {f} of type {type(f).__name__}."
+        )
     if no_scientific:
         result = format(d, "f")
     elif use_locale:

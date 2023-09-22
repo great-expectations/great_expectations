@@ -62,7 +62,6 @@ def test_parse_row_condition_string_pandas_engine():
 
 
 @pytest.mark.filesystem
-@pytest.mark.slow  # 1.52s
 def test_all_expectations_using_test_definitions():
     dir_path = os.path.dirname(os.path.abspath(__file__))  # noqa: PTH120, PTH100
     pattern = os.path.join(  # noqa: PTH118
