@@ -595,8 +595,6 @@ class TestTableIdentifiers:
         assert result.success is True
 
 
-# TODO: remove items from this lookup when working on fixes
-
 ColNameParamId: TypeAlias = Literal[
     "str unquoted_lower_col",
     'str "unquoted_lower_col"',
@@ -620,8 +618,9 @@ ColNameParamId: TypeAlias = Literal[
     # ----------------------
 ]
 
+# TODO: remove items from this lookup when working on fixes
 REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
-    'expect_column_to_exist-str "unquoted_lower_col"': ["sqlite"],
+    'expect_column_to_exist-str "unquoted_lower_col"': ["postgres", "sqlite"],
     "expect_column_to_exist-str UNQUOTED_LOWER_COL": [
         "databricks_sql",
         "postgres",
@@ -629,7 +628,7 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     ],
     'expect_column_to_exist-str "UNQUOTED_LOWER_COL"': ["sqlite"],
     "expect_column_to_exist-str unquoted_upper_col": ["databricks_sql", "sqlite"],
-    'expect_column_to_exist-str "unquoted_upper_col"': ["sqlite"],
+    'expect_column_to_exist-str "unquoted_upper_col"': ["postgres", "sqlite"],
     "expect_column_to_exist-str UNQUOTED_UPPER_COL": ["databricks_sql", "postgres"],
     'expect_column_to_exist-str "UNQUOTED_UPPER_COL"': ["sqlite"],
     'expect_column_to_exist-str "quoted_lower_col"': [
@@ -707,10 +706,10 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
 # NOTE: the expectation must fail without a raised_exception
 EXPECTED_FAILURE: Final[dict[ColNameParamId, list[DatabaseType]]] = {
     # TODO: add these for postgres, sqlite and databricks
-    'str "unquoted_lower_col"': ["postgres", "snowflake"],
+    'str "unquoted_lower_col"': ["snowflake"],
     'str "UNQUOTED_LOWER_COL"': ["postgres"],
     # -------------------------------------
-    'str "unquoted_upper_col"': ["postgres", "snowflake"],
+    'str "unquoted_upper_col"': ["snowflake"],
     'str "UNQUOTED_UPPER_COL"': ["postgres"],
     # -------------------------------------
     "str quoted_lower_col": ["postgres", "snowflake"],
