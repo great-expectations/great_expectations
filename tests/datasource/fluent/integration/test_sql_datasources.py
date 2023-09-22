@@ -820,15 +820,7 @@ class TestColumnIdentifiers:
             data=[
                 {
                     "id": 1,
-                    "name": "first",
-                    "quoted_upper_col": "my column is uppercase",
-                    "quoted_lower_col": "my column is lowercase",
-                    "unquoted_upper_col": "whatever",
-                    "unquoted_lower_col": "whatever",
-                },
-                {
-                    "id": 2,
-                    "name": "second",
+                    "name": param_id,
                     "quoted_upper_col": "my column is uppercase",
                     "quoted_lower_col": "my column is lowercase",
                     "unquoted_upper_col": "whatever",
