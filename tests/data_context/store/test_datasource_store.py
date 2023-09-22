@@ -626,3 +626,118 @@ def test_gx_cloud_response_json_to_object_dict(
     else:
         actual = DatasourceStore.gx_cloud_response_json_to_object_dict(response_json)
         assert actual == expected
+
+
+@pytest.mark.cloud
+def test_gx_cloud_response_json_to_object_collection():
+    response_json = {
+        "data": [
+            {
+                "attributes": {
+                    "datasource_config": {
+                        "class_name": "Datasource",
+                        "data_connectors": {
+                            "pandas_data_connector": {
+                                "assets": {
+                                    "hurricanes_and_typhoons": {
+                                        "batch_identifiers": ["ocean"],
+                                        "class_name": "Asset",
+                                        "module_name": "great_expectations.datasource.data_connector.asset",
+                                        "name": "hurricanes_and_typhoons",
+                                    }
+                                },
+                                "class_name": "RuntimeDataConnector",
+                                "id": "7df29075-2e4d-46b1-aa6f-3e93c19bd7b2",
+                                "module_name": "great_expectations.datasource.data_connector",
+                                "name": "pandas_data_connector",
+                            }
+                        },
+                        "execution_engine": {
+                            "class_name": "PandasExecutionEngine",
+                            "module_name": "great_expectations.execution_engine",
+                        },
+                        "id": "2e3248b9-465f-4933-b313-cae6e3cbe685",
+                        "module_name": "great_expectations.datasource",
+                        "name": "weather_ds",
+                    }
+                },
+                "id": "2e3248b9-465f-4933-b313-cae6e3cbe685",
+                "type": "datasource",
+            },
+            {
+                "attributes": {
+                    "datasource_config": {
+                        "class_name": "Datasource",
+                        "data_connectors": {
+                            "default_runtime_data_connector": {
+                                "batch_identifiers": ["my_identifier"],
+                                "class_name": "RuntimeDataConnector",
+                                "id": "c84911b0-a42e-4196-afb9-754532e465aa",
+                                "module_name": "great_expectations.datasource.data_connector",
+                                "name": "default_runtime_data_connector",
+                            }
+                        },
+                        "execution_engine": {
+                            "class_name": "PandasExecutionEngine",
+                            "module_name": "great_expectations.execution_engine",
+                        },
+                        "id": "9bd4deb0-1729-4eda-a829-eeb41bf4bbf1",
+                        "module_name": "great_expectations.datasource",
+                        "name": "runtime_datasource",
+                    }
+                },
+                "id": "9bd4deb0-1729-4eda-a829-eeb41bf4bbf1",
+                "type": "datasource",
+            },
+        ]
+    }
+    expected = [
+        {
+            "class_name": "Datasource",
+            "data_connectors": {
+                "pandas_data_connector": {
+                    "assets": {
+                        "hurricanes_and_typhoons": {
+                            "batch_identifiers": ["ocean"],
+                            "class_name": "Asset",
+                            "module_name": "great_expectations.datasource.data_connector.asset",
+                            "name": "hurricanes_and_typhoons",
+                        },
+                    },
+                    "class_name": "RuntimeDataConnector",
+                    "id": "7df29075-2e4d-46b1-aa6f-3e93c19bd7b2",
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "name": "pandas_data_connector",
+                },
+            },
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "id": "2e3248b9-465f-4933-b313-cae6e3cbe685",
+            "module_name": "great_expectations.datasource",
+            "name": "weather_ds",
+        },
+        {
+            "class_name": "Datasource",
+            "data_connectors": {
+                "default_runtime_data_connector": {
+                    "batch_identifiers": ["my_identifier"],
+                    "class_name": "RuntimeDataConnector",
+                    "id": "c84911b0-a42e-4196-afb9-754532e465aa",
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "name": "default_runtime_data_connector",
+                },
+            },
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "id": "9bd4deb0-1729-4eda-a829-eeb41bf4bbf1",
+            "module_name": "great_expectations.datasource",
+            "name": "runtime_datasource",
+        },
+    ]
+
+    actual = DatasourceStore.gx_cloud_response_json_to_object_collection(response_json)
+    assert actual == expected
