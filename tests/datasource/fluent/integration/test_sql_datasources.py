@@ -635,13 +635,13 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     "expect_column_to_exist-str unquoted_upper_col": ["databricks_sql", "sqlite"],
     'expect_column_to_exist-str "unquoted_upper_col"': ["postgres", "sqlite"],
     "expect_column_to_exist-str UNQUOTED_UPPER_COL": ["databricks_sql", "postgres"],
-    'expect_column_to_exist-str "UNQUOTED_UPPER_COL"': ["sqlite"],
+    'expect_column_to_exist-str "UNQUOTED_UPPER_COL"': ["snowflake", "sqlite"],
     'expect_column_to_exist-str "quoted_lower_col"': [
         "postgres",
         "snowflake",
         "sqlite",
     ],
-    "expect_column_to_exist-str quoted_lower_col": ["postgres"],
+    "expect_column_to_exist-str quoted_lower_col": ["postgres", "snowflake"],
     "expect_column_to_exist-str QUOTED_LOWER_COL": [
         "databricks_sql",
         "snowflake",
@@ -654,7 +654,7 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "sqlite",
     ],
     'expect_column_to_exist-str "quoted_upper_col"': ["sqlite"],
-    "expect_column_to_exist-str QUOTED_UPPER_COL": ["postgres"],
+    "expect_column_to_exist-str QUOTED_UPPER_COL": ["postgres", "snowflake"],
     'expect_column_to_exist-str "QUOTED_UPPER_COL"': [
         "postgres",
         "snowflake",
