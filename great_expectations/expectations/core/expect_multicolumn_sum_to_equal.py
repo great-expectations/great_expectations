@@ -174,9 +174,9 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
             if params.get("mostly") is None
             else ", at least $mostly_pct % of the time"
         )
-        sum_total = params.get("sum_total")
+        sum_total = params.get("sum_total")  # noqa: F841
 
-        template_str = f"Sum across columns must be {sum_total} {mostly_str}: "
+        template_str = f"Sum across columns must be $sum_total {mostly_str}: "
         for idx in range(len(params["column_list"]) - 1):
             template_str += f"$column_list_{idx!s}, "
             params[f"column_list_{idx!s}"] = params["column_list"][idx]
