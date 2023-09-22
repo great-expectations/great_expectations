@@ -18,14 +18,10 @@ from typing import (
 )
 
 import pytest
-import sqlalchemy as sa
 from packaging.version import Version
 from pytest import param
 
 from great_expectations import get_context
-from great_expectations.compatibility.sqlalchemy import (
-    ProgrammingError as SqlAlchemyProgrammingError,
-)
 from great_expectations.compatibility.sqlalchemy import (
     TextClause,
     engine,
@@ -46,7 +42,6 @@ from great_expectations.datasource.fluent import (
 from great_expectations.execution_engine.sqlalchemy_dialect import (
     DIALECT_IDENTIFIER_QUOTE_STRINGS,
     GXSqlDialect,
-    _strip_quotes,
     quote_str,
 )
 from great_expectations.expectations.expectation import (
@@ -684,103 +679,6 @@ def _is_quote_char_dialect_mismatch(
     ],
 )
 class TestColumnIdentifiers:
-    # unskip to help debug `test_column_expectation` failures
-    @pytest.mark.skip(reason="sanity checks for helping debug issues")
-    def test_raw_queries(
-        self,
-        context: EphemeralDataContext,
-        all_sql_datasources: SQLDatasource,
-        table_factory: TableFactory,
-        column_name: str,
-        request: pytest.FixtureRequest,
-    ):
-        datasource = all_sql_datasources
-        dialect = datasource.get_engine().dialect.name
-
-        if _is_quote_char_dialect_mismatch(dialect, column_name):
-            pytest.skip(reason=f"quote char dialect mismatch: {column_name[0]}")
-
-        if _requires_fix(request.node.callspec.id):
-            pytest.xfail(reason="requires fix")
-
-        schema: str | None = (
-            RAND_SCHEMA
-            if GXSqlDialect(dialect)
-            in (GXSqlDialect.SNOWFLAKE, GXSqlDialect.DATABRICKS)
-            else None
-        )
-
-        print(f"\ncolumn_name:\n  {column_name!r}")
-        print(f"type:\n  {type(column_name)}\n")
-
-        table_factory(
-            gx_engine=datasource.get_execution_engine(),
-            table_names={TEST_TABLE_NAME},
-            schema=schema,
-            data=[
-                {
-                    "id": 1,
-                    "name": "first",
-                    "quoted_upper_col": "uppercase",
-                    "quoted_lower_col": "lowercase",
-                    "unquoted_upper_col": "uppercase",
-                    "unquoted_lower_col": "lowercase",
-                }
-            ],
-        )
-
-        qualified_table_name: str = (
-            f"{schema}.{TEST_TABLE_NAME}" if schema else TEST_TABLE_NAME
-        )
-        # examine columns
-        with datasource.get_execution_engine().get_connection() as conn:
-            # TODO: remove one or all of these methods for checking for columns
-
-            # query information_schema
-            col_exist_check = conn.execute(
-                TextClause(
-                    """SELECT column_name FROM information_schema.columns WHERE table_name = :table_name AND column_name = :column_name""",
-                ),
-                table_name=TEST_TABLE_NAME,
-                column_name=quoted_name(column_name, quote=False),
-            )
-            print(f"INFORMATION_SCHEMA.COLUMNS check:\n  {col_exist_check.keys()}")
-            col_exist_result = col_exist_check.fetchone()
-            print(f"  Result: {col_exist_result}\n")
-
-            try:
-                query_builder_result = conn.execute(
-                    sa.sql.select(
-                        sa.column(column_name),
-                        # sa.text(column_name),
-                    )
-                    .select_from(sa.table(qualified_table_name))
-                    .limit(1)
-                )
-                print(f"query_builder_result:\n  {query_builder_result.keys()}\n")
-            except SqlAlchemyProgrammingError as e:
-                print(f"query_builder_result:\n  {e!r}\n")
-
-            try:
-                # query table
-                txt_result = conn.execute(
-                    TextClause(
-                        f"SELECT {column_name} FROM {qualified_table_name} LIMIT 1"
-                    )
-                )
-                assert txt_result
-                columns = txt_result.keys()
-                print(f"{TEST_TABLE_NAME} Columns:\n  {columns}\n")
-            except SqlAlchemyProgrammingError:
-                print(f"Column {column_name} does not exist in {qualified_table_name}")
-                raise
-
-        # normalize names, casing issues will be caught by the query itself
-        assert (
-            list(columns)[0].lower()
-            == _strip_quotes(column_name, dialect=dialect).lower()
-        ), "column name mismatch"
-
     @pytest.mark.parametrize(
         "expectation_type",
         [
