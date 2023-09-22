@@ -91,7 +91,7 @@ You'll need your user access token and organization ID to set your environment v
 
     - **Account or locator**: Enter your Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
-3. (Optional) Complete the following fields:
+3. Optional. Complete the following fields:
 
     - **Database**: Enter the name of the Snowflake database where the data you want to validate is stored.
  
@@ -103,19 +103,19 @@ You'll need your user access token and organization ID to set your environment v
 
     - **Authenticator**: Enter the Snowflake database authenticator that you want to use to verify your Snowflake connection. 
 
-4. (Optional) Clear **Create temp table** if you don't want to create a temporary database table.
+4. Optional. Clear **Create temp table** if you don't want to create a temporary database table.
 
-5. (Optional) Clear **Test connection** if you don't want to test the Data Asset connection.
+5. Optional. Clear **Test connection** if you don't want to test the Data Asset connection.
 
 6. Select **Table Asset** or **Query Asset** and complete the following fields:
 
     - **Asset name**: Enter a name for the Data Asset.
 
-    - **Table name** (Optional) : When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
+    - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
 
     - **Query**: Enter the query that you want to run on the table. 
 
-7. (Optional) Select **Add table/query** to add additional tables or queries and repeat step 6.
+7. Optional. Select **Add table/query** to add additional tables or queries and repeat step 6.
 
 8. Click **Finish**.
 
@@ -131,7 +131,7 @@ You'll need your user access token and organization ID to set your environment v
 
 4. Click **Save**.
 
-5. (Optional) Repeat steps 1 to 4 to add additional Expectations.
+5. Optional. Repeat steps 1 to 4 to add additional Expectations.
 
 ## Validate Expectations
 
