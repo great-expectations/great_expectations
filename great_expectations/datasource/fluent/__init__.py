@@ -34,6 +34,7 @@ from great_expectations.datasource.fluent.pandas_google_cloud_storage_datasource
 from great_expectations.datasource.fluent.pandas_azure_blob_storage_datasource import (
     PandasAzureBlobStorageDatasource,
 )
+from great_expectations.experimental.datasource.fabric import FabricPowerBIDatasource
 from great_expectations.datasource.fluent.postgres_datasource import (
     PostgresDatasource,
 )
@@ -71,6 +72,7 @@ from great_expectations.datasource.fluent.databricks_sql_datasource import (
 from great_expectations.datasource.fluent.snowflake_datasource import (
     SnowflakeDatasource,
 )
+
 
 _PANDAS_SCHEMA_VERSION: str = (
     "1.5.3"  # this is the version schemas we generated for. Update as needed

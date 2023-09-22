@@ -1974,10 +1974,10 @@ class Expectation(metaclass=MetaExpectation):
 
         result: str = ""
 
-        if type(rendered_result) == str:  # noqa: E721
+        if isinstance(rendered_result, str):
             result = rendered_result
 
-        elif type(rendered_result) == list:
+        elif isinstance(rendered_result, list):
             sub_result_list = []
             for sub_result in rendered_result:
                 res = self._get_rendered_result_as_string(sub_result)
@@ -2210,7 +2210,7 @@ class Expectation(metaclass=MetaExpectation):
                 )
             if forbidden_keys:
                 problems.append(f"Extra key(s) found: {sorted(forbidden_keys)}")
-            if type(augmented_library_metadata["requirements"]) != list:
+            if not isinstance(augmented_library_metadata["requirements"], list):
                 problems.append("library_metadata['requirements'] is not a list ")
             if not problems:
                 augmented_library_metadata["library_metadata_passed_checks"] = True

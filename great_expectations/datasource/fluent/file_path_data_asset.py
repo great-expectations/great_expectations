@@ -84,6 +84,7 @@ class _FilePathDataAsset(DataAsset):
         "kwargs",  # kwargs need to be unpacked and passed separately
         "batch_metadata",  # noqa: PLW0130
         "connect_options",
+        "id",
     }
 
     # General file-path DataAsset pertaining attributes.
