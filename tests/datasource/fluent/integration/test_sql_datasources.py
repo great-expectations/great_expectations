@@ -631,7 +631,9 @@ REQUIRE_FIXES: Final[dict[ColNameParamId, list[DatabaseType]]] = {
 }
 
 # expect failures for these column names
-EXPECTED_FAILURE: Final[dict[ColNameParamId, list[DatabaseType]]] = {}
+EXPECTED_FAILURE: Final[dict[ColNameParamId, list[DatabaseType]]] = {
+    # TODO: add these for postgres, sqlite and databricks
+}
 
 
 def _requires_fix(param_id: str) -> bool:
@@ -639,6 +641,13 @@ def _requires_fix(param_id: str) -> bool:
     dialect, *_, column_name = param_id.split("-")  # type: ignore[assignment]
     dialects_need_fixes: list[DatabaseType] = REQUIRE_FIXES.get(column_name, [])
     return dialect in dialects_need_fixes
+
+
+def _is_expected_to_fail(param_id: str) -> bool:
+    column_name: ColNameParamId
+    dialect, *_, column_name = param_id.split("-")  # type: ignore[assignment]
+    dialects_should_fail: list[DatabaseType] = EXPECTED_FAILURE.get(column_name, [])
+    return dialect in dialects_should_fail
 
 
 def _is_quote_char_dialect_mismatch(
@@ -695,12 +704,11 @@ class TestColumnIdentifiers:
         expectation_type: str,
         request: pytest.FixtureRequest,
     ):
+        param_id = request.node.callspec.id
         datasource = all_sql_datasources
         dialect = datasource.get_engine().dialect.name
-        if _is_quote_char_dialect_mismatch(dialect, column_name):
-            pytest.skip(reason=f"quote char dialect mismatch: {column_name[0]}")
 
-        if _requires_fix(request.node.callspec.id):
+        if _requires_fix(param_id):
             pytest.xfail(reason="requires fix")
 
         schema: str | None = (
@@ -785,7 +793,10 @@ class TestColumnIdentifiers:
         exc_details = _get_exception_details(result, prettyprint=True)
         assert not exc_details, exc_details[0]["exception_message"]
 
-        assert result.success is True, "validation failed"
+        if _is_expected_to_fail(param_id):
+            assert result.success is False, "validation should have failed"
+        else:
+            assert result.success is True, "validation failed"
 
 
 if __name__ == "__main__":
