@@ -719,6 +719,9 @@ class TestColumnIdentifiers:
         datasource = all_sql_datasources
         dialect = datasource.get_engine().dialect.name
 
+        if _is_quote_char_dialect_mismatch(dialect, column_name):
+            pytest.skip(f"quote char dialect mismatch: {column_name[0]}")
+
         if _requires_fix(param_id):
             pytest.xfail(reason="requires fix")
 
