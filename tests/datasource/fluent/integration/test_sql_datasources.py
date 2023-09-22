@@ -639,14 +639,12 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     "expect_column_to_exist-str quoted_lower_col": ["postgres"],
     "expect_column_to_exist-str QUOTED_LOWER_COL": [
         "databricks_sql",
-        "postgres",
         "snowflake",
         "sqlite",
     ],
     'expect_column_to_exist-str "QUOTED_LOWER_COL"': ["sqlite"],
     "expect_column_to_exist-str quoted_upper_col": [
         "databricks_sql",
-        "postgres",
         "snowflake",
         "sqlite",
     ],
@@ -705,7 +703,7 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
 # expect failures for these column names
 # NOTE: the expectation must fail without a raised_exception
 EXPECTED_FAILURE: Final[dict[ColNameParamId, list[DatabaseType]]] = {
-    # TODO: add these for postgres, sqlite and databricks
+    # TODO: add these for sqlite and databricks
     'str "unquoted_lower_col"': ["snowflake"],
     'str "UNQUOTED_LOWER_COL"': ["postgres"],
     # -------------------------------------
@@ -800,7 +798,8 @@ class TestColumnIdentifiers:
             pytest.skip(f"quote char dialect mismatch: {column_name[0]}")
 
         if _requires_fix(param_id):
-            pytest.xfail(reason="requires fix")
+            # apply marker this way so that xpasses can be seen in the report
+            request.applymarker(pytest.mark.xfail)
 
         schema: str | None = (
             RAND_SCHEMA
@@ -883,4 +882,4 @@ class TestColumnIdentifiers:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-vv"])
+    pytest.main([__file__, "-vv", "-rXf"])
