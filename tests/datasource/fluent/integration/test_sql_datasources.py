@@ -157,7 +157,12 @@ RAND_SCHEMA: Final[str] = f"{PYTHON_VERSION}_{get_random_identifier_name()}"
 def _get_exception_details(
     result: CheckpointResult,
     prettyprint: bool = False,
-) -> list[dict[Literal["exception_message", "exception_traceback"], str,]]:
+) -> list[
+    dict[
+        Literal["exception_message", "exception_traceback", "raised_exception"],
+        str,
+    ]
+]:
     """Extract a list of exception_info dicts from a CheckpointResult."""
     validation_results: list[
         dict[
@@ -626,7 +631,7 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "postgres",
         "sqlite",
     ],
-    'expect_column_to_exist-str "UNQUOTED_LOWER_COL"': ["sqlite"],
+    'expect_column_to_exist-str "UNQUOTED_LOWER_COL"': ["snowflake", "sqlite"],
     "expect_column_to_exist-str unquoted_upper_col": ["databricks_sql", "sqlite"],
     'expect_column_to_exist-str "unquoted_upper_col"': ["postgres", "sqlite"],
     "expect_column_to_exist-str UNQUOTED_UPPER_COL": ["databricks_sql", "postgres"],
@@ -655,24 +660,39 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "snowflake",
         "sqlite",
     ],
-    'expect_column_values_to_not_be_null-str "unquoted_lower_col"': ["postgres"],
+    'expect_column_values_to_not_be_null-str "unquoted_lower_col"': [
+        "postgres",
+        "snowflake",
+    ],
     "expect_column_values_to_not_be_null-str UNQUOTED_LOWER_COL": [
         "databricks_sql",
         "postgres",
         "sqlite",
     ],
-    'expect_column_values_to_not_be_null-str "UNQUOTED_LOWER_COL"': ["postgres"],
+    'expect_column_values_to_not_be_null-str "UNQUOTED_LOWER_COL"': [
+        "postgres",
+        "snowflake",
+    ],
     "expect_column_values_to_not_be_null-str unquoted_upper_col": [
         "databricks_sql",
         "sqlite",
     ],
-    'expect_column_values_to_not_be_null-str "unquoted_upper_col"': ["postgres"],
+    'expect_column_values_to_not_be_null-str "unquoted_upper_col"': [
+        "postgres",
+        "snowflake",
+    ],
     "expect_column_values_to_not_be_null-str UNQUOTED_UPPER_COL": [
         "databricks_sql",
         "postgres",
     ],
-    'expect_column_values_to_not_be_null-str "UNQUOTED_UPPER_COL"': ["postgres"],
-    "expect_column_values_to_not_be_null-str quoted_lower_col": ["postgres"],
+    'expect_column_values_to_not_be_null-str "UNQUOTED_UPPER_COL"': [
+        "postgres",
+        "snowflake",
+    ],
+    "expect_column_values_to_not_be_null-str quoted_lower_col": [
+        "postgres",
+        "snowflake",
+    ],
     'expect_column_values_to_not_be_null-str "quoted_lower_col"': [
         "postgres",
         "snowflake",
@@ -684,15 +704,24 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "snowflake",
         "sqlite",
     ],
-    'expect_column_values_to_not_be_null-str "QUOTED_LOWER_COL"': ["postgres"],
+    'expect_column_values_to_not_be_null-str "QUOTED_LOWER_COL"': [
+        "postgres",
+        "snowflake",
+    ],
     "expect_column_values_to_not_be_null-str quoted_upper_col": [
         "databricks_sql",
         "postgres",
         "snowflake",
         "sqlite",
     ],
-    'expect_column_values_to_not_be_null-str "quoted_upper_col"': ["postgres"],
-    "expect_column_values_to_not_be_null-str QUOTED_UPPER_COL": ["postgres"],
+    'expect_column_values_to_not_be_null-str "quoted_upper_col"': [
+        "postgres",
+        "snowflake",
+    ],
+    "expect_column_values_to_not_be_null-str QUOTED_UPPER_COL": [
+        "postgres",
+        "snowflake",
+    ],
     'expect_column_values_to_not_be_null-str "QUOTED_UPPER_COL"': [
         "postgres",
         "snowflake",
@@ -725,7 +754,6 @@ def _requires_fix(param_id: str) -> bool:
     dialect, expectation, column_name = param_id.split("-")  # type: ignore[assignment]
     key = f"{expectation}-{column_name}"
     dialects_need_fixes: list[DatabaseType] = REQUIRE_FIXES.get(key, [])
-    print(key, dialects_need_fixes)
     return dialect in dialects_need_fixes
 
 
@@ -873,7 +901,7 @@ class TestColumnIdentifiers:
         result = checkpoint.run()
 
         exc_details = _get_exception_details(result, prettyprint=True)
-        assert not exc_details, exc_details[0]["exception_message"]
+        assert not exc_details, exc_details[0]["raised_exception"]
 
         if _is_expected_to_fail(param_id):
             assert result.success is False, "validation should have failed"
