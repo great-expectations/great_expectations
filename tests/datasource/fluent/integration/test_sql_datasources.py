@@ -793,26 +793,26 @@ def _is_quote_char_dialect_mismatch(
 @pytest.mark.parametrize(
     "column_name",
     [
+        # DDL: unquoted_lower_col ----------------------------------
         param("unquoted_lower_col", id="str unquoted_lower_col"),
         param('"unquoted_lower_col"', id='str "unquoted_lower_col"'),
         param("UNQUOTED_LOWER_COL", id="str UNQUOTED_LOWER_COL"),
         param('"UNQUOTED_LOWER_COL"', id='str "UNQUOTED_LOWER_COL"'),
-        # ------------------------------------------------------
+        # DDL: UNQUOTED_UPPER_COL ----------------------------------
         param("unquoted_upper_col", id="str unquoted_upper_col"),
         param('"unquoted_upper_col"', id='str "unquoted_upper_col"'),
         param("UNQUOTED_UPPER_COL", id="str UNQUOTED_UPPER_COL"),
         param('"UNQUOTED_UPPER_COL"', id='str "UNQUOTED_UPPER_COL"'),
-        # ------------------------------------------------------
+        # DDL: "quoted_lower_col"-----------------------------------
         param("quoted_lower_col", id="str quoted_lower_col"),
         param('"quoted_lower_col"', id='str "quoted_lower_col"'),
         param("QUOTED_LOWER_COL", id="str QUOTED_LOWER_COL"),
         param('"QUOTED_LOWER_COL"', id='str "QUOTED_LOWER_COL"'),
-        # ------------------------------------------------------
+        # DDL: "QUOTED_UPPER_COL" ----------------------------------
         param("quoted_upper_col", id="str quoted_upper_col"),
         param('"quoted_upper_col"', id='str "quoted_upper_col"'),
         param("QUOTED_UPPER_COL", id="str QUOTED_UPPER_COL"),
         param('"QUOTED_UPPER_COL"', id='str "QUOTED_UPPER_COL"'),
-        # ------------------------------------------------------
     ],
 )
 class TestColumnIdentifiers:
