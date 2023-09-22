@@ -601,7 +601,31 @@ class TestTableIdentifiers:
 
 
 # TODO: remove items from this lookup when working on fixes
-REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
+
+ColNameParamId: TypeAlias = Literal[
+    "str unquoted_lower_col",
+    'str "unquoted_lower_col"',
+    "str UNQUOTED_LOWER_COL",
+    'str "UNQUOTED_LOWER_COL"',
+    # ----------------------
+    "str unquoted_upper_col",
+    'str "unquoted_upper_col"',
+    "str UNQUOTED_UPPER_COL",
+    'str "UNQUOTED_UPPER_COL"',
+    # ----------------------
+    "str quoted_lower_col",
+    'str "quoted_lower_col"',
+    "str QUOTED_LOWER_COL",
+    'str "QUOTED_LOWER_COL"',
+    # ----------------------
+    "str quoted_upper_col",
+    'str "quoted_upper_col"',
+    "str QUOTED_UPPER_COL",
+    'str "QUOTED_UPPER_COL"',
+    # ----------------------
+]
+
+REQUIRE_FIXES: Final[dict[ColNameParamId, list[DatabaseType]]] = {
     "str UNQUOTED_LOWER_COL": ["databricks_sql", "postgres", "sqlite"],
     "str unquoted_upper_col": ["databricks_sql", "sqlite"],
     "str UNQUOTED_UPPER_COL": ["databricks_sql", "postgres"],
@@ -609,26 +633,15 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     "str QUOTED_LOWER_COL": ["databricks_sql", "postgres", "snowflake", "sqlite"],
     "str quoted_upper_col": ["databricks_sql", "postgres", "snowflake", "sqlite"],
     'str "QUOTED_UPPER_COL"': ["postgres", "snowflake", "sqlite"],
-    "quoted_name quoted_lower_col quote=None": ["snowflake"],
-    "quoted_name quoted_lower_col quote=True": ["snowflake"],
-    "quoted_name quoted_lower_col quote=False": ["snowflake"],
-    "quoted_name quoted_upper_col quote=None": [
-        "databricks_sql",
-        "postgres",
-        "snowflake",
-        "sqlite",
-    ],
-    "quoted_name QUOTED_LOWER_COL quote=None": [
-        "databricks_sql",
-        "postgres",
-        "snowflake",
-        "sqlite",
-    ],
 }
+
+# expect failures for these column names
+EXPECTED_FAILURE: Final[dict[ColNameParamId, list[DatabaseType]]] = {}
 
 
 def _requires_fix(param_id: str) -> bool:
-    dialect, *_, column_name = param_id.split("-")
+    column_name: ColNameParamId
+    dialect, *_, column_name = param_id.split("-")  # type: ignore[assignment]
     dialects_need_fixes: list[DatabaseType] = REQUIRE_FIXES.get(column_name, [])
     return dialect in dialects_need_fixes
 
@@ -649,71 +662,25 @@ def _is_quote_char_dialect_mismatch(
     "column_name",
     [
         param("unquoted_lower_col", id="str unquoted_lower_col"),
+        param('"unquoted_lower_col"', id='str "unquoted_lower_col"'),
         param("UNQUOTED_LOWER_COL", id="str UNQUOTED_LOWER_COL"),
+        param('"UNQUOTED_LOWER_COL"', id='str "UNQUOTED_LOWER_COL"'),
+        # ------------------------------------------------------
         param("unquoted_upper_col", id="str unquoted_upper_col"),
+        param('"unquoted_upper_col"', id='str "unquoted_upper_col"'),
         param("UNQUOTED_UPPER_COL", id="str UNQUOTED_UPPER_COL"),
+        param('"UNQUOTED_UPPER_COL"', id='str "UNQUOTED_UPPER_COL"'),
+        # ------------------------------------------------------
         param("quoted_lower_col", id="str quoted_lower_col"),
+        param('"quoted_lower_col"', id='str "quoted_lower_col"'),
         param("QUOTED_LOWER_COL", id="str QUOTED_LOWER_COL"),
+        param('"QUOTED_LOWER_COL"', id='str "QUOTED_LOWER_COL"'),
+        # ------------------------------------------------------
         param("quoted_upper_col", id="str quoted_upper_col"),
+        param('"quoted_upper_col"', id='str "quoted_upper_col"'),
         param("QUOTED_UPPER_COL", id="str QUOTED_UPPER_COL"),
         param('"QUOTED_UPPER_COL"', id='str "QUOTED_UPPER_COL"'),
-        param('"quoted_lower_col"', id='str "quoted_lower_col"'),
-        param(
-            quoted_name(
-                "quoted_lower_col",
-                quote=None,
-            ),
-            id="quoted_name quoted_lower_col quote=None",
-        ),
-        param(
-            quoted_name(
-                "quoted_lower_col",
-                quote=True,
-            ),
-            id="quoted_name quoted_lower_col quote=True",
-        ),
-        param(
-            quoted_name(
-                "quoted_lower_col",
-                quote=False,
-            ),
-            id="quoted_name quoted_lower_col quote=False",
-        ),
-        param(
-            quoted_name(
-                "QUOTED_LOWER_COL",
-                quote=None,
-            ),
-            id="quoted_name QUOTED_LOWER_COL quote=None",
-        ),
-        param(
-            quoted_name(
-                "QUOTED_UPPER_COL",
-                quote=None,
-            ),
-            id="quoted_name QUOTED_UPPER_COL quote=None",
-        ),
-        param(
-            quoted_name(
-                "QUOTED_UPPER_COL",
-                quote=True,
-            ),
-            id="quoted_name QUOTED_UPPER_COL quote=True",
-        ),
-        param(
-            quoted_name(
-                "QUOTED_UPPER_COL",
-                quote=False,
-            ),
-            id="quoted_name QUOTED_UPPER_COL quote=False",
-        ),
-        param(
-            quoted_name(
-                "quoted_upper_col",
-                quote=None,
-            ),
-            id="quoted_name quoted_upper_col quote=None",
-        ),
+        # ------------------------------------------------------
     ],
 )
 class TestColumnIdentifiers:
@@ -724,7 +691,7 @@ class TestColumnIdentifiers:
         context: EphemeralDataContext,
         all_sql_datasources: SQLDatasource,
         table_factory: TableFactory,
-        column_name: str | quoted_name,
+        column_name: str,
         request: pytest.FixtureRequest,
     ):
         datasource = all_sql_datasources
