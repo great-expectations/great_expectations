@@ -1,6 +1,5 @@
 from typing import List, Optional
 
-from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
     ExpectationConfiguration,
 )
@@ -13,11 +12,6 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.renderer_configuration import (
-    AddParamArgs,
-    RendererConfiguration,
-    RendererValueType,
-)
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
 try:
@@ -132,43 +126,6 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
                 ), 'Evaluation Parameter dict for like_pattern kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-
-    @classmethod
-    @override
-    def _prescriptive_template(
-        cls, renderer_configuration: RendererConfiguration
-    ) -> RendererConfiguration:
-        add_param_args: AddParamArgs = (
-            ("column", RendererValueType.STRING),
-            ("like_pattern", RendererValueType.STRING),
-            ("mostly", RendererValueType.NUMBER),
-            ("ignore_row_if", RendererValueType.STRING),
-        )
-
-        for name, param_type in add_param_args:
-            renderer_configuration.add_param(name=name, param_type=param_type)
-
-        params = renderer_configuration.params
-
-        if not params.like_pattern:
-            template_str = (
-                "values must not match a like pattern but none was specified."
-            )
-        else:
-            template_str = "Values must not match like pattern $like_pattern"
-            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
-                renderer_configuration = cls._add_mostly_pct_param(
-                    renderer_configuration=renderer_configuration
-                )
-                template_str += ", at least $mostly_pct % of the time."
-            else:
-                template_str += "."
-
-        if renderer_configuration.include_column_name:
-            template_str = "$column " + template_str
-
-        renderer_configuration.template_str = template_str
-        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
