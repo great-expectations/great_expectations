@@ -703,7 +703,6 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     'expect_column_values_to_not_be_null-str "quoted_lower_col"': [
         "postgres",
         "snowflake",
-        "sqlite",
     ],
     "expect_column_values_to_not_be_null-str QUOTED_LOWER_COL": [
         "databricks_sql",
@@ -730,7 +729,6 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     'expect_column_values_to_not_be_null-str "QUOTED_UPPER_COL"': [
         "postgres",
         "snowflake",
-        "sqlite",
     ],
 }
 
