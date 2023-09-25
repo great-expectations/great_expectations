@@ -79,13 +79,13 @@ Environment variables securely store your GX Cloud access credentials.
 
 Use the following information to help resolve common issues with the GX Cloud agent installation.
 
-**Error message: great_expectations.agent.agent.GXAgentError: Missing or badly formed environment variable**
+**great_expectations.agent.agent.GXAgentError: Missing or badly formed environment variable**
 
 Confirm the `GX_CLOUD_ACCESS_TOKEN` and `GX_CLOUD_ORGANIZATION_ID` environment variables are set and available in your local environment. For example, on Unix systems, you can run `echo $GX_CLOUD_ORGANIZATION_ID` to confirm that your organization ID is present and set.
 
-**Error message: pika not found**
+**pika not found**
 
-In Jupyter Notebook, run the following command:
+Run the following command:
 
 ```bash title="Terminal input"
     pip install great_expectations[cloud]
