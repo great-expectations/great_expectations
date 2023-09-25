@@ -1,7 +1,7 @@
 ---
 sidebar_label: 'Install the GX Cloud agent'
 title: 'Install the GX Cloud agent'
-id: work_with_gx_cloud_agent
+id: install_gx_cloud_agent
 description: Install the GX Cloud agent.
 ---
 
