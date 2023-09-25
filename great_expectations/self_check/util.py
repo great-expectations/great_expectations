@@ -1731,9 +1731,16 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 test_backends += ["trino"]
 
         if include_azure:
+            azure_connection_string: Optional[str] = os.getenv(
+                "AZURE_CONNECTION_STRING"
+            )
             azure_credential: Optional[str] = os.getenv("AZURE_CREDENTIAL")
             azure_access_key: Optional[str] = os.getenv("AZURE_ACCESS_KEY")
-            if not azure_access_key and not azure_credential:
+            if (
+                not azure_access_key
+                and not azure_connection_string
+                and not azure_credential
+            ):
                 if raise_exceptions_for_backends is True:
                     raise ImportError(
                         "Azure tests are requested, but credentials were not set up"
@@ -2571,7 +2578,7 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                     )
                 except AssertionError:
                     if result["result"]["unexpected_list"]:
-                        if type(result["result"]["unexpected_list"][0]) == list:
+                        if isinstance(result["result"]["unexpected_list"][0], list):
                             unexpected_list_tup = [
                                 tuple(x) for x in result["result"]["unexpected_list"]
                             ]

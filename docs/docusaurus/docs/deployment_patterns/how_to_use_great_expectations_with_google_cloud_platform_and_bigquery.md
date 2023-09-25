@@ -52,8 +52,8 @@ The following diagram shows the recommended components for a Great Expectations 
 
 Relevant documentation for the components can also be found here:
 
-- [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md)
-- [How to configure a Validation Result store in GCS](../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.md)
+- [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/configure_expectation_stores.md)
+- [How to configure a Validation Result store in GCS](../guides/setup/configuring_metadata_stores/configure_result_stores.md)
 - [How to host and share Data Docs on GCS](../guides/setup/configuring_data_docs/host_and_share_data_docs.md)
 - Optionally, you can also use a [Secret Manager for GCP Credentials](../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
 
@@ -101,7 +101,7 @@ Great Expectations can then be configured to use this new Expectations Store, `e
 ```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_expectation_store"
 ```
 
-For additional details and example configurations, please refer to [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md).
+For additional details and example configurations, see [Configure Expectation Stores](../guides/setup/configuring_metadata_stores/configure_expectation_stores.md).
 
 #### Add Validations Store
 By default, Validations are stored in JSON format in the `uncommitted/validations/` subdirectory of your `great_expectations/` folder. A new Validations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
@@ -114,7 +114,7 @@ Great Expectations can then be configured to use this new Validations Store, `va
 ```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_validations_store"
 ```
 
-For additional details and example configurations, please refer to  [How to configure an Validation Result store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.md).
+For additional details and example configurations, see [Configure Validation Result Stores](../guides/setup/configuring_metadata_stores/configure_result_stores.md).
 
 #### Add Data Docs Store
 To host and share Datadocs on GCS, we recommend using the [following guide](../guides/setup/configuring_data_docs/host_and_share_data_docs.md), which will explain how to host and share Data Docs on Google Cloud Storage using IP-based access.

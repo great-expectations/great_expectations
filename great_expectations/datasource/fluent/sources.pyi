@@ -1,4 +1,5 @@
 import pathlib
+import uuid
 from logging import Logger
 from typing import (
     Any,
@@ -14,14 +15,15 @@ from typing import (
     overload,
 )
 
-import pydantic
 from typing_extensions import TypeAlias, override
 
+from great_expectations.compatibility import pydantic
 from great_expectations.data_context import (
     AbstractDataContext as GXDataContext,
 )
 from great_expectations.datasource.fluent import (
     DatabricksSQLDatasource,
+    FabricPowerBIDatasource,
     PandasAzureBlobStorageDatasource,
     PandasDatasource,
     PandasDBFSDatasource,
@@ -714,6 +716,14 @@ class _SourceFactories:
         self,
         name: str,
     ) -> None: ...
+    def add_fabric_powerbi(
+        self,
+        name: Optional[str] = None,
+        datasource: Optional[FabricPowerBIDatasource] = None,
+        *,
+        workspace: Optional[Union[uuid.UUID, str]] = None,
+        dataset: Union[uuid.UUID, str] = ...,
+    ) -> FabricPowerBIDatasource: ...
 
 def _iter_all_registered_types(
     include_datasource: bool = True, include_data_asset: bool = True

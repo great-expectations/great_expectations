@@ -66,7 +66,7 @@ class ExpectationsStore(Store):
         icon:
         short_description: S3
         description: Use an Amazon Web Services S3 bucket to store expectations.
-        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3.html
+        how_to_guide_url: https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/configure_expectation_stores.html
         maturity: Beta
         maturity_details:
             api_stability: Stable
@@ -96,7 +96,7 @@ class ExpectationsStore(Store):
         icon:
         short_description: Azure Blob Storage
         description:  Use Microsoft Azure Blob Storage to store expectations.
-        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.html
+        how_to_guide_url: https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/configure_expectation_stores.html
         maturity: N/A
         maturity_details:
             api_stability: Stable
@@ -166,7 +166,8 @@ class ExpectationsStore(Store):
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     @override
-    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
+    @staticmethod
+    def gx_cloud_response_json_to_object_dict(response_json: Dict) -> Dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object

@@ -25,9 +25,9 @@ Steps
 
             The Google Cloud Platform documentation describes how to verify your `authentication for the Google Cloud API <https://cloud.google.com/docs/authentication/getting-started>`_, which includes:
 
-                1. Creating a Google Cloud Platform (GCP) service account,
-                2. Setting the ``GOOGLE_APPLICATION_CREDENTIALS`` environment variable,
-                3. Verifying authentication by running a simple `Google Cloud Storage client <https://cloud.google.com/storage/docs/reference/libraries>`_ library script.
+                Creating a Google Cloud Platform (GCP) service account,
+                Setting the ``GOOGLE_APPLICATION_CREDENTIALS`` environment variable,
+                Verifying authentication by running a simple `Google Cloud Storage client <https://cloud.google.com/storage/docs/reference/libraries>`_ library script.
 
         2. **Identify your Data Context Expectations Store**
 
@@ -122,9 +122,9 @@ Steps
 
             The Google Cloud Platform documentation describes how to verify your `authentication for the Google Cloud API <https://cloud.google.com/docs/authentication/getting-started>`_, which includes:
 
-                1. Creating a Google Cloud Platform (GCP) service account,
-                2. Setting the ``GOOGLE_APPLICATION_CREDENTIALS`` environment variable,
-                3. Verifying authentication by running a simple `Google Cloud Storage client <https://cloud.google.com/storage/docs/reference/libraries>`_ library script.
+                Creating a Google Cloud Platform (GCP) service account,
+                Setting the ``GOOGLE_APPLICATION_CREDENTIALS`` environment variable,
+                Verifying authentication by running a simple `Google Cloud Storage client <https://cloud.google.com/storage/docs/reference/libraries>`_ library script.
 
         2. **Identify your Data Context Expectations Store**
 

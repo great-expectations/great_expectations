@@ -1,16 +1,6 @@
-from typing import Optional
-
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
 from great_expectations.expectations.expectation import (
     BatchExpectation,
-    render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyDiagnosticRendererType, LegacyRendererType
-from great_expectations.render.renderer.renderer import renderer
 
 
 class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
@@ -34,28 +24,3 @@ class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
     success_keys = ()
     default_kwarg_values = {}
     args_keys = ()
-
-    @classmethod
-    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
-    @override
-    def _prescriptive_renderer(
-        cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ) -> None:
-        pass
-
-    @classmethod
-    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
-    @override
-    def _diagnostic_observed_value_renderer(
-        cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ) -> None:
-        pass

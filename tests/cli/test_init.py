@@ -70,7 +70,7 @@ def test_cli_init_on_new_project(
         os.path.join(project_dir, FileDataContext.GX_DIR)  # noqa: PTH118
     )
     config_path = os.path.join(  # noqa: PTH118
-        project_dir, "great_expectations/great_expectations.yml"
+        project_dir, f"{FileDataContext.GX_DIR}/{FileDataContext.GX_YML}"
     )
     assert os.path.isfile(config_path)  # noqa: PTH113
 
@@ -83,7 +83,7 @@ def test_cli_init_on_new_project(
 
     assert (
         obs_tree
-        == """great_expectations/
+        == """gx/
     .gitignore
     great_expectations.yml
     checkpoints/
