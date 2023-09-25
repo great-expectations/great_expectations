@@ -5,7 +5,7 @@ module.exports = {
       type: 'category',
       label: 'GX Cloud',
       items: [
-        `cloud/quickstarts/snowflake_quickstart`,
+        `cloud/install_gx_cloud_agent`,
       ]
     },
     {

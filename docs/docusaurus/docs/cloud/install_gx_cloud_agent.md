@@ -5,5 +5,88 @@ id: work_with_gx_cloud_agent
 description: Install the GX Cloud agent.
 ---
 
-The GX Cloud Agent runs open source Great Expectations (GX) code in GX Cloud, and it allows you to securely access your data without connecting or interacting with it directly. 
+The GX Cloud agent runs open source Great Expectations (GX) code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. 
 
+## Prerequisites
+
+- You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
+
+## Prepare your environment
+
+1. Download and install Python. See [Active Python Releases](https://www.python.org/downloads/).
+
+2. Download and install pip. See the [pip documentation](https://pip.pypa.io/en/stable/cli/pip/).
+
+3. Run the following command in an empty base directory inside a Python virtual environment to install GX Cloud and its dependencies:
+
+    ```bash title="Terminal input"
+    pip install great_expectations[cloud]
+    ```
+
+    It can take several minutes for the installation to complete.
+
+    If you've previously installed GX Cloud, run the following command to upgrade to the latest version:
+
+    ```bash title="Terminal input"
+    pip install 'great_expectations[cloud]' --upgrade
+    ```
+
+## Generate your user access token and copy your organization ID
+
+You'll need your user access token and organization ID to set your environment variables. Access tokens shouldn't be committed to version control software.
+
+1. In GX Cloud, click **Settings** > **Tokens**.
+
+2. In the **Access tokens** pane, click **Create user access token**.
+
+3. Complete the following fields:
+
+    - **Token name** - Enter a name for the token that will help you quickly identify it.
+
+    - **Role** - Select **Admin**. For more information about the available roles, click **Information** (?) .
+
+4. Click **Create**.
+
+5. Copy the access token and store it in a secure location. The token can't be retrieved after you close the dialog.
+
+6. Click **Close**.
+
+7. Copy the value in the **Organization ID** field and save it in the same location with your user access token.
+
+## Set the environment variables and start the GX Cloud agent
+
+Environment variables securely store your GX Cloud access credentials.
+
+1. Set the following environment variables:
+
+    - `GX_CLOUD_ORGANIZATION_ID` - The Organization ID you copied previously.
+
+    - `GX_CLOUD_ACCESS_TOKEN` - The user access token you generated previously.
+
+    To set the environment variables, see the documentation specific to your operating system. 
+
+2. In Jupyter Notebook, run the following code to start the GX Cloud agent:
+    
+    ```python title="Jupyter Notebook"
+       gx-agent
+    ```
+
+    If you stop the GX Cloud agent, close the terminal, and open a new terminal you'll need to set the environment variables again.
+
+    To edit an environment variable, stop the GX Cloud agent, edit the environment variable, save the change, and then restart the GX Cloud agent.
+
+## Troubleshoot
+
+Use the following information to help resolve common issues with the GX Cloud agent installation.
+
+**Error message: great_expectations.agent.agent.GXAgentError: Missing or badly formed environment variable**
+
+Confirm the `GX_CLOUD_ACCESS_TOKEN` and `GX_CLOUD_ORGANIZATION_ID` environment variables are set and available in your local environment. For example, on Unix systems, you can run `echo $GX_CLOUD_ORGANIZATION_ID` to confirm that your organization ID is present and set.
+
+**Error message: pika not found**
+
+In Jupyter Notebook, run the following command:
+
+```bash title="Terminal input"
+    pip install great_expectations[cloud]
+```
