@@ -24,6 +24,7 @@ from tests.datasource.fluent.conftest import (
 )
 
 
+@pytest.mark.cloud
 class TestCloudDataStore:
     def test_add_expectation_suite_success(
         self, empty_cloud_context_fluent: CloudDataContext  # noqa: F811
