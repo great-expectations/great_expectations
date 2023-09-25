@@ -55,7 +55,9 @@ You'll need your user access token and organization ID to set your environment v
 
 7. Copy the value in the **Organization ID** field and save it in the same location with your user access token.
 
-## Set the environment variables and start the GX Cloud Agent
+## Set the environment variables and start the GX Cloud agent
+
+Environment variables securely store your GX Cloud and Snowflake access credentials.
 
 1. Set the following environment variables:
 
@@ -67,17 +69,19 @@ You'll need your user access token and organization ID to set your environment v
 
     To set the environment variables, see the documentation specific to your operating system. 
 
-2. In Jupyter Notebook, run the following code to start the GX Cloud Agent:
+2. In Jupyter Notebook, run the following code to start the GX Cloud agent:
     
     ```python title="Jupyter Notebook"
        gx-agent
     ```
 
-    If you stop the GX Cloud Agent, close the terminal, and open a new terminal you'll need to set the environment variables again.
+    If you stop the GX Cloud agent, close the terminal, and open a new terminal you'll need to set the environment variables again.
 
-    To edit an environment variable, stop the GX Cloud Agent, edit the environment variable, save the change, and then restart the GX Cloud Agent.
+    To edit an environment variable, stop the GX Cloud agent, edit the environment variable, save the change, and then restart the GX Cloud agent.
 
 ## Create the Snowflake Data Asset
+
+Create a Data Asset to define the data you want GX Cloud to access within Snowflake. 
 
 1. In GX Cloud, click **Data Assets** > **New Asset**.
 
@@ -113,13 +117,15 @@ You'll need your user access token and organization ID to set your environment v
 
     - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
 
-    - **Query**: Enter the query that you want to run on the table. 
+    - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
 
 7. Optional. Select **Add table/query** to add additional tables or queries and repeat step 6.
 
 8. Click **Finish**.
 
 ## Add an Expectation
+
+An Expectation is a verifiable assertion about your data. They make implicit assumptions about your data explicit.
 
 1. In the **Data Assets** list, click the Snowflake Data Asset name.
 
