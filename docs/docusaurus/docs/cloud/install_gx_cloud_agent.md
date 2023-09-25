@@ -71,7 +71,7 @@ Environment variables securely store your GX Cloud access credentials.
 
 3. In Jupyter Notebook, run the following code to start the GX Cloud agent:
     
-    ```python title="Jupyter Notebook"
+    ```python
        gx-agent
     ```
 
