@@ -317,12 +317,16 @@ def get_parameter_value(
     ) and is_fully_qualified_parameter_name_prefix_in_literal(
         fully_qualified_parameter_name=parameter_reference
     ):
+        # TODO: this is missing right now
         parameter_reference = get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=parameter_reference,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
+        if parameter_reference is None:
+            raise Exception("why is this null?")
+        # and this is missing too
         parameter_reference = get_parameter_value(
             domain=domain,
             parameter_reference=parameter_reference,

@@ -1,0 +1,147 @@
+<test-run id="2" testcasecount="1" result="Passed" start-time="2023-09-25 21:12:19.804472" end-time="2023-09-25 21:12:23.466219" duration="3" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0" clr-version="3.8.18 (default, Aug 25 2023, 02:07:22) &#10;[Clang 14.0.3 (clang-1403.0.22.14.1)]" engine-version="3.6.2"><command-line>/Applications/PyCharm.app/Contents/plugins/python/helpers/pycharm/_jb_pytest_runner.py test_rendering_missingness.py::test_me</command-line><filter><test re="0">test_rendering_missingness.py::test_me</test></filter><test-suite id="great_expectations/rule_based_profiler/data_assistant/test_rendering_missingness.py" name="great_expectations/rule_based_profiler/data_assistant/test_rendering_missingness.py" fullname="great_expectations/rule_based_profiler/data_assistant/test_rendering_missingness.py" methodname="" classname="" runstate="Runnable" type="Assembly" testcasecount="1" result="Passed" label="" start-time="2023-09-25 21:12:23.192940" end-time="2023-09-25 21:12:23.465308" duration="0.272368" asserts="0" total="1" passed="0" failed="1" warnings="0" inconclusive="0" skipped="0"><properties><property name="python_version" value="3.8.18 (default, Aug 25 2023, 02:07:22) &#10;[Clang 14.0.3 (clang-1403.0.22.14.1)]" /></properties><test-case id="100" name="great_expectations/rule_based_profiler/data_assistant/test_rendering_missingness.py::test_me" fullname="great_expectations/rule_based_profiler/data_assistant/test_rendering_missingness.py::test_me" methodname="test_me" classname="great_expectations/rule_based_profiler/data_assistant/test_rendering_missingness.py" runstate="Runnable" seed="1" result="Failed" label="" start-time="2023-09-25 21:12:23.192940" end-time="2023-09-25 21:12:23.465308" duration="0.272368" asserts="0"><properties><property name="python-version" value="3.8.18 (default, Aug 25 2023, 02:07:22) &#10;[Clang 14.0.3 (clang-1403.0.22.14.1)]" /><property name="fspath" value="great_expectations/rule_based_profiler/data_assistant/test_rendering_missingness.py" /></properties><environment framework-version="3.6.2" clr-version="3.8.18 (default, Aug 25 2023, 02:07:22) &#10;[Clang 14.0.3 (clang-1403.0.22.14.1)]" os-version="22.6.0" platform="Darwin" cwd="/Users/work/Development/great_expectations/great_expectations/rule_based_profiler/data_assistant" machine-name="arm64" user="" user-domain="" culture="en_US" uiculture="en_US" os-architecture="64bit" /><failure><message><![CDATA[def test_me():
+        YAMLHandler()
+        context = gx.get_context()
+        current_path = pathlib.Path(__file__).parents[1]
+        data_path = (
+            current_path
+            / ".."
+            / ".."
+            / "tests"
+            / "test_sets"
+            / "taxi_yellow_tripdata_samples"
+            / "first_ten_trips_in_each_file"
+        )
+        context.sources.add_pandas_filesystem(
+            "taxi_multi_batch_datasource",
+            base_directory=data_path,  # replace with your data directory
+        ).add_csv_asset(
+            "all_years",
+            batching_regex=r"yellow_tripdata_sample_(?P&lt;year&gt;\d{4})-(?P&lt;month&gt;\d{2})\.csv",
+        )
+        expectation_suite_name = "my_missingness_assistant_suite"
+        expectation_suite = context.add_or_update_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+        all_years_asset: DataAsset = context.datasources[
+            "taxi_multi_batch_datasource"
+        ].get_asset("all_years")
+
+        multi_batch_all_years_batch_request: BatchRequest = (
+            all_years_asset.build_batch_request()
+        )
+        exclude_column_names = [
+            "VendorID",
+            "pickup_datetime",
+            "dropoff_datetime",
+            "RatecodeID",
+            "PULocationID",
+            "DOLocationID",
+            "payment_type",
+            "fare_amount",
+            "extra",
+            "mta_tax",
+            "tip_amount",
+            "tolls_amount",
+            "improvement_surcharge",
+            "congestion_surcharge",
+        ]
+&gt;       data_assistant_result = context.assistants.missingness.run(
+            batch_request=multi_batch_all_years_batch_request,
+            exclude_column_names=exclude_column_names,
+        )
+
+test_rendering_missingness.py:61:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+data_assistant_dispatcher.py:58: in __getattr__
+    data_assistant_runner = DataAssistantRunner(
+data_assistant_runner.py:70: in __init__
+    self._profiler: BaseRuleBasedProfiler = self.get_profiler()
+data_assistant_runner.py:81: in get_profiler
+    return self._build_data_assistant().profiler
+data_assistant_runner.py:261: in _build_data_assistant
+    data_assistant = self._data_assistant_cls(
+column_value_missing_data_assistant.py:65: in __init__
+    super().__init__(
+data_assistant.py:521: in __init__
+    self._profiler = RuleBasedProfiler(
+../rule_based_profiler.py:1643: in __init__
+    super().__init__(
+../rule_based_profiler.py:149: in __init__
+    self.variables = _variables
+../rule_based_profiler.py:1488: in variables
+    self.config.variables = convert_variables_to_dict(variables=value)
+../helpers/util.py:481: in convert_variables_to_dict
+    ] = get_parameter_value_and_validate_return_type(
+../helpers/util.py:264: in get_parameter_value_and_validate_return_type
+    parameter_reference = get_parameter_value(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+domain = None, parameter_reference = None
+variables = ParameterContainer(parameter_nodes=None), parameters = None
+
+    def get_parameter_value(
+        domain: Optional[Domain] = None,
+        parameter_reference: Optional[Union[Any, str]] = None,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+    ) -&gt; Optional[Any]:
+        """
+        This method allows for the parameter_reference to be specified as an object (literal, dict, any typed object, etc.)
+        or as a fully-qualified parameter name.  Moreover, if the parameter_reference argument is an object of type "dict",
+        it will recursively detect values using the fully-qualified parameter name format and evaluate them accordingly.
+        """
+        if isinstance(parameter_reference, dict):
+            for key, value in parameter_reference.items():
+                parameter_reference[key] = get_parameter_value(
+                    domain=domain,
+                    parameter_reference=value,
+                    variables=variables,
+                    parameters=parameters,
+                )
+        elif isinstance(parameter_reference, (list, set, tuple)):
+            parameter_reference_type: type = type(parameter_reference)
+            element: Any
+            return parameter_reference_type(
+                [
+                    get_parameter_value(
+                        domain=domain,
+                        parameter_reference=element,
+                        variables=variables,
+                        parameters=parameters,
+                    )
+                    for element in parameter_reference
+                ]
+            )
+        elif isinstance(
+            parameter_reference, str
+        ) and is_fully_qualified_parameter_name_prefix_in_literal(
+            fully_qualified_parameter_name=parameter_reference
+        ):
+            # TODO: this is missing right now
+            parameter_reference = get_parameter_value_by_fully_qualified_parameter_name(
+                fully_qualified_parameter_name=parameter_reference,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
+            if parameter_reference is None:
+&gt;               raise Exception("why is this null?")
+E               Exception: why is this null?
+
+../helpers/util.py:328: Exception]]></message><stack-trace><![CDATA[/Users/work/Development/great_expectations/great_expectations/rule_based_profiler/helpers/util.py:328: Exception: why is this null?]]></stack-trace></failure><reason><message><![CDATA[INFO     great_expectations.data_context.data_context.context_factory:context_factory.py:375 Could not find local file-backed GX project
+INFO     great_expectations.data_context.types.base:base.py:2152 Created temporary directory '/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/tmpdedas58x' for ephemeral docs site
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4341 Usage statistics is disabled globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4372 usage_statistics_url is defined globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:5633 EphemeralDataContext has not implemented `_load_fluent_config()` returning empty `GxConfig`
+INFO     great_expectations.datasource.fluent.config:config.py:185 Loading 'datasources' -&gt;
+[]
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4580 Usage statistics is disabled; skipping initialization.
+INFO     great_expectations.datasource.fluent.sources:sources.py:281 'taxi_multi_batch_datasource' PandasFilesystemDatasource uses FilesystemDataConnector]]></message></reason><output><![CDATA[INFO     great_expectations.data_context.data_context.context_factory:context_factory.py:375 Could not find local file-backed GX project
+INFO     great_expectations.data_context.types.base:base.py:2152 Created temporary directory '/var/folders/xc/q2lzqtf11m1ftwmz88783yq40000gn/T/tmpdedas58x' for ephemeral docs site
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4341 Usage statistics is disabled globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4372 usage_statistics_url is defined globally. Applying override to project_config.
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:5633 EphemeralDataContext has not implemented `_load_fluent_config()` returning empty `GxConfig`
+INFO     great_expectations.datasource.fluent.config:config.py:185 Loading 'datasources' -&gt;
+[]
+INFO     great_expectations.data_context.data_context.abstract_data_context:abstract_data_context.py:4580 Usage statistics is disabled; skipping initialization.
+INFO     great_expectations.datasource.fluent.sources:sources.py:281 'taxi_multi_batch_datasource' PandasFilesystemDatasource uses FilesystemDataConnector]]></output></test-case><environment framework-version="3.6.2" clr-version="3.8.18 (default, Aug 25 2023, 02:07:22) &#10;[Clang 14.0.3 (clang-1403.0.22.14.1)]" os-version="22.6.0" platform="Darwin" cwd="/Users/work/Development/great_expectations/great_expectations/rule_based_profiler/data_assistant" machine-name="arm64" user="" user-domain="" culture="en_US" uiculture="en_US" os-architecture="64bit" /></test-suite></test-run>

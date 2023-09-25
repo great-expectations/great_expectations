@@ -144,6 +144,10 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
         )
 
+        unexpected_fraction_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = (
+            DataAssistant.commonly_used_parameter_builders.get_column_values_null_unexpected_fraction_metric_multi_batch_parameter_builder()
+        )
+
         evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
         map_metric_name: str
@@ -171,6 +175,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             unexpected_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
+            unexpected_fraction_parameter_builder_name=unexpected_fraction_metric_multi_batch_parameter_builder_for_evaluations.name,
             mode=mode,
             max_error_rate=None,
             expectation_type=None,
@@ -183,16 +188,16 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         expectation_type = "expect_column_values_to_not_be_null"
 
         column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
-            name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+            name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUE_COUNT_FRACTIONS.value}",
             unexpected_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
+            unexpected_fraction_parameter_builder_name=unexpected_fraction_metric_multi_batch_parameter_builder_for_evaluations.name,
             mode=mode,
             max_error_rate=f"{VARIABLES_KEY}max_error_rate",
             expectation_type=expectation_type,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=None,
         )
-
         validation_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.to_json_dict()
@@ -235,6 +240,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             unexpected_count_parameter_builder_name=column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
+            unexpected_fraction_parameter_builder_name=unexpected_fraction_metric_multi_batch_parameter_builder_for_evaluations.name,
             mode=mode,
             max_error_rate=None,
             expectation_type=None,
@@ -250,6 +256,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             unexpected_count_parameter_builder_name=column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
+            unexpected_fraction_parameter_builder_name=unexpected_fraction_metric_multi_batch_parameter_builder_for_evaluations.name,
             mode=mode,
             max_error_rate=f"{VARIABLES_KEY}max_error_rate",
             expectation_type=expectation_type,
@@ -304,5 +311,5 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             parameter_builders=parameter_builders,
             expectation_configuration_builders=expectation_configuration_builders,
         )
-
+        # breakpoint()
         return rule

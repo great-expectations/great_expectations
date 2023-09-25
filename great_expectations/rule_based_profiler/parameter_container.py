@@ -461,6 +461,8 @@ def get_parameter_value_by_fully_qualified_parameter_name(
     :return: Optional[Union[Any, ParameterNode]] object corresponding to the last part of the fully-qualified parameter
     name supplied as argument -- a value (of type "Any") or a ParameterNode object (containing the sub-tree structure).
     """
+    # this shouldn't be variables
+    print("hello second layer")
     validate_fully_qualified_parameter_name_delimiter(
         fully_qualified_parameter_name=fully_qualified_parameter_name
     )
@@ -495,6 +497,7 @@ def get_parameter_value_by_fully_qualified_parameter_name(
     parameter_container: ParameterContainer
 
     if fully_qualified_parameter_name.startswith(VARIABLES_PREFIX):
+        # this is here
         parameter_container = variables  # type: ignore[assignment] # could be None
     else:
         parameter_container = parameters[domain.id]  # type: ignore[index,union-attr] # `parameters` & `domain` could be None

@@ -172,6 +172,22 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 metric_value_kwargs=None,
             )
 
+        def get_column_values_nonnull_unexpected_fraction_metric_multi_batch_parameter_builder(
+            self,
+        ) -> ParameterBuilder:
+            return self.build_numeric_metric_multi_batch_parameter_builder(
+                metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUE_COUNT_FRACTIONS.value}",
+                metric_value_kwargs=None,
+            )
+
+        def get_column_values_null_unexpected_fraction_metric_multi_batch_parameter_builder(
+            self,
+        ) -> ParameterBuilder:
+            return self.build_numeric_metric_multi_batch_parameter_builder(
+                metric_name=f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUE_COUNT_FRACTIONS.value}",
+                metric_value_kwargs=None,
+            )
+
         def get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder(
             self,
         ) -> ParameterBuilder:

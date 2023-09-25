@@ -75,8 +75,8 @@ def test_me():
             }
         ],
     )
-    checkpoint_result = checkpoint.run()
-    print(checkpoint_result)
+    checkpoint.run()
+    # print(checkpoint_result)
     print("hello")
-    res = data_assistant_result.plot_expectations_and_metrics()
-    print(res)
+    data_assistant_result.plot_expectations_and_metrics()
+    # print(res)

@@ -4029,6 +4029,34 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         metrics_attributed_values_by_domain: Dict[
             Domain, Dict[str, List[ParameterNode]]
         ] = {}
+        # key method. If we have the metrics correct then it should show up here
+
+        # ok so i'm re-writing this method
+        if self.metrics_by_domain:
+            for (
+                domain,
+                parameter_values_for_fully_qualified_parameter_names,
+            ) in self.metrics_by_domain.items():
+                # print(f"parameter_values_for_fully_qualified_parameter_names: {parameter_values_for_fully_qualified_parameter_names}")
+                metrics_attributed_values_by_domain[domain] = {}
+                for (
+                    fully_qualified_parameter_name,
+                    parameter_node,
+                ) in parameter_values_for_fully_qualified_parameter_names.items():
+                    if FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY in parameter_node:
+                        print(f"parameter_node: {parameter_node}")
+                        # parameter_node: {'value': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 0.1, 0.2, 0.0, 0.2, 0.3, 0.1, 0.3, 0.1, 0.0], 'details': {'metric_configuration': {'metric_name': 'column_values.nonnull.unexpected_count', 'domain_kwargs': {'column': 'vendor_id'}, 'metric_value_kwargs': None}, 'num_batches': 36, 'mode': 'unexpected_count_fraction_values'}}
+                        # parameter_node: {'value': array([1. , 1. , 1. , 1. , 1. , 1. , 1. , 1. , 1. , 1. , 1. , 1. , 1. ,
+                        #        1. , 1. , 1. , 1. , 1. , 1. , 1. , 1. , 1. , 1. , 0.9, 1. , 1. ,
+                        #        1. , 0.9, 0.8, 1. , 0.8, 0.7, 0.9, 0.7, 0.9, 1. ]), 'details': {'metric_configuration': {'metric_name': 'column_values.null.unexpected_count', 'domain_kwargs': {'column': 'vendor_id'}, 'metric_value_kwargs': None}, 'num_batches': 36, 'mode': 'unexpected_count_fraction_values'}}
+
+                        # missing attributed_value feature
+                        # how do you generate this?
+
+                        # parameter_node: {'value': array([10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+                        #        10, 10, 10, 10, 10, 10,  9, 10, 10, 10,  9,  8, 10,  8,  7,  9,  7,
+                        #         9, 10]), 'attributed_value': {'taxi_multi_batch_datasource-all_years-year_2018-month_01': array([10]), 'taxi_multi_batch_datasource-all_years-year_2018-month_02': array([10]), 'taxi_multi_batch_datasource-all_years-year_2018-month_03': array([10]), 'taxi_multi_batch_datasource-all_years-year_2018-month_04': array([10]), 'taxi_multi_batch_datasource-all_years-year_2018-month_05': array([10]), 'taxi_multi_batch_datasource-all_years-year_2018-month_06': array([10]), 'taxi_multi_batch_datasource-all_years-year_2018-month_07': array([10]), 'taxi_multi_batch_datasource-all_years-year_2018-month_08': array([10]), 'taxi_multi_batch_datasource-all_years-year_2018-month_09': array([10]), 'taxi_multi_batch_datasource-all_years-year_2018-month_10': array([10]), 'taxi_multi_batch_datasource-all_years-year_2018-month_11': array([10]), 'taxi_multi_batch_datasource-all_years-year_2018-month_12': array([10]), 'taxi_multi_batch_datasource-all_years-year_2019-month_01': array([10]), 'taxi_multi_batch_datasource-all_years-year_2019-month_02': array([10]), 'taxi_multi_batch_datasource-all_years-year_2019-month_03': array([10]), 'taxi_multi_batch_datasource-all_years-year_2019-month_04': array([10]), 'taxi_multi_batch_datasource-all_years-year_2019-month_05': array([10]), 'taxi_multi_batch_datasource-all_years-year_2019-month_06': array([10]), 'taxi_multi_batch_datasource-all_years-year_2019-month_07': array([10]), 'taxi_multi_batch_datasource-all_years-year_2019-month_08': array([10]), 'taxi_multi_batch_datasource-all_years-year_2019-month_09': array([10]), 'taxi_multi_batch_datasource-all_years-year_2019-month_10': array([10]), 'taxi_multi_batch_datasource-all_years-year_2019-month_11': array([10]), 'taxi_multi_batch_datasource-all_years-year_2019-month_12': array([9]), 'taxi_multi_batch_datasource-all_years-year_2020-month_01': array([10]), 'taxi_multi_batch_datasource-all_years-year_2020-month_02': array([10]), 'taxi_multi_batch_datasource-all_years-year_2020-month_03': array([10]), 'taxi_multi_batch_datasource-all_years-year_2020-month_04': array([9]), 'taxi_multi_batch_datasource-all_years-year_2020-month_05': array([8]), 'taxi_multi_batch_datasource-all_years-year_2020-month_06': array([10]), 'taxi_multi_batch_datasource-all_years-year_2020-month_07': array([8]), 'taxi_multi_batch_datasource-all_years-year_2020-month_08': array([7]), 'taxi_multi_batch_datasource-all_years-year_2020-month_09': array([9]), 'taxi_multi_batch_datasource-all_years-year_2020-month_10': array([7]), 'taxi_multi_batch_datasource-all_years-year_2020-month_11': array([9]), 'taxi_multi_batch_datasource-all_years-year_2020-month_12': array([10])}, 'details': {'metric_configuration': {'metric_name': 'column_values.null.unexpected_count', 'domain_kwargs': {'column': 'vendor_id'}, 'metric_value_kwargs': None}, 'num_batches': 36, 'mode': 'multi_batch'}}
+        # breakpoint()
         if self.metrics_by_domain:
             for (
                 domain,
@@ -4039,7 +4067,16 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                     fully_qualified_parameter_name,
                     parameter_node,
                 ) in parameter_values_for_fully_qualified_parameter_names.items():
-                    if (
+                    if FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY in parameter_node:
+                        if (
+                            parameter_node[
+                                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                            ].get("mode")
+                            == "unexpected_count_fraction_parameter_nodes"
+                        ):
+                            print("will we ever ever ever")
+
+                    elif (
                         FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
                         in parameter_node
                         and FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY

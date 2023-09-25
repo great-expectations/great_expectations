@@ -43,6 +43,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
 
     RECOGNIZED_UNEXPECTED_RATIO_AGGREGATION_METHODS: set = {
         "unexpected_count_fraction_values",
+        "unexpected_count_fraction_parameter_nodes",
         "single_batch",
         "multi_batch",
     }
@@ -52,6 +53,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         name: str,
         unexpected_count_parameter_builder_name: str,
         total_count_parameter_builder_name: str,
+        unexpected_fraction_parameter_builder_name: str,
         mode: str,
         max_error_rate: Optional[Union[str, float]] = None,
         expectation_type: Optional[str] = None,
@@ -67,6 +69,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             unexpected_count_parameter_builder_name: name of parameter that computes unexpected_count (of domain values in Batch).
             total_count_parameter_builder_name: name of parameter that computes total_count (of rows in Batch).
+            unexpected_fraction_parameter_builder_name: name of parameter that computes count fraction (of rows in Batch).
             mode: directive for aggregating/summarizing unexpected count fractions of domain over observed Batch samples.
             max_error_rate: user-configured fraction between 0 and 1 expressing maximum error rate for encountering
             unexpected values as judged by computing predicted validation errors based on observed unexpected fractions.
@@ -86,6 +89,9 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         self._unexpected_count_parameter_builder_name = (
             unexpected_count_parameter_builder_name
         )
+        self._unexpected_fraction_parameter_builder_name = (
+            unexpected_fraction_parameter_builder_name
+        )
         self._mode = mode
 
         self._expectation_type = expectation_type
@@ -102,6 +108,10 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
     @property
     def total_count_parameter_builder_name(self) -> str:
         return self._total_count_parameter_builder_name
+
+    @property
+    def unexpected_fraction_parameter_builder_name(self) -> str:
+        return self._unexpected_fraction_parameter_builder_name
 
     @property
     def mode(self) -> str:
@@ -128,7 +138,6 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
         """
-
         if (
             domain.domain_type == MetricDomainTypes.COLUMN
             and "." in domain.domain_kwargs["column"]
@@ -174,25 +183,47 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
             )
         )
 
-        fully_qualified_total_count_parameter_builder_name: str = (
-            f"{RAW_PARAMETER_KEY}{total_count_parameter_builder_name}"
+        unexpected_fraction_parameter_builder_name: Optional[
+            str
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.unexpected_fraction_parameter_builder_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
         )
+        fully_qualified_unexpected_fraction_parameter_builder_name: str = (
+            f"{RAW_PARAMETER_KEY}{unexpected_fraction_parameter_builder_name}"
+        )
+
+        # breakpoint()
         # Obtain total_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        total_count_parameter_node: ParameterNode = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=fully_qualified_total_count_parameter_builder_name,
-                expected_return_type=None,
-                variables=variables,
-                parameters=parameters,
-            )
+        total_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=fully_qualified_unexpected_fraction_parameter_builder_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
         )
         total_count_values: MetricValues = total_count_parameter_node[
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
-
         unexpected_count_fraction_values: np.ndarray = unexpected_count_values / (
             total_count_values + NP_EPSILON
+        )
+
+        # now do it as an attributed_node
+        fully_qualified_total_count_fraction_parameter_builder_name: str = (
+            f"{RAW_PARAMETER_KEY}{total_count_parameter_builder_name}"
+        )
+        print("this is where we create the string")
+        # why does this disapper?
+        unexpected_count_fraction_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=fully_qualified_total_count_fraction_parameter_builder_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
         )
 
         # Obtain mode from "rule state" (i.e., variables and parameters); from instance variable otherwise.
@@ -216,7 +247,9 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         result: Union[np.float64, Dict[str, Union[np.float64, np.ndarray]]]
 
         if mode == "unexpected_count_fraction_values":
-            result = unexpected_count_fraction_values
+            # is this going to come back and bite me?
+            # result = unexpected_count_fraction_values
+            result = unexpected_count_fraction_parameter_node
         else:
             result = {
                 "single_batch_mode": mode == "single_batch",
