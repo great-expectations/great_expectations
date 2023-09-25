@@ -73,9 +73,9 @@ Environment variables securely store your GX Cloud and Snowflake access credenti
 
 2. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
 
-3. In Jupyter Notebook, run the following code to start the GX Cloud agent:
+3. Run the following code to start the GX Cloud agent:
     
-    ```python title="Jupyter Notebook"
+    ```python
        gx-agent
     ```
 
