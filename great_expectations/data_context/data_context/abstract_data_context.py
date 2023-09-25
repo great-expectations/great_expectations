@@ -5147,7 +5147,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         --Documentation--
             - https://docs.greatexpectations.io/docs/terms/data_context
-            - https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config
 
         Args:
             yaml_config: A string containing the yaml config to be tested
