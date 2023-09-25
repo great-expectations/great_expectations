@@ -43,8 +43,7 @@ class RunColumnDescriptiveMetricsEvent(EventBase):
     type: Literal[
         "column_descriptive_metrics_request.received"
     ] = "column_descriptive_metrics_request.received"
-    datasource_name: str
-    data_asset_name: str
+    data_asset_id: UUID
 
 
 class ListTableNamesEvent(EventBase):
