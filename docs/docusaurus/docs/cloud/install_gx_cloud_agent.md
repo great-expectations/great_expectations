@@ -81,7 +81,7 @@ Environment variables securely store your GX Cloud access credentials.
 
 ## Troubleshoot
 
-Use the following information to help resolve common issues with the GX Cloud agent installation.
+Use the following information to help resolve issues with the GX Cloud agent installation.
 
 **great_expectations.agent.agent.GXAgentError: Missing or badly formed environment variable**
 
