@@ -1790,7 +1790,6 @@ class Expectation(metaclass=MetaExpectation):
     ) -> RendererConfiguration:
         mostly_pct_value: str = num_to_str(
             renderer_configuration.params.mostly.value * 100,
-            precision=15,
             no_scientific=True,
         )
         renderer_configuration.add_param(
