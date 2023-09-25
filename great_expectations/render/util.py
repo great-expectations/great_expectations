@@ -15,7 +15,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.exceptions import RenderingError
 
-DEFAULT_PRECISION = 4
+DEFAULT_PRECISION = 15
 # create a new context for this task
 ctx = decimal.Context()
 # Lowering precision from the system default (28) can allow additional control over display
@@ -57,7 +57,12 @@ def num_to_str(
     s = repr(f)
     if not isinstance(f, float):
         s += f"{locale.localeconv().get('decimal_point')}0"
-    d = local_context.create_decimal(s)
+    try:
+        d = local_context.create_decimal(s)
+    except decimal.InvalidOperation:
+        raise TypeError(
+            f"num_to_str received an invalid value: {f} of type {type(f).__name__}."
+        )
     if no_scientific:
         result = format(d, "f")
     elif use_locale:

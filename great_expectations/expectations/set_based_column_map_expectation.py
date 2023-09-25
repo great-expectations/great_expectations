@@ -296,7 +296,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                 template_str = "values must match this set: $set_"
             if params["mostly"] is not None:
                 params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+                    params["mostly"] * 100, no_scientific=True
                 )
                 template_str += ", at least $mostly_pct % of the time."
             else:
