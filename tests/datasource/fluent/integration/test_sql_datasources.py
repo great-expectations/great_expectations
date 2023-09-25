@@ -226,13 +226,13 @@ class TableFactory(Protocol):
 
 
 @pytest.fixture(
-    # scope="function",
     scope="class",
 )
 def table_factory() -> Generator[TableFactory, None, None]:
     """
+    Class scoped.
     Given a SQLALchemy engine, table_name and schema,
-    create the table if it does not exist and drop it after the test.
+    create the table if it does not exist and drop it after the test class.
     """
     all_created_tables: dict[
         str, list[dict[Literal["table_name", "schema"], str | None]]
