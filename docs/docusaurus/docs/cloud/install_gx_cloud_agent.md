@@ -47,11 +47,13 @@ You'll need your user access token and organization ID to set your environment v
 
 4. Click **Create**.
 
-5. Copy the access token and store it in a secure location. The token can't be retrieved after you close the dialog.
+5. Copy and then paste the user access token into a temporary file. The token can't be retrieved after you close the dialog.
 
 6. Click **Close**.
 
-7. Copy the value in the **Organization ID** field and save it in the same location with your user access token.
+7. Copy the value in the **Organization ID** field into the temporary file with your user access token and then save the file. 
+
+    GX recommends deleting the temporary file after you set the environment variables.
 
 ## Set the environment variables and start the GX Cloud agent
 
@@ -59,13 +61,15 @@ Environment variables securely store your GX Cloud access credentials.
 
 1. Set the following environment variables:
 
-    - `GX_CLOUD_ORGANIZATION_ID` - The Organization ID you copied previously.
-
     - `GX_CLOUD_ACCESS_TOKEN` - The user access token you generated previously.
+    
+    - `GX_CLOUD_ORGANIZATION_ID` - The Organization ID you copied previously.
 
     To set the environment variables, see the documentation specific to your operating system. 
 
-2. In Jupyter Notebook, run the following code to start the GX Cloud agent:
+2. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
+
+3. In Jupyter Notebook, run the following code to start the GX Cloud agent:
     
     ```python title="Jupyter Notebook"
        gx-agent
