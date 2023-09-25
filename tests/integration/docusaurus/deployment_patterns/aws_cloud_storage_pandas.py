@@ -64,8 +64,8 @@ stores:
     class_name: ExpectationsStore
     store_backend:
       class_name: TupleS3StoreBackend
-      bucket: <YOUR S3 BUCKET NAME>
-      prefix: <YOUR S3 PREFIX NAME>
+      bucket: '<YOUR S3 EXPECTATION BUCKET NAME>'
+      prefix: '<YOUR S3 EXPECTATION PREFIX NAME>'  # Bucket and prefix in combination must be unique across all stores
 
 expectations_store_name: expectations_S3_store
 # </snippet>
@@ -144,8 +144,8 @@ stores:
     class_name: ValidationsStore
     store_backend:
       class_name: TupleS3StoreBackend
-      bucket: <YOUR S3 BUCKET NAME>
-      prefix: <YOUR S3 PREFIX NAME>
+      bucket: '<YOUR S3 VALIDATION BUCKET NAME>'
+      prefix: '<YOUR S3 VALIDATION PREFIX NAME>'  # Bucket and prefix in combination must be unique across all stores
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py set_new_validations_store">
@@ -192,7 +192,7 @@ data_docs_sites:
     class_name: SiteBuilder
     store_backend:
       class_name: TupleS3StoreBackend
-      bucket: <YOUR S3 BUCKET NAME>
+      bucket: '<YOUR S3 BUCKET NAME>'
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
 # </snippet>
