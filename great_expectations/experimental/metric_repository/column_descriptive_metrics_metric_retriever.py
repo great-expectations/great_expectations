@@ -19,16 +19,27 @@ from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBu
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent import BatchRequest
     from great_expectations.validator.metrics_calculator import (
         _AbortedMetricsInfoDict,
         _MetricKey,
         _MetricsDict,
     )
+    from great_expectations.validator.validator import Validator
 
 
 class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
     """Compute and retrieve Column Descriptive Metrics for a batch of data."""
+
+    def __init__(self, context: AbstractDataContext):
+        super().__init__(context=context)
+        self._validator: Validator | None = None
+
+    def get_validator(self, batch_request: BatchRequest) -> Validator:
+        if self._validator is None:
+            self._validator = self._context.get_validator(batch_request=batch_request)
+        return self._validator
 
     @override
     def get_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
@@ -227,7 +238,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
 
     def _get_numeric_column_names(self, batch_request: BatchRequest) -> list[str]:
         """Get the names of all numeric columns in the batch."""
-        validator = self._context.get_validator(batch_request=batch_request)
+        validator = self.get_validator(batch_request=batch_request)
         domain_builder = ColumnDomainBuilder(
             include_semantic_types=[SemanticDomainTypes.NUMERIC],
         )
@@ -270,7 +281,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
     def _compute_metrics(
         self, batch_request: BatchRequest, metric_configs: list[MetricConfiguration]
     ) -> tuple[str, _MetricsDict, _AbortedMetricsInfoDict]:
-        validator = self._context.get_validator(batch_request=batch_request)
+        validator = self.get_validator(batch_request=batch_request)
         # The runtime configuration catch_exceptions is explicitly set to True to catch exceptions
         # that are thrown when computing metrics. This is so we can capture the error for later
         # surfacing, and not have the entire metric run fail so that other metrics will still be
