@@ -71,7 +71,7 @@ Environment variables securely store your GX Cloud access credentials.
 
 3. Run the following code to start the GX Cloud agent:
     
-    ```python
+    ```bash title="Terminal input"
        gx-agent
     ```
 
