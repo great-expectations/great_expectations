@@ -75,7 +75,7 @@ Environment variables securely store your GX Cloud and Snowflake access credenti
 
 3. Run the following code to start the GX Cloud agent:
     
-    ```python
+    ````bash title="Terminal input"
        gx-agent
     ```
 
