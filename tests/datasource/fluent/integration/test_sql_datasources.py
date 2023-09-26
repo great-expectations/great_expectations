@@ -18,6 +18,7 @@ from typing import (
 )
 
 import pytest
+import sqlalchemy as sa
 from packaging.version import Version
 from pytest import param
 
@@ -868,6 +869,13 @@ class TestColumnIdentifiers:
         )
         # examine columns
         with datasource.get_execution_engine().get_connection() as conn:
+            cols_from_inspector = sa.inspect(conn).get_columns(
+                TEST_TABLE_NAME, schema=schema
+            )
+            print(
+                f"{TEST_TABLE_NAME} Columns from SQLAlchemy Inspector:\n  {pf(cols_from_inspector)}\n"
+            )
+
             query = f"""SELECT {column_name} FROM {qualified_table_name} LIMIT 1;"""
             print(f"query:\n  {query}")
             # an exception will be raised if the column does not exist
@@ -880,8 +888,10 @@ class TestColumnIdentifiers:
                 print(f"  Values: {col_exist_result}\n")
             except SqlAlchemyProgrammingError as sql_err:
                 LOGGER.warning("SQLAlchemy Error", exc_info=sql_err)
-                print(f"{column_name} does not exist")
-                assert should_fail is True
+                print(f"\n{column_name} does not exist")
+                assert (
+                    should_fail is True
+                ), f"{column_name} column should have been found"
             else:
                 if should_fail is True:
                     assert not col_exist_result, f"{column_name} should not exist"
