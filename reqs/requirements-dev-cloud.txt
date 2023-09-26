@@ -1,1 +1,2 @@
-great_expectations_cloud>=0.0.dev0
+--pre
+great_expectations_cloud
