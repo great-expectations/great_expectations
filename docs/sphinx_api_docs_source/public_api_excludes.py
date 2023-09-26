@@ -806,4 +806,11 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         name="add_dataframe_asset",
         filepath=pathlib.Path("great_expectations/core/datasource_dict.py"),
     ),
+    IncludeExcludeDefinition(
+        reason="This method shares a name with a public API method.",
+        name="get_validator",
+        filepath=pathlib.Path(
+            "great_expectations/experimental/metric_repository/column_descriptive_metrics_metric_retriever.py"
+        ),
+    ),
 ]

@@ -455,3 +455,49 @@ def test_get_metrics_with_exception():
             column="col2",
         ),
     ]
+
+
+def test_get_metrics_only_gets_a_validator_once():
+    mock_context = Mock(spec=CloudDataContext)
+    mock_validator = Mock(spec=Validator)
+    mock_context.get_validator.return_value = mock_validator
+
+    aborted_metrics = {}
+
+    computed_metrics = {
+        ("table.row_count", (), ()): 2,
+        ("table.columns", (), ()): ["col1", "col2"],
+        ("table.column_types", (), "include_nested=True"): [
+            {"name": "col1", "type": "float"},
+            {"name": "col2", "type": "float"},
+        ],
+        ("column.min", "column=col1", ()): 2.5,
+        ("column.min", "column=col2", ()): 2.7,
+        ("column.max", "column=col1", ()): 5.5,
+        ("column.max", "column=col2", ()): 5.7,
+        ("column.mean", "column=col1", ()): 2.5,
+        ("column.mean", "column=col2", ()): 2.7,
+        ("column.median", "column=col1", ()): 2.5,
+        ("column.median", "column=col2", ()): 2.7,
+        ("column_values.null.count", "column=col1", ()): 1,
+        ("column_values.null.count", "column=col2", ()): 1,
+    }
+    mock_validator.compute_metrics_with_aborted_metrics.return_value = (
+        computed_metrics,
+        aborted_metrics,
+    )
+    mock_batch = Mock(spec=Batch)
+    mock_batch.id = "batch_id"
+    mock_validator.active_batch = mock_batch
+
+    metric_retriever = ColumnDescriptiveMetricsMetricRetriever(context=mock_context)
+
+    mock_batch_request = Mock(spec=BatchRequest)
+
+    with mock.patch(
+        f"{ColumnDomainBuilder.__module__}.{ColumnDomainBuilder.__name__}.get_effective_column_names",
+        return_value=["col1", "col2"],
+    ):
+        metric_retriever.get_metrics(batch_request=mock_batch_request)
+
+    mock_context.get_validator.assert_called_once_with(batch_request=mock_batch_request)
