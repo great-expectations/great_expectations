@@ -72,7 +72,7 @@ Environment variables securely store your GX Cloud access credentials.
 3. Run the following code to start the GX Cloud agent:
     
     ```bash title="Terminal input"
-       gx-agent
+    gx-agent
     ```
 
     If you stop the GX Cloud agent, close the terminal, and open a new terminal you'll need to set the environment variables again.
