@@ -744,8 +744,8 @@ EXPECTED_FAILURE: Final[dict[ColNameParamId, list[DatabaseType]]] = {
     'str "unquoted_upper_col"': ["snowflake"],
     'str "UNQUOTED_UPPER_COL"': ["postgres"],
     # DDL: "quoted_lower_col"-----------------------------------
-    "str quoted_lower_col": ["postgres", "snowflake"],
-    "str QUOTED_LOWER_COL": ["postgres", "snowflake"],
+    "str quoted_lower_col": ["snowflake"],
+    "str QUOTED_LOWER_COL": ["snowflake"],
     'str "QUOTED_LOWER_COL"': ["postgres", "snowflake"],
     # DDL: "QUOTED_UPPER_COL" ----------------------------------
     "str quoted_upper_col": ["postgres"],
