@@ -1,17 +1,21 @@
-from typing import Optional
+from typing import List, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
+)
+from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
-    render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyRendererType
+from great_expectations.render.components import (
+    LegacyRendererType,
+    RenderedStringTemplateContent,
+)
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import substitute_none_for_missing
+from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
 
 class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
@@ -127,18 +131,57 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ) -> None:
+    ) -> List[RenderedStringTemplateContent]:
         runtime_configuration = runtime_configuration or {}
         _ = False if runtime_configuration.get("include_column_name") is False else True
-        _ = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(  # noqa: F841 # unused
+        styling = runtime_configuration.get("styling")
+
+        params = substitute_none_for_missing(
             configuration.kwargs,
-            ["column", "mostly", "row_condition", "condition_parser"],
+            ["column", "like_pattern_list", "mostly"],
         )
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, no_scientific=True
+            )
+
+        if (
+            not params.get("like_pattern_list")
+            or len(params.get("like_pattern_list")) == 0
+        ):
+            values_string = "[ ]"
+        else:
+            for i, v in enumerate(params["like_pattern_list"]):
+                params[f"v__{i!s}"] = v
+            values_string = " ".join(
+                [f"$v__{i!s}" for i, v in enumerate(params["like_pattern_list"])]
+            )
+
+        template_str = "Values must match the following like patterns: " + values_string
+
+        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, no_scientific=True
+            )
+            template_str += ", at least $mostly_pct % of the time."
+        else:
+            template_str += "."
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
