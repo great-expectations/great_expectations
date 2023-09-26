@@ -736,16 +736,17 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
 # NOTE: the expectation must fail without a raised_exception
 EXPECTED_FAILURE: Final[dict[ColNameParamId, list[DatabaseType]]] = {
     # TODO: add these for sqlite and databricks
+    # DDL: unquoted_lower_col ----------------------------------
     'str "unquoted_lower_col"': ["snowflake"],
     'str "UNQUOTED_LOWER_COL"': ["postgres"],
-    # -------------------------------------
+    # DDL: UNQUOTED_UPPER_COL ----------------------------------
     'str "unquoted_upper_col"': ["snowflake"],
     'str "UNQUOTED_UPPER_COL"': ["postgres"],
-    # -------------------------------------
+    # DDL: "quoted_lower_col"-----------------------------------
     "str quoted_lower_col": ["postgres", "snowflake"],
     "str QUOTED_LOWER_COL": ["postgres", "snowflake"],
     'str "QUOTED_LOWER_COL"': ["postgres", "snowflake"],
-    # -------------------------------------
+    # DDL: "QUOTED_UPPER_COL" ----------------------------------
     "str quoted_upper_col": ["postgres"],
     'str "quoted_upper_col"': ["postgres", "snowflake"],
     "str QUOTED_UPPER_COL": ["postgres"],
