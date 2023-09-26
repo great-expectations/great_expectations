@@ -11,7 +11,7 @@ In this quickstart, you'll learn how to connect GX Cloud to Snowflake Data Asset
 
 - You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
 
-- You have a [Snowflake account](https://greatexpectations.io/cloud) with `ACCOUNTADMIN` access.
+- You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with `ACCOUNTADMIN` access.
 
 ## Prepare your environment
 
