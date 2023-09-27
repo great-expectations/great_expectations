@@ -12,12 +12,12 @@ module.exports = {
             {
               type: 'link',
               label: 'Sign up for a GX Cloud beta account',
-              href: 'cloud/set_up_gx_cloud#sign-up-for-a-gx-cloud-beta-account',
+              href: '/cloud/set_up_gx_cloud#sign-up-for-a-gx-cloud-beta-account',
             },
             {
               type: 'link',
               label: 'Prepare your environment',
-              href: 'cloud/set_up_gx_cloud#prepare-your-environment',
+              href: '/cloud/set_up_gx_cloud#prepare-your-environment',
             },
           ]
         },
