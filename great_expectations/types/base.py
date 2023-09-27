@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import copy
 import logging
-from typing import Callable, List, TypeVar
+from typing import TYPE_CHECKING, Callable, List, TypeVar
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 from ruamel.yaml import YAML, yaml_object
 
@@ -24,8 +27,8 @@ class DotDict(dict):
     def __getattr__(self, item):
         return self.get(item)
 
-    __setattr__: Callable[[dict[_KT, _VT], _KT, _VT], None] = dict.__setitem__
-    __delattr__: Callable[[dict[_KT, _VT], _KT], None] = dict.__delitem__
+    __setattr__: Callable[[Self, _KT, _VT], None] = dict.__setitem__
+    __delattr__: Callable[[Self, _KT], None] = dict.__delitem__
 
     def __dir__(self):
         return self.keys()
