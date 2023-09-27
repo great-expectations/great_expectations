@@ -25,6 +25,7 @@ class RunOnboardingDataAssistantAction(AgentAction[RunOnboardingDataAssistantEve
         )
         return build_action_result(
             context=self._context,
+            data_assistant_name="Onboarding",
             event=event,
             data_assistant_result=data_assistant_result,
             id=id,
