@@ -5,7 +5,7 @@ module.exports = {
       type: 'category',
       label: 'GX Cloud',
       items: [
-        `cloud/install_gx_cloud_agent`,
+        `cloud/set_up_gx_cloud`,
       ]
     },
     {

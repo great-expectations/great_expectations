@@ -1,15 +1,24 @@
 ---
-sidebar_label: 'Install the GX Cloud agent'
-title: 'Install the GX Cloud agent'
-id: install_gx_cloud_agent
-description: Install the GX Cloud agent.
+sidebar_label: 'Set up GX Cloud'
+title: 'Set up GX Cloud'
+id: set_up_gx_cloud
+description: Set up GX Cloud.
 ---
 
-The GX Cloud agent runs open source Great Expectations (GX) code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. 
+To get the most out of GX Cloud, you'll need to request a GX Cloud Beta account, install GX Cloud, generate and record access tokens, set environment variables, and then start the GX Cloud agent.
 
-## Prerequisites
+## Sign up for a GX Cloud beta account
 
-- You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
+1. Go to the GX Cloud beta [sign-up page](https://greatexpectations.io/cloud).
+
+2. Complete the sign-up form and then click **Submit**.
+
+3. When you receive your email response from Great Expectations (GX), schedule a time to meet with a GX representative. After your meeting you'll be sent an email invitation to join your GX Cloud organization.
+
+4. In your GX Cloud email invitation, click **click here**.
+
+5. Enter your email address and password, and then click **Continue to GX Cloud**. Alternatively, click **Log in with Google** and use your Google credentials to access GX Cloud.
+
 
 ## Prepare your environment
 
@@ -57,7 +66,7 @@ You'll need your user access token and organization ID to set your environment v
 
 ## Set the environment variables and start the GX Cloud agent
 
-Environment variables securely store your GX Cloud access credentials.
+Environment variables securely store your GX Cloud access credentials. The GX Cloud agent runs open source Great Expectations (GX) code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. 
 
 1. Set the following environment variables:
 
