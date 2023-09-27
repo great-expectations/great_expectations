@@ -10,14 +10,14 @@ module.exports = {
           label: 'Set up GX Cloud',
           items: [
             {
-              type: 'link',
+              type: 'doc',
               label: 'Sign up for a GX Cloud beta account',
-              href: '/cloud/set_up_gx_cloud#sign-up-for-a-gx-cloud-beta-account',
+              id: 'cloud/set_up_gx_cloud#sign-up-for-a-gx-cloud-beta-account',
             },
             {
-              type: 'link',
+              type: 'doc',
               label: 'Prepare your environment',
-              href: '/cloud/set_up_gx_cloud#prepare-your-environment',
+              id: 'cloud/set_up_gx_cloud#prepare-your-environment',
             },
           ]
         },
