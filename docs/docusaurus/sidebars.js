@@ -8,7 +8,6 @@ module.exports = {
         {
           type: 'category',
           label: 'Set up GX Cloud',
-
           items: [
             {
               type: 'link',
