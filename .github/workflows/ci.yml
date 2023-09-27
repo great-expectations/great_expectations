@@ -325,9 +325,9 @@ jobs:
           # TODO: would like to adopt `actionlint` pre-commit hook
           # but false positive here and inability to do an inline ignore
           # prevents this https://github.com/rhysd/actionlint/issues/237
-          - python-version: ${{ '3.9' && github.event_name == 'pull_request' || github.event == 'merge_group' }}
-          - python-version: ${{ '3.10' && github.event_name == 'pull_request' || github.event == 'merge_group' }}
-          - python-version: ${{ '3.11' && github.event_name == 'pull_request' || github.event == 'merge_group' }}
+          - python-version: ${{ '3.9' && (github.event_name == 'pull_request' || github.event == 'merge_group') }}
+          - python-version: ${{ '3.10' && (github.event_name == 'pull_request' || github.event == 'merge_group') }}
+          - python-version: ${{ '3.11' && (github.event_name == 'pull_request' || github.event == 'merge_group') }}
 
     steps:
       - name: Checkout
