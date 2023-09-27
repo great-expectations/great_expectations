@@ -1,7 +1,6 @@
 ---
 sidebar_label: 'Set up GX Cloud'
 title: 'Set up GX Cloud'
-id: set_up_gx_cloud
 description: Set up GX Cloud.
 ---
 
@@ -9,7 +8,7 @@ To get the most out of GX Cloud, you'll need to request a GX Cloud Beta account,
 
 ## Sign up for a GX Cloud beta account
 
-1. Go to the GX Cloud beta [sign-up page](https://greatexpectations.io/cloud).
+1. Go to the GX Cloud beta [sign-up page](#sign-up-for-a-gx-cloud-beta-account).
 
 2. Complete the sign-up form and then click **Submit**.
 
