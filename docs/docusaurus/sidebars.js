@@ -4,8 +4,21 @@ module.exports = {
     {
       type: 'category',
       label: 'GX Cloud',
+    },
+    {
+      type: 'category',
+      label: 'Set up GX Cloud',
       items: [
-        `cloud/set_up_gx_cloud`,
+        {
+          type: 'link',
+          label: 'Sign up for a GX Cloud beta account',
+          href: 'cloud/set_up_gx_cloud#sign_up_for_a_gx_cloud_beta_account',
+        },
+        {
+          type: 'link',
+          label: 'Prepare your environment',
+          href: 'cloud/set_up_gx_cloud#prepare_your_environment',
+        },
       ]
     },
     {
@@ -203,7 +216,7 @@ module.exports = {
     {
       type: 'category',
       label: 'Concepts',
-      link: { type: 'doc', id: 'conceptual_guides/learn_lp' }, 
+      link: { type: 'doc', id: 'conceptual_guides/learn_lp' },
       items: [
         'conceptual_guides/expectation_classes',
         'conceptual_guides/metricproviders',
