@@ -570,7 +570,7 @@ jobs:
       usage_stats_integration,
       build-n-publish
     ]
-    if: always() && !cancelled() && contains(needs.*.result, 'failure') && github.event_name != 'pull_request'
+    if: always() && !cancelled() && contains(needs.*.result, 'failure') && github.event_name != 'pull_request' && github.event_name != 'merge_group'
     runs-on: ubuntu-latest
     steps:
       - name: Scheduled CI job failure
