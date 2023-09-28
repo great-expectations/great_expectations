@@ -65,7 +65,7 @@ You'll need your user access token and organization ID to set your environment v
 
 ## Set the environment variables and start the GX Cloud agent
 
-Environment variables securely store your GX Cloud access credentials. The GX Cloud agent runs open source Great Expectations (GX) code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. 
+Environment variables securely store your GX Cloud access credentials. The GX Cloud agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. 
 
 1. Set the following environment variables:
 
