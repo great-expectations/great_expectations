@@ -47,7 +47,7 @@ class TestCloudDataStore:
 
 
 class TestCloudDataStoreMetricRun:
-    @pytest.mark.unit
+    @pytest.mark.cloud  # NOTE: needs orjson dependency
     def test_add_metric_run_non_generic_metric_type(
         self,
         empty_cloud_context_fluent: CloudDataContext,  # noqa: F811  # used as a fixture
@@ -104,7 +104,7 @@ class TestCloudDataStoreMetricRun:
         )
         assert uuid_from_add == response_metric_run_id
 
-    @pytest.mark.unit
+    @pytest.mark.cloud  # NOTE: needs orjson dependency
     def test_add_metric_run_generic_metric_type(
         self,
         empty_cloud_context_fluent: CloudDataContext,  # noqa: F811  # used as a fixture
