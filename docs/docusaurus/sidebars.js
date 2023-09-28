@@ -5,8 +5,16 @@ module.exports = {
       type: 'category',
       label: 'GX Cloud',
       items: [
-        `cloud/quickstarts/snowflake_quickstart`,
-      ]
+        {
+          type: 'category',
+          label: 'Quickstarts',
+          items: [
+            {
+              type: 'doc', id: 'cloud/quickstarts/snowflake_quickstart', label: 'Quickstart for GX Cloud and Snowflake'
+            },
+          ]
+        },
+      ],
     },
     {
       type: 'category',
