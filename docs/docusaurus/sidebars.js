@@ -12,7 +12,7 @@ module.exports = {
           items: [
             {
               type: 'link',
-              label: 'Sign up for a GX Cloud Beta account',
+              label: 'Request a GX Cloud Beta account',
               href: '/docs/cloud/set_up_gx_cloud#srequest-a-gx-cloud-beta-account',
             },
             {
