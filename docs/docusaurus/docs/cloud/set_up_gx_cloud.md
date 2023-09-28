@@ -91,11 +91,11 @@ Environment variables securely store your GX Cloud access credentials. The GX Cl
 
 Use the following information to help resolve issues with the GX Cloud agent installation.
 
-**great_expectations.agent.agent.GXAgentError: Missing or badly formed environment variable**
+**Error: `great_expectations.agent.agent.GXAgentError: Missing or badly formed environment variable`**
 
 Confirm the `GX_CLOUD_ACCESS_TOKEN` and `GX_CLOUD_ORGANIZATION_ID` environment variables are set and available in your local environment. For example, on Unix systems, you can run `echo $GX_CLOUD_ORGANIZATION_ID` to confirm that your organization ID is present and set.
 
-**pika not found**
+**Error: `pika not found`**
 
 Run the following command:
 
