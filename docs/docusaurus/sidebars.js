@@ -8,6 +8,7 @@ module.exports = {
         {
           type: 'category',
           label: 'Set up GX Cloud',
+          link: { type: 'doc', id: 'cloud/set_up_gx_cloud' },
           items: [
             {
               type: 'link',
