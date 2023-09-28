@@ -43,12 +43,17 @@ def build_batch_request(
 
 def build_action_result(
     context: CloudDataContext,
+    data_assistant_name: str,
     event: RunDataAssistantEvent,
     data_assistant_result: DataAssistantResult,
     id: str,
 ) -> ActionResult:
-    expectation_suite_name = f"{event.type} {event.data_asset_name} assistant suite"
-    checkpoint_name = f"{event.type} {event.data_asset_name} assistant checkpoint"
+    if event.expectation_suite_name is not None:
+        expectation_suite_name = event.expectation_suite_name
+    else:
+        expectation_suite_name = f"{event.data_asset_name} {data_assistant_name} Suite"
+
+    checkpoint_name = f"{event.data_asset_name} {data_assistant_name} Checkpoint"
 
     # build tz aware timestamp
     tz = datetime.now().astimezone().tzinfo

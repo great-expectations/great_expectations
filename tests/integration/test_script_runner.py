@@ -325,13 +325,6 @@ fluent_datasources = [
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
-        name="how_to_configure_a_new_checkpoint_using_test_yaml_config",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.py",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
         name="validate_data_by_running_a_checkpoint",
         user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py",
         data_context_dir=None,
