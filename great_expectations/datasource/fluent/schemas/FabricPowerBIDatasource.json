@@ -212,17 +212,7 @@
                     "title": "Groupby Columns",
                     "type": "array",
                     "items": {
-                        "type": "array",
-                        "minItems": 2,
-                        "maxItems": 2,
-                        "items": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "string"
-                            }
-                        ]
+                        "type": "string"
                     }
                 },
                 "filters": {
