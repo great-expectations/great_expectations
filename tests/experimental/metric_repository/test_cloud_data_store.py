@@ -46,8 +46,8 @@ class TestCloudDataStore:
             context.add_expectation_suite("test_suite")
 
 
+@pytest.mark.cloud  # NOTE: needs orjson dependency
 class TestCloudDataStoreMetricRun:
-    @pytest.mark.cloud  # NOTE: needs orjson dependency
     def test_add_metric_run_non_generic_metric_type(
         self,
         empty_cloud_context_fluent: CloudDataContext,  # noqa: F811  # used as a fixture
@@ -104,7 +104,6 @@ class TestCloudDataStoreMetricRun:
         )
         assert uuid_from_add == response_metric_run_id
 
-    @pytest.mark.cloud  # NOTE: needs orjson dependency
     def test_add_metric_run_generic_metric_type(
         self,
         empty_cloud_context_fluent: CloudDataContext,  # noqa: F811  # used as a fixture
@@ -157,7 +156,6 @@ class TestCloudDataStoreMetricRun:
         )
         assert uuid_from_add == response_metric_run_id
 
-    @pytest.mark.unit
     def test_add_metric_run_generic_metric_type_with_exception(
         self,
         empty_cloud_context_fluent: CloudDataContext,  # noqa: F811  # used as a fixture
@@ -215,7 +213,6 @@ class TestCloudDataStoreMetricRun:
         )
         assert uuid_from_add == response_metric_run_id
 
-    @pytest.mark.unit
     def test_add_metric_run_generic_metric_type_numpy(
         self,
         empty_cloud_context_fluent: CloudDataContext,  # noqa: F811  # used as a fixture
