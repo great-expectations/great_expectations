@@ -9,7 +9,7 @@ Requirements
 - **reqs/requirements-dev-contrib.txt**: Mostly linting tools like `black`, `mypy`, and `ruff`
 - **reqs/requirements-dev-all-contrib-expectations.txt**: The requirements for all of the contrib Expectations; only used in CI when building the Expectation Gallery
 - **reqs/requirements-dev-api-docs-test.txt**: Just `docstring-parser` package needed for generating API docs
-- **reqs/requirements-dev-cloud.txt**: Just `pika` package; `pip install ".[cloud]"`
+- **reqs/requirements-dev-cloud.txt**: `great_expectations_cloud` and any related deps to get Cloud functional; `pip install ".[cloud]"`
 - **reqs/requirements-dev-spark.txt**: `pip install ".[spark]"`
 - **reqs/requirements-dev-arrow.txt**: `pip install ".[arrow]"`
 - **reqs/requirements-dev-azure.txt**: `pip install ".[azure]"` and `pip install ".[azure_secrets]"`
