@@ -60,7 +60,7 @@ Steps
                         store_backend:
                             class_name: TupleS3StoreBackend
                             bucket: '<your_s3_bucket_name>'
-                            prefix: '<your_s3_bucket_folder_name>'
+                            prefix: '<your_s3_bucket_folder_name>'  # Bucket and prefix in combination must be unique across all stores
 
 
         4. **Copy existing Validation results to the S3 bucket**. (This step is optional).
@@ -95,7 +95,7 @@ Steps
                 store_backend:
                     class_name: TupleS3StoreBackend
                     bucket: '<your_s3_bucket_name>'
-                    prefix: '<your_s3_bucket_folder_name>'
+                    prefix: '<your_s3_bucket_folder_name>'  # Bucket and prefix in combination must be unique across all stores
 
     .. tab-container:: tab1
         :title: Show Docs for V3 (Batch Request) API
@@ -140,7 +140,7 @@ Steps
                         store_backend:
                             class_name: TupleS3StoreBackend
                             bucket: '<your_s3_bucket_name>'
-                            prefix: '<your_s3_bucket_folder_name>'
+                            prefix: '<your_s3_bucket_folder_name>'  # Bucket and prefix in combination must be unique across all stores
 
 
         4. **Copy existing Validation results to the S3 bucket**. (This step is optional).
@@ -175,7 +175,7 @@ Steps
                 store_backend:
                     class_name: TupleS3StoreBackend
                     bucket: '<your_s3_bucket_name>'
-                    prefix: '<your_s3_bucket_folder_name>'
+                    prefix: '<your_s3_bucket_folder_name>'  # Bucket and prefix in combination must be unique across all stores
 
 6. **Confirm that the Validations store has been correctly configured.**
 

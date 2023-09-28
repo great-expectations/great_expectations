@@ -6,6 +6,7 @@ import numpy
 import pytest
 
 from great_expectations.data_context import CloudDataContext
+from great_expectations.exceptions.exceptions import ExpectationSuiteError
 from great_expectations.experimental.metric_repository.cloud_data_store import (
     CloudDataStore,
 )
@@ -22,6 +23,27 @@ from tests.datasource.fluent.conftest import (
     cloud_details,  # noqa: F401  # used as a fixture
     empty_cloud_context_fluent,  # noqa: F401  # used as a fixture
 )
+
+
+@pytest.mark.cloud
+class TestCloudDataStore:
+    def test_add_expectation_suite_success(
+        self, empty_cloud_context_fluent: CloudDataContext  # noqa: F811
+    ):  # used as a fixture
+        context = empty_cloud_context_fluent
+        created_expectation_suite = context.add_expectation_suite("test_suite")
+        retrieved_expectation_suite = context.get_expectation_suite("test_suite")
+        assert created_expectation_suite == retrieved_expectation_suite
+
+    def test_add_expectation_suite_name_collision_failure(
+        self, empty_cloud_context_fluent: CloudDataContext  # noqa: F811
+    ):  # used as a fixture
+        context = empty_cloud_context_fluent
+        created_expectation_suite = context.add_expectation_suite("test_suite")
+        retrieved_expectation_suite = context.get_expectation_suite("test_suite")
+        assert created_expectation_suite == retrieved_expectation_suite
+        with pytest.raises(ExpectationSuiteError):
+            context.add_expectation_suite("test_suite")
 
 
 class TestCloudDataStoreMetricRun:
