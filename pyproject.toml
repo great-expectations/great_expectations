@@ -33,7 +33,6 @@ plugins = [
 files = [
     "great_expectations",
     "tests/datasource/fluent",
-    "tests/agent",
     # "contrib" # ignore entire `contrib` package
 ]
 warn_unused_configs = true
