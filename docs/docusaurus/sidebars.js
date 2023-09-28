@@ -8,17 +8,31 @@ module.exports = {
         {
           type: 'category',
           label: 'Set up GX Cloud',
-          link: { type: 'doc', id: 'cloud/set_up_gx_cloud' },
           items: [
             {
               type: 'link',
               label: 'Sign up for a GX Cloud beta account',
-              href: '/docs/cloud/set_up_gx_cloud#sign-up-for-a-gx-cloud-beta-account',
+              href: '/docs/cloud/set_up_gx_cloud#srequest-a-gx-cloud-beta-account',
             },
             {
               type: 'link',
               label: 'Prepare your environment',
               href: '/docs/cloud/set_up_gx_cloud#prepare-your-environment',
+            },
+            {
+              type: 'link',
+              label: 'Get your user access token and organization ID',
+              href: '/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id',
+            },
+            {
+              type: 'link',
+              label: 'Set the environment variables and start the GX Cloud agent',
+              href: '/docs/cloud/set_up_gx_cloud#set-the-environment-variables-and-start-the-gx-cloud-agent',
+            },
+            {
+              type: 'link',
+              label: 'Troubleshoot',
+              href: '/docs/cloud/set_up_gx_cloud#troubleshoot',
             },
           ]
         },

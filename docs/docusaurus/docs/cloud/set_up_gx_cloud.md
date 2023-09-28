@@ -6,9 +6,9 @@ description: Set up GX Cloud.
 
 To get the most out of GX Cloud, you'll need to request a GX Cloud Beta account, install GX Cloud, generate and record access tokens, set environment variables, and then start the GX Cloud agent.
 
-## Sign up for a GX Cloud beta account
+## Request a GX Cloud Beta account
 
-1. Go to the GX Cloud beta [sign-up page](#sign-up-for-a-gx-cloud-beta-account).
+1. Go to the GX Cloud Beta [sign-up page](https://greatexpectations.io/cloud).
 
 2. Complete the sign-up form and then click **Submit**.
 
@@ -39,9 +39,9 @@ To get the most out of GX Cloud, you'll need to request a GX Cloud Beta account,
     pip install 'great_expectations[cloud]' --upgrade
     ```
 
-## Generate your user access token and copy your organization ID
+## Get your user access token and organization ID
 
-You'll need your user access token and organization ID to set your environment variables. Access tokens shouldn't be committed to version control software.
+You'll need your user access token and organization ID to set your environment variables. Don't commit your access tokens to your version control software.
 
 1. In GX Cloud, click **Settings** > **Tokens**.
 
