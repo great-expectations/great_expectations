@@ -99,7 +99,7 @@ class TestFabricPowerBI:
                 "powerbi_measure",
                 {
                     "measure": "my_measure",
-                    "groupby_columns": [("foo", "bar"), ("fizz", "buzz")],
+                    "groupby_columns": ["foo[Bar]", "'fizz with space'[Buzz]"],
                     "filters": {
                         "State[Region]": ["East", "Central"],
                         "State[State]": ["WA", "CA"],
