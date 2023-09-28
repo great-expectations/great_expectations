@@ -37,7 +37,14 @@ module.exports = {
             },
           ]
         },
-      ]     
+        {
+          type: 'category',
+          label: 'Quickstarts',
+          items: [
+            'cloud/quickstarts/snowflake_quickstart',
+          ]
+        },
+      ]
     },
     {
       type: 'category',
