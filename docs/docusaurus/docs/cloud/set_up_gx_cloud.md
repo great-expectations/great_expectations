@@ -12,9 +12,9 @@ To get the most out of GX Cloud, you'll need to request a GX Cloud Beta account,
 
 2. Complete the sign-up form and then click **Submit**.
 
-3. When you receive your email response from Great Expectations (GX), schedule a time to meet with a GX representative. After your meeting you'll be sent an email invitation to join your GX Cloud organization.
+3. If you're invited to view a GX Cloud demonstration, click **Schedule a time to connect here** in the confirmation email to schedule a time to meet with a Great Expectations (GX) representative. After your meeting you'll be sent an email invitation to join your GX Cloud organization.
 
-4. In your GX Cloud email invitation, click **click here**.
+4. In your GX Cloud email invitation, click **click here** to set your password and sign in.
 
 5. Enter your email address and password, and then click **Continue to GX Cloud**. Alternatively, click **Log in with Google** and use your Google credentials to access GX Cloud.
 
