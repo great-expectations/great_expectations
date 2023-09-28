@@ -3,6 +3,21 @@ module.exports = {
     'intro',
     {
       type: 'category',
+      label: 'GX Cloud',
+      items: [
+        {
+          type: 'category',
+          label: 'Quickstarts',
+          items: [
+            {
+              type: 'doc', id: 'cloud/quickstarts/snowflake_quickstart', label: 'Quickstart for GX Cloud and Snowflake'
+            },
+          ]
+        },
+      ],
+    },
+    {
+      type: 'category',
       label: 'Get started with GX',
       link: { type: 'doc', id: 'guides/setup/get_started_lp' },
       items: [
