@@ -76,7 +76,6 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-contrib.txt"]
         | req_set_dict["requirements-dev-lite.txt"]
         | req_set_dict["requirements-dev-api-docs-test.txt"]
-        | req_set_dict["requirements-dev-cloud.txt"]
         == req_set_dict["requirements-dev-test.txt"]
     )
 
