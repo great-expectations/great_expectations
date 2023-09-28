@@ -175,7 +175,7 @@ providing the bucket/prefix combination:
           class_name: TupleS3StoreBackend
           base_directory: expectations/
           bucket: gx.my_org.com
-          prefix:
+          prefix: common_expectations
       validations_store:
         class_name: ValidationsStore
         store_backend:
