@@ -795,14 +795,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource._data_context = self
         datasource._data_context._save_project_config()
 
-        # temporary workaround while we update stores to work better with Fluent Datasources for all contexts
-        # Without this we end up with duplicate entries for datasources in both
-        # "fluent_datasources" and "datasources" config/yaml entries.
         if self._datasource_store.cloud_mode and not from_config:
-            set_datasource = self._datasource_store.set(key=None, value=datasource)
-            if set_datasource.id:
-                logger.debug(f"Assigning `id` to '{datasource_name}'")
-                datasource.id = set_datasource.id
+            return self.datasources.set_datasource(name=datasource_name, ds=datasource)
 
         self.datasources[datasource_name] = datasource
 
