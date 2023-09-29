@@ -48,7 +48,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'GX Core',
+      label: 'GX OSS',
       items: [
         {
           type: 'category',
