@@ -10,7 +10,7 @@ A Data Asset is a collection of records that you create when you connect to your
 
 - You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
 
-- You have [set up your environment](../set_up_gx_cloud.md). 
+- You have [set up your environment](../set_up_gx_cloud.md) including setting the `GX_CLOUD_SNOWFLAKE_PASSWORD` environment variable. 
 
 - You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with `ACCOUNTADMIN` access.
 
