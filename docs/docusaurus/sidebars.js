@@ -251,7 +251,6 @@ module.exports = {
             'reference/usage_statistics',
           ]
         },
-        { type: 'doc', id: 'changelog' },
         { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
         'contributing/contributing',
       ]
@@ -330,7 +329,8 @@ module.exports = {
         'terms/validator',
         'terms/validation_result'
       ]
-    }
+    },
+    { type: 'doc', id: 'changelog' },
   ]
 }
 
