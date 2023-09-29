@@ -215,12 +215,15 @@ class CacheableDatasourceDict(DatasourceDict):
             return False
 
     @override
-    def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
+    def set_datasource(
+        self, name: str, ds: FluentDatasource | BaseDatasource
+    ) -> FluentDatasource | BaseDatasource:
         self.data[name] = ds
 
         # FDS do not use stores
         if not isinstance(ds, FluentDatasource):
-            super().__setitem__(name, ds)
+            return super().set_datasource(name, ds)
+        return ds
 
     @override
     def __delitem__(self, name: str) -> None:
