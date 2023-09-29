@@ -625,10 +625,6 @@ ColNameParamId: TypeAlias = Literal[
     'str "QUOTED_UPPER_COL"',
     # ----------------------
 ]
-RAW_QUERY_REQUIRE_FIXES: Final[dict[ColNameParamId, list[DatabaseType]]] = {
-    "str quoted_lower_col": ["postgres"],
-    "str QUOTED_LOWER_COL": ["postgres"],
-}
 
 
 # TODO: remove items from this lookup when working on fixes
@@ -732,15 +728,6 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
 }
 
 
-def _raw_query_requires_fix(param_id: str) -> bool:
-    column_name: ColNameParamId
-    dialect, *_, column_name = param_id.split("-")  # type: ignore[assignment]
-    dialects_raw_query_requires_fix: list[DatabaseType] = RAW_QUERY_REQUIRE_FIXES.get(
-        column_name, []
-    )
-    return dialect in dialects_raw_query_requires_fix
-
-
 def _requires_fix(param_id: str) -> bool:
     column_name: ColNameParamId
     dialect, expectation, column_name = param_id.split("-")  # type: ignore[assignment]
@@ -778,6 +765,8 @@ def _raw_query_check_column_exists(
             print(f"\nResults:\n  {col_exist_check.keys()}")
             col_exist_result = col_exist_check.fetchone()
             print(f"  Values: {col_exist_result}\n{column_name_param} exists!\n")
+            if not col_exist_result:
+                return False
         except SqlAlchemyProgrammingError as sql_err:
             LOGGER.warning("SQLAlchemy Error", exc_info=sql_err)
             print(f"\n{column_name_param} does not exist!\n")
