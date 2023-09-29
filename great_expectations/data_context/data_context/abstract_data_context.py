@@ -379,9 +379,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _init_variables(self) -> DataContextVariables:
         raise NotImplementedError
 
-    def _save_project_config(
-        self, _fds_datasource: FluentDatasource | None = None
-    ) -> FluentDatasource | None:
+    def _save_project_config(self) -> None:
         """
         Each DataContext will define how its project_config will be saved through its internal 'variables'.
             - FileDataContext : Filesystem.
