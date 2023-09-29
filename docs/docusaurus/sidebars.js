@@ -5,7 +5,45 @@ module.exports = {
       type: 'category',
       label: 'GX Cloud',
       items: [
-        `cloud/setup/setup_cloud`,
+        {
+          type: 'category',
+          label: 'Set up GX Cloud',
+          link: { type: 'doc', id: 'cloud/set_up_gx_cloud' },
+          items: [
+            {
+              type: 'link',
+              label: 'Request a GX Cloud Beta account',
+              href: '/docs/cloud/set_up_gx_cloud#request-a-gx-cloud-beta-account',
+            },
+            {
+              type: 'link',
+              label: 'Prepare your environment',
+              href: '/docs/cloud/set_up_gx_cloud#prepare-your-environment',
+            },
+            {
+              type: 'link',
+              label: 'Get your user access token and organization ID',
+              href: '/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id',
+            },
+            {
+              type: 'link',
+              label: 'Set the environment variables and start the GX Cloud agent',
+              href: '/docs/cloud/set_up_gx_cloud#set-the-environment-variables-and-start-the-gx-cloud-agent',
+            },
+            {
+              type: 'link',
+              label: 'Troubleshoot',
+              href: '/docs/cloud/set_up_gx_cloud#troubleshoot',
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Quickstarts',
+          items: [
+            'cloud/quickstarts/snowflake_quickstart',
+          ]
+        },
       ]
     },
     {
