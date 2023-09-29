@@ -92,15 +92,20 @@ class DatasourceDict(UserDict):
 
         return datasources
 
-    @override
-    def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
+    def set_datasource(
+        self, name: str, ds: FluentDatasource | BaseDatasource
+    ) -> FluentDatasource | BaseDatasource:
         config: FluentDatasource | DatasourceConfig
         if isinstance(ds, FluentDatasource):
             config = self._prep_fds_config(name=name, ds=ds)
         else:
             config = self._prep_legacy_datasource_config(name=name, ds=ds)
 
-        self._datasource_store.set(key=None, value=config)
+        return self._datasource_store.set(key=None, value=config)
+
+    @override
+    def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
+        self.set_datasource(name=name, ds=ds)
 
     def _prep_fds_config(self, name: str, ds: FluentDatasource) -> FluentDatasource:
         if isinstance(ds, SupportsInMemoryDataAssets):
