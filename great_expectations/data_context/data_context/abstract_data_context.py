@@ -799,6 +799,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             return self.datasources.set_datasource(name=datasource_name, ds=datasource)
 
         self.datasources[datasource_name] = datasource
+        self._data_context._save_project_config()
 
         return datasource
 

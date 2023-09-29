@@ -471,7 +471,7 @@ class _SourceFactories:
             datasource._data_context = self._data_context
             datasource.test_connection()
             datasource = self._data_context._add_fluent_datasource(datasource)
-            self._data_context._save_project_config()
+
             return datasource
 
         add_datasource.__doc__ = doc_string
