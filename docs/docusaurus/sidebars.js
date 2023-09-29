@@ -3,6 +3,51 @@ module.exports = {
     'intro',
     {
       type: 'category',
+      label: 'GX Cloud',
+      items: [
+        {
+          type: 'category',
+          label: 'Set up GX Cloud',
+          link: { type: 'doc', id: 'cloud/set_up_gx_cloud' },
+          items: [
+            {
+              type: 'link',
+              label: 'Request a GX Cloud Beta account',
+              href: '/docs/cloud/set_up_gx_cloud#request-a-gx-cloud-beta-account',
+            },
+            {
+              type: 'link',
+              label: 'Prepare your environment',
+              href: '/docs/cloud/set_up_gx_cloud#prepare-your-environment',
+            },
+            {
+              type: 'link',
+              label: 'Get your user access token and organization ID',
+              href: '/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id',
+            },
+            {
+              type: 'link',
+              label: 'Set the environment variables and start the GX Cloud agent',
+              href: '/docs/cloud/set_up_gx_cloud#set-the-environment-variables-and-start-the-gx-cloud-agent',
+            },
+            {
+              type: 'link',
+              label: 'Troubleshoot',
+              href: '/docs/cloud/set_up_gx_cloud#troubleshoot',
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Quickstarts',
+          items: [
+            'cloud/quickstarts/snowflake_quickstart',
+          ]
+        },
+      ]
+    },
+    {
+      type: 'category',
       label: 'Get started with GX',
       link: { type: 'doc', id: 'guides/setup/get_started_lp' },
       items: [
@@ -133,7 +178,6 @@ module.exports = {
           link: { type: 'doc', id: 'guides/validation/checkpoints/checkpoint_lp' },
           items: [
             'guides/validation/checkpoints/how_to_create_a_new_checkpoint',
-            'guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config',
             'guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
             'guides/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint',
             'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint',
@@ -196,7 +240,7 @@ module.exports = {
     {
       type: 'category',
       label: 'Concepts',
-      link: { type: 'doc', id: 'conceptual_guides/learn_lp' }, 
+      link: { type: 'doc', id: 'conceptual_guides/learn_lp' },
       items: [
         'conceptual_guides/expectation_classes',
         'conceptual_guides/metricproviders',
