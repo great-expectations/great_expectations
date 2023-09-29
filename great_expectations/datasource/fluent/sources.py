@@ -492,15 +492,17 @@ class _SourceFactories:
         def update_datasource(
             name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs
         ) -> Datasource:
-            new_datasource: Optional[Datasource] = self._datasource_passed_in(
-                datasource_type, name_or_datasource, **kwargs
+            updated_datasource = (
+                self._datasource_passed_in(
+                    datasource_type, name_or_datasource, **kwargs
+                )
+            ) or (
+                datasource_type(name=name_or_datasource, **kwargs)
+                if name_or_datasource
+                else datasource_type(**kwargs)
             )
-            # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg
-            datasource_name: str = (
-                new_datasource.name  # type: ignore[assignment] # always a str
-                if new_datasource
-                else name_or_datasource or kwargs["name"]
-            )
+
+            datasource_name: str = updated_datasource.name  # type: ignore[assignment] # always a str
             logger.debug(f"Updating {datasource_type} with {datasource_name}")
             self._validate_current_datasource_type(
                 datasource_name,
@@ -512,18 +514,11 @@ class _SourceFactories:
                 self._data_context.datasources.get(datasource_name), "id", None
             )
             if id_:
-                # if not a str `name_or_datasource` is a datasource and `id` can be directly attached
-                if name_or_datasource and not isinstance(name_or_datasource, str):
-                    name_or_datasource.id = id_
-                else:
-                    kwargs["id"] = id_
+                updated_datasource.id = id_
 
-            if name_or_datasource and not isinstance(name_or_datasource, str):
-                return self._data_context._update_fluent_datasource(
-                    datasource=name_or_datasource
-                )
-            else:
-                return self._data_context._update_fluent_datasource(**kwargs)
+            return self._data_context._update_fluent_datasource(
+                datasource=updated_datasource
+            )
 
         update_datasource.__doc__ = doc_string
         # attr-defined issue https://github.com/python/mypy/issues/12472
