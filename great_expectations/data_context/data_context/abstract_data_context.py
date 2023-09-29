@@ -766,10 +766,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         self, datasource: Optional[FluentDatasource] = None, **kwargs
     ) -> FluentDatasource:
         if datasource:
-            from_config: bool = False
             datasource_name = datasource.name
         else:
-            from_config = True
             datasource_name = kwargs.get("name", "")
 
         if not datasource_name:
@@ -790,14 +788,11 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         assert isinstance(datasource, FluentDatasource)
 
+        datasource = self.datasources.set_datasource(
+            name=datasource_name, ds=datasource
+        )
         datasource._data_context = self
-        datasource._data_context._save_project_config()
-
-        if self._datasource_store.cloud_mode and not from_config:
-            return self.datasources.set_datasource(name=datasource_name, ds=datasource)
-
-        self.datasources[datasource_name] = datasource
-        self._data_context._save_project_config()
+        self._save_project_config()
 
         return datasource
 
