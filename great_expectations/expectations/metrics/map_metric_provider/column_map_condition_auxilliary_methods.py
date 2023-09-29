@@ -84,11 +84,20 @@ def _pandas_column_map_condition_values(
     ]
 
     result_format = metric_value_kwargs["result_format"]
-
+    unexpected_metrics_with_values: bool = result_format.get(
+        "unexpected_metrics_with_values", True)
+    
     if result_format["result_format"] == "COMPLETE":
-        return list(domain_values)
-
-    return list(domain_values[: result_format["partial_unexpected_count"]])
+        if not unexpected_metrics_with_values :
+            return []
+        else : 
+            return list(domain_values)
+        
+    else :
+        if not unexpected_metrics_with_values :
+            return []
+        else :  
+            return list(domain_values[: result_format["partial_unexpected_count"]])
 
 
 # TODO: <Alex>11/15/2022: Please DO_NOT_DELETE this method (even though it is not currently utilized).  Thanks.</Alex>
@@ -260,6 +269,7 @@ def _sqlalchemy_column_map_condition_values(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
+
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
     selectable = execution_engine.get_domain_records(
@@ -274,7 +284,11 @@ def _sqlalchemy_column_map_condition_values(
             query = query.select_from(selectable.subquery())
         else:
             query = query.select_from(selectable)
+
     result_format = metric_value_kwargs["result_format"]
+    unexpected_metrics_with_values: bool = result_format.get(
+        "unexpected_metrics_with_values", True)
+    
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
     elif (
@@ -287,6 +301,9 @@ def _sqlalchemy_column_map_condition_values(
         )
         query = query.limit(10000)  # BigQuery upper bound on query parameters
 
+    if not unexpected_metrics_with_values :
+        return []
+    
     return [
         val.unexpected_values
         for val in execution_engine.execute_query(query).fetchall()
@@ -376,18 +393,27 @@ def _spark_column_map_condition_values(
     )
 
     result_format = metric_value_kwargs["result_format"]
+    unexpected_metrics_with_values: bool = result_format.get(
+        "unexpected_metrics_with_values", True)
+    
     if result_format["result_format"] == "COMPLETE":
-        rows = filtered.select(
-            F.col(column_name).alias(column_name)
-        ).collect()  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name
-    else:
-        rows = (
-            filtered.select(
+        if not unexpected_metrics_with_values :
+            rows = []
+        else :
+            rows = filtered.select(
                 F.col(column_name).alias(column_name)
-            )  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name
-            .limit(result_format["partial_unexpected_count"])
-            .collect()
-        )
+            ).collect()  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name
+    else:
+        if not unexpected_metrics_with_values :
+            rows = []
+        else :
+            rows = (
+                filtered.select(
+                    F.col(column_name).alias(column_name)
+                )  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name
+                .limit(result_format["partial_unexpected_count"])
+                .collect()
+            )
     return [row[column_name] for row in rows]
 
 
