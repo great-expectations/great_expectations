@@ -18,7 +18,7 @@ To modify the following code for your use case, replace `batch_request` and `exp
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create checkpoint batch_request"
 ```
 
-There are other configuration options for more advanced deployments. See [How to configure a new Checkpoint using test_yaml_config](../../../guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md).
+For other Checkpoint configuration options, see [Manage Checkpoints](../../../guides/validation/checkpoints/checkpoint_lp.md).
 
 
 ## Run your Checkpoint (Optional)

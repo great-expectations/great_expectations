@@ -12,7 +12,7 @@ class_name: ExpectationsStore
 store_backend:
   class_name: TupleS3StoreBackend
   bucket: '<your_s3_bucket_name>'
-  prefix: '<your_s3_bucket_folder_name>'
+  prefix: '<your_s3_bucket_folder_name>'  # Bucket and prefix in combination must be unique across all stores
 ```
 
 Only one Expectation Store is listed. Your configuration contains the original ``expectations_store`` on the local filesystem and the ``expectations_S3_store`` you configured, but the `great_expectations store list` command only lists your active stores.  For your Expectation Store, this is the one that you set as the value of the ``expectations_store_name`` variable in the ``expectations_S3_store`` configuration file.

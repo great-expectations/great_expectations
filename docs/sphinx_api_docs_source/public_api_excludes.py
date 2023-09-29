@@ -688,56 +688,6 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         ),
     ),
     IncludeExcludeDefinition(
-        reason="Close is not included in the public API.",
-        name="close",
-        filepath=pathlib.Path("great_expectations/agent/message_service/subscriber.py"),
-    ),
-    IncludeExcludeDefinition(
-        reason="Run is not included in the public API.",
-        name="run",
-        filepath=pathlib.Path("great_expectations/agent/agent.py"),
-    ),
-    IncludeExcludeDefinition(
-        reason="Close is not included in the public API.",
-        name="close",
-        filepath=pathlib.Path(
-            "great_expectations/agent/message_service/asyncio_rabbit_mq_client.py"
-        ),
-    ),
-    IncludeExcludeDefinition(
-        reason="Close is not included in the public API.",
-        name="run",
-        filepath=pathlib.Path(
-            "great_expectations/agent/message_service/asyncio_rabbit_mq_client.py"
-        ),
-    ),
-    IncludeExcludeDefinition(
-        reason="Run is not included in the public API.",
-        name="run",
-        filepath=pathlib.Path(
-            "great_expectations/agent/actions/data_assistants/run_onboarding_data_assistant.py"
-        ),
-    ),
-    IncludeExcludeDefinition(
-        reason="Run is not included in the public API.",
-        name="run",
-        filepath=pathlib.Path(
-            "great_expectations/agent/actions/data_assistants/run_missingness_data_assistant.py"
-        ),
-    ),
-    IncludeExcludeDefinition(
-        reason="Run is not included in the public API.",
-        name="build_batch_request",
-        filepath=pathlib.Path(
-            "great_expectations/agent/actions/data_assistants/utils.py"
-        ),
-    ),
-    IncludeExcludeDefinition(
-        reason="Run is not included in the public API.",
-        name="run",
-        filepath=pathlib.Path("great_expectations/agent/actions/agent_action.py"),
-    ),
-    IncludeExcludeDefinition(
         reason='The "columns()" property in this module is not included in the public API',
         name="columns",
         filepath=pathlib.Path("great_expectations/datasource/fluent/sql_datasource.py"),
@@ -748,23 +698,6 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         filepath=pathlib.Path(
             "great_expectations/datasource/fluent/spark_generic_splitters.py"
         ),
-    ),
-    IncludeExcludeDefinition(
-        reason="The run method shares a name with a public API method",
-        name="run",
-        filepath=pathlib.Path(
-            "great_expectations/agent/actions/run_column_descriptive_metrics_action.py"
-        ),
-    ),
-    IncludeExcludeDefinition(
-        reason="The run method shares a name with a public API method",
-        name="run",
-        filepath=pathlib.Path("great_expectations/agent/actions/list_table_names.py"),
-    ),
-    IncludeExcludeDefinition(
-        reason="The agent is not part of the public API",
-        name="run",
-        filepath=pathlib.Path("great_expectations/agent/actions/run_checkpoint.py"),
     ),
     IncludeExcludeDefinition(
         reason="The add method shares a name with a public API method",
@@ -785,13 +718,6 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         name="add",
         filepath=pathlib.Path(
             "great_expectations/experimental/metric_repository/cloud_data_store.py"
-        ),
-    ),
-    IncludeExcludeDefinition(
-        reason="Run is not included in the public API.",
-        name="run",
-        filepath=pathlib.Path(
-            "great_expectations/agent/actions/draft_datasource_config_action.py"
         ),
     ),
     IncludeExcludeDefinition(
