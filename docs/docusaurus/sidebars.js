@@ -54,7 +54,7 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'Get your user access token and organization ID',
+              label: 'Delete a Data Asset',
               href: '/docs/cloud/data_assets/manage_data_assets#delete-a-data-asset',
             },
           ]
