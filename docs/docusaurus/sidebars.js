@@ -44,7 +44,7 @@ module.exports = {
           items: [
             {
               type: 'link',
-              label: 'Request a GX Cloud Beta account',
+              label: 'Create a Data Asset',
               href: '/docs/cloud/data_assets/manage_data_assets#create-a-data-asset',
             },
             {
