@@ -819,7 +819,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         updated_datasource.test_connection()
 
         updated_datasource = self.datasources.set_datasource(
-            name=datasource_name, ds=datasource
+            name=datasource_name, ds=updated_datasource
         )
         updated_datasource._data_context = self
         self._save_project_config()
