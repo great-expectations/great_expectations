@@ -1,7 +1,7 @@
 ---
 sidebar_label: 'Manage Data Assets'
 title: 'Manage Data Assets'
-description: Create and manage Data Assets.
+description: Create and manage Data Assets in GX Cloud.
 ---
 
 A Data Asset is a collection of records that you create when you connect to your Data Source. When you connect to your Data Source, you define a minimum of one Data Asset. You use these Data Assets to create the Batch Requests that define the data that is provided to your Expectations.
@@ -59,6 +59,8 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
 8. Click **Finish**.
 
+9. Add an Expectation. See [Add an Expectation](../expectations/manage_expectations.md#add-an-expectation).
+
 ## Edit a Data Asset
 
 1. In Jupyter Notebook, run the following code to import the `great_expectations` module and the existing Data Context:
@@ -95,3 +97,4 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 2. Click **Delete** for the Data Source and the associated Data Assets you want to delete.
 
 3. Click **Delete**.
+

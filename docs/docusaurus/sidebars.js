@@ -39,6 +39,13 @@ module.exports = {
         },
         {
           type: 'category',
+          label: 'Quickstarts',
+          items: [
+            'cloud/quickstarts/snowflake_quickstart',
+          ]
+        },
+        {
+          type: 'category',
           label: 'Manage Data Assets',
           link: { type: 'doc', id: 'cloud/data_assets/manage_data_assets' },
           items: [
@@ -61,9 +68,24 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Quickstarts',
+          label: 'Manage Expectations',
+          link: { type: 'doc', id: 'cloud/expectations/manage_expectations' },
           items: [
-            'cloud/quickstarts/snowflake_quickstart',
+            {
+              type: 'link',
+              label: 'Add an Expectation',
+              href: '/docs/cloud/expectations/manage_expectations#add-an-expectation',
+            },
+            {
+              type: 'link',
+              label: 'Edit an Expectation',
+              href: '/docs/cloud/expectations/manage_expectations#edit-an-expectation',
+            },
+            {
+              type: 'link',
+              label: 'Delete an Expectation',
+              href: '/docs/cloud/expectations/manage_expectations#delete-an-expectation',
+            },
           ]
         },
       ]
