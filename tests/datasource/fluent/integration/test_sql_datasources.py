@@ -18,7 +18,6 @@ from typing import (
 )
 
 import pytest
-import sqlalchemy as sa
 from packaging.version import Version
 from pytest import param
 
@@ -650,7 +649,7 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "snowflake",
         "sqlite",
     ],
-    "expect_column_to_exist-str quoted_lower_col": ["postgres", "snowflake"],
+    "expect_column_to_exist-str quoted_lower_col": ["snowflake"],
     "expect_column_to_exist-str QUOTED_LOWER_COL": [
         "databricks_sql",
         "snowflake",
@@ -698,7 +697,6 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "snowflake",
     ],
     "expect_column_values_to_not_be_null-str quoted_lower_col": [
-        "postgres",
         "snowflake",
     ],
     'expect_column_values_to_not_be_null-str "quoted_lower_col"': [
@@ -733,26 +731,6 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     ],
 }
 
-# expect failures for these column names
-# NOTE: the expectation must fail without a raised_exception
-EXPECTED_FAILURE: Final[dict[ColNameParamId, list[DatabaseType]]] = {
-    # TODO: add these for sqlite and databricks
-    # DDL: unquoted_lower_col ----------------------------------
-    'str "unquoted_lower_col"': ["snowflake"],
-    'str "UNQUOTED_LOWER_COL"': ["postgres"],
-    # DDL: UNQUOTED_UPPER_COL ----------------------------------
-    'str "unquoted_upper_col"': ["snowflake"],
-    'str "UNQUOTED_UPPER_COL"': ["postgres"],
-    # DDL: "quoted_lower_col"-----------------------------------
-    "str quoted_lower_col": ["snowflake"],
-    "str QUOTED_LOWER_COL": ["snowflake"],
-    'str "QUOTED_LOWER_COL"': ["postgres", "snowflake"],
-    # DDL: "QUOTED_UPPER_COL" ----------------------------------
-    "str quoted_upper_col": ["postgres"],
-    'str "quoted_upper_col"': ["postgres", "snowflake"],
-    "str QUOTED_UPPER_COL": ["postgres"],
-}
-
 
 def _raw_query_requires_fix(param_id: str) -> bool:
     column_name: ColNameParamId
@@ -771,13 +749,6 @@ def _requires_fix(param_id: str) -> bool:
     return dialect in dialects_need_fixes
 
 
-def _is_expected_to_fail(param_id: str) -> bool:
-    column_name: ColNameParamId
-    dialect, *_, column_name = param_id.split("-")  # type: ignore[assignment]
-    dialects_should_fail: list[DatabaseType] = EXPECTED_FAILURE.get(column_name, [])
-    return dialect in dialects_should_fail
-
-
 def _is_quote_char_dialect_mismatch(
     dialect: GXSqlDialect,
     column_name: str | quoted_name,
@@ -788,6 +759,30 @@ def _is_quote_char_dialect_mismatch(
         if quote_char != dialect_quote_char:
             return True
     return False
+
+
+def _raw_query_check_column_exists(
+    column_name_param: str,
+    qualified_table_name: str,
+    gx_execution_engine: SqlAlchemyExecutionEngine,
+) -> bool:
+    """Use a simple 'SELECT {column_name_param} from {qualified_table_name};' query to check if the column exists.'"""
+    with gx_execution_engine.get_connection() as connection:
+        query = f"""SELECT {column_name_param} FROM {qualified_table_name} LIMIT 1;"""
+        print(f"query:\n  {query}")
+        # an exception will be raised if the column does not exist
+        try:
+            col_exist_check = connection.execute(
+                TextClause(query),
+            )
+            print(f"\nResults:\n  {col_exist_check.keys()}")
+            col_exist_result = col_exist_check.fetchone()
+            print(f"  Values: {col_exist_result}\n{column_name_param} exists!\n")
+        except SqlAlchemyProgrammingError as sql_err:
+            LOGGER.warning("SQLAlchemy Error", exc_info=sql_err)
+            print(f"\n{column_name_param} does not exist!\n")
+            return False
+        return True
 
 
 @pytest.mark.parametrize(
@@ -816,88 +811,6 @@ def _is_quote_char_dialect_mismatch(
     ],
 )
 class TestColumnIdentifiers:
-    def test_raw_queries(
-        self,
-        context: EphemeralDataContext,
-        all_sql_datasources: SQLDatasource,
-        table_factory: TableFactory,
-        column_name: str | quoted_name,
-        request: pytest.FixtureRequest,
-    ):
-        param_id = request.node.callspec.id
-        datasource = all_sql_datasources
-        dialect = datasource.get_engine().dialect.name
-
-        if _is_quote_char_dialect_mismatch(dialect, column_name):
-            pytest.skip(reason=f"quote char dialect mismatch: {column_name[0]}")
-
-        if _raw_query_requires_fix(param_id):
-            # apply marker this way so that xpasses can be seen in the report
-            request.applymarker(pytest.mark.xfail)
-
-        should_fail: bool = _is_expected_to_fail(param_id)
-
-        schema: str | None = (
-            RAND_SCHEMA
-            if GXSqlDialect(dialect)
-            in (GXSqlDialect.SNOWFLAKE, GXSqlDialect.DATABRICKS)
-            else None
-        )
-
-        print(f"\ndialect:\n  {dialect}")
-        print(f"column_name:\n  {column_name!r}")
-        print(f"type:\n  {type(column_name)}\n")
-
-        table_factory(
-            gx_engine=datasource.get_execution_engine(),
-            table_names={TEST_TABLE_NAME},
-            schema=schema,
-            data=[
-                {
-                    "id": 1,
-                    "name": param_id,
-                    "quoted_upper_col": '"UPPERCASE"',
-                    "quoted_lower_col": '"lowercase"',
-                    "unquoted_upper_col": "UPPERCASE",
-                    "unquoted_lower_col": "lowercase",
-                }
-            ],
-        )
-
-        qualified_table_name: str = (
-            f"{schema}.{TEST_TABLE_NAME}" if schema else TEST_TABLE_NAME
-        )
-        # examine columns
-        with datasource.get_execution_engine().get_connection() as conn:
-            cols_from_inspector = sa.inspect(conn).get_columns(
-                TEST_TABLE_NAME, schema=schema
-            )
-            print(
-                f"{TEST_TABLE_NAME} Columns from SQLAlchemy Inspector:\n  {pf(cols_from_inspector)}\n"
-            )
-
-            query = f"""SELECT {column_name} FROM {qualified_table_name} LIMIT 1;"""
-            print(f"query:\n  {query}")
-            # an exception will be raised if the column does not exist
-            try:
-                col_exist_check = conn.execute(
-                    TextClause(query),
-                )
-                print(f"\nResults:\n  {col_exist_check.keys()}")
-                col_exist_result = col_exist_check.fetchone()
-                print(f"  Values: {col_exist_result}\n")
-            except SqlAlchemyProgrammingError as sql_err:
-                LOGGER.warning("SQLAlchemy Error", exc_info=sql_err)
-                print(f"\n{column_name} does not exist")
-                assert (
-                    should_fail is True
-                ), f"{column_name} column should have been found"
-            else:
-                if should_fail is True:
-                    assert not col_exist_result, f"{column_name} should not exist"
-                else:
-                    assert col_exist_result, f"{column_name} should exist"
-
     @pytest.mark.parametrize(
         "expectation_type",
         [
@@ -954,11 +867,12 @@ class TestColumnIdentifiers:
         qualified_table_name: str = (
             f"{schema}.{TEST_TABLE_NAME}" if schema else TEST_TABLE_NAME
         )
-        # examine columns
-        with datasource.get_execution_engine().get_connection() as conn:
-            result = conn.execute(TextClause(f"SELECT * FROM {qualified_table_name}"))
-            assert result
-            print(f"{TEST_TABLE_NAME} Columns:\n  {result.keys()}\n")
+        # check that the column exists so that we know what if the expectation should succeed or fail
+        column_exists = _raw_query_check_column_exists(
+            column_name,
+            qualified_table_name,
+            datasource.get_execution_engine(),
+        )
 
         asset = datasource.add_table_asset(
             "my_asset", table_name=TEST_TABLE_NAME, schema_name=schema
@@ -999,10 +913,12 @@ class TestColumnIdentifiers:
         exc_details = _get_exception_details(result, prettyprint=True)
         assert not exc_details, exc_details[0]["raised_exception"]
 
-        if _is_expected_to_fail(param_id):
-            assert result.success is False, "validation should have failed"
+        if column_exists:
+            assert result.success is True, "column exists but validation failed"
         else:
-            assert result.success is True, "validation failed"
+            assert (
+                result.success is False
+            ), "column does not exist but validation succeeded"
 
 
 if __name__ == "__main__":
