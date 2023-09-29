@@ -648,6 +648,7 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     "expect_column_to_exist-str quoted_lower_col": ["snowflake"],
     "expect_column_to_exist-str QUOTED_LOWER_COL": [
         "databricks_sql",
+        "postgres",
         "snowflake",
         "sqlite",
     ],
