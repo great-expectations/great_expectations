@@ -470,7 +470,7 @@ class _SourceFactories:
             logger.debug(f"Adding {datasource_type} with {datasource.name}")
             datasource._data_context = self._data_context
             datasource.test_connection()
-            self._data_context._add_fluent_datasource(datasource)
+            datasource = self._data_context._add_fluent_datasource(datasource)
             self._data_context._save_project_config()
             return datasource
 
