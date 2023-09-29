@@ -39,6 +39,28 @@ module.exports = {
         },
         {
           type: 'category',
+          label: 'Manage Data Assets',
+          link: { type: 'doc', id: 'cloud/data_assets/manage_data_assets' },
+          items: [
+            {
+              type: 'link',
+              label: 'Request a GX Cloud Beta account',
+              href: '/docs/cloud/data_assets/manage_data_assets#create-a-data-asset',
+            },
+            {
+              type: 'link',
+              label: 'Edit a Data Asset',
+              href: '/docs/cloud/data_assets/manage_data_assets#edit-a-data-asset',
+            },
+            {
+              type: 'link',
+              label: 'Get your user access token and organization ID',
+              href: '/docs/cloud/data_assets/manage_data_assets#delete-a-data-asset',
+            },
+          ]
+        },
+        {
+          type: 'category',
           label: 'Quickstarts',
           items: [
             'cloud/quickstarts/snowflake_quickstart',

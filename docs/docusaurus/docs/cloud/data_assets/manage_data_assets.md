@@ -1,7 +1,6 @@
 ---
 sidebar_label: 'Manage Data Assets'
 title: 'Manage Data Assets'
-id: manage_data_assets
 description: Create and manage Data Assets.
 ---
 
@@ -11,14 +10,14 @@ A Data Asset is a collection of records that you create when you connect to your
 
 - You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
 
-- You have prepared your environment. 
+- You have [set up your environment](../set_up_gx_cloud.md). 
 
 - You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with `ACCOUNTADMIN` access.
 
 
 ## Create a Data Asset
 
-Create a Data Asset to define the data you want GX Cloud to access. Currently, the GX Cloud user interface is configured for Snowflake. To connect to Data Assets on another Data Source, see [Connect to source data](https://deploy-preview-8760.docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_lp). 
+Create a Data Asset to define the data you want GX Cloud to access. Currently, the GX Cloud user interface is configured for Snowflake. To connect to Data Assets on another Data Source, see [Connect to source data](https://deploy-preview-8760.docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_lp) in the GX OSS documentation. 
 
 1. In GX Cloud, click **Data Assets** > **New Asset**.
 
