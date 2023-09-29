@@ -568,7 +568,7 @@ class Datasource(
 
         return asset
 
-    def _save_context_project_config(self) -> Union[Datasource, None]:
+    def _save_context_project_config(self) -> None:
         """Check if a DataContext is available and save the project config."""
         if self._data_context:
             try:
