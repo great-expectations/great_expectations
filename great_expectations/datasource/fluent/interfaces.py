@@ -556,16 +556,15 @@ class Datasource(
 
         self.assets.append(asset)
 
-        # if asset was added to a cloud FDS, _save_context_project_config will return FDS fetched from cloud,
+        # if asset was added to a cloud FDS, _update_fluent_datasource will return FDS fetched from cloud,
         # which will contain the new asset populated with an id
-        cloud_fds = self._save_context_project_config()
-        if cloud_fds:
-            # update asset with new id
-            asset_with_id = cloud_fds.get_asset(asset_name=asset.name)
-            asset.id = asset_with_id.id
-            if self._data_context:
-                # datasources setter will attach dataframe to in-memory assets
-                self._data_context.datasources[self.name] = self
+        if self._data_context:
+            updated_datasource = self._data_context._update_fluent_datasource(
+                datasource=self
+            )
+            if asset_id := updated_datasource.get_asset(asset_name=asset.name).id:
+                asset.id = asset_id
+            self._save_context_project_config()
 
         return asset
 
