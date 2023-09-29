@@ -638,7 +638,7 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     'expect_column_to_exist-str "UNQUOTED_LOWER_COL"': ["snowflake", "sqlite"],
     "expect_column_to_exist-str unquoted_upper_col": ["databricks_sql", "sqlite"],
     'expect_column_to_exist-str "unquoted_upper_col"': ["postgres", "sqlite"],
-    "expect_column_to_exist-str UNQUOTED_UPPER_COL": ["databricks_sql", "postgres"],
+    "expect_column_to_exist-str UNQUOTED_UPPER_COL": ["postgres"],
     'expect_column_to_exist-str "UNQUOTED_UPPER_COL"': ["snowflake", "sqlite"],
     'expect_column_to_exist-str "quoted_lower_col"': [
         "postgres",
@@ -686,7 +686,6 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "snowflake",
     ],
     "expect_column_values_to_not_be_null-str UNQUOTED_UPPER_COL": [
-        "databricks_sql",
         "postgres",
     ],
     'expect_column_values_to_not_be_null-str "UNQUOTED_UPPER_COL"': [
