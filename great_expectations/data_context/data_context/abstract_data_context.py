@@ -798,7 +798,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _update_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
-    ) -> None:
+    ) -> FluentDatasource | BaseDatasource:
         if datasource:
             datasource_name = datasource.name
         else:
@@ -815,14 +815,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             updated_datasource = datasource
 
-        updated_datasource._data_context = self
-
         updated_datasource._rebuild_asset_data_connectors()
-
         updated_datasource.test_connection()
-        self._save_project_config(_fds_datasource=updated_datasource)
 
-        self.datasources[datasource_name] = updated_datasource
+        updated_datasource = self.datasources.set_datasource(
+            name=datasource_name, ds=datasource
+        )
+        updated_datasource._data_context = self
+        self._save_project_config()
+
+        return updated_datasource
 
     def _delete_fluent_datasource(
         self, datasource_name: str, _call_store: bool = True
