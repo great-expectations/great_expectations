@@ -572,10 +572,9 @@ class Datasource(
         """Check if a DataContext is available and save the project config."""
         if self._data_context:
             try:
-                return self._data_context._save_project_config()
+                self._data_context._save_project_config()
             except TypeError as type_err:
                 warnings.warn(str(type_err), GxSerializationWarning)
-        return None
 
     def _rebuild_asset_data_connectors(self) -> None:
         """
