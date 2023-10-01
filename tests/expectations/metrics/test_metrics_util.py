@@ -78,6 +78,12 @@ def unexpected_index_list_one_index_column():
         {"animals": "zebra", "pk_1": 5},
     ]
 
+@pytest.fixture
+def unexpected_index_list_one_index_column_without_column_values():
+    return [
+        {"pk_1": [0, 1, 2, 3, 4, 5]},
+    ]
+
 
 @pytest.fixture
 def unexpected_index_list_two_index_columns():
@@ -88,6 +94,15 @@ def unexpected_index_list_two_index_columns():
         {"animals": "giraffe", "pk_1": 3, "pk_2": "three"},
         {"animals": "lion", "pk_1": 4, "pk_2": "four"},
         {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
+    ]
+
+
+@pytest.fixture
+def unexpected_index_list_two_index_columns_without_column_values():
+    return [
+        {"pk_1": [0, 1, 2, 3, 4, 5],
+         "pk_2": ["zero", "one", "two", "three", "four", "five"]
+        },
     ]
 
 
@@ -171,6 +186,30 @@ def test_get_unexpected_indices_for_single_pandas_named_index_named_unexpected_i
 
 
 @pytest.mark.unit
+def test_get_unexpected_indices_for_single_pandas_named_index_named_unexpected_index_columns_without_column_values(
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
+    unexpected_index_list_one_index_column_without_column_values,
+):
+    """
+    [NEW TEST] : for the new argument `unexpected_metrics_with_values` set as False. It will return unexpected_index_list without column values.
+    """
+
+    dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
+    updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1"])
+    expectation_domain_column_list: List[str] = ["animals"]
+    unexpected_index_column_names: List[str] = ["pk_1"]
+
+    unexpected_index_list = get_unexpected_indices_for_single_pandas_named_index(
+        domain_records_df=updated_dataframe,
+        unexpected_index_column_names=unexpected_index_column_names,
+        expectation_domain_column_list=expectation_domain_column_list,
+        unexpected_metrics_with_values=False, # the new argument
+
+    )
+    assert unexpected_index_list == unexpected_index_list_one_index_column_without_column_values
+
+
+@pytest.mark.unit
 def test_get_unexpected_indices_for_single_pandas_named_index(
     pandas_animals_dataframe_for_unexpected_rows_and_index,
     unexpected_index_list_one_index_column,
@@ -184,8 +223,32 @@ def test_get_unexpected_indices_for_single_pandas_named_index(
         domain_records_df=updated_dataframe,
         unexpected_index_column_names=unexpected_index_column_names,
         expectation_domain_column_list=expectation_domain_column_list,
+        
     )
     assert unexpected_index_list == unexpected_index_list_one_index_column
+
+
+@pytest.mark.unit
+def test_get_unexpected_indices_for_single_pandas_named_index_without_column_values(
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
+    unexpected_index_list_one_index_column_without_column_values,
+):
+    """
+    [NEW TEST] : for the new argument `unexpected_metrics_with_values` set as False. It will return unexpected_index_list without column values.
+    """
+
+    dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
+    updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1"])
+    expectation_domain_column_list: List[str] = ["animals"]
+    unexpected_index_column_names: List[str] = [updated_dataframe.index.name]
+
+    unexpected_index_list = get_unexpected_indices_for_single_pandas_named_index(
+        domain_records_df=updated_dataframe,
+        unexpected_index_column_names=unexpected_index_column_names,
+        expectation_domain_column_list=expectation_domain_column_list,
+        unexpected_metrics_with_values=False, # the new argument
+    )
+    assert unexpected_index_list == unexpected_index_list_one_index_column_without_column_values
 
 
 @pytest.mark.unit
@@ -207,6 +270,29 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices(
 
 
 @pytest.mark.unit
+def test_get_unexpected_indices_for_multiple_pandas_named_indices_without_column_values(
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
+    unexpected_index_list_two_index_columns_without_column_values,
+):
+    """
+    [NEW TEST] : for the new argument `unexpected_metrics_with_values` set as False. It will return unexpected_index_list without column values.
+    """
+
+    dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
+    updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1", "pk_2"])
+    expectation_domain_column_list: List[str] = ["animals"]
+    unexpected_index_column_names: List[str] = list(updated_dataframe.index.names)
+
+    unexpected_index_list = get_unexpected_indices_for_multiple_pandas_named_indices(
+        domain_records_df=updated_dataframe,
+        unexpected_index_column_names=unexpected_index_column_names,
+        expectation_domain_column_list=expectation_domain_column_list,
+        unexpected_metrics_with_values=False, # the new argument
+    )
+    assert unexpected_index_list == unexpected_index_list_two_index_columns_without_column_values
+
+
+@pytest.mark.unit
 def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_columns(
     pandas_animals_dataframe_for_unexpected_rows_and_index,
     unexpected_index_list_two_index_columns,
@@ -225,6 +311,29 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
 
 
 @pytest.mark.unit
+def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_columns_without_column_values(
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
+    unexpected_index_list_two_index_columns_without_column_values,
+):
+    """
+    [NEW TEST] : for the new argument `unexpected_metrics_with_values` set as False. It will return unexpected_index_list without column values.
+    """
+
+    dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
+    updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1", "pk_2"])
+    expectation_domain_column_list: List[str] = ["animals"]
+    unexpected_index_column_names: List[str] = ["pk_1", "pk_2"]
+
+    unexpected_index_list = get_unexpected_indices_for_multiple_pandas_named_indices(
+        domain_records_df=updated_dataframe,
+        unexpected_index_column_names=unexpected_index_column_names,
+        expectation_domain_column_list=expectation_domain_column_list,
+        unexpected_metrics_with_values=False, # the new argument
+    )
+    assert unexpected_index_list == unexpected_index_list_two_index_columns_without_column_values
+
+
+@pytest.mark.unit
 def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_columns_one_column(
     pandas_animals_dataframe_for_unexpected_rows_and_index,
     unexpected_index_list_one_index_column,
@@ -240,6 +349,30 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
         expectation_domain_column_list=expectation_domain_column_list,
     )
     assert unexpected_index_list == unexpected_index_list_one_index_column
+
+
+@pytest.mark.unit
+def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_columns_one_column_without_column_values(
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
+    unexpected_index_list_one_index_column_without_column_values,
+):
+    """
+    [NEW TEST] : for the new argument `unexpected_metrics_with_values` set as False. It will return unexpected_index_list without column values.
+    """
+
+    dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
+    updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1", "pk_2"])
+    expectation_domain_column_list: List[str] = ["animals"]
+    unexpected_index_column_names: List[str] = ["pk_1"]
+
+    unexpected_index_list = get_unexpected_indices_for_multiple_pandas_named_indices(
+        domain_records_df=updated_dataframe,
+        unexpected_index_column_names=unexpected_index_column_names,
+        expectation_domain_column_list=expectation_domain_column_list,
+        unexpected_metrics_with_values=False, # the new argument
+        
+    )
+    assert unexpected_index_list == unexpected_index_list_one_index_column_without_column_values
 
 
 @pytest.mark.unit

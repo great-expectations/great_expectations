@@ -19,6 +19,8 @@ When using a dictionary, `result_format` can include the following keys:
 
 - `partial_unexpected_count`: Sets the number of results to include in `partial_unexpected_count``, if applicable. Set the value to zero to suppress the unexpected counts.
 
+- `unexpected_metrics_with_values`: When running validations, a set of unexpected results' indices and values is returned.  Setting this value to `False` suppresses values from the output to only have indices (default is `True`).
+
 - `include_unexpected_rows`: When running validations, this returns the entire row for each unexpected value in dictionary form. When using `include_unexpected_rows`, you must explicitly specify `result_format` and `result_format` must be more verbose than `BOOLEAN_ONLY`.
 
     :::note

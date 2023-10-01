@@ -1256,7 +1256,7 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
     domain_records_df: pd.DataFrame,
     unexpected_index_column_names: List[str],
     expectation_domain_column_list: List[str],
-    unexpected_metrics_with_values: bool,
+    unexpected_metrics_with_values: bool = True,
 ) -> List[Dict[str, Any]]:
     """
     Builds unexpected_index list for Pandas Dataframe in situation where the named
@@ -1323,7 +1323,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
     domain_records_df: pd.DataFrame,
     unexpected_index_column_names: List[str],
     expectation_domain_column_list: List[str],
-    unexpected_metrics_with_values: bool,
+    unexpected_metrics_with_values: bool = True,
 ) -> List[Dict[str, Any]]:
     """
     Builds unexpected_index list for Pandas Dataframe in situation where the named

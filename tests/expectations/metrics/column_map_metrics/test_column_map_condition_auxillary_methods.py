@@ -217,6 +217,91 @@ def test_sqlalchemy_column_map_condition_values(
     assert res == expected_result
 
 
+# We calculate the column_values.between.condition with min value 0.0 and max value 10.0.
+# when row_condition is col("pk_1")!=0 _sqlalchemy_column_map_condition_values() method will return [14.8] because it will run against all rows of mini_taxi_df and find the total_amount values that out of range (0 < x < 10.0).
+# when row_condition is col("pk_1")==0 _sqlalchemy_column_map_condition_values() method will return [] because it will only run against a single row of mini_taxi_df (where pk_1==0), and that total_amount value is within our range (9.75).
+@pytest.mark.sqlite
+@pytest.mark.parametrize(
+    "execution_engine_fixture_name",
+    (
+        "sql_execution_engine_with_mini_taxi_table_name",
+        "sql_execution_engine_with_mini_taxi_query",
+        "sql_execution_engine_with_mini_taxi_selectable",
+    ),
+)
+@pytest.mark.parametrize(
+    "metric_domain_kwargs, expected_result",
+    [
+        (
+            {
+                "column": "total_amount",
+                "row_condition": 'col("pk_1")==0',
+                "condition_parser": "great_expectations__experimental__",
+            },
+            [],
+        ),
+        (
+            {
+                "column": "total_amount",
+                "row_condition": 'col("pk_1")!=0',
+                "condition_parser": "great_expectations__experimental__",
+            },
+            [14.8],
+        ),
+    ],
+)
+def test_sqlalchemy_column_map_condition_values_without_column_values(
+    execution_engine_fixture_name, metric_domain_kwargs, expected_result, request, sa
+):
+    """
+    [NEW TEST] : for metric_value_kwargs containing `unexpected_metrics_with_values` key set as False. It will an empty unexpected_values
+    """
+    
+    execution_engine = request.getfixturevalue(execution_engine_fixture_name)
+    metric_value_kwargs = {
+        "min_value": 0,
+        "max_value": 10.0,
+        "strict_min": False,
+        "strict_max": False,
+        "parse_strings_as_datetimes": False,
+        "allow_cross_type_comparisons": None,
+        "result_format": {
+            "result_format": "COMPLETE",
+            "partial_unexpected_count": 20,
+            "include_unexpected_rows": False,
+            "unexpected_metrics_with_values": False,
+        },
+    }
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.between.condition",
+        metric_domain_kwargs=metric_domain_kwargs,
+        metric_value_kwargs=metric_value_kwargs,
+    )
+
+    # table.columns metric has to be calculated and loaded first, because it is a dependency of the `column_values.between.condition` metric.
+    table_columns_metric, table_column_metrics_results = get_table_columns_metric(
+        execution_engine=execution_engine
+    )
+    desired_metric.metric_dependencies = {"table.columns": table_columns_metric}
+
+    results = execution_engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    metrics = {
+        "unexpected_condition": results[desired_metric.id],
+        "table.columns": table_column_metrics_results[table_columns_metric.id],
+    }
+    mp = MapMetricProvider()
+    res = _sqlalchemy_column_map_condition_values(
+        cls=mp,
+        execution_engine=execution_engine,
+        metric_domain_kwargs=metric_domain_kwargs,
+        metric_value_kwargs=metric_value_kwargs,
+        metrics=metrics,
+    )
+    # one value is out of range with row condition
+    assert res == []
+
+
 @pytest.mark.spark
 @pytest.mark.parametrize(
     "execution_engine_fixture_name, metric_domain_kwargs, expected_result",
@@ -289,3 +374,82 @@ def test_spark_column_map_condition_values(
     )
     # one value is out of range with row condition
     assert res == expected_result
+
+
+@pytest.mark.spark
+@pytest.mark.parametrize(
+    "execution_engine_fixture_name, metric_domain_kwargs, expected_result",
+    [
+        (
+            "spark_execution_engine_with_mini_taxi_loaded",
+            {
+                "column": "total_amount",
+                "row_condition": 'col("pk_1")==0',
+                "condition_parser": "great_expectations__experimental__",
+            },
+            [],
+        ),
+        (
+            "spark_execution_engine_with_mini_taxi_loaded",
+            {
+                "column": "total_amount",
+                "row_condition": 'col("pk_1")>=0',
+                "condition_parser": "great_expectations__experimental__",
+            },
+            [14.8],
+        ),
+    ],
+)
+def test_spark_column_map_condition_values_without_column_values(
+    execution_engine_fixture_name,
+    metric_domain_kwargs,
+    expected_result,
+    request,
+    spark_session,
+):
+    """
+    [NEW TEST] : for metric_value_kwargs containing `unexpected_metrics_with_values` key set as False. It will an empty unexpected_values
+    """
+
+    execution_engine = request.getfixturevalue(execution_engine_fixture_name)
+    metric_value_kwargs = {
+        "min_value": 0,
+        "max_value": 10.0,
+        "strict_min": False,
+        "strict_max": False,
+        "parse_strings_as_datetimes": False,
+        "allow_cross_type_comparisons": None,
+        "result_format": {
+            "result_format": "COMPLETE",
+            "partial_unexpected_count": 20,
+            "include_unexpected_rows": False,
+            "unexpected_metrics_with_values": False,
+        },
+    }
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.between.condition",
+        metric_domain_kwargs=metric_domain_kwargs,
+        metric_value_kwargs=metric_value_kwargs,
+    )
+
+    # table.columns metric has to be calculated and loaded first, because it is a dependency of the `column_values.between.condition` metric.
+    table_columns_metric, table_column_metrics_results = get_table_columns_metric(
+        execution_engine=execution_engine
+    )
+    desired_metric.metric_dependencies = {"table.columns": table_columns_metric}
+    results = execution_engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    metrics = {
+        "unexpected_condition": results[desired_metric.id],
+        "table.columns": table_column_metrics_results[table_columns_metric.id],
+    }
+    mp = MapMetricProvider()
+    res = _spark_column_map_condition_values(
+        cls=mp,
+        execution_engine=execution_engine,
+        metric_domain_kwargs=metric_domain_kwargs,
+        metric_value_kwargs=metric_value_kwargs,
+        metrics=metrics,
+    )
+    # one value is out of range with row condition
+    assert res == []
