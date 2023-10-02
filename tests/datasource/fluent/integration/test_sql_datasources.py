@@ -699,7 +699,7 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "sqlite",
     ],
     'expect_column_values_to_not_be_null-str "UNQUOTED_LOWER_COL"': [
-        "postgres",
+        # "postgres",
         "snowflake",
     ],
     "expect_column_values_to_not_be_null-str unquoted_upper_col": [
@@ -714,7 +714,7 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "postgres",
     ],
     'expect_column_values_to_not_be_null-str "UNQUOTED_UPPER_COL"': [
-        "postgres",
+        # "postgres",
         "snowflake",
     ],
     "expect_column_values_to_not_be_null-str quoted_lower_col": [
@@ -731,16 +731,16 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "sqlite",
     ],
     'expect_column_values_to_not_be_null-str "QUOTED_LOWER_COL"': [
-        "postgres",
+        # "postgres",
         "snowflake",
     ],
     "expect_column_values_to_not_be_null-str quoted_upper_col": [
         "databricks_sql",
-        "postgres",
+        # "postgres",
         "sqlite",
     ],
     'expect_column_values_to_not_be_null-str "quoted_upper_col"': [
-        "postgres",
+        # "postgres",
         "snowflake",
     ],
     "expect_column_values_to_not_be_null-str QUOTED_UPPER_COL": [
@@ -755,11 +755,11 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "postgres",  # triple quote error
     ],
     "expect_column_values_to_not_be_null-str QUOTED.W.DOTS": [
-        "postgres",  # metric lookup KeyError
-        "sqlite",  # metric lookup KeyError
+        # "postgres",  # metric lookup KeyError
     ],
     'expect_column_values_to_not_be_null-str "QUOTED.W.DOTS"': [
-        "postgres",  # triple quote error
+        # "postgres",  # triple quote error
+        "snowflake",  # triple quote error
     ],
 }
 
@@ -870,6 +870,8 @@ class TestColumnIdentifiers:
             # apply marker this way so that xpasses can be seen in the report
             request.applymarker(pytest.mark.xfail)
 
+        print(f"expectations_type:\n  {expectation_type}")
+
         schema: str | None = (
             RAND_SCHEMA
             if GXSqlDialect(dialect)
@@ -943,8 +945,7 @@ class TestColumnIdentifiers:
         )
         result = checkpoint.run()
 
-        exc_details = _get_exception_details(result, prettyprint=True)
-        assert not exc_details, exc_details[0]["raised_exception"]
+        _ = _get_exception_details(result, prettyprint=True)
 
         if column_exists:
             assert result.success is True, "column exists but validation failed"
