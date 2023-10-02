@@ -750,6 +750,17 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "postgres",
         "snowflake",
     ],
+    "expect_column_values_to_not_be_null-str quoted.w.dots": ["postgres", "sqlite"],
+    'expect_column_values_to_not_be_null-str "quoted.w.dots"': [
+        "postgres",  # triple quote error
+    ],
+    "expect_column_values_to_not_be_null-str QUOTED.W.DOTS": [
+        "postgres",  # metric lookup KeyError
+        "sqlite",  # metric lookup KeyError
+    ],
+    'expect_column_values_to_not_be_null-str "QUOTED.W.DOTS"': [
+        "postgres",  # triple quote error
+    ],
 }
 
 
