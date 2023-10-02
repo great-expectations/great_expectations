@@ -614,26 +614,30 @@ class TestTableIdentifiers:
 
 
 ColNameParamId: TypeAlias = Literal[
-    "str unquoted_lower_col",
+    # DDL: unquoted_lower_col ------
     'str "unquoted_lower_col"',
     "str UNQUOTED_LOWER_COL",
     'str "UNQUOTED_LOWER_COL"',
-    # ----------------------
+    # DDL: UNQUOTED_UPPER_COL ------
     "str unquoted_upper_col",
     'str "unquoted_upper_col"',
     "str UNQUOTED_UPPER_COL",
     'str "UNQUOTED_UPPER_COL"',
-    # ----------------------
+    # DDL: "quoted_lower_col" -----
     "str quoted_lower_col",
     'str "quoted_lower_col"',
     "str QUOTED_LOWER_COL",
     'str "QUOTED_LOWER_COL"',
-    # ----------------------
+    # DDl: "QUOTED_UPPER_COL" ----
     "str quoted_upper_col",
     'str "quoted_upper_col"',
     "str QUOTED_UPPER_COL",
     'str "QUOTED_UPPER_COL"',
-    # ----------------------
+    # DDL: "quoted.w.dots" -------
+    "str quoted.w.dots",
+    'str "quoted.w.dots"',
+    "str QUOTED.W.DOTS",
+    'str "QUOTED.W.DOTS"',
 ]
 
 
@@ -673,6 +677,17 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "postgres",
         "snowflake",
         "sqlite",
+    ],
+    "expect_column_to_exist-str quoted.w.dots": [
+        "postgres",  # should fail but succeeds
+        "sqlite",  # should fail but succeeds
+    ],
+    'expect_column_to_exist-str "quoted.w.dots"': [
+        "postgres",  # should succeed but fails
+        "sqlite",  # should succeed but fails
+    ],
+    'expect_column_to_exist-str "QUOTED.W.DOTS"': [
+        "sqlite",  # should succeed but fails
     ],
     'expect_column_values_to_not_be_null-str "unquoted_lower_col"': [
         "postgres",
