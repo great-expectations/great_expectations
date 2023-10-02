@@ -679,6 +679,7 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "sqlite",
     ],
     "expect_column_to_exist-str quoted.w.dots": [
+        "databricks_sql",
         "postgres",  # should fail but succeeds
         "snowflake",  # should fail but succeeds
         "sqlite",  # should fail but succeeds
@@ -688,7 +689,7 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "snowflake",
         "sqlite",  # should succeed but fails
     ],
-    "expect_column_to_exist-str QUOTED.W.DOTS": ["snowflake"],
+    "expect_column_to_exist-str QUOTED.W.DOTS": ["databricks_sql", "snowflake"],
     'expect_column_to_exist-str "QUOTED.W.DOTS"': [
         "sqlite",  # should succeed but fails
     ],
@@ -752,6 +753,7 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "snowflake",
     ],
     "expect_column_values_to_not_be_null-str quoted.w.dots": [
+        "databricks_sql",
         "postgres",
         "snowflake",
         "sqlite",
@@ -761,6 +763,7 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "snowflake",
     ],
     "expect_column_values_to_not_be_null-str QUOTED.W.DOTS": [
+        "databricks_sql",
         # "postgres",  # metric lookup KeyError
     ],
     'expect_column_values_to_not_be_null-str "QUOTED.W.DOTS"': [
