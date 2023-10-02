@@ -88,6 +88,23 @@ module.exports = {
             },
           ]
         },
+        {
+          type: 'category',
+          label: 'Manage Validations',
+          link: { type: 'doc', id: 'cloud/validations/manage_validations' },
+          items: [
+            {
+              type: 'link',
+              label: 'Run a Validation',
+              href: '/docs/cloud/validations/manage_validations#run_a_validation',
+            },
+            {
+              type: 'link',
+              label: ' View Validation run history',
+              href: '/docs/cloud/validations/manage_validations#view-validation-run-history',
+            },
+          ]
+        },
       ]
     },
     {

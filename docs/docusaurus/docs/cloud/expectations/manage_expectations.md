@@ -12,9 +12,9 @@ An Expectation is a verifiable assertion about your data. They make implicit ass
 
 - You have a [Data Asset](../data_assets/manage_data_assets.md#create-a-data-asset).
 
-## Add an Expectation
+## Create an Expectation
 
-1. In GX Cloud, click **Data Assets**. [set up your environment](#delete-an-expectation)
+1. In GX Cloud, click **Data Assets**.
 
 2. In the **Data Assets** list, click the Data Asset name.
 
