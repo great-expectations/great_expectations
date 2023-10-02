@@ -336,38 +336,23 @@ class CaseInsensitiveString(str):
 
     @override
     def __eq__(self, other: CaseInsensitiveString | str | object):
-        # TODO: cleanup this logic
-        if not isinstance(other, str):
-            return False
-        if self._original == "quoted.w.dots":  # TODO: remove me
-            logger.warning(
-                f"{type(self).__name__}:{self!r} - {type(other).__name__}:{other!r}"
-            )
-        if self.is_quoted(other):
-            logger.warning("other is quoted")  # TODO: remove me
-            return self._original.strip(self._quote_string) == str(other).strip(
-                self._quote_string
-            )
-        if self.is_quoted(self):
+        if self.is_quoted():
             return self._original == str(other)
         if isinstance(other, CaseInsensitiveString):
             return self._lower == other._lower
         elif isinstance(other, str):
             return self._lower == other.lower()
-        return False
+        else:
+            return False
 
     def __hash__(self):
         return hash(self._lower)
 
-    @override
     def __str__(self) -> str:
         return self._original
 
-    def is_quoted(self, s: str = "") -> bool:
-        """Check if a string is quoted using the particular quote string."""
-        if not s:
-            s = self._original
-        return s.startswith(self._quote_string) and s.endswith(self._quote_string)
+    def is_quoted(self):
+        return self._original.startswith(self._quote_string)
 
 
 class CaseInsensitiveNameDict(UserDict):
