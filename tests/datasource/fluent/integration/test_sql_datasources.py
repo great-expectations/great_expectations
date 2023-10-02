@@ -55,6 +55,7 @@ from great_expectations.expectations.expectation import (
 )
 
 if TYPE_CHECKING:
+    from _pytest.mark.structures import ParameterSet
     from typing_extensions import TypeAlias
 
     from great_expectations.checkpoint.checkpoint import CheckpointResult
@@ -821,6 +822,12 @@ def _raw_query_check_column_exists(
         return True
 
 
+_EXPECTATION_TYPES: Final[tuple[ParameterSet, ...]] = (
+    param("expect_column_to_exist"),
+    param("expect_column_values_to_not_be_null"),
+)
+
+
 @pytest.mark.filterwarnings(
     "once::DeprecationWarning"
 )  # snowflake `add_table_asset` raises warning on passing a schema
@@ -849,20 +856,103 @@ def _raw_query_check_column_exists(
         param('"QUOTED_UPPER_COL"', id='str "QUOTED_UPPER_COL"'),
         # DDL: "quoted.w.dots" -------------------------------------
         param("quoted.w.dots", id="str quoted.w.dots"),
-        param('"quoted.w.dots"', id='str "quoted.w.dots"'),
+        param('"quoted.w.dots"', id='str "quoted.w.dots"'),  # TODO: fix me
         param("QUOTED.W.DOTS", id="str QUOTED.W.DOTS"),
         param('"QUOTED.W.DOTS"', id='str "QUOTED.W.DOTS"'),
     ],
 )
 class TestColumnIdentifiers:
-    @pytest.mark.parametrize(
-        "expectation_type",
-        [
-            "expect_column_to_exist",
-            "expect_column_values_to_not_be_null",
-        ],
-    )
-    def test_column_expectation(
+    @pytest.mark.parametrize("expectation_type", _EXPECTATION_TYPES)
+    def test_column_expectation_current_state(
+        self,
+        context: EphemeralDataContext,
+        all_sql_datasources: SQLDatasource,
+        table_factory: TableFactory,
+        column_name: str | quoted_name,
+        expectation_type: str,
+        request: pytest.FixtureRequest,
+    ):
+        param_id = request.node.callspec.id
+        datasource = all_sql_datasources
+        dialect = datasource.get_engine().dialect.name
+
+        if column_name[0] in ("'", '"', "`"):
+            pytest.skip(f"see _desired_state tests for {column_name!r}")
+        elif _requires_fix(param_id):
+            # apply marker this way so that xpasses can be seen in the report
+            request.applymarker(pytest.mark.xfail)
+
+        print(f"expectations_type:\n  {expectation_type}")
+
+        schema: str | None = (
+            RAND_SCHEMA
+            if GXSqlDialect(dialect)
+            in (GXSqlDialect.SNOWFLAKE, GXSqlDialect.DATABRICKS)
+            else None
+        )
+
+        print(f"\ncolumn_name:\n  {column_name!r}")
+        print(f"type:\n  {type(column_name)}\n")
+
+        table_factory(
+            gx_engine=datasource.get_execution_engine(),
+            table_names={TEST_TABLE_NAME},
+            schema=schema,
+            data=[
+                {
+                    "id": 1,
+                    "name": param_id,
+                    "quoted_upper_col": "my column is uppercase",
+                    "quoted_lower_col": "my column is lowercase",
+                    "unquoted_upper_col": "whatever",
+                    "unquoted_lower_col": "whatever",
+                    "quoted_w_dots": "what.ever",
+                },
+            ],
+        )
+
+        asset = datasource.add_table_asset(
+            "my_asset", table_name=TEST_TABLE_NAME, schema_name=schema
+        )
+        print(f"asset:\n{asset!r}\n")
+
+        suite = context.add_expectation_suite(
+            expectation_suite_name=f"{datasource.name}-{asset.name}"
+        )
+        suite.add_expectation(
+            expectation_configuration=ExpectationConfiguration(
+                expectation_type=expectation_type,
+                kwargs={
+                    "column": column_name,
+                    "mostly": 1,
+                },
+            )
+        )
+        suite = context.add_or_update_expectation_suite(expectation_suite=suite)
+
+        checkpoint_config = {
+            "name": f"{datasource.name}-{asset.name}",
+            "validations": [
+                {
+                    "expectation_suite_name": suite.expectation_suite_name,
+                    "batch_request": {
+                        "datasource_name": datasource.name,
+                        "data_asset_name": asset.name,
+                    },
+                }
+            ],
+        }
+        checkpoint = context.add_checkpoint(  # type: ignore[call-overload]
+            **checkpoint_config,
+        )
+        result = checkpoint.run()
+
+        _ = _get_exception_details(result, prettyprint=True)
+
+        assert result.success is True, "column exists but validation failed"
+
+    @pytest.mark.parametrize("expectation_type", _EXPECTATION_TYPES)
+    def test_column_expectation_desired_state(
         self,
         context: EphemeralDataContext,
         all_sql_datasources: SQLDatasource,
