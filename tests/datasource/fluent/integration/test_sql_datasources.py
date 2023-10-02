@@ -680,18 +680,20 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     ],
     "expect_column_to_exist-str quoted.w.dots": [
         "postgres",  # should fail but succeeds
+        "snowflake",  # should fail but succeeds
         "sqlite",  # should fail but succeeds
     ],
     'expect_column_to_exist-str "quoted.w.dots"': [
         "postgres",  # should succeed but fails
+        "snowflake",
         "sqlite",  # should succeed but fails
     ],
+    "expect_column_to_exist-str QUOTED.W.DOTS": ["snowflake"],
     'expect_column_to_exist-str "QUOTED.W.DOTS"': [
         "sqlite",  # should succeed but fails
     ],
     'expect_column_values_to_not_be_null-str "unquoted_lower_col"': [
         "postgres",
-        "snowflake",
     ],
     "expect_column_values_to_not_be_null-str UNQUOTED_LOWER_COL": [
         "databricks_sql",
@@ -708,7 +710,6 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     ],
     'expect_column_values_to_not_be_null-str "unquoted_upper_col"': [
         "postgres",
-        "snowflake",
     ],
     "expect_column_values_to_not_be_null-str UNQUOTED_UPPER_COL": [
         "postgres",
@@ -718,7 +719,7 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "snowflake",
     ],
     "expect_column_values_to_not_be_null-str quoted_lower_col": [
-        "snowflake",
+        # "snowflake",
     ],
     'expect_column_values_to_not_be_null-str "quoted_lower_col"': [
         "postgres",
@@ -727,12 +728,12 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     "expect_column_values_to_not_be_null-str QUOTED_LOWER_COL": [
         "databricks_sql",
         "postgres",
-        "snowflake",
+        # "snowflake",
         "sqlite",
     ],
     'expect_column_values_to_not_be_null-str "QUOTED_LOWER_COL"': [
         # "postgres",
-        "snowflake",
+        # "snowflake",
     ],
     "expect_column_values_to_not_be_null-str quoted_upper_col": [
         "databricks_sql",
@@ -741,7 +742,7 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
     ],
     'expect_column_values_to_not_be_null-str "quoted_upper_col"': [
         # "postgres",
-        "snowflake",
+        # "snowflake",
     ],
     "expect_column_values_to_not_be_null-str QUOTED_UPPER_COL": [
         "postgres",
@@ -750,16 +751,21 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
         "postgres",
         "snowflake",
     ],
-    "expect_column_values_to_not_be_null-str quoted.w.dots": ["postgres", "sqlite"],
+    "expect_column_values_to_not_be_null-str quoted.w.dots": [
+        "postgres",
+        "snowflake",
+        "sqlite",
+    ],
     'expect_column_values_to_not_be_null-str "quoted.w.dots"': [
         "postgres",  # triple quote error
+        "snowflake",
     ],
     "expect_column_values_to_not_be_null-str QUOTED.W.DOTS": [
         # "postgres",  # metric lookup KeyError
     ],
     'expect_column_values_to_not_be_null-str "QUOTED.W.DOTS"': [
         # "postgres",  # triple quote error
-        "snowflake",  # triple quote error
+        # "snowflake",  # triple quote error
     ],
 }
 
