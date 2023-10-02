@@ -140,6 +140,7 @@ UNQUOTED_UPPER_COL: Final[Literal["UNQUOTED_UPPER_COL"]] = "UNQUOTED_UPPER_COL"
 UNQUOTED_LOWER_COL: Final[Literal["unquoted_lower_col"]] = "unquoted_lower_col"
 QUOTED_UPPER_COL: Final[Literal["QUOTED_UPPER_COL"]] = "QUOTED_UPPER_COL"
 QUOTED_LOWER_COL: Final[Literal["quoted_lower_col"]] = "quoted_lower_col"
+QUOTED_W_DOTS: Final[Literal["quoted.w.dots"]] = "quoted.w.dots"
 
 
 @pytest.fixture
@@ -210,6 +211,7 @@ class Row(TypedDict):
     name: str
     quoted_upper_col: str
     quoted_lower_col: str
+    quoted_w_dots: str
     unquoted_upper_col: str
     unquoted_lower_col: str
 
@@ -263,6 +265,9 @@ def table_factory() -> Generator[TableFactory, None, None]:
             quoted_lower_col: str = quote_str(
                 QUOTED_LOWER_COL, dialect=sa_engine.dialect.name
             )
+            quoted_w_dots: str = quote_str(
+                QUOTED_W_DOTS, dialect=sa_engine.dialect.name
+            )
             transaction = conn.begin()
             if schema:
                 conn.execute(TextClause(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
@@ -272,13 +277,15 @@ def table_factory() -> Generator[TableFactory, None, None]:
                 create_tables: str = (
                     f"CREATE TABLE IF NOT EXISTS {qualified_table_name}"
                     f" (id INTEGER, name VARCHAR(255), {quoted_upper_col} VARCHAR(255), {quoted_lower_col} VARCHAR(255),"
-                    f" {UNQUOTED_UPPER_COL} VARCHAR(255), {UNQUOTED_LOWER_COL} VARCHAR(255))"
+                    f" {UNQUOTED_UPPER_COL} VARCHAR(255), {UNQUOTED_LOWER_COL} VARCHAR(255), {quoted_w_dots} VARCHAR(255))"
                 )
                 conn.execute(TextClause(create_tables))
                 if data:
                     insert_data = (
-                        f"INSERT INTO {qualified_table_name} (id, name, {quoted_upper_col}, {quoted_lower_col}, {UNQUOTED_UPPER_COL}, {UNQUOTED_LOWER_COL})"
-                        " VALUES (:id, :name, :quoted_upper_col, :quoted_lower_col, :unquoted_upper_col, :unquoted_lower_col)"
+                        f"INSERT INTO {qualified_table_name} (id, name, {quoted_upper_col}, {quoted_lower_col},"
+                        f" {UNQUOTED_UPPER_COL}, {UNQUOTED_LOWER_COL}, {quoted_w_dots})"
+                        " VALUES (:id, :name, :quoted_upper_col, :quoted_lower_col,"
+                        " :unquoted_upper_col, :unquoted_lower_col, :quoted_w_dots)"
                     )
                     conn.execute(TextClause(insert_data), data)
 
@@ -768,7 +775,9 @@ def _raw_query_check_column_exists(
             if not col_exist_result:
                 return False
         except SqlAlchemyProgrammingError as sql_err:
-            LOGGER.warning("SQLAlchemy Error", exc_info=sql_err)
+            LOGGER.debug(
+                "_raw_query_check_column_exists - SQLAlchemy Error", exc_info=sql_err
+            )
             print(f"\n{column_name_param} does not exist!\n")
             return False
         return True
@@ -797,6 +806,11 @@ def _raw_query_check_column_exists(
         param('"quoted_upper_col"', id='str "quoted_upper_col"'),
         param("QUOTED_UPPER_COL", id="str QUOTED_UPPER_COL"),
         param('"QUOTED_UPPER_COL"', id='str "QUOTED_UPPER_COL"'),
+        # DDL: "quoted.w.dots" -------------------------------------
+        param("quoted.w.dots", id="str quoted.w.dots"),
+        param('"quoted.w.dots"', id='str "quoted.w.dots"'),
+        param("QUOTED.W.DOTS", id="str QUOTED.W.DOTS"),
+        param('"QUOTED.W.DOTS"', id='str "QUOTED.W.DOTS"'),
     ],
 )
 class TestColumnIdentifiers:
@@ -849,6 +863,7 @@ class TestColumnIdentifiers:
                     "quoted_lower_col": "my column is lowercase",
                     "unquoted_upper_col": "whatever",
                     "unquoted_lower_col": "whatever",
+                    "quoted_w_dots": "what.ever",
                 },
             ],
         )
