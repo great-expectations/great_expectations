@@ -74,7 +74,7 @@ module.exports = {
             {
               type: 'link',
               label: 'Add an Expectation',
-              href: '/docs/cloud/expectations/manage_expectations#add-an-expectation',
+              href: '/docs/cloud/expectations/manage_expectations#create-an-expectation',
             },
             {
               type: 'link',
