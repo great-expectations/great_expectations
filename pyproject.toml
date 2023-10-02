@@ -128,7 +128,6 @@ exclude = [
     'expectations/core/expect_table_columns_to_match_set\.py',                                             # 8
     'expectations/core/expect_table_columns_to_match_ordered_list\.py',                                    # 11
     'expectations/core/expect_table_column_count_to_equal\.py',                                            # 5
-    'expectations/core/expect_table_column_count_to_be_between\.py',                                       # 3
     'expectations/core/expect_table_row_count_to_equal_other_table\.py',                                   # 11
     'expectations/regex_based_column_map_expectation\.py',                                                 # 3
     'expectations/row_conditions\.py',                                                                     # 4
