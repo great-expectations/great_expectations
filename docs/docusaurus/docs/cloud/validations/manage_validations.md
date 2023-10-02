@@ -10,7 +10,7 @@ When you run a validation on an Expectation, a Checkpoint is added. The Checkpoi
 
 - You have [set up your environment](../set_up_gx_cloud.md). 
 
-- You have created an [Expectation](../expectations/manage_expectations#create-an-expectation).
+- You have created an [Expectation](/docs/cloud/expectations/manage_expectations#create-an-expectation).
 
 ## Run a Validation
 

@@ -10,7 +10,7 @@ An Expectation is a verifiable assertion about your data. They make implicit ass
 
 - You have [set up your environment](../set_up_gx_cloud.md). 
 
-- You have a [Data Asset](../data_assets/manage_data_assets#create-a-data-asset).
+- You have a [Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset).
 
 ## Create an Expectation
 
