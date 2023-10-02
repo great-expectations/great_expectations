@@ -23,6 +23,9 @@ from pytest import param
 
 from great_expectations import get_context
 from great_expectations.compatibility.sqlalchemy import (
+    OperationalError as SqlAlchemyOperationalError,
+)
+from great_expectations.compatibility.sqlalchemy import (
     ProgrammingError as SqlAlchemyProgrammingError,
 )
 from great_expectations.compatibility.sqlalchemy import (
@@ -772,13 +775,13 @@ def _raw_query_check_column_exists(
             print(f"\nResults:\n  {col_exist_check.keys()}")
             col_exist_result = col_exist_check.fetchone()
             print(f"  Values: {col_exist_result}\n{column_name_param} exists!\n")
-            if not col_exist_result:
-                return False
-        except SqlAlchemyProgrammingError as sql_err:
+        except (SqlAlchemyProgrammingError, SqlAlchemyOperationalError) as sql_err:
             LOGGER.debug(
                 "_raw_query_check_column_exists - SQLAlchemy Error", exc_info=sql_err
             )
-            print(f"\n{column_name_param} does not exist!\n")
+            print(
+                f"\n{column_name_param} does not exist! - {sql_err.__class__.__name__}\n"
+            )
             return False
         return True
 
