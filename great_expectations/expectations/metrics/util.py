@@ -363,8 +363,10 @@ class CaseInsensitiveString(str):
     def __str__(self) -> str:
         return self._original
 
-    def is_quoted(self, s: str) -> bool:
+    def is_quoted(self, s: str = "") -> bool:
         """Check if a string is quoted using the particular quote string."""
+        if not s:
+            s = self._original
         return s.startswith(self._quote_string) and s.endswith(self._quote_string)
 
 
