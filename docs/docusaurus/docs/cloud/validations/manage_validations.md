@@ -24,7 +24,7 @@ When you run a validation on an Expectation, a Checkpoint is added. The Checkpoi
 
     - To run a Validation on all columns, click **Validate**.
 
-4. When the confirmation messages appears, click **See results**, or click the Validations tab and select the Validation in the **Run History** pane.
+4. When the confirmation messages appears, click **See results**, or click the **Validations** tab and select the Validation in the **Run History** pane.
 
 5. Optional. Click **Share** to copy the URL for the Validation Results that you can share with another GX Cloud user.
 
@@ -44,7 +44,7 @@ When you run a validation on an Expectation, a Checkpoint is added. The Checkpoi
 
     - To view only run validation failures, click **Failures Only**.
 
-5. Optional. Hover over a circle in the Validation timeline to view details about a specific Validation run including the observed values.
+5. Optional. Hover over a circle in the Validation timeline to view details about a specific Validation run, including the observed values.
 
     ![Validation timeline detail](../../../static/img/view_validation_timeline_detail.png)
 
