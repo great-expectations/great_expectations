@@ -96,12 +96,39 @@ module.exports = {
             {
               type: 'link',
               label: 'Run a Validation',
-              href: '/docs/cloud/validations/manage_validations#run_a_validation',
+              href: '/docs/cloud/validations/managevalidations#run-a-validation',
             },
             {
               type: 'link',
-              label: ' View Validation run history',
+              label: 'View Validation run history',
               href: '/docs/cloud/validations/manage_validations#view-validation-run-history',
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Manage Checkpoints',
+          link: { type: 'doc', id: 'cloud/checkpoints/manage_checkpoints' },
+          items: [
+            {
+              type: 'link',
+              label: 'Run a Validation',
+              href: '/docs/cloud/checkpoints/manage_checkpoints#add-a-checkpoint',
+            },
+            {
+              type: 'link',
+              label: 'Run a Checkpoint',
+              href: '/docs/cloud/checkpoints/manage_checkpoints#run-a-checkpoint',
+            },
+            {
+              type: 'link',
+              label: 'Edit a Checkpoint configuration',
+              href: '/docs/cloud/checkpoints/manage_checkpoints#edit-a-checkpoint-configuration',
+            },
+            {
+              type: 'link',
+              label: 'Delete a Checkpoint',
+              href: '/docs/cloud/checkpoints/manage_checkpoints#delete-a-checkpoint',
             },
           ]
         },
