@@ -1,11 +1,9 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Dict, List, Optional
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_evaluation_parameter_string,
@@ -39,6 +37,11 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -250,6 +253,7 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
         "required": ["column"],
     }
 
+    @override
     @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -270,6 +274,7 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -315,11 +320,12 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
         return renderer_configuration
 
     @classmethod
+    @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
+        configuration: ExpectationConfiguration,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
@@ -368,14 +374,12 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]
 
@@ -400,6 +404,7 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
             f"{result.result['observed_value']:.2f}",
         ]
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,
