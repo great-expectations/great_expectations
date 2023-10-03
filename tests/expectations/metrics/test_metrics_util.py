@@ -78,6 +78,7 @@ def unexpected_index_list_one_index_column():
         {"animals": "zebra", "pk_1": 5},
     ]
 
+
 @pytest.fixture
 def unexpected_index_list_one_index_column_without_column_values():
     return [
@@ -100,8 +101,9 @@ def unexpected_index_list_two_index_columns():
 @pytest.fixture
 def unexpected_index_list_two_index_columns_without_column_values():
     return [
-        {"pk_1": [0, 1, 2, 3, 4, 5],
-         "pk_2": ["zero", "one", "two", "three", "four", "five"]
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
         },
     ]
 
@@ -203,10 +205,12 @@ def test_get_unexpected_indices_for_single_pandas_named_index_named_unexpected_i
         domain_records_df=updated_dataframe,
         unexpected_index_column_names=unexpected_index_column_names,
         expectation_domain_column_list=expectation_domain_column_list,
-        unexpected_metrics_with_values=False, # the new argument
-
+        unexpected_metrics_with_values=False,  # the new argument
     )
-    assert unexpected_index_list == unexpected_index_list_one_index_column_without_column_values
+    assert (
+        unexpected_index_list
+        == unexpected_index_list_one_index_column_without_column_values
+    )
 
 
 @pytest.mark.unit
@@ -223,7 +227,6 @@ def test_get_unexpected_indices_for_single_pandas_named_index(
         domain_records_df=updated_dataframe,
         unexpected_index_column_names=unexpected_index_column_names,
         expectation_domain_column_list=expectation_domain_column_list,
-        
     )
     assert unexpected_index_list == unexpected_index_list_one_index_column
 
@@ -246,9 +249,12 @@ def test_get_unexpected_indices_for_single_pandas_named_index_without_column_val
         domain_records_df=updated_dataframe,
         unexpected_index_column_names=unexpected_index_column_names,
         expectation_domain_column_list=expectation_domain_column_list,
-        unexpected_metrics_with_values=False, # the new argument
+        unexpected_metrics_with_values=False,  # the new argument
     )
-    assert unexpected_index_list == unexpected_index_list_one_index_column_without_column_values
+    assert (
+        unexpected_index_list
+        == unexpected_index_list_one_index_column_without_column_values
+    )
 
 
 @pytest.mark.unit
@@ -287,9 +293,12 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_without_column
         domain_records_df=updated_dataframe,
         unexpected_index_column_names=unexpected_index_column_names,
         expectation_domain_column_list=expectation_domain_column_list,
-        unexpected_metrics_with_values=False, # the new argument
+        unexpected_metrics_with_values=False,  # the new argument
     )
-    assert unexpected_index_list == unexpected_index_list_two_index_columns_without_column_values
+    assert (
+        unexpected_index_list
+        == unexpected_index_list_two_index_columns_without_column_values
+    )
 
 
 @pytest.mark.unit
@@ -328,9 +337,12 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
         domain_records_df=updated_dataframe,
         unexpected_index_column_names=unexpected_index_column_names,
         expectation_domain_column_list=expectation_domain_column_list,
-        unexpected_metrics_with_values=False, # the new argument
+        unexpected_metrics_with_values=False,  # the new argument
     )
-    assert unexpected_index_list == unexpected_index_list_two_index_columns_without_column_values
+    assert (
+        unexpected_index_list
+        == unexpected_index_list_two_index_columns_without_column_values
+    )
 
 
 @pytest.mark.unit
@@ -369,10 +381,12 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
         domain_records_df=updated_dataframe,
         unexpected_index_column_names=unexpected_index_column_names,
         expectation_domain_column_list=expectation_domain_column_list,
-        unexpected_metrics_with_values=False, # the new argument
-        
+        unexpected_metrics_with_values=False,  # the new argument
     )
-    assert unexpected_index_list == unexpected_index_list_one_index_column_without_column_values
+    assert (
+        unexpected_index_list
+        == unexpected_index_list_one_index_column_without_column_values
+    )
 
 
 @pytest.mark.unit

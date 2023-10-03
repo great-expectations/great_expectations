@@ -256,7 +256,7 @@ def test_sqlalchemy_column_map_condition_values_without_column_values(
     """
     [NEW TEST] : for metric_value_kwargs containing `unexpected_metrics_with_values` key set as False. It will an empty unexpected_values
     """
-    
+
     execution_engine = request.getfixturevalue(execution_engine_fixture_name)
     metric_value_kwargs = {
         "min_value": 0,

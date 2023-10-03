@@ -593,20 +593,24 @@ def _sqlalchemy_map_condition_index(
 
     unexpected_index_list: List[Dict[str, Any]] = []
     unexpected_metrics_with_values: bool = result_format.get(
-        "unexpected_metrics_with_values", True)
+        "unexpected_metrics_with_values", True
+    )
 
-    if not unexpected_metrics_with_values and len(query_result) != 0 and len(unexpected_index_column_names) != 0 :
+    if (
+        not unexpected_metrics_with_values
+        and len(query_result) != 0
+        and len(unexpected_index_column_names) != 0
+    ):
         primary_key_dict: dict[str, List[Any]] = {
-            idx_col : [] 
-            for idx_col in unexpected_index_column_names
+            idx_col: [] for idx_col in unexpected_index_column_names
         }
         for row in query_result:
             for index in range(len(unexpected_index_column_names)):
                 name: str = unexpected_index_column_names[index]
                 primary_key_dict[name].append(row[index])
         unexpected_index_list.append(primary_key_dict)
-    
-    else :
+
+    else:
         for row in query_result:
             primary_key_dict: Dict[str, Any] = {}
             # add the actual unexpected value
@@ -763,7 +767,8 @@ def _spark_map_condition_index(
     )
     unexpected_index_list: List[Dict[str, Any]] = []
     unexpected_metrics_with_values: bool = result_format.get(
-        "unexpected_metrics_with_values", True)
+        "unexpected_metrics_with_values", True
+    )
 
     unexpected_index_column_names: List[str] = result_format[
         "unexpected_index_column_names"
@@ -784,17 +789,16 @@ def _spark_map_condition_index(
     # Prune the dataframe down only the columns we care about
     filtered = filtered.select(columns_to_keep)
 
-    if not unexpected_metrics_with_values and not filtered.isEmpty() :
+    if not unexpected_metrics_with_values and not filtered.isEmpty():
         dict_to_add: dict[str, List[Any]] = {
-            idx_col : [] 
-            for idx_col in unexpected_index_column_names
+            idx_col: [] for idx_col in unexpected_index_column_names
         }
         for row in filtered.collect():
             for col_name in unexpected_index_column_names:
                 dict_to_add[col_name].append(row[col_name])
         unexpected_index_list.append(dict_to_add)
-    
-    else :  
+
+    else:
         for row in filtered.collect():
             dict_to_add: dict = {}
             for col_name in columns_to_keep:

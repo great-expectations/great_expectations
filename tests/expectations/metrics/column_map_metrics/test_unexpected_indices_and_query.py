@@ -146,8 +146,9 @@ def test_pd_unexpected_index_list_metric_without_id_pk(animal_table_df):
 
 
 @pytest.mark.unit
-def test_pd_unexpected_index_list_metric_without_id_pk_without_column_values(animal_table_df):
-    
+def test_pd_unexpected_index_list_metric_without_id_pk_without_column_values(
+    animal_table_df,
+):
     """
     [NEW TEST] : for `unexpected_metrics_with_values` key set as False.
     """
@@ -161,7 +162,7 @@ def test_pd_unexpected_index_list_metric_without_id_pk_without_column_values(ani
             "result_format": "COMPLETE",
             "partial_unexpected_count": 20,
             "include_unexpected_rows": False,
-            "unexpected_metrics_with_values": False,   
+            "unexpected_metrics_with_values": False,
         },
     }
 
@@ -264,7 +265,7 @@ def test_pd_unexpected_index_list_metric_with_id_pk_without_column_values(
     for key, val in results.items():
         assert val == [
             {"pk_1": [3, 4, 5]},
-        ]        
+        ]
 
 
 @pytest.mark.unit
@@ -383,8 +384,9 @@ def test_sa_unexpected_index_list_metric_without_id_pk(sa, animal_table_df):
 
 
 @pytest.mark.unit
-def test_sa_unexpected_index_list_metric_without_id_pk_without_column_values(sa, animal_table_df):
-
+def test_sa_unexpected_index_list_metric_without_id_pk_without_column_values(
+    sa, animal_table_df
+):
     """
     [NEW TEST] : for `unexpected_metrics_with_values` key set as False.
     """
@@ -397,7 +399,7 @@ def test_sa_unexpected_index_list_metric_without_id_pk_without_column_values(sa,
             "result_format": "COMPLETE",
             "partial_unexpected_count": 20,
             "include_unexpected_rows": False,
-            "unexpected_metrics_with_values": False,   
+            "unexpected_metrics_with_values": False,
         },
     }
 
@@ -613,6 +615,7 @@ def test_spark_unexpected_index_list_metric_without_id_pk(
         metrics_to_resolve=(unexpected_index_list,), metrics=metrics
     )
     assert list(results.values())[0] is None
+
 
 @pytest.mark.spark
 def test_spark_unexpected_index_list_metric_without_id_pk_without_column_values(
