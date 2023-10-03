@@ -59,13 +59,6 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
         strict_max (boolean): \
             If True, the maximal column minimum must be strictly smaller than max_value, default=False
 
-    Keyword Args:
-        parse_strings_as_datetimes (Boolean or None): \
-            If True, parse min_value, max_values, and all non-null column values to datetimes before making \
-            comparisons.
-        output_strftime_format (str or None): \
-            A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
-
     Other Parameters:
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
