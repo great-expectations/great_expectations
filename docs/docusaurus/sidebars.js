@@ -96,7 +96,7 @@ module.exports = {
             {
               type: 'link',
               label: 'Run a Validation',
-              href: '/docs/cloud/validations/managevalidations#run-a-validation',
+              href: '/docs/cloud/validations/manage_validations#run-a-validation',
             },
             {
               type: 'link',
