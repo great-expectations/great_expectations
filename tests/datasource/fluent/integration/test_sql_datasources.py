@@ -13,6 +13,7 @@ from typing import (
     Final,
     Generator,
     Literal,
+    Mapping,
     Protocol,
     Sequence,
     TypedDict,
@@ -96,7 +97,7 @@ TableNameCase: TypeAlias = Literal[
 # all the naming conventions we want to support for different SQL dialects
 # NOTE: commented out are tests we know fail for individual datasources. Ideally all
 # test cases should work for all datasrouces
-TABLE_NAME_MAPPING: Final[dict[DatabaseType, dict[TableNameCase, str]]] = {
+TABLE_NAME_MAPPING: Final[Mapping[DatabaseType, Mapping[TableNameCase, str]]] = {
     "postgres": {
         "unquoted_lower": TEST_TABLE_NAME.lower(),
         "quoted_lower": f'"{TEST_TABLE_NAME.lower()}"',
@@ -614,8 +615,37 @@ class TestTableIdentifiers:
         assert result.success is True
 
 
+ColNameParams: TypeAlias = Literal[
+    # DDL: unquoted_lower_col ------
+    "unquoted_lower_col",
+    '"unquoted_lower_col"',
+    "UNQUOTED_LOWER_COL",
+    '"UNQUOTED_LOWER_COL"',
+    # DDL: UNQUOTED_UPPER_COL ------
+    "unquoted_upper_col",
+    '"unquoted_upper_col"',
+    "UNQUOTED_UPPER_COL",
+    '"UNQUOTED_UPPER_COL"',
+    # DDL: "quoted_lower_col" -----
+    "quoted_lower_col",
+    '"quoted_lower_col"',
+    "QUOTED_LOWER_COL",
+    '"QUOTED_LOWER_COL"',
+    # DDl: "QUOTED_UPPER_COL" ----
+    "quoted_upper_col",
+    '"quoted_upper_col"',
+    "QUOTED_UPPER_COL",
+    '"QUOTED_UPPER_COL"',
+    # DDL: "quoted.w.dots" -------
+    "quoted.w.dots",
+    '"quoted.w.dots"',
+    "QUOTED.W.DOTS",
+    '"QUOTED.W.DOTS"',
+]
+
 ColNameParamId: TypeAlias = Literal[
     # DDL: unquoted_lower_col ------
+    "str unquoted_lower_col",
     'str "unquoted_lower_col"',
     "str UNQUOTED_LOWER_COL",
     'str "UNQUOTED_LOWER_COL"',
@@ -640,6 +670,34 @@ ColNameParamId: TypeAlias = Literal[
     "str QUOTED.W.DOTS",
     'str "QUOTED.W.DOTS"',
 ]
+
+COLUMN_DDL: Final[Mapping[ColNameParams, str]] = {
+    # DDL: unquoted_lower_col ------
+    "unquoted_lower_col": UNQUOTED_LOWER_COL,
+    '"unquoted_lower_col"': UNQUOTED_LOWER_COL,
+    "UNQUOTED_LOWER_COL": UNQUOTED_LOWER_COL,
+    '"UNQUOTED_LOWER_COL"': UNQUOTED_LOWER_COL,
+    # DDL: UNQUOTED_UPPER_COL ------
+    "unquoted_upper_col": UNQUOTED_UPPER_COL,
+    '"unquoted_upper_col"': UNQUOTED_UPPER_COL,
+    "UNQUOTED_UPPER_COL": UNQUOTED_UPPER_COL,
+    '"UNQUOTED_UPPER_COL"': UNQUOTED_UPPER_COL,
+    # DDL: "quoted_lower_col" -----
+    "quoted_lower_col": f'"{QUOTED_LOWER_COL}"',
+    '"quoted_lower_col"': f'"{QUOTED_LOWER_COL}"',
+    "QUOTED_LOWER_COL": f'"{QUOTED_LOWER_COL}"',
+    '"QUOTED_LOWER_COL"': f'"{QUOTED_LOWER_COL}"',
+    # DDl: "QUOTED_UPPER_COL" ----
+    "quoted_upper_col": f'"{QUOTED_UPPER_COL}"',
+    '"quoted_upper_col"': f'"{QUOTED_UPPER_COL}"',
+    "QUOTED_UPPER_COL": f'"{QUOTED_UPPER_COL}"',
+    '"QUOTED_UPPER_COL"': f'"{QUOTED_UPPER_COL}"',
+    # DDL: "quoted.w.dots" -------
+    "quoted.w.dots": f'"{QUOTED_W_DOTS}"',
+    '"quoted.w.dots"': f'"{QUOTED_W_DOTS}"',
+    "QUOTED.W.DOTS": f'"{QUOTED_W_DOTS}"',
+    '"QUOTED.W.DOTS"': f'"{QUOTED_W_DOTS}"',
+}
 
 
 # TODO: remove items from this lookup when working on fixes
@@ -776,7 +834,7 @@ REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
 
 def _requires_fix(param_id: str) -> bool:
     column_name: ColNameParamId
-    dialect, expectation, column_name = param_id.split("-")  # type: ignore[assignment]
+    dialect, column_name, expectation = param_id.split("-")  # type: ignore[assignment]
     key = f"{expectation}-{column_name}"
     dialects_need_fixes: list[DatabaseType] = REQUIRE_FIXES.get(key, [])
     return dialect in dialects_need_fixes
@@ -828,42 +886,29 @@ _EXPECTATION_TYPES: Final[tuple[ParameterSet, ...]] = (
 )
 
 
-@pytest.mark.filterwarnings(
-    "once::DeprecationWarning"
-)  # snowflake `add_table_asset` raises warning on passing a schema
-@pytest.mark.parametrize(
-    "column_name",
-    [
-        # DDL: unquoted_lower_col ----------------------------------
-        param("unquoted_lower_col", id="str unquoted_lower_col"),
-        param('"unquoted_lower_col"', id='str "unquoted_lower_col"'),
-        param("UNQUOTED_LOWER_COL", id="str UNQUOTED_LOWER_COL"),
-        param('"UNQUOTED_LOWER_COL"', id='str "UNQUOTED_LOWER_COL"'),
-        # DDL: UNQUOTED_UPPER_COL ----------------------------------
-        param("unquoted_upper_col", id="str unquoted_upper_col"),
-        param('"unquoted_upper_col"', id='str "unquoted_upper_col"'),
-        param("UNQUOTED_UPPER_COL", id="str UNQUOTED_UPPER_COL"),
-        param('"UNQUOTED_UPPER_COL"', id='str "UNQUOTED_UPPER_COL"'),
-        # DDL: "quoted_lower_col"-----------------------------------
-        param("quoted_lower_col", id="str quoted_lower_col"),
-        param('"quoted_lower_col"', id='str "quoted_lower_col"'),
-        param("QUOTED_LOWER_COL", id="str QUOTED_LOWER_COL"),
-        param('"QUOTED_LOWER_COL"', id='str "QUOTED_LOWER_COL"'),
-        # DDL: "QUOTED_UPPER_COL" ----------------------------------
-        param("quoted_upper_col", id="str quoted_upper_col"),
-        param('"quoted_upper_col"', id='str "quoted_upper_col"'),
-        param("QUOTED_UPPER_COL", id="str QUOTED_UPPER_COL"),
-        param('"QUOTED_UPPER_COL"', id='str "QUOTED_UPPER_COL"'),
-        # DDL: "quoted.w.dots" -------------------------------------
-        param("quoted.w.dots", id="str quoted.w.dots"),
-        param('"quoted.w.dots"', id='str "quoted.w.dots"'),  # TODO: fix me
-        param("QUOTED.W.DOTS", id="str QUOTED.W.DOTS"),
-        param('"QUOTED.W.DOTS"', id='str "QUOTED.W.DOTS"'),
-    ],
-)
-class TestColumnIdentifiers:
-    @pytest.mark.parametrize("expectation_type", _EXPECTATION_TYPES)
-    def test_column_expectation_current_state(
+@pytest.mark.parametrize("expectation_type", _EXPECTATION_TYPES)
+class TestColumnExpectations:
+    @pytest.mark.parametrize(
+        "column_name",
+        [
+            # DDL: unquoted_lower_col ----------------------------------
+            param("unquoted_lower_col", id="str unquoted_lower_col"),
+            param("UNQUOTED_LOWER_COL", id="str UNQUOTED_LOWER_COL"),
+            # DDL: UNQUOTED_UPPER_COL ----------------------------------
+            param("unquoted_upper_col", id="str unquoted_upper_col"),
+            param("UNQUOTED_UPPER_COL", id="str UNQUOTED_UPPER_COL"),
+            # DDL: "quoted_lower_col"-----------------------------------
+            param("quoted_lower_col", id="str quoted_lower_col"),
+            param("QUOTED_LOWER_COL", id="str QUOTED_LOWER_COL"),
+            # DDL: "QUOTED_UPPER_COL" ----------------------------------
+            param("quoted_upper_col", id="str quoted_upper_col"),
+            param("QUOTED_UPPER_COL", id="str QUOTED_UPPER_COL"),
+            # DDL: "quoted.w.dots" -------------------------------------
+            param("quoted.w.dots", id="str quoted.w.dots"),
+            param("QUOTED.W.DOTS", id="str QUOTED.W.DOTS"),
+        ],
+    )
+    def test_unquoted_params(
         self,
         context: EphemeralDataContext,
         all_sql_datasources: SQLDatasource,
@@ -891,7 +936,8 @@ class TestColumnIdentifiers:
             else None
         )
 
-        print(f"\ncolumn_name:\n  {column_name!r}")
+        print(f"\ncolumn DDL:\n  {COLUMN_DDL[column_name]}")
+        print(f"\n`column_name` parameter __repr__:\n  {column_name!r}")
         print(f"type:\n  {type(column_name)}\n")
 
         table_factory(
@@ -949,10 +995,39 @@ class TestColumnIdentifiers:
 
         _ = _get_exception_details(result, prettyprint=True)
 
-        assert result.success is True, "column exists but validation failed"
+        assert result.success is True, "validation failed"
 
-    @pytest.mark.parametrize("expectation_type", _EXPECTATION_TYPES)
-    def test_column_expectation_desired_state(
+    @pytest.mark.parametrize(
+        "column_name",
+        [
+            # DDL: unquoted_lower_col ----------------------------------
+            param("unquoted_lower_col", id="str unquoted_lower_col"),
+            param('"unquoted_lower_col"', id='str "unquoted_lower_col"'),
+            param("UNQUOTED_LOWER_COL", id="str UNQUOTED_LOWER_COL"),
+            param('"UNQUOTED_LOWER_COL"', id='str "UNQUOTED_LOWER_COL"'),
+            # DDL: UNQUOTED_UPPER_COL ----------------------------------
+            param("unquoted_upper_col", id="str unquoted_upper_col"),
+            param('"unquoted_upper_col"', id='str "unquoted_upper_col"'),
+            param("UNQUOTED_UPPER_COL", id="str UNQUOTED_UPPER_COL"),
+            param('"UNQUOTED_UPPER_COL"', id='str "UNQUOTED_UPPER_COL"'),
+            # DDL: "quoted_lower_col"-----------------------------------
+            param("quoted_lower_col", id="str quoted_lower_col"),
+            param('"quoted_lower_col"', id='str "quoted_lower_col"'),
+            param("QUOTED_LOWER_COL", id="str QUOTED_LOWER_COL"),
+            param('"QUOTED_LOWER_COL"', id='str "QUOTED_LOWER_COL"'),
+            # DDL: "QUOTED_UPPER_COL" ----------------------------------
+            param("quoted_upper_col", id="str quoted_upper_col"),
+            param('"quoted_upper_col"', id='str "quoted_upper_col"'),
+            param("QUOTED_UPPER_COL", id="str QUOTED_UPPER_COL"),
+            param('"QUOTED_UPPER_COL"', id='str "QUOTED_UPPER_COL"'),
+            # DDL: "quoted.w.dots" -------------------------------------
+            param("quoted.w.dots", id="str quoted.w.dots"),
+            param('"quoted.w.dots"', id='str "quoted.w.dots"'),  # TODO: fix me
+            param("QUOTED.W.DOTS", id="str QUOTED.W.DOTS"),
+            param('"QUOTED.W.DOTS"', id='str "QUOTED.W.DOTS"'),
+        ],
+    )
+    def test_desired_state(
         self,
         context: EphemeralDataContext,
         all_sql_datasources: SQLDatasource,
@@ -981,7 +1056,8 @@ class TestColumnIdentifiers:
             else None
         )
 
-        print(f"\ncolumn_name:\n  {column_name!r}")
+        print(f"\ncolumn DDL:\n  {COLUMN_DDL[column_name]}")
+        print(f"\n`column_name` parameter __repr__:\n  {column_name!r}")
         print(f"type:\n  {type(column_name)}\n")
 
         table_factory(
