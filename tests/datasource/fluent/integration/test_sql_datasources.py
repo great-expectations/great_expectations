@@ -701,142 +701,64 @@ COLUMN_DDL: Final[Mapping[ColNameParams, str]] = {
 
 
 # TODO: remove items from this lookup when working on fixes
-REQUIRE_FIXES: Final[dict[str, list[DatabaseType]]] = {
-    'expect_column_to_exist-str "unquoted_lower_col"': ["postgres", "sqlite"],
-    "expect_column_to_exist-str UNQUOTED_LOWER_COL": [
+REQUIRE_FIXES: Final[Mapping[ColNameParamId, list[DatabaseType]]] = {
+    'str "unquoted_lower_col"': ["postgres", "sqlite"],
+    "str UNQUOTED_LOWER_COL": [
         "databricks_sql",
         "postgres",
         "sqlite",
     ],
-    'expect_column_to_exist-str "UNQUOTED_LOWER_COL"': ["snowflake", "sqlite"],
-    "expect_column_to_exist-str unquoted_upper_col": ["databricks_sql", "sqlite"],
-    'expect_column_to_exist-str "unquoted_upper_col"': ["postgres", "sqlite"],
-    "expect_column_to_exist-str UNQUOTED_UPPER_COL": ["postgres"],
-    'expect_column_to_exist-str "UNQUOTED_UPPER_COL"': ["snowflake", "sqlite"],
-    'expect_column_to_exist-str "quoted_lower_col"': [
+    'str "UNQUOTED_LOWER_COL"': ["snowflake", "sqlite"],
+    "str unquoted_upper_col": ["databricks_sql", "sqlite"],
+    'str "unquoted_upper_col"': ["postgres", "sqlite"],
+    "str UNQUOTED_UPPER_COL": ["postgres"],
+    'str "UNQUOTED_UPPER_COL"': ["snowflake", "sqlite"],
+    'str "quoted_lower_col"': [
         "postgres",
         "snowflake",
         "sqlite",
     ],
-    "expect_column_to_exist-str quoted_lower_col": ["snowflake"],
-    "expect_column_to_exist-str QUOTED_LOWER_COL": [
+    "str quoted_lower_col": ["snowflake"],
+    "str QUOTED_LOWER_COL": [
         "databricks_sql",
         "postgres",
         "snowflake",
         "sqlite",
     ],
-    'expect_column_to_exist-str "QUOTED_LOWER_COL"': ["sqlite"],
-    "expect_column_to_exist-str quoted_upper_col": [
+    'str "QUOTED_LOWER_COL"': ["sqlite"],
+    "str quoted_upper_col": [
         "databricks_sql",
         "sqlite",
     ],
-    'expect_column_to_exist-str "quoted_upper_col"': ["sqlite"],
-    "expect_column_to_exist-str QUOTED_UPPER_COL": ["postgres"],
-    'expect_column_to_exist-str "QUOTED_UPPER_COL"': [
+    'str "quoted_upper_col"': ["sqlite"],
+    "str QUOTED_UPPER_COL": ["postgres"],
+    'str "QUOTED_UPPER_COL"': [
         "postgres",
         "snowflake",
         "sqlite",
     ],
-    "expect_column_to_exist-str quoted.w.dots": [
+    "str quoted.w.dots": [
         "databricks_sql",
         "postgres",  # should fail but succeeds
         "snowflake",  # should fail but succeeds
         "sqlite",  # should fail but succeeds
     ],
-    'expect_column_to_exist-str "quoted.w.dots"': [
+    'str "quoted.w.dots"': [
         "postgres",  # should succeed but fails
         "snowflake",
         "sqlite",  # should succeed but fails
     ],
-    "expect_column_to_exist-str QUOTED.W.DOTS": ["databricks_sql", "snowflake"],
-    'expect_column_to_exist-str "QUOTED.W.DOTS"': [
+    "str QUOTED.W.DOTS": ["databricks_sql", "snowflake"],
+    'str "QUOTED.W.DOTS"': [
         "sqlite",  # should succeed but fails
-    ],
-    'expect_column_values_to_not_be_null-str "unquoted_lower_col"': [
-        "postgres",
-    ],
-    "expect_column_values_to_not_be_null-str UNQUOTED_LOWER_COL": [
-        "databricks_sql",
-        "postgres",
-        "sqlite",
-    ],
-    'expect_column_values_to_not_be_null-str "UNQUOTED_LOWER_COL"': [
-        # "postgres",
-        "snowflake",
-    ],
-    "expect_column_values_to_not_be_null-str unquoted_upper_col": [
-        "databricks_sql",
-        "sqlite",
-    ],
-    'expect_column_values_to_not_be_null-str "unquoted_upper_col"': [
-        "postgres",
-    ],
-    "expect_column_values_to_not_be_null-str UNQUOTED_UPPER_COL": [
-        "postgres",
-    ],
-    'expect_column_values_to_not_be_null-str "UNQUOTED_UPPER_COL"': [
-        # "postgres",
-        "snowflake",
-    ],
-    "expect_column_values_to_not_be_null-str quoted_lower_col": [
-        # "snowflake",
-    ],
-    'expect_column_values_to_not_be_null-str "quoted_lower_col"': [
-        "postgres",
-        "snowflake",
-    ],
-    "expect_column_values_to_not_be_null-str QUOTED_LOWER_COL": [
-        "databricks_sql",
-        "postgres",
-        # "snowflake",
-        "sqlite",
-    ],
-    'expect_column_values_to_not_be_null-str "QUOTED_LOWER_COL"': [
-        # "postgres",
-        # "snowflake",
-    ],
-    "expect_column_values_to_not_be_null-str quoted_upper_col": [
-        "databricks_sql",
-        # "postgres",
-        "sqlite",
-    ],
-    'expect_column_values_to_not_be_null-str "quoted_upper_col"': [
-        # "postgres",
-        # "snowflake",
-    ],
-    "expect_column_values_to_not_be_null-str QUOTED_UPPER_COL": [
-        "postgres",
-    ],
-    'expect_column_values_to_not_be_null-str "QUOTED_UPPER_COL"': [
-        "postgres",
-        "snowflake",
-    ],
-    "expect_column_values_to_not_be_null-str quoted.w.dots": [
-        "databricks_sql",
-        "postgres",
-        "snowflake",
-        "sqlite",
-    ],
-    'expect_column_values_to_not_be_null-str "quoted.w.dots"': [
-        "postgres",  # triple quote error
-        "snowflake",
-    ],
-    "expect_column_values_to_not_be_null-str QUOTED.W.DOTS": [
-        "databricks_sql",
-        # "postgres",  # metric lookup KeyError
-    ],
-    'expect_column_values_to_not_be_null-str "QUOTED.W.DOTS"': [
-        # "postgres",  # triple quote error
-        # "snowflake",  # triple quote error
     ],
 }
 
 
 def _requires_fix(param_id: str) -> bool:
     column_name: ColNameParamId
-    dialect, column_name, expectation = param_id.split("-")  # type: ignore[assignment]
-    key = f"{expectation}-{column_name}"
-    dialects_need_fixes: list[DatabaseType] = REQUIRE_FIXES.get(key, [])
+    dialect, column_name, _ = param_id.split("-")  # type: ignore[assignment]
+    dialects_need_fixes: list[DatabaseType] = REQUIRE_FIXES.get(column_name, [])
     return dialect in dialects_need_fixes
 
 
