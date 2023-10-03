@@ -1,0 +1,143 @@
+{
+  "consumer": {
+    "name": "great_expectations"
+  },
+  "provider": {
+    "name": "mercury"
+  },
+  "interactions": [
+    {
+      "description": "a request for Data Context",
+      "providerState": "a Data Context exists",
+      "request": {
+        "method": "get",
+        "path": "/organizations/0ccac18e-7631-4bdd-8a42-3c35cce574c6/data-context-configuration"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+        },
+        "body": {
+          "anonymous_usage_statistics": {
+            "data_context_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+            "enabled": false,
+            "usage_statistics_url": "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+          },
+          "config_version": 3,
+          "datasources": {
+          },
+          "fluent_datasources": {
+          },
+          "include_rendered_content": {
+            "globally": false,
+            "expectation_validation_result": false,
+            "expectation_suite": false
+          },
+          "stores": {
+          }
+        },
+        "matchingRules": {
+          "$.body": {
+            "match": "type"
+          }
+        }
+      }
+    },
+    {
+      "description": "a request for Datasources",
+      "providerState": "no datasources exist",
+      "request": {
+        "method": "get",
+        "path": "/organizations/0ccac18e-7631-4bdd-8a42-3c35cce574c6/datasources"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+        },
+        "body": {
+          "data": [
+
+          ]
+        },
+        "matchingRules": {
+          "$.body": {
+            "match": "type"
+          }
+        }
+      }
+    },
+    {
+      "description": "a request to add a Datasource",
+      "providerState": "the Datasource does not exist",
+      "request": {
+        "method": "post",
+        "path": "/organizations/0ccac18e-7631-4bdd-8a42-3c35cce574c6/datasources"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+        },
+        "body": {
+          "data": {
+            "id": "e7d11180-e9c0-4028-933c-ca86adb79ec2",
+            "attributes": {
+              "datasource_config": {
+                "id": "e7d11180-e9c0-4028-933c-ca86adb79ec2",
+                "name": "pandas_datasource",
+                "type": "pandas",
+                "assets": [
+
+                ],
+                "test": "this should fail"
+              }
+            }
+          }
+        },
+        "matchingRules": {
+          "$.body": {
+            "match": "type"
+          }
+        }
+      }
+    },
+    {
+      "description": "a request to get a Datasource",
+      "providerState": "the Datasource exists",
+      "request": {
+        "method": "get",
+        "path": "/organizations/0ccac18e-7631-4bdd-8a42-3c35cce574c6/datasources/e7d11180-e9c0-4028-933c-ca86adb79ec2"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+        },
+        "body": {
+          "data": {
+            "id": "e7d11180-e9c0-4028-933c-ca86adb79ec2",
+            "attributes": {
+              "datasource_config": {
+                "id": "e7d11180-e9c0-4028-933c-ca86adb79ec2",
+                "name": "pandas_datasource",
+                "type": "pandas",
+                "assets": [
+
+                ],
+                "test": "this should fail"
+              }
+            }
+          }
+        },
+        "matchingRules": {
+          "$.body": {
+            "match": "type"
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "2.0.0"
+    }
+  }
+}

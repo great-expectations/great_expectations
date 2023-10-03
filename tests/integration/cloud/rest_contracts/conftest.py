@@ -1,77 +1,40 @@
-import json
-import logging
+import os
 import pathlib
 from typing import Final
+from urllib import parse
 
 import pytest
-import requests
-from pact import Consumer, Provider
-from requests.auth import HTTPBasicAuth
-
-log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+from pact import Consumer, Pact, Provider
 
 CONSUMER: Final[str] = "great_expectations"
 PROVIDER: Final[str] = "mercury"
 PACT_UPLOAD_URL: Final[
     str
-] = f"http://localhost:9292/pacts/provider/{PROVIDER}/consumer/{CONSUMER}/version"
-PACT_FILE: Final[str] = f"{CONSUMER}-{PROVIDER}.json"
-PACT_BROKER_USERNAME: Final[str] = "pact_broker"
-PACT_BROKER_PASSWORD: Final[str] = ""
+] = f"https://greatexpectations.pactflow.io/pacts/provider/{PROVIDER}/consumer/{CONSUMER}/version"
 
-PACT_MOCK_HOST = "localhost"
-PACT_MOCK_PORT = 9292
-PACT_DIR = pathlib.Path(__file__).stem
-
-
-def pytest_addoption(parser):
-    parser.addoption(
-        "--publish-pact",
-        type=str,
-        action="store",
-        help="Upload generated pact file to pact broker with version",
-    )
+PACT_BROKER_BASE_URL: Final[str] = "https://greatexpectations.pactflow.io"
+PACT_BROKER_TOKEN: Final[str] = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN")
+PACT_MOCK_HOST: Final[str] = "localhost"
+PACT_MOCK_PORT: Final[int] = 9292
+PACT_DIR = str((pathlib.Path(__file__).parent / pathlib.Path("pacts")).resolve())
 
 
-def push_to_broker(version):
-    """TODO: see if we can dynamically learn the pact file name, version, etc."""
-    with open(pathlib.Path(PACT_DIR, PACT_FILE), "rb") as pact_file:
-        pact_file_json = json.load(pact_file)
-
-    basic_auth = HTTPBasicAuth(PACT_BROKER_USERNAME, PACT_BROKER_PASSWORD)
-
-    log.info("Uploading pact file to pact broker...")
-
-    r = requests.put(
-        f"{PACT_UPLOAD_URL}/{version}", auth=basic_auth, json=pact_file_json
-    )
-    if not r.ok:
-        log.error("Error uploading: %s", r.content)
-        r.raise_for_status()
-
-
-@pytest.fixture(scope="session")
-def pact(request):
-    pact = Consumer(CONSUMER).has_pact_with(
+@pytest.fixture
+def pact(request) -> Pact:
+    pact: Pact = Consumer(CONSUMER).has_pact_with(
         Provider(PROVIDER),
+        broker_base_url=PACT_BROKER_BASE_URL,
+        broker_token=PACT_BROKER_TOKEN,
         host_name=PACT_MOCK_HOST,
         port=PACT_MOCK_PORT,
         pact_dir=PACT_DIR,
+        publish_to_broker=False,
     )
     pact.start_service()
     yield pact
     pact.stop_service()
 
-    version = request.config.getoption("--publish-pact")
-    if not request.node.testsfailed and version:
-        push_to_broker(version)
-
 
 @pytest.fixture
-def cloud_data_context():
-    import great_expectations as gx
-
-    return gx.get_context(
-        mode="cloud", cloud_base_url=f"https://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}"
-    )
+def pact_mock_mercury_url():
+    return parse.urlparse(f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}")
