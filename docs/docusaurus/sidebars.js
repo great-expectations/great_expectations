@@ -132,6 +132,28 @@ module.exports = {
             },
           ]
         },
+        {
+          type: 'category',
+          label: 'Manage Users',
+          link: { type: 'doc', id: 'cloud/users/manage_users' },
+          items: [
+            {
+              type: 'link',
+              label: 'Invite a user',
+              href: '/docs/cloud/users/manage_users#invite-a-user',
+            },
+            {
+              type: 'link',
+              label: 'Edit a user role',
+              href: '/docs/cloud/users/manage_users#edit-a-user-role',
+            },
+            {
+              type: 'link',
+              label: 'Delete a user',
+              href: '/docs/cloud/users/manage_users#delete-a-user',
+            },
+          ]
+        },
       ]
     },
     {
