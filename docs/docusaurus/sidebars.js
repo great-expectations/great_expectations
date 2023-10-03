@@ -112,7 +112,7 @@ module.exports = {
           items: [
             {
               type: 'link',
-              label: 'Run a Validation',
+              label: 'Add a Checkpoint',
               href: '/docs/cloud/checkpoints/manage_checkpoints#add-a-checkpoint',
             },
             {
