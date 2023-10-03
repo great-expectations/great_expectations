@@ -4,7 +4,7 @@ title: 'Manage Data Assets'
 description: Create and manage Data Assets in GX Cloud.
 ---
 
-A Data Asset is a collection of records that you create when you connect to your Data Source. When you connect to your Data Source, you define a minimum of one Data Asset. You use these Data Assets to create the Batch Requests that define the data that is provided to your Expectations.
+A Data Asset is a collection of records that you create when you connect to your Data Source. When you connect to your Data Source, you define a minimum of one Data Asset. You use these Data Assets to create the Batch Requests that select the data that is provided to your Expectations.
 
 To learn more about Data Assets, see [Data Asset](../../terms/data_asset.md).
 
