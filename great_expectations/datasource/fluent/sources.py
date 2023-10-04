@@ -543,15 +543,18 @@ class _SourceFactories:
         def add_or_update_datasource(
             name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs
         ) -> Datasource:
-            new_datasource: Optional[Datasource] = self._datasource_passed_in(
-                datasource_type, name_or_datasource, **kwargs
+            new_datasource = (
+                self._datasource_passed_in(
+                    datasource_type, name_or_datasource, **kwargs
+                )
+            ) or (
+                datasource_type(name=name_or_datasource, **kwargs)
+                if name_or_datasource
+                else datasource_type(**kwargs)
             )
+
             # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg
-            datasource_name: str = (
-                new_datasource.name  # type: ignore[assignment] # will be a str
-                if new_datasource
-                else name_or_datasource or kwargs["name"]
-            )
+            datasource_name: str = new_datasource.name
             logger.debug(
                 f"Adding or updating {datasource_type.__name__} with '{datasource_name}'"
             )
