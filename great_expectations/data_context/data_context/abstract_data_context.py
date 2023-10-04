@@ -788,13 +788,13 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         assert isinstance(datasource, FluentDatasource)
 
-        datasource = self.datasources.set_datasource(
+        return_obj = self.datasources.set_datasource(
             name=datasource_name, ds=datasource
         )
-        datasource._data_context = self
+        return_obj._data_context = self
         self._save_project_config()
 
-        return datasource
+        return return_obj
 
     def _update_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
