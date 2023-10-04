@@ -101,7 +101,9 @@ class DatasourceDict(UserDict):
         else:
             config = self._prep_legacy_datasource_config(name=name, ds=ds)
 
-        return self._datasource_store.set(key=None, value=config)
+        datasource = self._datasource_store.set(key=None, value=config)
+        assert isinstance(datasource, BaseDatasource)
+        return datasource
 
     @override
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:

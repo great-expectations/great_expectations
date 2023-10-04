@@ -786,7 +786,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ds_type = _SourceFactories.type_lookup[kwargs["type"]]
             datasource = ds_type(**kwargs)
 
-        assert isinstance(datasource, FluentDatasource)
+        assert isinstance(datasource, Datasource)
 
         datasource = self.datasources.set_datasource(
             name=datasource_name, ds=datasource

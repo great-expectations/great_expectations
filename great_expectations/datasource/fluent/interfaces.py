@@ -562,6 +562,7 @@ class Datasource(
             updated_datasource = self._data_context._update_fluent_datasource(
                 datasource=self
             )
+            assert isinstance(updated_datasource, Datasource)
             if asset_id := updated_datasource.get_asset(asset_name=asset.name).id:
                 asset.id = asset_id
             self._save_context_project_config()
