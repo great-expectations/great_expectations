@@ -1303,8 +1303,6 @@ class Dataset(MetaDataset):
             mostly (None or a float between 0 and 1): \
                 Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
-            parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed as \
-                datetimes before making comparisons.
 
         Other Parameters:
             result_format (str or None): \
@@ -1447,10 +1445,6 @@ class Dataset(MetaDataset):
                 If True, values must be strictly smaller than max_value, default=False
              allow_cross_type_comparisons (boolean or None) : If True, allow comparisons between types (e.g. integer and\
                 string). Otherwise, attempting such comparisons will raise an exception.
-            parse_strings_as_datetimes (boolean or None) : If True, parse min_value, max_value, and all non-null column\
-                values to datetimes before making comparisons.
-            output_strftime_format (str or None): \
-                A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
 
             mostly (None or a float between 0 and 1): \
                 Return `"success": True` if at least mostly fraction of values match the expectation. \
@@ -1519,8 +1513,6 @@ class Dataset(MetaDataset):
         Keyword Args:
             strictly (Boolean or None): \
                 If True, values must be strictly greater than previous values
-            parse_strings_as_datetimes (boolean or None) : \
-                If True, all non-null column values to datetimes before making comparisons
             mostly (None or a float between 0 and 1): \
                 Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
@@ -1583,8 +1575,6 @@ class Dataset(MetaDataset):
         Keyword Args:
             strictly (Boolean or None): \
                 If True, values must be strictly greater than previous values
-            parse_strings_as_datetimes (boolean or None) : \
-                If True, all non-null column values to datetimes before making comparisons
             mostly (None or a float between 0 and 1): \
                 Return `"success": True` if at least mostly fraction of values match the expectation. \
                 For more detail, see :ref:`mostly`.
@@ -2347,10 +2337,6 @@ class Dataset(MetaDataset):
             value_set (set-like): \
                 A set of objects used for comparison.
 
-        Keyword Args:
-            parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed \
-            as datetimes before making comparisons.
-
         Other Parameters:
             result_format (str or None): \
                 Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
@@ -2448,10 +2434,6 @@ class Dataset(MetaDataset):
             value_set (set-like): \
                 A set of objects used for comparison.
 
-        Keyword Args:
-            parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed as \
-                datetimes before making comparisons.
-
         Other Parameters:
             result_format (str or None): \
                 Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
@@ -2537,10 +2519,6 @@ class Dataset(MetaDataset):
                 The column name.
             value_set (set-like): \
                 A set of objects used for comparison.
-
-        Keyword Args:
-            parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed as \
-                datetimes before making comparisons.
 
         Other Parameters:
             result_format (str or None): \
@@ -3445,13 +3423,6 @@ class Dataset(MetaDataset):
             strict_max (boolean):
                 If True, the maximal column minimum must be strictly smaller than max_value, default=False
 
-        Keyword Args:
-            parse_strings_as_datetimes (Boolean or None): \
-                If True, parse min_value, max_values, and all non-null column values to datetimes before making \
-                comparisons.
-            output_strftime_format (str or None): \
-                A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
-
         Other Parameters:
             result_format (str or None): \
                 Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
@@ -3582,11 +3553,6 @@ class Dataset(MetaDataset):
                 The maximum number of unique values allowed.
 
         Keyword Args:
-            parse_strings_as_datetimes (Boolean or None): \
-                If True, parse min_value, max_values, and all non-null column values to datetimes before making \
-                comparisons.
-            output_strftime_format (str or None): \
-                A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
             strict_min (boolean):
                 If True, the minimal column minimum must be strictly larger than min_value, default=False
             strict_max (boolean):
