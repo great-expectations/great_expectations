@@ -12,7 +12,6 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.datasource.fluent.constants import _IN_MEMORY_DATA_ASSET_TYPE
-from great_expectations.datasource.new_datasource import BaseDatasource
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -20,6 +19,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.datasource.fluent.interfaces import DataAsset
+    from great_expectations.datasource.new_datasource import BaseDatasource
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +102,7 @@ class DatasourceDict(UserDict):
             config = self._prep_legacy_datasource_config(name=name, ds=ds)
 
         datasource = self._datasource_store.set(key=None, value=config)
-        assert isinstance(datasource, BaseDatasource)
+        assert isinstance(datasource, FluentDatasource)
         return datasource
 
     @override
