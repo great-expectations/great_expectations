@@ -84,7 +84,7 @@ def test_cloud_context_datasource_crud_e2e() -> None:
     context = cast(CloudDataContext, gx.get_context(cloud_mode=True))
     datasource_name = f"OSSTestDatasource_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
 
-    context.add_datasource(name=datasource_name, type="pandas")
+    context.sources.add_pandas(name=datasource_name)
 
     saved_datasource = context.get_datasource(datasource_name)
     assert saved_datasource is not None and saved_datasource.name == datasource_name
