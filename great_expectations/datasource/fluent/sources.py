@@ -543,6 +543,9 @@ class _SourceFactories:
         def add_or_update_datasource(
             name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs
         ) -> Datasource:
+            # circular import
+            from great_expectations.datasource.fluent.interfaces import Datasource
+
             new_datasource = (
                 self._datasource_passed_in(
                     datasource_type, name_or_datasource, **kwargs
