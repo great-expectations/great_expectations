@@ -502,7 +502,7 @@ class _SourceFactories:
                 else datasource_type(**kwargs)
             )
 
-            datasource_name: str = updated_datasource.name  # type: ignore[assignment] # always a str
+            datasource_name: str = updated_datasource.name
             logger.debug(f"Updating {datasource_type} with {datasource_name}")
             self._validate_current_datasource_type(
                 datasource_name,
@@ -516,9 +516,11 @@ class _SourceFactories:
             if id_:
                 updated_datasource.id = id_
 
-            return self._data_context._update_fluent_datasource(
+            updated_datasource = self._data_context._update_fluent_datasource(
                 datasource=updated_datasource
             )
+            assert isinstance(updated_datasource, Datasource)
+            return updated_datasource
 
         update_datasource.__doc__ = doc_string
         # attr-defined issue https://github.com/python/mypy/issues/12472
@@ -565,14 +567,16 @@ class _SourceFactories:
                 else:
                     kwargs["id"] = id_
 
+            datasource: Datasource
             if datasource_name in self._data_context.datasources:
-                return self._data_context._update_fluent_datasource(
+                datasource = self._data_context._update_fluent_datasource(
                     datasource=new_datasource
                 )
             else:
-                return self._data_context._add_fluent_datasource(
+                datasource = self._data_context._add_fluent_datasource(
                     datasource=new_datasource
                 )
+            return datasource
 
         add_or_update_datasource.__doc__ = doc_string
         # attr-defined issue https://github.com/python/mypy/issues/12472
