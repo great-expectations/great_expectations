@@ -134,7 +134,7 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Manage Users',
+          label: 'Manage Users and access tokens',
           link: { type: 'doc', id: 'cloud/users/manage_users' },
           items: [
             {
@@ -151,6 +151,21 @@ module.exports = {
               type: 'link',
               label: 'Delete a user',
               href: '/docs/cloud/users/manage_users#delete-a-user',
+            },
+            {
+              type: 'link',
+              label: 'Create a user access token',
+              href: '/docs/cloud/users/manage_users#create-a-user-access-token',
+            },
+            {
+              type: 'link',
+              label: 'Create an organization access token',
+              href: '/docs/cloud/users/manage_users#create-an-organization-access-token',
+            },
+            {
+              type: 'link',
+              label: 'Delete a user or organization access token',
+              href: '/docs/cloud/users/manage_users#delete-a-user-or-organization-access-token',
             },
           ]
         },
