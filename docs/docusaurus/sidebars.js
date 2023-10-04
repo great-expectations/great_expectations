@@ -4,6 +4,7 @@ module.exports = {
     {
       type: 'category',
       label: 'GX Cloud',
+      link: { type: 'doc', id: 'cloud/gx_cloud_lp' },
       items: [
         {
           type: 'category',
@@ -134,7 +135,7 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Manage Users and access tokens',
+          label: 'Manage users and access tokens',
           link: { type: 'doc', id: 'cloud/users/manage_users' },
           items: [
             {
