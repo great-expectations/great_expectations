@@ -28,11 +28,13 @@ from typing import (
     Set,
     Tuple,
     Type,
+    TypeVar,
     Union,
 )
 
 import pandas as pd
 from dateutil.parser import parse
+from typing_extensions import ParamSpec
 
 from great_expectations import __version__ as ge_version
 from great_expectations.compatibility.typing_extensions import override
@@ -143,9 +145,12 @@ _TEST_DEFS_DIR: Final = pathlib.Path(
     __file__, "..", "..", "..", "tests", "test_definitions"
 ).resolve()
 
+P = ParamSpec("P")
+T = TypeVar("T")
+
 
 @public_api
-def render_evaluation_parameter_string(render_func) -> Callable:
+def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]:
     """Decorator for Expectation classes that renders evaluation parameters as strings.
 
     allows Expectations that use Evaluation Parameters to render the values
