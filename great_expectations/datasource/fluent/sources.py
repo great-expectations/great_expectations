@@ -27,6 +27,7 @@ from great_expectations.datasource.fluent.constants import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
     DEFAULT_PANDAS_DATASOURCE_NAME,
 )
+from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 from great_expectations.datasource.fluent.signatures import _merge_signatures
 from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
@@ -36,7 +37,6 @@ if TYPE_CHECKING:
     from great_expectations.compatibility import pydantic
     from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.datasource.fluent import PandasDatasource
-    from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
     from great_expectations.validator.validator import Validator
 
 SourceFactoryFn: TypeAlias = Callable[..., "Datasource"]
@@ -516,11 +516,11 @@ class _SourceFactories:
             if id_:
                 updated_datasource.id = id_
 
-            updated_datasource = self._data_context._update_fluent_datasource(
+            return_obj = self._data_context._update_fluent_datasource(
                 datasource=updated_datasource
             )
-            assert isinstance(updated_datasource, Datasource)
-            return updated_datasource
+            assert isinstance(return_obj, Datasource)
+            return return_obj
 
         update_datasource.__doc__ = doc_string
         # attr-defined issue https://github.com/python/mypy/issues/12472
@@ -567,16 +567,16 @@ class _SourceFactories:
                 else:
                     kwargs["id"] = id_
 
-            datasource: Datasource
             if datasource_name in self._data_context.datasources:
-                datasource = self._data_context._update_fluent_datasource(
+                return_obj = self._data_context._update_fluent_datasource(
                     datasource=new_datasource
                 )
             else:
-                datasource = self._data_context._add_fluent_datasource(
+                return_obj = self._data_context._add_fluent_datasource(
                     datasource=new_datasource
                 )
-            return datasource
+            assert isinstance(return_obj, Datasource)
+            return return_obj
 
         add_or_update_datasource.__doc__ = doc_string
         # attr-defined issue https://github.com/python/mypy/issues/12472
