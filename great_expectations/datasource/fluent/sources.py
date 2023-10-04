@@ -565,15 +565,14 @@ class _SourceFactories:
                 else:
                     kwargs["id"] = id_
 
-            # local delete only, don't update the persisted store entry
-            self._data_context._delete_fluent_datasource(
-                datasource_name=datasource_name, _call_store=False
-            )
-            # Now that the input is validated and the old datasource is deleted we pass the
-            # original arguments to the add method (ie name and not datasource_name).
-            return self.create_add_crud_method(datasource_type)(
-                name_or_datasource, **kwargs
-            )
+            if datasource_name in self._data_context.datasources:
+                return self._data_context._update_fluent_datasource(
+                    datasource=new_datasource
+                )
+            else:
+                return self._data_context._add_fluent_datasource(
+                    datasource=new_datasource
+                )
 
         add_or_update_datasource.__doc__ = doc_string
         # attr-defined issue https://github.com/python/mypy/issues/12472
