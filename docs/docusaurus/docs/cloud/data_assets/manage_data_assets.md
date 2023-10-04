@@ -45,13 +45,13 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
     - **Authenticator**: Enter the Snowflake database authenticator that you want to use to verify your Snowflake connection. 
 
-4. Optional. Clear **Create temp table** if you don't want to create a temporary database table.
+4. Optional. Clear **Create temp table** if you don't want to create a temporary database table. Temporary database tables store data temporarily and can improve performance by making queries run faster.
 
-5. Optional. Clear **Test connection** if you don't want to test the Data Asset connection.
+5. Optional. Clear **Test connection** if you don't want to test the Data Asset connection. Testing the connection to the Data Asset is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
 
 6. Select **Table Asset** or **Query Asset** and complete the following fields:
 
-    - **Asset name**: Enter a name for the Data Asset.
+    - **Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
 
     - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
 
