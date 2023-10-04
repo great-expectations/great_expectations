@@ -82,6 +82,7 @@ from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
+from great_expectations.datasource.fluent import PandasDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
@@ -3709,7 +3710,7 @@ def cloud_data_context_with_datasource_pandas_engine(
     empty_cloud_data_context: CloudDataContext, db_file
 ):
     context: CloudDataContext = empty_cloud_data_context
-    config = yaml.load(
+    yaml.load(
         """
     class_name: Datasource
     execution_engine:
@@ -3734,11 +3735,8 @@ def cloud_data_context_with_datasource_pandas_engine(
         "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
         side_effect=set_side_effect,
     ):
-        with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
-            context.add_datasource(
-                "my_datasource",
-                **config,
-            )
+        fds = PandasDatasource(name="my_datasource")
+        context.add_datasource(datasource=fds)
     return context
 
 

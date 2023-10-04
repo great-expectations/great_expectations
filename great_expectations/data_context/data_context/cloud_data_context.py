@@ -981,9 +981,7 @@ class CloudDataContext(SerializableDataContext):
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
-        if (datasource and not isinstance(datasource, FluentDatasource)) or (
-            "type" not in kwargs
-        ):
+        if datasource and not isinstance(datasource, FluentDatasource):
             raise TypeError(
                 "Adding block-style or legacy datasources in a Cloud-backed environment is no longer supported; please use fluent-style datasources moving forward."
             )
