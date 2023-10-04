@@ -47,8 +47,6 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
     Keyword Args:
         strictly (Boolean or None): \
             If True, values must be strictly greater than previous values
-        parse_strings_as_datetimes (boolean or None) : \
-            If True, all non-null column values to datetimes before making comparisons
         mostly (None or a float between 0 and 1): \
             Successful if at least mostly fraction of values match the expectation. \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
