@@ -785,12 +785,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         if not datasource:
             ds_type = _SourceFactories.type_lookup[kwargs["type"]]
             datasource = ds_type(**kwargs)
-
         assert isinstance(datasource, FluentDatasource)
 
         return_obj = self.datasources.set_datasource(
             name=datasource_name, ds=datasource
         )
+        assert isinstance(return_obj, FluentDatasource)
         return_obj._data_context = self
         self._save_project_config()
 
