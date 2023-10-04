@@ -981,15 +981,16 @@ class CloudDataContext(SerializableDataContext):
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
-        result = super()._add_datasource(
+        if (datasource and not isinstance(datasource, FluentDatasource)) or (
+            "type" not in kwargs
+        ):
+            raise TypeError(
+                "Adding block-style or legacy datasources in a Cloud-backed environment is no longer supported; please use fluent-style datasources moving forward."
+            )
+        return super()._add_datasource(
             name=name,
             initialize=initialize,
             save_changes=save_changes,
             datasource=datasource,
             **kwargs,
         )
-        if result and not isinstance(result, FluentDatasource):
-            raise TypeError(
-                "Adding block-style or legacy datasources in a Cloud-backed environment is no longer supported; please use fluent-style datasources moving forward."
-            )
-        return result
