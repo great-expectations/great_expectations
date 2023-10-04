@@ -151,7 +151,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         version="0.16.15",
     )
     @override
-    def build_batch_request(
+    def build_batch_request(  # type: ignore[override]
         self, dataframe: Optional[_SparkDataFrameT] = None
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.

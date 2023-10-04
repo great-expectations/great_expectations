@@ -378,7 +378,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     )
     @override
     def build_batch_request(
-        self, dataframe: Optional[pd.DataFrame] = None
+        self, dataframe: Optional[pd.DataFrame] = None  # type: ignore[override]
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
