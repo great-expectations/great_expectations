@@ -18,7 +18,7 @@ If you're eager to try GX Cloud, and you haven't requested a GX Cloud Beta accou
   <LinkCard topIcon label="Set up GX Cloud" description="To get the most from GX Cloud, configure your environment first." href="/docs/cloud/set_up_gx_cloud" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Quickstarts" description="Quickly connect GX Cloud to Data Assets stored on your Snowflake instance." href="/docs/cloud/quickstarts/snowflake_quickstart" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage Data Assets" description="Create, edit, or delete a Data Asset." href="/docs/cloud/data_assets/manage_data_assets" icon="/img/small_gx_logo.png" />
-  <LinkCard topIcon label="Manage Expectations" description="Create,edit, or delete an Expectation." href="/docs/cloud/expectations/manage_expectations" icon="/img/small_gx_logo.png" />
+  <LinkCard topIcon label="Manage Expectations" description="Create, edit, or delete an Expectation." href="/docs/cloud/expectations/manage_expectations" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage Validations" description="Run a Validation, or view the Validation run history." href="docs/cloud/validations/manage_validations" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage Checkpoints" description="Add, run, edit, or delete a Checkpoint." href="/docs/cloud/checkpoints/manage_checkpoints" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage users and access tokens" description="Manage GX Cloud users and access tokens." href="/docs/cloud/users/manage_users" icon="/img/small_gx_logo.png" />

@@ -41,6 +41,7 @@ module.exports = {
         {
           type: 'category',
           label: 'Quickstarts',
+          link: { type: 'doc', id: 'cloud/quickstarts/snowflake_quickstart' },
           items: [
             'cloud/quickstarts/snowflake_quickstart',
           ]
