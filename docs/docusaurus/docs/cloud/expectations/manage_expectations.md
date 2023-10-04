@@ -30,6 +30,8 @@ To learn more about Expectations, see [Expectation](../../terms/expectation.md).
 
 6. Optional. Repeat steps 1 to 4 to add additional Expectations.
 
+7. Optional. Run a Validation. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
+
 ## Edit an Expectation
 
 1. In GX Cloud, click **Data Assets**.
