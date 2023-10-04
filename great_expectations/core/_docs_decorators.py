@@ -1,5 +1,5 @@
 from textwrap import dedent
-from typing import Callable, TypeVar
+from typing import Any, Callable, TypeVar
 
 from typing_extensions import ParamSpec
 
@@ -7,12 +7,12 @@ from great_expectations.compatibility import docstring_parser
 
 WHITELISTED_TAG = "--Public API--"
 
-
 P = ParamSpec("P")
 T = TypeVar("T")
+F = TypeVar("F", bound=Callable[..., Any])
 
 
-def public_api(func: Callable[P, T]) -> Callable[P, T]:
+def public_api(func: F) -> F:
     """Add the public API tag for processing by the auto documentation generator.
 
     Used as a decorator:
