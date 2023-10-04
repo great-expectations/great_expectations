@@ -47,38 +47,36 @@ def test_cloud_context_add_datasource_with_fds(
     type_ = "pandas"
     id_ = "a135f497-31b0-4da3-9704-911bd9c190c3"
 
-    responses.add(
-        responses.POST,
-        f"{ge_cloud_config.base_url}/organizations/{ge_cloud_config.organization_id}/datasources",
-        json={
-            "data": {
-                "attributes": {
-                    "datasource_config": {"id": id_, "name": name, "type": type_}
-                },
-                "id": id_,
-                "type": "datasource",
-            }
-        },
-        status=200,
-    )
+    payload = {
+        "data": {
+            "attributes": {
+                "datasource_config": {"id": id_, "name": name, "type": type_}
+            },
+            "id": id_,
+            "type": "datasource",
+        }
+    }
+    post_url = f"{ge_cloud_config.base_url}/organizations/{ge_cloud_config.organization_id}/datasources"
+    get_url = f"{ge_cloud_config.base_url}/organizations/{ge_cloud_config.organization_id}/datasources/{id_}?name={name}"
 
     responses.add(
+        responses.POST,
+        post_url,
+        json=payload,
+        status=200,
+    )
+    responses.add(
         responses.GET,
-        f"{ge_cloud_config.base_url}/organizations/{ge_cloud_config.organization_id}/datasources/{id_}?name={name}",
-        json={
-            "data": {
-                "attributes": {
-                    "datasource_config": {"id": id_, "name": name, "type": type_}
-                },
-                "id": id_,
-                "type": "datasource",
-            }
-        },
+        get_url,
+        json=payload,
         status=200,
     )
 
     fds = PandasDatasource(name=name)
     _ = context.add_datasource(datasource=fds)
+
+    assert responses.assert_call_count(url=post_url, count=1)
+    assert responses.assert_call_count(url=get_url, count=1)
 
 
 @pytest.mark.e2e

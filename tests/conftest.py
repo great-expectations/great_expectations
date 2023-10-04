@@ -3710,18 +3710,6 @@ def cloud_data_context_with_datasource_pandas_engine(
     empty_cloud_data_context: CloudDataContext, db_file
 ):
     context: CloudDataContext = empty_cloud_data_context
-    yaml.load(
-        """
-    class_name: Datasource
-    execution_engine:
-        class_name: PandasExecutionEngine
-    data_connectors:
-        default_runtime_data_connector_name:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
-        """,
-    )
 
     # DatasourceStore.set() in a Cloud-back env usually makes an external HTTP request
     # and returns the config it persisted. This side effect enables us to mimick that
