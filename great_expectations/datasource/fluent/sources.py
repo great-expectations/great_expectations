@@ -27,7 +27,6 @@ from great_expectations.datasource.fluent.constants import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
     DEFAULT_PANDAS_DATASOURCE_NAME,
 )
-from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 from great_expectations.datasource.fluent.signatures import _merge_signatures
 from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
@@ -37,6 +36,7 @@ if TYPE_CHECKING:
     from great_expectations.compatibility import pydantic
     from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.datasource.fluent import PandasDatasource
+    from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
     from great_expectations.validator.validator import Validator
 
 SourceFactoryFn: TypeAlias = Callable[..., "Datasource"]
@@ -492,6 +492,9 @@ class _SourceFactories:
         def update_datasource(
             name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs
         ) -> Datasource:
+            # circular import
+            from great_expectations.datasource.fluent.interfaces import Datasource
+
             updated_datasource = (
                 self._datasource_passed_in(
                     datasource_type, name_or_datasource, **kwargs
