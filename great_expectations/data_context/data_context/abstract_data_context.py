@@ -824,6 +824,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         updated_datasource._data_context = self
         self._save_project_config()
 
+        assert isinstance(updated_datasource, FluentDatasource)
         return updated_datasource
 
     def _delete_fluent_datasource(
