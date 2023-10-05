@@ -180,7 +180,7 @@ module.exports = {
       items: [
         {
           type: 'category',
-          label: 'Get started with GX',
+          label: 'Get started with GX OSS',
           link: { type: 'doc', id: 'guides/setup/get_started_lp' },
           items: [
             'tutorials/quickstart/quickstart',
@@ -193,7 +193,7 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Configure your GX environment',
+          label: 'Configure your GX OSS environment',
           link: { type: 'doc', id: 'guides/setup/setup_overview_lp' },
           items: [
             'guides/setup/setup_overview',
