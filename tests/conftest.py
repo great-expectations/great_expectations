@@ -3672,9 +3672,6 @@ def empty_cloud_data_context(
         cloud_organization_id=ge_cloud_config.organization_id,
     )
 
-    context._datasources = (
-        {}
-    )  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
     return context
 
 
