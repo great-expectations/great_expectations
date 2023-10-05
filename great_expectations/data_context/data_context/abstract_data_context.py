@@ -3360,9 +3360,10 @@ class AbstractDataContext(ConfigPeer, ABC):
     @overload
     def add_or_update_profiler(  # noqa: PLR0913
         self,
-        name: str,
-        config_version: float,
-        rules: dict[str, dict],
+        name: str = ...,
+        id: str | None = ...,
+        config_version: float = ...,
+        rules: dict[str, dict] = ...,
         variables: dict | None = ...,
         profiler: None = ...,
     ) -> RuleBasedProfiler:
@@ -3376,6 +3377,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_or_update_profiler(  # noqa: PLR0913
         self,
         name: None = ...,
+        id: None = ...,
         config_version: None = ...,
         rules: None = ...,
         variables: None = ...,

@@ -579,7 +579,7 @@ class CloudDataContext(SerializableDataContext):
 
         return expectation_suite
 
-    @overload
+    @overload  # type: ignore[override] # overloads don't match
     def delete_expectation_suite(
         self,
         expectation_suite_name: str = ...,
