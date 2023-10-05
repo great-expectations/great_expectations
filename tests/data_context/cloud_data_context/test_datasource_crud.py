@@ -57,7 +57,6 @@ def test_cloud_context_add_datasource_with_fds(
         }
     }
     post_url = f"{ge_cloud_config.base_url}/organizations/{ge_cloud_config.organization_id}/datasources"
-    get_url = f"{ge_cloud_config.base_url}/organizations/{ge_cloud_config.organization_id}/datasources/{id_}?name={name}"
 
     fds = PandasDatasource(name=name)
     _ = context.add_datasource(datasource=fds)
