@@ -3656,6 +3656,7 @@ def empty_data_context_in_cloud_mode(
 
 @pytest.fixture
 def empty_cloud_data_context(
+    cloud_api_fake,
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
