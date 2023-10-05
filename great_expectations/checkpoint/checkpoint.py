@@ -1075,7 +1075,6 @@ constructor arguments.
         return checkpoint
 
 
-@public_api
 @deprecated_argument(argument_name="validation_operator_name", version="0.14.0")
 @deprecated_argument(argument_name="batches", version="0.14.0")
 @new_argument(
