@@ -100,9 +100,9 @@ class DatasourceDict(UserDict):
     ) -> FluentDatasource | BaseDatasource:
         config: FluentDatasource | DatasourceConfig
         if isinstance(ds, FluentDatasource):
-            config = self._prep_fds_config(name=name, ds=ds)
+            config = self._prep_fds_config_for_set(name=name, ds=ds)
         else:
-            config = self._prep_legacy_datasource_config(name=name, ds=ds)
+            config = self._prep_legacy_datasource_config_for_set(name=name, ds=ds)
 
         datasource = self._datasource_store.set(key=None, value=config)
         if isinstance(datasource, DatasourceConfig):
@@ -115,7 +115,7 @@ class DatasourceDict(UserDict):
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
         self.set_datasource(name=name, ds=ds)
 
-    def _prep_fds_config(self, name: str, ds: FluentDatasource) -> FluentDatasource:
+    def _prep_fds_config_for_set(self, name: str, ds: FluentDatasource) -> FluentDatasource:
         if isinstance(ds, SupportsInMemoryDataAssets):
             for asset in ds.assets:
                 if asset.type == _IN_MEMORY_DATA_ASSET_TYPE:
@@ -128,7 +128,7 @@ class DatasourceDict(UserDict):
                     self._in_memory_data_assets[in_memory_asset_name] = asset
         return ds
 
-    def _prep_legacy_datasource_config(
+    def _prep_legacy_datasource_config_for_set(
         self, name: str, ds: BaseDatasource
     ) -> DatasourceConfig:
         config = ds.config
