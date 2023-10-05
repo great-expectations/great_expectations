@@ -105,8 +105,13 @@ from great_expectations.util import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
-from tests.datasource.fluent._fake_cloud_api import CloudDetails, GX_CLOUD_MOCK_BASE_URL, FAKE_ORG_ID, DUMMY_JWT_TOKEN, \
-    gx_cloud_api_fake_ctx
+from tests.datasource.fluent._fake_cloud_api import (
+    DUMMY_JWT_TOKEN,
+    FAKE_ORG_ID,
+    GX_CLOUD_MOCK_BASE_URL,
+    CloudDetails,
+    gx_cloud_api_fake_ctx,
+)
 from tests.rule_based_profiler.parameter_builder.conftest import (
     RANDOM_SEED,
     RANDOM_STATE,

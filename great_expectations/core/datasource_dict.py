@@ -10,7 +10,6 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.datasource.fluent.constants import _IN_MEMORY_DATA_ASSET_TYPE
 
@@ -113,7 +112,9 @@ class DatasourceDict(UserDict):
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
         self.set_datasource(name=name, ds=ds)
 
-    def _prep_fds_config_for_set(self, name: str, ds: FluentDatasource) -> FluentDatasource:
+    def _prep_fds_config_for_set(
+        self, name: str, ds: FluentDatasource
+    ) -> FluentDatasource:
         if isinstance(ds, SupportsInMemoryDataAssets):
             for asset in ds.assets:
                 if asset.type == _IN_MEMORY_DATA_ASSET_TYPE:

@@ -107,26 +107,6 @@ def test_cloud_backed_data_context_expectation_validation_result_include_rendere
 
     df = pd.DataFrame([1, 2, 3, 4, 5])
     suite_name = f"test_suite_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
-    mock_datasource_get_response = {
-        "data": {
-            "id": "6ca2ab40-bb82-49f4-bba2-33484c8ada80",
-            "attributes": {
-                "datasource_config": {
-                    "assets": [
-                        {
-                            "batch_metadata": {},
-                            "id": "e1fe603d-0dd4-44d1-8737-5914d8bd6244",
-                            "name": "my_dataframe_asset",
-                            "type": "dataframe",
-                        }
-                    ],
-                    "id": "6ca2ab40-bb82-49f4-bba2-33484c8ada80",
-                    "name": "default_pandas_datasource",
-                    "type": "pandas",
-                },
-            },
-        },
-    }
 
     data_asset = context.sources.pandas_default.add_dataframe_asset(
         name="my_dataframe_asset",
