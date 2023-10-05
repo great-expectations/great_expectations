@@ -3742,20 +3742,8 @@ def cloud_data_context_with_datasource_pandas_engine(
 ):
     context: CloudDataContext = empty_cloud_data_context
 
-    # DatasourceStore.set() in a Cloud-back env usually makes an external HTTP request
-    # and returns the config it persisted. This side effect enables us to mimick that
-    # behavior while avoiding requests.
-    def set_side_effect(key, value):
-        return value
-
-    with mock.patch(
-        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.list_keys"
-    ), mock.patch(
-        "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
-        side_effect=set_side_effect,
-    ):
-        fds = PandasDatasource(name="my_datasource")
-        context.add_datasource(datasource=fds)
+    fds = PandasDatasource(name="my_datasource")
+    context.add_datasource(datasource=fds)
     return context
 
 
