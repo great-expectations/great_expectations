@@ -3612,9 +3612,7 @@ def empty_base_data_context_in_cloud_mode(
             cloud_mode=True,
             cloud_config=ge_cloud_config,
         )
-    context._datasources = (
-        {}
-    )  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
+
     return context
 
 
