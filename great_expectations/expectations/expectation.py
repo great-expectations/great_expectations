@@ -146,15 +146,11 @@ _TEST_DEFS_DIR: Final = pathlib.Path(
 ).resolve()
 
 P = ParamSpec("P")
-T = TypeVar("T")
+T = TypeVar("T", List[RenderedStringTemplateContent], RenderedAtomicContent)
 
 
 @public_api
-def render_evaluation_parameter_string(
-    render_func: Callable[
-        P, list[RenderedStringTemplateContent] | RenderedAtomicContent
-    ]
-) -> Callable[P, list[RenderedStringTemplateContent] | RenderedAtomicContent]:
+def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]:
     """Decorator for Expectation classes that renders evaluation parameters as strings.
 
     allows Expectations that use Evaluation Parameters to render the values
@@ -167,13 +163,9 @@ def render_evaluation_parameter_string(
         GreatExpectationsError: If runtime_configuration with evaluation_parameters is not provided.
     """
 
-    def inner_func(
-        *args: P.args, **kwargs: P.kwargs
-    ) -> list[RenderedStringTemplateContent] | RenderedAtomicContent:
-        rendered_string_template: list[
-            RenderedStringTemplateContent
-        ] | RenderedAtomicContent = render_func(*args, **kwargs)
-        current_expectation_params = list()
+    def inner_func(*args: P.args, **kwargs: P.kwargs) -> T:
+        rendered_string_template = render_func(*args, **kwargs)
+        current_expectation_params: list = []
         app_template_str = (
             "\n - $eval_param = $eval_param_value (at time of validation)."
         )
