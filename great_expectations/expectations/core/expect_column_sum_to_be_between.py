@@ -260,7 +260,7 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     @override
-    def _prescriptive_renderer(
+    def _prescriptive_renderer(  # type: ignore[override] # TODO: Fix this type ignore
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
