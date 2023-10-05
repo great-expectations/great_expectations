@@ -699,6 +699,7 @@ class PandasDatasource(_PandasDatasource):
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: DataFrameAsset = self.add_dataframe_asset(
             name=name,
+            dataframe=dataframe,
             batch_metadata=batch_metadata or {},
         )
         return self._get_validator(asset=asset, dataframe=dataframe)
