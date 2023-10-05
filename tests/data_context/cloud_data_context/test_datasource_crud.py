@@ -39,10 +39,10 @@ def test_cloud_context_add_datasource_with_legacy_datasource_raises_error(
 
 @responses.activate
 def test_cloud_context_add_datasource_with_fds(
-    empty_base_data_context_in_cloud_mode: CloudDataContext,
+    empty_cloud_data_context: CloudDataContext,
     ge_cloud_config: GXCloudConfig,
 ):
-    context = empty_base_data_context_in_cloud_mode
+    context = empty_cloud_data_context
     name = "my_pandas_ds"
     type_ = "pandas"
     id_ = "a135f497-31b0-4da3-9704-911bd9c190c3"
