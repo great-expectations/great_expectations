@@ -16,8 +16,8 @@ from great_expectations.experimental.metric_repository.metrics import (
     TableMetric,
 )
 
-# Import and use fixtures defined in tests/datasource/fluent/conftest.py
-from tests.datasource.fluent.conftest import (
+# Import and use fixtures defined in tests/conftest.py
+from tests.conftest import (
     cloud_api_fake,  # noqa: F401  # used as a fixture
     cloud_details,  # noqa: F401  # used as a fixture
     empty_cloud_context_fluent,  # noqa: F401  # used as a fixture

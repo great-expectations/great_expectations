@@ -181,40 +181,11 @@ def seed_ds_env_vars(
     return tuple((k, v) for k, v in config_sub_dict.items())
 
 
-@pytest.fixture(scope="session")
-def cloud_details() -> CloudDetails:
-    return CloudDetails(
-        base_url=GX_CLOUD_MOCK_BASE_URL,
-        org_id=FAKE_ORG_ID,
-        access_token=DUMMY_JWT_TOKEN,
-    )
-
-
-@pytest.fixture
-def cloud_api_fake(cloud_details: CloudDetails):
-    with gx_cloud_api_fake_ctx(cloud_details=cloud_details) as requests_mock:
-        yield requests_mock
-
-
 @pytest.fixture
 def cloud_api_fake_db(cloud_api_fake) -> FakeDBTypedDict:
     from tests.datasource.fluent._fake_cloud_api import _CLOUD_API_FAKE_DB
 
     return _CLOUD_API_FAKE_DB
-
-
-@pytest.fixture
-def empty_cloud_context_fluent(
-    cloud_api_fake, cloud_details: CloudDetails
-) -> CloudDataContext:
-    context = gx.get_context(
-        cloud_access_token=cloud_details.access_token,
-        cloud_organization_id=cloud_details.org_id,
-        cloud_base_url=cloud_details.base_url,
-        cloud_mode=True,
-    )
-
-    return context
 
 
 @pytest.fixture

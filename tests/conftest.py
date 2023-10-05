@@ -105,6 +105,8 @@ from great_expectations.util import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
+from tests.datasource.fluent._fake_cloud_api import CloudDetails, GX_CLOUD_MOCK_BASE_URL, FAKE_ORG_ID, DUMMY_JWT_TOKEN, \
+    gx_cloud_api_fake_ctx
 from tests.rule_based_profiler.parameter_builder.conftest import (
     RANDOM_SEED,
     RANDOM_STATE,
@@ -3669,6 +3671,35 @@ def empty_cloud_data_context(
     context._datasources = (
         {}
     )  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
+    return context
+
+
+@pytest.fixture(scope="session")
+def cloud_details() -> CloudDetails:
+    return CloudDetails(
+        base_url=GX_CLOUD_MOCK_BASE_URL,
+        org_id=FAKE_ORG_ID,
+        access_token=DUMMY_JWT_TOKEN,
+    )
+
+
+@pytest.fixture
+def cloud_api_fake(cloud_details: CloudDetails):
+    with gx_cloud_api_fake_ctx(cloud_details=cloud_details) as requests_mock:
+        yield requests_mock
+
+
+@pytest.fixture
+def empty_cloud_context_fluent(
+    cloud_api_fake, cloud_details: CloudDetails
+) -> CloudDataContext:
+    context = gx.get_context(
+        cloud_access_token=cloud_details.access_token,
+        cloud_organization_id=cloud_details.org_id,
+        cloud_base_url=cloud_details.base_url,
+        cloud_mode=True,
+    )
+
     return context
 
 
