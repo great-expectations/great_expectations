@@ -3466,17 +3466,17 @@ def ge_cloud_id():
 
 @pytest.fixture
 def ge_cloud_base_url() -> str:
-    return "https://app.test.greatexpectations.io"
+    return GX_CLOUD_MOCK_BASE_URL
 
 
 @pytest.fixture
 def ge_cloud_organization_id() -> str:
-    return "bd20fead-2c31-4392-bcd1-f1e87ad5a79c"
+    return FAKE_ORG_ID
 
 
 @pytest.fixture
 def ge_cloud_access_token() -> str:
-    return "6bb5b6f5c7794892a4ca168c65c2603e"
+    return DUMMY_JWT_TOKEN
 
 
 @pytest.fixture
@@ -3676,12 +3676,12 @@ def empty_cloud_data_context(
     return context
 
 
-@pytest.fixture(scope="session")
-def cloud_details() -> CloudDetails:
+@pytest.fixture
+def cloud_details(ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token) -> CloudDetails:
     return CloudDetails(
-        base_url=GX_CLOUD_MOCK_BASE_URL,
-        org_id=FAKE_ORG_ID,
-        access_token=DUMMY_JWT_TOKEN,
+        base_url=ge_cloud_base_url,
+        org_id=ge_cloud_organization_id,
+        access_token=ge_cloud_access_token,
     )
 
 
