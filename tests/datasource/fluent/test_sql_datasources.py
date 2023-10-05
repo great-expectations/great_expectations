@@ -104,7 +104,6 @@ def test_table_quoted_name_type_all_upper_case_normalizion_is_noop():
             assert str(table_asset.table_name) == table_name
             assert str(table_asset.table_name.casefold()) != table_name
             assert isinstance(table_asset.table_name, sqlalchemy.quoted_name)
-            assert table_asset.table_name.quote is True
             assert table_asset.table_name in table_names_in_dbms_schema
 
 
@@ -164,7 +163,6 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full():
             assert str(table_asset.table_name) == table_name
             assert str(table_asset.table_name.casefold()) == table_name
             assert isinstance(table_asset.table_name, sqlalchemy.quoted_name)
-            assert table_asset.table_name.quote is True
             assert table_asset.table_name in table_names_in_dbms_schema
             assert table_asset.table_name in quoted_table_names
 

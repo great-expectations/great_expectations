@@ -11,7 +11,6 @@ from tests.data_context.migrator.conftest import StubBaseDataContext
 
 
 @pytest.mark.cloud
-@pytest.mark.unit
 class TestConfigurationBundleCreate:
     def test_configuration_bundle_created(
         self,
@@ -69,7 +68,6 @@ class TestConfigurationBundleCreate:
 
 
 @pytest.mark.cloud
-@pytest.mark.unit
 class TestConfigurationBundleSerialization:
     def test_configuration_bundle_serialization_all_fields(
         self,

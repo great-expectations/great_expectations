@@ -4,9 +4,8 @@ import logging
 import re
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Final, Literal, Type, Union
 
-import pydantic
-
-from great_expectations.compatibility import azure
+from great_expectations.compatibility import azure, pydantic
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
@@ -18,9 +17,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
-from great_expectations.datasource.fluent.pandas_datasource import (
-    PandasDatasourceError,
-)
+from great_expectations.datasource.fluent.pandas_datasource import PandasDatasourceError
 
 if TYPE_CHECKING:
     from great_expectations.compatibility.azure import BlobServiceClient
@@ -95,7 +92,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
                 except Exception as e:
                     # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
                     raise PandasAzureBlobStorageDatasourceError(
-                        f'Due to exception: "{str(e)}", "azure_client" could not be created.'
+                        f'Due to exception: "{e!s}", "azure_client" could not be created.'
                     ) from e
             else:
                 raise PandasAzureBlobStorageDatasourceError(
@@ -111,6 +108,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
 
         return azure_client
 
+    @override
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the PandasAzureBlobStorageDatasource.
 
@@ -125,13 +123,14 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         except Exception as e:
             raise TestConnectionError(
                 "Attempt to connect to datasource failed with the following error message: "
-                f"{str(e)}"
+                f"{e!s}"
             ) from e
 
         if self.assets and test_assets:
             for asset in self.assets:
                 asset.test_connection()
 
+    @override
     def _build_data_connector(  # noqa: PLR0913
         self,
         data_asset: _FilePathDataAsset,

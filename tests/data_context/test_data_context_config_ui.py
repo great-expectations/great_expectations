@@ -4,6 +4,7 @@ from typing import Dict, Final, Optional
 
 import pytest
 
+from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.serializable_data_context import (
     SerializableDataContext,
 )
@@ -19,7 +20,7 @@ from great_expectations.data_context.types.base import (
     InMemoryStoreBackendDefaults,
     S3StoreBackendDefaults,
 )
-from great_expectations.util import filter_properties_dict, get_context
+from great_expectations.util import filter_properties_dict
 
 """
 What does this test and why?
@@ -1378,7 +1379,7 @@ def test_override_general_defaults(
     )
 
 
-@pytest.mark.unit
+@pytest.mark.big
 @pytest.mark.slow  # 1.81s
 def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_variable_sub(
     monkeypatch, construct_data_context_config, default_pandas_datasource_config

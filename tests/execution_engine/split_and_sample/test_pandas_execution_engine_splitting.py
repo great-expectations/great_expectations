@@ -98,7 +98,6 @@ def batch_with_split_on_whole_table_s3(test_s3_files) -> S3BatchSpec:
 
 
 @pytest.mark.big
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "splitter_kwargs_year,num_values_in_df",
     [
@@ -128,7 +127,6 @@ def test_get_batch_with_split_on_year(
 
 
 @pytest.mark.big
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "column_batch_identifier,num_values_in_df",
     [

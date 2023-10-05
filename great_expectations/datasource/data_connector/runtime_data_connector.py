@@ -4,6 +4,7 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition, RuntimeBatchRequest
 from great_expectations.core.batch_spec import (
@@ -142,9 +143,11 @@ class RuntimeDataConnector(DataConnector):
             if batch_identifiers:
                 self._batch_identifiers[self.name] = batch_identifiers
 
+    @override
     def _refresh_data_references_cache(self) -> None:
         self._data_references_cache: dict = {}
 
+    @override
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
     ) -> List[str]:
@@ -166,6 +169,7 @@ class RuntimeDataConnector(DataConnector):
             ]
             return data_reference_list  # type: ignore[return-value] # could be list of lists
 
+    @override
     def get_data_reference_count(self) -> int:
         """
         Get number of data_references corresponding to all data_asset_names in cache. In cases where the
@@ -177,6 +181,7 @@ class RuntimeDataConnector(DataConnector):
             for key, data_reference_dict in self._data_references_cache.items()
         )
 
+    @override
     def _get_data_reference_list_from_cache_by_data_asset_name(
         self, data_asset_name: str
     ) -> List[str]:
@@ -189,10 +194,12 @@ class RuntimeDataConnector(DataConnector):
         else:
             return []
 
+    @override
     def get_unmatched_data_references(self) -> List[str]:
         return []
 
     @public_api
+    @override
     def get_available_data_asset_names(self) -> List[str]:
         """Returns a list of data_assets that are both defined at runtime, and defined in DataConnector configuration"""
         defined_assets: List[str] = list(self.assets.keys())
@@ -203,6 +210,7 @@ class RuntimeDataConnector(DataConnector):
         return sorted_available_assets
 
     # noinspection PyMethodOverriding
+    @override
     def get_batch_data_and_metadata(  # type: ignore[override]
         self,
         batch_definition: BatchDefinition,
@@ -222,6 +230,7 @@ class RuntimeDataConnector(DataConnector):
             batch_markers,
         )
 
+    @override
     def get_batch_definition_list_from_batch_request(  # type: ignore[override] # BatchRequestBase
         self,
         batch_request: RuntimeBatchRequest,
@@ -301,6 +310,7 @@ class RuntimeDataConnector(DataConnector):
     ):
         return {}
 
+    @override
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
     ) -> dict:
@@ -309,6 +319,7 @@ class RuntimeDataConnector(DataConnector):
 
     # This method is currently called called only in tests.
     # noinspection PyMethodOverriding
+    @override
     def build_batch_spec(  # type: ignore[return,override]
         self,
         batch_definition: BatchDefinition,
@@ -353,7 +364,7 @@ class RuntimeDataConnector(DataConnector):
         if not isinstance(runtime_parameters, dict):
             raise TypeError(
                 f"""The type of runtime_parameters must be a dict object. The type given is
-        "{str(type(runtime_parameters))}", which is illegal.
+        "{type(runtime_parameters)!s}", which is illegal.
                         """
             )
         keys_present: List[str] = [
@@ -367,6 +378,7 @@ class RuntimeDataConnector(DataConnector):
                 "'query', 'path'."
             )
 
+    @override
     def _validate_batch_request(self, batch_request: RuntimeBatchRequest) -> None:  # type: ignore[override]
         super()._validate_batch_request(batch_request=batch_request)
 

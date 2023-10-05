@@ -1,4 +1,5 @@
-from typing import Optional
+import logging
+from typing import List, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -7,10 +8,16 @@ from great_expectations.core import (
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
-    render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyDiagnosticRendererType, LegacyRendererType
+from great_expectations.render import RenderedStringTemplateContent
+from great_expectations.render.components import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.util import (
+    num_to_str,
+    substitute_none_for_missing,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
@@ -95,25 +102,50 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @renderer(renderer_type="renderer.prescriptive")
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ) -> None:
-        # TODO: Need for prescriptive renderer for Expectation if we want to render in DataDocs.
-        pass
+    ) -> List[RenderedStringTemplateContent]:
+        runtime_configuration = runtime_configuration or {}
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            ["column_list", "sum_total", "mostly"],
+        )
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, no_scientific=True
+            )
+        mostly_str = (
+            ""
+            if params.get("mostly") is None
+            else ", at least $mostly_pct % of the time"
+        )
+        sum_total = params.get("sum_total")  # noqa: F841
 
-    @classmethod
-    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
-    def _diagnostic_observed_value_renderer(
-        cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ) -> None:
-        # TODO: Need for diagnostic renderer for Expectation if we want to render in DataDocs.
-        pass
+        column_list_str = ""
+        for idx in range(len(params["column_list"]) - 1):
+            column_list_str += f"$column_list_{idx!s}, "
+            params[f"column_list_{idx!s}"] = params["column_list"][idx]
+        last_idx = len(params["column_list"]) - 1
+        column_list_str += f"$column_list_{last_idx!s}"
+        params[f"column_list_{last_idx!s}"] = params["column_list"][last_idx]
+        template_str = (
+            f"Sum across columns {column_list_str} must be $sum_total{mostly_str}."
+        )
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]

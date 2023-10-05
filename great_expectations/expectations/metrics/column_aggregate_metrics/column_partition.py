@@ -1,8 +1,10 @@
-from typing import Any, Dict, List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Dict, Literal, Optional
 
 import numpy as np
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -15,6 +17,11 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.util import convert_ndarray_to_datetime_dtype_best_effort
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    import numpy.typing as npt
+
+    from great_expectations.core import ExpectationConfiguration
 
 
 class ColumnPartition(ColumnAggregateMetricProvider):
@@ -72,6 +79,7 @@ class ColumnPartition(ColumnAggregateMetricProvider):
         )
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
@@ -129,20 +137,25 @@ class ColumnPartition(ColumnAggregateMetricProvider):
         return dependencies
 
 
-def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) -> list:
+def _get_column_partition_using_metrics(
+    bins: Literal["uniform", "ntile", "quantile", "percentile", "auto"],
+    n_bins: int,
+    _metrics: dict,
+) -> list | npt.NDArray:
+    result_bins: list | npt.NDArray
     if bins == "uniform":
         min_ = _metrics["column.min"]
         max_ = _metrics["column.max"]
 
         original_ndarray_is_datetime_type: bool
         conversion_ndarray_to_datetime_type_performed: bool
-        min_max_values: np.ndaarray
+        min_max_values: npt.NDArray | list
         (
             original_ndarray_is_datetime_type,
             conversion_ndarray_to_datetime_type_performed,
             min_max_values,
         ) = convert_ndarray_to_datetime_dtype_best_effort(
-            data=[min_, max_],
+            data=[min_, max_],  # type: ignore[arg-type] # expects NDArray
             parse_strings_as_datetimes=True,
         )
         ndarray_is_datetime_type: bool = (
@@ -152,32 +165,30 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
         min_ = min_max_values[0]
         max_ = min_max_values[1]
 
-        bins = _determine_bins_using_proper_units(
+        result_bins = _determine_bins_using_proper_units(  # type: ignore[assignment] # TODO: ensure not None
             ndarray_is_datetime_type=ndarray_is_datetime_type,
             n_bins=n_bins,
             min_=min_,
             max_=max_,
         )
     elif bins in ["ntile", "quantile", "percentile"]:
-        bins = _metrics["column.quantile_values"]
+        result_bins = _metrics["column.quantile_values"]
     elif bins == "auto":
         # Use the method from numpy histogram_bin_edges
         nonnull_count = _metrics["column_values.nonnull.count"]
         sturges = np.log2(1.0 * nonnull_count + 1.0)
         min_, _25, _75, max_ = _metrics["column.quantile_values"]
 
-        original_ndarray_is_datetime_type: bool
-        conversion_ndarray_to_datetime_type_performed: bool
-        box_plot_values: np.ndaarray
+        box_plot_values: npt.NDArray
         (
             original_ndarray_is_datetime_type,
             conversion_ndarray_to_datetime_type_performed,
             box_plot_values,
         ) = convert_ndarray_to_datetime_dtype_best_effort(
-            data=[min_, _25, _75, max_],
+            data=[min_, _25, _75, max_],  # type: ignore[arg-type] # expects NDArray
             parse_strings_as_datetimes=True,
         )
-        ndarray_is_datetime_type: bool = (
+        ndarray_is_datetime_type = (
             original_ndarray_is_datetime_type
             or conversion_ndarray_to_datetime_type_performed
         )
@@ -199,8 +210,8 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
             iqr < 1.0e-10  # noqa: PLR2004
         ):  # Consider IQR 0 and do not use variance-based estimator
             n_bins = int(np.ceil(sturges))
-        else:
-            if nonnull_count == 0:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if nonnull_count == 0:
                 n_bins = 0
             else:
                 fd = (2 * float(iqr)) / (nonnull_count ** (1.0 / 3.0))
@@ -209,7 +220,7 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
                     int(np.ceil(float(max_as_float_ - min_as_float_) / fd)),
                 )
 
-        bins = _determine_bins_using_proper_units(
+        result_bins = _determine_bins_using_proper_units(  # type: ignore[assignment] # need overloads to ensure not None
             ndarray_is_datetime_type=ndarray_is_datetime_type,
             n_bins=n_bins,
             min_=min_,
@@ -218,12 +229,12 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
     else:
         raise ValueError("Invalid parameter for bins argument")
 
-    return bins
+    return result_bins
 
 
 def _determine_bins_using_proper_units(
     ndarray_is_datetime_type: bool, n_bins: int, min_: Any, max_: Any
-) -> Optional[List[Any]]:
+) -> list | npt.NDArray | None:
     if ndarray_is_datetime_type:
         if n_bins == 0:
             bins = [min_]

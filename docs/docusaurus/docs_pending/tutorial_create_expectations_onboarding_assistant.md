@@ -46,7 +46,7 @@ Which data asset (accessible by data connector "default_inferred_data_connector_
     2. yellow_tripdata_sample_2019-02.csv
 : 1
 ```
-The Profiler will require a <TechnicalTag relative="../../" tag="batch" text="Batch" /> to analyze.  This prompt is asking us which data to use for that.  As you can see, the prompt it is giving corresponds to the .CSV files in our `data` folder.  These are the very same ones we configured our <TechnicalTag relative="../../" tag="datasource" text="Datasource" /> to connect to back in Step 2: Connect to Data.
+The Profiler will require a <TechnicalTag relative="../../" tag="batch" text="Batch" /> to analyze.  This prompt is asking us which data to use for that.  As you can see, the prompt it is giving corresponds to the .CSV files in our `data` folder.  These are the very same ones we configured our <TechnicalTag relative="../../" tag="datasource" text="Data Source" /> to connect to back in Step 2: Connect to Data.
 
 We're going to choose the first file.  If you're wondering why, here's an explanation: Recall that our data directory contains two CSV files: `yellow_tripdata_sample_2019-01` and `yellow_tripdata_sample_2019-02`.
 
@@ -125,7 +125,7 @@ In particular, take a look at the Expectations that were created for the `passen
 
 You can create and edit Expectations using several different workflows. Using an automated [Profiler](../../reference/profilers.md) as we just did is one of the quickest options to get started with an Expectation Suite.
 
-This Profiler connected to your data (using the Datasource you configured in the previous step), took a quick look at the contents of the data, and produced an initial set of Expectations. The Profiler considers the following properties, amongst others:
+This Profiler connected to your data (using the Data Source you configured in the previous step), took a quick look at the contents of the data, and produced an initial set of Expectations. The Profiler considers the following properties, amongst others:
 
   - the data type of the column
 
@@ -141,7 +141,7 @@ These Expectations are not intended to be very smart. Instead, the goal is to qu
   <summary>Creating Custom Expectations</summary>
   <div>
     <p>
-      Later, you should also take a look at other workflows for <a href="https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview/">creating Custom Expectations</a>. Creating Custom Expectations is an active area of work in the Great Expectations community. Stay tuned for improvements over time.
+      Later, you should also take a look at other workflows for <a href="https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp/">creating Custom Expectations</a>. Creating Custom Expectations is an active area of work in the Great Expectations community. Stay tuned for improvements over time.
     </p>
   </div>
 </details>

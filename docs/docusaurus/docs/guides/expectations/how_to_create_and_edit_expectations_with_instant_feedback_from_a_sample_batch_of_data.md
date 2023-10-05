@@ -23,50 +23,11 @@ No.  The interactive method used to create and edit Expectations does not edit o
 
 - Great Expectations installed in a Python environment
 - A Filesystem Data Context for your Expectations
-- Created a Datasource from which to request a Batch of data for introspection
+- Created a Data Source from which to request a Batch of data for introspection
 
 </Prerequisites> 
 
-<details>
-<summary>
-
-### If you haven't set up Great Expectations
-
-</summary>
-
-<IfYouStillNeedToSetupGX />
-
-</details>
-
-<details>
-<summary>
-
-### If you haven't initialized your Data Context
-
-</summary>
-
-See one of the following guides:
-
-<DataContextInitializeQuickOrFilesystem />
-
-</details>
-
-<details>
-<summary>
-
-### If you haven't created a Datasource
-
-</summary>
-
-See one of the following guides:
-
-<ConnectingToDataFluently />
-
-</details>
-
-## Steps
-
-### 1. Import the Great Expectations module and instantiate a Data Context
+## Import the Great Expectations module and instantiate a Data Context
 
 For this guide we will be working with Python code in a Jupyter Notebook. Jupyter is included with GX and lets us easily edit code and immediately see the results of our changes.
 
@@ -77,11 +38,11 @@ Run the following code to import Great Expectations and instantiate a Data Conte
 
 :::info Data Contexts and persisting data
 
-If you're using an Ephemeral Data Context, your configurations will not persist beyond the current Python session.  However, if you're using a Filesystem or Cloud Data Context, they do persist.  The `get_context()` method returns the first Cloud or Filesystem Data Context it can find.  If a Cloud or Filesystem Data Context has not be configured or cannot be found, it provides an Ephemeral Data Context.  For more information about the `get_context()` method, see [How to quickly instantiate a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+If you're using an Ephemeral Data Context, your configurations will not persist beyond the current Python session.  However, if you're using a Filesystem or Cloud Data Context, they do persist.  The `get_context()` method returns the first Cloud or Filesystem Data Context it can find.  If a Cloud or Filesystem Data Context has not be configured or cannot be found, it provides an Ephemeral Data Context.  For more information about the `get_context()` method, see [Instantiate a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 
 :::
 
-### 2. Use an existing Data Asset to create a Batch Request
+## Use an existing Data Asset to create a Batch Request
 
 Add the following method to retrieve a previously configured Data Asset from the Data Context you initialized and create a Batch Request to identify the Batch of data that you'll use to validate your Expectations:
 
@@ -94,7 +55,7 @@ You can provide a dictionary as the `options` parameter of `build_batch_request(
 
 :::
 
-### 3. Create a Validator
+## Create a Validator
 
 When you use a Validator to interactively create your Expectations, the Validator needs two parameters. One parameter identifies the Batch that contains the data that is used to Validate the Expectations. The second parameter provides a name for the combined list of Expectations you create.
 
@@ -117,7 +78,7 @@ If you're using a Jupyter Notebook you'll automatically see the results of the c
     ```python name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py get_validator_and_inspect_data"
     ```
 
-### 4. Use the Validator to create and run an Expectation
+## Use the Validator to create and run an Expectation
 
 The Validator provides access to all the available Expectations as methods.  When an `expect_*()` method is run from the Validator, the Validator adds the specified Expectation to an Expectation Suite (or edits an existing Expectation in the Expectation Suite, if applicable) in its configuration, and then the specified Expectation is run against the data that was provided when the Validator was initialized with a Batch Request.
 
@@ -134,7 +95,7 @@ If you are not working in a Jupyter Notebook you may need to explicitly print yo
 
 :::
 
-### 5. (Optional) Repeat step 4 to edit Expectations or create additional Expectations
+## Edit Expectations or create additional Expectations (Optional)
 
 If you choose to edit an Expectation after you've viewed the Validation Results that were returned when it was created, you can do so by running the `validator.expect_*()` method with different parameters than you supplied previously.  You can also have the Validator run an entirely different `expect_*()` method and create additional Expectations.  All the Expectations that you create are stored in a list in the Validator's in-memory configuration.
 
@@ -144,7 +105,7 @@ GX takes into account certain parameters when determining if an Expectation is b
 
 :::
 
-### 6. (Optional) Save your Expectations for future use
+## Save your Expectations for future use (Optional)
 
 The Expectations you create with the interactive method are saved in an Expectation Suite on the Validator object.  Validators do not persist outside the current Python session and for this reason these Expectations will not be kept unless you save them to your Data Context.  This can be ideal if you are using a Validator for quick data validation and exploration, but in most cases you'll want to reuse your newly created Expectation Suite in future Python sessions.
 

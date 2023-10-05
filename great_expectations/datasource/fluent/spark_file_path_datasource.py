@@ -12,9 +12,9 @@ from typing import (
     Union,
 )
 
-import pydantic
-from pydantic import Field
-
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import Field
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent import _SparkDatasource
 from great_expectations.datasource.fluent.directory_data_asset import (
     _DirectoryDataAssetMixin,
@@ -47,6 +47,7 @@ class _SparkGenericFilePathAssetMixin(_FilePathDataAsset):
     modified_before: Optional[Union[bool, str]] = Field(None, alias="modifiedBefore")
     modified_after: Optional[Union[bool, str]] = Field(None, alias="modifiedAfter")
 
+    @override
     def _get_reader_options_include(self) -> set[str]:
         return {
             "path_glob_filter",
@@ -175,9 +176,11 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
         allow_population_by_field_name = True
 
     @classmethod
+    @override
     def _get_reader_method(cls) -> str:
         return "csv"
 
+    @override
     def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
@@ -235,9 +238,11 @@ class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAsset):
     type: Literal["directory_csv"] = "directory_csv"  # type: ignore[assignment]
 
     @classmethod
+    @override
     def _get_reader_method(cls) -> str:
         return "csv"
 
+    @override
     def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
@@ -266,9 +271,11 @@ class ParquetAsset(_SparkGenericFilePathAssetMixin):
         allow_population_by_field_name = True
 
     @classmethod
+    @override
     def _get_reader_method(cls) -> str:
         return "parquet"
 
+    @override
     def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
@@ -291,9 +298,11 @@ class DirectoryParquetAsset(_DirectoryDataAssetMixin, ParquetAsset):
     type: Literal["directory_parquet"] = "directory_parquet"  # type: ignore[assignment]
 
     @classmethod
+    @override
     def _get_reader_method(cls) -> str:
         return "parquet"
 
+    @override
     def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
@@ -316,9 +325,11 @@ class ORCAsset(_SparkGenericFilePathAssetMixin):
         allow_population_by_field_name = True
 
     @classmethod
+    @override
     def _get_reader_method(cls) -> str:
         return "orc"
 
+    @override
     def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
@@ -331,9 +342,11 @@ class DirectoryORCAsset(_DirectoryDataAssetMixin, ORCAsset):
     type: Literal["directory_orc"] = "directory_orc"  # type: ignore[assignment]
 
     @classmethod
+    @override
     def _get_reader_method(cls) -> str:
         return "orc"
 
+    @override
     def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
@@ -440,9 +453,11 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
         allow_population_by_field_name = True
 
     @classmethod
+    @override
     def _get_reader_method(cls) -> str:
         return "json"
 
+    @override
     def _get_reader_options_include(self) -> set[str]:
         return (
             super()
@@ -490,9 +505,11 @@ class DirectoryJSONAsset(_DirectoryDataAssetMixin, JSONAsset):
     type: Literal["directory_json"] = "directory_json"  # type: ignore[assignment]
 
     @classmethod
+    @override
     def _get_reader_method(cls) -> str:
         return "json"
 
+    @override
     def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
@@ -516,9 +533,11 @@ class TextAsset(_SparkGenericFilePathAssetMixin):
         allow_population_by_field_name = True
 
     @classmethod
+    @override
     def _get_reader_method(cls) -> str:
         return "text"
 
+    @override
     def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
@@ -531,9 +550,11 @@ class DirectoryTextAsset(_DirectoryDataAssetMixin, TextAsset):
     type: Literal["directory_text"] = "directory_text"  # type: ignore[assignment]
 
     @classmethod
+    @override
     def _get_reader_method(cls) -> str:
         return "text"
 
+    @override
     def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
@@ -558,9 +579,11 @@ class DeltaAsset(_FilePathDataAsset):
         allow_population_by_field_name = True
 
     @classmethod
+    @override
     def _get_reader_method(cls) -> str:
         return "delta"
 
+    @override
     def _get_reader_options_include(self) -> set[str]:
         """The options below are available as of 2023-05-12
 
@@ -573,9 +596,11 @@ class DirectoryDeltaAsset(_DirectoryDataAssetMixin, DeltaAsset):
     type: Literal["directory_delta"] = "directory_delta"  # type: ignore[assignment]
 
     @classmethod
+    @override
     def _get_reader_method(cls) -> str:
         return "delta"
 
+    @override
     def _get_reader_options_include(self) -> set[str]:
         """The options below are available as of 2023-05-12
 
@@ -625,4 +650,4 @@ class _SparkFilePathDatasource(_SparkDatasource):
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = _SPARK_FILE_PATH_ASSET_TYPES
 
     # instance attributes
-    assets: List[_SPARK_FILE_PATH_ASSET_TYPES_UNION] = []  # type: ignore[assignment]
+    assets: List[_SPARK_FILE_PATH_ASSET_TYPES_UNION] = []

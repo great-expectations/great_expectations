@@ -161,7 +161,7 @@ class InlineRenderer(Renderer):
                 renderer_rendered_content, RenderedAtomicContent
             ), f"The renderer: {renderer_name} for expectation: {expectation_type} should return RenderedAtomicContent."
         except Exception as e:
-            error_message = f'Renderer "{renderer_name}" failed to render Expectation "{expectation_type} with exception message: {str(e)}".'
+            error_message = f'Renderer "{renderer_name}" failed to render Expectation "{expectation_type} with exception message: {e!s}".'
             logger.info(error_message)
 
             failure_renderer: AtomicPrescriptiveRendererType | AtomicDiagnosticRendererType

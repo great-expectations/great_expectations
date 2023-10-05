@@ -179,7 +179,7 @@ def _pandas_column_map_condition_value_counts(
         boolean_mapped_unexpected_values,
         compute_domain_kwargs,
         accessor_domain_kwargs,
-    ) = metrics.get("unexpected_condition")
+    ) = metrics["unexpected_condition"]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -245,9 +245,9 @@ def _sqlalchemy_column_map_condition_values(
     Particularly for the purpose of finding unexpected values, returns all the metric values which do not meet an
     expected Expectation condition for ColumnMapExpectation Expectations.
     """
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
-    )
+    ]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -260,7 +260,6 @@ def _sqlalchemy_column_map_condition_values(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
-
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
     selectable = execution_engine.get_domain_records(
@@ -271,8 +270,10 @@ def _sqlalchemy_column_map_condition_values(
         unexpected_condition
     )
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
-        query = query.select_from(selectable)
-
+        if hasattr(selectable, "subquery"):
+            query = query.select_from(selectable.subquery())
+        else:
+            query = query.select_from(selectable)
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
@@ -304,9 +305,9 @@ def _sqlalchemy_column_map_condition_value_counts(
     Returns value counts for all the metric values which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
     """
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
-    )
+    ]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -348,9 +349,9 @@ def _spark_column_map_condition_values(
     **kwargs,
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
-    )
+    ]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -398,9 +399,9 @@ def _spark_column_map_condition_value_counts(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
-    )
+    ]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(

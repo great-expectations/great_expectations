@@ -20,6 +20,7 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
+from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -28,7 +29,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
 from great_expectations.datasource import BaseDatasource
-from great_expectations.util import get_context
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
@@ -471,7 +471,7 @@ def load_data_context_with_error_handling(  # noqa: PLR0912
         cli_message(string=err.cli_colored_message)
         sys.exit(1)
     except gx_exceptions.InvalidConfigurationYamlError as err:
-        cli_message(string=f"<red>{str(err)}</red>")
+        cli_message(string=f"<red>{err!s}</red>")
         sys.exit(1)
 
 
@@ -892,7 +892,7 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
         }
     """
 
-    if config_file_location is not None and config_file_location != "":  # noqa: PLC1901
+    if config_file_location is not None and config_file_location != "":
         config_file_location_path = Path(config_file_location)
 
         # If the file or directory exists, treat it appropriately
@@ -900,8 +900,8 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
         filename: Optional[str]
         directory: Optional[str]
         if config_file_location_path.is_file():
-            filename = rf"{str(config_file_location_path.name)}"
-            directory = rf"{str(config_file_location_path.parent)}"
+            filename = rf"{config_file_location_path.name!s}"
+            directory = rf"{config_file_location_path.parent!s}"
         elif config_file_location_path.is_dir():
             filename = None
             directory = config_file_location

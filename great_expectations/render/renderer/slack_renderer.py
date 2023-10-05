@@ -75,8 +75,8 @@ class SlackRenderer(Renderer):
             if validation_result.success:
                 status = "Success :tada:"
 
-            else:
-                if show_failed_expectations:  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if show_failed_expectations:
                     failed_expectations_text = self.create_failed_expectations_text(
                         validation_result["results"]
                     )
@@ -120,7 +120,7 @@ class SlackRenderer(Renderer):
                         else:
                             logger.critical(
                                 f"*ERROR*: Slack is trying to provide a link to the following DataDocs: `"
-                                f"{str(docs_link_key)}`, but it is not configured under `data_docs_sites` in the "
+                                f"{docs_link_key!s}`, but it is not configured under `data_docs_sites` in the "
                                 f"`great_expectations.yml`\n"
                             )
                             report_element = {
@@ -128,7 +128,7 @@ class SlackRenderer(Renderer):
                                 "text": {
                                     "type": "mrkdwn",
                                     "text": f"*ERROR*: Slack is trying to provide a link to the following DataDocs: "
-                                    f"`{str(docs_link_key)}`, but it is not configured under "
+                                    f"`{docs_link_key!s}`, but it is not configured under "
                                     f"`data_docs_sites` in the `great_expectations.yml`\n",
                                 },
                             }

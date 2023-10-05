@@ -3,6 +3,7 @@ import traceback
 import warnings
 from copy import deepcopy
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -58,6 +59,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         return sorted(custom_columns)
 
     @classmethod
+    @override
     def _process_content_block(
         cls, content_block, has_failed_evr, render_object=None
     ) -> None:
@@ -98,7 +100,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 expectation_type
             )
         if expectation_string_fn is None:
-            expectation_string_fn = getattr(cls, "_missing_content_block_fn")
+            expectation_string_fn = cls._missing_content_block_fn
 
         # This function wraps expect_* methods from ExpectationStringRenderer to generate table classes
         def row_generator_fn(
@@ -124,7 +126,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             status_cell = (
                 [status_icon_renderer[1](result=result)]
                 if status_icon_renderer
-                else [getattr(cls, "_diagnostic_status_icon_renderer")(result=result)]
+                else [cls._diagnostic_status_icon_renderer(result=result)]
             )
             unexpected_statement = []
             unexpected_table = None
@@ -149,7 +151,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 exception_traceback = traceback.format_exc()
                 exception_message = (
                     data_docs_exception_message
-                    + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                    + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                 )
                 logger.error(exception_message)
             try:
@@ -166,7 +168,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 exception_traceback = traceback.format_exc()
                 exception_message = (
                     data_docs_exception_message
-                    + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                    + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                 )
                 logger.error(exception_message)
             try:
@@ -188,7 +190,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 exception_traceback = traceback.format_exc()
                 exception_message = (
                     data_docs_exception_message
-                    + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+                    + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                 )
                 logger.error(exception_message)
 

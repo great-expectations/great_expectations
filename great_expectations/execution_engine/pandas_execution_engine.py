@@ -26,13 +26,16 @@ from great_expectations.compatibility import aws, azure, google
 from great_expectations.compatibility.sqlalchemy_and_pandas import (
     execute_pandas_reader_fn,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     BatchSpec,
+    FabricBatchSpec,
     GCSBatchSpec,
     PandasBatchSpec,
+    PandasBatchSpecProtocol,
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
@@ -185,10 +188,12 @@ class PandasExecutionEngine(ExecutionEngine):
         except (TypeError, AttributeError, google.DefaultCredentialsError):
             self._gcs = None
 
+    @override
     def configure_validator(self, validator) -> None:
         super().configure_validator(validator)
         validator.expose_dataframe_methods = True
 
+    @override
     def load_batch_data(
         self, batch_id: str, batch_data: Union[PandasBatchData, pd.DataFrame]
     ) -> None:
@@ -201,9 +206,10 @@ class PandasExecutionEngine(ExecutionEngine):
 
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
+    @override
     def get_batch_data_and_markers(  # noqa: C901, PLR0912, PLR0915
-        self, batch_spec: BatchSpec
-    ) -> Tuple[Any, BatchMarkers]:  # batch_data
+        self, batch_spec: BatchSpec | PandasBatchSpecProtocol
+    ) -> Tuple[PandasBatchData, BatchMarkers]:  # batch_data
         # We need to build a batch_markers to be used in the dataframe
         batch_markers = BatchMarkers(
             {
@@ -349,9 +355,13 @@ Bucket: {error}"""
             else:
                 df = reader_fn_result
 
+        elif isinstance(batch_spec, FabricBatchSpec):
+            reader_fn = batch_spec.get_reader_function()
+            df = reader_fn(**batch_spec.reader_options)
+
         else:
             raise gx_exceptions.BatchSpecError(
-                f"""batch_spec must be of type RuntimeDataBatchSpec, PandasBatchSpec, PathBatchSpec, S3BatchSpec, or AzureBatchSpec, \
+                f"""batch_spec must be of type RuntimeDataBatchSpec, PandasBatchSpec, PathBatchSpec, S3BatchSpec, AzureBatchSpec or FabricBatchSpec \
 not {batch_spec.__class__.__name__}"""
             )
 
@@ -363,21 +373,27 @@ not {batch_spec.__class__.__name__}"""
 
         return typed_batch_data, batch_markers
 
-    def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
-        splitter_method_name: Optional[str] = batch_spec.get("splitter_method")
-        if splitter_method_name:
-            splitter_fn: Callable = self._data_splitter.get_splitter_method(
-                splitter_method_name
-            )
-            splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
-            batch_data = splitter_fn(batch_data, **splitter_kwargs)
+    def _apply_splitting_and_sampling_methods(
+        self,
+        batch_spec: BatchSpec | PandasBatchSpecProtocol,
+        batch_data: PandasBatchData,
+    ):
+        # splitting and sampling not supported for FabricBatchSpec
+        if isinstance(batch_spec, BatchSpec):
+            splitter_method_name: Optional[str] = batch_spec.get("splitter_method")
+            if splitter_method_name:
+                splitter_fn: Callable = self._data_splitter.get_splitter_method(
+                    splitter_method_name
+                )
+                splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
+                batch_data = splitter_fn(batch_data, **splitter_kwargs)
 
-        sampler_method_name: Optional[str] = batch_spec.get("sampling_method")
-        if sampler_method_name:
-            sampling_fn: Callable = self._data_sampler.get_sampler_method(
-                sampler_method_name
-            )
-            batch_data = sampling_fn(batch_data, batch_spec)
+            sampler_method_name: Optional[str] = batch_spec.get("sampling_method")
+            if sampler_method_name:
+                sampling_fn: Callable = self._data_sampler.get_sampler_method(
+                    sampler_method_name
+                )
+                batch_data = sampling_fn(batch_data, batch_spec)
 
         return batch_data
 
@@ -483,6 +499,7 @@ not {batch_spec.__class__.__name__}"""
                 f'Unable to find reader_method "{reader_method}" in pandas.'
             )
 
+    @override
     def resolve_metric_bundle(
         self, metric_fn_bundle
     ) -> Dict[Tuple[str, str, str], Any]:
@@ -492,6 +509,7 @@ not {batch_spec.__class__.__name__}"""
         )  # This is NO-OP for "PandasExecutionEngine" (no bundling for direct execution computational backend).
 
     @public_api
+    @override
     def get_domain_records(  # noqa: C901, PLR0912
         self,
         domain_kwargs: dict,
@@ -521,8 +539,8 @@ not {batch_spec.__class__.__name__}"""
                 raise gx_exceptions.ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
-        else:
-            if batch_id in self.batch_manager.batch_data_cache:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if batch_id in self.batch_manager.batch_data_cache:
                 data = cast(
                     PandasBatchData, self.batch_manager.batch_data_cache[batch_id]
                 ).dataframe
@@ -572,8 +590,8 @@ not {batch_spec.__class__.__name__}"""
                     how="any",
                     subset=[column_A_name, column_B_name],
                 )
-            else:
-                if ignore_row_if != "neither":  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -596,8 +614,8 @@ not {batch_spec.__class__.__name__}"""
                     how="any",
                     subset=column_list,
                 )
-            else:
-                if ignore_row_if != "never":  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if ignore_row_if != "never":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -607,6 +625,7 @@ not {batch_spec.__class__.__name__}"""
         return data
 
     @public_api
+    @override
     def get_compute_domain(
         self,
         domain_kwargs: dict,

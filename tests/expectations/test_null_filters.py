@@ -1,7 +1,8 @@
+import pytest
+
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-import pytest
 
 
 @pytest.mark.spark
@@ -71,5 +72,5 @@ def test_sa_null_filters(sa):
     add_dataframe_to_db(df=df, name="test", con=eng, index=False)
     with eng.begin() as connection:
         assert (
-            connection.execute(sa.text(f"SELECT MAX(a) FROM test;")).fetchone()[0] == 4
+            connection.execute(sa.text("SELECT MAX(a) FROM test;")).fetchone()[0] == 4
         )

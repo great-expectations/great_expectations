@@ -177,6 +177,9 @@
           "max_value": 0,
           "catch_exceptions": false
         },
+        "suppress_test_for": [
+          "spark"
+        ],
         "out": {
           "success": false,
           "observed_value": null

@@ -19,7 +19,7 @@ A clear and concise description of what you expected to happen.
 **Environment (please complete the following information):**
  - Operating System: [e.g. Linux, MacOS, Windows]
  - Great Expectations Version: [e.g. 0.13.2]
- - Datasource: [e.g. Pandas, Snowflake]
+ - Data Source: [e.g. Pandas, Snowflake]
  - Cloud environment: [e.g. Airflow, AWS, Azure, Databricks, GCP]
 
 **Additional context**

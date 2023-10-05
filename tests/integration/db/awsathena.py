@@ -23,7 +23,6 @@ connection_string = f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_D
 
 # create datasource and add to DataContext
 context = gx.get_context()
-# <snippet name="tests/integration/db/awsathena.py Datasource YAML config">
 datasource_yaml = f"""
 name: my_awsathena_datasource
 class_name: Datasource
@@ -42,7 +41,6 @@ data_connectors:
     module_name: great_expectations.datasource.data_connector
     include_schema_name: true
 """
-# </snippet>
 context.test_yaml_config(datasource_yaml)
 
 datasource_dict = {

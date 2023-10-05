@@ -7,11 +7,11 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, List, cast
 
-import pydantic
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.alias_types import PathStr
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.pyspark import types as pyspark_types
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -145,7 +145,7 @@ add_csv_asset = [
         "add_csv_asset",
         {
             **add_csv_asset_all_params,
-            **additional_params,  # type: ignore[arg-type]
+            **additional_params,
         },
         id="csv_all_params_pyspark_3_4_0",
     ),
@@ -267,7 +267,7 @@ add_json_asset = [
         "add_json_asset",
         {
             **add_json_asset_all_params,
-            **additional_params,  # type: ignore[arg-type]
+            **additional_params,
         },
         id="json_all_params_pyspark_3_4_0",
     ),
@@ -443,7 +443,7 @@ add_directory_csv_asset = [
             **{
                 "data_directory": "some_directory",
             },
-            **additional_params,  # type: ignore[arg-type]
+            **additional_params,
         },
         id="directory_csv_all_params_pyspark_3_4_0",
     ),
@@ -554,7 +554,7 @@ add_directory_json_asset = [
             **{
                 "data_directory": "some_directory",
             },
-            **additional_params,  # type: ignore[arg-type]
+            **additional_params,
         },
         id="directory_json_all_params_pyspark_3_4_0",
     ),
@@ -1042,7 +1042,7 @@ def datasource_test_connection_error_messages(
     request,
 ) -> tuple[SparkFilesystemDatasource, TestConnectionError]:
     batching_regex, test_connection_error = request.param(csv_path=csv_path)
-    csv_asset = CSVAsset(
+    csv_asset = CSVAsset(  # type: ignore[call-arg] # missing args
         name="csv_asset",
         batching_regex=batching_regex,
     )

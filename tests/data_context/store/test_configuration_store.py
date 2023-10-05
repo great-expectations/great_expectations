@@ -41,8 +41,8 @@ class SampleConfig(BaseYamlConfig):
 
     def __init__(
         self,
-        some_param_0: str = None,
-        some_param_1: int = None,
+        some_param_0: Optional[str] = None,
+        some_param_1: Optional[int] = None,
         commented_map: CommentedMap = None,
     ):
         if some_param_0 is None:
@@ -82,7 +82,6 @@ class SampleConfigurationStore(ConfigurationStore):
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_v3_configuration_store(tmp_path_factory):
     root_directory_path: str = "test_v3_configuration_store"
     root_directory: str = str(tmp_path_factory.mktemp(root_directory_path))

@@ -81,10 +81,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
         value_set (set-like): \
             A set of objects used for comparison.
 
-    Keyword Args:
-        parse_strings_as_datetimes (boolean or None): If True values provided in value_set will be parsed \
-        as datetimes before making comparisons.
-
     Other Parameters:
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
@@ -211,9 +207,9 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
 
         else:
             for i, v in enumerate(params["value_set"]):
-                params[f"v__{str(i)}"] = v
+                params[f"v__{i!s}"] = v
             values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
+                [f"$v__{i!s}" for i, v in enumerate(params["value_set"])]
             )
 
             if renderer_configuration.include_column_name:
@@ -322,7 +318,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
                 ),
                 "graph": chart,
                 "styling": {
-                    "classes": [f"col-{str(chart_container_col_width)}", "mt-1"],
+                    "classes": [f"col-{chart_container_col_width!s}", "mt-1"],
                 },
             }
         )

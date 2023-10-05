@@ -4,9 +4,8 @@ from enum import Enum
 from typing import ClassVar, Dict, Optional, Set
 
 import pandas as pd
-import pydantic
 
-from great_expectations.compatibility import pyspark
+from great_expectations.compatibility import pydantic, pyspark
 
 from ..alias_types import JSONValues
 from ..core._docs_decorators import public_api
@@ -216,7 +215,7 @@ class DictDot:
                         _ = self[f"_{name}"]
                     except AttributeError:
                         raise ValueError(
-                            f'Property "{name}", marked for {purpose} on object "{str(type(self))}", does not exist.'
+                            f'Property "{name}", marked for {purpose} on object "{type(self)!s}", does not exist.'
                         )
 
         if include_keys:

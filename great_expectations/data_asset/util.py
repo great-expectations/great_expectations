@@ -20,8 +20,8 @@ def parse_result_format(result_format):
     there is no need to specify a custom partial_unexpected_count."""
     if isinstance(result_format, str):
         result_format = {"result_format": result_format, "partial_unexpected_count": 20}
-    else:
-        if "partial_unexpected_count" not in result_format:  # noqa: PLR5501
+    else:  # noqa: PLR5501
+        if "partial_unexpected_count" not in result_format:
             result_format["partial_unexpected_count"] = 20
 
     return result_format
@@ -198,7 +198,7 @@ def _recursively_convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
 
     else:
         raise TypeError(
-            f"{str(test_obj)} is of type {type(test_obj).__name__} which cannot be serialized."
+            f"{test_obj!s} is of type {type(test_obj).__name__} which cannot be serialized."
         )
 
 
@@ -222,5 +222,5 @@ def ensure_row_condition_is_correct(row_condition_string) -> None:
         )
     if "\n" in row_condition_string:
         raise InvalidExpectationConfigurationError(
-            f"{repr(row_condition_string)} cannot be serialized to json. Do not introduce \\n in configuration."
+            f"{row_condition_string!r} cannot be serialized to json. Do not introduce \\n in configuration."
         )

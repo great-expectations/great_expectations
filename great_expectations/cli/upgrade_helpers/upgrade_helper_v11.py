@@ -215,8 +215,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
         except Exception as e:
             exception_traceback = traceback.format_exc()
             exception_message = (
-                f'{type(e).__name__}: "{str(e)}".  '
-                f'Traceback: "{exception_traceback}".'
+                f'{type(e).__name__}: "{e!s}".  ' f'Traceback: "{exception_traceback}".'
             )
             self._update_upgrade_log(
                 store_backend=store_backend,
@@ -239,7 +238,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             except Exception as e:
                 exception_traceback = traceback.format_exc()
                 exception_message = (
-                    f'{type(e).__name__}: "{str(e)}".  '
+                    f'{type(e).__name__}: "{e!s}".  '
                     f'Traceback: "{exception_traceback}".'
                 )
                 self._update_upgrade_log(
@@ -271,7 +270,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             except Exception as e:
                 exception_traceback = traceback.format_exc()
                 exception_message = (
-                    f'{type(e).__name__}: "{str(e)}".  '
+                    f'{type(e).__name__}: "{e!s}".  '
                     f'Traceback: "{exception_traceback}".'
                 )
                 self._update_upgrade_log(
@@ -327,8 +326,8 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 self.upgrade_log["upgraded_validations_stores"][store_name][
                     "validations_updated"
                 ].append(log_dict)
-        else:
-            if exception_message:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if exception_message:
                 self.upgrade_log["upgraded_docs_site_validations_stores"][site_name][
                     "exceptions"
                 ] = True
@@ -366,7 +365,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 store_backend.full_base_directory,
                 store_backend._convert_key_to_filepath(source_key),
             )
-            path_mod_timestamp = os.path.getmtime(source_path)
+            path_mod_timestamp = os.path.getmtime(source_path)  # noqa: PTH204
             path_mod_iso_str = datetime.datetime.fromtimestamp(  # noqa: DTZ006
                 path_mod_timestamp
             ).strftime("%Y%m%dT%H%M%S.%fZ")
@@ -658,8 +657,8 @@ A log detailing the upgrade can be found here:
     - {upgrade_log_path}\
 </green>\
 """
-        else:
-            if exceptions:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if exceptions:
                 exception_occurred = True
                 upgrade_report += f"""
 <red>\

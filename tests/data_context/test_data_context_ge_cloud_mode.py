@@ -3,17 +3,16 @@ from unittest import mock
 import pytest
 import responses
 
+from great_expectations.data_context import get_context
 from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
 from great_expectations.exceptions import GXCloudError
 from great_expectations.exceptions.exceptions import GXCloudConfigurationError
-from great_expectations.util import get_context
 
 
 @pytest.mark.cloud
-@pytest.mark.unit
 def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_error():
     # Don't want to make a real request in a unit test so we simply patch the config fixture
     with mock.patch(
@@ -25,7 +24,6 @@ def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_er
 
 
 @responses.activate
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
     request_headers: dict,
@@ -58,7 +56,6 @@ def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
 
 
 @responses.activate
-@pytest.mark.unit
 @pytest.mark.cloud
 @mock.patch("requests.Session.get")
 def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_error(
@@ -81,7 +78,6 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
 
 @responses.activate
 @pytest.mark.cloud
-@pytest.mark.unit
 @mock.patch("requests.Session.get")
 def test_data_context_in_cloud_mode_passes_base_url_to_store_backend(
     mock_request,

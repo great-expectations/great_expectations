@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
@@ -40,7 +42,6 @@ def checkpoint_store_with_mock_backend() -> Tuple[CheckpointStore, mock.MagicMoc
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_checkpoint_store(empty_data_context):
     store_name: str = "checkpoint_store"
     base_directory: str = str(Path(empty_data_context.root_directory) / "checkpoints")
@@ -247,7 +248,6 @@ def test_checkpoint_store(empty_data_context):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-@pytest.mark.integration
 @pytest.mark.filesystem
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled
@@ -287,45 +287,116 @@ store_backend:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
-def test_ge_cloud_response_json_to_object_dict() -> None:
-    store = CheckpointStore(store_name="checkpoint_store")
-
-    checkpoint_id = "7b5e962c-3c67-4a6d-b311-b48061d52103"
-    checkpoint_config = {
-        "name": "oss_test_checkpoint",
-        "config_version": 1.0,
-        "class_name": "Checkpoint",
-        "expectation_suite_name": "oss_test_expectation_suite",
-        "validations": [
+@pytest.mark.parametrize(
+    "response_json, expected, error_type",
+    [
+        pytest.param(
             {
-                "expectation_suite_name": "taxi.demo_pass",
+                "data": {
+                    "id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
+                    "attributes": {
+                        "checkpoint_config": {
+                            "name": "oss_test_checkpoint",
+                            "config_version": 1.0,
+                            "class_name": "Checkpoint",
+                            "expectation_suite_name": "oss_test_expectation_suite",
+                            "validations": [
+                                {
+                                    "expectation_suite_name": "taxi.demo_pass",
+                                },
+                                {
+                                    "batch_request": {
+                                        "datasource_name": "oss_test_datasource",
+                                        "data_connector_name": "oss_test_data_connector",
+                                        "data_asset_name": "users",
+                                    },
+                                },
+                            ],
+                        }
+                    },
+                }
             },
             {
-                "batch_request": {
-                    "datasource_name": "oss_test_datasource",
-                    "data_connector_name": "oss_test_data_connector",
-                    "data_asset_name": "users",
-                },
+                "class_name": "Checkpoint",
+                "config_version": 1.0,
+                "expectation_suite_name": "oss_test_expectation_suite",
+                "ge_cloud_id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
+                "name": "oss_test_checkpoint",
+                "validations": [
+                    {"expectation_suite_name": "taxi.demo_pass"},
+                    {
+                        "batch_request": {
+                            "data_asset_name": "users",
+                            "data_connector_name": "oss_test_data_connector",
+                            "datasource_name": "oss_test_datasource",
+                        },
+                    },
+                ],
             },
-        ],
-    }
-    response_json = {
-        "data": {
-            "id": checkpoint_id,
-            "attributes": {
-                "checkpoint_config": checkpoint_config,
+            None,
+            id="single_config",
+        ),
+        pytest.param({"data": []}, None, ValueError, id="empty_payload"),
+        pytest.param(
+            {
+                "data": [
+                    {
+                        "id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
+                        "attributes": {
+                            "checkpoint_config": {
+                                "name": "oss_test_checkpoint",
+                                "config_version": 1.0,
+                                "class_name": "Checkpoint",
+                                "expectation_suite_name": "oss_test_expectation_suite",
+                                "validations": [
+                                    {
+                                        "expectation_suite_name": "taxi.demo_pass",
+                                    },
+                                    {
+                                        "batch_request": {
+                                            "datasource_name": "oss_test_datasource",
+                                            "data_connector_name": "oss_test_data_connector",
+                                            "data_asset_name": "users",
+                                        },
+                                    },
+                                ],
+                            }
+                        },
+                    }
+                ]
             },
-        }
-    }
-
-    expected = checkpoint_config
-    expected["ge_cloud_id"] = checkpoint_id
-
-    actual = store.ge_cloud_response_json_to_object_dict(response_json)
-
-    assert actual == expected
+            {
+                "class_name": "Checkpoint",
+                "config_version": 1.0,
+                "expectation_suite_name": "oss_test_expectation_suite",
+                "ge_cloud_id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
+                "name": "oss_test_checkpoint",
+                "validations": [
+                    {"expectation_suite_name": "taxi.demo_pass"},
+                    {
+                        "batch_request": {
+                            "data_asset_name": "users",
+                            "data_connector_name": "oss_test_data_connector",
+                            "datasource_name": "oss_test_datasource",
+                        },
+                    },
+                ],
+            },
+            None,
+            id="single_config_in_list",
+        ),
+    ],
+)
+def test_gx_cloud_response_json_to_object_dict(
+    response_json: dict, expected: dict | None, error_type: Exception | None
+) -> None:
+    if error_type:
+        with pytest.raises(error_type):
+            _ = CheckpointStore.gx_cloud_response_json_to_object_dict(response_json)
+    else:
+        actual = CheckpointStore.gx_cloud_response_json_to_object_dict(response_json)
+        assert actual == expected
 
 
 @pytest.mark.unit
@@ -382,7 +453,6 @@ def test_list_checkpoints(
     assert checkpoints == ["a.b.c", "d.e.f"]
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_list_checkpoints_cloud_mode(
     checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
@@ -411,7 +481,6 @@ def test_delete_checkpoint(
 
 
 @pytest.mark.cloud
-@pytest.mark.unit
 def test_delete_checkpoint_with_cloud_id(
     checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
 ) -> None:

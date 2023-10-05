@@ -2,7 +2,18 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, overload
+from collections import UserDict
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    overload,
+)
 
 import numpy as np
 from dateutil.parser import parse
@@ -13,6 +24,7 @@ from great_expectations.compatibility import aws, sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.execution_engine import (
     PandasExecutionEngine,  # noqa: TCH001
     SqlAlchemyExecutionEngine,  # noqa: TCH001
@@ -20,9 +32,10 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import (
+    GXSqlDialect,
+)
 from great_expectations.execution_engine.util import check_sql_engine_dialect
-from great_expectations.util import get_sqlalchemy_inspector
 
 try:
     import psycopg2  # noqa: F401
@@ -85,19 +98,22 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
     # redshift
     # noinspection PyUnresolvedReferences
-    if hasattr(dialect, "RedshiftDialect") or (
-        aws.redshiftdialect
-        and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)
-    ):
-        if positive:
-            return sqlalchemy.BinaryExpression(
-                column, sqlalchemy.literal(regex), sqlalchemy.custom_op("~")
-            )
+    try:
+        if hasattr(dialect, "RedshiftDialect") or (
+            aws.redshiftdialect
+            and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)
+        ):
+            if positive:
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("~")
+                )
+            else:
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("!~")
+                )
         else:
-            return sqlalchemy.BinaryExpression(
-                column, sqlalchemy.literal(regex), sqlalchemy.custom_op("!~")
-            )
-    else:
+            pass
+    except AttributeError:
         pass
 
     try:
@@ -122,15 +138,16 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
             dialect.dialect,
             snowflake.sqlalchemy.snowdialect.SnowflakeDialect,
         ):
-            # if positive:
-            #     return BinaryExpression(column, literal(regex), custom_op("RLIKE"))
-            # else:
-            #     return BinaryExpression(column, literal(regex), custom_op("NOT RLIKE"))
-
-            # While the snowflake docs mention having regex-related functions, they don't
-            # seem to work with the Python driver
-            # https://docs.snowflake.com/en/sql-reference/functions/regexp.html
-            return None
+            if positive:
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("REGEXP")
+                )
+            else:
+                return sqlalchemy.BinaryExpression(
+                    column,
+                    sqlalchemy.literal(regex),
+                    sqlalchemy.custom_op("NOT REGEXP"),
+                )
     except (
         AttributeError,
         TypeError,
@@ -305,44 +322,82 @@ def attempt_allowing_relative_error(dialect):
     return detected_redshift or detected_psycopg2
 
 
-def is_column_present_in_table(
-    engine: sqlalchemy.Engine,
-    table_selectable: sqlalchemy.Select,
-    column_name: str,
-    schema_name: Optional[str] = None,
-) -> bool:
-    all_columns_metadata: List[Dict[str, Any]] = (
-        get_sqlalchemy_column_metadata(
-            engine=engine, table_selectable=table_selectable, schema_name=schema_name
-        )
-        or []
-    )
-    # Purposefully do not check for a NULL "all_columns_metadata" to insure that it must never happen.
-    column_names: List[str] = [col_md["name"] for col_md in all_columns_metadata]
-    return column_name in column_names
+class CaseInsensitiveString(str):
+    """
+    A string that compares equal to another string regardless of case,
+    unless it is quoted.
+    """
+
+    def __init__(self, string: str):
+        # TODO: check if string is already a CaseInsensitiveString?
+        self._original = string
+        self._lower = string.lower()
+        self._quote_string = '"'
+
+    @override
+    def __eq__(self, other: CaseInsensitiveString | str | object):
+        if self.is_quoted():
+            return self._original == str(other)
+        if isinstance(other, CaseInsensitiveString):
+            return self._lower == other._lower
+        elif isinstance(other, str):
+            return self._lower == other.lower()
+        else:
+            return False
+
+    def __hash__(self):
+        return hash(self._lower)
+
+    @override
+    def __str__(self) -> str:
+        return self._original
+
+    def is_quoted(self):
+        return self._original.startswith(self._quote_string)
+
+
+class CaseInsensitiveNameDict(UserDict):
+    """Normal dict except it returns a case-insensitive string for any `name` key values."""
+
+    def __init__(self, data: dict[str, Any]):
+        self.data = data
+
+    @override
+    def __getitem__(self, key: Any) -> Any:
+        item = self.data[key]
+        if key == "name":
+            logger.debug(f"CaseInsensitiveNameDict.__getitem__ - {key}:{item}")
+            return CaseInsensitiveString(item)
+        return item
 
 
 def get_sqlalchemy_column_metadata(
-    engine: sqlalchemy.Engine,
+    execution_engine: SqlAlchemyExecutionEngine,
     table_selectable: sqlalchemy.Select,
     schema_name: Optional[str] = None,
-) -> Optional[List[Dict[str, Any]]]:
+) -> Sequence[Mapping[str, Any]] | None:
     try:
-        columns: List[Dict[str, Any]]
+        columns: Sequence[Dict[str, Any]]
 
-        inspector: sqlalchemy.reflection.Inspector = get_sqlalchemy_inspector(engine)
+        engine = execution_engine.engine
+        inspector = execution_engine.get_inspector()
         try:
             # if a custom query was passed
             if sqlalchemy.TextClause and isinstance(
                 table_selectable, sqlalchemy.TextClause
             ):
                 if hasattr(table_selectable, "selected_columns"):
+                    # New in version 1.4.
                     columns = table_selectable.selected_columns.columns
                 else:
-                    columns = table_selectable.columns().columns
+                    # Implicit subquery for columns().column was deprecated in SQLAlchemy 1.4
+                    # We must explicitly create a subquery
+                    columns = table_selectable.columns().subquery().columns
             else:
                 columns = inspector.get_columns(
-                    table_selectable,
+                    str(
+                        table_selectable
+                    ),  # TODO: remove cast to a string once [this](https://github.com/snowflakedb/snowflake-sqlalchemy/issues/157) issue is resovled
                     schema=schema_name,
                 )
         except (
@@ -350,7 +405,13 @@ def get_sqlalchemy_column_metadata(
             AttributeError,
             sa.exc.NoSuchTableError,
             sa.exc.ProgrammingError,
-        ):
+        ) as exc:
+            logger.debug(
+                f"{type(exc).__name__} while introspecting columns", exc_info=exc
+            )
+            logger.info(
+                f"While introspecting columns {exc!r}; attempting reflection fallback"
+            )
             # we will get a KeyError for temporary tables, since
             # reflection will not find the temporary schema
             columns = column_reflection_fallback(
@@ -367,13 +428,21 @@ def get_sqlalchemy_column_metadata(
                 sqlalchemy_engine=engine,
             )
 
+        dialect_name = execution_engine.dialect.name
+        if dialect_name == GXSqlDialect.SNOWFLAKE:
+            return [
+                # TODO: SmartColumn should know the dialect and do lookups based on that
+                CaseInsensitiveNameDict(column)
+                for column in columns
+            ]
+
         return columns
     except AttributeError as e:
-        logger.debug(f"Error while introspecting columns: {str(e)}")
+        logger.debug(f"Error while introspecting columns: {e!r}", exc_info=e)
         return None
 
 
-def column_reflection_fallback(
+def column_reflection_fallback(  # noqa: PLR0915
     selectable: sqlalchemy.Select,
     dialect: sqlalchemy.Dialect,
     sqlalchemy_engine: sqlalchemy.Engine,
@@ -587,9 +656,11 @@ def column_reflection_fallback(
             # if a custom query was passed
             if sqlalchemy.TextClause and isinstance(selectable, sqlalchemy.TextClause):
                 query: sqlalchemy.TextClause = selectable
-            else:
+            elif sqlalchemy.Table and isinstance(selectable, sqlalchemy.Table):
+                query = sa.select(sa.text("*")).select_from(selectable).limit(1)
+            else:  # noqa: PLR5501
                 # noinspection PyUnresolvedReferences
-                if dialect.name.lower() == GXSqlDialect.REDSHIFT:  # noqa: PLR5501
+                if dialect.name.lower() == GXSqlDialect.REDSHIFT:
                     # Redshift needs temp tables to be declared as text
                     query = (
                         sa.select(sa.text("*"))
@@ -597,7 +668,11 @@ def column_reflection_fallback(
                         .limit(1)
                     )
                 else:
-                    query = sa.select(sa.text("*")).select_from(selectable).limit(1)
+                    query = (
+                        sa.select(sa.text("*"))
+                        .select_from(sa.text(selectable))
+                        .limit(1)
+                    )
 
             result_object = connection.execute(query)
             # noinspection PyProtectedMember
@@ -608,7 +683,7 @@ def column_reflection_fallback(
 
 def get_dbms_compatible_metric_domain_kwargs(
     metric_domain_kwargs: dict,
-    batch_columns_list: List[str | sqlalchemy.quoted_name],
+    batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
 ) -> dict:
     """
     This method checks "metric_domain_kwargs" and updates values of "Domain" keys based on actual "Batch" columns.  If
@@ -657,7 +732,7 @@ def get_dbms_compatible_metric_domain_kwargs(
 @overload
 def get_dbms_compatible_column_names(
     column_names: str,
-    batch_columns_list: List[str | sqlalchemy.quoted_name],
+    batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
     error_message_template: str = ...,
 ) -> str | sqlalchemy.quoted_name:
     ...
@@ -666,7 +741,7 @@ def get_dbms_compatible_column_names(
 @overload
 def get_dbms_compatible_column_names(
     column_names: List[str],
-    batch_columns_list: List[str | sqlalchemy.quoted_name],
+    batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
     error_message_template: str = ...,
 ) -> List[str | sqlalchemy.quoted_name]:
     ...
@@ -674,7 +749,7 @@ def get_dbms_compatible_column_names(
 
 def get_dbms_compatible_column_names(
     column_names: List[str] | str,
-    batch_columns_list: List[str | sqlalchemy.quoted_name],
+    batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
 ) -> List[str | sqlalchemy.quoted_name] | str | sqlalchemy.quoted_name:
     """
@@ -730,7 +805,7 @@ def verify_column_names_exist(
 
 def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
     column_names: List[str] | str,
-    batch_columns_list: List[str | sqlalchemy.quoted_name],
+    batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
     verify_only: bool = False,
 ) -> List[Tuple[str, str | sqlalchemy.quoted_name]] | None:
@@ -758,10 +833,27 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
         typed_column_name_cursor: str | sqlalchemy.quoted_name
         for typed_column_name_cursor in batch_columns_list:
             if (
-                (type(typed_column_name_cursor) == str)
+                (type(typed_column_name_cursor) == str)  # noqa: E721
                 and (column_name.casefold() == typed_column_name_cursor.casefold())
             ) or (column_name == str(typed_column_name_cursor)):
                 return column_name, typed_column_name_cursor
+
+            # use explicit identifier if passed in by user
+            if isinstance(typed_column_name_cursor, str) and (
+                (
+                    column_name.casefold().strip('"')
+                    == typed_column_name_cursor.casefold()
+                )
+                or (
+                    column_name.casefold().strip("[]")
+                    == typed_column_name_cursor.casefold()
+                )
+                or (
+                    column_name.casefold().strip("`")
+                    == typed_column_name_cursor.casefold()
+                )
+            ):
+                return column_name, column_name
 
         return None
 
@@ -779,8 +871,8 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
             raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=error_message_template.format(column_name=column_name)
             )
-        else:
-            if not verify_only:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if not verify_only:
                 normalized_batch_columns_mappings.append(normalized_column_name_mapping)
 
     return None if verify_only else normalized_batch_columns_mappings

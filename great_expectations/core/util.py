@@ -30,11 +30,10 @@ from urllib.parse import urlparse
 import dateutil.parser
 import numpy as np
 import pandas as pd
-import pydantic
 from IPython import get_ipython
 
 from great_expectations import exceptions as gx_exceptions
-from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility import pydantic, pyspark, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     SQLALCHEMY_NOT_IMPORTED,
     LegacyRow,
@@ -153,7 +152,7 @@ def in_databricks() -> bool:
     Returns:
         bool
     """
-    return "DATABRICKS_RUNTIME_VERSION" in os.environ
+    return "DATABRICKS_RUNTIME_VERSION" in os.environ  # noqa: TID251
 
 
 def determine_progress_bar_method_by_environment() -> Callable:
@@ -193,7 +192,7 @@ ToDict: TypeAlias = Union[
 ]
 
 JSONConvertable: TypeAlias = Union[
-    ToDict, ToList, ToStr, ToInt, ToFloat, ToBool, ToBool, None
+    ToDict, ToList, ToStr, ToInt, ToFloat, ToBool, ToBool, None  # noqa: PYI016
 ]
 
 
@@ -413,20 +412,20 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
 
     # Unable to serialize (unrecognized data type).
     raise TypeError(
-        f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
+        f"{data!s} is of type {type(data).__name__} which cannot be serialized."
     )
 
 
-def ensure_json_serializable(data):  # noqa: C901, PLR0911, PLR0912
+def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
     """
     Helper function to convert an object to one that is json serializable
     Args:
         data: an object to attempt to convert a corresponding json-serializable object
-    Returns:
-        (dict) A converted test_object
     Warning:
         test_obj may also be converted in place.
     """
+    if isinstance(data, pydantic.BaseModel):
+        return
 
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
         return
@@ -451,7 +450,7 @@ def ensure_json_serializable(data):  # noqa: C901, PLR0911, PLR0912
         # test_obj[key] = test_obj[key].tolist()
         # If we have an array or index, convert it first to a list--causing coercion to float--and then round
         # to the number of digits for which the string representation will equal the float representation
-        _ = [ensure_json_serializable(x) for x in data.tolist()]
+        _ = [ensure_json_serializable(x) for x in data.tolist()]  # type: ignore[func-returns-value]
         return
 
     if isinstance(data, (datetime.datetime, datetime.date)):
@@ -502,7 +501,7 @@ def ensure_json_serializable(data):  # noqa: C901, PLR0911, PLR0912
         ]
         return
 
-    if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function]
+    if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
         return ensure_json_serializable(
@@ -527,7 +526,7 @@ def ensure_json_serializable(data):  # noqa: C901, PLR0911, PLR0912
         return
 
     raise InvalidExpectationConfigurationError(
-        f"{str(data)} is of type {type(data).__name__} which cannot be serialized to json"
+        f"{data!s} is of type {type(data).__name__} which cannot be serialized to json"
     )
 
 
@@ -561,7 +560,7 @@ def parse_string_to_datetime(
 ) -> datetime.datetime:
     if not isinstance(datetime_string, str):
         raise gx_exceptions.SorterError(
-            f"""Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
+            f"""Source "datetime_string" must have string type (actual type is "{type(datetime_string)!s}").
             """
         )
 
@@ -571,7 +570,7 @@ def parse_string_to_datetime(
     if datetime_format_string and not isinstance(datetime_format_string, str):
         raise gx_exceptions.SorterError(
             f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
-"{str(type(datetime_format_string))}").
+"{type(datetime_format_string)!s}").
             """
         )
 
@@ -936,8 +935,8 @@ def get_sql_dialect_floating_point_infinity_value(
             return -np.inf
         else:
             return np.inf
-    else:
-        if negative:  # noqa: PLR5501
+    else:  # noqa: PLR5501
+        if negative:
             return res["NegativeInfinity"]
         else:
             return res["PositiveInfinity"]

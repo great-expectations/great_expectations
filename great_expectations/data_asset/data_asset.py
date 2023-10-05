@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import decimal
@@ -7,10 +9,10 @@ import logging
 import traceback
 import uuid
 import warnings
-from collections import Counter, defaultdict, namedtuple
+from collections import Counter, defaultdict
 from collections.abc import Hashable
 from functools import wraps
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, NamedTuple, Optional, Union
 
 from marshmallow import ValidationError
 
@@ -84,8 +86,6 @@ class DataAsset:
         self._active_validation = False
         if profiler is not None:
             profiler.profile(self)
-        if data_context and hasattr(data_context, "_expectation_explorer_manager"):
-            self.set_default_expectation_argument("include_config", True)
 
     def list_available_expectation_types(self):
         keys = dir(self)
@@ -108,12 +108,6 @@ class DataAsset:
             self, profiler_configuration
         )
         return expectation_suite, validation_results
-
-    # TODO: add warning if no expectation_explorer_manager and how to turn on
-    def edit_expectation_suite(self):
-        return self._data_context._expectation_explorer_manager.edit_expectation_suite(
-            self
-        )
 
     @classmethod  # - complexity 24
     def expectation(cls, method_arg_names):  # noqa: C901, PLR0915
@@ -188,8 +182,8 @@ class DataAsset:
 
                 if "result_format" in argspec:
                     all_args["result_format"] = result_format
-                else:
-                    if "result_format" in all_args:  # noqa: PLR5501
+                else:  # noqa: PLR5501
+                    if "result_format" in all_args:
                         del all_args["result_format"]
 
                 all_args = recursively_convert_to_json_serializable(all_args)
@@ -252,7 +246,7 @@ class DataAsset:
                         if catch_exceptions:
                             raised_exception = True
                             exception_traceback = traceback.format_exc()
-                            exception_message = f"{type(err).__name__}: {str(err)}"
+                            exception_message = f"{type(err).__name__}: {err!s}"
 
                             return_obj = ExpectationValidationResult(success=False)
 
@@ -894,8 +888,7 @@ class DataAsset:
 
             self._data_context = validate__data_context
         except Exception:
-            if getattr(data_context, "_usage_statistics_handler", None):
-                handler = data_context._usage_statistics_handler
+            if handler := getattr(data_context, "_usage_statistics_handler", None):
                 handler.send_usage_message(
                     event=UsageStatsEvents.DATA_ASSET_VALIDATE,
                     event_payload=handler.anonymizer.anonymize(obj=self),
@@ -905,8 +898,7 @@ class DataAsset:
         finally:
             self._active_validation = False
 
-        if getattr(data_context, "_usage_statistics_handler", None):
-            handler = data_context._usage_statistics_handler
+        if handler := getattr(data_context, "_usage_statistics_handler", None):
             handler.send_usage_message(
                 event=UsageStatsEvents.DATA_ASSET_VALIDATE,
                 event_payload=handler.anonymizer.anonymize(obj=self),
@@ -1173,19 +1165,15 @@ class DataAsset:
         return new_function(self, *args, **kwargs)
 
 
-ValidationStatistics = namedtuple(
-    "ValidationStatistics",
-    [
-        "evaluated_expectations",
-        "successful_expectations",
-        "unsuccessful_expectations",
-        "success_percent",
-        "success",
-    ],
-)
+class ValidationStatistics(NamedTuple):
+    evaluated_expectations: int
+    successful_expectations: int
+    unsuccessful_expectations: int
+    success_percent: float | None
+    success: bool
 
 
-def _calc_validation_statistics(validation_results):
+def _calc_validation_statistics(validation_results) -> ValidationStatistics:
     """
     Calculate summary statistics for the validation results and
     return ``ExpectationStatistics``.

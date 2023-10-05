@@ -1,11 +1,9 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Dict, Optional
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     InvalidExpectationConfigurationError,
@@ -20,6 +18,11 @@ from great_expectations.render.renderer_configuration import (
 from great_expectations.render.util import ordinal, substitute_none_for_missing
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -27,7 +30,7 @@ class ExpectColumnToExist(BatchExpectation):
     """Expect the specified column to exist.
 
     expect_column_to_exist is a \
-    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
+    [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
     Args:
         column (str): \
@@ -81,6 +84,7 @@ class ExpectColumnToExist(BatchExpectation):
     args_keys = ("column", "column_index")
 
     @public_api
+    @override
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
@@ -117,12 +121,13 @@ class ExpectColumnToExist(BatchExpectation):
             ), "column_index must be an integer, dict, or None"
             if isinstance(configuration.kwargs.get("column_index"), dict):
                 assert "$PARAMETER" in configuration.kwargs.get(
-                    "column_index"
+                    "column_index", tuple()
                 ), 'Evaluation Parameter dict for column_index kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -157,6 +162,7 @@ class ExpectColumnToExist(BatchExpectation):
         return renderer_configuration
 
     @classmethod
+    @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
@@ -172,7 +178,7 @@ class ExpectColumnToExist(BatchExpectation):
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs,  # type: ignore[union-attr] # FIXME: could be None
             ["column", "column_index"],
         )
 
@@ -190,17 +196,16 @@ class ExpectColumnToExist(BatchExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -208,7 +213,7 @@ class ExpectColumnToExist(BatchExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        actual_columns = metrics.get("table.columns")
+        actual_columns = metrics["table.columns"]
         expected_column_name = self.get_success_kwargs().get("column")
         expected_column_index = self.get_success_kwargs().get("column_index")
 

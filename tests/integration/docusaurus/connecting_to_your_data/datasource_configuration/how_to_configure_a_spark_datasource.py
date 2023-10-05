@@ -13,7 +13,7 @@ the snippets that are specified for use in documentation are maintained.  These 
 
 To run this code as a local test, use the following console command:
 ```
-pytest -v --docs-tests -m integration -k "how_to_configure_a_spark_datasource" tests/integration/test_script_runner.py
+pytest -v --docs-tests -k "how_to_configure_a_spark_datasource" tests/integration/test_script_runner.py
 ```
 
 To validate the snippets in this file, use the following console command:

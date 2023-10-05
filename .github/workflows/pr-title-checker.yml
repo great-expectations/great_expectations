@@ -15,7 +15,7 @@ jobs:
     steps:
     - name : Check PR title validity
       run: |
-        echo ${{ github.event.pull_request.title }} | grep -E "^\\[(FEATURE|BUGFIX|DOCS|MAINTENANCE|CONTRIB|RELEASE)\\]"
+        echo "${{ github.event.pull_request.title }}" | grep -E "^\\[(FEATURE|BUGFIX|DOCS|MAINTENANCE|CONTRIB|RELEASE)\\]"
         if [ $? -ne 0 ]; then
         echo "Invalid PR title - please prefix with one of: [FEATURE] | [BUGFIX] | [DOCS] | [MAINTENANCE] | [CONTRIB] | [RELEASE]"
           exit 1

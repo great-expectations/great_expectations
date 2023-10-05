@@ -1,14 +1,15 @@
 import os
+import urllib
 from unittest import mock
 
 import pytest
 
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.exceptions import DataContextError
-from great_expectations.util import get_context
 
 
 @pytest.mark.unit
@@ -37,18 +38,14 @@ def test_open_docs_with_single_local_site(mock_webbrowser, empty_data_context):
     context = empty_data_context
     obs = context.get_docs_sites_urls(only_if_exists=False)
     assert len(obs) == 1
-    assert obs[0]["site_url"].endswith(
-        "great_expectations/uncommitted/data_docs/local_site/index.html"
-    )
+    assert obs[0]["site_url"].endswith("gx/uncommitted/data_docs/local_site/index.html")
     assert obs[0]["site_name"] == "local_site"
 
     context.open_data_docs(only_if_exists=False)
     assert mock_webbrowser.call_count == 1
     call = mock_webbrowser.call_args_list[0][0][0]
     assert call.startswith("file:///")
-    assert call.endswith(
-        "/great_expectations/uncommitted/data_docs/local_site/index.html"
-    )
+    assert call.endswith("/gx/uncommitted/data_docs/local_site/index.html")
 
 
 @pytest.mark.unit
@@ -90,13 +87,11 @@ def context_with_multiple_built_sites(empty_data_context):
     context.build_data_docs()
     obs = context.get_docs_sites_urls(only_if_exists=False)
     assert len(obs) == 2
-    assert obs[0]["site_url"].endswith(
-        "great_expectations/uncommitted/data_docs/local_site/index.html"
-    )
+    assert obs[0]["site_url"].endswith("gx/uncommitted/data_docs/local_site/index.html")
     assert obs[0]["site_name"] == "local_site"
 
     assert obs[1]["site_url"].endswith(
-        "great_expectations/uncommitted/data_docs/another_local_site/index.html"
+        "gx/uncommitted/data_docs/another_local_site/index.html"
     )
     assert obs[1]["site_name"] == "another_local_site"
     for site in ["local_site", "another_local_site"]:
@@ -123,13 +118,11 @@ def test_open_docs_with_two_local_sites(
     assert mock_webbrowser.call_count == 2
     first_call = mock_webbrowser.call_args_list[0][0][0]
     assert first_call.startswith("file:///")
-    assert first_call.endswith(
-        "/great_expectations/uncommitted/data_docs/local_site/index.html"
-    )
+    assert first_call.endswith("/gx/uncommitted/data_docs/local_site/index.html")
     second_call = mock_webbrowser.call_args_list[1][0][0]
     assert second_call.startswith("file:///")
     assert second_call.endswith(
-        "/great_expectations/uncommitted/data_docs/another_local_site/index.html"
+        "/gx/uncommitted/data_docs/another_local_site/index.html"
     )
 
 
@@ -144,9 +137,7 @@ def test_open_docs_with_two_local_sites_specify_open_one(
     assert mock_webbrowser.call_count == 1
     call = mock_webbrowser.call_args_list[0][0][0]
     assert call.startswith("file:///")
-    assert call.endswith(
-        "/great_expectations/uncommitted/data_docs/another_local_site/index.html"
-    )
+    assert call.endswith("/gx/uncommitted/data_docs/another_local_site/index.html")
 
 
 @pytest.fixture
@@ -188,9 +179,7 @@ def test_get_docs_sites_urls_with_two_local_sites_specify_one(
 
     url = obs[0]["site_url"]
     assert url.startswith("file:///")
-    assert url.endswith(
-        "/great_expectations/uncommitted/data_docs/another_local_site/index.html"
-    )
+    assert url.endswith("/gx/uncommitted/data_docs/another_local_site/index.html")
 
 
 @pytest.mark.unit
@@ -264,9 +253,7 @@ def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasource
 
     obs = context.get_docs_sites_urls(only_if_exists=False)
     assert len(obs) == 1
-    assert obs[0]["site_url"].endswith(
-        "great_expectations/uncommitted/data_docs/local_site/index.html"
-    )
+    assert obs[0]["site_url"].endswith("gx/uncommitted/data_docs/local_site/index.html")
 
 
 @pytest.mark.filesystem
@@ -417,7 +404,6 @@ def test_get_site_names_with_three_sites(tmpdir, basic_data_context_config):
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_view_validation_result(
     checkpoint_result: CheckpointResult,
 ):
@@ -433,3 +419,39 @@ def test_view_validation_result(
     url_used = mock_open.call_args[0][0]
     assert url_used.startswith("file:///")
     assert url_used.endswith("default_pandas_datasource-%23ephemeral_pandas_asset.html")
+
+
+@pytest.mark.big
+def test_view_validation_result_uses_run_name_template_env_var(
+    monkeypatch, empty_data_context
+):
+    monkeypatch.setenv("MY_ENV_VAR", "PLEASE_RENDER_ME")
+
+    context = empty_data_context
+
+    validator = context.sources.pandas_default.read_csv(
+        "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
+    )
+
+    validator.expect_column_values_to_not_be_null("pickup_datetime")
+    validator.save_expectation_suite()
+
+    checkpoint = context.add_or_update_checkpoint(
+        name="my_checkpoint",
+        validator=validator,
+        run_name_template="staging-$MY_ENV_VAR",
+    )
+
+    checkpoint_result = checkpoint.run()
+    with mock.patch("webbrowser.open") as mock_open:
+        context.view_validation_result(checkpoint_result)
+
+    mock_open.assert_called_once()
+
+    url_used = mock_open.call_args[0][0]
+    assert url_used.startswith("file:///")
+    assert "staging-PLEASE_RENDER_ME" in url_used
+
+    f = urllib.request.urlopen(url_used)
+    myfile = f.read()
+    assert b"staging-PLEASE_RENDER_ME" in myfile

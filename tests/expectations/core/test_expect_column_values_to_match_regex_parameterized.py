@@ -1,7 +1,6 @@
 from typing import Optional
 
 import pandas as pd
-
 import pytest
 
 from great_expectations.core import ExpectationConfiguration

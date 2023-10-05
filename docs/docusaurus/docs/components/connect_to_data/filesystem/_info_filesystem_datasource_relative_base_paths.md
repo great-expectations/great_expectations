@@ -1,5 +1,5 @@
 
-:::info Using relative paths as the `base_directory` of a Filesystem Datasource
+:::info Using relative paths as the `base_directory` of a Filesystem Data Source
 
 If you are using a Filesystem Data Context you can provide a path for `base_directory` that is relative to the folder containing your Data Context.
 
