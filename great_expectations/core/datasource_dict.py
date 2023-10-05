@@ -106,10 +106,8 @@ class DatasourceDict(UserDict):
 
         datasource = self._datasource_store.set(key=None, value=config)
         if isinstance(datasource, DatasourceConfig):
-            return instantiate_class_from_config(
-                config=datasource.to_json_dict(), runtime_environment=None
-            )
-        return datasource
+            return self._init_block_style_datasource(name=name, config=datasource)
+        return self._init_fluent_datasource(name=name, ds=datasource)
 
     @override
     def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
