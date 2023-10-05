@@ -23,10 +23,8 @@ from tests.datasource.fluent._fake_cloud_api import (
     GX_CLOUD_MOCK_BASE_URL,
     UUID_REGEX,
     CallbackResult,
-    CloudResponseSchema,
-)
-from tests.datasource.fluent.conftest import (
     CloudDetails,
+    CloudResponseSchema,
 )
 
 if TYPE_CHECKING:
