@@ -1,6 +1,6 @@
 ---
-sidebar_label: 'Get started with GX'
-title: 'Get started with GX'
+sidebar_label: 'Get started with GX OSS'
+title: 'Get started with GX OSS'
 id: get_started_lp
 description: Install Great Expectations and initialize your deployment.
 ---
@@ -8,7 +8,7 @@ description: Install Great Expectations and initialize your deployment.
 import LinkCardGrid from '/docs/components/LinkCardGrid';
 import LinkCard from '/docs/components/LinkCard';
 
-<p class="DocItem__header-description">Start here if you're unfamiliar with Great Expectations (GX), or you want to use GX with Databricks or a SQL Data Source in a production environment. To install and configure GX in your specific production environment, see <a href='/docs/guides/setup/setup_overview_lp'>Set up your Great Expectations environment</a>. </p>
+<p class="DocItem__header-description">Start here if you're unfamiliar with GX OSS, or you want to use GX OSS with Databricks or a SQL Data Source in a production environment. To install and configure GX OSS in your specific production environment, see <a href='/docs/guides/setup/setup_overview_lp'>Set up your Great Expectations environment</a>. </p>
 
 
 

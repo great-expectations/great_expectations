@@ -1,6 +1,6 @@
----
-sidebar_label: "Install GX with source data system dependencies"
-title: "Install Great Expectations with source data system dependencies"
+--- 
+sidebar_label: "Install GX OSS with source data system dependencies"
+title: "Install GX OSS with source data system dependencies"
 id: install_gx
 description: Install Great Expectations locally, or in a hosted environment.
 toc_min_heading_level: 2
@@ -37,11 +37,11 @@ import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
 
-You can install Great Expectations (GX) locally, or in hosted environments such as Databricks, Amazon EMR, or Google Cloud Composer. Installing GX locally lets you test features and functionality to determine if it's suitable for your use case. 
+You can install GX OSS locally, or in hosted environments such as Databricks, Amazon EMR, or Google Cloud Composer. Installing GX OSS locally lets you test features and functionality to determine if it's suitable for your use case. 
 
 :::info Windows Support
 
-Windows support for the open source Python version of GX is currently unavailable. If you’re using GX in a Windows environment, you might experience errors or performance issues.
+Windows support for the open source Python version of GX OSS is currently unavailable. If you’re using GX OSS in a Windows environment, you might experience errors or performance issues.
 
 :::
 
@@ -60,7 +60,7 @@ Windows support for the open source Python version of GX is currently unavailabl
 
 ## Local
 
-Install Great Expectations (GX) locally.
+Install GX OSS locally.
 
 <Preface />
 
@@ -82,7 +82,7 @@ Install Great Expectations (GX) locally.
 
 ## Hosted
 
-Great Expectations can be deployed in environments such as Databricks, Amazon EMR, or Google Cloud Composer. These environments do not always have a file system that allows a Great Expectations installation. To install Great Expectations in a hosted environment, see one of the following guides:
+GX OSS can be deployed in environments such as Databricks, Amazon EMR, or Google Cloud Composer. These environments do not always have a file system that allows a GX OSS installation. To install GX OSS in a hosted environment, see one of the following guides:
 
 - [How to Use Great Expectations in Databricks](https://docs.greatexpectations.io/docs/tutorials/getting_started/how_to_use_great_expectations_in_databricks/)
 - [How to instantiate a Data Context on an EMR Spark cluster](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
@@ -93,7 +93,7 @@ Great Expectations can be deployed in environments such as Databricks, Amazon EM
 
 ## Amazon S3
 
-Create your GX Python environment, install Great Expectations locally, and then configure the necessary dependencies to access data stored on Amazon S3.
+Create your GX Python environment, install GX OSS locally, and then configure the necessary dependencies to access data stored on Amazon S3.
 
 ### Prerequisites
 
@@ -133,7 +133,7 @@ Create your GX Python environment, install Great Expectations locally, and then 
 
 ### Next steps
 
-Now that you have installed GX with the necessary dependencies for working with S3, you are ready to initialize your <TechnicalTag tag="data_context" text="Data Context" />.  The Data Context will contain your configurations for GX components, as well as provide you with access to GX's Python API.
+Now that you have installed GX OSS with the necessary dependencies for working with S3, you are ready to initialize your <TechnicalTag tag="data_context" text="Data Context" />.  The Data Context will contain your configurations for GX OSS components, as well as provide you with access to GX's Python API.
 
 <LinksAfterInstallingGx />
 
@@ -142,7 +142,7 @@ Now that you have installed GX with the necessary dependencies for working with 
 
 ## Microsoft Azure Blob Storage
 
-Create your GX Python environment, install Great Expectations locally, and then configure the necessary dependencies to access data stored on Microsoft Azure Blob Storage.
+Create your GX OSS Python environment, install GX OSS locally, and then configure the necessary dependencies to access data stored on Microsoft Azure Blob Storage.
 
 ### Prerequisites
 
@@ -184,7 +184,7 @@ Create your GX Python environment, install Great Expectations locally, and then 
 
 ## GCS
 
-Create your GX Python environment, install Great Expectations locally, and then configure the necessary dependencies to access data stored on GCS.
+Create your GX Python environment, install GX OSS locally, and then configure the necessary dependencies to access data stored on GCS.
 
 ### Prerequisites
 
@@ -219,7 +219,7 @@ Create your GX Python environment, install Great Expectations locally, and then 
 
 ### Next steps
 
-Now that you have installed GX with the necessary dependencies for working with GCS, you are ready to initialize your <TechnicalTag tag="data_context" text="Data Context" />.  The Data Context will contain your configurations for GX components, as well as provide you with access to GX's Python API.
+Now that you have installed GX OSS with the necessary dependencies for working with GCS, you are ready to initialize your <TechnicalTag tag="data_context" text="Data Context" />.  The Data Context will contain your configurations for GX components, as well as provide you with access to the GX OSS Python API.
 
 <LinksAfterInstallingGx />
 
@@ -228,7 +228,7 @@ Now that you have installed GX with the necessary dependencies for working with 
 
 ## SQL databases
 
-Create your GX Python environment, install Great Expectations locally, and then configure the necessary dependencies to access data stored on SQL databases.
+Create your GX OSS Python environment, install GX OSS locally, and then configure the necessary dependencies to access data stored on SQL databases.
 
 ### Prerequisites
 
@@ -254,7 +254,7 @@ Create your GX Python environment, install Great Expectations locally, and then 
 
 :::caution Additional dependencies for some SQL dialects
 
-The above pip instruction will install GX with basic SQL support through SqlAlchemy.  However, certain SQL dialects require additional dependencies.  Depending on the SQL database type you will be working with, you may wish to use one of the following installation commands, instead:
+The above pip instruction will install GX OSS with basic SQL support through SqlAlchemy.  However, certain SQL dialects require additional dependencies.  Depending on the SQL database type you will be working with, use one of the following installation commands instead:
 
 - AWS Athena: `pip install 'great_expectations[athena]'`
 - BigQuery: `pip install 'great_expectations[bigquery]'`
@@ -266,7 +266,7 @@ The above pip instruction will install GX with basic SQL support through SqlAlch
 
 :::
 
-### Verify that GX has been installed correctly
+### Verify that GX OSS has been installed correctly
 
 <GxVerifyInstallation />
 
