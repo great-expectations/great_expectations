@@ -22,7 +22,7 @@ In this quickstart, you'll learn how to connect GX Cloud to Snowflake Data Asset
 3. Run the following command in an empty base directory inside a Python virtual environment to install GX Cloud and its dependencies:
 
     ```bash title="Terminal input"
-    pip install 'great_expectations_cloud[snowflake]'
+    pip install 'great_expectations[cloud,snowflake]'
     ```
 
     It can take several minutes for the installation to complete.
