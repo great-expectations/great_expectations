@@ -37,8 +37,8 @@ def test_cloud_context_add_datasource_with_legacy_datasource_raises_error(
         context.add_datasource(datasource=datasource)
 
 
-@responses.activate
 def test_cloud_context_add_datasource_with_fds(
+    cloud_api_fake,
     empty_cloud_data_context: CloudDataContext,
     ge_cloud_config: GXCloudConfig,
 ):
@@ -59,24 +59,10 @@ def test_cloud_context_add_datasource_with_fds(
     post_url = f"{ge_cloud_config.base_url}/organizations/{ge_cloud_config.organization_id}/datasources"
     get_url = f"{ge_cloud_config.base_url}/organizations/{ge_cloud_config.organization_id}/datasources/{id_}?name={name}"
 
-    responses.add(
-        responses.POST,
-        post_url,
-        json=payload,
-        status=200,
-    )
-    responses.add(
-        responses.GET,
-        get_url,
-        json=payload,
-        status=200,
-    )
-
     fds = PandasDatasource(name=name)
     _ = context.add_datasource(datasource=fds)
 
-    assert responses.assert_call_count(url=post_url, count=1)
-    assert responses.assert_call_count(url=get_url, count=1)
+    assert cloud_api_fake.assert_call_count(url=post_url, count=2)
 
 
 @pytest.mark.e2e
