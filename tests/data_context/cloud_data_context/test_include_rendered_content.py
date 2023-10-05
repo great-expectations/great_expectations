@@ -104,6 +104,7 @@ def test_cloud_backed_data_context_expectation_validation_result_include_rendere
     All CloudDataContexts should save an ExpectationValidationResult with rendered_content by default.
     """
     context = empty_cloud_context_fluent
+    context.config.include_rendered_content.globally = True
 
     df = pd.DataFrame([1, 2, 3, 4, 5])
     suite_name = f"test_suite_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
