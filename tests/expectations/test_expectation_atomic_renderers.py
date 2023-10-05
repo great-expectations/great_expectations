@@ -2,7 +2,6 @@ import re
 from pprint import pprint
 from typing import Callable, Dict, Union
 
-import pandas as pd
 import pytest
 
 from great_expectations.core import ExpectationValidationResult

@@ -12,13 +12,9 @@ This guide will walk you through the process of creating a custom `ColumnMapExpe
 
 <Prerequisites>
 
-- Completion of the [overview for creating Custom Expectations](./overview.md).
-
 </Prerequisites>
 
-## Steps
-
-### 1. Choose a name for your Expectation
+## Choose a name for your Expectation
 
 First, decide on a name for your own Expectation. By convention, `ColumnMapExpectations` always start with `expect_column_values_`. You can see other naming conventions in the [Expectations section](../../../contributing/style_guides/code_style.md#expectations)  of the code Style Guide.
 
@@ -27,7 +23,7 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 - `ExpectColumnValuesToEqualThree`
 - `expect_column_values_to_equal_three`
 
-### 2. Copy and rename the template file
+## Copy and rename the template file
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
@@ -37,28 +33,17 @@ You can find the template file for a custom [`ColumnMapExpectation` here](https:
 cp column_map_expectation_template.py /SOME_DIRECTORY/expect_column_values_to_equal_three.py
 ```
 
-<details>
-  <summary>Where should I put my Expectation file?</summary>
-  <div>
-    <p>
-        During development, you don't actually need to put the file anywhere in particular. It's self-contained, and can be executed anywhere as long as <code>great_expectations</code> is installed.
-    </p>
-    <p>
-        But to use your new Expectation alongside the other components of Great Expectations, you'll need to make sure the file is in the right place. The right place depends on what you intend to use it for.
-    </p>
-    <p>
-        <ul>
-            <li>If you're building a <TechnicalTag tag="custom_expectation" text="Custom Expectation" /> for personal use, you'll need to put it in the <code>great_expectations/plugins/expectations</code> folder of your Great Expectations deployment, and import your Custom Expectation from that directory whenever it will be used. When you instantiate the corresponding <code>DataContext</code>, it will automatically make all <TechnicalTag tag="plugin" text="Plugins" /> in the directory available for use.</li>
-            <li>If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.</li>
-        </ul>
-    </p>
-	<p>
-		See our <a href="how_to_use_custom_expectations"> guide on how to use a Custom Expectation</a> for more!
-	</p>
-  </div>
-</details>
+### Storing Expectation files
 
-### 3. Generate a diagnostic checklist for your Expectation
+During development, you don't need to store Expectation files in a specific location. Expectation files are self-contained and can be executed anywhere as long as GX is installed However, to use your new Expectation with other GX components, you'll need to make sure the file is stored one of the following locations:
+
+- If you're building a <TechnicalTag tag="custom_expectation" text="Custom Expectation" /> for personal use, you'll need to put it in the <code>great_expectations/plugins/expectations</code> folder of your GX deployment, and import your Custom Expectation from that directory whenever it will be used. When you instantiate the corresponding <code>DataContext</code>, it will automatically make all <TechnicalTag tag="plugin" text="Plugins" /> in the directory available for use.
+
+- If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.
+
+For more information about Custom Expectations, see [Use a Custom Expectation](./how_to_use_custom_expectations.md).
+
+## Generate a diagnostic checklist for your Expectation
 
 Once you've copied and renamed the template file, you can execute it as follows.
 
@@ -84,7 +69,7 @@ Completeness checklist for ExpectColumnValuesToMatchSomeCriteria:
 
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it. This guide covers the first five steps on the checklist.
 
-### 4. Change the Expectation class name and add a docstring
+## Change the Expectation class name and add a docstring
 
 By convention, your <TechnicalTag tag="metric" text="Metric" /> class is defined first in a Custom Expectation. For now, we're going to skip to the Expectation class and begin laying the groundwork for the functionality of your Custom Expectation.
 
@@ -106,7 +91,7 @@ with something like:
 ```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py docstring"
 ```
 
-You'll also need to change the class name at the bottom of the file, by replacing this line:
+Make sure your one-line docstring begins with "Expect " and ends with a period. You'll also need to change the class name at the bottom of the file, by replacing this line:
 
 ```python name="tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py diagnostics"
 ```
@@ -115,7 +100,7 @@ with this one:
 ```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py diagnostics"
 ```
 
-Later, you can go back and write a more thorough docstring.
+Later, you can go back and write a more thorough docstring. See [Expectation Docstring Formatting](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/3-expectation-docstring-formatting.md).
 
 At this point you can re-run your diagnostic checklist. You should see something like this:
 ```
@@ -130,17 +115,15 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
 ...
 ```
 
-Congratulations! You're one step closer to implementing a Custom Expectation.
+## Add example cases
 
-### 5. Add example cases
+You're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve the following purposes:
 
-Next, we're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve a dual purpose:
+- They provide test fixtures that Great Expectations can execute automatically with pytest.
 
-1. They provide test fixtures that Great Expectations can execute automatically via pytest.
+- They help users understand the logic of your Expectation by providing tidy examples of paired input and output. If you contribute your Expectation to open source, these examples will appear in the Gallery.
 
-2. They help users understand the logic of your Expectation by providing tidy examples of paired input and output. If you contribute your Expectation to open source, these examples will appear in the Gallery.
-
-Your examples will look something like this:
+Your examples will look similar to this example:
 
 ```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py examples"
 ```
@@ -178,7 +161,7 @@ For more information on tests and example cases, <br/>
 see our guide on [how to create example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
 :::
 
-### 6. Implement your Metric and connect it to your Expectation
+## Implement your Metric and connect it to your Expectation
 
 This is the stage where you implement the actual business logic for your Expectation.   
 
@@ -196,20 +179,13 @@ Your Metric function will have the `@column_condition_partial` decorator, with t
 
 This is all that you need to define for now. The `ColumnMapMetricProvider` and `ColumnMapExpectation` classes have built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
 
-<details>
-  <summary>Other parameters</summary>
-  <div>
-    <p>
-        <b>Expectation Success Keys</b> - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
-    </p>
-    <p>
-        <b>Expectation Default Kwarg Values</b> (Optional) - Default values for success keys and the defined domain, among other values.
-    </p>
-    <p>
-        <b>Metric Condition Value Keys</b> (Optional) - Contains any additional arguments passed as parameters to compute the Metric.
-    </p>
-  </div>
-</details>
+### Other parameters
+
+Expectation Success Keys - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
+
+Expectation Default Kwarg Values (Optional) - Default values for success keys and the defined domain, among other values.
+
+Metric Condition Value Keys (Optional) - Contains any additional arguments passed as parameters to compute the Metric.
 
 Next, choose a Metric Identifier for your Metric. By convention, Metric Identifiers for Column Map Expectations start with `column_values.`. The remainder of the Metric Identifier simply describes what the Metric computes, in snake case. For this example, we'll use `column_values.equal_three`.
 
@@ -260,7 +236,7 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
 ...
 ```
 
-### 7. Linting
+## Linting
 
 Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, and `ruff`.
 
@@ -289,19 +265,13 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
 ...
 ```
 
-<div style={{"text-align":"center"}}>  
-<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>  
-Congratulations!<br/>&#127881; You've just built your first Custom Expectation! &#127881;  
-</b></p>  
-</div>
-
 :::note
 If you've already built a [Custom Column Aggregate Expectation](./how_to_create_custom_column_aggregate_expectations.md),
 you may notice that we didn't implement a `_validate` method here. While we have to explicitly create this functionality for Column Aggregate Expectations,
 Column Map Expectations come with that functionality built in; no extra `_validate` needed!
 :::
 
-### 8. Contribution (Optional)
+## Contribute (Optional)
 
 This guide will leave you with a Custom Expectation sufficient for [contribution](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) to Great Expectations at an Experimental level.
 

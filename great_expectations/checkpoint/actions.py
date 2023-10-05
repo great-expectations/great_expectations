@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import requests
 
+from great_expectations.compatibility.typing_extensions import override
+
 try:
     import pypd
 except ImportError:
@@ -143,6 +145,7 @@ class NoOpAction(ValidationAction):
     ) -> None:
         super().__init__(data_context)
 
+    @override
     def _run(  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -236,6 +239,7 @@ class SlackNotificationAction(ValidationAction):
         self.notify_with = notify_with
         self.show_failed_expectations = show_failed_expectations
 
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -336,6 +340,7 @@ class PagerdutyAlertAction(ValidationAction):
       api_key: ${pagerduty_api_key}
       routing_key: ${pagerduty_routing_key}
       notify_on: failure
+      severity: critical
     ```
 
     Args:
@@ -343,14 +348,16 @@ class PagerdutyAlertAction(ValidationAction):
         api_key: Events API v2 key for pagerduty.
         routing_key: The 32 character Integration Key for an integration on a service or on a global ruleset.
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
+        severity: The PagerDuty severity levels determine the level of urgency. One of "critical", "error", "warning", or "info".
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         data_context: AbstractDataContext,
         api_key: str,
         routing_key: str,
         notify_on: str = "failure",
+        severity: str = "critical",
     ) -> None:
         """Create a PagerdutyAlertAction"""
         super().__init__(data_context)
@@ -361,7 +368,9 @@ class PagerdutyAlertAction(ValidationAction):
         self.routing_key = routing_key
         assert routing_key, "No Pagerduty routing_key found in action config."
         self.notify_on = notify_on
+        self.severity = severity
 
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -410,7 +419,7 @@ class PagerdutyAlertAction(ValidationAction):
                     "event_action": "trigger",
                     "payload": {
                         "summary": f"Great Expectations suite check {expectation_suite_name} has failed",
-                        "severity": "critical",
+                        "severity": self.severity,
                         "source": "Great Expectations",
                     },
                 }
@@ -480,6 +489,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         ), "No Microsoft teams webhook found in action config."
         self.notify_on = notify_on
 
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -594,6 +604,7 @@ class OpsgenieAlertAction(ValidationAction):
         self.notify_on = notify_on
         self.tags = tags
 
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -756,6 +767,7 @@ class EmailAction(ValidationAction):
         self.notify_on = notify_on
         self.notify_with = notify_with
 
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -857,6 +869,7 @@ class StoreValidationResultAction(ValidationAction):
         else:
             self.target_store = data_context.stores[target_store_name]
 
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -969,6 +982,7 @@ class StoreEvaluationParametersAction(ValidationAction):
         else:
             self.target_store = data_context.stores[target_store_name]
 
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -1056,6 +1070,7 @@ class StoreMetricsAction(ValidationAction):
                 "StoreMetricsAction must have a valid MetricsStore for its target store."
             )
 
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -1132,6 +1147,7 @@ class UpdateDataDocsAction(ValidationAction):
         super().__init__(data_context)
         self._site_names = site_names
 
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -1225,6 +1241,7 @@ class SNSNotificationAction(ValidationAction):
         self.sns_topic_arn = sns_topic_arn
         self.sns_message_subject = sns_message_subject
 
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -1266,6 +1283,7 @@ class APINotificationAction(ValidationAction):
         super().__init__(data_context)
         self.url = url
 
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,

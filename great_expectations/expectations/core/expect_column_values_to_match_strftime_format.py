@@ -186,7 +186,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
                     strftime_format,
                 )
         except ValueError as e:
-            raise ValueError(f"Unable to use provided strftime_format. {str(e)}")
+            raise ValueError(f"Unable to use provided strftime_format. {e!s}")
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -260,7 +260,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
             )
             if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
                 params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+                    params["mostly"] * 100, no_scientific=True
                 )
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 template_str += ", at least $mostly_pct % of the time."

@@ -3,20 +3,25 @@ from awsglue.context import GlueContext
 from pyspark.context import SparkContext
 
 import great_expectations as gx
-from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     S3StoreBackendDefaults,
 )
-from great_expectations.util import get_context
+from great_expectations.data_context import get_context
+
+import warnings
 
 yaml = YAMLHandler()
 
-sc = SparkContext.getOrCreate()
-glueContext = GlueContext(sc)
-spark = glueContext.spark_session
+# needed because GlueContext(sc) function emits the following FutureWarning: Deprecated in 3.0.0. Use SparkSession.builder.getOrCreate() instead.
+with warnings.catch_warnings():
+    warnings.simplefilter(action="ignore", category=FutureWarning)
+    sc = SparkContext.getOrCreate()
+    glueContext = GlueContext(sc)
+    spark = glueContext.spark_session
+
 s3_client = boto3.client("s3")
 response = s3_client.get_object(
     Bucket="bucket", Key="bucket/great_expectations/great_expectations.yml"
@@ -64,7 +69,7 @@ validator.expect_column_values_to_not_be_null(
 validator.save_expectation_suite(discard_failed_expectations=False)
 
 checkpoint_config = {
-    "class_name": "SimpleCheckpoint",
+    "class_name": "Checkpoint",
     "validations": [
         {
             "batch_request": batch_request,
@@ -73,8 +78,8 @@ checkpoint_config = {
     ],
 }
 
-checkpoint = SimpleCheckpoint(
-    f"_tmp_checkpoint_{expectation_suite_name}", context_gx, **checkpoint_config
+checkpoint = context_gx.add_or_update_checkpoint(
+    f"_tmp_checkpoint_{expectation_suite_name}", **checkpoint_config
 )
 results = checkpoint.run(result_format="SUMMARY", run_name="test")
 validation_result_identifier = results.list_validation_result_identifiers()[0]

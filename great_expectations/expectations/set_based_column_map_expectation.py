@@ -180,19 +180,19 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     def _question_renderer(cls, configuration, result=None, runtime_configuration=None):
         column = configuration.kwargs.get("column")
         mostly = configuration.kwargs.get("mostly")
-        set_ = getattr(cls, "set_")
+        set_ = cls.set_
         set_semantic_name = getattr(cls, "set_semantic_name", None)
 
         if mostly == 1 or mostly is None:
             if set_semantic_name is not None:
-                return f'Are all values in column "{column}" in {set_semantic_name}: {str(set_)}?'
+                return f'Are all values in column "{column}" in {set_semantic_name}: {set_!s}?'
             else:
-                return f'Are all values in column "{column}" in the set {str(set_)}?'
-        else:
-            if set_semantic_name is not None:  # noqa: PLR5501
-                return f'Are at least {mostly * 100}% of values in column "{column}" in {set_semantic_name}: {str(set_)}?'
+                return f'Are all values in column "{column}" in the set {set_!s}?'
+        else:  # noqa: PLR5501
+            if set_semantic_name is not None:
+                return f'Are at least {mostly * 100}% of values in column "{column}" in {set_semantic_name}: {set_!s}?'
             else:
-                return f'Are at least {mostly * 100}% of values in column "{column}" in the set {str(set_)}?'
+                return f'Are at least {mostly * 100}% of values in column "{column}" in the set {set_!s}?'
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.ANSWER)
@@ -201,27 +201,25 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     ):
         column = result.expectation_config.kwargs.get("column")
         mostly = result.expectation_config.kwargs.get("mostly")
-        set_ = getattr(cls, "set_")
+        set_ = cls.set_
         set_semantic_name = getattr(cls, "set_semantic_name", None)
 
         if result.success:
             if mostly == 1 or mostly is None:
                 if set_semantic_name is not None:
-                    return f'All values in column "{column}" are in {set_semantic_name}: {str(set_)}.'
+                    return f'All values in column "{column}" are in {set_semantic_name}: {set_!s}.'
                 else:
-                    return (
-                        f'All values in column "{column}" are in the set {str(set_)}.'
-                    )
-            else:
-                if set_semantic_name is not None:  # noqa: PLR5501
-                    return f'At least {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {str(set_)}.'
+                    return f'All values in column "{column}" are in the set {set_!s}.'
+            else:  # noqa: PLR5501
+                if set_semantic_name is not None:
+                    return f'At least {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {set_!s}.'
                 else:
-                    return f'At least {mostly * 100}% of values in column "{column}" are in the set {str(set)}.'
-        else:
-            if set_semantic_name is not None:  # noqa: PLR5501
-                return f' Less than {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {str(set_)}.'
+                    return f'At least {mostly * 100}% of values in column "{column}" are in the set {set!s}.'
+        else:  # noqa: PLR5501
+            if set_semantic_name is not None:
+                return f' Less than {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {set_!s}.'
             else:
-                return f'Less than {mostly * 100}% of values in column "{column}" are in the set {str(set_)}.'
+                return f'Less than {mostly * 100}% of values in column "{column}" are in the set {set_!s}.'
 
     @classmethod
     def _prescriptive_template(
@@ -298,7 +296,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                 template_str = "values must match this set: $set_"
             if params["mostly"] is not None:
                 params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+                    params["mostly"] * 100, no_scientific=True
                 )
                 template_str += ", at least $mostly_pct % of the time."
             else:

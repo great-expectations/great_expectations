@@ -42,7 +42,7 @@ if TYPE_CHECKING:
 @public_api
 def column_condition_partial(  # noqa: C901, PLR0915
     engine: Type[ExecutionEngine],
-    partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,
+    partial_fn_type: Optional[MetricPartialFunctionTypes] = None,
     **kwargs,
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
@@ -74,6 +74,10 @@ def column_condition_partial(  # noqa: C901, PLR0915
             )
 
         def wrapper(metric_fn: Callable):
+            assert (
+                partial_fn_type is not None
+            )  # mypy has trouble type narrowing with closures
+
             @metric_partial(
                 engine=engine,
                 partial_fn_type=partial_fn_type,
@@ -143,6 +147,10 @@ def column_condition_partial(  # noqa: C901, PLR0915
             )
 
         def wrapper(metric_fn: Callable):
+            assert (
+                partial_fn_type is not None
+            )  # mypy has trouble type narrowing with closures
+
             @metric_partial(
                 engine=engine,
                 partial_fn_type=partial_fn_type,
@@ -283,8 +291,8 @@ def column_condition_partial(  # noqa: C901, PLR0915
                             )
                         )
                     unexpected_condition = ~expected_condition
-                else:
-                    if filter_column_isnull:  # noqa: PLR5501
+                else:  # noqa: PLR5501
+                    if filter_column_isnull:
                         unexpected_condition = column.isNotNull() & ~expected_condition
                     else:
                         unexpected_condition = ~expected_condition

@@ -4,6 +4,9 @@ import os
 import pytest
 
 import great_expectations as gx
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.self_check.util import expectationSuiteValidationResultSchema
 
@@ -13,7 +16,7 @@ def empty_data_context_module_scoped(tmp_path_factory):
     # Re-enable GE_USAGE_STATS
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
     context = gx.data_context.FileDataContext.create(project_path)
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
     return context

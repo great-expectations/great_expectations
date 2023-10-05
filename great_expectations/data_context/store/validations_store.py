@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import random
 import uuid
-from typing import Dict
+from typing import ClassVar, Dict, Type
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationSuiteValidationResultSchema,
@@ -93,7 +96,7 @@ class ValidationsStore(Store):
     --ge-feature-maturity-info--
     """
 
-    _key_class: type = ValidationResultIdentifier
+    _key_class: ClassVar[Type] = ValidationResultIdentifier
 
     def __init__(
         self, store_backend=None, runtime_environment=None, store_name=None
@@ -151,7 +154,9 @@ class ValidationsStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
+    @override
+    @staticmethod
+    def gx_cloud_response_json_to_object_dict(response_json: Dict) -> Dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
@@ -193,7 +198,7 @@ class ValidationsStore(Store):
             else:
                 print(f"\t{len_keys} keys found:")
                 for key in return_obj["keys"][:10]:
-                    print(f"		{str(key)}")
+                    print(f"		{key!s}")
             if len_keys > 10:  # noqa: PLR2004
                 print("\t\t...")
             print()
@@ -239,5 +244,6 @@ class ValidationsStore(Store):
         return return_obj
 
     @property
+    @override
     def config(self) -> dict:
         return self._config

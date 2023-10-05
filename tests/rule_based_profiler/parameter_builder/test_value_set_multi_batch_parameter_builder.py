@@ -2,9 +2,9 @@ from typing import Any, Collection, Dict, List, Optional, Set, cast
 
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.data_context import AbstractDataContext
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -19,30 +19,28 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 1.08s
 def test_instantiation_value_set_multi_batch_parameter_builder(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
-    # noinspection PyUnusedLocal
-    parameter_builder: ParameterBuilder = ValueSetMultiBatchParameterBuilder(
+    parameter_builder = ValueSetMultiBatchParameterBuilder(  # noqa: F841
         name="my_name",
         data_context=data_context,
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 1.07s
 def test_instantiation_value_set_multi_batch_parameter_builder_no_name(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     with pytest.raises(TypeError) as excinfo:
-        # noinspection PyUnusedLocal,PyArgumentList
-        parameter_builder: ParameterBuilder = ValueSetMultiBatchParameterBuilder(
+        parameter_builder = ValueSetMultiBatchParameterBuilder(  # noqa: F841
             data_context=data_context,
         )
     assert "__init__() missing 1 required positional argument: 'name'" in str(
@@ -50,12 +48,12 @@ def test_instantiation_value_set_multi_batch_parameter_builder_no_name(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 1.19s
 def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -125,7 +123,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
     assert parameter_node.details == expected_parameter_node_as_dict["details"]
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 1.20s
 def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
     alice_columnar_table_single_batch_context,
@@ -134,7 +132,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
     What does this test and why?
     This tests that non-numeric columns are handled appropriately,
     """
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: AbstractDataContext = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -206,11 +204,11 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
     assert parameter_node.details == expected_parameter_node_as_dict["details"]
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_value_set_multi_batch_parameter_builder_bobby_numeric(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
+    data_context: AbstractDataContext = (
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 
@@ -285,11 +283,11 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
     assert parameter_node.details == expected_parameter_node_as_dict["details"]
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_value_set_multi_batch_parameter_builder_bobby_string(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
+    data_context: AbstractDataContext = (
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 

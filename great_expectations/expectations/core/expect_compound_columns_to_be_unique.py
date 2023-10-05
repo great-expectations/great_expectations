@@ -168,19 +168,19 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
 
         if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+                params["mostly"] * 100, no_scientific=True
             )
             template_str = "Values for given compound columns must be unique together, at least $mostly_pct % of the time: "
         else:
             template_str = "Values for given compound columns must be unique together: "
 
         for idx in range(len(params["column_list"]) - 1):
-            template_str += f"$column_list_{str(idx)}, "
-            params[f"column_list_{str(idx)}"] = params["column_list"][idx]
+            template_str += f"$column_list_{idx!s}, "
+            params[f"column_list_{idx!s}"] = params["column_list"][idx]
 
         last_idx = len(params["column_list"]) - 1
-        template_str += f"$column_list_{str(last_idx)}"
-        params[f"column_list_{str(last_idx)}"] = params["column_list"][last_idx]
+        template_str += f"$column_list_{last_idx!s}"
+        params[f"column_list_{last_idx!s}"] = params["column_list"][last_idx]
 
         if params["row_condition"] is not None:
             (

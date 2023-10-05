@@ -11,11 +11,15 @@ from typing import (
     Union,
 )
 
-import pydantic
-from pydantic import StrictStr
-from pydantic.json import pydantic_encoder
-from pydantic.schema import default_ref_template
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import Field, StrictStr
+from great_expectations.compatibility.pydantic import json as pydantic_json
+from great_expectations.compatibility.pydantic import (
+    schema as pydantic_schema,
+)
 
+# default_ref_template
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchSlice,
@@ -58,17 +62,17 @@ class BatchRequest(pydantic.BaseModel):
         BatchRequest
     """
 
-    datasource_name: StrictStr = pydantic.Field(
+    datasource_name: StrictStr = Field(
         ...,
         allow_mutation=False,
         description="The name of the Datasource used to connect to the data.",
     )
-    data_asset_name: StrictStr = pydantic.Field(
+    data_asset_name: StrictStr = Field(
         ...,
         allow_mutation=False,
         description="The name of the Data Asset used to connect to the data.",
     )
-    options: BatchRequestOptions = pydantic.Field(
+    options: BatchRequestOptions = Field(
         default_factory=dict,
         allow_mutation=True,
         description=(
@@ -131,6 +135,7 @@ class BatchRequest(pydantic.BaseModel):
         return options
 
     @public_api
+    @override
     def json(  # noqa: PLR0913
         self,
         *,
@@ -163,6 +168,7 @@ class BatchRequest(pydantic.BaseModel):
         )
 
     @public_api
+    @override
     def dict(  # noqa: PLR0913
         self,
         *,
@@ -207,11 +213,12 @@ class BatchRequest(pydantic.BaseModel):
         return result
 
     @classmethod
+    @override
     def schema_json(
         cls,
         *,
         by_alias: bool = True,
-        ref_template: str = default_ref_template,
+        ref_template: str = pydantic_schema.default_ref_template,
         **dumps_kwargs: Any,
     ) -> str:
         # batch_slice is only a property/pydantic setter, so we need to add a field
@@ -226,7 +233,7 @@ class BatchRequest(pydantic.BaseModel):
         )
         result = cls.__config__.json_dumps(
             cls.schema(by_alias=by_alias, ref_template=ref_template),
-            default=pydantic_encoder,
+            default=pydantic_json.pydantic_encoder,
             **dumps_kwargs,
         )
         # revert model changes

@@ -38,7 +38,7 @@ This guide will help you integrate Great Expectations (GX) with [Google Cloud Pl
 
 We recommend that you use Great Expectations in GCP by using the following services:
   - [Google Cloud Composer](https://cloud.google.com/composer) (GCC) for managing workflow orchestration including validating your data. GCC is built on [Apache Airflow](https://airflow.apache.org/).
-  - [BigQuery](https://cloud.google.com/bigquery) or files in [Google Cloud Storage](https://cloud.google.com/storage) (GCS) as your <TechnicalTag tag="datasource" text="Datasource"/>
+  - [BigQuery](https://cloud.google.com/bigquery) or files in [Google Cloud Storage](https://cloud.google.com/storage) (GCS) as your <TechnicalTag tag="datasource" text="Data Source"/>
   - [GCS](https://cloud.google.com/storage) for storing metadata (<TechnicalTag tag="expectation_suite" text="Expectation Suites"/>, <TechnicalTag tag="validation_result" text="Validation Results"/>, <TechnicalTag tag="data_docs" text="Data Docs"/>)
   - [Google App Engine](https://cloud.google.com/appengine) (GAE) for hosting and controlling access to <TechnicalTag tag="data_docs" text="Data Docs"/>.
 
@@ -52,9 +52,9 @@ The following diagram shows the recommended components for a Great Expectations 
 
 Relevant documentation for the components can also be found here:
 
-- [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md)
-- [How to configure a Validation Result store in GCS](../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.md)
-- [How to host and share Data Docs on GCS](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md)
+- [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/configure_expectation_stores.md)
+- [How to configure a Validation Result store in GCS](../guides/setup/configuring_metadata_stores/configure_result_stores.md)
+- [How to host and share Data Docs on GCS](../guides/setup/configuring_data_docs/host_and_share_data_docs.md)
 - Optionally, you can also use a [Secret Manager for GCP Credentials](../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
 
 ## Part 1: Local Configuration of Great Expectations that connects to Google Cloud Platform
@@ -101,7 +101,7 @@ Great Expectations can then be configured to use this new Expectations Store, `e
 ```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_expectation_store"
 ```
 
-For additional details and example configurations, please refer to [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md).
+For additional details and example configurations, see [Configure Expectation Stores](../guides/setup/configuring_metadata_stores/configure_expectation_stores.md).
 
 #### Add Validations Store
 By default, Validations are stored in JSON format in the `uncommitted/validations/` subdirectory of your `great_expectations/` folder. A new Validations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
@@ -114,10 +114,10 @@ Great Expectations can then be configured to use this new Validations Store, `va
 ```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_validations_store"
 ```
 
-For additional details and example configurations, please refer to  [How to configure an Validation Result store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.md).
+For additional details and example configurations, see [Configure Validation Result Stores](../guides/setup/configuring_metadata_stores/configure_result_stores.md).
 
 #### Add Data Docs Store
-To host and share Datadocs on GCS, we recommend using the [following guide](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md), which will explain how to host and share Data Docs on Google Cloud Storage using IP-based access.
+To host and share Datadocs on GCS, we recommend using the [following guide](../guides/setup/configuring_data_docs/host_and_share_data_docs.md), which will explain how to host and share Data Docs on Google Cloud Storage using IP-based access.
 
 Afterwards, your `great-expectations.yml` will contain the following configuration under `data_docs_sites`,  with `project`, and `bucket` being replaced with your information.
 
@@ -153,9 +153,9 @@ Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Cont
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py datasource"
 ```
 
-In the example, we have added a Datasource that connects to data in GCS using a Pandas dataframe. The name of the new datasource is `gcs_datasource` and it refers to a GCS bucket named `test_docs_data`.
+In the example, we have added a Data Source that connects to data in GCS using a Pandas dataframe. The name of the new datasource is `gcs_datasource` and it refers to a GCS bucket named `test_docs_data`.
 
-For more details on how to configure the Datasource, and additional information on authentication, please refer to [How to connect to data on GCS using Pandas
+For more details on how to configure the Data Source, and additional information on authentication, please refer to [How to connect to data on GCS using Pandas
 ](/docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/pandas)
 
 </TabItem>
@@ -168,14 +168,14 @@ In order to support tables that are created as the result of queries in BigQuery
 :::
 
 
-Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Context" /> that was initialized in the previous section, create a Datasource that will connect to data in BigQuery,
+Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Context" /> that was initialized in the previous section, create a Data Source that will connect to data in BigQuery,
 
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_datasource"
 ```
 
-In the example, we have created a Datasource named `my_bigquery_datasource`, using the `add_or_update_sql` method and passing in a connection string.
+In the example, we have created a Data Source named `my_bigquery_datasource`, using the `add_or_update_sql` method and passing in a connection string.
 
-To configure the BigQuery Datasource, see [How to connect to a BigQuery database](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery).
+To configure the BigQuery Data Source, see [How to connect to a BigQuery database](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery).
 
 </TabItem>
 </Tabs>
@@ -206,7 +206,7 @@ test_docs_data/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-03.
 ```
 The `batching_regex` pattern will match the 4 digits of the year portion and assign it to the `year` domain, and match the 2 digits of the month portion and assign it to the `month` domain.
 
-Next we can add an `Asset` named `csv_taxi_gcs_asset` to our Datasource by using the `add_csv_asset` function. 
+Next we can add an `Asset` named `csv_taxi_gcs_asset` to our Data Source by using the `add_csv_asset` function. 
 
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py asset"
 ```
@@ -291,7 +291,7 @@ To configure the BatchRequest and learn how you can load data by specifying a ta
 
 ### 5. Build and Run a Checkpoint
 
-For our example, we will create a basic Checkpoint configuration using the `SimpleCheckpoint` class. For [additional examples](../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md), information on [how to add validations, data, or suites to existing checkpoints](../guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md), and [more complex configurations](../guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md) please refer to the documentation under `How to Guides` -> `Validating your data` -> `Checkpoints`.
+In the following example, you'll create a basic Checkpoint configuration. For more information about data validation, see [Validate Data](../guides/validation/validate_data_lp.md).
 
 <Tabs
   groupId="connect-to-data-gcs-bigquery"

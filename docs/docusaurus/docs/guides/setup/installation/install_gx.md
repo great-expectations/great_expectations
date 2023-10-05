@@ -1,6 +1,6 @@
 ---
-sidebar_label: "Install GX with Source Data System dependencies"
-title: "Install Great Expectations with Source Data System dependencies"
+sidebar_label: "Install GX with source data system dependencies"
+title: "Install Great Expectations with source data system dependencies"
 id: install_gx
 description: Install Great Expectations locally, or in a hosted environment.
 toc_min_heading_level: 2
@@ -272,9 +272,9 @@ The above pip instruction will install GX with basic SQL support through SqlAlch
 
 ### Set up credentials
 
-Different SQL dialects have different requirements for connection strings and methods of configuring credentials.  By default, GX allows you to define credentials as environment variables or as values in your Data Context ([once you have initialized one](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python)).
+Different SQL dialects have different requirements for connection strings and methods of configuring credentials.  By default, GX allows you to define credentials as environment variables or as values in your Data Context. See [Instantiate a Data Context](../configuring_data_contexts/instantiating_data_contexts/instantiate_data_context.md).
 
-There may also be third party utilities for setting up credentials of a given SQL database type.  For more information on setting up credentials for a given source database, please reference the official documentation for that SQL dialect as well as our guide on [how to set up credentials(/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials).
+There may also be third party utilities for setting up credentials of a given SQL database type.  For more information on setting up credentials for a given source database, please reference the official documentation for that SQL dialect as well as our guide on [how to set up credentials](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials).
 
 ### Next steps
 

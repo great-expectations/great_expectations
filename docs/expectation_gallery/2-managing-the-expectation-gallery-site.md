@@ -16,7 +16,7 @@ The staging S3 file will get copied to prod at <https://superconductive-public.s
 
 - Make sure everything looks OK in staging <https://staging-great-expectations.netlify.app/expectations>
     - Check total number of Expectations
-    - Look at the "Completeness" view and "Datasource" view
+    - Look at the "Completeness" view and "Data Source" view
 - Visit <https://dev.azure.com/great-expectations/great_expectations/_build?definitionId=18> while logged into Azure Pipelines
     - Click the "Run pipeline" button
     - Click the "Run" button

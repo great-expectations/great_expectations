@@ -1,17 +1,18 @@
-from typing import Optional
+from typing import List, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
+)
+from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
-    render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyRendererType
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import substitute_none_for_missing
+from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
 try:
     import sqlalchemy as sa  # noqa: F401, TID251
@@ -125,18 +126,43 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ) -> None:
+    ) -> List[RenderedStringTemplateContent]:
         runtime_configuration = runtime_configuration or {}
         _ = False if runtime_configuration.get("include_column_name") is False else True
-        _ = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(  # noqa: F841 # unused
+        styling = runtime_configuration.get("styling")
+
+        params = substitute_none_for_missing(
             configuration.kwargs,
-            ["column", "mostly", "row_condition", "condition_parser"],
+            ["column", "like_pattern", "mostly"],
         )
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, no_scientific=True
+            )
+        mostly_str = (
+            ""
+            if params.get("mostly") is None
+            else ", at least $mostly_pct % of the time"
+        )
+        like_pattern = params.get("like_pattern")  # noqa: F841
+
+        template_str = f"Values must match like pattern $like_pattern {mostly_str}: "
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]

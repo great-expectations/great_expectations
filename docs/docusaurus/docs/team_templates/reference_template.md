@@ -38,10 +38,6 @@ title: <!-- Add the topic title here -->
 
 <!-- List the secondary resources that can help a user get a better understanding of the subject matter discussed in this reference. Don't add an introductory statement for the list. What follows is an example provided for your reference. If there aren't any secondary resources, remove this section.-->
 
-- [How to install Great Expectations locally](../guides/setup/installation/local.md)
-- [How to set up GX to work with data on AWS S3](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3.md)
-- [How to set up GX to work with data in Azure Blob Storage](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs.md)
-- [How to set up GX to work with data on GCS](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)
-- [How to set up GX to work with SQL databases](../guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases.md) 
-- [How to instantiate a Data Context on an EMR Spark Cluster](../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-- [How to use Great Expectations in Databricks](../tutorials/getting_started/how_to_use_great_expectations_in_databricks.md)
+- [Install Great Expectations with source data system dependencies](../guides/setup/installation/install_gx.md)
+- [Instantiate a Data Context on an EMR Spark Cluster](../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
+- [Use Great Expectations with Databricks](../tutorials/getting_started/how_to_use_great_expectations_in_databricks.md)

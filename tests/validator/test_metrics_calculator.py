@@ -45,12 +45,8 @@ def integer_and_datetime_sample_dataset() -> dict:
 @pytest.mark.parametrize(
     "backend,",
     [
-        pytest.param(
-            "pandas",
-        ),
-        pytest.param(
-            "sqlite",
-        ),
+        pytest.param("pandas", marks=pytest.mark.unit),
+        pytest.param("sqlite", marks=pytest.mark.sqlite),
         pytest.param("spark", marks=pytest.mark.spark),
     ],
 )

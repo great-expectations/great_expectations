@@ -34,7 +34,7 @@ def metric_value(
     the value of the requested metric.
 
     ---Documentation---
-        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
+        - https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp
 
     Args:
         engine: the *type* of ExecutionEngine that this partial supports
@@ -60,7 +60,7 @@ def metric_value(
 @public_api
 def metric_partial(
     engine: Type[ExecutionEngine],
-    partial_fn_type: Union[str, MetricPartialFunctionTypes],
+    partial_fn_type: MetricPartialFunctionTypes,
     domain_type: Union[str, MetricDomainTypes],
     **kwargs,
 ):
@@ -153,8 +153,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 # This is not a metric or renderer.
                 continue
 
-            if hasattr(attr_obj, "metric_engine"):
-                engine = getattr(attr_obj, "metric_engine")
+            if engine := getattr(attr_obj, "metric_engine", None):
                 if not issubclass(engine, ExecutionEngine):
                     raise ValueError(
                         "metric functions must be defined with an Execution Engine"

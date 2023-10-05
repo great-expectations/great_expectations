@@ -35,50 +35,11 @@ No.  The interactive method used to create and edit Expectations does not edit o
 
 - Great Expectations installed in a Python environment
 - A Filesystem Data Context for your Expectations
-- Created a Datasource from which to request a Batch of data for introspection
+- Created a Data Source from which to request a Batch of data for introspection
 
 </Prerequisites>
 
-<details>
-<summary>
-
-### If you haven't set up Great Expectations
-
-</summary>
-
-<IfYouStillNeedToSetupGX />
-
-</details>
-
-<details>
-<summary>
-
-### If you haven't initialized your Data Context
-
-</summary>
-
-See one of the following guides:
-
-<DataContextInitializeQuickOrFilesystem />
-
-</details>
-
-<details>
-<summary>
-
-### If you haven't created a Datasource
-
-</summary>
-
-See one of the following guides:
-
-<ConnectingToDataFluently />
-
-</details>
-
-## Steps
-
-### 1. Import the Great Expectations module and instantiate a Data Context
+## Import the Great Expectations module and instantiate a Data Context
 
 For this guide we will be working with Python code in a Jupyter Notebook. Jupyter is included with GX and lets us easily edit code and immediately see the results of our changes.
 
@@ -89,18 +50,18 @@ Run the following code to import Great Expectations and instantiate a Data Conte
 
 :::info Data Contexts and persisting data
 
-If you're using an Ephemeral Data Context, your configurations will not persist beyond the current Python session.  However, if you're using a Filesystem or Cloud Data Context, they do persist.  The `get_context()` method returns the first Cloud or Filesystem Data Context it can find.  If a Cloud or Filesystem Data Context has not be configured or cannot be found, it provides an Ephemeral Data Context.  For more information about the `get_context()` method, see [How to quickly instantiate a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+If you're using an Ephemeral Data Context, your configurations will not persist beyond the current Python session.  However, if you're using a Filesystem or Cloud Data Context, they do persist.  The `get_context()` method returns the first Cloud or Filesystem Data Context it can find.  If a Cloud or Filesystem Data Context has not be configured or cannot be found, it provides an Ephemeral Data Context.  For more information about the `get_context()` method, see [Instantiate a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 
 :::
 
-### 2. Create an ExpectationSuite 
+## Create an ExpectationSuite 
 
 We will use the `add_expectation_suite()` method to create an empty ExpectationSuite.
 
 ```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_suite"
 ```
 
-### 3. Create Expectation Configurations
+## Create Expectation Configurations
 
 You are adding Expectation configurations to the suite. Since there is no sample Batch of data, no <TechnicalTag tag="validation" text="Validation" /> happens during this process. To illustrate how to do this, consider a hypothetical example. Suppose that you have a table with the columns ``account_id``, ``user_id``, ``transaction_id``, ``transaction_type``, and ``transaction_amt_usd``. Then the following code snipped adds an Expectation that the columns of the actual table will appear in the order specified above:
 
@@ -121,7 +82,7 @@ Here are a few more example expectations for this dataset:
 
 You can see all the available Expectations in the [Expectation Gallery](https://greatexpectations.io/expectations).
 
-### 4. Save your Expectations for future use
+## Save your Expectations for future use
 
 To keep your Expectations for future use, you save them to your Data Context.  A Filesystem or Cloud Data Context persists outside the current Python session, so saving the Expectation Suite in your Data Context's Expectations Store ensures you can access it in the future:
 

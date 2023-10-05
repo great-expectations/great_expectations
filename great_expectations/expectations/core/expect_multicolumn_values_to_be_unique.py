@@ -169,7 +169,7 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
 
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+                params["mostly"] * 100, no_scientific=True
             )
         mostly_str = (
             ""
@@ -179,12 +179,12 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
 
         template_str = f"Values must always be unique across columns{mostly_str}: "
         for idx in range(len(params["column_list"]) - 1):
-            template_str += f"$column_list_{str(idx)}, "
-            params[f"column_list_{str(idx)}"] = params["column_list"][idx]
+            template_str += f"$column_list_{idx!s}, "
+            params[f"column_list_{idx!s}"] = params["column_list"][idx]
 
         last_idx = len(params["column_list"]) - 1
-        template_str += f"$column_list_{str(last_idx)}"
-        params[f"column_list_{str(last_idx)}"] = params["column_list"][last_idx]
+        template_str += f"$column_list_{last_idx!s}"
+        params[f"column_list_{last_idx!s}"] = params["column_list"][last_idx]
 
         if params["row_condition"] is not None:
             (

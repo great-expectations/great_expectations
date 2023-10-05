@@ -1,7 +1,7 @@
-from __future__ import annotations
-
+import pathlib
+import uuid
+from logging import Logger
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
@@ -15,48 +15,41 @@ from typing import (
     overload,
 )
 
-from typing_extensions import TypeAlias
+from typing_extensions import TypeAlias, override
 
+from great_expectations.compatibility import pydantic
 from great_expectations.data_context import (
     AbstractDataContext as GXDataContext,
 )
+from great_expectations.datasource.fluent import (
+    DatabricksSQLDatasource,
+    FabricPowerBIDatasource,
+    PandasAzureBlobStorageDatasource,
+    PandasDatasource,
+    PandasDBFSDatasource,
+    PandasFilesystemDatasource,
+    PandasGoogleCloudStorageDatasource,
+    PandasS3Datasource,
+    PostgresDatasource,
+    SnowflakeDatasource,
+    SparkAzureBlobStorageDatasource,
+    SparkDatasource,
+    SparkDBFSDatasource,
+    SparkFilesystemDatasource,
+    SparkGoogleCloudStorageDatasource,
+    SparkS3Datasource,
+    SQLDatasource,
+    SqliteDatasource,
+)
+from great_expectations.datasource.fluent.config_str import ConfigStr
+from great_expectations.datasource.fluent.databricks_sql_datasource import DatabricksDsn
+from great_expectations.datasource.fluent.interfaces import (
+    DataAsset,
+    Datasource,
+)
+from great_expectations.datasource.fluent.snowflake_datasource import SnowflakeDsn
 from great_expectations.datasource.fluent.spark_datasource import SparkConfig
-
-if TYPE_CHECKING:
-    import pathlib
-    from logging import Logger
-
-    import pydantic
-
-    from great_expectations.datasource.fluent import (
-        DatabricksSQLDatasource,
-        PandasAzureBlobStorageDatasource,
-        PandasDatasource,
-        PandasDBFSDatasource,
-        PandasFilesystemDatasource,
-        PandasGoogleCloudStorageDatasource,
-        PandasS3Datasource,
-        PostgresDatasource,
-        SnowflakeDatasource,
-        SparkAzureBlobStorageDatasource,
-        SparkDatasource,
-        SparkDBFSDatasource,
-        SparkFilesystemDatasource,
-        SparkGoogleCloudStorageDatasource,
-        SparkS3Datasource,
-        SQLDatasource,
-        SqliteDatasource,
-    )
-    from great_expectations.datasource.fluent.config_str import ConfigStr
-    from great_expectations.datasource.fluent.databricks_sql_datasource import (
-        DatabricksDsn,
-    )
-    from great_expectations.datasource.fluent.interfaces import (
-        DataAsset,
-        Datasource,
-    )
-    from great_expectations.datasource.fluent.snowflake_datasource import SnowflakeDsn
-    from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
+from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
 
 SourceFactoryFn: TypeAlias = Callable[..., Datasource]
 logger: Logger
@@ -87,6 +80,7 @@ class _SourceFactories:
     @property
     def factories(self) -> List[str]: ...
     def __getattr__(self, attr_name: str): ...
+    @override
     def __dir__(self) -> List[str]: ...
     def add_pandas(
         self,
@@ -329,6 +323,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
     ) -> SparkDatasource: ...
     def update_spark(
         self,
@@ -336,6 +331,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
     ) -> SparkDatasource: ...
     def add_or_update_spark(
         self,
@@ -343,6 +339,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
     ) -> SparkDatasource: ...
     def delete_spark(
         self,
@@ -356,6 +353,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkFilesystemDatasource: ...
@@ -367,6 +365,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkFilesystemDatasource: ...
@@ -378,6 +377,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkFilesystemDatasource: ...
@@ -393,6 +393,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkDBFSDatasource: ...
@@ -404,6 +405,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkDBFSDatasource: ...
@@ -415,6 +417,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkDBFSDatasource: ...
@@ -430,6 +433,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         bucket: str = ...,
         boto3_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkS3Datasource: ...
@@ -441,6 +445,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         bucket: str = ...,
         boto3_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkS3Datasource: ...
@@ -452,6 +457,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         bucket: str = ...,
         boto3_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkS3Datasource: ...
@@ -467,6 +473,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         bucket_or_name: str = ...,
         gcs_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkGoogleCloudStorageDatasource: ...
@@ -478,6 +485,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         bucket_or_name: str = ...,
         gcs_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkGoogleCloudStorageDatasource: ...
@@ -489,6 +497,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         bucket_or_name: str = ...,
         gcs_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkGoogleCloudStorageDatasource: ...
@@ -504,6 +513,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         azure_options: dict[str, Any] = ...,
     ) -> SparkAzureBlobStorageDatasource: ...
     def update_spark_abs(  # noqa: PLR0913
@@ -514,6 +524,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         azure_options: dict[str, Any] = ...,
     ) -> SparkAzureBlobStorageDatasource: ...
     def add_or_update_spark_abs(  # noqa: PLR0913
@@ -524,6 +535,7 @@ class _SourceFactories:
         *,
         spark_config: SparkConfig | None = None,
         force_reuse_spark_context: bool = True,
+        persist: bool = True,
         azure_options: dict[str, Any] = ...,
     ) -> SparkAzureBlobStorageDatasource: ...
     def delete_spark_abs(
@@ -704,6 +716,14 @@ class _SourceFactories:
         self,
         name: str,
     ) -> None: ...
+    def add_fabric_powerbi(
+        self,
+        name: Optional[str] = None,
+        datasource: Optional[FabricPowerBIDatasource] = None,
+        *,
+        workspace: Optional[Union[uuid.UUID, str]] = None,
+        dataset: Union[uuid.UUID, str] = ...,
+    ) -> FabricPowerBIDatasource: ...
 
 def _iter_all_registered_types(
     include_datasource: bool = True, include_data_asset: bool = True

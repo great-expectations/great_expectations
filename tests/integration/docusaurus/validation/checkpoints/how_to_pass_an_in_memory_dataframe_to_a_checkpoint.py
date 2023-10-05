@@ -1,5 +1,6 @@
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py setup">
 import pandas
+
 import great_expectations as gx
 
 context = gx.get_context()

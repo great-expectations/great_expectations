@@ -347,7 +347,6 @@ def test_batch_request_deepcopy():
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_checkpoint_config_deepcopy(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
     monkeypatch,
@@ -482,7 +481,6 @@ def test_checkpoint_config_deepcopy(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_checkpoint_config_print(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
     monkeypatch,
@@ -1037,7 +1035,6 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
     ],
 )
 @pytest.mark.spark
-@pytest.mark.integration
 def test_checkpoint_config_and_nested_objects_are_serialized_spark(
     checkpoint_config_fixture_name: str,
     expected_serialized_checkpoint_config: dict,
@@ -1187,7 +1184,6 @@ def test_checkpoint_config_and_nested_objects_are_serialized_spark(
     ],
 )
 @pytest.mark.spark
-@pytest.mark.integration
 def test_datasource_config_and_nested_objects_are_serialized_spark(
     datasource_config: Union[DatasourceConfig, str],
     expected_serialized_datasource_config: dict,
@@ -1257,7 +1253,6 @@ def test_datasource_config_and_nested_objects_are_serialized_spark(
     ],
 )
 @pytest.mark.spark
-@pytest.mark.integration
 def test_data_connector_and_nested_objects_are_serialized_spark(
     data_connector_config: DataConnectorConfig,
     expected_serialized_data_connector_config: dict,
@@ -1324,7 +1319,6 @@ def test_data_connector_and_nested_objects_are_serialized_spark(
     ],
 )
 @pytest.mark.spark
-@pytest.mark.integration
 def test_asset_and_nested_objects_are_serialized_spark(
     asset_config: AssetConfig,
     expected_serialized_asset_config: dict,

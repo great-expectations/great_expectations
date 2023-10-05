@@ -15,7 +15,11 @@ from great_expectations.expectations.metrics import (
 )
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
+from great_expectations.render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 
 class ColumnValuesEqualThree(ColumnMapMetricProvider):
@@ -123,7 +127,7 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
                 return (
                     f'Less than {mostly * 100}% of values in column "{column}" equal 3.'
                 )
-        else:
+        else:  # noqa: PLR5501
             if result.success:
                 return f'All of the values in column "{column}" equal 3.'
             else:
@@ -152,7 +156,7 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
         template_str = "values must be equal to 3"
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+                params["mostly"] * 100, no_scientific=True
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."

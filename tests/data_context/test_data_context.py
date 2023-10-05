@@ -1,7 +1,10 @@
+import configparser
 import copy
 import json
 import os
+import pathlib
 import shutil
+import uuid
 from collections import OrderedDict
 from typing import Dict, List, Union
 
@@ -18,7 +21,10 @@ from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import DataContext
+from great_expectations.data_context import DataContext, get_context
+from great_expectations.data_context.data_context.ephemeral_data_context import (
+    EphemeralDataContext,
+)
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -34,7 +40,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.dataset import Dataset
 from great_expectations.datasource import (
     Datasource,
     LegacyDatasource,
@@ -52,7 +57,6 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.util import (
     deep_filter_properties_iterable,
     gen_directory_tree_str,
-    get_context,
 )
 from tests.test_utils import create_files_in_directory, safe_remove
 
@@ -77,7 +81,7 @@ def titanic_multibatch_data_context(
     project_path = tmp_path / "titanic_data_context"
     project_path.mkdir()
     project_path = str(project_path)
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
@@ -85,7 +89,7 @@ def titanic_multibatch_data_context(
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH103, PTH118
     shutil.copy(
         file_relative_path(__file__, "../test_fixtures/great_expectations_titanic.yml"),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(__file__, "../test_sets/Titanic.csv"),
@@ -118,7 +122,7 @@ def data_context_with_bad_datasource(tmp_path_factory):
     It is used by test_get_batch_multiple_datasources_do_not_scan_all()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "../test_fixtures")
     os.makedirs(  # noqa: PTH103
@@ -129,7 +133,7 @@ def data_context_with_bad_datasource(tmp_path_factory):
         os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_bad_datasource.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     return get_context(context_root_dir=context_path)
 
@@ -211,7 +215,6 @@ def test_save_expectation_suite(data_context_parameterized_expectation_suite):
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_save_expectation_suite_include_rendered_content(
     data_context_parameterized_expectation_suite,
 ):
@@ -245,7 +248,6 @@ def test_save_expectation_suite_include_rendered_content(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_get_expectation_suite_include_rendered_content(
     data_context_parameterized_expectation_suite,
 ):
@@ -512,14 +514,14 @@ project_path/
     tree_str = gen_directory_tree_str(project_dir)
     assert (
         tree_str
-        == """project_path/
+        == f"""project_path/
     data/
         random/
             f1.csv
             f2.csv
         titanic/
             Titanic.csv
-    great_expectations/
+    gx/
         .gitignore
         great_expectations.yml
         checkpoints/
@@ -547,10 +549,8 @@ project_path/
                             BasicDatasetProfiler/
                                 profiling/
                                     20190926T134241.000000Z/
-                                        {}.json
-""".format(
-            titanic_profiled_batch_id
-        )
+                                        {titanic_profiled_batch_id}.json
+"""
     )
 
     context.profile_datasource("random")
@@ -573,12 +573,12 @@ project_path/
     ).to_id()
 
     data_docs_dir = os.path.join(  # noqa: PTH118
-        project_dir, "great_expectations/uncommitted/data_docs"
+        project_dir, "gx/uncommitted/data_docs"
     )
     observed = gen_directory_tree_str(data_docs_dir)
     assert (
         observed
-        == """\
+        == f"""\
 data_docs/
     local_site/
         index.html
@@ -625,22 +625,20 @@ data_docs/
                         BasicDatasetProfiler/
                             profiling/
                                 20190926T134241.000000Z/
-                                    {:s}.html
+                                    {f1_profiled_batch_id:s}.html
                     f2/
                         BasicDatasetProfiler/
                             profiling/
                                 20190926T134241.000000Z/
-                                    {:s}.html
+                                    {f2_profiled_batch_id:s}.html
             titanic/
                 subdir_reader/
                     Titanic/
                         BasicDatasetProfiler/
                             profiling/
                                 20190926T134241.000000Z/
-                                    {:s}.html
-""".format(
-            f1_profiled_batch_id, f2_profiled_batch_id, titanic_profiled_batch_id
-        )
+                                    {titanic_profiled_batch_id:s}.html
+"""
     )
 
     # save data_docs locally if you need to inspect the files manually
@@ -726,7 +724,7 @@ def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
     project_path = tmp_path / "a" / "b" / "c" / "d" / "data_context"
     project_path.mkdir(parents=True)
 
-    context_path = project_path / "great_expectations"
+    context_path = project_path / FileDataContext.GX_DIR
     context_path.mkdir()
     monkeypatch.chdir(str(context_path))
 
@@ -740,7 +738,7 @@ def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
                 "..", "test_fixtures", "great_expectations_basic.yml"
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     monkeypatch.setenv("GX_HOME", str(context_path))
     assert FileDataContext.find_context_root_dir() == str(context_path)
@@ -850,12 +848,13 @@ def test_data_context_create_does_not_raise_error_or_warning_if_ge_dir_exists(
 def empty_context(tmp_path_factory) -> FileDataContext:
     project_path = str(tmp_path_factory.mktemp("data_context"))
     FileDataContext.create(project_path)
-    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    ge_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     assert os.path.isdir(ge_dir)  # noqa: PTH112
     assert os.path.isfile(  # noqa: PTH113
         os.path.join(ge_dir, FileDataContext.GX_YML)  # noqa: PTH118
     )
-    context = DataContext(ge_dir)
+    with pytest.deprecated_call():
+        context = DataContext(ge_dir)
     assert isinstance(context, FileDataContext)
     return context
 
@@ -1045,9 +1044,7 @@ def test_data_context_create_raises_warning_and_leaves_existing_yml_untouched(
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
     FileDataContext.create(project_path)
-    ge_yml = os.path.join(  # noqa: PTH118
-        project_path, "great_expectations/great_expectations.yml"
-    )
+    ge_yml = os.path.join(project_path, "gx/great_expectations.yml")  # noqa: PTH118
     with open(ge_yml, "a") as ff:
         ff.write("# LOOK I WAS MODIFIED")
 
@@ -1067,7 +1064,7 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
     FileDataContext.create(project_path)
 
     # mangle the existing setup
-    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    ge_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
     shutil.rmtree(uncommitted_dir)
 
@@ -1084,7 +1081,7 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
     assert (
         obs
         == """\
-great_expectations/
+gx/
     .gitignore
     great_expectations.yml
     checkpoints/
@@ -1111,7 +1108,7 @@ def test_data_context_create_does_nothing_if_all_uncommitted_dirs_exist(
     tmp_path_factory,
 ):
     expected = """\
-great_expectations/
+gx/
     .gitignore
     great_expectations.yml
     checkpoints/
@@ -1131,7 +1128,7 @@ great_expectations/
             .ge_store_backend_id
 """
     project_path = str(tmp_path_factory.mktemp("stuff"))
-    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    ge_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
 
     FileDataContext.create(project_path)
     fixture = gen_directory_tree_str(ge_dir)
@@ -1158,7 +1155,7 @@ uncommitted/
         .ge_store_backend_id
 """
     project_path = str(tmp_path_factory.mktemp("stuff"))
-    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    ge_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
     FileDataContext.create(project_path)
     fixture = gen_directory_tree_str(uncommitted_dir)
@@ -1198,7 +1195,7 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
     FileDataContext.create(project_path)
-    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    ge_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
     config_vars_yml = os.path.join(  # noqa: PTH118
         uncommitted_dir, "config_variables.yml"
@@ -1220,6 +1217,7 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
 @pytest.mark.filesystem
 def test_scaffold_directories(tmp_path_factory):
     empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories"))
+    empty_directory = pathlib.Path(empty_directory)
     FileDataContext._scaffold_directories(empty_directory)
 
     assert set(os.listdir(empty_directory)) == {
@@ -1337,54 +1335,6 @@ def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
 
 
 @pytest.mark.unit
-def test_get_batch_raises_error_when_passed_a_non_string_type_for_suite_parameter(
-    titanic_data_context,
-):
-    with pytest.raises(gx_exceptions.DataContextError):
-        titanic_data_context.get_batch({}, 99)
-
-
-@pytest.mark.unit
-def test_get_batch_raises_error_when_passed_a_non_dict_or_batch_kwarg_type_for_batch_kwarg_parameter(
-    titanic_data_context,
-):
-    with pytest.raises(gx_exceptions.BatchKwargsError):
-        titanic_data_context.get_batch(99, "foo")
-
-
-@pytest.mark.filesystem
-def test_get_batch_when_passed_a_suite_name(titanic_data_context):
-    context = titanic_data_context
-    root_dir = context.root_directory
-    batch_kwargs = {
-        "datasource": "mydatasource",
-        "path": os.path.join(root_dir, "..", "data", "Titanic.csv"),  # noqa: PTH118
-    }
-    context.add_expectation_suite("foo")
-    assert context.list_expectation_suite_names() == ["foo"]
-    batch = context.get_batch(batch_kwargs, "foo")
-    assert isinstance(batch, Dataset)
-    assert isinstance(batch.get_expectation_suite(), ExpectationSuite)
-
-
-@pytest.mark.filesystem
-def test_get_batch_when_passed_a_suite(titanic_data_context):
-    context = titanic_data_context
-    root_dir = context.root_directory
-    batch_kwargs = {
-        "datasource": "mydatasource",
-        "path": os.path.join(root_dir, "..", "data", "Titanic.csv"),  # noqa: PTH118
-    }
-    context.add_expectation_suite("foo")
-    assert context.list_expectation_suite_names() == ["foo"]
-    suite = context.get_expectation_suite("foo")
-
-    batch = context.get_batch(batch_kwargs, suite)
-    assert isinstance(batch, Dataset)
-    assert isinstance(batch.get_expectation_suite(), ExpectationSuite)
-
-
-@pytest.mark.unit
 def test_list_validation_operators_data_context_with_none_returns_empty_list(
     titanic_data_context,
 ):
@@ -1499,7 +1449,6 @@ def test_get_checkpoint(empty_context_with_checkpoint):
 
 
 @pytest.mark.big
-@pytest.mark.integration
 def test_run_checkpoint_new_style(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -1761,38 +1710,6 @@ def test_get_validator_with_batch_list(in_memory_runtime_context):
         create_expectation_suite_with_name="A_expectation_suite",
     )
     assert len(my_validator.batches) == 2
-
-
-@pytest.mark.filesystem
-def test_get_batch_multiple_datasources_do_not_scan_all(
-    data_context_with_bad_datasource,
-):
-    """
-    What does this test and why?
-
-    A DataContext can have "stale" datasources in its configuration (ie. connections to DBs that are now offline).
-    If we configure a new datasource and are only using it (like the PandasDatasource below), then we don't
-    want to be dependent on all the "stale" datasources working too.
-
-    data_context_with_bad_datasource is a fixture that contains a configuration for an invalid datasource
-    (with "fake_port" and "fake_host")
-
-    In the test we configure a new expectation_suite, a local pandas_datasource and retrieve a single batch.
-
-    This tests a fix for the following issue:
-    https://github.com/great-expectations/great_expectations/issues/2241
-    """
-
-    context = data_context_with_bad_datasource
-    context.add_expectation_suite(expectation_suite_name="local_test.default")
-    expectation_suite = context.get_expectation_suite("local_test.default")
-    context.add_datasource("pandas_datasource", class_name="PandasDatasource")
-    df = pd.DataFrame({"a": [1, 2, 3]})
-    batch = context.get_batch(
-        batch_kwargs={"datasource": "pandas_datasource", "dataset": df},
-        expectation_suite_name=expectation_suite,
-    )
-    assert len(batch) == 3
 
 
 @pytest.mark.filesystem
@@ -2202,7 +2119,8 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
     # Check that the datasource was written to disk as expected
     root_directory = context.root_directory
     del context
-    context = DataContext(root_directory)
+    with pytest.deprecated_call():
+        context = DataContext(root_directory)
 
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
@@ -2362,7 +2280,8 @@ def test_add_datasource_from_yaml_sql_datasource(  # noqa: PLR0915
     # Check that the datasource was written to disk as expected
     root_directory = context.root_directory
     del context
-    context = DataContext(root_directory)
+    with pytest.deprecated_call():
+        context = DataContext(root_directory)
 
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
@@ -2745,7 +2664,8 @@ def test_add_datasource_from_yaml_with_substitution_variables(
     # Check that the datasource was written to disk as expected
     root_directory = context.root_directory
     del context
-    context = DataContext(root_directory)
+    with pytest.deprecated_call():
+        context = DataContext(root_directory)
 
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
@@ -2853,7 +2773,6 @@ def test_modifications_to_config_vars_is_recognized_within_same_program_executio
 
 
 @pytest.mark.big
-@pytest.mark.integration
 def test_check_for_usage_stats_sync_finds_diff(
     empty_data_context_stats_enabled: DataContext,
     data_context_config_with_datasources: DataContextConfig,
@@ -2873,7 +2792,6 @@ def test_check_for_usage_stats_sync_finds_diff(
 
 
 @pytest.mark.big
-@pytest.mark.integration
 def test_check_for_usage_stats_sync_does_not_find_diff(
     empty_data_context_stats_enabled: DataContext,
 ) -> None:
@@ -2892,7 +2810,6 @@ def test_check_for_usage_stats_sync_does_not_find_diff(
 
 
 @pytest.mark.big
-@pytest.mark.integration
 def test_check_for_usage_stats_sync_short_circuits_due_to_disabled_usage_stats(
     empty_data_context: DataContext,
     data_context_config_with_datasources: DataContextConfig,
@@ -2933,7 +2850,6 @@ class ExpectSkyToBeColor(BatchExpectation):
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_unrendered_and_failed_prescriptive_renderer_behavior(
     empty_data_context: DataContext,
 ):
@@ -3091,3 +3007,84 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
         actual_rendered_content.extend(expectation_configuration.rendered_content)
 
     assert actual_rendered_content == legacy_rendered_content
+
+
+@pytest.mark.filesystem
+def test_file_backed_context_scaffolds_gitignore(tmp_path: pathlib.Path):
+    project_path = tmp_path / "my_project_root_dir"
+    context_path = project_path / FileDataContext.GX_DIR
+    uncommitted = context_path / FileDataContext.GX_UNCOMMITTED_DIR
+    gitignore = context_path / FileDataContext.GITIGNORE
+
+    assert not uncommitted.exists()
+    assert not gitignore.exists()
+
+    # Scaffold project directory
+    _ = get_context(context_root_dir=context_path)
+
+    assert uncommitted.exists()
+    assert gitignore.exists()
+    assert FileDataContext.GX_UNCOMMITTED_DIR in gitignore.read_text()
+
+
+@pytest.mark.filesystem
+def test_file_backed_context_updates_existing_gitignore(tmp_path: pathlib.Path):
+    project_path = tmp_path / "my_project_root_dir"
+    context_path = project_path / FileDataContext.GX_DIR
+    uncommitted = context_path / FileDataContext.GX_UNCOMMITTED_DIR
+    gitignore = context_path / FileDataContext.GITIGNORE
+
+    # Scaffold necessary files so `get_context` updates rather than creates
+    uncommitted.mkdir(parents=True)
+    existing_value = "__pycache__/"
+    with gitignore.open("w") as f:
+        f.write(f"\n{existing_value}")
+
+    # Scaffold project directory
+    _ = get_context(context_root_dir=context_path)
+
+    contents = gitignore.read_text()
+    assert existing_value in contents
+    assert FileDataContext.GX_UNCOMMITTED_DIR in contents
+
+
+@pytest.mark.unit
+def test_set_oss_id_with_empty_config(in_memory_runtime_context: EphemeralDataContext):
+    context = in_memory_runtime_context
+    config = configparser.ConfigParser()
+
+    oss_id = context._set_oss_id(config)
+
+    assert config.sections() == ["anonymous_usage_statistics"]
+    assert list(config["anonymous_usage_statistics"]) == ["oss_id"]
+    assert oss_id == uuid.UUID(config["anonymous_usage_statistics"]["oss_id"])
+
+
+@pytest.mark.unit
+def test_set_oss_id_with_existing_config(
+    in_memory_runtime_context: EphemeralDataContext,
+):
+    context = in_memory_runtime_context
+
+    # Set up existing config
+    # [anonymous_usage_statistics]
+    # usage_statistics_url=https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
+    config = configparser.ConfigParser()
+    config["anonymous_usage_statistics"] = {}
+    usage_statistics_url = (
+        "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+    )
+    config["anonymous_usage_statistics"]["usage_statistics_url"] = usage_statistics_url
+
+    oss_id = context._set_oss_id(config)
+
+    assert config.sections() == ["anonymous_usage_statistics"]
+    assert list(config["anonymous_usage_statistics"]) == [
+        "usage_statistics_url",
+        "oss_id",
+    ]
+    assert (
+        usage_statistics_url
+        == config["anonymous_usage_statistics"]["usage_statistics_url"]
+    )
+    assert oss_id == uuid.UUID(config["anonymous_usage_statistics"]["oss_id"])

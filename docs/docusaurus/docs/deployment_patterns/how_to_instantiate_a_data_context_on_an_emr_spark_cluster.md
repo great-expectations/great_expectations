@@ -25,7 +25,7 @@ Use the information provided here to instantiate a Data Context on an EMR Spark 
 
 ## Configure a Data Context in code
 
-1. Create an in-code Data Context. See [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
+1. Create an in-code Data Context. See [Instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 
 2. Copy the Python code at the end of **How to instantiate an Ephemeral Data Context** into a cell in your EMR Spark notebook, or use the other examples to customize your configuration. The code instantiates and configures a Data Context for an EMR Spark cluster.
 

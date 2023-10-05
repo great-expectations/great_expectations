@@ -1,4 +1,4 @@
-Finally, having added our Checkpoint to our Data Context, we will run the Checkpoint:
+Run the following code to run the Checkpoint:
 
-```python name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py run checkpoint"
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Run Checkpoint"
 ```

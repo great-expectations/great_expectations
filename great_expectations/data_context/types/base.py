@@ -43,6 +43,7 @@ from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
@@ -165,6 +166,7 @@ class BaseYamlConfig(SerializableDictDot):
         return object_to_yaml_str(obj=self.commented_map)
 
     @public_api
+    @override
     def to_json_dict(self) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict containing this DataContextConfig.
 
@@ -368,6 +370,7 @@ class AssetConfig(SerializableDictDot):
         return self._module_name
 
     @public_api
+    @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this AssetConfig.
 
@@ -615,6 +618,7 @@ class DataConnectorConfig(AbstractConfig):
         return self._module_name
 
     @public_api
+    @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this DataConnectorConfig.
 
@@ -1049,6 +1053,7 @@ class ExecutionEngineConfigSchema(Schema):
     caching = fields.Boolean(required=False, allow_none=True)
     batch_spec_defaults = fields.Dict(required=False, allow_none=True)
     force_reuse_spark_context = fields.Boolean(required=False, allow_none=True)
+    persist = fields.Boolean(required=False, allow_none=True)
     # BigQuery Service Account Credentials
     # https://googleapis.dev/python/sqlalchemy-bigquery/latest/README.html#connection-string-parameters
     credentials_info = fields.Dict(required=False, allow_none=True)
@@ -1177,6 +1182,7 @@ class DatasourceConfig(AbstractConfig):
         return self._module_name
 
     @public_api
+    @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this DatasourceConfig.
 
@@ -1219,6 +1225,7 @@ class DatasourceConfigSchema(AbstractConfigSchema):
         missing="great_expectations.datasource",
     )
     force_reuse_spark_context = fields.Bool(required=False, allow_none=True)
+    persist = fields.Bool(required=False, allow_none=True)
     spark_config = fields.Raw(required=False, allow_none=True)
     execution_engine = fields.Nested(
         ExecutionEngineConfigSchema, required=False, allow_none=True
@@ -1692,6 +1699,7 @@ class DataContextConfigSchema(Schema):
                 data.pop(key)
         return data
 
+    @override
     def handle_error(self, exc, data, **kwargs) -> None:  # type: ignore[override]
         """Log and raise our custom exception when (de)serialization fails."""
         if (
@@ -1809,6 +1817,9 @@ class DataContextConfigDefaults(enum.Enum):
 
     # Datasource
     DEFAULT_DATASOURCE_STORE_NAME = "datasource_store"
+
+    # DataAsset
+    DEFAULT_DATA_ASSET_STORE_NAME = "data_asset_store"
 
     # Checkpoints
     DEFAULT_CHECKPOINT_STORE_NAME = "checkpoint_store"
@@ -2528,6 +2539,7 @@ class DataContextConfig(BaseYamlConfig):
         self._config_version = config_version
 
     @public_api
+    @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this DataContextConfig.
 
@@ -2557,6 +2569,7 @@ class DataContextConfig(BaseYamlConfig):
         for k, v in config.items():
             self[k] = v
 
+    @override
     def __repr__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -2578,6 +2591,7 @@ class DataContextConfig(BaseYamlConfig):
 
         return json.dumps(sorted_json_dict, indent=2)
 
+    @override
     def __str__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -2613,6 +2627,7 @@ class CheckpointValidationConfigSchema(AbstractConfigSchema):
 
     id = fields.String(required=False, allow_none=True)
 
+    @override
     def dump(self, obj: dict, *, many: Optional[bool] = None) -> dict:
         """
         Chetan - 20220803 - By design, Marshmallow accepts unknown fields through the
@@ -2800,7 +2815,7 @@ class CheckpointConfig(BaseYamlConfig):
     def __init__(  # noqa: PLR0913
         self,
         name: Optional[str] = None,
-        config_version: Union[int, float] = 1.0,
+        config_version: Union[int, float] = 1.0,  # noqa: PYI041
         template_name: Optional[str] = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: str = "Checkpoint",
@@ -3034,6 +3049,7 @@ class CheckpointConfig(BaseYamlConfig):
         return result
 
     @public_api
+    @override
     def to_json_dict(self) -> Dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this CheckpointConfig.
 
@@ -3049,6 +3065,7 @@ class CheckpointConfig(BaseYamlConfig):
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
 
+    @override
     def __repr__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -3070,6 +3087,7 @@ class CheckpointConfig(BaseYamlConfig):
 
         return json.dumps(sorted_json_dict, indent=2)
 
+    @override
     def __str__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>

@@ -68,10 +68,10 @@ Use the information provided here to configure a new storage location for Expect
 
 <Prerequisites>
 
-- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 - [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 - [An Azure Storage account](https://docs.microsoft.com/en-us/azure/storage/).
-- An Azure Blob container. If you need to [host and share Data Docs on Azure Blob Storage](../configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md), then you can set this up first and then use the ``$web`` existing container to store your Expectations.
+- An Azure Blob container. If you need to [host and share Data Docs on Azure Blob Storage](../configuring_data_docs/host_and_share_data_docs.md), then you can set this up first and then use the ``$web`` existing container to store your Expectations.
 - A prefix (folder) where to store Expectations. You don't need to create the folder, the prefix is just part of the Azure Blob name.
 
 </Prerequisites>
@@ -120,10 +120,10 @@ stores:
 ```
 
 :::note
-If the container for [hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md) is named ``$web``, use ``container: \$web`` to allow access to the ``$web``container.
+If the container for [hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/host_and_share_data_docs.md) is named ``$web``, use ``container: \$web`` to allow access to the ``$web``container.
 :::
 
-Additional authentication and configuration options are available. See [Hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md).
+Additional authentication and configuration options are available. See [Hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/host_and_share_data_docs.md).
 
 ### Copy existing Expectation JSON files to the Azure blob (Optional)
 
@@ -179,7 +179,7 @@ To view all the code used in this topic, see [how_to_configure_an_expectation_st
 
 <Prerequisites>
 
-- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 - [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 - A GCP [service account](https://cloud.google.com/iam/docs/service-accounts) with credentials that allow access to GCP resources such as Storage Objects.
 - A GCP project, GCS bucket, and prefix to store Expectations.
@@ -213,7 +213,7 @@ In the following example, `expectations_store_name` is set to ``expectations_GCS
 ```
 
 :::warning
-If you are also storing [Validations in GCS](./how_to_configure_a_validation_result_store_in_gcs.md) or [DataDocs in GCS](../configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md), make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
+If you are also storing [Validations in GCS](./configure_result_stores.md) or [DataDocs in GCS](../configuring_data_docs/host_and_share_data_docs.md), make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
 :::
 
 ### Copy existing Expectation JSON files to the GCS bucket (Optional)
@@ -265,7 +265,7 @@ Use the information provided here to configure a new storage location for Expect
 
 <Prerequisites>
 
-- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 - [An Expectation Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 - A storage location for Expectations. This can be a local path, or a path to a network filesystem.
     
@@ -374,7 +374,7 @@ Use the information provided here to configure an Expectations store in a Postgr
 
 <Prerequisites>
 
-- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 - [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 - A [PostgreSQL](https://www.postgresql.org/) database with appropriate credentials.
 

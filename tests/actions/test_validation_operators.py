@@ -1,5 +1,4 @@
 # TODO: ADD TESTS ONCE GET_BATCH IS INTEGRATED!
-
 import dateutil.parser
 import pandas as pd
 import pytest
@@ -7,8 +6,11 @@ from freezegun import freeze_time
 
 import great_expectations as gx
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context import get_context
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.self_check.util import modify_locale
-from great_expectations.util import get_context
 from great_expectations.validation_operators.validation_operators import (
     WarningAndFailureExpectationSuitesValidationOperator,
 )
@@ -52,7 +54,7 @@ def warning_failure_validation_operator_data_context(
     tmp_path_factory,
     filesystem_csv_4,
 ):
-    project_path = str(tmp_path_factory.mktemp("great_expectations"))
+    project_path = str(tmp_path_factory.mktemp(FileDataContext.GX_DIR))
 
     # NOTE: This setup is almost identical to test_DefaultDataContextAwareValidationOperator.
     # Consider converting to a single fixture.
@@ -74,7 +76,7 @@ def warning_failure_validation_operator_data_context(
     )
 
     data_context.add_expectation_suite(expectation_suite_name="f1.failure")
-    df = data_context.get_batch(
+    df = data_context._get_batch_v2(
         expectation_suite_name="f1.failure",
         batch_kwargs=data_context.build_batch_kwargs(
             "my_datasource", "subdir_reader", "f1"
@@ -87,7 +89,7 @@ def warning_failure_validation_operator_data_context(
     data_context.update_expectation_suite(expectation_suite=failure_expectations)
 
     data_context.add_expectation_suite(expectation_suite_name="f1.warning")
-    df = data_context.get_batch(
+    df = data_context._get_batch_v2(
         expectation_suite_name="f1.warning",
         batch_kwargs=data_context.build_batch_kwargs(
             "my_datasource", "subdir_reader", "f1"

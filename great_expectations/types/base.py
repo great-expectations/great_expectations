@@ -1,11 +1,19 @@
+from __future__ import annotations
+
 import copy
 import logging
-from typing import List
+from typing import TYPE_CHECKING, Callable, List, TypeVar
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 from ruamel.yaml import YAML, yaml_object
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
+
+_KT = TypeVar("_KT")
+_VT = TypeVar("_VT")
 
 
 @yaml_object(yaml)
@@ -19,8 +27,8 @@ class DotDict(dict):
     def __getattr__(self, item):
         return self.get(item)
 
-    __setattr__ = dict.__setitem__  # type: ignore[assignment]
-    __delattr__ = dict.__delitem__  # type: ignore[assignment]
+    __setattr__: Callable[[Self, _KT, _VT], None] = dict.__setitem__
+    __delattr__: Callable[[Self, _KT], None] = dict.__delitem__
 
     def __dir__(self):
         return self.keys()

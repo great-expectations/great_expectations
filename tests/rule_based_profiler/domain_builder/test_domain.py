@@ -21,7 +21,7 @@ def test_semantic_domain_consistency():
 
     with pytest.raises(ValueError) as excinfo:
         # noinspection PyUnusedLocal
-        domain = Domain(
+        Domain(
             domain_type="column",
             domain_kwargs={"column": "passenger_count"},
             details={
@@ -206,7 +206,7 @@ def test_semantic_domain_equivalence():
 
     with pytest.raises(ValueError) as excinfo:
         # noinspection PyUnusedLocal
-        domain_as_dict: dict = domain_d.to_json_dict()
+        domain_d.to_json_dict()
 
     assert (
         "'unknown_semantic_type_as_string' is not a valid SemanticDomainTypes"
@@ -228,7 +228,7 @@ def test_semantic_domain_equivalence():
 
     with pytest.raises(ValueError) as excinfo:
         # noinspection PyUnusedLocal
-        domain_as_dict: dict = domain_e.to_json_dict()
+        domain_e.to_json_dict()
 
     assert (
         "'unknown_semantic_type_as_string' is not a valid SemanticDomainTypes"

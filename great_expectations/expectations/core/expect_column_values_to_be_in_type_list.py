@@ -247,14 +247,14 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
         if params["type_list"] is not None:
             for i, v in enumerate(params["type_list"]):
-                params[f"v__{str(i)}"] = v
+                params[f"v__{i!s}"] = v
             values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["type_list"])]
+                [f"$v__{i!s}" for i, v in enumerate(params["type_list"])]
             )
 
             if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
                 params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+                    params["mostly"] * 100, no_scientific=True
                 )
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if include_column_name:
@@ -269,8 +269,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                         + values_string
                         + ", at least $mostly_pct % of the time."
                     )
-            else:
-                if include_column_name:  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if include_column_name:
                     template_str = (
                         f"$column value types must belong to this set: {values_string}."
                     )
@@ -278,8 +278,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                     template_str = (
                         f"value types must belong to this set: {values_string}."
                     )
-        else:
-            if include_column_name:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if include_column_name:
                 template_str = "$column value types may be any value, but observed value will be reported"
             else:
                 template_str = (
