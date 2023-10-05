@@ -149,13 +149,13 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
-    def _prescriptive_renderer(  # type: ignore[override] # TODO: Fix this type ignore
+    def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ):
+    ) -> list[RenderedStringTemplateContent]:
         runtime_configuration = runtime_configuration or {}
         include_column_name = (
             False if runtime_configuration.get("include_column_name") is False else True

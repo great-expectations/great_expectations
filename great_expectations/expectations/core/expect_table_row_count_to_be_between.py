@@ -1,12 +1,9 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -35,6 +32,11 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -241,13 +243,13 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     @override
-    def _prescriptive_renderer(  # type: ignore[override] # TODO: Fix this type ignore
+    def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ):
+    ) -> list[RenderedStringTemplateContent]:
         runtime_configuration = runtime_configuration or {}
         _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
