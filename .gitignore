@@ -149,3 +149,4 @@ metastore_db
 Pipfile
 Pipfile.lock
 
+data/
