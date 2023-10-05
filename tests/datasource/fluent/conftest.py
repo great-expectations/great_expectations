@@ -28,11 +28,7 @@ from great_expectations.core.batch_spec import (
     BatchMarkers,
     SqlAlchemyDatasourceBatchSpec,
 )
-from great_expectations.core.datasource_dict import CacheableDatasourceDict
-from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context import FileDataContext
-from great_expectations.data_context.store import DatasourceStore
-from great_expectations.data_context.types.base import datasourceConfigSchema
 from great_expectations.datasource.fluent import (
     PandasAzureBlobStorageDatasource,
     PandasGoogleCloudStorageDatasource,
@@ -217,15 +213,7 @@ def empty_cloud_context_fluent(
         cloud_base_url=cloud_details.base_url,
         cloud_mode=True,
     )
-    # Basic in-memory mock for DatasourceDict to avoid HTTP calls
-    context._datasources = CacheableDatasourceDict(  # type: ignore[assignment]
-        context=context,
-        datasource_store=DatasourceStore(
-            store_name="datasource_store",
-            store_backend={"class_name": "InMemoryStoreBackend"},
-            serializer=DictConfigSerializer(schema=datasourceConfigSchema),
-        ),
-    )
+
     return context
 
 
