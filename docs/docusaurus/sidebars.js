@@ -176,6 +176,7 @@ module.exports = {
     {
       type: 'category',
       label: 'GX OSS',
+      link: { type: 'doc', id: 'gx_oss_lp' },
       items: [
         {
           type: 'category',
