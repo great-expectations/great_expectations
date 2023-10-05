@@ -970,6 +970,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 error_message += " (but not both)"
             raise TypeError(error_message)
 
+        # "type" is only used in FDS so we check for its existence (equivalent for block-style would be "class_name" and "module_name")
         if "type" in kwargs:
             raise TypeError(
                 "Creation of fluent-datasources with individual arguments is not supported and should be done through the `context.sources` API."
