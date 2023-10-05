@@ -8,7 +8,7 @@ description: Connect to source data stored on Amazon S3, Google Cloud Storage (G
 import LinkCardGrid from '/docs/components/LinkCardGrid';
 import LinkCard from '/docs/components/LinkCard';
 
-<p class="DocItem__header-description">This is where you'll find information for connecting to source data stored on databases and local filesystems, how to request data from a Data Source, how to organize Batches in a file-based Data Asset, and how to connect Great Expectations (GX) to SQL tables and data returned by SQL database queries.</p>
+<p class="DocItem__header-description">This is where you'll find information for connecting to source data stored on databases and local filesystems, how to request data from a Data Source, how to organize Batches in a file-based Data Asset, and how to connect GX OSS to SQL tables and data returned by SQL database queries.</p>
 
 <LinkCardGrid>
   <LinkCard topIcon label="Connect to filesystem source data" description="Connect to filesystem source data" href="/docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data" icon="/img/connect_icon.svg" />
