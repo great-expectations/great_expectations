@@ -230,7 +230,7 @@ class ExpectMulticolumnProductToBeEqualToSingleColumn(MulticolumnMapExpectation)
             "multi-column expectation",
             "multi-column product values to be equal to single column",
         ],
-        "contributors": ["@AsaFLachisch", "@mkopec87"],
+        "contributors": ["@calvingdu"],
     }
     # </snippet>
 
