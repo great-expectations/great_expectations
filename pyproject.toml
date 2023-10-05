@@ -96,12 +96,10 @@ exclude = [
     'expectations/core/expect_column_values_to_match_like_pattern_list\.py',                               # 3
     'expectations/core/expect_column_values_to_match_like_pattern\.py',                                    # 2
     'expectations/core/expect_column_values_to_match_json_schema\.py',                                     # 1
-    'expectations/core/expect_column_values_to_be_unique\.py',                                             # 1
     'expectations/core/expect_column_values_to_be_null\.py',                                               # 3
     'expectations/core/expect_column_values_to_be_json_parseable\.py',                                     # 1
     'expectations/core/expect_column_values_to_be_increasing\.py',                                         # 1
     'expectations/core/expect_column_values_to_be_in_type_list\.py',                                       # 11
-    'expectations/core/expect_column_values_to_be_in_set\.py',                                             # 1
     'expectations/core/expect_column_values_to_be_decreasing\.py',                                         # 1
     'expectations/core/expect_column_values_to_be_dateutil_parseable\.py',                                 # 1
     'expectations/core/expect_column_values_to_be_between\.py',                                            # 3
@@ -116,10 +114,6 @@ exclude = [
     'expectations/core/expect_column_values_a_to_be_greater_than_b\.py',                                   # 3
     'expectations/core/expect_column_pair_cramers_phi_value_to_be_less_than\.py',                          # 7
     'expectations/core/expect_column_most_common_value_to_be_in_set\.py',                                  # 3
-    'expectations/core/expect_column_min_to_be_between\.py',                                               # 1
-    'expectations/core/expect_column_median_to_be_between\.py',                                            # 1
-    'expectations/core/expect_column_mean_to_be_between\.py',                                              # 1
-    'expectations/core/expect_column_max_to_be_between\.py',                                               # 1
     'expectations/core/expect_column_kl_divergence_to_be_less_than\.py',                                   # 22
     'expectations/core/expect_column_pair_values_to_be_in_set\.py',                                        # 2
     'expectations/core/expect_column_pair_values_to_be_equal\.py',                                         # 3
@@ -134,7 +128,6 @@ exclude = [
     'expectations/core/expect_table_columns_to_match_set\.py',                                             # 8
     'expectations/core/expect_table_columns_to_match_ordered_list\.py',                                    # 11
     'expectations/core/expect_table_column_count_to_equal\.py',                                            # 5
-    'expectations/core/expect_table_column_count_to_be_between\.py',                                       # 3
     'expectations/core/expect_table_row_count_to_equal_other_table\.py',                                   # 11
     'expectations/regex_based_column_map_expectation\.py',                                                 # 3
     'expectations/row_conditions\.py',                                                                     # 4

@@ -39,10 +39,6 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
         value_set (set-like): \
             A set of objects used for comparison.
 
-    Keyword Args:
-        parse_strings_as_datetimes (boolean or None): If True values provided in value_set will be parsed \
-        as datetimes before making comparisons.
-
     Other Parameters:
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
