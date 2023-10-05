@@ -204,7 +204,7 @@ def test_context_add_or_update_datasource(
         # TODO: adjust call counts as needed
         cloud_api_fake.assert_call_count(
             f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources",
-            1,
+            2,
         )
         cloud_api_fake.assert_call_count(
             f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}?name={datasource.name}",
