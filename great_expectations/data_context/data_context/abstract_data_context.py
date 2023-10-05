@@ -962,12 +962,19 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _validate_add_datasource_args(
         name: str | None,
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None,
+        **kwargs,
     ) -> None:
         if not ((datasource is None) ^ (name is None)):
             error_message = "Must either pass in an existing 'datasource' or individual constructor arguments"
             if datasource and name:
                 error_message += " (but not both)"
             raise TypeError(error_message)
+
+        # "type" is only used in FDS so we check for its existence (equivalent for block-style would be "class_name" and "module_name")
+        if "type" in kwargs:
+            raise TypeError(
+                "Creation of fluent-datasources with individual arguments is not supported and should be done through the `context.sources` API."
+            )
 
     def _add_datasource(
         self,
@@ -977,7 +984,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
-        self._validate_add_datasource_args(name=name, datasource=datasource)
+        self._validate_add_datasource_args(name=name, datasource=datasource, **kwargs)
         if isinstance(datasource, FluentDatasource):
             self._add_fluent_datasource(
                 datasource=datasource,
