@@ -28,7 +28,7 @@ To get the most out of GX Cloud, you'll need to request a GX Cloud Beta account,
 3. Run the following command in an empty base directory inside a Python virtual environment to install GX Cloud and its dependencies:
 
     ```bash title="Terminal input"
-    pip install 'great_expectations[cloud,snowflake]'
+    pip install 'great_expectations_cloud[snowflake]'
     ```
 
     It can take several minutes for the installation to complete.
@@ -100,5 +100,5 @@ Confirm the `GX_CLOUD_ACCESS_TOKEN` and `GX_CLOUD_ORGANIZATION_ID` environment v
 Run the following command:
 
 ```bash title="Terminal input"
-    pip install great_expectations[cloud]
+    pip install 'great_expectations_cloud[snowflake]'
 ```
