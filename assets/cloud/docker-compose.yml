@@ -1,0 +1,64 @@
+version: "3.4"
+
+services:
+  db:
+    image: postgres:13.7
+    # Very important that parent dir of `data` already exists
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    # Turn off db logs by default
+    # https://postgresqlco.nf/doc/en/param/log_statement/
+    command: [ "postgres", "-c", "log_statement=none" ]
+    environment:
+      POSTGRES_DB: mercury
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+  mq:
+    image: rabbitmq:3.10.20-management
+    hostname: gx-bunny
+    environment:
+      RABBITMQ_DEFAULT_USER: gx_prod
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - 8042:15672
+      - 5672:5672
+  db-provisioner:
+    image: 258143015559.dkr.ecr.us-east-1.amazonaws.com/mercury/provisioner:0.4.1
+    environment:
+      PGPASSWORD: postgres
+      APP_DB_API_USER_PASSWORD: postgres
+      APP_DB_ADDR: db
+    # Note: We are overwriting the existing command, just adding a retry
+    #       In Cloud environment, we connect to RDS so no need to worry about starting up
+    #       In local, the DB needs a few seconds to boot up and listen
+    command: 'bash -c "until ./init-db.sh; do sleep 5; done;"'
+    depends_on:
+      - db
+  mercury-service-api:
+    image: 258143015559.dkr.ecr.us-east-1.amazonaws.com/mercury/api:latest
+    restart: always
+    volumes:
+      - ./services/ge_cloud/:/code
+    ports:
+      - 5000:5000
+    environment:
+      LOGGING_LEVEL: ${LOGGING_LEVEL}
+      ENVIRONMENT: ${ENVIRONMENT}
+      MERCURY_DIALECT: postgresql
+      MERCURY_USER: gx_mercury_user
+      MERCURY_PASSWORD: postgres
+      MERCURY_HOST: db
+      MERCURY_DATABASE: mercury
+      GE_USAGE_STATISTICS_URL: ${GE_USAGE_STATISTICS_URL}
+      AMQP_CONNECTION_STRING: amqp://gx_prod:password@mq:5672
+      # AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      # AUTH0_API_AUDIENCE: ${AUTH0_API_AUDIENCE}
+      # AUTH0_MERCURY_API_CLIENT_ID: ${AUTH0_MERCURY_API_CLIENT_ID}
+      # AUTH0_MERCURY_API_CLIENT_SECRET: ${AUTH0_MERCURY_API_CLIENT_SECRET}
+      SENDGRID_API_KEY: fake_key
+
+    depends_on:
+      - db-provisioner
+      - mq
