@@ -14,7 +14,7 @@
         "c": "StringType"
       }
     },
-    "suppress_test_for": ["snowflake"],
+    "suppress_test_for": ["sqlite", "mssql"],
     "tests": [
     {
       "title": "negative_test_insufficient_mostly_and_one_non_matching_value",
@@ -30,7 +30,23 @@
         "unexpected_index_list": [{"a": "aaa", "pk_index": 0}, {"a": "abb", "pk_index": 1}, {"a": "acc", "pk_index": 2}, {"a": "add", "pk_index": 3}],
         "unexpected_list": ["aaa", "abb", "acc", "add"]
       },
-      "suppress_test_for": ["sqlite", "mssql"]
+      "suppress_test_for": ["snowflake"]
+    },
+    {
+      "title": "negative_test_insufficient_mostly_and_one_non_matching_value__snowflake",
+      "include_in_gallery": true,
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "regex": "^a.*",
+        "mostly": 0.3
+      },
+      "out": {
+        "success":false,
+        "unexpected_index_list": [{"a": "aaa", "pk_index": 0}, {"a": "abb", "pk_index": 1}, {"a": "acc", "pk_index": 2}, {"a": "add", "pk_index": 3}],
+        "unexpected_list": ["aaa", "abb", "acc", "add"]
+      },
+      "only_for": ["snowflake"]
     },
     {
       "title": "positive_test_exact_mostly_w_one_non_matching_value",
@@ -46,7 +62,23 @@
         "unexpected_index_list": [{"a": "aaa", "pk_index": 0}, {"a": "abb", "pk_index": 1}, {"a": "acc", "pk_index": 2}, {"a": "add", "pk_index": 3}],
         "unexpected_list": ["aaa", "abb", "acc", "add"]
       },
-      "suppress_test_for": ["sqlite", "mssql"]
+      "suppress_test_for": ["snowflake"]
+    },
+    {
+      "title": "positive_test_exact_mostly_w_one_non_matching_value__snowflake",
+      "include_in_gallery": true,
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "regex": "^a.*",
+        "mostly": 0.2
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [{"a": "aaa", "pk_index": 0}, {"a": "abb", "pk_index": 1}, {"a": "acc", "pk_index": 2}, {"a": "add", "pk_index": 3}],
+        "unexpected_list": ["aaa", "abb", "acc", "add"]
+      },
+      "only_for": ["snowflake"]
     },
     {
       "title": "positive_test_sufficient_mostly_w_one_non_matching_value",
@@ -61,7 +93,22 @@
         "unexpected_index_list": [{"a": "aaa", "pk_index": 0}, {"a": "abb", "pk_index": 1}, {"a": "acc", "pk_index": 2}, {"a": "add", "pk_index": 3}],
         "unexpected_list": ["aaa", "abb", "acc", "add"]
       },
-      "suppress_test_for": ["sqlite", "mssql"]
+      "suppress_test_for": ["snowflake"]
+    },
+    {
+      "title": "positive_test_sufficient_mostly_w_one_non_matching_value__snowflake",
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "regex": "^a.*",
+        "mostly": 0.1
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [{"a": "aaa", "pk_index": 0}, {"a": "abb", "pk_index": 1}, {"a": "acc", "pk_index": 2}, {"a": "add", "pk_index": 3}],
+        "unexpected_list": ["aaa", "abb", "acc", "add"]
+      },
+      "only_for": ["snowflake"]
     },
     {
       "title": "negative_test_one_missing_value_and_insufficent_mostly",
@@ -76,7 +123,22 @@
         "unexpected_index_list": [{"b": "aaa", "pk_index": 0}, {"b": "abb", "pk_index": 1}, {"b": "acc", "pk_index": 2}],
         "unexpected_list": ["aaa", "abb", "acc"]
       },
-      "suppress_test_for": ["sqlite", "mssql"]
+      "suppress_test_for": ["snowflake"]
+    },
+    {
+      "title": "negative_test_one_missing_value_and_insufficent_mostly__snowflake",
+      "exact_match_out" : false,
+      "in": {
+        "column": "b",
+        "regex": "^a.*",
+        "mostly": 0.5
+      },
+      "out": {
+        "success":false,
+        "unexpected_index_list": [{"b": "aaa", "pk_index": 0}, {"b": "abb", "pk_index": 1}, {"b": "acc", "pk_index": 2}],
+        "unexpected_list": ["aaa", "abb", "acc"]
+      },
+      "only_for": ["snowflake"]
     },
     {
       "title": "positive_test_one_missing_value_no_exceptions",
@@ -90,7 +152,7 @@
         "unexpected_index_list": [],
         "unexpected_list": []
       },
-      "suppress_test_for": ["sqlite", "mssql"]
+      "suppress_test_for": ["snowflake"]
     },
     {
       "title": "positive_test_all_missing_values",
@@ -104,7 +166,7 @@
         "unexpected_index_list": [],
         "unexpected_list": []
       },
-      "suppress_test_for": ["sqlite", "mssql"]
+      "suppress_test_for": ["snowflake"]
     },
     {
       "title": "positive_test_all_missing_values_mostly",
@@ -119,7 +181,7 @@
         "unexpected_index_list": [],
         "unexpected_list": []
       },
-      "suppress_test_for": ["sqlite", "mssql"]
+      "suppress_test_for": ["snowflake"]
     },
     {
       "title": "negative_test_empty_regex",
@@ -133,7 +195,7 @@
         "unexpected_index_list": [{"b": "aaa", "pk_index": 0}, {"b": "abb", "pk_index": 1}, {"b": "acc", "pk_index": 2}, {"b": "bdd", "pk_index": 3}],
         "unexpected_list": ["aaa", "abb", "acc", "bdd"]
       },
-      "suppress_test_for": ["sqlite", "mysql", "mssql"]
+      "suppress_test_for": ["mysql", "snowflake"]
     },
     {
       "title": "negative_test_match_characters_not_at_the_beginning_of_string_exact_mostly",
@@ -148,7 +210,7 @@
         "unexpected_index_list": [{"a": "abb", "pk_index": 1}, {"a": "bee", "pk_index": 4}],
         "unexpected_list": ["abb", "bee"]
       },
-      "suppress_test_for": ["sqlite", "mssql"]
+      "suppress_test_for": ["snowflake"]
     }]
   }]
 }

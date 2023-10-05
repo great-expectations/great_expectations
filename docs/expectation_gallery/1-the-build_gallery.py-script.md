@@ -77,6 +77,11 @@ To see all high-level issues with Expectations at a glance, the following shell 
 
 ```
 grep -E "(^expect|Completeness checklist|^ *\"|^ *[A-z]|^ *-|-----)" checklists.txt | less
+
+or
+
+grep -E "(^expect|Completeness checklist|^ *\"|^ *[A-z]|^ *-|-----)" checklists.txt |
+    grep -vE '(No validate_configuration|Using default validate_configuration|Has a full suite|Has passed a manual)' | less
 ```
 
 #### docstrings.txt
@@ -87,7 +92,7 @@ The `format_docstring_to_markdown` function in the `build_gallery.py` script tak
 
 You can copy the markdown to a file and render with a tool like [GitHub README instant preview (grip)](https://github.com/joeyespo/grip) if you are ever making changes to `format_docstring_to_markdown` for some reason.
 
-> TODO: add link to docstring formatting doc
+> See [Expectation Docstring Formatting](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/3-expectation-docstring-formatting.md).
 
 #### gallery-tracebacks.txt
 
@@ -108,17 +113,33 @@ This is not done automatically, but leverages error redirection and the `tee` co
 python ./build_gallery.py ... 2>&1 | tee output--build_gallery.txt
 ```
 
-There was a lot of effort spent to log precicse details in the Expectation testing process across backends, including durations for loading test data, showing when tests are skipped, what the results are when there are failures, what utility functions are doing what, and more. This was essential to make performance improvements and fix issues with individual Expectations.
+There was a lot of effort spent to log precicse details in the Expectation testing process across backends, including durations for loading test data, showing when tests are skipped, what the results are when there are failures, what utility functions are doing what, and more. This was essential to make performance improvements and fix issues with individual Expectations. See PRs [4548](https://github.com/great-expectations/great_expectations/pull/4548), [4816](https://github.com/great-expectations/great_expectations/pull/4816), [5239](https://github.com/great-expectations/great_expectations/pull/5239), [5616](https://github.com/great-expectations/great_expectations/pull/5616), [5881](https://github.com/great-expectations/great_expectations/pull/5881), [8019](https://github.com/great-expectations/great_expectations/pull/8019).
 
-> See PRs [4548](https://github.com/great-expectations/great_expectations/pull/4548), [4816](https://github.com/great-expectations/great_expectations/pull/4816), [5239](https://github.com/great-expectations/great_expectations/pull/5239), [5616](https://github.com/great-expectations/great_expectations/pull/5616), [5881](https://github.com/great-expectations/great_expectations/pull/5881), [8019](https://github.com/great-expectations/great_expectations/pull/8019)
 
-Since the logging/debug output follows consistent patterns, it is possible to generate other text files from the captured output by using some standard shell utilities like `grep`, `cut` and `sort`.
+Since the logging/debug output follows consistent patterns, it is possible to generate other text files from the captured output by using some standard shell utilities like `grep`, `cut` and `sort`. See below for some examples.
+
+```
+grep -o "Took .* seconds to .*" output--build_gallery.txt | sort -k2,2nr > testing-times.txt
+
+# Show testing warnings
+grep --color -n -i warning -B 2 output--build_gallery.txt || echo "No warnings found"
+
+# Show DataFrame to SQL times
+grep "to df.to_sql" testing-times.txt || echo "No df.to_sql calls were made"
+
+# Show testing times grouped by backend and Expectation
+grep "to run" testing-times.txt
+
+# Show testing times for individual tests
+grep "to evaluate_json" testing-times.txt
+```
+
 
 ## The `build_gallery.py` script in CI
 
-The script is run in Azure Pipelines against every core and contributed Expectation, in every backend that we officially test in (pandas, spark, sqlite, postgresql, mysql, mssql, trino, redshift, bigquery, snowflake).
+The script is run in Azure Pipelines against every core and contributed Expectation, in every backend that we officially test in (pandas, spark, sqlite, postgresql, mysql, mssql, trino, redshift, bigquery, snowflake). The script is run automatically once a day against the develop branch. See the [cron schedule in azure-pipelines-expectation-gallery.yml](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/azure-pipelines-expectation-gallery.yml#L10-L16).
 
-The resulting JSON file is pushed up to S3 at <https://superconductive-public.s3.us-east-2.amazonaws.com/static/gallery/expectation_library_v2--staging.json> and the Algolia indicies for the staging site are updated.
+The resulting JSON file is pushed up to S3 at <https://superconductive-public.s3.us-east-2.amazonaws.com/static/gallery/expectation_library_v2--staging.json> and the [Algolia indicies](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/2-managing-the-expectation-gallery-site.md#algolia-index-names) for the staging site are updated.
 
 In the `expectation_gallery` pipeline, there are additional stages after the invocation(s) of `build_gallery.py` to show useful summary output, leveraging the trick mentioned in the [previous section](#full-loggingdebug-output-of-the-build_gallerypy-script).
 
@@ -136,49 +157,32 @@ cat testing-error-messages.txt
 cat gallery-tracebacks.txt
 ```
 
-Then there is a final stage after the parallelized stages complete to make the complete expectation gallery JSON file.
-
-Prior to [PR 7572](https://github.com/great-expectations/great_expectations/pull/7572) that refactored the script to allow parallelization, the `build_gallery.py` script was invoked a single time for all backends and a lot more useful summary info was shown.
+Then there is the `build_gallery_staging` stage that uses the intermediate JSON files from the previous stage to make the complete Expectation gallery JSON file.
 
 ```
-python ./build_gallery.py --outfile-name "expectation_library_v2--staging.json" 2>&1 | tee output--build_gallery.txt
-grep -o "Took .* seconds to .*" output--build_gallery.txt | sort -k2,2nr > testing-times.txt
+python ./build_gallery.py --only-combine --outfile-name "expectation_library_v2--staging.json" 2>&1 | tee output--build_gallery.txt
 grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt
-touch gallery-tracebacks.txt
 grep -o "Expectation type.*" output--build_gallery.txt | sort > gallery-exp-types.txt
-
-# Show coverage scores
-grep -o "coverage_score:.*" output--build_gallery.txt | sort -k2,2nr
-
-# Show Expectation types and counts
-cut -d " " -f 3,4 gallery-exp-types.txt | uniq -c | sort -nr; echo; cut -d " " -f 3,4,6 gallery-exp-types.txt | sort
-
-# Show implemented engines
-grep -o "Implemented engines.*" output--build_gallery.txt
-
-# Show full checklist summary
-cat checklists.txt
-
-# Show checklist issues
-grep -E "(^expect|Completeness checklist|^ *[A-z]|^ *-|-----)" checklists.txt | grep -vE '(No validate_configuration|Using default validate_configuration|Has a full suite|Has passed a manual)'
+touch gallery-tracebacks.txt
 
 # Show testing errors
 cat testing-error-messages.txt
 
-# Show testing warnings
-grep --color -n -i warning -B 2 output--build_gallery.txt || echo "No warnings found"
-
 # Show gallery tracebacks
 cat gallery-tracebacks.txt
 
-# Show DataFrame to SQL times
-grep "to df.to_sql" testing-times.txt || echo "No df.to_sql calls were made"
+# Show docstring conversions
+cat docstrings.txt
 
-# Show testing times grouped by backend and Expectation
-grep "to run" testing-times.txt
+# Show Expectation types and counts
+cut -d " " -f 3,4 gallery-exp-types.txt | uniq -c | sort -nr
+cut -d " " -f 3,4,6 gallery-exp-types.txt | sort
 
-# Show testing times for individual tests
-grep "to evaluate_json" testing-times.txt
+# Show implemented engines
+grep -o "Implemented engines.*" output--build_gallery.txt
+
+# Show generated JSON
+cat expectation_library_v2--staging.json
 ```
 
 ### Manually triggered pipeline
@@ -189,9 +193,3 @@ You can manually trigger the `expectation_gallery` pipeline in Azure Pipeline ag
     - Click the "Run pipeline" button
     - In the "Branch/tag" dropdown, select your branch
     - Click the "Run" button
-
-### Daily cron schedule to run `build_gallery.py`
-
-The script is run automatically once a day against against the develop branch.
-
-See: <https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/azure-pipelines-expectation-gallery.yml#L10-L16>

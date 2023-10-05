@@ -147,7 +147,6 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
     assert len(res) == 2
 
 
-@pytest.mark.unit
 @pytest.mark.sqlite
 def test_instantiation_with_unknown_dialect(sqlite_view_engine):
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
@@ -162,7 +161,6 @@ def test_instantiation_with_unknown_dialect(sqlite_view_engine):
     assert batch_data.dialect == GXSqlDialect.OTHER
 
 
-@pytest.mark.unit
 @pytest.mark.sqlite
 def test_instantiation_with_temp_table_schema():
     # not supported

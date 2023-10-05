@@ -5,6 +5,9 @@ import shutil
 import pytest
 
 import great_expectations as gx
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
 
 pytestmark = pytest.mark.filesystem
@@ -27,7 +30,7 @@ def data_context_parameterized_expectation_suite_with_usage_statistics_enabled(
     created with DataContext.create()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "../test_fixtures")
     os.makedirs(  # noqa: PTH103
@@ -38,7 +41,7 @@ def data_context_parameterized_expectation_suite_with_usage_statistics_enabled(
         os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_v013_basic_with_usage_stats_enabled.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         os.path.join(  # noqa: PTH118
@@ -76,7 +79,7 @@ def test_preserve_comments_in_yml_after_adding_datasource(
     pytest.skip("KNOWN ISSUE")
     config_filepath = os.path.join(  # noqa: PTH118
         data_context_parameterized_expectation_suite_with_usage_statistics_enabled.root_directory,
-        "great_expectations.yml",
+        FileDataContext.GX_YML,
     )
     initial_config = read_config_file_from_disk(config_filepath)
     print("++++++++++++++++ initial config +++++++++++++++++++++++")

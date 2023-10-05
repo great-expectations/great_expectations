@@ -8,7 +8,6 @@ from tests.test_utils import get_awsathena_connection_url
 
 
 @pytest.mark.athena
-@pytest.mark.unit
 def test_get_awsathena_connection_url(monkeypatch):
     monkeypatch.setenv("ATHENA_STAGING_S3", "s3://test-staging/")
     monkeypatch.setenv("ATHENA_DB_NAME", "test_db_name")

@@ -115,7 +115,7 @@ Now that you've learned about Expectation classes, you can use the following res
 
 - [How to create and edit Expectations based on domain knowledge, without inspecting data directly](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md)
 
-- [Creating Custom Expectations - Overview](../guides/expectations/creating_custom_expectations/overview.md)
+- [Create and manage Custom Expectations](../guides/expectations/custom_expectations_lp.md)
 
 - [Expectations naming conventions](../contributing/style_guides/code_style.md#expectations)
 

@@ -15,14 +15,14 @@ import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_cont
 <!-- ### Retrieve existing DataAsset from existing Datsource -->
 import GetExistingDataAssetFromExistingDatasource from '/docs/components/setup/datasource/data_asset/_get_existing_data_asset_from_existing_datasource.md'
 
-This guide demonstrates how you can request data from a Datasource that has been defined with the `context.sources.add_*` method.
+Learn how you can request data from a Data Source that has been defined with the `context.sources.add_*` method.
 
 ## Prerequisites
 
 <Prerequisites> 
 
-- An installation of GX
-- A Datasource with a configured Data Asset
+- [An installation of GX](/docs/guides/setup/installation/install_gx)
+- A Data Source with a configured Data Asset
 
 </Prerequisites> 
 
@@ -36,7 +36,7 @@ This guide demonstrates how you can request data from a Datasource that has been
 
 ## Build an `options` dictionary for your Batch Request (Optional)
 
-An `options` dictionary can be used to limit the Batches returned by a Batch Request.  Omitting the `options` dictionary will result in all available Batches being returned.
+An `options` dictionary can be used to limit the Batches returned by a Batch Request. Omitting the `options` dictionary will result in all available Batches being returned.
 
 The structure of the `options` dictionary will depend on the type of Data Asset being used.  The valid keys for the `options` dictionary can be found by checking the Data Asset's `batch_request_options` property.
 
@@ -49,7 +49,7 @@ You can create a dictionary of keys pulled from the `batch_request_options` tupl
 
 ## Build your Batch Request
 
-We will use the `build_batch_request(...)` method of our Data Asset to generate a Batch Request.
+Use the `build_batch_request(...)` method of your Data Asset to generate a Batch Request.
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_request"
 ```
@@ -58,6 +58,23 @@ For `dataframe` Data Assets, the `dataframe` is always specified as the argument
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py build_batch_request_with_dataframe"
 ```
+
+## Extract a Batch from a Batch Request (Optional)
+
+You can use the Python slice function to remove a subset of data from a Batch Request and use a specific selection of records to build Metrics, Validations, and Profiles. In the following example, data is sliced and filtered by column, but you can also use other parameters such as time or date to slice and filter data.
+
+1. Run the following code to retrieve an entire table of data from a SQL datasource:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py create_datasource"
+    ```
+2. Run the following code to define the column to slice:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py add_vendor_id_splitter"
+    ```
+3. Run the following code to slice and filter the column:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py build_vendor_id_batch_request"
+    ```
 
 ## Verify that the correct Batches were returned
 

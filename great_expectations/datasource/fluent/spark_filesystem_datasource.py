@@ -4,14 +4,13 @@ import logging
 import pathlib
 from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Type
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import (
-    TestConnectionError,
-)
+from great_expectations.datasource.fluent.interfaces import TestConnectionError
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
@@ -39,6 +38,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
     base_directory: pathlib.Path
     data_context_root_directory: Optional[pathlib.Path] = None
 
+    @override
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the SparkDatasource.
 
@@ -57,6 +57,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             for asset in self.assets:
                 asset.test_connection()
 
+    @override
     def _build_data_connector(
         self,
         data_asset: _SPARK_FILE_PATH_ASSET_TYPES_UNION,

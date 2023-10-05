@@ -1,11 +1,11 @@
 import pytest
 
+from great_expectations.core.expectation_diagnostics.supporting_types import Maturity
 from tests.expectations.fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
     ExpectColumnValuesToEqualThree__SecondIteration,
     ExpectColumnValuesToEqualThree__ThirdIteration,
 )
-from great_expectations.core.expectation_diagnostics.supporting_types import Maturity
 
 # module level markers
 pytestmark = pytest.mark.unit

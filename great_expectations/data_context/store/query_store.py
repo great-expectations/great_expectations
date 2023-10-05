@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 import logging
 from string import Template
+from typing import ClassVar, Type
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.data_context_key import StringKey
 from great_expectations.data_context.store.store import Store
 from great_expectations.util import filter_properties_dict
@@ -23,7 +27,7 @@ class SqlAlchemyQueryStore(Store):
     """SqlAlchemyQueryStore stores queries by name, and makes it possible to retrieve the resulting value by query
     name."""
 
-    _key_class = StringKey  # type: ignore[assignment] # StringKey is a DataContextKey??
+    _key_class: ClassVar[Type] = StringKey
 
     def __init__(  # noqa: PLR0913
         self,
@@ -126,5 +130,6 @@ class SqlAlchemyQueryStore(Store):
             return res
 
     @property
+    @override
     def config(self) -> dict:
         return self._config

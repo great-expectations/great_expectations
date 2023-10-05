@@ -7,6 +7,7 @@ import scipy
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,  # noqa: TCH001
 )
@@ -127,6 +128,15 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
         """
+
+        if (
+            domain.domain_type == MetricDomainTypes.COLUMN
+            and "." in domain.domain_kwargs["column"]
+        ):
+            raise gx_exceptions.ProfilerExecutionError(
+                "Column names cannot contain '.' when computing parameters for unexpected count statistics."
+            )
+
         # Obtain unexpected_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         unexpected_count_parameter_builder_name: Optional[
             str
@@ -267,22 +277,22 @@ def _standardize_mostly_for_single_batch(  # noqa: PLR0911
     Applies business logic to standardize "mostly" value for single-Batch case.
     """
     if expectation_type == "expect_column_values_to_be_null":
-        if mostly >= 1.0:  # noqa:  PLR0915
+        if mostly >= 1.0:  # noqa: PLR2004
             return np.float64(1.0)
 
-        if mostly >= 0.99:  # noqa:  PLR0915
+        if mostly >= 0.99:  # noqa: PLR2004
             return np.float64(0.99)
 
-        if mostly >= 0.975:  # noqa:  PLR0915
+        if mostly >= 0.975:  # noqa: PLR2004
             return np.float64(0.975)
 
         return mostly
 
     if expectation_type == "expect_column_values_to_not_be_null":
-        if mostly >= 1.0:  # noqa:  PLR0915
+        if mostly >= 1.0:  # noqa: PLR2004
             return np.float64(1.0)
 
-        if mostly >= 0.99:  # noqa:  PLR0915
+        if mostly >= 0.99:  # noqa: PLR2004
             return np.float64(0.99)
 
         # round down to nearest 0.025

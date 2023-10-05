@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -32,7 +33,7 @@ class ColumnMostCommonValue(ColumnAggregateMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ):
-        column_value_counts = metrics.get("column.value_counts")
+        column_value_counts = metrics["column.value_counts"]
         return list(
             column_value_counts[column_value_counts == column_value_counts.max()].index
         )
@@ -46,12 +47,13 @@ class ColumnMostCommonValue(ColumnAggregateMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ):
-        column_value_counts = metrics.get("column.value_counts")
+        column_value_counts = metrics["column.value_counts"]
         return list(
             column_value_counts[column_value_counts == column_value_counts.max()].index
         )
 
     @classmethod
+    @override
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,

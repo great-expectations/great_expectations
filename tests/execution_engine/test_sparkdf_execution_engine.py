@@ -9,9 +9,15 @@ import pytest
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.batch_spec import PathBatchSpec, RuntimeDataBatchSpec
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
+from great_expectations.data_context import get_context
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    FilesystemStoreBackendDefaults,
+)
 from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.expectations.row_conditions import (
     RowCondition,
@@ -37,7 +43,6 @@ def test_reader_fn(spark_session, basic_spark_df_execution_engine):
     assert "<bound method DataFrameReader.csv" in str(fn_new)
 
 
-@pytest.mark.integration
 def test_reader_fn_parameters(
     spark_session, basic_spark_df_execution_engine, tmp_path_factory
 ):
@@ -1177,7 +1182,6 @@ def test_dataframe_property_given_loaded_batch(spark_session):
     assert engine.dataframe == df
 
 
-@pytest.mark.integration
 def test_schema_properly_added(spark_session):
     schema: pyspark.types.StructType = pyspark.types.StructType(
         [
@@ -1194,3 +1198,90 @@ def test_schema_properly_added(spark_session):
     )
     df = engine.dataframe
     assert df.schema == schema
+
+
+@pytest.mark.spark
+def test_explicit_string_identifiers_should_work_with_validator(spark_session):
+    """
+    Integration test taken from: https://github.com/great-expectations/great_expectations/issues/7628
+    Ensures that the expectations can be used with a string identifier, resolves to the correct column
+    in SQL and a result is returned.
+    """
+    metastore_dir = "/tmp/great_expectations_v3"
+
+    data_context_config = DataContextConfig(
+        store_backend_defaults=FilesystemStoreBackendDefaults(
+            root_directory=metastore_dir
+        ),
+    )
+    context = get_context(project_config=data_context_config)
+    batch_identifiers = [
+        "customer",
+    ]
+    my_spark_datasource_config = {
+        "name": "test_dataset",
+        "class_name": "Datasource",
+        "execution_engine": {"class_name": "SparkDFExecutionEngine"},
+        "data_connectors": {
+            "runtimedataconnector_test_dataset": {
+                "module_name": "great_expectations.datasource.data_connector",
+                "class_name": "RuntimeDataConnector",
+                "batch_identifiers": batch_identifiers,
+            }
+        },
+    }
+
+    context.add_datasource(**my_spark_datasource_config)
+
+    data2 = [
+        ("James", 100),
+        ("Michael", 101),
+        ("Robert", 102),
+        ("Maria", 103),
+        ("Jen", 104),
+    ]
+
+    schema = pyspark.types.StructType(
+        [
+            pyspark.types.StructField("customer", pyspark.types.StringType(), True),
+            pyspark.types.StructField(
+                "order number", pyspark.types.IntegerType(), True
+            ),
+        ]
+    )
+    df = spark_session.createDataFrame(data=data2, schema=schema)
+
+    batch_request = RuntimeBatchRequest(
+        datasource_name="test_dataset",
+        data_connector_name="runtimedataconnector_test_dataset",
+        data_asset_name="test_dataset",
+        batch_identifiers={
+            "customer": "test",
+        },
+        runtime_parameters={"batch_data": df},  # Your dataframe goes here
+    )
+
+    context.add_or_update_expectation_suite(
+        expectation_suite_name="test_ge_unique_record"
+    )
+
+    validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name="test_ge_unique_record",
+    )
+
+    col_name = "`order number`"
+    result = validator.expect_column_values_to_be_unique(column=col_name)
+
+    assert result["success"]
+    assert result["expectation_config"]["kwargs"]["column"] == col_name
+    assert result["result"] == {
+        "element_count": 5,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 0.0,
+        "unexpected_percent_nonmissing": 0.0,
+    }

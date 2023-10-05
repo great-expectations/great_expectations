@@ -4,6 +4,9 @@ import pytest
 
 import great_expectations as gx
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
 yaml = YAMLHandler()
 
@@ -16,7 +19,7 @@ def totally_empty_data_context(tmp_path_factory):
     # TODO: Where appropriate, switch DataContext tests to the new method.
     project_root_dir = str(tmp_path_factory.mktemp("totally_empty_data_context"))
     os.mkdir(  # noqa: PTH102
-        os.path.join(project_root_dir, "great_expectations")  # noqa: PTH118
+        os.path.join(project_root_dir, FileDataContext.GX_DIR)  # noqa: PTH118
     )
 
     config = {
@@ -39,16 +42,14 @@ def totally_empty_data_context(tmp_path_factory):
         "validation_operators": {},
     }
     with open(
-        os.path.join(  # noqa: PTH118
-            project_root_dir, "great_expectations/great_expectations.yml"
-        ),
+        os.path.join(project_root_dir, "gx/great_expectations.yml"),  # noqa: PTH118
         "w",
     ) as config_file:
         yaml.dump(config, config_file)
 
     context = gx.get_context(
         context_root_dir=os.path.join(  # noqa: PTH118
-            project_root_dir, "great_expectations"
+            project_root_dir, FileDataContext.GX_DIR
         )
     )
     # print(json.dumps(context._project_config, indent=2))

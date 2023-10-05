@@ -41,7 +41,7 @@ if TYPE_CHECKING:
 
 def multicolumn_function_partial(  # noqa: C901 - 16
     engine: Type[ExecutionEngine],
-    partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,
+    partial_fn_type: Optional[MetricPartialFunctionTypes] = None,
     **kwargs,
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
@@ -126,6 +126,10 @@ def multicolumn_function_partial(  # noqa: C901 - 16
             )
 
         def wrapper(metric_fn: Callable):
+            assert (
+                partial_fn_type is not None
+            )  # mypy has trouble type narrowing with closures
+
             @metric_partial(
                 engine=engine,
                 partial_fn_type=partial_fn_type,

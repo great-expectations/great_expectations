@@ -3,7 +3,7 @@ Your Data Asset will connect to all files that match the regex that you provide.
 
 For example:
 
-Let's say that you have a filesystem Datasource pointing to a base folder that contains the following files:
+Let's say that you have a filesystem Data Source pointing to a base folder that contains the following files:
 - "yellow_tripdata_sample_2019-03.csv"
 - "yellow_tripdata_sample_2020-07.csv"
 - "yellow_tripdata_sample_2021-02.csv"

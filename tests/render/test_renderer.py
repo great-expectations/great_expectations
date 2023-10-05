@@ -37,6 +37,7 @@ def test_render():
 #     Renderer()._find_ge_object_type(ge_object)
 
 
+@pytest.mark.unit
 def test__find_evr_by_type(titanic_profiled_evrs_1):
     # TODO: _find_all_evrs_by_type should accept an ValidationResultSuite, not ValidationResultSuite.results
     found_evr = Renderer()._find_evr_by_type(
@@ -78,6 +79,7 @@ def test__find_evr_by_type(titanic_profiled_evrs_1):
     )
 
 
+@pytest.mark.unit
 def test__find_all_evrs_by_type(titanic_profiled_evrs_1):
     # TODO: _find_all_evrs_by_type should accept an ValidationResultSuite, not ValidationResultSuite.results
     found_evrs = Renderer()._find_all_evrs_by_type(
@@ -112,6 +114,7 @@ def test__find_all_evrs_by_type(titanic_profiled_evrs_1):
     assert len(found_evrs) == 1
 
 
+@pytest.mark.unit
 def test__get_column_list_from_evrs(titanic_profiled_evrs_1):
     column_list = Renderer()._get_column_list_from_evrs(titanic_profiled_evrs_1)
     print(column_list)

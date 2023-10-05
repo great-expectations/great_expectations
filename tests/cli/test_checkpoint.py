@@ -3,7 +3,7 @@ import os
 import shutil
 import subprocess
 import unittest
-from typing import List, Optional, Union
+from typing import List
 from unittest import mock
 
 import nbformat
@@ -26,14 +26,12 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
     GETTING_STARTED_DATASOURCE_NAME,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import get_context
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource import (
-    Datasource,
-    LegacyDatasource,
-    SimpleSqlalchemyDatasource,
-)
-from great_expectations.util import get_context
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 yaml = YAMLHandler()
@@ -55,14 +53,14 @@ def titanic_data_context_with_sql_datasource(
 
     db_file_path: str = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "titanic_sql_test_cases.db"),
+        os.path.join("..", "test_sets", "titanic_sql_test_cases.db"),  # noqa: PTH118
     )
     sqlite_engine: sa.engine.base.Engine = sa.create_engine(f"sqlite:///{db_file_path}")
     # noinspection PyUnusedLocal
     conn: sa.engine.base.Connection = sqlite_engine.connect()
     try:
         csv_path: str = file_relative_path(
-            __file__, os.path.join("..", "test_sets", "Titanic.csv")
+            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
         )
         df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
         add_dataframe_to_db(df=df, name="titanic", con=conn)
@@ -70,7 +68,7 @@ def titanic_data_context_with_sql_datasource(
         add_dataframe_to_db(df=df, name="incomplete", con=conn)
         add_dataframe_to_db(df=test_df, name="wrong", con=conn)
     except ValueError as ve:
-        logger.warning(f"Unable to store information into database: {str(ve)}")
+        logger.warning(f"Unable to store information into database: {ve!s}")
 
     datasource_config: str = f"""
 class_name: SimpleSqlalchemyDatasource
@@ -81,9 +79,7 @@ introspection:
 
     try:
         # noinspection PyUnusedLocal
-        my_sql_datasource: Optional[
-            Union[SimpleSqlalchemyDatasource, LegacyDatasource]
-        ] = context.add_datasource(
+        context.add_datasource(
             "test_sqlite_db_datasource", **yaml.load(datasource_config)
         )
     except AttributeError:
@@ -104,36 +100,48 @@ def titanic_data_context_with_spark_datasource(
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path: str = os.path.join(context_path, "..", "data", "titanic")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
+    context_path: str = os.path.join(  # noqa: PTH118
+        project_path, FileDataContext.GX_DIR
+    )
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    data_path: str = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH103, PTH118
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "..",
                 "test_fixtures",
                 "great_expectations_v013_no_datasource_stats_enabled.yml",
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
-        file_relative_path(__file__, os.path.join("..", "test_sets", "Titanic.csv")),
-        str(
-            os.path.join(
-                context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
-            )
+        file_relative_path(
+            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        os.path.join(  # noqa: PTH118
+            context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
         ),
     )
     shutil.copy(
-        file_relative_path(__file__, os.path.join("..", "test_sets", "Titanic.csv")),
-        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1911.csv")),
+        file_relative_path(
+            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        os.path.join(  # noqa: PTH118
+            context_path, "..", "data", "titanic", "Titanic_1911.csv"
+        ),
     )
     shutil.copy(
-        file_relative_path(__file__, os.path.join("..", "test_sets", "Titanic.csv")),
-        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
+        file_relative_path(
+            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        os.path.join(  # noqa: PTH118
+            context_path, "..", "data", "titanic", "Titanic_1912.csv"
+        ),
     )
 
     context = get_context(context_root_dir=context_path)
@@ -186,7 +194,7 @@ def titanic_data_context_with_spark_datasource(
         """
 
     # noinspection PyUnusedLocal
-    datasource: Datasource = context.test_yaml_config(
+    context.test_yaml_config(
         name=GETTING_STARTED_DATASOURCE_NAME,
         yaml_config=datasource_config,
         pretty_print=False,
@@ -197,7 +205,7 @@ def titanic_data_context_with_spark_datasource(
     csv_path: str
 
     # To fail an expectation, make number of rows less than 1313 (the original number of rows in the "Titanic" dataset).
-    csv_path = os.path.join(
+    csv_path = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_1911.csv"
     )
     df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
@@ -205,7 +213,7 @@ def titanic_data_context_with_spark_datasource(
     # noinspection PyTypeChecker
     df.to_csv(path_or_buf=csv_path)
 
-    csv_path: str = os.path.join(
+    csv_path: str = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
     # mangle the csv
@@ -225,7 +233,7 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
 ):
     context = empty_data_context_stats_enabled
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -283,7 +291,7 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
 ):
     context = empty_context_with_checkpoint_v1_stats_enabled
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -352,7 +360,7 @@ def test_checkpoint_delete_with_single_checkpoint_assume_yes_flag(
     empty_context_with_checkpoint_v1_stats_enabled,
 ):
     context = empty_context_with_checkpoint_v1_stats_enabled
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     runner: CliRunner = CliRunner(mix_stderr=False)
     checkpoint_name: str = "my_v1_checkpoint"
     # noinspection PyTypeChecker
@@ -427,7 +435,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
 ):
     context = empty_context_with_checkpoint_v1_stats_enabled
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -495,7 +503,7 @@ def test_checkpoint_list_with_no_checkpoints(
 ):
     context = empty_data_context_stats_enabled
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -551,7 +559,7 @@ def test_checkpoint_list_with_single_checkpoint(
 ):
     context = empty_context_with_checkpoint_v1_stats_enabled
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -610,7 +618,7 @@ def test_checkpoint_list_with_eight_checkpoints(
 ):
     context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -634,7 +642,7 @@ def test_checkpoint_list_with_eight_checkpoints(
         "my_simple_checkpoint_with_slack",
         "my_simple_template_checkpoint",
     ]
-    assert all([checkpoint_name in stdout for checkpoint_name in checkpoint_names_list])
+    assert all(checkpoint_name in stdout for checkpoint_name in checkpoint_names_list)
 
     assert mock_emit.call_count == 3
 
@@ -684,7 +692,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
     """
     context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -753,7 +761,7 @@ def test_checkpoint_new_no_fluent_datasource_messages(
     """
     context = data_context_with_block_datasource
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -789,7 +797,7 @@ def test_checkpoint_new_raises_error_on_fluent_datasources_only(
     """
     context = data_context_with_fluent_datasource
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -824,7 +832,7 @@ def test_checkpoint_new_raises_warning_on_mixed_datasource_styles(
     """
     context = data_context_with_fluent_datasource_and_block_datasource
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -864,7 +872,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     context = deterministic_asset_data_connector_context
 
     root_dir: str = context.root_directory
-    monkeypatch.chdir(os.path.dirname(root_dir))
+    monkeypatch.chdir(os.path.dirname(root_dir))  # noqa: PTH120
 
     assert context.list_checkpoints() == []
     context.save_expectation_suite(titanic_expectation_suite)
@@ -916,25 +924,25 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     assert mock_subprocess.call_count == 1
     assert mock_webbroser.call_count == 0
 
-    expected_notebook_path: str = os.path.join(
+    expected_notebook_path: str = os.path.join(  # noqa: PTH118
         root_dir, "uncommitted", "edit_checkpoint_passengers.ipynb"
     )
-    assert os.path.isfile(expected_notebook_path)
+    assert os.path.isfile(expected_notebook_path)  # noqa: PTH113
 
     with open(expected_notebook_path) as f:
         nb: NotebookNode = nbformat.read(f, as_version=4)
 
-    uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(root_dir, "uncommitted")  # noqa: PTH118
     # Run notebook
     # TODO: <ANTHONY>We should mock the datadocs call or skip running that cell within the notebook (rather than commenting it out in the notebook)</ANTHONY>
     ep: ExecutePreprocessor = ExecutePreprocessor(timeout=600, kernel_name="python3")
     ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     # Ensure the checkpoint file was created
-    expected_checkpoint_path: str = os.path.join(
+    expected_checkpoint_path: str = os.path.join(  # noqa: PTH118
         root_dir, "checkpoints", "passengers.yml"
     )
-    assert os.path.isfile(expected_checkpoint_path)
+    assert os.path.isfile(expected_checkpoint_path)  # noqa: PTH113
 
     # Ensure the Checkpoint configuration in the file is as expected
     with open(expected_checkpoint_path) as f:
@@ -987,7 +995,7 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
 ):
     context = empty_context_with_checkpoint_v1_stats_enabled
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -1053,7 +1061,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
 
     context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -1187,7 +1195,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     context.save_expectation_suite(expectation_suite=suite)
     assert context.list_expectation_suite_names() == ["bar"]
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "bad_batch.yml",
@@ -1232,7 +1240,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
         config=config, checkpoint_file_path=checkpoint_file_path
     )
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
@@ -1391,7 +1399,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     assert context.list_expectation_suite_names() == []
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "no_suite.yml",
@@ -1433,7 +1441,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
@@ -1506,7 +1514,7 @@ def test_checkpoint_run_on_non_existent_validations(
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     assert context.list_expectation_suite_names() == []
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "no_validations.yml",
@@ -1541,7 +1549,7 @@ def test_checkpoint_run_on_non_existent_validations(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
@@ -1619,7 +1627,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -1662,7 +1670,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
@@ -1673,14 +1681,12 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
 
     stdout: str = result.stdout
     assert all(
-        [
-            msg in stdout
-            for msg in [
-                "Validation succeeded!",
-                "Titanic.warning",
-                "Passed",
-                "100.0 %",
-            ]
+        msg in stdout
+        for msg in [
+            "Validation succeeded!",
+            "Titanic.warning",
+            "Passed",
+            "100.0 %",
         ]
     )
 
@@ -1818,217 +1824,6 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-@pytest.mark.slow  # 1.44s
-def test_checkpoint_run_happy_path_with_successful_validation_sql(
-    mock_emit,
-    caplog,
-    monkeypatch,
-    titanic_data_context_with_sql_datasource,
-    titanic_expectation_suite,
-):
-    monkeypatch.setenv("VAR", "test")
-    monkeypatch.setenv("MY_PARAM", "1")
-    monkeypatch.setenv("OLD_PARAM", "2")
-
-    context = titanic_data_context_with_sql_datasource
-    context.save_expectation_suite(
-        expectation_suite=titanic_expectation_suite,
-        expectation_suite_name="Titanic.warning",
-    )
-    assert context.list_expectation_suite_names() == ["Titanic.warning"]
-
-    checkpoint_file_path: str = os.path.join(
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "my_fancy_checkpoint.yml",
-    )
-
-    checkpoint_yaml_config: str = """
-    name: my_fancy_checkpoint
-    config_version: 1
-    class_name: Checkpoint
-    run_name_template: "%Y-%M-foo-bar-template-$VAR"
-    validations:
-      - batch_request:
-          datasource_name: test_sqlite_db_datasource
-          data_connector_name: whole_table
-          data_asset_name: titanic
-        expectation_suite_name: Titanic.warning
-        action_list:
-            - name: store_validation_result
-              action:
-                class_name: StoreValidationResultAction
-            - name: store_evaluation_params
-              action:
-                class_name: StoreEvaluationParametersAction
-            - name: update_data_docs
-              action:
-                class_name: UpdateDataDocsAction
-    evaluation_parameters:
-      param1: "$MY_PARAM"
-      param2: 1 + "$OLD_PARAM"
-    runtime_configuration:
-      result_format:
-        result_format: BASIC
-        partial_unexpected_count: 20
-    """
-    config: dict = dict(yaml.load(checkpoint_yaml_config))
-    _write_checkpoint_dict_to_file(
-        config=config, checkpoint_file_path=checkpoint_file_path
-    )
-
-    runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    # noinspection PyTypeChecker
-    result: Result = runner.invoke(
-        cli,
-        "checkpoint run my_fancy_checkpoint",
-        catch_exceptions=False,
-    )
-    assert result.exit_code == 0
-
-    stdout: str = result.stdout
-    assert all(
-        [
-            msg in stdout
-            for msg in [
-                "Validation succeeded!",
-                "Titanic.warning",
-                "Passed",
-                "100.0 %",
-            ]
-        ]
-    )
-
-    assert mock_emit.call_count == 9
-
-    # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call] = [
-        mock.call(
-            {
-                "event_payload": {
-                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
-                },
-                "event": "data_context.save_expectation_suite",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {},
-                "event": "data_context.__init__",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "cli.checkpoint.run.begin",
-                "event_payload": {"api_version": "v3"},
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "data_context.get_batch_list",
-                "event_payload": {
-                    "anonymized_batch_request_required_top_level_properties": {
-                        "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
-                        "anonymized_data_connector_name": "6a6c3e6d98f688927f5434b7c19bfb05",
-                        "anonymized_data_asset_name": "c30b60089ede018ad9680153ba85adaf",
-                    },
-                },
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "data_asset.validate",
-                "event_payload": {
-                    "anonymized_batch_kwarg_keys": [],
-                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
-                    "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
-                },
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {},
-                "event": "data_context.build_data_docs",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {
-                    "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "config_version": 1.0,
-                    "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
-                    "anonymized_validations": [
-                        {
-                            "anonymized_batch_request": {
-                                "anonymized_batch_request_required_top_level_properties": {
-                                    "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
-                                    "anonymized_data_connector_name": "6a6c3e6d98f688927f5434b7c19bfb05",
-                                    "anonymized_data_asset_name": "c30b60089ede018ad9680153ba85adaf",
-                                },
-                            },
-                            "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        }
-                    ],
-                    "checkpoint_optional_top_level_keys": [
-                        "evaluation_parameters",
-                        "runtime_configuration",
-                    ],
-                },
-                "event": "checkpoint.run",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {},
-                "event": "data_context.run_checkpoint",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "cli.checkpoint.run.end",
-                "event_payload": {"api_version": "v3"},
-                "success": True,
-            }
-        ),
-    ]
-
-    # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    for actual, expected in zip(actual_events, expected_events):
-        assert actual == expected
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-    )
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_checkpoint_run_happy_path_with_successful_validation_spark(
     mock_emit,
     caplog,
@@ -2047,7 +1842,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -2091,7 +1886,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
@@ -2102,14 +1897,12 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
 
     stdout: str = result.stdout
     assert all(
-        [
-            msg in stdout
-            for msg in [
-                "Validation succeeded!",
-                "Titanic.warning",
-                "Passed",
-                "100.0 %",
-            ]
+        msg in stdout
+        for msg in [
+            "Validation succeeded!",
+            "Titanic.warning",
+            "Passed",
+            "100.0 %",
         ]
     )
 
@@ -2266,10 +2059,10 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     # To fail an expectation, make number of rows less than 1313 (the original number of rows in the "Titanic" dataset).
-    csv_path: str = os.path.join(
+    csv_path: str = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
     df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
@@ -2277,7 +2070,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
     # noinspection PyTypeChecker
     df.to_csv(path_or_buf=csv_path)
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -2465,206 +2258,6 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-@pytest.mark.slow  # 1.44s
-def test_checkpoint_run_happy_path_with_failed_validation_sql(
-    mock_emit,
-    caplog,
-    monkeypatch,
-    titanic_data_context_with_sql_datasource,
-    titanic_expectation_suite,
-):
-    monkeypatch.setenv("VAR", "test")
-    monkeypatch.setenv("MY_PARAM", "1")
-    monkeypatch.setenv("OLD_PARAM", "2")
-
-    context = titanic_data_context_with_sql_datasource
-    context.save_expectation_suite(
-        expectation_suite=titanic_expectation_suite,
-        expectation_suite_name="Titanic.warning",
-    )
-    assert context.list_expectation_suite_names() == ["Titanic.warning"]
-
-    checkpoint_file_path: str = os.path.join(
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "my_fancy_checkpoint.yml",
-    )
-
-    checkpoint_yaml_config: str = """
-    name: my_fancy_checkpoint
-    config_version: 1
-    class_name: Checkpoint
-    run_name_template: "%Y-%M-foo-bar-template-$VAR"
-    validations:
-      - batch_request:
-          datasource_name: test_sqlite_db_datasource
-          data_connector_name: whole_table
-          data_asset_name: incomplete
-        expectation_suite_name: Titanic.warning
-        action_list:
-            - name: store_validation_result
-              action:
-                class_name: StoreValidationResultAction
-            - name: store_evaluation_params
-              action:
-                class_name: StoreEvaluationParametersAction
-            - name: update_data_docs
-              action:
-                class_name: UpdateDataDocsAction
-    evaluation_parameters:
-      param1: "$MY_PARAM"
-      param2: 1 + "$OLD_PARAM"
-    runtime_configuration:
-      result_format:
-        result_format: BASIC
-        partial_unexpected_count: 20
-    """
-    config: dict = dict(yaml.load(checkpoint_yaml_config))
-    _write_checkpoint_dict_to_file(
-        config=config, checkpoint_file_path=checkpoint_file_path
-    )
-
-    runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    # noinspection PyTypeChecker
-    result: Result = runner.invoke(
-        cli,
-        "checkpoint run my_fancy_checkpoint",
-        catch_exceptions=False,
-    )
-    assert result.exit_code == 1
-
-    stdout: str = result.stdout
-    assert "Validation failed!" in stdout
-
-    assert mock_emit.call_count == 9
-
-    # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call] = [
-        mock.call(
-            {
-                "event_payload": {
-                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
-                },
-                "event": "data_context.save_expectation_suite",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {},
-                "event": "data_context.__init__",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "cli.checkpoint.run.begin",
-                "event_payload": {"api_version": "v3"},
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "data_context.get_batch_list",
-                "event_payload": {
-                    "anonymized_batch_request_required_top_level_properties": {
-                        "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
-                        "anonymized_data_connector_name": "6a6c3e6d98f688927f5434b7c19bfb05",
-                        "anonymized_data_asset_name": "61b23df5338c9164d0f9514847cba679",
-                    },
-                },
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "data_asset.validate",
-                "event_payload": {
-                    "anonymized_batch_kwarg_keys": [],
-                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
-                    "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
-                },
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {},
-                "event": "data_context.build_data_docs",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {
-                    "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "config_version": 1.0,
-                    "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
-                    "anonymized_validations": [
-                        {
-                            "anonymized_batch_request": {
-                                "anonymized_batch_request_required_top_level_properties": {
-                                    "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
-                                    "anonymized_data_connector_name": "6a6c3e6d98f688927f5434b7c19bfb05",
-                                    "anonymized_data_asset_name": "61b23df5338c9164d0f9514847cba679",
-                                },
-                            },
-                            "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        }
-                    ],
-                    "checkpoint_optional_top_level_keys": [
-                        "evaluation_parameters",
-                        "runtime_configuration",
-                    ],
-                },
-                "event": "checkpoint.run",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {},
-                "event": "data_context.run_checkpoint",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "cli.checkpoint.run.end",
-                "event_payload": {"api_version": "v3"},
-                "success": True,
-            }
-        ),
-    ]
-    # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    for actual, expected in zip(actual_events, expected_events):
-        assert actual == expected
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-    )
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_checkpoint_run_happy_path_with_failed_validation_spark(
     mock_emit,
     caplog,
@@ -2683,7 +2276,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -2729,7 +2322,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
@@ -2900,16 +2493,16 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
-    csv_path: str = os.path.join(
+    csv_path: str = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
     # mangle the csv
     with open(csv_path, "w") as f:
         f.write("foo,bar\n1,2\n")
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -3092,202 +2685,6 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-@pytest.mark.slow  # 1.05s
-def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
-    mock_emit,
-    caplog,
-    monkeypatch,
-    titanic_data_context_with_sql_datasource,
-    titanic_expectation_suite,
-):
-    monkeypatch.setenv("VAR", "test")
-    monkeypatch.setenv("MY_PARAM", "1")
-    monkeypatch.setenv("OLD_PARAM", "2")
-
-    context = titanic_data_context_with_sql_datasource
-    context.save_expectation_suite(
-        expectation_suite=titanic_expectation_suite,
-        expectation_suite_name="Titanic.warning",
-    )
-    assert context.list_expectation_suite_names() == ["Titanic.warning"]
-
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-
-    checkpoint_file_path: str = os.path.join(
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "my_fancy_checkpoint.yml",
-    )
-
-    checkpoint_yaml_config: str = """
-    name: my_fancy_checkpoint
-    config_version: 1
-    class_name: Checkpoint
-    run_name_template: "%Y-%M-foo-bar-template-$VAR"
-    validations:
-      - batch_request:
-          datasource_name: test_sqlite_db_datasource
-          data_connector_name: whole_table
-          data_asset_name: wrong
-        expectation_suite_name: Titanic.warning
-        action_list:
-            - name: store_validation_result
-              action:
-                class_name: StoreValidationResultAction
-            - name: store_evaluation_params
-              action:
-                class_name: StoreEvaluationParametersAction
-            - name: update_data_docs
-              action:
-                class_name: UpdateDataDocsAction
-    evaluation_parameters:
-      param1: "$MY_PARAM"
-      param2: 1 + "$OLD_PARAM"
-    runtime_configuration:
-      catch_exceptions: False
-      result_format:
-        result_format: BASIC
-        partial_unexpected_count: 20
-    """
-    config: dict = dict(yaml.load(checkpoint_yaml_config))
-    _write_checkpoint_dict_to_file(
-        config=config, checkpoint_file_path=checkpoint_file_path
-    )
-
-    runner: CliRunner = CliRunner(mix_stderr=False)
-    # noinspection PyTypeChecker
-    result: Result = runner.invoke(
-        cli,
-        "checkpoint run my_fancy_checkpoint",
-        catch_exceptions=False,
-    )
-    assert result.exit_code == 1
-
-    stdout: str = result.stdout
-    assert "Exception occurred while running Checkpoint." in stdout
-    assert 'Error: The column "Name" in BatchData does not exist...' in stdout
-
-    assert mock_emit.call_count == 8
-
-    # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call] = [
-        mock.call(
-            {
-                "event_payload": {
-                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
-                },
-                "event": "data_context.save_expectation_suite",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "data_context.__init__",
-                "event_payload": {},
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "cli.checkpoint.run.begin",
-                "event_payload": {"api_version": "v3"},
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "data_context.get_batch_list",
-                "event_payload": {
-                    "anonymized_batch_request_required_top_level_properties": {
-                        "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
-                        "anonymized_data_connector_name": "6a6c3e6d98f688927f5434b7c19bfb05",
-                        "anonymized_data_asset_name": "96a15275c07d53de6b4a9464704b12d8",
-                    },
-                },
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "data_asset.validate",
-                "event_payload": {
-                    "anonymized_batch_kwarg_keys": [],
-                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
-                    "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
-                },
-                "success": False,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {
-                    "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "config_version": 1.0,
-                    "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
-                    "anonymized_validations": [
-                        {
-                            "anonymized_batch_request": {
-                                "anonymized_batch_request_required_top_level_properties": {
-                                    "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
-                                    "anonymized_data_connector_name": "6a6c3e6d98f688927f5434b7c19bfb05",
-                                    "anonymized_data_asset_name": "96a15275c07d53de6b4a9464704b12d8",
-                                },
-                            },
-                            "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        }
-                    ],
-                    "checkpoint_optional_top_level_keys": [
-                        "evaluation_parameters",
-                        "runtime_configuration",
-                    ],
-                },
-                "event": "checkpoint.run",
-                "success": False,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {},
-                "event": "data_context.run_checkpoint",
-                "success": False,
-            }
-        ),
-        mock.call(
-            {
-                "event": "cli.checkpoint.run.end",
-                "event_payload": {"api_version": "v3"},
-                "success": False,
-            }
-        ),
-    ]
-    # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    for actual, expected in zip(actual_events, expected_events):
-        assert actual == expected
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-    )
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
     mock_emit,
     caplog,
@@ -3306,14 +2703,14 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    csv_path: str = os.path.join(
+    csv_path: str = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
     # mangle the csv
     with open(csv_path, "w") as f:
         f.write("foo,bar\n1,2\n")
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -3360,7 +2757,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
@@ -3512,7 +2909,7 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
     context = empty_context_with_checkpoint_v1_stats_enabled
     assert context.list_checkpoints() == ["my_v1_checkpoint"]
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -3567,15 +2964,15 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
 
     assert context.list_checkpoints() == ["my_v1_checkpoint"]
 
-    script_path: str = os.path.join(
+    script_path: str = os.path.join(  # noqa: PTH118
         context.root_directory, context.GX_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
     )
     with open(script_path, "w") as f:
         f.write("script here")
-    assert os.path.isfile(script_path)
+    assert os.path.isfile(script_path)  # noqa: PTH113
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
@@ -3630,7 +3027,7 @@ def test_checkpoint_script_happy_path_generates_script_pandas(
 ):
     context = empty_context_with_checkpoint_v1_stats_enabled
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
@@ -3675,10 +3072,10 @@ def test_checkpoint_script_happy_path_generates_script_pandas(
             }
         ),
     ]
-    expected_script: str = os.path.join(
+    expected_script: str = os.path.join(  # noqa: PTH118
         context.root_directory, context.GX_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
     )
-    assert os.path.isfile(expected_script)
+    assert os.path.isfile(expected_script)  # noqa: PTH113
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -3714,9 +3111,9 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     context.save_expectation_suite(expectation_suite=suite)
     assert context.list_expectation_suite_names() == ["users.delivery"]
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -3772,14 +3169,14 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
         click_result=result,
     )
 
-    script_path: str = os.path.abspath(
-        os.path.join(
+    script_path: str = os.path.abspath(  # noqa: PTH100
+        os.path.join(  # noqa: PTH118
             context.root_directory,
             context.GX_UNCOMMITTED_DIR,
             "run_my_fancy_checkpoint.py",
         )
     )
-    assert os.path.isfile(script_path)
+    assert os.path.isfile(script_path)  # noqa: PTH113
 
     # In travis on osx, python may not execute from the build dir
     cmdstring: str = f"python {script_path}"
@@ -3790,7 +3187,13 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     print("about to run: " + cmdstring)
     print(os.curdir)
     print(os.listdir(os.curdir))
-    print(os.listdir(os.path.abspath(os.path.join(context.root_directory, ".."))))
+    print(
+        os.listdir(
+            os.path.abspath(  # noqa: PTH100
+                os.path.join(context.root_directory, "..")  # noqa: PTH118
+            )
+        )
+    )
 
     status: int
     output: str
@@ -3830,10 +3233,10 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
     # To fail an expectation, make number of rows less than 1313 (the original number of rows in the "Titanic" dataset).
-    csv_path: str = os.path.join(
+    csv_path: str = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
     df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
@@ -3841,7 +3244,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     # noinspection PyTypeChecker
     df.to_csv(path_or_buf=csv_path)
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -3897,14 +3300,14 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
         click_result=result,
     )
 
-    script_path: str = os.path.abspath(
-        os.path.join(
+    script_path: str = os.path.abspath(  # noqa: PTH100
+        os.path.join(  # noqa: PTH118
             context.root_directory,
             context.GX_UNCOMMITTED_DIR,
             "run_my_fancy_checkpoint.py",
         )
     )
-    assert os.path.isfile(script_path)
+    assert os.path.isfile(script_path)  # noqa: PTH113
 
     # In travis on osx, python may not execute from the build dir
     cmdstring: str = f"python {script_path}"
@@ -3915,7 +3318,13 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     print("about to run: " + cmdstring)
     print(os.curdir)
     print(os.listdir(os.curdir))
-    print(os.listdir(os.path.abspath(os.path.join(context.root_directory, ".."))))
+    print(
+        os.listdir(
+            os.path.abspath(  # noqa: PTH100
+                os.path.join(context.root_directory, "..")  # noqa: PTH118
+            )
+        )
+    )
 
     status: int
     output: str
@@ -3954,16 +3363,16 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
 
-    csv_path: str = os.path.join(
+    csv_path: str = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
     # mangle the csv
     with open(csv_path, "w") as f:
         f.write("foo,bar\n1,2\n")
 
-    checkpoint_file_path: str = os.path.join(
+    checkpoint_file_path: str = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_fancy_checkpoint.yml",
@@ -4020,14 +3429,14 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
         click_result=result,
     )
 
-    script_path: str = os.path.abspath(
-        os.path.join(
+    script_path: str = os.path.abspath(  # noqa: PTH100
+        os.path.join(  # noqa: PTH118
             context.root_directory,
             context.GX_UNCOMMITTED_DIR,
             "run_my_fancy_checkpoint.py",
         )
     )
-    assert os.path.isfile(script_path)
+    assert os.path.isfile(script_path)  # noqa: PTH113
 
     # In travis on osx, python may not execute from the build dir
     cmdstring: str = f"python {script_path}"
@@ -4038,7 +3447,13 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     print("about to run: " + cmdstring)
     print(os.curdir)
     print(os.listdir(os.curdir))
-    print(os.listdir(os.path.abspath(os.path.join(context.root_directory, ".."))))
+    print(
+        os.listdir(
+            os.path.abspath(  # noqa: PTH100
+                os.path.join(context.root_directory, "..")  # noqa: PTH118
+            )
+        )
+    )
 
     status: int
     output: str

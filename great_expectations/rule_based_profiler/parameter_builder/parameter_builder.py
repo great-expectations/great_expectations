@@ -678,7 +678,7 @@ specified (empty "metric_name" value detected)."""
                     ):
                         raise gx_exceptions.ProfilerExecutionError(
                             message=f"""Applicability of {parameter_builder.__class__.__name__} is restricted to \
-numeric-valued and datetime-valued metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
+numeric-valued and datetime-valued metrics (value {metric_value} of type "{type(metric_value)!s}" was computed).
 """
                         )
                     else:

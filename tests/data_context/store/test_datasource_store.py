@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import pathlib
 from typing import Callable, List, Optional, cast
@@ -15,6 +17,9 @@ from great_expectations.core.serializer import (
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.data_context import DataContext
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
@@ -171,7 +176,6 @@ def test__assert_serialized_datasource_configs_are_equal(
 
 
 @pytest.mark.unit
-@pytest.mark.integration
 def test_datasource_store_retrieval(
     empty_datasource_store: DatasourceStore,
     block_config_datasource_config: DatasourceConfig,
@@ -196,7 +200,6 @@ def test_datasource_store_retrieval(
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
 def test_datasource_store_set_cloud_mode(
     block_config_datasource_config: DatasourceConfig,
     datasource_config_with_names_and_ids: DatasourceConfig,
@@ -263,7 +266,6 @@ def test_datasource_store_set_cloud_mode(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_datasource_store_with_inline_store_backend(
     block_config_datasource_config: DatasourceConfig, empty_data_context: DataContext
 ) -> None:
@@ -339,7 +341,6 @@ def test_datasource_store_set(
 
 
 @pytest.mark.unit
-@pytest.mark.integration
 def test_datasource_store_retrieve_by_name(
     fake_datasource_name,
     block_config_datasource_config: DatasourceConfig,
@@ -379,7 +380,6 @@ def test_datasource_store_delete(
 
 
 @pytest.mark.unit
-@pytest.mark.integration
 def test_datasource_store_update_by_name(
     fake_datasource_name,
     block_config_datasource_config: DatasourceConfig,
@@ -433,7 +433,6 @@ def test_datasource_store_update_raises_error_if_datasource_doesnt_exist(
 
 
 @pytest.mark.unit
-@pytest.mark.integration
 def test_datasource_store_with_inline_store_backend_config_with_names_does_not_store_datasource_name(
     datasource_config_with_names: DatasourceConfig,
     block_config_datasource_config: DatasourceConfig,
@@ -472,7 +471,7 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     )
 
     with open(
-        pathlib.Path(empty_data_context.root_directory) / "great_expectations.yml"
+        pathlib.Path(empty_data_context.root_directory) / FileDataContext.GX_YML
     ) as f:
         context_config_from_disk: dict = yaml.load(f)
 
@@ -480,7 +479,6 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_datasource_store_with_inline_store_backend_config_with_names_does_not_store_dataconnector_name(
     datasource_config_with_names: DatasourceConfig,
     block_config_datasource_config: DatasourceConfig,
@@ -519,7 +517,7 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     )
 
     with open(
-        pathlib.Path(empty_data_context.root_directory) / "great_expectations.yml"
+        pathlib.Path(empty_data_context.root_directory) / FileDataContext.GX_YML
     ) as f:
         context_config_from_disk: dict = yaml.load(f)
 
@@ -529,3 +527,217 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
             "data_connectors"
         ]["tripdata_monthly_configured"]
     )
+
+
+@pytest.mark.cloud
+@pytest.mark.parametrize(
+    "response_json, expected, error_type",
+    [
+        pytest.param(
+            {
+                "data": {
+                    "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                    "attributes": {
+                        "datasource_config": {
+                            "name": "my_pandas",
+                            "type": "pandas",
+                            "assets": [],
+                        },
+                    },
+                }
+            },
+            {
+                "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                "name": "my_pandas",
+                "type": "pandas",
+                "assets": [],
+            },
+            None,
+            id="single_config",
+        ),
+        pytest.param(
+            {
+                "data": [
+                    {
+                        "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                        "attributes": {
+                            "datasource_config": {
+                                "name": "my_pandas",
+                                "type": "pandas",
+                                "assets": [],
+                            },
+                        },
+                    }
+                ]
+            },
+            {
+                "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                "name": "my_pandas",
+                "type": "pandas",
+                "assets": [],
+            },
+            None,
+            id="single_config_in_list",
+        ),
+        pytest.param(
+            {
+                "data": [
+                    {
+                        "data": [
+                            {
+                                "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                                "attributes": {
+                                    "datasource_config": {
+                                        "name": "my_pandas",
+                                        "type": "pandas",
+                                        "assets": [],
+                                    },
+                                },
+                            }
+                        ]
+                    },
+                    {
+                        "data": [
+                            {
+                                "id": "ffg61d4e-003f-48e7-a3b2-f9f842384da3",
+                                "attributes": {
+                                    "data_asset_config": {
+                                        "name": "my_other_pandas",
+                                        "type": "pandas",
+                                    },
+                                },
+                            }
+                        ]
+                    },
+                ]
+            },
+            None,
+            TypeError,
+            id="multiple_config_in_list",
+        ),
+    ],
+)
+def test_gx_cloud_response_json_to_object_dict(
+    response_json: dict, expected: dict | None, error_type: Exception | None
+) -> None:
+    if error_type:
+        with pytest.raises(error_type):
+            _ = DatasourceStore.gx_cloud_response_json_to_object_dict(response_json)
+    else:
+        actual = DatasourceStore.gx_cloud_response_json_to_object_dict(response_json)
+        assert actual == expected
+
+
+@pytest.mark.cloud
+def test_gx_cloud_response_json_to_object_collection():
+    response_json = {
+        "data": [
+            {
+                "attributes": {
+                    "datasource_config": {
+                        "class_name": "Datasource",
+                        "data_connectors": {
+                            "pandas_data_connector": {
+                                "assets": {
+                                    "hurricanes_and_typhoons": {
+                                        "batch_identifiers": ["ocean"],
+                                        "class_name": "Asset",
+                                        "module_name": "great_expectations.datasource.data_connector.asset",
+                                        "name": "hurricanes_and_typhoons",
+                                    }
+                                },
+                                "class_name": "RuntimeDataConnector",
+                                "id": "7df29075-2e4d-46b1-aa6f-3e93c19bd7b2",
+                                "module_name": "great_expectations.datasource.data_connector",
+                                "name": "pandas_data_connector",
+                            }
+                        },
+                        "execution_engine": {
+                            "class_name": "PandasExecutionEngine",
+                            "module_name": "great_expectations.execution_engine",
+                        },
+                        "id": "2e3248b9-465f-4933-b313-cae6e3cbe685",
+                        "module_name": "great_expectations.datasource",
+                        "name": "weather_ds",
+                    }
+                },
+                "id": "2e3248b9-465f-4933-b313-cae6e3cbe685",
+                "type": "datasource",
+            },
+            {
+                "attributes": {
+                    "datasource_config": {
+                        "class_name": "Datasource",
+                        "data_connectors": {
+                            "default_runtime_data_connector": {
+                                "batch_identifiers": ["my_identifier"],
+                                "class_name": "RuntimeDataConnector",
+                                "id": "c84911b0-a42e-4196-afb9-754532e465aa",
+                                "module_name": "great_expectations.datasource.data_connector",
+                                "name": "default_runtime_data_connector",
+                            }
+                        },
+                        "execution_engine": {
+                            "class_name": "PandasExecutionEngine",
+                            "module_name": "great_expectations.execution_engine",
+                        },
+                        "id": "9bd4deb0-1729-4eda-a829-eeb41bf4bbf1",
+                        "module_name": "great_expectations.datasource",
+                        "name": "runtime_datasource",
+                    }
+                },
+                "id": "9bd4deb0-1729-4eda-a829-eeb41bf4bbf1",
+                "type": "datasource",
+            },
+        ]
+    }
+    expected = [
+        {
+            "class_name": "Datasource",
+            "data_connectors": {
+                "pandas_data_connector": {
+                    "assets": {
+                        "hurricanes_and_typhoons": {
+                            "batch_identifiers": ["ocean"],
+                            "class_name": "Asset",
+                            "module_name": "great_expectations.datasource.data_connector.asset",
+                            "name": "hurricanes_and_typhoons",
+                        },
+                    },
+                    "class_name": "RuntimeDataConnector",
+                    "id": "7df29075-2e4d-46b1-aa6f-3e93c19bd7b2",
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "name": "pandas_data_connector",
+                },
+            },
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "id": "2e3248b9-465f-4933-b313-cae6e3cbe685",
+            "module_name": "great_expectations.datasource",
+            "name": "weather_ds",
+        },
+        {
+            "class_name": "Datasource",
+            "data_connectors": {
+                "default_runtime_data_connector": {
+                    "batch_identifiers": ["my_identifier"],
+                    "class_name": "RuntimeDataConnector",
+                    "id": "c84911b0-a42e-4196-afb9-754532e465aa",
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "name": "default_runtime_data_connector",
+                },
+            },
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "id": "9bd4deb0-1729-4eda-a829-eeb41bf4bbf1",
+            "module_name": "great_expectations.datasource",
+            "name": "runtime_datasource",
+        },
+    ]
+
+    actual = DatasourceStore.gx_cloud_response_json_to_object_collection(response_json)
+    assert actual == expected

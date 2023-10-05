@@ -12,7 +12,7 @@ This guide will help you create <TechnicalTag tag="expectation" text="Expectatio
 <Prerequisites>
 
 - A configured <TechnicalTag tag="data_context" text="Data Context" />.
-- A configured <TechnicalTag tag="datasource" text="Datasource" /> (or several Datasources) with a minimum of two <TechnicalTag tag="data_asset" text="Data Assets" /> and an understanding of the basics of <TechnicalTag tag="batch_request" text="Batch Requests" />.
+- A configured <TechnicalTag tag="datasource" text="Data Source" /> (or several Datasources) with a minimum of two <TechnicalTag tag="data_asset" text="Data Assets" /> and an understanding of the basics of <TechnicalTag tag="batch_request" text="Batch Requests" />.
 - A <TechnicalTag tag="expectation_suite" text="Expectations Suites" /> for the Data Assets.
 - A working Evaluation Parameter store. The default in-memory <TechnicalTag tag="store" text="Store" /> from ``great_expectations init`` can work for this.
 - A working <TechnicalTag tag="checkpoint" text="Checkpoint" />

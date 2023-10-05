@@ -44,8 +44,6 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
     Keyword Args:
         strictly (Boolean or None): \
             If True, values must be strictly greater than previous values
-        parse_strings_as_datetimes (boolean or None): \
-            If True, all non-null column values to datetimes before making comparisons
         mostly (None or a float between 0 and 1): \
             Successful if at least mostly fraction of values match the expectation. \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
@@ -192,7 +190,7 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
 
         if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+                params["mostly"] * 100, no_scientific=True
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."

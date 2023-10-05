@@ -62,7 +62,7 @@ For more information on these Expectations, please see [our reference guide for 
 
 ## Limitations
 
-Unfortunately, not all Expectations are implemented for all source data systems.  To see a list of what Expectations are implemented for a given backend, please reference our [guide to implemented Expectations](../reference/expectations/implemented_expectations.md).
+Unfortunately, not all Expectations are implemented for all source data systems. To view a list of available Expectations, see the [Expectations Gallery](https://greatexpectations.io/expectations.html).
 
 Likewise, Conditional Expectations are considered **experimental** and may exhibit unexpected behavior when utilized with Spark and SQLAlchemy backends.  You can reference our [documentation on Conditional Expectations](../reference/expectations/conditional_expectations.md) for more information.
 

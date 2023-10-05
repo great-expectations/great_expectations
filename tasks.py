@@ -211,6 +211,14 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
         )
 
 
+@invoke.task()
+def marker_coverage(
+    ctx: Context,
+):
+    pytest_cmds = ["pytest", "--verify-marker-coverage-and-exit"]
+    ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
+
+
 @invoke.task(
     aliases=["types"],
     iterable=["packages"],
@@ -225,7 +233,8 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
         " stub files in `great_expectations`."
         " By default `mypy` will not check implementation files if a `.pyi` stub file exists."
         " This should be run in CI in addition to the normal type-checking step.",
-        "python-version": "Type check as if running a specific python version. Default 3.8",
+        "python-version": "Type check as if running a specific python version."
+        " Default to version set in pyproject.toml",
     },
 )
 def type_check(  # noqa: PLR0913, PLR0912
@@ -239,7 +248,7 @@ def type_check(  # noqa: PLR0913, PLR0912
     report: bool = False,
     check_stub_sources: bool = False,
     ci: bool = False,
-    python_version: str = "3.8",
+    python_version: str = "",
 ):
     """Run mypy static type-checking on select packages."""
     mypy_cache = pathlib.Path(".mypy_cache")
@@ -359,7 +368,6 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
     aliases=["test"],
     help={
         "unit": "Runs tests marked with the 'unit' marker. Default behavior.",
-        "integration": "Runs integration tests and exclude unit-tests. By default only unit tests are run.",
         "ignore-markers": "Don't exclude any test by not passing any markers to pytest.",
         "slowest": "Report on the slowest n number of tests",
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
@@ -372,7 +380,6 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
 def tests(  # noqa: PLR0913
     ctx: Context,
     unit: bool = True,
-    integration: bool = False,
     ignore_markers: bool = False,
     ci: bool = False,
     html: bool = False,
@@ -391,9 +398,6 @@ def tests(  # noqa: PLR0913
     See also, the newer `invoke ci-tests --help`.
     """
     markers = []
-    if integration:
-        markers += ["integration"]
-        unit = False
     markers += ["unit" if unit else "not unit"]
 
     marker_text = " and ".join(markers)
@@ -671,8 +675,8 @@ def docs(
         ctx.run(" ".join(rm_rf_cmds), echo=True)
     elif lint:
         ctx.run(" ".join(["yarn lint"]), echo=True)
-    else:
-        if start:  # noqa: PLR5501
+    else:  # noqa: PLR5501
+        if start:
             ctx.run(" ".join(["yarn start"]), echo=True)
         else:
             print("Making sure docusaurus dependencies are installed.")
@@ -787,28 +791,104 @@ def show_automerges(ctx: Context):
 class TestDependencies(NamedTuple):
     requirement_files: tuple[str, ...]
     services: tuple[str, ...] = tuple()
-    exta_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
+    extra_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
         str, ...
     ] = tuple()
 
 
-MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
+MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "athena": TestDependencies(("reqs/requirements-dev-athena.txt",)),
+    "aws_deps": TestDependencies(("reqs/requirements-dev-lite.txt",)),
+    "clickhouse": TestDependencies(("reqs/requirements-dev-clickhouse.txt",)),
     "cloud": TestDependencies(
-        ("reqs/requirements-dev-cloud.txt",), exta_pytest_args=("--cloud",)
+        ("reqs/requirements-dev-cloud.txt",), extra_pytest_args=("--cloud",)
     ),
-    "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
+    "databricks": TestDependencies(
+        requirement_files=("reqs/requirements-dev-databricks.txt",),
+    ),
+    "docs-basic": TestDependencies(
+        # these installs are handled by the CI
+        requirement_files=(
+            "reqs/requirements-dev-test.txt",
+            "reqs/requirements-dev-mssql.txt",
+            "reqs/requirements-dev-mysql.txt",
+            "reqs/requirements-dev-postgresql.txt",
+            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
+            "reqs/requirements-dev-sqlalchemy1.txt",
+            "reqs/requirements-dev-trino.txt",
+        ),
+        services=("postgresql", "mssql", "mysql", "trino"),
+        extra_pytest_args=(
+            "--mssql",
+            "--mysql",
+            "--postgresql",
+            "--trino",
+            "--docs-tests",
+        ),
+    ),
+    "docs-creds-needed": TestDependencies(
+        # these installs are handled by the CI
+        requirement_files=(
+            "reqs/requirements-dev-azure.txt",
+            "reqs/requirements-dev-bigquery.txt",
+            "reqs/requirements-dev-redshift.txt",
+            "reqs/requirements-dev-snowflake.txt",
+            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
+            "reqs/requirements-dev-sqlalchemy1.txt",
+        ),
+        extra_pytest_args=(
+            "--aws",
+            "--azure",
+            "--bigquery",
+            "--redshift",
+            "--snowflake",
+            "--docs-tests",
+        ),
+    ),
+    "docs-spark": TestDependencies(
+        requirement_files=(
+            "reqs/requirements-dev-test.txt",
+            "reqs/requirements-dev-spark.txt",
+        ),
+        services=("spark",),
+        extra_pytest_args=("--spark", "--docs-tests"),
+    ),
+    "mssql": TestDependencies(
+        ("reqs/requirements-dev-mssql.txt",),
+        services=("mssql",),
+        extra_pytest_args=("--mssql",),
+    ),
+    "mysql": TestDependencies(
+        ("reqs/requirements-dev-mysql.txt",),
+        services=("mysql",),
+        extra_pytest_args=("--mysql",),
+    ),
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
     "postgresql": TestDependencies(
         ("reqs/requirements-dev-postgresql.txt",),
-        services=["postgresql"],
-        exta_pytest_args=("--postgresql",),
+        services=("postgresql",),
+        extra_pytest_args=("--postgresql",),
+    ),
+    "snowflake": TestDependencies(
+        requirement_files=("reqs/requirements-dev-snowflake.txt",),
     ),
     "spark": TestDependencies(
-        ("reqs/requirements-dev-spark.txt",),
-        exta_pytest_args=("--spark",),
+        requirement_files=("reqs/requirements-dev-spark.txt",),
+        services=("spark",),
+        extra_pytest_args=("--spark",),
+    ),
+    "trino": TestDependencies(
+        ("reqs/requirements-dev-trino.txt",),
+        services=("trino",),
+        extra_pytest_args=("--trino",),
     ),
 }
+
+
+def _add_all_backends_marker(marker_string: str) -> bool:
+    # We should generalize this, possibly leveraging MARKER_DEPENDENCY_MAP, but for now
+    # right I've hardcoded all the containerized backend services we support in testing.
+    return marker_string in ["postgresql", "mssql", "mysql", "spark", "trino"]
 
 
 def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
@@ -823,9 +903,13 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
     tokens = marker_string.split()
     if len(tokens) == 1:
         yield tokens[0]
-    elif marker_string == "cloud and not e2e":
-        yield "cloud"
-    elif marker_string == "openpyxl or pyarrow or project or sqlite":
+    elif (
+        marker_string
+        == "athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds"
+    ):
+        yield "aws_creds"
+        yield "athena"
+        yield "clickhouse"
         yield "openpyxl"
         yield "pyarrow"
         yield "project"
@@ -840,7 +924,7 @@ def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependenc
     dependencies: list[TestDependencies] = []
     for marker_string in markers:
         for marker_token in _tokenize_marker_string(marker_string):
-            if marker_depedencies := MARKER_DEPENDENDENCY_MAP.get(marker_token):
+            if marker_depedencies := MARKER_DEPENDENCY_MAP.get(marker_token):
                 LOGGER.debug(f"'{marker_token}' has dependencies")
                 dependencies.append(marker_depedencies)
     return dependencies
@@ -865,7 +949,7 @@ def deps(  # noqa: PLR0913
     """
     Install dependencies for development and testing.
 
-    Specific requirement files needed for a specific test maker can be registered in `MARKER_REQ_MAPPING`,
+    Specific requirement files needed for a specific test marker can be registered in `MARKER_DEPENDENCY_MAP`,
     `invoke deps` will always check for and use these when installing dependencies.
 
     If no `markers` or `requirements-dev` are specified, the dev-contrib and
@@ -905,15 +989,49 @@ def deps(  # noqa: PLR0913
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
-@invoke.task(
-    iterable=["service_names", "up_services", "verbose"],
-)
-def ci_tests(
+@invoke.task(iterable=["service_names", "up_services", "verbose"])
+def docs_snippet_tests(
     ctx: Context,
     marker: str,
     up_services: bool = False,
     verbose: bool = False,
     reports: bool = False,
+):
+    pytest_cmds = [
+        "pytest",
+        "-rEf",
+    ]
+    if reports:
+        pytest_cmds.extend(["--cov=great_expectations", "--cov-report=xml"])
+
+    if verbose:
+        pytest_cmds.append("-vv")
+
+    for test_deps in _get_marker_dependencies(marker):
+        if up_services:
+            service(ctx, names=test_deps.services, markers=test_deps.services)
+
+        for extra_pytest_arg in test_deps.extra_pytest_args:
+            pytest_cmds.append(extra_pytest_arg)
+
+    pytest_cmds.append("tests/integration/test_script_runner.py")
+    ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
+
+
+@invoke.task(
+    help={"pty": _PTY_HELP_DESC},
+    iterable=["service_names", "up_services", "verbose"],
+)
+def ci_tests(  # noqa: PLR0913
+    ctx: Context,
+    marker: str,
+    up_services: bool = False,
+    verbose: bool = False,
+    reports: bool = False,
+    slowest: int = 5,
+    timeout: float = 0.0,  # 0 indicates no timeout
+    xdist: bool = False,
+    pty: bool = True,
 ):
     """
     Run tests in CI.
@@ -927,36 +1045,49 @@ def ci_tests(
 
     Defined this as a new invoke task to avoid some of the baggage of our old test setup.
     """
-    pytest_cmds = [
-        "pytest",
-        "-m",
-        f"'{marker}'",
-        "-rEf",
-    ]
+    pytest_options = [f"--durations={slowest}", "-rEf"]
+
+    if xdist:
+        pytest_options.append("-n auto")
+
+    if timeout != 0:
+        pytest_options.append(f"--timeout={timeout}")
+
     if reports:
-        pytest_cmds.extend(["--cov=great_expectations", "--cov-report=xml"])
+        pytest_options.extend(["--cov=great_expectations", "--cov-report=xml"])
 
     if verbose:
-        pytest_cmds.append("-vv")
+        pytest_options.append("-vv")
 
     for test_deps in _get_marker_dependencies(marker):
         if up_services:
-            service(ctx, names=test_deps.services, markers=test_deps.services)
+            service(ctx, names=test_deps.services, markers=test_deps.services, pty=pty)
 
-        for extra_pytest_arg in test_deps.exta_pytest_args:
-            pytest_cmds.append(extra_pytest_arg)
+        for extra_pytest_arg in test_deps.extra_pytest_args:
+            pytest_options.append(extra_pytest_arg)
 
-    ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
+    marker_statement = (
+        f"'all_backends or {marker}'"
+        if _add_all_backends_marker(marker)
+        else f"'{marker}'"
+    )
+
+    pytest_cmd = ["pytest", "-m", marker_statement] + pytest_options
+    ctx.run(" ".join(pytest_cmd), echo=True, pty=pty)
 
 
 @invoke.task(
+    aliases=("services",),
+    help={"pty": _PTY_HELP_DESC},
     iterable=["names", "markers"],
 )
-def service(ctx: Context, names: Sequence[str], markers: Sequence[str]):
+def service(
+    ctx: Context, names: Sequence[str], markers: Sequence[str], pty: bool = True
+):
     """
     Startup a service, by referencing its name directly or by looking up a pytest marker.
 
-    If a marker is specified, the services listed in `MARKER_DEPENDENDENCY_MAP` will be used.
+    If a marker is specified, the services listed in `MARKER_DEPENDENCY_MAP` will be used.
 
     Note:
         The main reason this is a separate task is to make it easy to start services
@@ -972,12 +1103,17 @@ def service(ctx: Context, names: Sequence[str], markers: Sequence[str]):
         print(f"  Starting services for {', '.join(service_names)} ...")
         for service_name in service_names:
             cmds = [
-                "docker-compose",
+                "docker",
+                "compose",
                 "-f",
                 f"assets/docker/{service_name}/docker-compose.yml",
                 "up",
                 "-d",
+                "--quiet-pull",
             ]
-            ctx.run(" ".join(cmds), echo=True, pty=True)
+            ctx.run(" ".join(cmds), echo=True, pty=pty)
+        # TODO: remove this sleep. This is a temporary hack to give services enough
+        #       time to come up to get ci merging again.
+        ctx.run("sleep 15")
     else:
         print("  No matching services to start")

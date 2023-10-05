@@ -129,8 +129,8 @@ class _YamlConfigValidator:
         class_name: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         pretty_print: bool = True,
-        return_mode: Union[
-            Literal["instantiated_class"], Literal["report_object"]
+        return_mode: Literal[
+            "instantiated_class", "report_object"
         ] = "instantiated_class",
         shorten_tracebacks: bool = False,
     ):
@@ -150,7 +150,6 @@ class _YamlConfigValidator:
 
         --Documentation--
             https://docs.greatexpectations.io/docs/terms/data_context
-            https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config
 
         Args:
             yaml_config: A string containing the yaml config to be tested

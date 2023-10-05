@@ -1,50 +1,50 @@
 import re
 import typing
 from logging import Logger
-from typing import TYPE_CHECKING, Hashable, Iterable, Literal, Optional, Sequence, Union
+from typing import Hashable, Iterable, Literal, Optional, Sequence, Union
 
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.datasource.fluent import PandasFilesystemDatasource, Sorter
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     DBFSDataConnector as DBFSDataConnector,
 )
+from great_expectations.datasource.fluent.dynamic_pandas import (
+    CompressionOptions,
+    CSVEngine,
+    FilePath,
+    IndexLabel,
+    StorageOptions,
+)
+from great_expectations.datasource.fluent.interfaces import BatchMetadata
 from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition as SortersDefinition,
 )
 from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError as TestConnectionError,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.dynamic_pandas import (
-        CompressionOptions,
-        CSVEngine,
-        FilePath,
-        IndexLabel,
-        StorageOptions,
-    )
-    from great_expectations.datasource.fluent.interfaces import BatchMetadata
-    from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-        CSVAsset,
-        ExcelAsset,
-        FeatherAsset,
-        HDFAsset,
-        HTMLAsset,
-        JSONAsset,
-        ORCAsset,
-        ParquetAsset,
-        PickleAsset,
-        SASAsset,
-        SPSSAsset,
-        StataAsset,
-        XMLAsset,
-    )
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+    CSVAsset,
+    ExcelAsset,
+    FeatherAsset,
+    HDFAsset,
+    HTMLAsset,
+    JSONAsset,
+    ORCAsset,
+    ParquetAsset,
+    PickleAsset,
+    SASAsset,
+    SPSSAsset,
+    StataAsset,
+    XMLAsset,
+)
 
 logger: Logger
 
 class PandasDBFSDatasource(PandasFilesystemDatasource):
     type: Literal["pandas_dbfs"]  # type: ignore[assignment]
 
+    @override
     def add_csv_asset(  # noqa: PLR0913
         self,
         name: str,
@@ -104,6 +104,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         memory_map: bool = ...,
         storage_options: StorageOptions = ...,
     ) -> CSVAsset: ...
+    @override
     def add_excel_asset(  # noqa: PLR0913
         self,
         name: str,
@@ -136,6 +137,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         mangle_dupe_cols: bool = ...,
         storage_options: StorageOptions = ...,
     ) -> ExcelAsset: ...
+    @override
     def add_feather_asset(  # noqa: PLR0913
         self,
         name: str,
@@ -148,6 +150,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         use_threads: bool = ...,
         storage_options: StorageOptions = ...,
     ) -> FeatherAsset: ...
+    @override
     def add_hdf_asset(  # noqa: PLR0913
         self,
         name: str,
@@ -167,6 +170,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         chunksize: typing.Union[int, None] = ...,
         kwargs: typing.Union[dict, None] = ...,
     ) -> HDFAsset: ...
+    @override
     def add_html_asset(  # noqa: PLR0913
         self,
         name: str,
@@ -190,6 +194,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         keep_default_na: bool = ...,
         displayed_only: bool = ...,
     ) -> HTMLAsset: ...
+    @override
     def add_json_asset(  # noqa: PLR0913
         self,
         name: str,
@@ -214,6 +219,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         nrows: typing.Union[int, None] = ...,
         storage_options: StorageOptions = ...,
     ) -> JSONAsset: ...
+    @override
     def add_orc_asset(  # noqa: PLR0913
         self,
         name: str,
@@ -225,6 +231,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         columns: typing.Union[typing.List[str], None] = ...,
         kwargs: typing.Union[dict, None] = ...,
     ) -> ORCAsset: ...
+    @override
     def add_parquet_asset(  # noqa: PLR0913
         self,
         name: str,
@@ -239,6 +246,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         use_nullable_dtypes: bool = ...,
         kwargs: typing.Union[dict, None] = ...,
     ) -> ParquetAsset: ...
+    @override
     def add_pickle_asset(  # noqa: PLR0913
         self,
         name: str,
@@ -250,6 +258,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         compression: CompressionOptions = "infer",
         storage_options: StorageOptions = ...,
     ) -> PickleAsset: ...
+    @override
     def add_sas_asset(  # noqa: PLR0913
         self,
         name: str,
@@ -265,6 +274,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         iterator: bool = ...,
         compression: CompressionOptions = "infer",
     ) -> SASAsset: ...
+    @override
     def add_spss_asset(  # noqa: PLR0913
         self,
         name: str,
@@ -276,6 +286,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         usecols: typing.Union[int, str, typing.Sequence[int], None] = ...,
         convert_categoricals: bool = ...,
     ) -> SPSSAsset: ...
+    @override
     def add_stata_asset(  # noqa: PLR0913
         self,
         name: str,
@@ -296,6 +307,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         compression: CompressionOptions = "infer",
         storage_options: StorageOptions = ...,
     ) -> StataAsset: ...
+    @override
     def add_xml_asset(  # noqa: PLR0913
         self,
         name: str,

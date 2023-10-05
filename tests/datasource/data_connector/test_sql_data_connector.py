@@ -1,6 +1,5 @@
 import json
 import random
-from typing import List, Set
 from unittest import mock
 
 import pytest
@@ -616,6 +615,7 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
 #  'table_that_should_be_partitioned_by_random_hash__H']
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_get_batch_data_and_markers_sampling_method__limit(
     in_memory_runtime_context,
@@ -665,6 +665,7 @@ def test_get_batch_data_and_markers_sampling_method__limit(
     ).success
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_get_batch_data_and_markers_sampling_method__random(
     sampler_method_name_prefix,
@@ -691,6 +692,7 @@ def test_get_batch_data_and_markers_sampling_method__random(
     pass
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_get_batch_data_and_markers_sampling_method__mod(
     sampler_method_name_prefix,
@@ -719,6 +721,7 @@ def test_get_batch_data_and_markers_sampling_method__mod(
     assert len(validator.head(fetch_all=True)) == 12
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_get_batch_data_and_markers_sampling_method__a_list(
     sampler_method_name_prefix,
@@ -817,6 +820,7 @@ def test_get_batch_data_and_markers_to_make_sure_splitter_and_sampler_methods_ar
     assert len(validator.head(fetch_all=True)) == 123
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__limit(
     in_memory_runtime_context,
@@ -880,6 +884,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__limit(
     ).success
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__random(
     sampler_method_name_prefix,
@@ -928,6 +933,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__random(
     assert len(validator.head(fetch_all=True)) == 123
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__mod(
     sampler_method_name_prefix,
@@ -982,6 +988,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__mod(
     assert len(validator.head(fetch_all=True)) == 12
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__a_list(
     sampler_method_name_prefix,
@@ -1033,6 +1040,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__a_list(
     assert len(validator.head(fetch_all=True)) == 4
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_ConfiguredAssetSqlDataConnector_assets_sampling_method_default__a_list(
     sampler_method_name_prefix,
@@ -1084,6 +1092,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method_default__a_list(
     assert len(validator.head(fetch_all=True)) == 4
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_ConfiguredAssetSqlDataConnector_assets_sampling_method_default__random_asset_override__a_list(
     sampler_method_name_prefix,
@@ -1135,6 +1144,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method_default__random_
     assert len(validator.head(fetch_all=True)) == 4
 
 
+@pytest.mark.sqlite
 def test_default_behavior_with_no_splitter(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
@@ -1895,7 +1905,6 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
 
 
 @pytest.mark.sqlite
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "splitter_method,splitter_kwargs,table_name,first_3_batch_identifiers_expected,last_3_batch_identifiers_expected",
     [
@@ -2066,7 +2075,6 @@ def test_ConfiguredAssetSqlDataConnector_sorting(
 
 
 @pytest.mark.sqlite
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "data_connector_yaml,expected_batch_identifiers_list",
     [
@@ -2157,7 +2165,6 @@ def test_ConfiguredAssetSqlDataConnector_return_all_batch_definitions_sorted(
 
 
 @pytest.mark.sqlite
-@pytest.mark.integration
 def test_introspect_db(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
@@ -2477,76 +2484,3 @@ def test_introspect_db(
             "type": "view",
         },
     ]
-
-
-@pytest.mark.mysql
-@pytest.mark.integration
-def test_include_schema_name_introspection(mysql_engine):
-    execution_engine = SqlAlchemyExecutionEngine(
-        name="test_sql_execution_engine",
-        engine=mysql_engine,
-    )
-
-    my_data_connector = instantiate_class_from_config(
-        config={
-            "class_name": "InferredAssetSqlDataConnector",
-            "name": "inferred_data_connector",
-            "include_schema_name": True,
-        },
-        runtime_environment={
-            "execution_engine": execution_engine,
-            "datasource_name": "my_test_datasource",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-    )
-
-    introspected_tables: List[str] = [
-        table
-        for table in my_data_connector._introspect_db()
-        if table["type"] == "table"
-    ]
-
-    # noinspection PyUnresolvedReferences
-    introspected_schemas: Set[str] = {
-        table.get("schema_name") for table in introspected_tables
-    }
-    assert introspected_schemas == {"test_ci", "test_connection"}
-
-    # ensure that tables with the same name are referenced by both schema_name and table_name
-    # test_df exists in both connection_test and public schemas
-    for schema_name in introspected_schemas:
-        assert {
-            "schema_name": schema_name,
-            "table_name": "test_df",
-            "type": "table",
-        } in introspected_tables
-
-
-@pytest.mark.mysql
-@pytest.mark.integration
-def test_include_schema_name_get_available_data_assets(
-    mysql_engine,
-):
-    execution_engine = SqlAlchemyExecutionEngine(
-        name="test_sql_execution_engine",
-        engine=mysql_engine,
-    )
-
-    my_data_connector = instantiate_class_from_config(
-        config={
-            "class_name": "InferredAssetSqlDataConnector",
-            "name": "inferred_data_connector",
-            "include_schema_name": True,
-        },
-        runtime_environment={
-            "execution_engine": execution_engine,
-            "datasource_name": "my_test_datasource",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-    )
-
-    actual_data_asset_names = my_data_connector.get_available_data_asset_names()
-
-    expected_data_asset_names = ["test_ci.test_df", "test_connection.test_df"]
-
-    assert set(expected_data_asset_names).issubset(set(actual_data_asset_names))

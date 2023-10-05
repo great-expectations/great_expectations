@@ -189,7 +189,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
             template_str = "Values in $column_A and $column_B must always be equal."
         else:
             params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+                params["mostly"] * 100, no_scientific=True
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str = "Values in $column_A and $column_B must be equal, at least $mostly_pct % of the time."

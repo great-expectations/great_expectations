@@ -67,8 +67,10 @@ def execute_shell_command(command: str) -> int:
     """
     cwd: str = os.getcwd()  # noqa: PTH109
 
-    path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
-    env: dict = dict(os.environ, PATH=path_env_var)
+    path_env_var: str = os.pathsep.join(
+        [os.environ.get("PATH", os.defpath), cwd]  # noqa: TID251
+    )
+    env: dict = dict(os.environ, PATH=path_env_var)  # noqa: TID251
 
     status_code: int = 0
     try:
@@ -97,7 +99,7 @@ def execute_shell_command(command: str) -> int:
         exception_message: str = "A Sub-Process call Exception occurred.\n"
         exception_traceback: str = traceback.format_exc()
         exception_message += (
-            f'{type(cpe).__name__}: "{str(cpe)}".  Traceback: "{exception_traceback}".'
+            f'{type(cpe).__name__}: "{cpe!s}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
 
@@ -144,7 +146,7 @@ def get_expectations_info_dict(
 
     if include_core:
         files_found.extend(
-            glob(
+            glob(  # noqa: PTH207
                 os.path.join(  # noqa: PTH118
                     repo_path,
                     "great_expectations",
@@ -157,7 +159,7 @@ def get_expectations_info_dict(
         )
     if include_contrib:
         files_found.extend(
-            glob(
+            glob(  # noqa: PTH207
                 os.path.join(repo_path, "contrib", "**", "expect_*.py"),  # noqa: PTH118
                 recursive=True,
             )
@@ -206,10 +208,8 @@ def get_expectations_info_dict(
                     f"..{os.path.sep}..", grandparent_dir
                 )
 
-        updated_at_cmd = f'git log -1 --format="%ai %ar" -- {repr(file_path)}'
-        created_at_cmd = (
-            f'git log --diff-filter=A --format="%ai %ar" -- {repr(file_path)}'
-        )
+        updated_at_cmd = f'git log -1 --format="%ai %ar" -- {file_path!r}'
+        created_at_cmd = f'git log --diff-filter=A --format="%ai %ar" -- {file_path!r}'
         result[expectation_name] = {
             "updated_at": check_output(updated_at_cmd, shell=True)
             .decode("utf-8")
@@ -328,7 +328,7 @@ def combine_backend_results(
     expected_full_backend_files = [
         f"{backend}_full.json" for backend in ALL_GALLERY_BACKENDS
     ]
-    found_full_backend_files = glob("*_full.json")
+    found_full_backend_files = glob("*_full.json")  # noqa: PTH207
 
     if sorted(found_full_backend_files) == sorted(expected_full_backend_files):
         logger.info(
@@ -434,7 +434,7 @@ def get_contrib_requirements(filepath: str) -> Dict:
                 if "library_metadata" in target_ids:
                     library_metadata = ast.literal_eval(node.value)
                     requirements = library_metadata.get("requirements", [])
-                    if type(requirements) == str:
+                    if type(requirements) == str:  # noqa: E721
                         requirements = [requirements]
                     requirements_info[current_class] = requirements
                     requirements_info["requirements"] += requirements
@@ -629,11 +629,11 @@ def format_docstring_to_markdown(docstr: str) -> str:
         elif line.strip().endswith(":"):
             in_param = True
             # This adds a blank line before the header if one doesn't already exist.
-            if prev_line:
+            if prev_line != "":
                 clean_docstr_list.append("")
             # Turn the line into an H4 header
             clean_docstr_list.append(f"#### {line.strip()}")
-        elif line.strip() and prev_line != "::":
+        elif line.strip() == "" and prev_line != "::":
             # All of our parameter groups end with a line break, but we don't want to exit a parameter block due to a
             # line break in a code block.  However, some code blocks start with a blank first line, so we want to make
             # sure we aren't immediately exiting the code block (hence the test for '::' on the previous line.
@@ -644,25 +644,26 @@ def format_docstring_to_markdown(docstr: str) -> str:
             in_code_block = False
             first_code_indentation = None
             clean_docstr_list.append(line)
-        elif in_code_block:
-            # Determine the number of spaces indenting the first line of code so they can be removed from all lines
-            # in the code block without wrecking the hierarchical indentation levels of future lines.
-            if first_code_indentation is None and line.strip():
-                first_code_indentation = len(
-                    re.match(r"\s*", original_line, re.UNICODE).group(0)
-                )
-            if not line.strip() and prev_line == "::":
-                # If the first line of the code block is a blank one, just skip it.
-                pass
+        else:  # noqa: PLR5501
+            if in_code_block:
+                # Determine the number of spaces indenting the first line of code so they can be removed from all lines
+                # in the code block without wrecking the hierarchical indentation levels of future lines.
+                if first_code_indentation is None and line.strip() != "":
+                    first_code_indentation = len(
+                        re.match(r"\s*", original_line, re.UNICODE).group(0)
+                    )
+                if line.strip() == "" and prev_line == "::":
+                    # If the first line of the code block is a blank one, just skip it.
+                    pass
+                else:
+                    # Append the line of code, minus the extra indentation from being written in an indented docstring.
+                    clean_docstr_list.append(original_line[first_code_indentation:])
+            elif ":" in line.replace(":ref:", "") and in_param:
+                # This indicates a parameter. arg. or other definition.
+                clean_docstr_list.append(f"- {line.strip()}")
             else:
-                # Append the line of code, minus the extra indentation from being written in an indented docstring.
-                clean_docstr_list.append(original_line[first_code_indentation:])
-        elif ":" in line.replace(":ref:", "") and in_param:
-            # This indicates a parameter. arg. or other definition.
-            clean_docstr_list.append(f"- {line.strip()}")
-        else:
-            # This indicates a regular line of text.
-            clean_docstr_list.append(f"{line.strip()}")
+                # This indicates a regular line of text.
+                clean_docstr_list.append(f"{line.strip()}")
         prev_line = line.strip()
     clean_docstr = "\n".join(clean_docstr_list)
     return clean_docstr

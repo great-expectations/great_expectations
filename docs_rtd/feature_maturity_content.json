@@ -454,7 +454,7 @@
             "icon": "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/expectations_store_git.png",
             "short_description": "Store Expectations in Git",
             "description": "Use a git repository to store expectation suites.",
-            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.html#additional-notes",
+            "how_to_guide_url": "https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/configure_expectation_stores.html",
             "maturity": "Production",
             "maturity_details": {
               "api_stability": "Stable",
@@ -471,7 +471,7 @@
             "icon": "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/expectations_store_filesystem.png",
             "short_description": "Filesystem-based Expectations Store",
             "description": "Filesystem-based Expectations Store",
-            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.html",
+            "how_to_guide_url": "https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/configure_expectation_stores.html",
             "maturity": "Production",
             "maturity_details": {
               "api_stability": "Stable",
@@ -488,7 +488,7 @@
             "icon": "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/expectations_store_s3.png",
             "short_description": "S3",
             "description": "Use an Amazon Web Services S3 bucket to store expectations.",
-            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3.html",
+            "how_to_guide_url": "https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/configure_expectation_stores.html",
             "maturity": "Beta",
             "maturity_details": {
               "api_stability": "Stable",
@@ -505,7 +505,7 @@
             "icon": "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/expectations_store_gcs.png",
             "short_description": "Cloud Storage",
             "description": "Use a Google Cloud Platform Cloud Storage bucket to store expectations.",
-            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.html",
+            "how_to_guide_url": "https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/configure_expectation_stores.html",
             "maturity": "Beta",
             "maturity_details": {
               "api_stability": "Stable",
@@ -522,7 +522,7 @@
             "icon": "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/expectations_store_azure_blob_storage.png",
             "short_description": "Azure Blob Storage",
             "description": "Use Microsoft Azure Blob Storage to store expectations.",
-            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.html",
+            "how_to_guide_url": "https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/configure_expectation_stores.html",
             "maturity": "N/A",
             "maturity_details": {
               "api_stability": "Stable",
@@ -546,7 +546,7 @@
             "icon": "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/validations_store_filesystem.png",
             "short_description": "Filesystem",
             "description": "Use a locally-mounted filesystem to store validation results.",
-            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem.html",
+            "how_to_guide_url": "https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/configure_result_stores.html",
             "maturity": "Production",
             "maturity_details": {
               "api_stability": "Stable",
@@ -580,7 +580,7 @@
             "icon": "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/validations_store_gcs.png",
             "short_description": "",
             "description": "# What it does  <br /> Store validation results in a Google Cloud Storage bucket. You may optionally specify a key to use. <br /> <br /> See the GCS Store backend [module docs](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_context/store/tuple_store_backend/index.html#great_expectations.data_context.store.tuple_store_backend.TupleGCSStoreBackend) for more information.",
-            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.html",
+            "how_to_guide_url": "https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/configure_result_stores.html",
             "maturity": "Beta",
             "maturity_details": {
               "api_stability": "Stable",
@@ -621,7 +621,7 @@
             "icon": "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/html_site_store_filesystem.png",
             "short_description": "DataDocs on Filesystem",
             "description": "For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on the Filesystem",
-            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.html",
+            "how_to_guide_url": "https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/host_and_share_data_docs.html",
             "maturity": "Production",
             "maturity_details": {
               "api_stability": "Mostly Stable (profiling)",
@@ -655,7 +655,7 @@
             "icon": "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/html_site_store_gcs.png",
             "short_description": "DataDocs on GCS",
             "description": "For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on GCS",
-            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.html",
+            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/host_and_share_data_docs.html",
             "maturity": "Beta",
             "maturity_details": {
               "api_stability": "Mostly Stable (profiling)",
@@ -672,7 +672,7 @@
             "icon": "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/html_site_store_azure_blob_storage.png",
             "short_description": "DataDocs on Azure Blob Storage",
             "description": "For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on Azure Blob Storage",
-            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.html",
+            "how_to_guide_url": "https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/host_and_share_data_docs.html",
             "maturity": "N/A",
             "maturity_details": {
               "api_stability": "Mostly Stable (profiling)",

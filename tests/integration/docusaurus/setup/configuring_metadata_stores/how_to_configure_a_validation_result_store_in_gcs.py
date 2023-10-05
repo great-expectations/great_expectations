@@ -3,6 +3,9 @@ import os
 import subprocess
 
 import great_expectations as gx
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.core.yaml_handler import YAMLHandler
 
 yaml = YAMLHandler()
@@ -40,18 +43,19 @@ expectation_suite_name = "my_expectation_suite"
 context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 checkpoint_name = "my_checkpoint"
-checkpoint_config = f"""
-name: {checkpoint_name}
-config_version: 1
-class_name: SimpleCheckpoint
-validations:
-  - batch_request:
-      datasource_name: my_datasource
-      data_connector_name: default_inferred_data_connector_name
-      data_asset_name: yellow_tripdata_sample_2019-01
-    expectation_suite_name: {expectation_suite_name}
-"""
-context.add_or_update_checkpoint(**yaml.load(checkpoint_config))
+context.add_or_update_checkpoint(
+    name=checkpoint_name,
+    validations=[
+        {
+            "batch_request": {
+                "datasource_name": "my_datasource",
+                "data_connector_name": "default_inferred_data_connector_name",
+                "data_asset_name": "yellow_tripdata_sample_2019-01",
+            },
+            "expectation_suite_name": expectation_suite_name,
+        }
+    ],
+)
 
 # run the checkpoint twice to create two validations
 context.run_checkpoint(checkpoint_name=checkpoint_name)
@@ -59,7 +63,7 @@ context.run_checkpoint(checkpoint_name=checkpoint_name)
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(
-    context.root_directory, "great_expectations.yml"
+    context.root_directory, FileDataContext.GX_YML
 )
 with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.load(f)

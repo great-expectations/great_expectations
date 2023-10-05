@@ -331,8 +331,8 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                     template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
                 else:
                     template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
-            else:
-                if params.min_value and params.max_value:  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if params.min_value and params.max_value:
                     template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
                 elif not params.min_value:
                     template_str = f"values must always be {at_most_str} $max_value characters long."
@@ -392,7 +392,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 
             if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
                 params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+                    params["mostly"] * 100, no_scientific=True
                 )
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 if params["min_value"] is not None and params["max_value"] is not None:
@@ -403,10 +403,8 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 
                 elif params["max_value"] is None:
                     template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
-            else:
-                if (  # noqa: PLR5501
-                    params["min_value"] is not None and params["max_value"] is not None
-                ):
+            else:  # noqa: PLR5501
+                if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
 
                 elif params["min_value"] is None:

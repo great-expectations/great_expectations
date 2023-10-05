@@ -2,10 +2,10 @@ from typing import List, Optional
 
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
+from great_expectations.data_context import AbstractDataContext
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.parameter_builder import (
     MeanUnexpectedMapMetricMultiBatchParameterBuilder,
@@ -16,18 +16,17 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 # module level markers
-pytestmark = pytest.mark.integration
+pytestmark = pytest.mark.big
 
 
 def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
+    data_context: AbstractDataContext = (
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 
-    # noinspection PyUnusedLocal
-    parameter_builder: ParameterBuilder = (
+    parameter_builder: ParameterBuilder = (  # noqa: F841
         MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             name="my_name",
             map_metric_name="column_values.nonnull",
@@ -40,18 +39,15 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder(
 def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_required_arguments_absent(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
+    data_context: AbstractDataContext = (
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 
     with pytest.raises(TypeError) as excinfo:
-        # noinspection PyUnusedLocal,PyArgumentList
-        parameter_builder: ParameterBuilder = (
-            MeanUnexpectedMapMetricMultiBatchParameterBuilder(
-                name="my_name",
-                map_metric_name="column_values.nonnull",
-                data_context=data_context,
-            )
+        _: ParameterBuilder = MeanUnexpectedMapMetricMultiBatchParameterBuilder(
+            name="my_name",
+            map_metric_name="column_values.nonnull",
+            data_context=data_context,
         )
 
     assert (
@@ -60,13 +56,10 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_
     )
 
     with pytest.raises(TypeError) as excinfo:
-        # noinspection PyUnusedLocal,PyArgumentList
-        parameter_builder: ParameterBuilder = (
-            MeanUnexpectedMapMetricMultiBatchParameterBuilder(
-                name="my_name",
-                total_count_parameter_builder_name="my_total_count",
-                data_context=data_context,
-            )
+        _: ParameterBuilder = MeanUnexpectedMapMetricMultiBatchParameterBuilder(
+            name="my_name",
+            total_count_parameter_builder_name="my_total_count",
+            data_context=data_context,
         )
 
     assert (
@@ -78,7 +71,7 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_
 def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_serialized_keys_no_evaluation_parameter_builder_configs(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
+    data_context: AbstractDataContext = (
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 
@@ -114,7 +107,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
 def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_serialized_keys_with_evaluation_parameter_builder_configs(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
+    data_context: AbstractDataContext = (
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 

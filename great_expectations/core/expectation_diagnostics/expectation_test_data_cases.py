@@ -38,7 +38,7 @@ class TestBackend:
             ), f"You may not specify dialects for backend {self.backend}"
         else:
             assert (
-                type(self.dialects) == list and len(self.dialects) > 0
+                isinstance(self.dialects, list) and len(self.dialects) > 0
             ), "dialects must be a list for backend sqlalchemy"
             bad_dialects = [
                 dialect

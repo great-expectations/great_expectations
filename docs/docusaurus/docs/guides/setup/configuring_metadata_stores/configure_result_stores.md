@@ -72,11 +72,11 @@ Use the information provided here to configure a new storage location for Valida
 
 <Prerequisites>
 
-- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 - [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 - [A Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint).
 - [An Azure Storage account](https://docs.microsoft.com/en-us/azure/storage) and get the [connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal).
-- An Azure Blob container. If you want to [host and share Data Docs on Azure Blob Storage](../../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md), you can set this up first and then use the ``$web`` existing container to store your <TechnicalTag tag="expectation" text="Expectations" />.
+- An Azure Blob container. If you want to [host and share Data Docs on Azure Blob Storage](../../../guides/setup/configuring_data_docs/host_and_share_data_docs.md), you can set this up first and then use the ``$web`` existing container to store your <TechnicalTag tag="expectation" text="Expectations" />.
 - A prefix (folder) to store Validation Results. You don't need to create the folder, the prefix is just part of the Blob name.
 
 </Prerequisites>
@@ -125,10 +125,10 @@ stores:
 ```
 
 :::note
-If the container for [hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md) is named ``$web``, use ``container: \$web`` to allow access to the ``$web``container.
+If the container for [hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/host_and_share_data_docs.md) is named ``$web``, use ``container: \$web`` to allow access to the ``$web``container.
 :::
 
-Additional authentication and configuration options are available. See [Hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md).
+Additional authentication and configuration options are available. See [Host and Share Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/host_and_share_data_docs.md).
 
 ### Copy existing Validation Results JSON files to the Azure blob (Optional)
 
@@ -168,7 +168,7 @@ To view all the code used in this topic, see [how_to_configure_a_validation_resu
 
 <Prerequisites>
 
-- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 - [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 - [A Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint).
 - A GCP [service account](https://cloud.google.com/iam/docs/service-accounts) with credentials that allow access to GCP resources such as Storage Objects.
@@ -202,7 +202,7 @@ In the following example, `validations_store_name` is set to ``validations_GCS_s
 ```
 
 :::warning
-If you are also storing [Expectations in GCS](../configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md) or [DataDocs in GCS](../configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md), make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
+If you are also storing [Expectations in GCS](../configuring_metadata_stores/configure_expectation_stores.md) or [DataDocs in GCS](../configuring_data_docs/host_and_share_data_docs.md), make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
 :::
 
 ### Copy existing Validation Results to the GCS bucket (Optional)
@@ -223,7 +223,7 @@ To make Great Expectations look for Validation Results on the GCS store, set the
 
 ### Confirm that the Validation Results Store has been correctly configured
 
-[Run a Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results Store on GCS, and then visualize the results by [re-building Data Docs](/docs/terms/data_docs).
+[Run a Checkpoint](/docs/guides/validation//checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional) to store results in the new Validation Results Store on GCS, and then visualize the results by [re-building Data Docs](/docs/terms/data_docs).
 
 </TabItem>
 <TabItem value="filesystem">
@@ -236,7 +236,7 @@ Use the information provided here to configure a new storage location for Valida
 
 <Prerequisites>
 
-- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 - [An Expectation Suite ](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 - [A Checkpoint](../../../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 - A new storage location to store Validation Results. This can be a local path, or a path to a secure network filesystem.
@@ -288,7 +288,7 @@ stores:
 
 ### Confirm that the Validation Results Store has been correctly configured
 
-Run a [Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results Store in your new location, and then visualize the results by re-building [Data Docs](../../../terms/data_docs.md).
+Run a [Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional) to store results in the new Validation Results Store in your new location, and then visualize the results by re-building [Data Docs](../../../terms/data_docs.md).
 
 </TabItem>
 <TabItem value="postgresql">
@@ -301,7 +301,7 @@ Use the information provided here to configure Great Expectations to store Valid
 
 <Prerequisites>
 
-- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 - [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 - [A Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint).
 - [A PostgreSQL database](https://www.postgresql.org/) with appropriate credentials.
@@ -399,7 +399,7 @@ store_backend:
 
 ### Confirm the Validation Results Store is configured correctly
 
-[Run a Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results store in PostgreSQL, and then visualize the results by [re-building Data Docs](../../../terms/data_docs.md).
+[Run a Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint#run-your-checkpoint-optional) to store results in the new Validation Results store in PostgreSQL, and then visualize the results by [re-building Data Docs](../../../terms/data_docs.md).
 
 Great Expectations creates a new table in your database named ``ge_validations_store``, and populates the fields with information from the Validation Results.
 

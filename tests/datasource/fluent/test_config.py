@@ -18,9 +18,9 @@ from typing import (  # TODO: revert use of cast
     cast,
 )
 
-import pydantic
 import pytest
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import (
@@ -460,11 +460,42 @@ def test_catch_bad_top_level_config(
                 _FLUENT_DATASOURCES_KEY,
                 "assets",
                 0,
+                "TableAsset",
                 "splitter",
                 "method_name",
             ),
             "unexpected value; permitted:",
             id="unknown splitter method",
+        ),
+        p(
+            {
+                "type": "table",
+                "table_name": "pool",
+            },
+            (
+                _FLUENT_DATASOURCES_KEY,
+                "assets",
+                0,
+                "TableAsset",
+                "name",
+            ),
+            "field required",
+            id="missing name",
+        ),
+        p(
+            {
+                "type": "query",
+                "name": "missing query string",
+            },
+            (
+                _FLUENT_DATASOURCES_KEY,
+                "assets",
+                0,
+                "QueryAsset",
+                "query",
+            ),
+            "field required",
+            id="missing query",
         ),
     ],
 )
@@ -502,6 +533,8 @@ def test_catch_bad_asset_configs(
         if expected_error_loc == all_errors[0]["loc"]:
             test_msg = error["msg"]
             break
+
+    print(f"\n\ttest_msg:\n{test_msg}")
     assert test_msg.startswith(expected_msg)
 
 
@@ -803,6 +836,7 @@ def file_dc_config_file_with_substitutions(
 
 @pytest.mark.sqlite
 def test_config_substitution_retains_original_value_on_save(
+    unset_gx_env_variables,
     seed_ds_env_vars: tuple,
     file_dc_config_file_with_substitutions: pathlib.Path,
     sqlite_database_path: pathlib.Path,
@@ -845,6 +879,7 @@ def test_config_substitution_retains_original_value_on_save(
 
 @pytest.mark.sqlite
 def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
+    unset_gx_env_variables,
     seed_ds_env_vars: tuple,
     file_dc_config_file_with_substitutions: pathlib.Path,
     cloud_storage_get_client_doubles,

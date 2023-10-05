@@ -7,23 +7,21 @@ import Prerequisites from '../creating_custom_expectations/components/prerequisi
 
 <Prerequisites>
 
-- [A custom Expectation](./overview.md).
+- [A custom Expectation](../custom_expectations_lp.md).
 
 </Prerequisites>
 
-## Steps
-
-### 1. Determine if the auto-initializing framework is appropriate to include in your Expectation
+## Determine if the auto-initializing framework is appropriate to include in your Expectation
 
 Auto-initializing Expectations automate parameter estimation for Expectations, but not all parameters require this kind of estimation.  If your expectation only takes in a Domain (such as the name of a column) then it will not benefit from being configured to work in the auto-initializing framework.  In general, the auto-initializing Expectation framework benefits those Expectations that have numeric ranges which are intended to be descriptive of the data found in a Batch or Batches.  Existing examples of these would be Expectations such as `ExpectColumnMeanToBeBetween`, `ExpectColumnMaxToBeBetween`, or `ExpectColumnSumToBeBetween`.
 
-### 2. Build a Custom Profiler for your Expectation
+## Build a Custom Profiler for your Expectation
 
 In order to automate the estimation of parameters, auto-initializing Expectations utilize a Custom Profiler.  You will need to create an appropriate configuration for the Profiler that your Expectation will use.  The easiest way to do this is to modify an existing Profiler configuration.
 
 You can find existing Profiler configurations in the source code for any Expectation that works within the auto-initializing framework.  For this example, we will look at the existing configuration for the `ExpectColumnMeanToBeBetween` Expectation. You can [view the source code for this Expectation on our GitHub](https://github.com/great-expectations/great_expectations/blob/f53e27b068007471b819fc089f008d2a24864d20/great_expectations/expectations/core/expect_column_mean_to_be_between.py).
 
-#### 2a. Modifying variables
+### Modify variables
 
 Key-value pairs defined in the `variables` portion of a Profiler Configuration will be shared across all of its `Rules` and `Rule` components.  This helps you define and keep track of values without having to input them multiple times.  In our example, the `variables` are:
 
@@ -37,7 +35,7 @@ Key-value pairs defined in the `variables` portion of a Profiler Configuration w
 * `truncate_values`: A value used by the `NumericMetricRangeMultiBatchParameterBuilder` to specify the `[lower_bound, upper_bound]` interval, where either boundary is numeric or None. In our case the value is an empty dictionary, and an equivalent configuration would have been `truncate_values : { lower_bound: None, upper_bound: None }`. 
 * `round_decimals` : Used by `NumericMetricRangeMultiBatchParameterBuilder`, and determines how many digits after the decimal point to output (in our case 2). 
 
-#### 2b. Modifying the `domain_builder`
+### Modify the `domain_builder`
 
 The `DomainBuilder` configuration requries a `class_name` and `module_name`.  In this example, we will be using the `ColumnDomainBuilder` which outputs the column of interest (for example: `trip_distance` in the NYC taxi data) which is then accessed by the `ExpectationConfigurationBuilder` using the variable `$domain.domain_kwargs.column`.
 
@@ -54,7 +52,7 @@ The `DomainBuilder` configuration requries a `class_name` and `module_name`.  In
 
 - **`module_name`**: is `great_expectations.rule_based_profiler.domain_builder`, which is common for all `DomainBuilders`.
 
-#### 2c. Modifying the `ParameterBuilder`
+### Modify the `ParameterBuilder`
 
 Our example contains a configuration for one `ParamterBuilder`, a `NumericMetricRangeMultiBatchParameterBuilder`.  You can find the other types of `ParameterBuilder` by browsing [the source code in our GitHub](https://github.com/great-expectations/great_expectations/tree/develop/great_expectations/rule_based_profiler/parameter_builder).  For the `NumericMetricRangeMultiBatchParameterBuilder` the configuration key-value pairs consist of:
 
@@ -74,7 +72,7 @@ Our example contains a configuration for one `ParamterBuilder`, a `NumericMetric
 * `replace_nan_with_zero`: If False, then if the computed metric gives `NaN`, then exception is raised; otherwise, if True (default), then if the computed metric gives NaN, then it is converted to the 0.0 (float) value. Set to `True` in our configuration.
 * `metric_domain_kwargs`: Domain values for `ParameteBuilder`. Pulled from `$domain.domain_kwargs`, and is empty in our configuration.
 
-#### 2d. Modifing the `expectation_configuration_builders`
+### Modify the `expectation_configuration_builders`
 
 Our Configuration contains 1 `ExpectationConfigurationBuilder`, for the `expect_column_mean_to_be_between` Expectation type. 
 
@@ -98,10 +96,10 @@ Next are the parameters that are specific to the `expect_column_mean_to_be_betwe
 
 Last is `meta` which contains `details` from our `parameter_builder`. 
 
-### 3. Assign your configuration to the `default_profiler_config` class attribute of your Expectation
+## Assign your configuration to the `default_profiler_config` class attribute of your Expectation
 
 Once you have modified the necessary parts of the Profiler configuration to suit your purposes you will need to assign it to the `default_profiler_config` class attribute of your Expectation.  If you initially copied the Profiler configuration that you modified from another Expectation that was already set up to work with the auto-initializing framework then you can refer to that Expectation for an example of this.
 
-### 4. Test your Expectation with `auto=True`
+## Test your Expectation with `auto=True`
 
 After assigning your Profiler configuration to the `default_profiler_config` attribute of your Expectation, your Expectation should be able to work in the auto-initializing framework.  [Test your expectation](./how_to_use_custom_expectations.md) with the parameter `auto=True`.

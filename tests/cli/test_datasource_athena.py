@@ -8,7 +8,6 @@ from click.testing import CliRunner
 from great_expectations.cli import cli
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
-
 pytestmark = pytest.mark.cli
 
 
@@ -29,7 +28,7 @@ def test_cli_athena_datasource_new_connection_string(
     assert context.list_datasources() == []
 
     runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     result = runner.invoke(
         cli,
         "datasource new",
@@ -44,10 +43,12 @@ def test_cli_athena_datasource_new_connection_string(
 
     assert result.exit_code == 0
 
-    uncommitted_dir = os.path.join(root_dir, context.GX_UNCOMMITTED_DIR)
-    expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
+    uncommitted_dir = os.path.join(root_dir, context.GX_UNCOMMITTED_DIR)  # noqa: PTH118
+    expected_notebook = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "datasource_new.ipynb"
+    )
 
-    assert os.path.isfile(expected_notebook)
+    assert os.path.isfile(expected_notebook)  # noqa: PTH113
     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
 
     expected_call_args_list = [
@@ -104,7 +105,7 @@ def test_cli_athena_datasource_new_connection_string(
     region_test = "us-east-1"
     schema_test = "test_data"
     table_name_test = "table_test"
-    connection_string = f"awsathena+rest://@athena.{region_test}.amazonaws.com/{schema_test}?s3_staging_dir=s3://YOUR_S3_BUCKET/path/to/"
+    _ = f"awsathena+rest://@athena.{region_test}.amazonaws.com/{schema_test}?s3_staging_dir=s3://YOUR_S3_BUCKET/path/to/"
 
     nb["cells"][5]["source"] = credentials_cell.replace("YOUR_REGION", region_test)
 
