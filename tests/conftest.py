@@ -3677,7 +3677,9 @@ def empty_cloud_data_context(
 
 
 @pytest.fixture
-def cloud_details(ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token) -> CloudDetails:
+def cloud_details(
+    ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token
+) -> CloudDetails:
     return CloudDetails(
         base_url=ge_cloud_base_url,
         org_id=ge_cloud_organization_id,

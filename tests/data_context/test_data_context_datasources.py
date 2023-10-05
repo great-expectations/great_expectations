@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pathlib
-from typing import TYPE_CHECKING
 from unittest import mock
 
 import pytest
@@ -19,15 +18,10 @@ from great_expectations.data_context.store.inline_store_backend import (
 )
 from great_expectations.data_context.types.base import (
     DataContextConfig,
-    DatasourceConfig,
     GXCloudConfig,
     InMemoryStoreBackendDefaults,
 )
 from great_expectations.datasource import Datasource
-from great_expectations.datasource.fluent import PandasDatasource
-
-if TYPE_CHECKING:
-    from great_expectations.data_context import CloudDataContext
 
 
 @pytest.fixture

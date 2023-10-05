@@ -6,7 +6,6 @@ import string
 from typing import cast
 
 import pytest
-import responses
 
 import great_expectations as gx
 from great_expectations.data_context import CloudDataContext
@@ -44,18 +43,7 @@ def test_cloud_context_add_datasource_with_fds(
 ):
     context = empty_cloud_data_context
     name = "my_pandas_ds"
-    type_ = "pandas"
-    id_ = "a135f497-31b0-4da3-9704-911bd9c190c3"
 
-    payload = {
-        "data": {
-            "attributes": {
-                "datasource_config": {"id": id_, "name": name, "type": type_}
-            },
-            "id": id_,
-            "type": "datasource",
-        }
-    }
     post_url = f"{ge_cloud_config.base_url}/organizations/{ge_cloud_config.organization_id}/datasources"
 
     fds = PandasDatasource(name=name)
