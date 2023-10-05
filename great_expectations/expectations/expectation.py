@@ -150,7 +150,11 @@ T = TypeVar("T")
 
 
 @public_api
-def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]:
+def render_evaluation_parameter_string(
+    render_func: Callable[
+        P, list[RenderedStringTemplateContent] | RenderedAtomicContent
+    ]
+) -> Callable[P, list[RenderedStringTemplateContent] | RenderedAtomicContent]:
     """Decorator for Expectation classes that renders evaluation parameters as strings.
 
     allows Expectations that use Evaluation Parameters to render the values
@@ -164,16 +168,16 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
     """
 
     def inner_func(
-        *args: Tuple[MetaExpectation], **kwargs: dict
-    ) -> Union[List[RenderedStringTemplateContent], RenderedAtomicContent]:
-        rendered_string_template: Union[
-            List[RenderedStringTemplateContent], RenderedAtomicContent
-        ] = render_func(*args, **kwargs)
+        *args: P.args, **kwargs: P.kwargs
+    ) -> list[RenderedStringTemplateContent] | RenderedAtomicContent:
+        rendered_string_template: list[
+            RenderedStringTemplateContent
+        ] | RenderedAtomicContent = render_func(*args, **kwargs)
         current_expectation_params = list()
         app_template_str = (
             "\n - $eval_param = $eval_param_value (at time of validation)."
         )
-        configuration: Optional[dict] = kwargs.get("configuration")
+        configuration: dict | None = kwargs.get("configuration")  # type: ignore[assignment] # could be object?
         if configuration:
             kwargs_dict: dict = configuration.get("kwargs", {})
             for key, value in kwargs_dict.items():
@@ -185,7 +189,7 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
         if current_expectation_params and not isinstance(
             rendered_string_template, RenderedAtomicContent
         ):
-            runtime_configuration: Optional[dict] = kwargs.get("runtime_configuration")
+            runtime_configuration: Optional[dict] = kwargs.get("runtime_configuration")  # type: ignore[assignment] # could be object?
             if runtime_configuration:
                 eval_params = runtime_configuration.get("evaluation_parameters", {})
                 styling = runtime_configuration.get("styling")
