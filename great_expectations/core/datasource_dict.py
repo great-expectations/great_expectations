@@ -175,6 +175,10 @@ class DatasourceDict(UserDict):
                     )
                     if cached_data_asset:
                         asset.dataframe = cached_data_asset.dataframe
+                    else:
+                        # Asset is loaded into cache here (even without df) to enable loading of df at a later
+                        # time when DataframeAsset.build_batch_request(dataframe=df) is called
+                        self._in_memory_data_assets[in_memory_asset_name] = asset
         return ds
 
     # To be removed once block-style is fully removed (deprecated as of v0.17.2)
