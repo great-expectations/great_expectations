@@ -79,16 +79,15 @@
         },
         "body": {
           "data": {
-            "id": "e7d11180-e9c0-4028-933c-ca86adb79ec2",
+            "id": "15da041b-328e-44f7-892e-2bfd1a887ef8",
             "attributes": {
               "datasource_config": {
-                "id": "e7d11180-e9c0-4028-933c-ca86adb79ec2",
+                "id": "15da041b-328e-44f7-892e-2bfd1a887ef8",
                 "name": "pandas_datasource",
                 "type": "pandas",
                 "assets": [
 
-                ],
-                "test": "this should fail"
+                ]
               }
             }
           }
@@ -105,7 +104,7 @@
       "providerState": "the Datasource exists",
       "request": {
         "method": "get",
-        "path": "/organizations/0ccac18e-7631-4bdd-8a42-3c35cce574c6/datasources/e7d11180-e9c0-4028-933c-ca86adb79ec2"
+        "path": "/organizations/0ccac18e-7631-4bdd-8a42-3c35cce574c6/datasources/15da041b-328e-44f7-892e-2bfd1a887ef8"
       },
       "response": {
         "status": 200,
@@ -113,16 +112,48 @@
         },
         "body": {
           "data": {
-            "id": "e7d11180-e9c0-4028-933c-ca86adb79ec2",
+            "id": "15da041b-328e-44f7-892e-2bfd1a887ef8",
             "attributes": {
               "datasource_config": {
-                "id": "e7d11180-e9c0-4028-933c-ca86adb79ec2",
+                "id": "15da041b-328e-44f7-892e-2bfd1a887ef8",
                 "name": "pandas_datasource",
                 "type": "pandas",
                 "assets": [
 
-                ],
-                "test": "this should fail"
+                ]
+              }
+            }
+          }
+        },
+        "matchingRules": {
+          "$.body": {
+            "match": "type"
+          }
+        }
+      }
+    },
+    {
+      "description": "a request to update a Datasource",
+      "providerState": "the Datasource exists",
+      "request": {
+        "method": "put",
+        "path": "/organizations/0ccac18e-7631-4bdd-8a42-3c35cce574c6/datasources/15da041b-328e-44f7-892e-2bfd1a887ef8"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+        },
+        "body": {
+          "data": {
+            "id": "15da041b-328e-44f7-892e-2bfd1a887ef8",
+            "attributes": {
+              "datasource_config": {
+                "id": "15da041b-328e-44f7-892e-2bfd1a887ef8",
+                "name": "pandas_datasource",
+                "type": "pandas",
+                "assets": [
+
+                ]
               }
             }
           }

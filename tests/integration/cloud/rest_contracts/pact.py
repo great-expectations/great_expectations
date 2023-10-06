@@ -4,7 +4,7 @@ from pact import Like
 import great_expectations as gx
 
 ORGANIZATION_ID = "0ccac18e-7631-4bdd-8a42-3c35cce574c6"
-DATASOURCE_ID = "e7d11180-e9c0-4028-933c-ca86adb79ec2"
+DATASOURCE_ID = "15da041b-328e-44f7-892e-2bfd1a887ef8"
 
 
 EXPECTED_DATA_CONTEXT = {
