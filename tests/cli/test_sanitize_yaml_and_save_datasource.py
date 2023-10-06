@@ -42,24 +42,23 @@ def test_sanitize_yaml_and_save_datasource_works_without_credentials(
     context = empty_data_context
     yaml_snippet = """
 name: my_datasource
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-connection_string: sqlite://"""
+class_name: Datasource
+execution_engine:
+  class_name: PandasExecutionEngine
+"""
 
     assert len(context.list_datasources()) == 0
     sanitize_yaml_and_save_datasource(context, yaml_snippet)
     assert len(context.list_datasources()) == 1
     assert context.list_datasources() == [
         {
-            "class_name": "SimpleSqlalchemyDatasource",
-            "connection_string": "sqlite://",
-            "introspection": {
-                "whole_table": {"data_asset_name_suffix": "__whole_table"}
-            },
+            "class_name": "Datasource",
             "module_name": "great_expectations.datasource",
             "name": "my_datasource",
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
         }
     ]
     obs = context.config_variables
