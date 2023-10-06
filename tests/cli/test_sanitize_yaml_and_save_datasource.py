@@ -224,11 +224,9 @@ execution_engine:
     # retest with a different type of datasource with the same name
     sql_yaml_snippet = """
     name: my_datasource
-    class_name: SimpleSqlalchemyDatasource
-    introspection:
-      whole_table:
-        data_asset_name_suffix: __whole_table
-    connection_string: sqlite://"""
+    class_name: PandasDatasource
+    execution_engine:
+        class_name: PandasExecutionEngine"""
 
     sanitize_yaml_and_save_datasource(
         context, sql_yaml_snippet, overwrite_existing=True
@@ -241,10 +239,14 @@ execution_engine:
     assert context.list_datasources() != pandas_datasource_from_context
     sql_datasource_from_context = [
         {
-            "class_name": "SimpleSqlalchemyDatasource",
-            "connection_string": "sqlite://",
-            "introspection": {
-                "whole_table": {"data_asset_name_suffix": "__whole_table"}
+            "class_name": "PandasDatasource",
+            "data_asset_type": {
+                "class_name": "PandasDataset",
+                "module_name": "great_expectations.dataset",
+            },
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
             },
             "module_name": "great_expectations.datasource",
             "name": "my_datasource",
