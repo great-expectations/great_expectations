@@ -17,6 +17,15 @@ from great_expectations.datasource.fluent import PandasDatasource
 pytestmark = pytest.mark.cloud
 
 
+def test_cloud_context_add_datasource_with_individual_fds_args_raises_error(
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
+):
+    context = empty_base_data_context_in_cloud_mode
+
+    with pytest.raises(TypeError):
+        context.add_datasource(name="my_pandas_fds", type="pandas", assets=[])
+
+
 def test_cloud_context_add_datasource_with_legacy_datasource_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
 ):

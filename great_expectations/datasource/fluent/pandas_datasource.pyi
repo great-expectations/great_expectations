@@ -126,7 +126,7 @@ class DataFrameAsset(_PandasDataAsset):
         version="0.16.15",
     )
     @override
-    def build_batch_request(
+    def build_batch_request(  # type: ignore[override]
         self, dataframe: Optional[pd.DataFrame] = None
     ) -> BatchRequest: ...
     @override
