@@ -91,7 +91,7 @@ The full configuration used in this guide can be found in the [`great-expectatio
 :::
 
 #### Add Expectations Store
-By default, newly profiled Expectations are stored in JSON format in the `expectations/` subdirectory of your `great_expectations/` folder. A new Expectations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
+By default, newly profiled Expectations are stored in JSON format in the `expectations/` subdirectory of your `gx/` folder. A new Expectations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
 
 ```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py expected_expectation_store"
 ```
@@ -104,7 +104,7 @@ Great Expectations can then be configured to use this new Expectations Store, `e
 For additional details and example configurations, see [Configure Expectation Stores](../guides/setup/configuring_metadata_stores/configure_expectation_stores.md).
 
 #### Add Validations Store
-By default, Validations are stored in JSON format in the `uncommitted/validations/` subdirectory of your `great_expectations/` folder. A new Validations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
+By default, Validations are stored in JSON format in the `uncommitted/validations/` subdirectory of your `gx/` folder. A new Validations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
 
 ```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py expected_validations_store"
 ```
@@ -395,15 +395,15 @@ If you run into trouble while installing Great Expectations in Cloud Composer, t
 
 Cloud Composer uses Cloud Storage to store Apache Airflow DAGs (also known as workflows), with each Environment having an associated Cloud Storage bucket (typically the name of the bucket will follow the pattern `[region]-[composer environment name]-[UUID]-bucket`).
 
-The simplest way to perform the migration is to move the entire local `great_expectations/` folder from [Part 1](#part-1-local-configuration-of-great-expectations-that-connects-to-google-cloud-platform) to the Cloud Storage bucket where Composer can access the configuration.
+The simplest way to perform the migration is to move the entire local `gx/` folder from [Part 1](#part-1-local-configuration-of-great-expectations-that-connects-to-google-cloud-platform) to the Cloud Storage bucket where Composer can access the configuration.
 
 First open the Environments page in the Cloud Console, then click on the name of the environment to open the Environment details page. In the Configuration tab, the name of the Cloud Storage bucket can be found to the right of the DAGs folder.
 
-This will take you to the folder where DAGs are stored, which can be accessed from the Airflow worker nodes at: `/home/airflow/gcsfuse/dags`. The location we want to uploads `great_expectations/` is **one level above the `/dags` folder**.
+This will take you to the folder where DAGs are stored, which can be accessed from the Airflow worker nodes at: `/home/airflow/gcsfuse/dags`. The location we want to upload the `gx/` folder to is **one level above the `/dags` folder**.
 
-Upload the local `great_expectations/` folder either dragging and dropping it into the window, using [`gsutil cp`](https://cloud.google.com/storage/docs/gsutil/commands/cp), or by clicking the `Upload Folder` button.
+Upload the local `gx/` folder either dragging and dropping it into the window, using [`gsutil cp`](https://cloud.google.com/storage/docs/gsutil/commands/cp), or by clicking the `Upload Folder` button.
 
-Once the `great_expectations/` folder is uploaded to the Cloud Storage bucket, it will be mapped to the Airflow instances in your Cloud Composer and be accessible from the Airflow Worker nodes at the location: `/home/airflow/gcsfuse/great_expectations`.
+Once the `gx/` folder is uploaded to the Cloud Storage bucket, it will be mapped to the Airflow instances in your Cloud Composer and be accessible from the Airflow Worker nodes at the location: `/home/airflow/gcsfuse/great_expectations`.
 
 ### 5. Write DAG and Add to Cloud Composer
 <Tabs
@@ -420,7 +420,7 @@ We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`
 ```python name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py full"
 ```
 
-The `BashOperator` will first change directories to `/home/airflow/gcsfuse/great_expectations`, where we have uploaded our local configuration.
+The `BashOperator` will first change directories to `/home/airflow/gcsfuse/gx`, where we have uploaded our local configuration.
 Then we will run the Checkpoint using same CLI command we used to run the Checkpoint locally:
 
 ```bash
@@ -441,7 +441,7 @@ We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`
 ```python name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py full"
 ```
 
-The `BashOperator` will first change directories to `/home/airflow/gcsfuse/great_expectations`, where we have uploaded our local configuration.
+The `BashOperator` will first change directories to `/home/airflow/gcsfuse/gx`, where we have uploaded our local configuration.
 Then we will run the Checkpoint using same CLI command we used to run the Checkpoint locally:
 
 
