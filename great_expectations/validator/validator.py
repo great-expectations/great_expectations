@@ -1337,7 +1337,7 @@ class Validator:
 
     def discard_failing_expectations(self) -> None:
         """Removes any expectations from the validator where the validation has failed"""
-        res = self.validate(only_return_failures=True).results
+        res = self.validate(only_return_failures=True).results  # type: ignore[union-attr] # ExpectationValidationResult has no `.results` attr
         if any(res):
             for item in res:
                 self.remove_expectation(
