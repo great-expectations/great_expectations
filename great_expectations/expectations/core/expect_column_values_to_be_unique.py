@@ -174,7 +174,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
     @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
-    def _prescriptive_renderer(
+    def _prescriptive_renderer(  # type: ignore[override] # TODO: Fix this type ignore
         cls,
         configuration: ExpectationConfiguration,
         result: Optional[ExpectationValidationResult] = None,
