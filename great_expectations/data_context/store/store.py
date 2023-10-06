@@ -134,11 +134,6 @@ class Store:
         return isinstance(self._store_backend, GXCloudStoreBackend)
 
     @property
-    def ge_cloud_mode(self) -> bool:
-        # <GX_RENAME> Deprecated 0.15.37
-        return self.cloud_mode
-
-    @property
     def store_backend(self) -> StoreBackend:
         return self._store_backend
 
