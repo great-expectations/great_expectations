@@ -10,6 +10,26 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.17.21
+* [DOCS] Create GX Cloud Agent Installation Topic ([#8760](https://github.com/great-expectations/great_expectations/pull/8760))
+* [DOCS] Update Section Link in GX Cloud TOC ([#8772](https://github.com/great-expectations/great_expectations/pull/8772))
+* [DOCS] Update Cloud Snowflake install instructions ([#8776](https://github.com/great-expectations/great_expectations/pull/8776))
+* [DOCS] Add GX Cloud Content ([#8775](https://github.com/great-expectations/great_expectations/pull/8775))
+* [DOCS] Update Link on Landing Page ([#8794](https://github.com/great-expectations/great_expectations/pull/8794))
+* [DOCS] Minor Update to Code Syntax in Quickstart ([#8800](https://github.com/great-expectations/great_expectations/pull/8800))
+* [DOCS] Consistent pip install instructions ([#8801](https://github.com/great-expectations/great_expectations/pull/8801))
+* [DOCS] Add Mermaid plugin to Docusaurus ([#8793](https://github.com/great-expectations/great_expectations/pull/8793))
+* [MAINTENANCE] Bump Cloud dependency to `0.0.3.dev3` ([#8774](https://github.com/great-expectations/great_expectations/pull/8774))
+* [MAINTENANCE] Fix merge group worker usage ([#8778](https://github.com/great-expectations/great_expectations/pull/8778))
+* [MAINTENANCE] SQL column identifier testing - ensure expectations fail when expected ([#8757](https://github.com/great-expectations/great_expectations/pull/8757))
+* [MAINTENANCE] Use checkoutV3 ([#8777](https://github.com/great-expectations/great_expectations/pull/8777))
+* [MAINTENANCE] Expectations typings ([#8784](https://github.com/great-expectations/great_expectations/pull/8784))
+* [MAINTENANCE] Removing gallery parameter parse_strings_as_datetimes ([#8786](https://github.com/great-expectations/great_expectations/pull/8786))
+* [MAINTENANCE] Prevent block-style datasource creation with Cloud-backed contexts ([#8791](https://github.com/great-expectations/great_expectations/pull/8791))
+* [MAINTENANCE] Raise error if constructing FDS with individual args through base context API ([#8792](https://github.com/great-expectations/great_expectations/pull/8792))
+* [MAINTENANCE] Remove SimpleCheckpoint from public API docs ([#8770](https://github.com/great-expectations/great_expectations/pull/8770))
+* [MAINTENANCE] disallow-untyped-decorators ([#8788](https://github.com/great-expectations/great_expectations/pull/8788))
+
 ### 0.17.20
 * [FEATURE] DataDocs Renderer for `ExpectMulticolumnSumToEqual` and `LikePattern` Expectations ([#8739](https://github.com/great-expectations/great_expectations/pull/8739))
 * [FEATURE] Allow optional expectation_suite_name to be passed to RunDataAssistantEvent ([#8693](https://github.com/great-expectations/great_expectations/pull/8693))
