@@ -504,9 +504,6 @@ class Datasource(
                 filter(lambda asset: asset.name == asset_name, self.assets)
             )[0]
             found_asset._datasource = self
-            if self._data_context:
-                # datasources setter will attach dataframe to in-memory assets
-                self._data_context.datasources[self.name] = self
             return found_asset
         except IndexError as exc:
             raise LookupError(
