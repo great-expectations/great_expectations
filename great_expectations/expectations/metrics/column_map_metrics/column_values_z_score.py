@@ -1,11 +1,10 @@
-from typing import Optional
+from __future__ import annotations
 
-import pandas as pd
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypeSuffixes,
 )
@@ -21,6 +20,11 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     column_function_partial,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    import pandas as pd
+
+    from great_expectations.core import ExpectationConfiguration
 
 
 class ColumnValuesZScore(ColumnMapMetricProvider):
@@ -48,7 +52,7 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
                 )
             )
 
-    @column_condition_partial(engine=PandasExecutionEngine)
+    @column_condition_partial(engine=PandasExecutionEngine)  # type: ignore[misc] # untyped-decorator
     def _pandas_condition(
         cls, column, _metrics, threshold, double_sided, **kwargs
     ) -> pd.Series:
