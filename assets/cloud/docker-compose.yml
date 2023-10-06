@@ -3,6 +3,7 @@ version: "3.4"
 services:
   db:
     image: postgres:13.7
+    platform: linux/amd64
     # Very important that parent dir of `data` already exists
     volumes:
       - ./data:/var/lib/postgresql/data
@@ -17,6 +18,7 @@ services:
       - 5432:5432
   mq:
     image: rabbitmq:3.10.20-management
+    platform: linux/amd64
     hostname: gx-bunny
     environment:
       RABBITMQ_DEFAULT_USER: gx_prod
@@ -26,6 +28,7 @@ services:
       - 5672:5672
   db-provisioner:
     image: 258143015559.dkr.ecr.us-east-1.amazonaws.com/mercury/provisioner:0.4.1
+    platform: linux/amd64
     environment:
       PGPASSWORD: postgres
       APP_DB_API_USER_PASSWORD: postgres
@@ -38,9 +41,7 @@ services:
       - db
   mercury-service-api:
     image: 258143015559.dkr.ecr.us-east-1.amazonaws.com/mercury/api:latest
-    restart: always
-    volumes:
-      - ./services/ge_cloud/:/code
+    # restart: always
     ports:
       - 5000:5000
     environment:
@@ -53,12 +54,11 @@ services:
       MERCURY_DATABASE: mercury
       GE_USAGE_STATISTICS_URL: ${GE_USAGE_STATISTICS_URL}
       AMQP_CONNECTION_STRING: amqp://gx_prod:password@mq:5672
-      # AUTH0_DOMAIN: ${AUTH0_DOMAIN}
-      # AUTH0_API_AUDIENCE: ${AUTH0_API_AUDIENCE}
-      # AUTH0_MERCURY_API_CLIENT_ID: ${AUTH0_MERCURY_API_CLIENT_ID}
-      # AUTH0_MERCURY_API_CLIENT_SECRET: ${AUTH0_MERCURY_API_CLIENT_SECRET}
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      AUTH0_API_AUDIENCE: ${AUTH0_API_AUDIENCE}
+      AUTH0_MERCURY_API_CLIENT_ID: ${AUTH0_MERCURY_API_CLIENT_ID}
+      AUTH0_MERCURY_API_CLIENT_SECRET: ${AUTH0_MERCURY_API_CLIENT_SECRET}
       SENDGRID_API_KEY: fake_key
-
     depends_on:
       - db-provisioner
       - mq
