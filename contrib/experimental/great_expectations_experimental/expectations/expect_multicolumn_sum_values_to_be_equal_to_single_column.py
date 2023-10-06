@@ -81,7 +81,7 @@ class ExpectMulticolumnSumValuesToBeEqualToSingleColumn(MulticolumnMapExpectatio
 
     Args:
         column_list (list of str): \
-            A list of 2 or more float columns, in which we expect the sum of the first n-1th \
+            A list of 2 or more int or float columns, in which we expect the sum of the first n-1th \
             columns to be equal to the nth column. This means that if one wants to compare \
             between the sum of n-1 columns and the nth column, it needs to put the nth column \
             at the end of the list.
