@@ -107,6 +107,7 @@ class ExpectMulticolumnSumValuesToBeEqualToSingleColumn(MulticolumnMapExpectatio
                 "col_i": [-2, 3, 1, 0],
                 "col_j": [-1, 4, 2, 0],
                 "col_k": [-1, 9, 5, 2],
+                "col_l": [3.15, 16.0, 6.0, 4.0],
             },
             "tests": [
                 {
@@ -185,6 +186,18 @@ class ExpectMulticolumnSumValuesToBeEqualToSingleColumn(MulticolumnMapExpectatio
                     "in": {
                         "column_list": ["col_i", "col_j", "col_k"],
                         "additional_value": 2,
+                    },
+                    "out": {
+                        "success": True,
+                    },
+                },
+                {
+                    "title": "columns_to_sum integer and float set + additional value equal to column_to_equal",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column_list": ["col_a", "col_k", "col_l"],
+                        "additional_value": 1,
                     },
                     "out": {
                         "success": True,
