@@ -206,7 +206,7 @@ def test_context_add_or_update_datasource(
         )
         cloud_api_fake.assert_call_count(
             f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}?name={datasource.name}",
-            3,
+            1,
         )
 
         response = requests.get(
@@ -393,7 +393,7 @@ class TestPandasDefaultWithCloud:
 
         assert verify_asset_names_mock.assert_call_count(
             f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources/{pandas_default_id}",
-            3,
+            1,
         )
 
 
