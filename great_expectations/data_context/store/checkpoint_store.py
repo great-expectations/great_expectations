@@ -251,7 +251,7 @@ class CheckpointStore(ConfigurationStore):
             ]
             checkpoint_config["ge_cloud_id"] = checkpoint_config.pop("id")
             return self.deserialize(checkpoint_config)
-        elif self.ge_cloud_mode:
+        elif self.cloud_mode:
             # if in cloud mode and checkpoint_ref is not a GXCloudResourceRef, a PUT operation occurred
             # re-fetch and return CheckpointConfig from cloud to account for any defaults/new ids added in cloud
             return self.get_checkpoint(name=checkpoint.name, id=None)
