@@ -108,6 +108,9 @@ class ExpectMulticolumnProductToBeEqualToSingleColumn(MulticolumnMapExpectation)
                 "col_f": [-21.0, -18.0, 0.0, 3.125],
                 "col_g": [7.0, 12.0, 0.0, 2.5],
                 "col_h": [-42.0, -36.0, 0.0, 6.25],
+                "col_i": [3, -2, 0, 5],
+                "col_j": [2, 1, 5, 8],
+                "col_k": [12, -4, 0, 80],
             },
             "tests": [
                 {
@@ -172,6 +175,27 @@ class ExpectMulticolumnProductToBeEqualToSingleColumn(MulticolumnMapExpectation)
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {"column_list": ["col_a", "col_c", "col_d"]},
+                    "out": {
+                        "success": False,
+                    },
+                },
+                {
+                    "title": "columns_to_multiply integer set and additional_value is equal to column_to_equal",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column_list": ["col_i", "col_j", "col_k"],
+                        "additional_value": 2,
+                    },
+                    "out": {
+                        "success": True,
+                    },
+                },
+                {
+                    "title": "columns_to_multiply integer set and additional_value is not equal to column_to_equal",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column_list": ["col_i", "col_j", "col_k"]},
                     "out": {
                         "success": False,
                     },
