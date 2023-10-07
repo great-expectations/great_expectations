@@ -457,6 +457,7 @@ class _SQLAsset(DataAsset):
         context: AbstractDataContext | None
         if context := self._datasource._data_context:
             context.datasources[self._datasource.name] = self._datasource
+            context._save_project_config()
         return self
 
     @public_api
