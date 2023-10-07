@@ -816,7 +816,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             updated_datasource = datasource
 
         updated_datasource._rebuild_asset_data_connectors()
-        updated_datasource.test_connection()
 
         updated_datasource = self.datasources.set_datasource(
             name=datasource_name, ds=updated_datasource
