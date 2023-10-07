@@ -136,8 +136,12 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             aborted_metrics=aborted_metrics,
         )
         raw_column_types: list[dict[str, Any]] = value
+        # If type is not found, default to UNKNOWN
         column_types_converted_to_str: list[dict[str, str]] = [
-            {"name": raw_column_type["name"], "type": str(raw_column_type["type"])}
+            {
+                "name": raw_column_type["name"],
+                "type": str(raw_column_type.get("type", "UNKNOWN")),
+            }
             for raw_column_type in raw_column_types
         ]
         return TableMetric[List[str]](
