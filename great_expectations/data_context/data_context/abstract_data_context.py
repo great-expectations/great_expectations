@@ -3217,7 +3217,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         ...
 
-    @public_api
     @new_argument(
         argument_name="profiler",
         version="0.15.48",
@@ -3272,7 +3271,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 profiler=profiler,
             )
 
-    @public_api
     @new_argument(
         argument_name="id",
         version="0.15.48",
@@ -3308,7 +3306,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             id=id,
         )
 
-    @public_api
     @new_argument(
         argument_name="id",
         version="0.15.48",
@@ -3340,7 +3337,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             id=id,
         )
 
-    @public_api
     @new_method_or_class(version="0.15.48")
     def update_profiler(self, profiler: RuleBasedProfiler) -> RuleBasedProfiler:
         """Update a Profiler that already exists.
@@ -3389,7 +3385,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         ...
 
-    @public_api
     @new_method_or_class(version="0.15.48")
     def add_or_update_profiler(  # noqa: PLR0913
         self,
