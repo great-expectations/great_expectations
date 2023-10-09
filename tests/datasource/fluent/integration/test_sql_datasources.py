@@ -27,7 +27,6 @@ from great_expectations.compatibility.sqlalchemy import (
 )
 from great_expectations.compatibility.sqlalchemy import (
     TextClause,
-    engine,
     inspect,
     quoted_name,
 )

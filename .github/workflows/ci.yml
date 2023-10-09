@@ -314,6 +314,7 @@ jobs:
           - cli
           - databricks
           - filesystem
+          - mercury
           - mssql
           - mysql
           - postgresql

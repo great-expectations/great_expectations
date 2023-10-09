@@ -3,10 +3,6 @@ version: "3.4"
 services:
   db:
     image: postgres:13.7
-    platform: linux/amd64
-    # Very important that parent dir of `data` already exists
-    volumes:
-      - ./data:/var/lib/postgresql/data
     # Turn off db logs by default
     # https://postgresqlco.nf/doc/en/param/log_statement/
     command: [ "postgres", "-c", "log_statement=none" ]
@@ -16,9 +12,13 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
       - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
+      interval: 10s
+      timeout: 2s
+      retries: 5
   mq:
     image: rabbitmq:3.10.20-management
-    platform: linux/amd64
     hostname: gx-bunny
     environment:
       RABBITMQ_DEFAULT_USER: gx_prod
@@ -31,6 +31,7 @@ services:
     platform: linux/amd64
     environment:
       PGPASSWORD: postgres
+      APP_DB_API_USER: postgres
       APP_DB_API_USER_PASSWORD: postgres
       APP_DB_ADDR: db
     # Note: We are overwriting the existing command, just adding a retry
@@ -38,10 +39,12 @@ services:
     #       In local, the DB needs a few seconds to boot up and listen
     command: 'bash -c "until ./init-db.sh; do sleep 5; done;"'
     depends_on:
-      - db
+      db:
+        condition: service_healthy
   mercury-service-api:
     image: 258143015559.dkr.ecr.us-east-1.amazonaws.com/mercury/api:latest
-    # restart: always
+    platform: linux/amd64
+    restart: always
     ports:
       - 5000:5000
     environment:
@@ -59,6 +62,17 @@ services:
       AUTH0_MERCURY_API_CLIENT_ID: ${AUTH0_MERCURY_API_CLIENT_ID}
       AUTH0_MERCURY_API_CLIENT_SECRET: ${AUTH0_MERCURY_API_CLIENT_SECRET}
       SENDGRID_API_KEY: fake_key
+      LD_SDK_KEY: ${LD_SDK_KEY}
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        sed -i 's/localhost/db/g' /app/services/ge_cloud/mercury/alembic.ini
+        cd /app/services/ge_cloud/mercury
+        alembic upgrade head
+        cd /app/services/ge_cloud
+        python -m tests.utils.dev_db_seed_script
+        gunicorn mercury.api:get_app\(\) --config ./gunicorn.conf.py
     depends_on:
-      - db-provisioner
-      - mq
+      db-provisioner:
+        condition: service_completed_successfully
