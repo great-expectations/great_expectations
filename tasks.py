@@ -865,7 +865,7 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     ),
     "mercury": TestDependencies(
         services=("mercury",),
-        extra_pytest_args=("--mercury",),
+        extra_pytest_args=("--snowflake",),
     ),
     "mssql": TestDependencies(
         ("reqs/requirements-dev-mssql.txt",),
@@ -904,7 +904,6 @@ def _add_all_backends_marker(marker_string: str) -> bool:
     # right I've hardcoded all the containerized backend services we support in testing.
     return marker_string in [
         "postgresql",
-        "mercury",
         "mssql",
         "mysql",
         "spark",
