@@ -101,7 +101,6 @@ def checkpoint(
     context.delete_checkpoint(name=checkpoint_name)
 
 
-@pytest.mark.snowflake
 @pytest.mark.mercury
 def test_checkpoint_run(checkpoint: Checkpoint):
     checkpoint.run()
