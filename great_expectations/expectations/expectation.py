@@ -3601,7 +3601,8 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
         "unexpected_percent": unexpected_percent_nonmissing,
     }
 
-    if unexpected_list is not None:
+    exclude_unexpected_values = result_format.get("exclude_unexpected_values", False)
+    if unexpected_list is not None and not exclude_unexpected_values:
         return_obj["result"]["partial_unexpected_list"] = unexpected_list[
             : result_format["partial_unexpected_count"]
         ]
@@ -3629,7 +3630,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     if result_format["result_format"] == "BASIC":
         return return_obj
 
-    if unexpected_list is not None:
+    if unexpected_list is not None and not exclude_unexpected_values:
         if len(unexpected_list) and isinstance(unexpected_list[0], dict):
             # in the case of multicolumn map expectations `unexpected_list` contains dicts,
             # which will throw an exception when we hash it to count unique members.
@@ -3647,15 +3648,19 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     partial_unexpected_counts: Optional[List[Dict[str, Any]]] = None
     if partial_unexpected_count is not None and 0 < partial_unexpected_count:
         try:
-            partial_unexpected_counts = [
-                {"value": key, "count": value}
-                for key, value in sorted(
-                    Counter(immutable_unexpected_list).most_common(
-                        result_format["partial_unexpected_count"]
-                    ),
-                    key=lambda x: (-x[1], x[0]),
+            if not exclude_unexpected_values:
+                partial_unexpected_counts = [
+                    {"value": key, "count": value}
+                    for key, value in sorted(
+                        Counter(immutable_unexpected_list).most_common(
+                            result_format["partial_unexpected_count"]
+                        ),
+                        key=lambda x: (-x[1], x[0]),
+                    )
+                ]
+                return_obj["result"].update(
+                    {"partial_unexpected_counts": partial_unexpected_counts}
                 )
-            ]
         except TypeError:
             partial_unexpected_counts = [
                 {"error": "partial_exception_counts requires a hashable type"}
@@ -3669,14 +3674,11 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
                         ],
                     }
                 )
-            return_obj["result"].update(
-                {"partial_unexpected_counts": partial_unexpected_counts}
-            )
 
     if result_format["result_format"] == "SUMMARY":
         return return_obj
 
-    if unexpected_list is not None:
+    if unexpected_list is not None and not exclude_unexpected_values:
         return_obj["result"].update({"unexpected_list": unexpected_list})
     if unexpected_index_list is not None:
         return_obj["result"].update({"unexpected_index_list": unexpected_index_list})

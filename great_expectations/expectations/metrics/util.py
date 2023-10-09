@@ -1256,7 +1256,7 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
     domain_records_df: pd.DataFrame,
     unexpected_index_column_names: List[str],
     expectation_domain_column_list: List[str],
-    unexpected_metrics_with_values: bool = True,
+    exclude_unexpected_values: bool = False,
 ) -> List[Dict[str, Any]]:
     """
     Builds unexpected_index list for Pandas Dataframe in situation where the named
@@ -1293,7 +1293,7 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
 
     unexpected_index_list: List[Dict[str, Any]] = list()
 
-    if not unexpected_metrics_with_values and len(unexpected_indices) != 0:
+    if exclude_unexpected_values and len(unexpected_indices) != 0:
         primary_key_dict: dict[str, List[Any]] = {
             idx_col: [] for idx_col in unexpected_index_column_names
         }
@@ -1321,7 +1321,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
     domain_records_df: pd.DataFrame,
     unexpected_index_column_names: List[str],
     expectation_domain_column_list: List[str],
-    unexpected_metrics_with_values: bool = True,
+    exclude_unexpected_values: bool = False,
 ) -> List[Dict[str, Any]]:
     """
     Builds unexpected_index list for Pandas Dataframe in situation where the named
@@ -1350,10 +1350,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
             failed_metrics=["unexpected_index_list"],
         )
 
-    if (
-        not unexpected_metrics_with_values
-        and len(unexpected_index_values_by_named_index) != 0
-    ):
+    if exclude_unexpected_values and len(unexpected_index_values_by_named_index) != 0:
         primary_key_dict: dict[str, List[Any]] = {unexpected_index_column_names[0]: []}
         for index in unexpected_index_values_by_named_index:
             column_name: str = unexpected_index_column_names[0]
@@ -1398,8 +1395,8 @@ def compute_unexpected_pandas_indices(
     """
     unexpected_index_column_names: List[str]
     unexpected_index_list: List[Dict[str, Any]]
-    unexpected_metrics_with_values: bool = result_format.get(
-        "unexpected_metrics_with_values", True
+    exclude_unexpected_values: bool = result_format.get(
+        "exclude_unexpected_values", False
     )
 
     if domain_records_df.index.name is not None:
@@ -1410,7 +1407,7 @@ def compute_unexpected_pandas_indices(
             domain_records_df=domain_records_df,
             unexpected_index_column_names=unexpected_index_column_names,
             expectation_domain_column_list=expectation_domain_column_list,
-            unexpected_metrics_with_values=unexpected_metrics_with_values,
+            exclude_unexpected_values=exclude_unexpected_values,
         )
     # multiple named indices
     elif domain_records_df.index.names[0] is not None:
@@ -1422,7 +1419,7 @@ def compute_unexpected_pandas_indices(
                 domain_records_df=domain_records_df,
                 unexpected_index_column_names=unexpected_index_column_names,
                 expectation_domain_column_list=expectation_domain_column_list,
-                unexpected_metrics_with_values=unexpected_metrics_with_values,
+                exclude_unexpected_values=exclude_unexpected_values,
             )
         )
     # named columns
@@ -1432,7 +1429,7 @@ def compute_unexpected_pandas_indices(
         unexpected_indices: List[int | str] = list(domain_records_df.index)
 
         if (
-            not unexpected_metrics_with_values
+            exclude_unexpected_values
             and len(unexpected_indices) != 0
             and len(unexpected_index_column_names) != 0
         ):

@@ -193,7 +193,7 @@ def test_get_unexpected_indices_for_single_pandas_named_index_named_unexpected_i
     unexpected_index_list_one_index_column_without_column_values,
 ):
     """
-    [NEW TEST] : for the new argument `unexpected_metrics_with_values` set as False. It will return unexpected_index_list without column values.
+    [NEW TEST] : for the new argument `exclude_unexpected_values` set as True. It will return unexpected_index_list without column values.
     """
 
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
@@ -205,7 +205,7 @@ def test_get_unexpected_indices_for_single_pandas_named_index_named_unexpected_i
         domain_records_df=updated_dataframe,
         unexpected_index_column_names=unexpected_index_column_names,
         expectation_domain_column_list=expectation_domain_column_list,
-        unexpected_metrics_with_values=False,  # the new argument
+        exclude_unexpected_values=True,  # the new argument
     )
     assert (
         unexpected_index_list
@@ -237,7 +237,7 @@ def test_get_unexpected_indices_for_single_pandas_named_index_without_column_val
     unexpected_index_list_one_index_column_without_column_values,
 ):
     """
-    [NEW TEST] : for the new argument `unexpected_metrics_with_values` set as False. It will return unexpected_index_list without column values.
+    [NEW TEST] : for the new argument `exclude_unexpected_values` set as True. It will return unexpected_index_list without column values.
     """
 
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
@@ -249,7 +249,7 @@ def test_get_unexpected_indices_for_single_pandas_named_index_without_column_val
         domain_records_df=updated_dataframe,
         unexpected_index_column_names=unexpected_index_column_names,
         expectation_domain_column_list=expectation_domain_column_list,
-        unexpected_metrics_with_values=False,  # the new argument
+        exclude_unexpected_values=True,  # the new argument
     )
     assert (
         unexpected_index_list
@@ -281,7 +281,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_without_column
     unexpected_index_list_two_index_columns_without_column_values,
 ):
     """
-    [NEW TEST] : for the new argument `unexpected_metrics_with_values` set as False. It will return unexpected_index_list without column values.
+    [NEW TEST] : for the new argument `exclude_unexpected_values` set as True. It will return unexpected_index_list without column values.
     """
 
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
@@ -293,7 +293,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_without_column
         domain_records_df=updated_dataframe,
         unexpected_index_column_names=unexpected_index_column_names,
         expectation_domain_column_list=expectation_domain_column_list,
-        unexpected_metrics_with_values=False,  # the new argument
+        exclude_unexpected_values=True,  # the new argument
     )
     assert (
         unexpected_index_list
@@ -325,7 +325,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
     unexpected_index_list_two_index_columns_without_column_values,
 ):
     """
-    [NEW TEST] : for the new argument `unexpected_metrics_with_values` set as False. It will return unexpected_index_list without column values.
+    [NEW TEST] : for the new argument `exclude_unexpected_values` set as True. It will return unexpected_index_list without column values.
     """
 
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
@@ -337,7 +337,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
         domain_records_df=updated_dataframe,
         unexpected_index_column_names=unexpected_index_column_names,
         expectation_domain_column_list=expectation_domain_column_list,
-        unexpected_metrics_with_values=False,  # the new argument
+        exclude_unexpected_values=True,  # the new argument
     )
     assert (
         unexpected_index_list
@@ -369,7 +369,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
     unexpected_index_list_one_index_column_without_column_values,
 ):
     """
-    [NEW TEST] : for the new argument `unexpected_metrics_with_values` set as False. It will return unexpected_index_list without column values.
+    [NEW TEST] : for the new argument `exclude_unexpected_values` set as True. It will return unexpected_index_list without column values.
     """
 
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
@@ -381,7 +381,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
         domain_records_df=updated_dataframe,
         unexpected_index_column_names=unexpected_index_column_names,
         expectation_domain_column_list=expectation_domain_column_list,
-        unexpected_metrics_with_values=False,  # the new argument
+        exclude_unexpected_values=True,  # the new argument
     )
     assert (
         unexpected_index_list

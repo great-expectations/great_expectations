@@ -57,7 +57,7 @@ def metric_value_kwargs_complete() -> dict:
             "unexpected_index_column_names": ["pk_1"],
             "partial_unexpected_count": 20,
             "include_unexpected_rows": False,
-            "unexpected_metrics_with_values": True,
+            "exclude_unexpected_values": False,
         },
     }
 
@@ -150,7 +150,7 @@ def test_pd_unexpected_index_list_metric_without_id_pk_without_column_values(
     animal_table_df,
 ):
     """
-    [NEW TEST] : for `unexpected_metrics_with_values` key set as False.
+    [NEW TEST] : for `exclude_unexpected_values` key set as True.
     """
 
     df: pd.DataFrame = animal_table_df
@@ -162,7 +162,7 @@ def test_pd_unexpected_index_list_metric_without_id_pk_without_column_values(
             "result_format": "COMPLETE",
             "partial_unexpected_count": 20,
             "include_unexpected_rows": False,
-            "unexpected_metrics_with_values": False,
+            "exclude_unexpected_values": True,
         },
     }
 
@@ -227,7 +227,7 @@ def test_pd_unexpected_index_list_metric_with_id_pk_without_column_values(
     metric_value_kwargs_complete, animal_table_df
 ):
     """
-    [NEW TEST] : for metric_value_kwargs containing `unexpected_metrics_with_values` key set as False. It will return unexpected_index_list without column values.
+    [NEW TEST] : for metric_value_kwargs containing `exclude_unexpected_values` key set as True. It will return unexpected_index_list without column values.
     """
 
     df: pd.DataFrame = animal_table_df
@@ -239,7 +239,7 @@ def test_pd_unexpected_index_list_metric_with_id_pk_without_column_values(
             "unexpected_index_column_names": ["pk_1"],
             "partial_unexpected_count": 20,
             "include_unexpected_rows": False,
-            "unexpected_metrics_with_values": False,
+            "exclude_unexpected_values": True,
         },
     }
 
@@ -307,7 +307,7 @@ def test_sa_unexpected_index_list_metric_with_id_pk_without_column_values(
     sa, animal_table_df, metric_value_kwargs_complete
 ):
     """
-    [NEW TEST] : for metric_value_kwargs containing `unexpected_metrics_with_values` key set as False. It will return unexpected_index_list without column values.
+    [NEW TEST] : for metric_value_kwargs containing `exclude_unexpected_values` key set as True. It will return unexpected_index_list without column values.
     """
 
     df: pd.DataFrame = animal_table_df
@@ -319,7 +319,7 @@ def test_sa_unexpected_index_list_metric_with_id_pk_without_column_values(
             "unexpected_index_column_names": ["pk_1"],
             "partial_unexpected_count": 20,
             "include_unexpected_rows": False,
-            "unexpected_metrics_with_values": False,
+            "exclude_unexpected_values": True,
         },
     }
 
@@ -388,7 +388,7 @@ def test_sa_unexpected_index_list_metric_without_id_pk_without_column_values(
     sa, animal_table_df
 ):
     """
-    [NEW TEST] : for `unexpected_metrics_with_values` key set as False.
+    [NEW TEST] : for `exclude_unexpected_values` key set as True.
     """
 
     df: pd.DataFrame = animal_table_df
@@ -399,7 +399,7 @@ def test_sa_unexpected_index_list_metric_without_id_pk_without_column_values(
             "result_format": "COMPLETE",
             "partial_unexpected_count": 20,
             "include_unexpected_rows": False,
-            "unexpected_metrics_with_values": False,
+            "exclude_unexpected_values": True,
         },
     }
 
@@ -537,7 +537,7 @@ def test_spark_unexpected_index_list_metric_with_id_pk_without_column_values(
     spark_session, animal_table_df
 ):
     """
-    [NEW TEST] : for metric_value_kwargs containing `unexpected_metrics_with_values` key set as False. It will return unexpected_index_list without column values.
+    [NEW TEST] : for metric_value_kwargs containing `exclude_unexpected_values` key set as True. It will return unexpected_index_list without column values.
     """
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
@@ -547,7 +547,7 @@ def test_spark_unexpected_index_list_metric_with_id_pk_without_column_values(
             "unexpected_index_column_names": ["pk_1"],
             "partial_unexpected_count": 20,
             "include_unexpected_rows": False,
-            "unexpected_metrics_with_values": False,
+            "exclude_unexpected_values": True,
         },
     }
 
@@ -622,7 +622,7 @@ def test_spark_unexpected_index_list_metric_without_id_pk_without_column_values(
     spark_session, animal_table_df
 ):
     """
-    [NEW TEST] : `unexpected_metrics_with_values` key set as False
+    [NEW TEST] : `exclude_unexpected_values` key set as True
     """
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
@@ -631,7 +631,7 @@ def test_spark_unexpected_index_list_metric_without_id_pk_without_column_values(
             "result_format": "COMPLETE",
             "partial_unexpected_count": 20,
             "include_unexpected_rows": False,
-            "unexpected_metrics_with_values": False,
+            "exclude_unexpected_values": True,
         },
     }
 

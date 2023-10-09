@@ -84,20 +84,11 @@ def _pandas_column_map_condition_values(
     ]
 
     result_format = metric_value_kwargs["result_format"]
-    unexpected_metrics_with_values: bool = result_format.get(
-        "unexpected_metrics_with_values", True
-    )
 
     if result_format["result_format"] == "COMPLETE":
-        if not unexpected_metrics_with_values:
-            return []
-        else:
-            return list(domain_values)
+        return list(domain_values)
 
-    elif not unexpected_metrics_with_values:
-        return []
-    else:
-        return list(domain_values[: result_format["partial_unexpected_count"]])
+    return list(domain_values[: result_format["partial_unexpected_count"]])
 
 
 # TODO: <Alex>11/15/2022: Please DO_NOT_DELETE this method (even though it is not currently utilized).  Thanks.</Alex>
@@ -286,9 +277,6 @@ def _sqlalchemy_column_map_condition_values(
             query = query.select_from(selectable)
 
     result_format = metric_value_kwargs["result_format"]
-    unexpected_metrics_with_values: bool = result_format.get(
-        "unexpected_metrics_with_values", True
-    )
 
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
@@ -301,9 +289,6 @@ def _sqlalchemy_column_map_condition_values(
             "if your data contains more than 10000 columns your results will be truncated."
         )
         query = query.limit(10000)  # BigQuery upper bound on query parameters
-
-    if not unexpected_metrics_with_values:
-        return []
 
     return [
         val.unexpected_values
@@ -394,19 +379,11 @@ def _spark_column_map_condition_values(
     )
 
     result_format = metric_value_kwargs["result_format"]
-    unexpected_metrics_with_values: bool = result_format.get(
-        "unexpected_metrics_with_values", True
-    )
 
     if result_format["result_format"] == "COMPLETE":
-        if not unexpected_metrics_with_values:
-            rows = []
-        else:
-            rows = filtered.select(
-                F.col(column_name).alias(column_name)
-            ).collect()  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name
-    elif not unexpected_metrics_with_values:
-        rows = []
+        rows = filtered.select(
+            F.col(column_name).alias(column_name)
+        ).collect()  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name
     else:
         rows = (
             filtered.select(

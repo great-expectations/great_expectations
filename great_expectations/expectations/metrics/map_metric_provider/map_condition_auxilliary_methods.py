@@ -591,12 +591,12 @@ def _sqlalchemy_map_condition_index(
         final_query
     ).fetchall()
 
-    unexpected_metrics_with_values: bool = result_format.get(
-        "unexpected_metrics_with_values", True
+    exclude_unexpected_values: bool = result_format.get(
+        "exclude_unexpected_values", False
     )
 
     return _get_sqlalchemy_customized_unexpected_index_list(
-        unexpected_metrics_with_values=unexpected_metrics_with_values,
+        exclude_unexpected_values=exclude_unexpected_values,
         unexpected_index_column_names=unexpected_index_column_names,
         query_result=query_result,
         domain_column_name_list=domain_column_name_list,
@@ -745,8 +745,8 @@ def _spark_map_condition_index(
     filtered = data.filter(F.col("__unexpected") == True).drop(  # noqa: E712
         F.col("__unexpected")
     )
-    unexpected_metrics_with_values: bool = result_format.get(
-        "unexpected_metrics_with_values", True
+    exclude_unexpected_values: bool = result_format.get(
+        "exclude_unexpected_values", False
     )
 
     unexpected_index_column_names: List[str] = result_format[
@@ -769,7 +769,7 @@ def _spark_map_condition_index(
     filtered = filtered.select(columns_to_keep)
 
     return _get_spark_customized_unexpected_index_list(
-        unexpected_metrics_with_values=unexpected_metrics_with_values,
+        exclude_unexpected_values=exclude_unexpected_values,
         unexpected_index_column_names=unexpected_index_column_names,
         filtered=filtered,
         columns_to_keep=columns_to_keep,
@@ -840,7 +840,7 @@ def _generate_temp_table(
 
 
 def _get_sqlalchemy_customized_unexpected_index_list(
-    unexpected_metrics_with_values: bool,
+    exclude_unexpected_values: bool,
     unexpected_index_column_names: List[str],
     query_result: List[sqlalchemy.Row],
     domain_column_name_list: List[Union[str, sqlalchemy.quoted_name]],
@@ -848,7 +848,7 @@ def _get_sqlalchemy_customized_unexpected_index_list(
     unexpected_index_list: List[Dict[str, Any]] = []
 
     if (
-        not unexpected_metrics_with_values
+        exclude_unexpected_values
         and len(query_result) != 0
         and len(unexpected_index_column_names) != 0
     ):
@@ -875,14 +875,14 @@ def _get_sqlalchemy_customized_unexpected_index_list(
 
 
 def _get_spark_customized_unexpected_index_list(
-    unexpected_metrics_with_values: bool,
+    exclude_unexpected_values: bool,
     unexpected_index_column_names: List[str],
     filtered: pyspark.sql.dataframe.DataFrame,
     columns_to_keep: List[str],
 ) -> Union[List[Dict[str, Any]], None]:
     unexpected_index_list: List[Dict[str, Any]] = []
 
-    if not unexpected_metrics_with_values and not filtered.isEmpty():
+    if exclude_unexpected_values and not filtered.isEmpty():
         dict_to_add: dict[str, List[Any]] = {
             idx_col: [] for idx_col in unexpected_index_column_names
         }
