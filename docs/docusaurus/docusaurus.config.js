@@ -25,6 +25,7 @@ module.exports = {
     ],
   ],
 
+
   themeConfig: {
     algolia: {
       // See: https://docusaurus.io/docs/search#connecting-algolia
@@ -225,9 +226,12 @@ module.exports = {
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Great Expectations. All Rights Reserved.`,
     },
+    mermaid: {
+      theme: {light: "neutral", dark: "neutral"},
+    }
   },
+  themes: ['@docusaurus/theme-mermaid'],
 
-  // themes:[ ],
   presets: [
     [
       '@docusaurus/preset-classic',
@@ -239,7 +243,7 @@ module.exports = {
           lastVersion: 'current',
           versions: {
             current: {
-              label: '0.17.20',
+              label: '0.17.21',
               path: ''
             }
           }
@@ -256,4 +260,8 @@ module.exports = {
       },
     ],
   ],
+
+  markdown: {
+    mermaid: true,
+  },
 };

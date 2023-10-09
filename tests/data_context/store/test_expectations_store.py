@@ -295,8 +295,3 @@ def test_gx_cloud_response_json_to_object_dict(
     else:
         actual = ExpectationsStore.gx_cloud_response_json_to_object_dict(response_json)
         assert actual == expected
-
-
-@pytest.mark.cloud
-def test_gx_cloud_response_json_to_object_dict_data_list() -> None:
-    pass

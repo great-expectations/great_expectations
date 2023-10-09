@@ -21,7 +21,7 @@ import Tabs from '@theme/Tabs';
 
 An Expectation Store is a connector to store and retrieve information about collections of verifiable assertions about data.
 
-By default, new <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the `expectations/` subdirectory of your `great_expectations/` folder. Use the information provided here to configure a store for your Expectations.
+By default, new <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the `expectations/` subdirectory of your `gx/` folder. Use the information provided here to configure a store for your Expectations.
 
 <Tabs
   groupId="configure-expectation-stores"
@@ -133,7 +133,7 @@ You can use the ``az storage blob upload`` command to copy Expectations into Azu
 export AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
 az storage blob upload -f <local/path/to/expectation.json> -c <GREAT-EXPECTATION-DEDICATED-AZURE-BLOB-CONTAINER-NAME> -n <PREFIX>/<expectation.json>
 example :
-az storage blob upload -f great_expectations/expectations/exp1.json -c <blob-container> -n expectations/exp1.json
+az storage blob upload -f gx/expectations/exp1.json -c <blob-container> -n expectations/exp1.json
 
 Finished[#############################################################]  100.0000%
 {
@@ -276,7 +276,7 @@ Use the information provided here to configure a new storage location for Expect
 Run the following command to create a new folder for your Expectations and move your existing Expectations to the new folder:
 
 ```bash
-# in the great_expectations/ folder
+# in the gx/ folder
 mkdir shared_expectations
 mv expectations/npi_expectations.json shared_expectations/
 ```
@@ -338,10 +338,10 @@ git log -p npi_expectations.json
 commit cbc127fb27095364c3c1fcbf6e7f078369b07455
   changed expect_table_column_count_to_equal to 331
 
-diff --git a/great_expectations/expectations/npi_expectations.json b/great_expectations/expectations/npi_expectations.json
+diff --git a/gx/expectations/npi_expectations.json b/great_expectations/expectations/npi_expectations.json
 
---- a/great_expectations/expectations/npi_expectations.json
-+++ b/great_expectations/expectations/npi_expectations.json
+--- a/gx/expectations/npi_expectations.json
++++ b/gx/expectations/npi_expectations.json
 @@ -17,7 +17,7 @@
    {
      "expectation_type": "expect_table_column_count_to_equal",
@@ -352,9 +352,9 @@ diff --git a/great_expectations/expectations/npi_expectations.json b/great_expec
 commit 05b3c8c1ed35d183bac1717d4877fe13bc574963
 changed expect_table_column_count_to_equal to 333
 
-diff --git a/great_expectations/expectations/npi_expectations.json b/great_expectations/expectations/npi_expectations.json
---- a/great_expectations/expectations/npi_expectations.json
-+++ b/great_expectations/expectations/npi_expectations.json
+diff --git a/gx/expectations/npi_expectations.json b/great_expectations/expectations/npi_expectations.json
+--- a/gx/expectations/npi_expectations.json
++++ b/gx/expectations/npi_expectations.json
    {
      "expectation_type": "expect_table_column_count_to_equal",
      "kwargs": {
