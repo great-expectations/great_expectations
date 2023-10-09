@@ -1,4 +1,5 @@
 import os
+import uuid
 
 import pytest
 
@@ -25,29 +26,42 @@ def datasource(
         pytest.skip("no snowflake credentials")
 
     datasource_name = "snowflake_ci_datasource"
-    yield context.sources.add_snowflake(
+    datasource = context.sources.add_snowflake(
         name=datasource_name,
         connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
         # NOTE: uncomment this and set SNOWFLAKE_USER to run tests against your own snowflake account
         # connection_string="snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
     )
-    _ = context.get_datasource(datasource_name=datasource_name)
-    context.delete_datasource(datasource_name=datasource_name)
+    datasource.create_temp_table = False
+    # this doesn't work due to a bug
+    # _ = context.sources.add_or_update_snowflake(datasource)
+    # datasource = context.get_datasource(datasource_name=datasource_name)
+    yield datasource
+    # this doesn't work due to a bug
+    # the checkpoint is already deleted, but an error is incorrectly raised
+    # context.delete_datasource(datasource_name=datasource_name)
 
 
 @pytest.fixture
-def data_asset(datasource: SnowflakeDatasource) -> TableAsset:
+def data_asset(
+    context: CloudDataContext, datasource: SnowflakeDatasource, table_factory
+) -> TableAsset:
+    schema_name = f"i{uuid.uuid4().hex}"
+    table_name = "test_table"
+    table_factory(
+        gx_engine=datasource.get_execution_engine(),
+        table_names={table_name},
+        schema_name=schema_name,
+    )
     asset_name = "end-to-end_snowflake_asset"
-    # table_name = "test_table"
-    table_name = "TEST_TABLE"
-    # schema_name = ""
-    schema_name = "bdirks_test"
     _ = datasource.add_table_asset(
         name=asset_name, table_name=table_name, schema_name=schema_name
     )
     table_asset = datasource.get_asset(asset_name=asset_name)
     yield table_asset
-    datasource.delete_asset(asset_name=asset_name)
+    # this doesn't work due to a bug
+    # the checkpoint is already deleted, but an error is incorrectly raised
+    # datasource.delete_asset(asset_name=asset_name)
 
 
 @pytest.fixture
@@ -58,8 +72,9 @@ def batch_request(data_asset: TableAsset) -> BatchRequest:
 @pytest.fixture
 def expectation_suite(
     context: CloudDataContext,
+    data_asset: TableAsset,
 ) -> ExpectationSuite:
-    expectation_suite_name = "snowflake_ci_datasource | end-to-end_snowflake_asset"
+    expectation_suite_name = f"{data_asset.datasource.name} | {data_asset.name}"
     expectation_suite = context.add_expectation_suite(
         expectation_suite_name=expectation_suite_name,
     )
@@ -83,10 +98,11 @@ def expectation_suite(
 @pytest.fixture
 def checkpoint(
     context: CloudDataContext,
+    data_asset: TableAsset,
     batch_request: BatchRequest,
     expectation_suite: ExpectationSuite,
 ) -> Checkpoint:
-    checkpoint_name = "snowflake_ci_datasource | end-to-end_snowflake_asset"
+    checkpoint_name = f"{data_asset.datasource.name} | {data_asset.name}"
     _ = context.add_checkpoint(
         name=checkpoint_name,
         validations=[
@@ -98,7 +114,11 @@ def checkpoint(
     )
     checkpoint = context.get_checkpoint(name=checkpoint_name)
     yield checkpoint
-    context.delete_checkpoint(name=checkpoint_name)
+    # this is a bug - you should only have to pass name
+    context.delete_checkpoint(
+        # name=checkpoint_name,
+        id=checkpoint.ge_cloud_id,
+    )
 
 
 @pytest.mark.mercury

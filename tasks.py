@@ -798,7 +798,7 @@ def show_automerges(ctx: Context):
 
 
 class TestDependencies(NamedTuple):
-    requirement_files: tuple[str, ...] = tuple()
+    requirement_files: tuple[str, ...]
     services: tuple[str, ...] = tuple()
     extra_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
         str, ...
@@ -863,7 +863,10 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         extra_pytest_args=("--spark", "--docs-tests"),
     ),
     "mercury": TestDependencies(
-        ("reqs/requirements-dev-cloud.txt", "reqs/requirements-dev-snowflake.txt"),
+        (
+            "reqs/requirements-dev-cloud.txt",
+            "reqs/requirements-dev-snowflake.txt",
+        ),
         services=("mercury",),
         extra_pytest_args=("--snowflake",),
     ),
