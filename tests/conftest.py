@@ -138,6 +138,7 @@ REQUIRED_MARKERS: Final[set[str]] = {
     "databricks",
     "docs",
     "filesystem",
+    "mercury",
     "mssql",
     "mysql",
     "openpyxl",
