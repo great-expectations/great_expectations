@@ -863,6 +863,7 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         extra_pytest_args=("--spark", "--docs-tests"),
     ),
     "mercury": TestDependencies(
+        ("reqs/requirements-dev-cloud.txt", "reqs/requirements-dev-snowflake.txt"),
         services=("mercury",),
         extra_pytest_args=("--snowflake",),
     ),
