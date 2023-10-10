@@ -143,11 +143,11 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             aborted_metrics=aborted_metrics,
         )
         raw_column_types: list[dict[str, Any]] = value
-        # If type is not found, default to UNKNOWN
+        # If type is not found, default to empty string. This can happen if our db introspection fails.
         column_types_converted_to_str: list[dict[str, str]] = [
             {
                 "name": raw_column_type["name"],
-                "type": str(raw_column_type.get("type", "UNKNOWN")),
+                "type": str(raw_column_type.get("type", "")),
             }
             for raw_column_type in raw_column_types
         ]
@@ -161,7 +161,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
     def _get_columns_to_exclude(self, table_column_types: Metric) -> List[str]:
         columns_to_skip: List[str] = []
         for column_type in table_column_types.value:
-            if column_type["type"] == "UNKNOWN":
+            if column_type["type"] == "":
                 columns_to_skip.append(column_type["name"])
         return columns_to_skip
 
