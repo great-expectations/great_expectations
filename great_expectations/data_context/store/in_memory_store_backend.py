@@ -59,7 +59,9 @@ class InMemoryStoreBackend(StoreBackend):
 
     @override
     def _get_all(self) -> list[Any]:
-        raise NotImplementedError
+        return [
+            val for key, val in self._store.items() if key != self.STORE_BACKEND_ID_KEY
+        ]
 
     @override
     def _set(self, key, value, **kwargs) -> None:

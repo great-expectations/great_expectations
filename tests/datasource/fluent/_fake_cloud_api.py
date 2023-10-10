@@ -472,7 +472,7 @@ def get_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     exp_suite_list: list[dict] = list(exp_suites.values())
     if queried_names:
         exp_suite_list = [
-            d
+            d["data"]
             for d in exp_suite_list
             if d["data"]["attributes"]["suite"]["expectation_suite_name"]
             in queried_names

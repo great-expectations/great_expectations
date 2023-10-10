@@ -66,7 +66,8 @@ class ProfilerStore(ConfigurationStore):
             )
 
     @override
-    def ge_cloud_response_json_to_object_dict(self, response_json: dict) -> dict:
+    @staticmethod
+    def gx_cloud_response_json_to_object_dict(response_json: dict) -> dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object

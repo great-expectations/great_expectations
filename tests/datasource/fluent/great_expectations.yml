@@ -223,3 +223,23 @@ fluent_datasources:
         id: f2597c56-eeea-4bfd-b07c-5f35779a71e5
         type: table
         table_name: my_table
+  my_fabric_ds:
+    type: fabric_powerbi
+    # dummy dataset
+    dataset: 0993ddd1-f01d-4c8f-a64e-9c4e5b8905e8
+    assets:
+      my_dax_asset:
+        type: powerbi_dax
+        dax_string: "foo bar"
+      my_measure_asset:
+        type: powerbi_measure
+        measure:
+          - foo
+          - bar
+        groupby_columns:
+          - foo[Bar]
+          - 'fizz with space[Buzz]'
+      my_pwr_bi_table_asset:
+        type: powerbi_table
+        table: my_table
+        num_rows: 100

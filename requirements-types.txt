@@ -11,6 +11,7 @@ types-python-dateutil
 types-pytz
 types-requests
 types-six
+types-tabulate
 types-typed-ast
 types-tzlocal
 types-urllib3

@@ -40,16 +40,24 @@ class CheckpointStore(ConfigurationStore):
     _configuration_class = CheckpointConfig
 
     @override
-    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
+    @staticmethod
+    def gx_cloud_response_json_to_object_dict(response_json: Dict) -> Dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
         """
+        response_data = response_json["data"]
+
         cp_data: Dict
-        if isinstance(response_json["data"], list):
-            cp_data = response_json["data"][0]
+        if isinstance(response_data, list):
+            if len(response_data) == 0:
+                raise ValueError(
+                    f"Cannot parse empty data from GX Cloud payload: {response_json}"
+                )
+            cp_data = response_data[0]
         else:
-            cp_data = response_json["data"]
+            cp_data = response_data
+
         ge_cloud_checkpoint_id: str = cp_data["id"]
         checkpoint_config_dict: Dict = cp_data["attributes"]["checkpoint_config"]
         checkpoint_config_dict["ge_cloud_id"] = ge_cloud_checkpoint_id
@@ -243,7 +251,7 @@ class CheckpointStore(ConfigurationStore):
             ]
             checkpoint_config["ge_cloud_id"] = checkpoint_config.pop("id")
             return self.deserialize(checkpoint_config)
-        elif self.ge_cloud_mode:
+        elif self.cloud_mode:
             # if in cloud mode and checkpoint_ref is not a GXCloudResourceRef, a PUT operation occurred
             # re-fetch and return CheckpointConfig from cloud to account for any defaults/new ids added in cloud
             return self.get_checkpoint(name=checkpoint.name, id=None)

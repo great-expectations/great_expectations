@@ -43,18 +43,19 @@ expectation_suite_name = "my_expectation_suite"
 context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 checkpoint_name = "my_checkpoint"
-checkpoint_config = f"""
-name: {checkpoint_name}
-config_version: 1
-class_name: Checkpoint
-validations:
-  - batch_request:
-      datasource_name: my_datasource
-      data_connector_name: default_inferred_data_connector_name
-      data_asset_name: yellow_tripdata_sample_2019-01
-    expectation_suite_name: {expectation_suite_name}
-"""
-context.add_or_update_checkpoint(**yaml.load(checkpoint_config))
+context.add_or_update_checkpoint(
+    name=checkpoint_name,
+    validations=[
+        {
+            "batch_request": {
+                "datasource_name": "my_datasource",
+                "data_connector_name": "default_inferred_data_connector_name",
+                "data_asset_name": "yellow_tripdata_sample_2019-01",
+            },
+            "expectation_suite_name": expectation_suite_name,
+        }
+    ],
+)
 
 # run the checkpoint twice to create two validations
 context.run_checkpoint(checkpoint_name=checkpoint_name)
