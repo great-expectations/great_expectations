@@ -67,6 +67,18 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
 Data Asset metrics provide you with insight into the data you can use with your Expectations and Validations. 
 
+1. In GX Cloud, click **Data Assets** and then select a Data Asset in the **Data Assets** list.
+
+2. Click the **Overview** tab.
+
+3. Select one of the following options: 
+
+    - If you have not previously generated Data Asset metrics, click **Fetch Metrics**. 
+
+    - If you previously generated Data Asset metrics, click **Refresh** to refresh the metrics.
+
+### Available Data Asset metrics
+
 The following table lists the available Data Asset metrics.
 
 | Column                                   | Description                                               | 
@@ -79,16 +91,6 @@ The following table lists the available Data Asset metrics.
 | **Mean**                                 | For numeric columns, the average value with the column.<br/> This is determined by dividing the sum of all values in the Data Asset by the number of values.  |
 | **Median**                                 | For numeric columns, the value in the middle of a data set.<br/> 50% of the data within the Data Asset has a value smaller or equal to the median, and 50% of the data within the Data Asset has a value that is higher or equal to the median.  |
 | **Null %**                                | The percentage of missing values in a column.             |
-
-1. In GX Cloud, click **Data Assets** and then select a Data Asset in the **Data Assets** list.
-
-2. Click the **Overview** tab.
-
-3. Select one of the following options: 
-
-    - If you have not previously generated Data Asset metrics, click **Fetch Metrics**. 
-
-    - If you previously generated Data Asset metrics, click **Refresh** to refresh the metrics. 
 
 
 ## Edit a Data Asset
