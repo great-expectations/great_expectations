@@ -38,7 +38,7 @@ def datasource(
     # _ = context.sources.add_or_update_snowflake(datasource)
     # get_datasource() works, but we don't use the return object here,
     # because it won't have the create_temp_table attribute set to False
-    # once the add_or_update bug above is fixed, we can use the return object
+    # once the add_or_update bug above is fixed, we can use the get_datasource() return object
     _ = context.get_datasource(datasource_name=datasource_name)
     yield datasource
     # PP-692: this doesn't work due to a bug
