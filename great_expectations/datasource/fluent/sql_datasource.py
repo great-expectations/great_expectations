@@ -456,7 +456,8 @@ class _SQLAsset(DataAsset):
         # persist the config changes
         context: AbstractDataContext | None
         if context := self._datasource._data_context:
-            context._save_project_config(self._datasource)
+            context.datasources[self._datasource.name] = self._datasource
+            context._save_project_config()
         return self
 
     @public_api

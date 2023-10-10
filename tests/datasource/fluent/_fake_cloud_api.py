@@ -79,7 +79,7 @@ class CloudResponseSchema(pydantic.BaseModel):
     def from_datasource_json(cls, ds_payload: str | bytes) -> CloudResponseSchema:
         payload_dict = json.loads(ds_payload)
         data = {
-            "id": payload_dict.get("id"),
+            "id": payload_dict["data"].get("id"),
             "type": "datasource",
             "attributes": payload_dict["data"]["attributes"],
         }
