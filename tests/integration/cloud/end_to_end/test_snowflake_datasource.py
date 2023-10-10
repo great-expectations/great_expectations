@@ -118,7 +118,8 @@ def checkpoint(
     )
     checkpoint = context.get_checkpoint(name=checkpoint_name)
     yield checkpoint
-    # this is a bug - you should only have to pass name
+    # PP-691: this is a bug
+    # you should only have to pass name
     context.delete_checkpoint(
         # name=checkpoint_name,
         id=checkpoint.ge_cloud_id,
