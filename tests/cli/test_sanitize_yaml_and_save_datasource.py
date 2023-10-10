@@ -42,23 +42,24 @@ def test_sanitize_yaml_and_save_datasource_works_without_credentials(
     context = empty_data_context
     yaml_snippet = """
 name: my_datasource
-class_name: Datasource
-execution_engine:
-  class_name: PandasExecutionEngine
-"""
+class_name: SimpleSqlalchemyDatasource
+introspection:
+  whole_table:
+    data_asset_name_suffix: __whole_table
+connection_string: sqlite://"""
 
     assert len(context.list_datasources()) == 0
     sanitize_yaml_and_save_datasource(context, yaml_snippet)
     assert len(context.list_datasources()) == 1
     assert context.list_datasources() == [
         {
-            "class_name": "Datasource",
+            "class_name": "SimpleSqlalchemyDatasource",
+            "connection_string": "sqlite://",
+            "introspection": {
+                "whole_table": {"data_asset_name_suffix": "__whole_table"}
+            },
             "module_name": "great_expectations.datasource",
             "name": "my_datasource",
-            "execution_engine": {
-                "class_name": "PandasExecutionEngine",
-                "module_name": "great_expectations.execution_engine",
-            },
         }
     ]
     obs = context.config_variables
@@ -223,9 +224,11 @@ execution_engine:
     # retest with a different type of datasource with the same name
     sql_yaml_snippet = """
     name: my_datasource
-    class_name: PandasDatasource
-    execution_engine:
-        class_name: PandasExecutionEngine"""
+    class_name: SimpleSqlalchemyDatasource
+    introspection:
+      whole_table:
+        data_asset_name_suffix: __whole_table
+    connection_string: sqlite://"""
 
     sanitize_yaml_and_save_datasource(
         context, sql_yaml_snippet, overwrite_existing=True
@@ -238,14 +241,10 @@ execution_engine:
     assert context.list_datasources() != pandas_datasource_from_context
     sql_datasource_from_context = [
         {
-            "class_name": "PandasDatasource",
-            "data_asset_type": {
-                "class_name": "PandasDataset",
-                "module_name": "great_expectations.dataset",
-            },
-            "execution_engine": {
-                "class_name": "PandasExecutionEngine",
-                "module_name": "great_expectations.execution_engine",
+            "class_name": "SimpleSqlalchemyDatasource",
+            "connection_string": "sqlite://",
+            "introspection": {
+                "whole_table": {"data_asset_name_suffix": "__whole_table"}
             },
             "module_name": "great_expectations.datasource",
             "name": "my_datasource",
