@@ -63,8 +63,8 @@ services:
       AUTH0_MERCURY_API_CLIENT_SECRET: ${AUTH0_MERCURY_API_CLIENT_SECRET}
       SENDGRID_API_KEY: fake_key
       LD_SDK_KEY: ${LD_SDK_KEY}
-      SNOWFLAKE_CI_ACCOUNT: ${{secrets.SNOWFLAKE_CI_ACCOUNT}}
-      SNOWFLAKE_CI_USER_PASSWORD: ${{secrets.SNOWFLAKE_CI_USER_PASSWORD}}
+      SNOWFLAKE_CI_ACCOUNT: ${SNOWFLAKE_CI_ACCOUNT}
+      SNOWFLAKE_CI_USER_PASSWORD: ${SNOWFLAKE_CI_USER_PASSWORD}
     entrypoint:
       - /bin/bash
       - -c
@@ -75,6 +75,11 @@ services:
         cd /app/services/ge_cloud
         python -m tests.utils.dev_db_seed_script
         gunicorn mercury.api:get_app\(\) --config ./gunicorn.conf.py
+    healthcheck:
+      test: ["CMD", "cat", "ge_version.txt"]
+      interval: 10s
+      timeout: 2s
+      retries: 10
     depends_on:
       db-provisioner:
         condition: service_completed_successfully
