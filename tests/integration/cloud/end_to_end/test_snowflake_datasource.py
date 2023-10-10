@@ -33,9 +33,13 @@ def datasource(
         # connection_string="snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
     )
     datasource.create_temp_table = False
-    # this doesn't work due to a bug
+    # PP-690: this doesn't work due to a bug
+    # calling add_or_update_<datasource>() results in the datasource being deleted from the store
     # _ = context.sources.add_or_update_snowflake(datasource)
-    # datasource = context.get_datasource(datasource_name=datasource_name)
+    # get_datasource() works, but we don't use the return object here,
+    # because it won't have the create_temp_table attribute set to False
+    # once the add_or_update bug above is fixed, we can use the return object
+    _ = context.get_datasource(datasource_name=datasource_name)
     yield datasource
     # this doesn't work due to a bug
     # the checkpoint is already deleted, but an error is incorrectly raised
