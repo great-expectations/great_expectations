@@ -25,6 +25,7 @@ module.exports = {
     ],
   ],
 
+
   themeConfig: {
     gxCard: {
       title: "What is GX Cloud?",
@@ -239,8 +240,12 @@ module.exports = {
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Great Expectations. All Rights Reserved.`,
     },
+    mermaid: {
+      theme: {light: "neutral", dark: "neutral"},
+    }
   },
-  // themes:[ ],
+  themes: ['@docusaurus/theme-mermaid'],
+
   presets: [
     [
       '@docusaurus/preset-classic',
@@ -252,7 +257,7 @@ module.exports = {
           lastVersion: 'current',
           versions: {
             current: {
-              label: '0.17.20',
+              label: '0.17.21',
               path: ''
             }
           }
@@ -269,4 +274,8 @@ module.exports = {
       },
     ],
   ],
+
+  markdown: {
+    mermaid: true,
+  },
 };
