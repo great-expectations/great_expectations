@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections import UserDict
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, TypeVar, overload, runtime_checkable
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
@@ -22,6 +22,8 @@ if TYPE_CHECKING:
     from great_expectations.datasource.new_datasource import (
         BaseDatasource,
     )
+
+T = TypeVar("T", bound=FluentDatasource)
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +95,14 @@ class DatasourceDict(UserDict):
                 logger.warning(f"Cannot initialize datasource {name}: {e}")
 
         return datasources
+
+    @overload
+    def set_datasource(self, name: str, ds: T) -> T:
+        ...
+
+    @overload
+    def set_datasource(self, name: str, ds: BaseDatasource) -> None:
+        ...
 
     def set_datasource(
         self, name: str, ds: FluentDatasource | BaseDatasource
@@ -224,6 +234,14 @@ class CacheableDatasourceDict(DatasourceDict):
             return True
         except KeyError:
             return False
+
+    @overload
+    def set_datasource(self, name: str, ds: T) -> T:
+        ...
+
+    @overload
+    def set_datasource(self, name: str, ds: BaseDatasource) -> None:
+        ...
 
     @override
     def set_datasource(
