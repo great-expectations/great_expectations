@@ -233,7 +233,7 @@ class CacheableDatasourceDict(DatasourceDict):
 
         # FDS do not use stores
         if not isinstance(ds, FluentDatasource):
-            return super().set_datasource(name, ds)
+            return super().set_datasource(name=name, ds=ds)
         return ds
 
     @override
