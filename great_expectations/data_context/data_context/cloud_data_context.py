@@ -941,15 +941,16 @@ class CloudDataContext(SerializableDataContext):
         return expectation_suite
 
     @override
-    def _save_project_config(
-        self, _fds_datasource: FluentDatasource | None = None
-    ) -> None:
+    def _save_project_config(self) -> None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
 
         Explicitly override base class implementation to retain legacy behavior.
         """
-        return None
+        logger.debug(
+            "CloudDataContext._save_project_config() was called. Base class impl was override to be no-op to retain "
+            "legacy behavior."
+        )
 
     @override
     def _view_validation_result(self, result: CheckpointResult) -> None:
