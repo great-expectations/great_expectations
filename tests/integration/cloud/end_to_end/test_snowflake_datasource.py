@@ -133,4 +133,5 @@ def checkpoint(
 
 @pytest.mark.mercury
 def test_checkpoint_run(checkpoint: Checkpoint):
-    checkpoint.run()
+    checkpoint_result = checkpoint.run()
+    assert checkpoint_result.success is True
