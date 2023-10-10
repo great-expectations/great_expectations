@@ -98,6 +98,9 @@ class DataContext:
         self._datasources[datasource.name] = datasource
         return datasource
 
+    def _update_fluent_datasource(self, datasource: Datasource) -> Datasource:
+        self._datasources[datasource.name] = datasource
+        return datasource
 
     def get_datasource(self, datasource_name: str) -> Datasource:
         # NOTE: this same method exists on AbstractDataContext
