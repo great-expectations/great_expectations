@@ -96,7 +96,7 @@ class DatasourceDict(UserDict):
 
     def set_datasource(
         self, name: str, ds: FluentDatasource | BaseDatasource
-    ) -> FluentDatasource | BaseDatasource | None:
+    ) -> FluentDatasource | None:
         config: FluentDatasource | DatasourceConfig
         if isinstance(ds, FluentDatasource):
             config = self._prep_fds_config_for_set(name=name, ds=ds)
@@ -228,7 +228,7 @@ class CacheableDatasourceDict(DatasourceDict):
     @override
     def set_datasource(
         self, name: str, ds: FluentDatasource | BaseDatasource
-    ) -> FluentDatasource | BaseDatasource | None:
+    ) -> FluentDatasource | None:
         self.data[name] = ds
 
         # FDS do not use stores
