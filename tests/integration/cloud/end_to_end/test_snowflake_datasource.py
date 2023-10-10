@@ -137,7 +137,7 @@ def test_interactive_validator(
     batch_request: BatchRequest,
     expectation_suite: ExpectationSuite,
 ):
-    assert len(expectation_suite.expectations) == 1
+    expectation_count = len(expectation_suite.expectations)
     expectation_suite_name = expectation_suite.expectation_suite_name
     validator = context.get_validator(
         batch_request=batch_request,
@@ -152,7 +152,7 @@ def test_interactive_validator(
     expectation_suite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
-    assert len(expectation_suite.expectations) == 2
+    assert len(expectation_suite.expectations) == expectation_count + 1
 
 
 @pytest.mark.mercury
