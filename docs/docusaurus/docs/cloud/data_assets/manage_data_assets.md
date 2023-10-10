@@ -76,8 +76,8 @@ The following table lists the available Data Asset metrics.
 | **Type**                                 | The data storage type in the Data Asset column.           | 
 | **Min**                                  | For numeric columns the lowest value in the column.       | 
 | **Max**                                  | For numeric columns, the highest value in the column.     | 
-| **Mean**                                 | For numeric columns, the average value with the column.<br> This is determined by dividing the sum of all values in the Data Asset by the number of values.  |
-| **Median**                                 | For numeric columns, the value in the middle of a data set.<br> 50% of the data within the Data Asset has a value smaller or equal to the median, and 50% of the data within the Data Asset has a value that is higher or equal to the median.  |
+| **Mean**                                 | For numeric columns, the average value with the column.<br/> This is determined by dividing the sum of all values in the Data Asset by the number of values.  |
+| **Median**                                 | For numeric columns, the value in the middle of a data set.<br/> 50% of the data within the Data Asset has a value smaller or equal to the median, and 50% of the data within the Data Asset has a value that is higher or equal to the median.  |
 | **Null %**                                | The percentage of missing values in a column.             |
 
 1. In GX Cloud, click **Data Assets** and then select a Data Asset in the **Data Assets** list.
