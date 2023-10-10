@@ -94,8 +94,10 @@ class DataContext:
     def datasources(self) -> DatasourceDict:
         return self._datasources
 
-    def _add_fluent_datasource(self, datasource: Datasource) -> None:
+    def _add_fluent_datasource(self, datasource: Datasource) -> Datasource:
         self._datasources[datasource.name] = datasource
+        return datasource
+
 
     def get_datasource(self, datasource_name: str) -> Datasource:
         # NOTE: this same method exists on AbstractDataContext
