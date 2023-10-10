@@ -12,7 +12,7 @@ from great_expectations.datasource.fluent.snowflake_datasource import (
 )
 
 
-@pytest.mark.unit
+@pytest.mark.snowflake  # TODO: make this a unit test
 @pytest.mark.parametrize(
     "config_kwargs",
     [
