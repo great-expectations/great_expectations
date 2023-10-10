@@ -14,7 +14,7 @@ services:
       - 5432:5432
     healthcheck:
       test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
-      interval: 10s
+      interval: 5s
       timeout: 2s
       retries: 5
   mq:
@@ -69,18 +69,19 @@ services:
       - /bin/bash
       - -c
       - |
+        apt update
+        apt -y install curl
         sed -i 's/localhost/db/g' /app/services/ge_cloud/mercury/alembic.ini
         cd /app/services/ge_cloud/mercury
         alembic upgrade head
         cd /app/services/ge_cloud
         python -m tests.utils.dev_db_seed_script
-        apt update && apt -y install curl
         gunicorn mercury.api:get_app\(\) --config ./gunicorn.conf.py
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/status"]
-      interval: 10s
+      interval: 5s
       timeout: 2s
-      retries: 10
+      retries: 18
     depends_on:
       db-provisioner:
         condition: service_completed_successfully
