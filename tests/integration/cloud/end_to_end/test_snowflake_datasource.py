@@ -132,6 +132,30 @@ def checkpoint(
 
 
 @pytest.mark.mercury
+def test_interactive_validator(
+    context: CloudDataContext,
+    batch_request: BatchRequest,
+    expectation_suite: ExpectationSuite,
+):
+    assert len(expectation_suite.expectations) == 1
+    expectation_suite_name = expectation_suite.expectation_suite_name
+    validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name=expectation_suite_name,
+    )
+    validator.head()
+    validator.expect_column_values_to_not_be_null(
+        column="id",
+        mostly=1,
+    )
+    validator.save_expectation_suite()
+    expectation_suite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    assert len(expectation_suite.expectations) == 2
+
+
+@pytest.mark.mercury
 def test_checkpoint_run(checkpoint: Checkpoint):
     checkpoint_result = checkpoint.run()
     assert checkpoint_result.success is True
