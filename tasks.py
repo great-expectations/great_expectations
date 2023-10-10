@@ -1132,7 +1132,6 @@ def service(
                 "up",
                 "-d",
                 "--quiet-pull",
-                "--wait",
             ]
             ctx.run(" ".join(cmds), echo=True, pty=pty)
         # TODO: remove this sleep. This is a temporary hack to give services enough
