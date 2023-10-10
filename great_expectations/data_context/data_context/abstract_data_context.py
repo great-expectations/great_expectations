@@ -798,7 +798,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _update_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
-    ) -> FluentDatasource | BaseDatasource:
+    ) -> FluentDatasource:
         if datasource:
             datasource_name = datasource.name
         else:
