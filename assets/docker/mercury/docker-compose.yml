@@ -78,7 +78,7 @@ services:
         python -m tests.utils.dev_db_seed_script
         gunicorn mercury.api:get_app\(\) --config ./gunicorn.conf.py
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://mercury-service-api:5000/status"]
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:5000/status"]
       interval: 5s
       timeout: 2s
       retries: 18
