@@ -300,7 +300,7 @@ jobs:
 
       - name: Run the mercury tests
         env:
-          GX_CLOUD_BASE_URL: ${MERCURY_BASE_URL}
+          GX_CLOUD_BASE_URL: ${{secrets.MERCURY_BASE_URL}}
           GX_CLOUD_ORGANIZATION_ID: ${{secrets.MERCURY_ORGANIZATION_ID}}
           GX_CLOUD_ACCESS_TOKEN: ${{secrets.MERCURY_ACCESS_TOKEN}}
           SNOWFLAKE_CI_ACCOUNT: ${{secrets.SNOWFLAKE_CI_ACCOUNT}}
