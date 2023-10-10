@@ -65,7 +65,7 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
 ## View Data Asset metrics
 
-Data Asset metrics provide you with insight into the data you can use with your Expectations and Validations. 
+Data Asset metrics provide you with insight into the data you can use for your data validations. 
 
 1. In GX Cloud, click **Data Assets** and then select a Data Asset in the **Data Assets** list.
 
