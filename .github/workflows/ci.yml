@@ -284,6 +284,16 @@ jobs:
           GX_CLOUD_ACCESS_TOKEN: ${{secrets.GX_CLOUD_ACCESS_TOKEN}}
         run: invoke ci-tests 'cloud' --up-services --verbose
 
+      - name: Configure ECR AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::258143015559:role/github-amazonec2containerregistryreadonly
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Run the mercury tests
         env:
           GX_CLOUD_BASE_URL: ${{secrets.MERCURY_BASE_URL}}
