@@ -15,9 +15,7 @@ from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 LOGGER: Final = logging.getLogger("tests")
 
 
-# this module scope should be removed once PP-692 is fixed
-# and the fixtures can clean up after themselves
-@pytest.fixture(scope="module")
+@pytest.fixture
 def context() -> CloudDataContext:
     context = gx.get_context(
         mode="cloud",
@@ -39,9 +37,7 @@ class TableFactory(Protocol):
         ...
 
 
-# this module scope should be removed once PP-692 is fixed
-# and the fixtures can clean up after themselves
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="class")
 def table_factory() -> Generator[TableFactory, None, None]:
     """
     Class scoped.

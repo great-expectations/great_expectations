@@ -10,16 +10,14 @@ from great_expectations.datasource.fluent import BatchRequest, SnowflakeDatasour
 from great_expectations.datasource.fluent.sql_datasource import TableAsset
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def creds_populated() -> bool:
     if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") or os.getenv("SNOWFLAKE_CI_ACCOUNT"):
         return True
     return False
 
 
-# this module scope should be removed once PP-692 is fixed
-# and the fixture can clean up after itself
-@pytest.fixture(scope="module")
+@pytest.fixture
 def datasource(
     context: CloudDataContext,
     creds_populated: bool,
@@ -27,7 +25,7 @@ def datasource(
     if not creds_populated:
         pytest.skip("no snowflake credentials")
 
-    datasource_name = "snowflake_ci_datasource"
+    datasource_name = f"i{uuid.uuid4().hex}"
     datasource = context.sources.add_snowflake(
         name=datasource_name,
         connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
@@ -51,18 +49,16 @@ def datasource(
     # context.delete_datasource(datasource_name=datasource_name)
 
 
-# this module scope should be removed once PP-692 is fixed
-# and the fixture can clean up after itself
-@pytest.fixture(scope="module")
+@pytest.fixture
 def data_asset(datasource: SnowflakeDatasource, table_factory) -> TableAsset:
     schema_name = f"i{uuid.uuid4().hex}"
-    table_name = "test_table"
+    table_name = f"i{uuid.uuid4().hex}"
     table_factory(
         gx_engine=datasource.get_execution_engine(),
         table_names={table_name},
         schema_name=schema_name,
     )
-    asset_name = "end-to-end_snowflake_asset"
+    asset_name = f"i{uuid.uuid4().hex}"
     _ = datasource.add_table_asset(
         name=asset_name, table_name=table_name, schema_name=schema_name
     )
