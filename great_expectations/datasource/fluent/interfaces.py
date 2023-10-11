@@ -504,9 +504,6 @@ class Datasource(
                 filter(lambda asset: asset.name == asset_name, self.assets)
             )[0]
             found_asset._datasource = self
-            if self._data_context:
-                # datasources setter will attach dataframe to in-memory assets
-                self._data_context.datasources[self.name] = self
             return found_asset
         except IndexError as exc:
             raise LookupError(
@@ -556,27 +553,25 @@ class Datasource(
 
         self.assets.append(asset)
 
-        # if asset was added to a cloud FDS, _save_context_project_config will return FDS fetched from cloud,
+        # if asset was added to a cloud FDS, _update_fluent_datasource will return FDS fetched from cloud,
         # which will contain the new asset populated with an id
-        cloud_fds = self._save_context_project_config()
-        if cloud_fds:
-            # update asset with new id
-            asset_with_id = cloud_fds.get_asset(asset_name=asset.name)
-            asset.id = asset_with_id.id
-            if self._data_context:
-                # datasources setter will attach dataframe to in-memory assets
-                self._data_context.datasources[self.name] = self
+        if self._data_context:
+            updated_datasource = self._data_context._update_fluent_datasource(
+                datasource=self
+            )
+            assert isinstance(updated_datasource, Datasource)
+            if asset_id := updated_datasource.get_asset(asset_name=asset.name).id:
+                asset.id = asset_id
 
         return asset
 
-    def _save_context_project_config(self) -> Union[Datasource, None]:
+    def _save_context_project_config(self) -> None:
         """Check if a DataContext is available and save the project config."""
         if self._data_context:
             try:
-                return self._data_context._save_project_config(self)
+                self._data_context._save_project_config()
             except TypeError as type_err:
                 warnings.warn(str(type_err), GxSerializationWarning)
-        return None
 
     def _rebuild_asset_data_connectors(self) -> None:
         """
