@@ -393,8 +393,7 @@ def test_delete_expectation_suite_by_name_deletes_suite_in_cloud(
 
     assert (
         mock_delete.call_args[0][1]
-        == "https://app.test.greatexpectations.io/organizations/bd20fead-2c31-4392"
-        "-bcd1-f1e87ad5a79c/expectation-suites"
+        == "https://app.greatexpectations.fake.io/organizations/12345678-1234-5678-1234-567812345678/expectation-suites"
     )
     assert mock_delete.call_args[1]["params"] == {"name": suite_name}
 

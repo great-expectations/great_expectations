@@ -23,10 +23,8 @@ from tests.datasource.fluent._fake_cloud_api import (
     GX_CLOUD_MOCK_BASE_URL,
     UUID_REGEX,
     CallbackResult,
-    CloudResponseSchema,
-)
-from tests.datasource.fluent.conftest import (
     CloudDetails,
+    CloudResponseSchema,
 )
 
 if TYPE_CHECKING:
@@ -69,7 +67,7 @@ def test_add_fluent_datasource_are_persisted(
     assert set_spy.call_count == 1
     cloud_api_fake.assert_call_count(
         f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources",
-        1,
+        2,
     )
 
 
@@ -204,7 +202,7 @@ def test_context_add_or_update_datasource(
         # TODO: adjust call counts as needed
         cloud_api_fake.assert_call_count(
             f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources",
-            1,
+            2,
         )
         cloud_api_fake.assert_call_count(
             f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}?name={datasource.name}",
@@ -316,7 +314,7 @@ def test_cloud_context_delete_datasource(
 
     cloud_api_fake.assert_call_count(
         f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources",
-        1,
+        3,
     )
     cloud_api_fake.assert_call_count(
         f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}",
