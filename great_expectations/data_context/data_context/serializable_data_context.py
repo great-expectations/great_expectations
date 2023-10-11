@@ -37,7 +37,6 @@ yaml.default_flow_style = False
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
-    from great_expectations.datasource.fluent import Datasource as FluentDatasource
 
 
 class SerializableDataContext(AbstractDataContext):
@@ -84,7 +83,7 @@ class SerializableDataContext(AbstractDataContext):
 
     @abc.abstractmethod
     @override
-    def _save_project_config(self, _fds_datasource=None) -> FluentDatasource | None:
+    def _save_project_config(self) -> None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
         Explicitly override base class implementation to retain legacy behavior.

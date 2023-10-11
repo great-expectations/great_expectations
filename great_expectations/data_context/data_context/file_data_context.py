@@ -152,7 +152,7 @@ class FileDataContext(SerializableDataContext):
         return variables
 
     @override
-    def _save_project_config(self, _fds_datasource=None) -> None:
+    def _save_project_config(self) -> None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
 
