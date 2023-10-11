@@ -69,19 +69,12 @@ services:
       - /bin/bash
       - -c
       - |
-        apt update
-        apt -y install curl
         sed -i 's/localhost/db/g' /app/services/ge_cloud/mercury/alembic.ini
         cd /app/services/ge_cloud/mercury
         alembic upgrade head
         cd /app/services/ge_cloud
         python -m tests.utils.dev_db_seed_script
         gunicorn mercury.api:get_app\(\) --config ./gunicorn.conf.py
-#    healthcheck:
-#      test: ["CMD", "curl", "-f", "http://0.0.0.0:5000/status"]
-#      interval: 5s
-#      timeout: 2s
-#      retries: 18
     depends_on:
       db-provisioner:
         condition: service_completed_successfully
