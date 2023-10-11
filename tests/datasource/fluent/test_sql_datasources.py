@@ -44,7 +44,7 @@ def test_kwargs_are_passed_to_create_engine(
     monkeypatch.setenv("MY_CONN_STR", "sqlite:///")
 
     context = ephemeral_context_with_defaults
-    ds = context.sources.add_sql(name="my_datasource", **ds_kwargs)
+    ds = context.sources.add_or_update_sql(name="my_datasource", **ds_kwargs)
     print(ds)
     ds.test_connection()
 
