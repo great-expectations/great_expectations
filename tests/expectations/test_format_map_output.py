@@ -56,12 +56,6 @@ def test_format_map_output_with_numbers():
 
 
 def test_format_map_output_with_numbers_without_values():
-    """
-    [NEW TEST] : for the new argument `exclude_unexpected_values` set as True.
-    It will return unexpected_index_list without column values and suppress unexpected_list,
-    partial_unexpected_list and partial_unexpected_counts
-    """
-
     success = False
     element_count = 5
     nonnull_count = 5
@@ -150,12 +144,6 @@ def test_format_map_output_with_strings():
 
 
 def test_format_map_output_with_strings_without_values():
-    """
-    [NEW TEST] : for the new argument `exclude_unexpected_values` set as True.
-    It will return unexpected_index_list without column values and suppress unexpected_list,
-    partial_unexpected_list and partial_unexpected_counts
-    """
-
     success = False
     element_count = 5
     nonnull_count = 5
@@ -247,12 +235,6 @@ def test_format_map_output_with_strings_two_matches():
 
 
 def test_format_map_output_with_strings_two_matches_without_values():
-    """
-    [NEW TEST] : for the new argument `exclude_unexpected_values` set as True.
-    It will return unexpected_index_list without column values and suppress unexpected_list,
-    partial_unexpected_list and partial_unexpected_counts
-    """
-
     success = False
     element_count = 5
     nonnull_count = 5

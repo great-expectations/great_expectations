@@ -149,10 +149,6 @@ def test_pd_unexpected_index_list_metric_without_id_pk(animal_table_df):
 def test_pd_unexpected_index_list_metric_without_id_pk_without_column_values(
     animal_table_df,
 ):
-    """
-    [NEW TEST] : for `exclude_unexpected_values` key set as True.
-    """
-
     df: pd.DataFrame = animal_table_df
     # pandas will return default unexpected_index_list without id_pk
     metric_value_kwargs: dict = {
@@ -226,10 +222,6 @@ def test_pd_unexpected_index_list_metric_with_id_pk(
 def test_pd_unexpected_index_list_metric_with_id_pk_without_column_values(
     metric_value_kwargs_complete, animal_table_df
 ):
-    """
-    [NEW TEST] : for metric_value_kwargs containing `exclude_unexpected_values` key set as True. It will return unexpected_index_list without column values.
-    """
-
     df: pd.DataFrame = animal_table_df
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
@@ -306,10 +298,6 @@ def test_sa_unexpected_index_list_metric_with_id_pk(
 def test_sa_unexpected_index_list_metric_with_id_pk_without_column_values(
     sa, animal_table_df, metric_value_kwargs_complete
 ):
-    """
-    [NEW TEST] : for metric_value_kwargs containing `exclude_unexpected_values` key set as True. It will return unexpected_index_list without column values.
-    """
-
     df: pd.DataFrame = animal_table_df
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
@@ -387,10 +375,6 @@ def test_sa_unexpected_index_list_metric_without_id_pk(sa, animal_table_df):
 def test_sa_unexpected_index_list_metric_without_id_pk_without_column_values(
     sa, animal_table_df
 ):
-    """
-    [NEW TEST] : for `exclude_unexpected_values` key set as True.
-    """
-
     df: pd.DataFrame = animal_table_df
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
@@ -536,9 +520,6 @@ def test_spark_unexpected_index_list_metric_with_id_pk(
 def test_spark_unexpected_index_list_metric_with_id_pk_without_column_values(
     spark_session, animal_table_df
 ):
-    """
-    [NEW TEST] : for metric_value_kwargs containing `exclude_unexpected_values` key set as True. It will return unexpected_index_list without column values.
-    """
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,
@@ -621,9 +602,6 @@ def test_spark_unexpected_index_list_metric_without_id_pk(
 def test_spark_unexpected_index_list_metric_without_id_pk_without_column_values(
     spark_session, animal_table_df
 ):
-    """
-    [NEW TEST] : `exclude_unexpected_values` key set as True
-    """
     metric_value_kwargs: dict = {
         "value_set": ["cat", "fish", "dog"],
         "parse_strings_as_datetimes": False,

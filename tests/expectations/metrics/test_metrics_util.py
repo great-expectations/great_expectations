@@ -192,10 +192,6 @@ def test_get_unexpected_indices_for_single_pandas_named_index_named_unexpected_i
     pandas_animals_dataframe_for_unexpected_rows_and_index,
     unexpected_index_list_one_index_column_without_column_values,
 ):
-    """
-    [NEW TEST] : for the new argument `exclude_unexpected_values` set as True. It will return unexpected_index_list without column values.
-    """
-
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
     updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1"])
     expectation_domain_column_list: List[str] = ["animals"]
@@ -236,10 +232,6 @@ def test_get_unexpected_indices_for_single_pandas_named_index_without_column_val
     pandas_animals_dataframe_for_unexpected_rows_and_index,
     unexpected_index_list_one_index_column_without_column_values,
 ):
-    """
-    [NEW TEST] : for the new argument `exclude_unexpected_values` set as True. It will return unexpected_index_list without column values.
-    """
-
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
     updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1"])
     expectation_domain_column_list: List[str] = ["animals"]
@@ -280,10 +272,6 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_without_column
     pandas_animals_dataframe_for_unexpected_rows_and_index,
     unexpected_index_list_two_index_columns_without_column_values,
 ):
-    """
-    [NEW TEST] : for the new argument `exclude_unexpected_values` set as True. It will return unexpected_index_list without column values.
-    """
-
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
     updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1", "pk_2"])
     expectation_domain_column_list: List[str] = ["animals"]
@@ -324,10 +312,6 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
     pandas_animals_dataframe_for_unexpected_rows_and_index,
     unexpected_index_list_two_index_columns_without_column_values,
 ):
-    """
-    [NEW TEST] : for the new argument `exclude_unexpected_values` set as True. It will return unexpected_index_list without column values.
-    """
-
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
     updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1", "pk_2"])
     expectation_domain_column_list: List[str] = ["animals"]
@@ -368,10 +352,6 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
     pandas_animals_dataframe_for_unexpected_rows_and_index,
     unexpected_index_list_one_index_column_without_column_values,
 ):
-    """
-    [NEW TEST] : for the new argument `exclude_unexpected_values` set as True. It will return unexpected_index_list without column values.
-    """
-
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
     updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1", "pk_2"])
     expectation_domain_column_list: List[str] = ["animals"]
