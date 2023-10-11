@@ -261,17 +261,20 @@ class FluentBaseModel(pydantic.BaseModel):
             exclude_none=exclude_none,
             skip_defaults=skip_defaults,
         )
+
+        class_name = self.__class__.__name__
         if config_provider:
-            logger.info(
-                f"{self.__class__.__name__}.dict() - substituting config values"
-            )
+            logger.info(f"{class_name}.dict() - substituting config values")
             _recursively_set_config_value(result, config_provider)
         elif raise_on_missing_config_provider:
-            class_name = self.__class__.__name__
             raise ValueError(
                 f"{class_name}.dict() -"
                 " `config_provider` must be provided if `raise_on_missing_config_provider` is True."
                 f" {class_name} may be missing a context."
+            )
+        else:
+            logger.info(
+                f"{class_name}.dict() - missing `config_provider`, skipping config substitution"
             )
 
         return result
