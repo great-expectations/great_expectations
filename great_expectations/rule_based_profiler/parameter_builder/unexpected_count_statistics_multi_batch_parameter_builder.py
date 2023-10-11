@@ -190,9 +190,27 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         total_count_values: MetricValues = total_count_parameter_node[
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
-
+        # Will this is where we actually do the count fraction calculation
         unexpected_count_fraction_values: np.ndarray = unexpected_count_values / (
             total_count_values + NP_EPSILON
+        )
+
+        unexpected_count_attributed_values = {}
+        # this is where we are going to do the loop for now.
+        batch_names = list(total_count_parameter_node["attributed_value"].keys())
+        for i in range(len(unexpected_count_fraction_values)):
+            # this is a list now :batch_names
+            # unexpected_count_values and total count values are numpy arrays, which cannot be index
+            unexpected_count_attributed_values[
+                batch_names[i]
+            ] = unexpected_count_fraction_values[i]
+
+        unexpected_count_fraction_parameter_node: ParameterNode = ParameterNode(
+            {
+                "value": unexpected_count_fraction_values,
+                "attributed_value": unexpected_count_attributed_values,
+                "details": total_count_parameter_node["details"],
+            }
         )
 
         # Obtain mode from "rule state" (i.e., variables and parameters); from instance variable otherwise.
@@ -216,7 +234,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         result: Union[np.float64, Dict[str, Union[np.float64, np.ndarray]]]
 
         if mode == "unexpected_count_fraction_values":
-            result = unexpected_count_fraction_values
+            result = unexpected_count_fraction_parameter_node
         else:
             result = {
                 "single_batch_mode": mode == "single_batch",
