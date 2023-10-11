@@ -131,7 +131,9 @@ class SnowflakeDatasource(SQLDatasource):
                     exclude=self._get_exec_engine_excludes(),
                     config_provider=self._config_provider,
                 )
-                _check_config_substitutions_needed(self, model_dict, True)
+                _check_config_substitutions_needed(
+                    self, model_dict, raise_warning_if_provider_not_present=True
+                )
 
                 kwargs = model_dict.pop("kwargs", {})
                 connection_string: str | None = model_dict.pop(

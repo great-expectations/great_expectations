@@ -1034,7 +1034,9 @@ class SQLDatasource(Datasource):
             exclude=self._get_exec_engine_excludes(),
             config_provider=self._config_provider,
         )
-        _check_config_substitutions_needed(self, model_dict, True)
+        _check_config_substitutions_needed(
+            self, model_dict, raise_warning_if_provider_not_present=True
+        )
         connection_string = model_dict.pop("connection_string")
         kwargs = model_dict.pop("kwargs", {})
         return sa.create_engine(connection_string, **kwargs)
