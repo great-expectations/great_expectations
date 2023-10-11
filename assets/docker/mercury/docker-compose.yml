@@ -3,6 +3,7 @@ version: "3.4"
 services:
   db:
     image: postgres:13.7
+    platform: linux/amd64
     # Turn off db logs by default
     # https://postgresqlco.nf/doc/en/param/log_statement/
     command: [ "postgres", "-c", "log_statement=none" ]
@@ -63,6 +64,7 @@ services:
       AUTH0_MERCURY_API_CLIENT_SECRET: ${AUTH0_MERCURY_API_CLIENT_SECRET}
       SENDGRID_API_KEY: fake_key
       LD_SDK_KEY: ${LD_SDK_KEY}
+    # TODO replace migtrations with ./scripts/automated_migrations.sh
     entrypoint:
       - /bin/bash
       - -c
@@ -72,7 +74,7 @@ services:
         alembic upgrade head
         cd /app/services/ge_cloud
         python -m tests.utils.dev_db_seed_script
-        gunicorn mercury.api:get_app\(\) --config ./gunicorn.conf.py
+        gunicorn mercury.api:get_app\(\) --config ./gunicorn.conf.py --workers=1
     healthcheck:
       test: timeout 10s bash -c ':> /dev/tcp/0.0.0.0/5000' || exit 1
       interval: 5s
