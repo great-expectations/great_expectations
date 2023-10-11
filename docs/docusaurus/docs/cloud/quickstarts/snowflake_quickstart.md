@@ -54,7 +54,7 @@ Environment variables securely store your GX Cloud and Snowflake access credenti
 
 3. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
 
-4. Optional. Run `docker ps` or open Docker Desktop to confirm the agent is running
+4. Optional. Run `docker ps` or open Docker Desktop to confirm the agent is running.
 
     If you stop the GX Cloud agent, close the terminal, and open a new terminal you'll need to set the environment variables again.
 
