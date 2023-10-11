@@ -130,7 +130,9 @@ class SnowflakeDatasource(SQLDatasource):
                 )
 
                 kwargs = model_dict.pop("kwargs", {})
-                connection_string = model_dict.pop("connection_string")
+                connection_string: str | None = model_dict.pop(
+                    "connection_string", None
+                )
 
                 if connection_string:
                     self._engine = sa.create_engine(connection_string, **kwargs)
