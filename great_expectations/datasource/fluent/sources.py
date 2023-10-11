@@ -519,6 +519,7 @@ class _SourceFactories:
             if id_:
                 updated_datasource.id = id_
 
+            updated_datasource._data_context = self._data_context
             updated_datasource.test_connection()
             return_obj = self._data_context._update_fluent_datasource(
                 datasource=updated_datasource
