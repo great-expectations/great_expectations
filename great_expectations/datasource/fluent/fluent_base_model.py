@@ -267,8 +267,11 @@ class FluentBaseModel(pydantic.BaseModel):
             )
             _recursively_set_config_value(result, config_provider)
         elif raise_on_missing_config_provider:
+            class_name = self.__class__.__name__
             raise ValueError(
-                f"{self.__class__.__name__}.dict() - config_provider must be provided if raise_on_missing_config_provider is True"
+                f"{class_name}.dict() -"
+                " `config_provider` must be provided if `raise_on_missing_config_provider` is True."
+                f" {class_name} may be missing a context."
             )
 
         return result
