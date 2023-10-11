@@ -12,7 +12,7 @@ Data Assets are usually tied to existing data that already has a name (e.g. “t
 
 The specifics of a filesystem Data Asset are defined by the parameters provided when it is created. With a SQL Data Asset, you can also add splitters after you have initially created the Data Asset.
 
-You can define multiple Data Assets built from the same underlying source data system to support different workflows such as interactive exploration and creation of <TechnicalTag relative="../" tag="expectation" text="Expectations" />, the use of <TechnicalTag relative="../" tag="profiler" text="Profilers" /> to analyze data, and ongoing <TechnicalTag relative="../" tag="validation" text="Validation" /> through <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" />.
+You can define multiple Data Assets built from the same underlying source data system to support different workflows such as interactive exploration and creation of <TechnicalTag relative="../" tag="expectation" text="Expectations" /> and ongoing <TechnicalTag relative="../" tag="validation" text="Validation" /> through <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" />.
 
 Great Expectations is designed to help you think and communicate clearly about your data. To do that, we need to rely on some specific ideas about *what* we're protecting with our Expectations. You usually do not need to think about these nuances to use Great Expectations, and many users never think about what *exactly* makes a Data Asset or Batch. But we think it can be extremely useful to understand the design decisions that guide Great Expectations.
 
@@ -62,15 +62,12 @@ When connecting to your data you will define at least one Data Asset for each Da
 
 When using the interactive workflow for creating Expectations, it is often useful to utilize a simple Data Asset configuration for purposes of exploring the data.  This configuration can then be replaced when it is time to Validate data going forward.
 
-When using a Profiler, Great Expectations can take advantage of as much information about your data as you can provide.  It may even be useful to configure multiple Data Assets to support complex Profiler configurations.
-
 When you are Validating new Batches of data you'll be using a Data Asset and Batch Request to indicate the Batch or Batches of data to Validate.
 
 ## Versatility
 
 Data Assets can be configured to cover a variety of use cases.  For example:
 
-- For append-only datasets such as logs, you configure a Data Asset to split data into batches corresponding to the intervals that you want the profiler to evaluate. For example, you could configure a log-style Data Asset to divide the data into Batches corresponding to single months.
 - When you are working with dynamic datasets such as database tables, you will configure a Data Asset that defines a Batch as the state of the table at the time of Validation. Because you usually cannot access previous states of the such a table, only a single Batch from that Data Asset will be available at any given time. In that case, you have a few options:
     - You can profile the data using a single Batch of data.  While you may not have as much statistical power in the estimated Expectations as if you had historical data available, this allows you to get started immediately, and you can build up a collection of Metrics over time that Great Expectations can use to refine the Expectations.
     - You can configure another Data Asset from the same source Data that randomly assigns data to different batches to bootstrap the refinement of Expectations by providing a random sampling of records.

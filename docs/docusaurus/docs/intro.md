@@ -3,7 +3,7 @@ title: Welcome
 slug: /
 ---
 
-Great Expectations is the leading tool for [validating](./terms/validation.md), [documenting](./terms/data_docs.md), and [profiling](./terms/profiler.md) your data to maintain quality and improve communication between teams. If you're ready to get started, see the [Quickstart](tutorials/quickstart/quickstart.md).
+Great Expectations is the leading tool for [validating](./terms/validation.md) and [documenting](./terms/data_docs.md) your data to maintain quality and improve communication between teams. If you're ready to get started, see the [Quickstart](tutorials/quickstart/quickstart.md).
 
 Software developers have long known that automated testing is essential for managing complex codebases. Great Expectations brings the same discipline, confidence, and acceleration to data science and data engineering teams.
 
@@ -35,22 +35,6 @@ expect_column_values_to_be_between(
 ```
 
 Great Expectations then uses this statement to validate whether the column passenger_count in a given table is indeed between 1 and 6, and returns a success or failure result. The library currently provides several dozen highly expressive built-in Expectations, and allows you to write custom Expectations.
-
-#### Automated data profiling
-
-Writing pipeline tests from scratch can be tedious and overwhelming. Great Expectations jump starts the process by providing automated data profiling. The library profiles your data to get basic statistics, and automatically generates a suite of Expectations based on what is observed in the data.
-
-For example, using the profiler on a column passenger_count that only contains integer values between 1 and 6, Great Expectations automatically generates this Expectation we’ve already seen:
-
-```python
-expect_column_values_to_be_between(
-    column="passenger_count",
-    min_value=1,
-    max_value=6
-)
-```
-
-This allows you to quickly create tests for your data, without having to write them from scratch.
 
 #### Data validation
 

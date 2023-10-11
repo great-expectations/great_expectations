@@ -14,11 +14,11 @@ by printing the `batch_request_options` attribute.
 
 ## Relationship to other objects
 
-A Batch Request is always used when Great Expectations builds a Batch. Any time you interact with something that requires a Batch of Data (such as a <TechnicalTag relative="../" tag="profiler" text="Profiler" />, <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" />, or <TechnicalTag relative="../" tag="validator" text="Validator" />) you will use a Batch Request to create the Batch that is used.
+A Batch Request is always used when Great Expectations builds a Batch. Any time you interact with something that requires a Batch of Data (such as a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" />, or <TechnicalTag relative="../" tag="validator" text="Validator" />) you will use a Batch Request to create the Batch that is used.
 
 ## Use cases
 
-If you are using a Custom Profiler or the interactive method of creating Expectations, you will need to provide a Batch of data for the Profiler to analyze or your manually defined Expectations to test against.  For both of these processes, you will therefore need a Batch Request to get the Batch.
+When you create Expectations, you will need to provide a Batch of data for your Expectations to test against.  For this processes, you will therefore need a Batch Request to get the Batch.
 
 For more information, see:
 
