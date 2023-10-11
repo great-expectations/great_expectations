@@ -27,7 +27,7 @@ context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = pathlib.Path(
-    full_path_to_project_directory, "great_expectations/great_expectations.yml"
+    full_path_to_project_directory, FileDataContext.GX_DIR, FileDataContext.GX_YML
 )
 great_expectations_yaml = yaml.load(great_expectations_yaml_file_path.read_text())
 
@@ -71,8 +71,8 @@ stores:
     class_name: ExpectationsStore
     store_backend:
       class_name: TupleS3StoreBackend
-      bucket: <YOUR S3 BUCKET NAME>
-      prefix: <YOUR S3 PREFIX NAME>
+      bucket: '<YOUR S3 BUCKET NAME>'
+      prefix: '<YOUR S3 PREFIX NAME>'  # Bucket and prefix in combination must be unique across all stores
 
 expectations_store_name: expectations_S3_store
 # </snippet>
@@ -151,8 +151,8 @@ stores:
     class_name: ValidationsStore
     store_backend:
       class_name: TupleS3StoreBackend
-      bucket: <YOUR S3 BUCKET NAME>
-      prefix: <YOUR S3 PREFIX NAME>
+      bucket: '<YOUR S3 BUCKET NAME>'
+      prefix: '<YOUR S3 PREFIX NAME>'  # Bucket and prefix in combination must be unique across all stores
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py set_new_validations_store">

@@ -28,11 +28,13 @@ from typing import (
     Set,
     Tuple,
     Type,
+    TypeVar,
     Union,
 )
 
 import pandas as pd
 from dateutil.parser import parse
+from typing_extensions import ParamSpec
 
 from great_expectations import __version__ as ge_version
 from great_expectations.compatibility.typing_extensions import override
@@ -143,9 +145,12 @@ _TEST_DEFS_DIR: Final = pathlib.Path(
     __file__, "..", "..", "..", "tests", "test_definitions"
 ).resolve()
 
+P = ParamSpec("P")
+T = TypeVar("T", List[RenderedStringTemplateContent], RenderedAtomicContent)
+
 
 @public_api
-def render_evaluation_parameter_string(render_func) -> Callable:
+def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]:
     """Decorator for Expectation classes that renders evaluation parameters as strings.
 
     allows Expectations that use Evaluation Parameters to render the values
@@ -158,17 +163,13 @@ def render_evaluation_parameter_string(render_func) -> Callable:
         GreatExpectationsError: If runtime_configuration with evaluation_parameters is not provided.
     """
 
-    def inner_func(
-        *args: Tuple[MetaExpectation], **kwargs: dict
-    ) -> Union[List[RenderedStringTemplateContent], RenderedAtomicContent]:
-        rendered_string_template: Union[
-            List[RenderedStringTemplateContent], RenderedAtomicContent
-        ] = render_func(*args, **kwargs)
-        current_expectation_params = list()
+    def inner_func(*args: P.args, **kwargs: P.kwargs) -> T:
+        rendered_string_template = render_func(*args, **kwargs)
+        current_expectation_params: list = []
         app_template_str = (
             "\n - $eval_param = $eval_param_value (at time of validation)."
         )
-        configuration: Optional[dict] = kwargs.get("configuration")
+        configuration: dict | None = kwargs.get("configuration")  # type: ignore[assignment] # could be object?
         if configuration:
             kwargs_dict: dict = configuration.get("kwargs", {})
             for key, value in kwargs_dict.items():
@@ -180,7 +181,7 @@ def render_evaluation_parameter_string(render_func) -> Callable:
         if current_expectation_params and not isinstance(
             rendered_string_template, RenderedAtomicContent
         ):
-            runtime_configuration: Optional[dict] = kwargs.get("runtime_configuration")
+            runtime_configuration: Optional[dict] = kwargs.get("runtime_configuration")  # type: ignore[assignment] # could be object?
             if runtime_configuration:
                 eval_params = runtime_configuration.get("evaluation_parameters", {})
                 styling = runtime_configuration.get("styling")
@@ -1790,7 +1791,6 @@ class Expectation(metaclass=MetaExpectation):
     ) -> RendererConfiguration:
         mostly_pct_value: str = num_to_str(
             renderer_configuration.params.mostly.value * 100,
-            precision=15,
             no_scientific=True,
         )
         renderer_configuration.add_param(
@@ -1974,10 +1974,10 @@ class Expectation(metaclass=MetaExpectation):
 
         result: str = ""
 
-        if type(rendered_result) == str:  # noqa: E721
+        if isinstance(rendered_result, str):
             result = rendered_result
 
-        elif type(rendered_result) == list:
+        elif isinstance(rendered_result, list):
             sub_result_list = []
             for sub_result in rendered_result:
                 res = self._get_rendered_result_as_string(sub_result)
@@ -2210,7 +2210,7 @@ class Expectation(metaclass=MetaExpectation):
                 )
             if forbidden_keys:
                 problems.append(f"Extra key(s) found: {sorted(forbidden_keys)}")
-            if type(augmented_library_metadata["requirements"]) != list:
+            if not isinstance(augmented_library_metadata["requirements"], list):
                 problems.append("library_metadata['requirements'] is not a list ")
             if not problems:
                 augmented_library_metadata["library_metadata_passed_checks"] = True

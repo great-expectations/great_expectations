@@ -243,6 +243,7 @@ def type_check(  # noqa: PLR0913, PLR0912
     install_types: bool = False,
     pretty: bool = False,
     warn_unused_ignores: bool = False,
+    disallow_untyped_decorators: bool = True,
     daemon: bool = False,
     clear_cache: bool = False,
     report: bool = False,
@@ -263,6 +264,7 @@ def type_check(  # noqa: PLR0913, PLR0912
             install_types=True,
             pretty=pretty,
             warn_unused_ignores=True,
+            disallow_untyped_decorators=True,
             daemon=daemon,
             clear_cache=clear_cache,
             report=report,
@@ -311,6 +313,8 @@ def type_check(  # noqa: PLR0913, PLR0912
         cmds.extend(["--pretty"])
     if warn_unused_ignores:
         cmds.extend(["--warn-unused-ignores"])
+    if disallow_untyped_decorators:
+        cmds.extend(["--disallow-untyped-decorators"])
     if python_version:
         cmds.extend(["--python-version", python_version])
     # use pseudo-terminal for colorized output
@@ -805,7 +809,6 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     ),
     "databricks": TestDependencies(
         requirement_files=("reqs/requirements-dev-databricks.txt",),
-        services=("databricks",),
     ),
     "docs-basic": TestDependencies(
         # these installs are handled by the CI

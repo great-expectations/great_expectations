@@ -20,7 +20,7 @@ defusedxml==0.6.0
 docutils==0.16
 entrypoints==0.3
 gitdb==4.0.5
-GitPython==3.1.33
+GitPython==3.1.37
 idna==2.10
 imagesize==1.2.0
 importlib-metadata==1.7.0
@@ -91,7 +91,7 @@ traitlets==5.9.0
 typed-ast==1.4.1
 tzlocal==2.1
 Unidecode==1.1.1
-urllib3==1.26.5
+urllib3==1.26.17
 wcwidth==0.2.5
 webencodings==0.5.1
 widgetsnbextension==3.5.1

@@ -33,7 +33,7 @@ def run_docusaurus_build(target_dir: str) -> None:
 
 def run_grep(target_dir: str) -> List[str]:
     try:
-        res = subprocess.run(
+        res = subprocess.run(  # noqa: PLW1510
             [
                 "grep",
                 "-Er",  # Enable regex and directory search

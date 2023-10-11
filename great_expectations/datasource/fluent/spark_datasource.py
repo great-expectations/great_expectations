@@ -15,10 +15,14 @@ from typing import (
     Union,
 )
 
-import pydantic
-from pydantic import StrictBool, StrictFloat, StrictInt, StrictStr
-
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import (
+    StrictBool,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+)
 from great_expectations.compatibility.pyspark import DataFrame, pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (
@@ -147,7 +151,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         version="0.16.15",
     )
     @override
-    def build_batch_request(
+    def build_batch_request(  # type: ignore[override]
         self, dataframe: Optional[_SparkDataFrameT] = None
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
@@ -261,7 +265,7 @@ class SparkDatasource(_SparkDatasource):
     # instance attributes
     type: Literal["spark"] = "spark"
 
-    assets: List[DataFrameAsset] = []  # type: ignore[assignment]
+    assets: List[DataFrameAsset] = []
 
     @override
     def test_connection(self, test_assets: bool = True) -> None:

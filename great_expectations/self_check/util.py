@@ -25,6 +25,7 @@ from typing import (
     Optional,
     Tuple,
     Type,
+    TypeVar,
     Union,
     cast,
 )
@@ -32,6 +33,7 @@ from typing import (
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
+from typing_extensions import ParamSpec
 
 import great_expectations.compatibility.bigquery as BigQueryDialect
 from great_expectations.compatibility import aws, pyspark, snowflake, sqlalchemy, trino
@@ -95,6 +97,9 @@ if TYPE_CHECKING:
         ExpectationExecutionEngineDiagnostics,
     )
     from great_expectations.data_context import AbstractDataContext
+
+P = ParamSpec("P")
+T = TypeVar("T")
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
@@ -1153,9 +1158,9 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     )
 
 
-def modify_locale(func):
+def modify_locale(func: Callable[P, None]) -> Callable[P, None]:
     @wraps(func)
-    def locale_wrapper(*args, **kwargs) -> None:
+    def locale_wrapper(*args: P.args, **kwargs: P.kwargs) -> None:
         old_locale = locale.setlocale(locale.LC_TIME, None)
         print(old_locale)
         # old_locale = locale.getlocale(locale.LC_TIME) Why not getlocale? not sure
@@ -1731,9 +1736,16 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 test_backends += ["trino"]
 
         if include_azure:
+            azure_connection_string: Optional[str] = os.getenv(
+                "AZURE_CONNECTION_STRING"
+            )
             azure_credential: Optional[str] = os.getenv("AZURE_CREDENTIAL")
             azure_access_key: Optional[str] = os.getenv("AZURE_ACCESS_KEY")
-            if not azure_access_key and not azure_credential:
+            if (
+                not azure_access_key
+                and not azure_connection_string
+                and not azure_credential
+            ):
                 if raise_exceptions_for_backends is True:
                     raise ImportError(
                         "Azure tests are requested, but credentials were not set up"
@@ -2571,7 +2583,7 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                     )
                 except AssertionError:
                     if result["result"]["unexpected_list"]:
-                        if type(result["result"]["unexpected_list"][0]) == list:
+                        if isinstance(result["result"]["unexpected_list"][0], list):
                             unexpected_list_tup = [
                                 tuple(x) for x in result["result"]["unexpected_list"]
                             ]

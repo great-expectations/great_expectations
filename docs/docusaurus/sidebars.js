@@ -3,6 +3,178 @@ module.exports = {
     'intro',
     {
       type: 'category',
+      label: 'GX Cloud',
+      link: { type: 'doc', id: 'cloud/gx_cloud_lp' },
+      items: [
+        {
+          type: 'category',
+          label: 'Set up GX Cloud',
+          link: { type: 'doc', id: 'cloud/set_up_gx_cloud' },
+          items: [
+            {
+              type: 'link',
+              label: 'Request a GX Cloud Beta account',
+              href: '/docs/cloud/set_up_gx_cloud#request-a-gx-cloud-beta-account',
+            },
+            {
+              type: 'link',
+              label: 'Prepare your environment',
+              href: '/docs/cloud/set_up_gx_cloud#prepare-your-environment',
+            },
+            {
+              type: 'link',
+              label: 'Get your user access token and organization ID',
+              href: '/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id',
+            },
+            {
+              type: 'link',
+              label: 'Set the environment variables and start the GX Cloud agent',
+              href: '/docs/cloud/set_up_gx_cloud#set-the-environment-variables-and-start-the-gx-cloud-agent',
+            },
+            {
+              type: 'link',
+              label: 'Troubleshoot',
+              href: '/docs/cloud/set_up_gx_cloud#troubleshoot',
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Quickstarts',
+          link: { type: 'doc', id: 'cloud/quickstarts/quickstart_lp' },
+          items: [
+            'cloud/quickstarts/snowflake_quickstart',
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Manage Data Assets',
+          link: { type: 'doc', id: 'cloud/data_assets/manage_data_assets' },
+          items: [
+            {
+              type: 'link',
+              label: 'Create a Data Asset',
+              href: '/docs/cloud/data_assets/manage_data_assets#create-a-data-asset',
+            },
+            {
+              type: 'link',
+              label: 'Edit a Data Asset',
+              href: '/docs/cloud/data_assets/manage_data_assets#edit-a-data-asset',
+            },
+            {
+              type: 'link',
+              label: 'Delete a Data Asset',
+              href: '/docs/cloud/data_assets/manage_data_assets#delete-a-data-asset',
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Manage Expectations',
+          link: { type: 'doc', id: 'cloud/expectations/manage_expectations' },
+          items: [
+            {
+              type: 'link',
+              label: 'Add an Expectation',
+              href: '/docs/cloud/expectations/manage_expectations#create-an-expectation',
+            },
+            {
+              type: 'link',
+              label: 'Edit an Expectation',
+              href: '/docs/cloud/expectations/manage_expectations#edit-an-expectation',
+            },
+            {
+              type: 'link',
+              label: 'Delete an Expectation',
+              href: '/docs/cloud/expectations/manage_expectations#delete-an-expectation',
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Manage Validations',
+          link: { type: 'doc', id: 'cloud/validations/manage_validations' },
+          items: [
+            {
+              type: 'link',
+              label: 'Run a Validation',
+              href: '/docs/cloud/validations/manage_validations#run-a-validation',
+            },
+            {
+              type: 'link',
+              label: 'View Validation run history',
+              href: '/docs/cloud/validations/manage_validations#view-validation-run-history',
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Manage Checkpoints',
+          link: { type: 'doc', id: 'cloud/checkpoints/manage_checkpoints' },
+          items: [
+            {
+              type: 'link',
+              label: 'Add a Checkpoint',
+              href: '/docs/cloud/checkpoints/manage_checkpoints#add-a-checkpoint',
+            },
+            {
+              type: 'link',
+              label: 'Run a Checkpoint',
+              href: '/docs/cloud/checkpoints/manage_checkpoints#run-a-checkpoint',
+            },
+            {
+              type: 'link',
+              label: 'Edit a Checkpoint configuration',
+              href: '/docs/cloud/checkpoints/manage_checkpoints#edit-a-checkpoint-configuration',
+            },
+            {
+              type: 'link',
+              label: 'Delete a Checkpoint',
+              href: '/docs/cloud/checkpoints/manage_checkpoints#delete-a-checkpoint',
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Manage users and access tokens',
+          link: { type: 'doc', id: 'cloud/users/manage_users' },
+          items: [
+            {
+              type: 'link',
+              label: 'Invite a user',
+              href: '/docs/cloud/users/manage_users#invite-a-user',
+            },
+            {
+              type: 'link',
+              label: 'Edit a user role',
+              href: '/docs/cloud/users/manage_users#edit-a-user-role',
+            },
+            {
+              type: 'link',
+              label: 'Delete a user',
+              href: '/docs/cloud/users/manage_users#delete-a-user',
+            },
+            {
+              type: 'link',
+              label: 'Create a user access token',
+              href: '/docs/cloud/users/manage_users#create-a-user-access-token',
+            },
+            {
+              type: 'link',
+              label: 'Create an organization access token',
+              href: '/docs/cloud/users/manage_users#create-an-organization-access-token',
+            },
+            {
+              type: 'link',
+              label: 'Delete a user or organization access token',
+              href: '/docs/cloud/users/manage_users#delete-a-user-or-organization-access-token',
+            },
+          ]
+        },
+      ]
+    },
+    {
+      type: 'category',
       label: 'Get started with GX',
       link: { type: 'doc', id: 'guides/setup/get_started_lp' },
       items: [
@@ -133,7 +305,6 @@ module.exports = {
           link: { type: 'doc', id: 'guides/validation/checkpoints/checkpoint_lp' },
           items: [
             'guides/validation/checkpoints/how_to_create_a_new_checkpoint',
-            'guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config',
             'guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
             'guides/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint',
             'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint',
@@ -187,7 +358,6 @@ module.exports = {
         'integrations/integration_datahub',
         'deployment_patterns/how_to_use_great_expectations_in_deepnote',
         'deployment_patterns/how_to_use_great_expectations_in_flyte',
-        'deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery',
         'deployment_patterns/how_to_use_great_expectations_with_meltano',
         'deployment_patterns/how_to_use_great_expectations_with_prefect',
         'deployment_patterns/how_to_use_great_expectations_with_ydata_synthetic',
@@ -197,7 +367,7 @@ module.exports = {
     {
       type: 'category',
       label: 'Concepts',
-      link: { type: 'doc', id: 'conceptual_guides/learn_lp' }, 
+      link: { type: 'doc', id: 'conceptual_guides/learn_lp' },
       items: [
         'conceptual_guides/expectation_classes',
         'conceptual_guides/metricproviders',

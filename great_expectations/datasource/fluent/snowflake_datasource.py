@@ -2,23 +2,24 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Union
 
-import pydantic
-from pydantic import AnyUrl, errors
-
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import AnyUrl, errors
 from great_expectations.compatibility.snowflake import URL
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.datasource.fluent.config_str import ConfigStr
+from great_expectations.datasource.fluent.config_str import (
+    ConfigStr,
+    _check_config_substitutions_needed,
+)
 from great_expectations.datasource.fluent.sql_datasource import (
     SQLDatasource,
     SQLDatasourceError,
 )
 
 if TYPE_CHECKING:
-    from pydantic.networks import Parts
-
     from great_expectations.compatibility import sqlalchemy
+    from great_expectations.compatibility.pydantic.networks import Parts
 
 
 class _UrlPasswordError(pydantic.UrlError):
@@ -130,9 +131,14 @@ class SnowflakeDatasource(SQLDatasource):
                     exclude=self._get_exec_engine_excludes(),
                     config_provider=self._config_provider,
                 )
+                _check_config_substitutions_needed(
+                    self, model_dict, raise_warning_if_provider_not_present=True
+                )
 
                 kwargs = model_dict.pop("kwargs", {})
-                connection_string = model_dict.pop("connection_string")
+                connection_string: str | None = model_dict.pop(
+                    "connection_string", None
+                )
 
                 if connection_string:
                     self._engine = sa.create_engine(connection_string, **kwargs)

@@ -129,7 +129,7 @@ class ConfigurationBundle:
             )
 
         return [
-            round_trip_profiler_config(self._context.get_profiler(name).config)
+            round_trip_profiler_config(self._context.get_profiler(name).config)  # type: ignore[arg-type] # expected str | None
             for name in self._context.list_profilers()
         ]
 
