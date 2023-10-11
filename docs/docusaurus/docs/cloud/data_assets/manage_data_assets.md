@@ -14,7 +14,7 @@ To learn more about Data Assets, see [Data Asset](../../terms/data_asset.md).
 
 - You have [set up your environment](../set_up_gx_cloud.md) including setting the `GX_CLOUD_SNOWFLAKE_PASSWORD` environment variable. 
 
-- You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with `ACCOUNTADMIN` access.
+- You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with `ACCOUNTADMIN` access and know the password.
 
 
 ## Create a Data Asset
