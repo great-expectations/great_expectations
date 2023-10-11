@@ -8,7 +8,10 @@ from great_expectations.compatibility.snowflake import URL
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.datasource.fluent.config_str import ConfigStr
+from great_expectations.datasource.fluent.config_str import (
+    ConfigStr,
+    _check_config_substitutions_needed,
+)
 from great_expectations.datasource.fluent.sql_datasource import (
     SQLDatasource,
     SQLDatasourceError,
@@ -127,8 +130,8 @@ class SnowflakeDatasource(SQLDatasource):
                 model_dict = self.dict(
                     exclude=self._get_exec_engine_excludes(),
                     config_provider=self._config_provider,
-                    raise_on_missing_config_provider=True,
                 )
+                _check_config_substitutions_needed(self, model_dict, True)
 
                 kwargs = model_dict.pop("kwargs", {})
                 connection_string = model_dict.pop("connection_string")
