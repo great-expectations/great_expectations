@@ -13,16 +13,38 @@ from great_expectations.datasource.fluent.sql_datasource import TableAsset
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
+    from great_expectations.data_context import EphemeralDataContext
+
+
+@pytest.fixture
+def create_engine_spy(mocker: MockerFixture) -> mock.MagicMock:
+    return mocker.spy(sa, "create_engine")
+
 
 @pytest.mark.unit
-def test_kwargs_are_passed_to_create_engine(mocker: MockerFixture):
-    create_engine_spy = mocker.spy(sa, "create_engine")
+@pytest.mark.parametrize(
+    "ds_kwargs",
+    [
+        dict(
+            connection_string="sqlite:///",
+            kwargs={"isolation_level": "SERIALIZABLE"},
+        ),
+        dict(
+            connection_string="${MY_CONN_STR}",
+            kwargs={"isolation_level": "SERIALIZABLE"},
+        ),
+    ],
+)
+def test_kwargs_are_passed_to_create_engine(
+    create_engine_spy: mock.MagicMock,
+    monkeypatch: pytest.MonkeyPatch,
+    ephemeral_context_with_defaults: EphemeralDataContext,
+    ds_kwargs: dict,
+):
+    monkeypatch.setenv("MY_CONN_STR", "sqlite:///")
 
-    ds = SQLDatasource(
-        name="my_datasource",
-        connection_string="sqlite:///",
-        kwargs={"isolation_level": "SERIALIZABLE"},
-    )
+    context = ephemeral_context_with_defaults
+    ds = context.sources.add_or_update_sql(name="my_datasource", **ds_kwargs)
     print(ds)
     ds.test_connection()
 
