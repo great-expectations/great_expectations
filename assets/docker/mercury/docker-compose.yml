@@ -71,9 +71,9 @@ services:
       - |
         sed -i 's/localhost/db/g' /app/services/ge_cloud/mercury/alembic.ini
         cd /app/services/ge_cloud/mercury
-        alembic upgrade head
+        alembic upgrade head &
         cd /app/services/ge_cloud
-        python -m tests.utils.dev_db_seed_script
+        python -m tests.utils.dev_db_seed_script &
         wait
         gunicorn mercury.api:get_app\(\) --config ./gunicorn.conf.py
     healthcheck:
