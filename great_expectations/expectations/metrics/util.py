@@ -408,10 +408,12 @@ def get_sqlalchemy_column_metadata(
                     # We must explicitly create a subquery
                     columns = table_selectable.columns().subquery().columns
             else:
+                # TODO: remove cast to a string once [this](https://github.com/snowflakedb/snowflake-sqlalchemy/issues/157) issue is resovled
+                table_name = str(table_selectable)
+                if execution_engine.dialect_name == GXSqlDialect.SNOWFLAKE:
+                    table_name = table_name.lower()
                 columns = inspector.get_columns(
-                    str(
-                        table_selectable
-                    ),  # TODO: remove cast to a string once [this](https://github.com/snowflakedb/snowflake-sqlalchemy/issues/157) issue is resovled
+                    table_name=table_name,
                     schema=schema_name,
                 )
         except (

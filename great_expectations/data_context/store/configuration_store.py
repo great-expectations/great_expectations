@@ -161,7 +161,7 @@ class ConfigurationStore(Store):
         assert bool(name) ^ bool(id), "Must provide either name or id."
 
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
-        if id or self.ge_cloud_mode:
+        if id or self.cloud_mode:
             key = GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.CHECKPOINT,
                 id=id,
