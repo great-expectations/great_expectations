@@ -45,8 +45,15 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
     def get_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
         table_metrics = self._get_table_metrics(batch_request)
 
+        # We need to skip columns that do not report a type, because the metric computation
+        # to determine semantic type will fail.
+        table_column_types = list(
+            filter(lambda m: m.metric_name == "table.column_types", table_metrics)
+        )[0]
+        exclude_column_names = self._get_columns_to_exclude(table_column_types)
+
         numeric_column_names = self._get_numeric_column_names(
-            batch_request=batch_request
+            batch_request=batch_request, exclude_column_names=exclude_column_names
         )
         numeric_column_metrics = self._get_numeric_column_metrics(
             batch_request=batch_request, column_list=numeric_column_names
@@ -136,11 +143,11 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             aborted_metrics=aborted_metrics,
         )
         raw_column_types: list[dict[str, Any]] = value
-        # If type is not found, default to UNKNOWN
+        # If type is not found, default to empty string. This can happen if our db introspection fails.
         column_types_converted_to_str: list[dict[str, str]] = [
             {
                 "name": raw_column_type["name"],
-                "type": str(raw_column_type.get("type", "UNKNOWN")),
+                "type": str(raw_column_type.get("type", "")),
             }
             for raw_column_type in raw_column_types
         ]
@@ -150,6 +157,13 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
             value=column_types_converted_to_str,
             exception=exception,
         )
+
+    def _get_columns_to_exclude(self, table_column_types: Metric) -> List[str]:
+        columns_to_skip: List[str] = []
+        for column_type in table_column_types.value:
+            if column_type["type"] == "":
+                columns_to_skip.append(column_type["name"])
+        return columns_to_skip
 
     def _get_numeric_column_metrics(
         self, batch_request: BatchRequest, column_list: List[str]
@@ -240,11 +254,16 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                 column_list = metric.value
         return column_list
 
-    def _get_numeric_column_names(self, batch_request: BatchRequest) -> list[str]:
+    def _get_numeric_column_names(
+        self,
+        batch_request: BatchRequest,
+        exclude_column_names: List[str],
+    ) -> list[str]:
         """Get the names of all numeric columns in the batch."""
         validator = self.get_validator(batch_request=batch_request)
         domain_builder = ColumnDomainBuilder(
             include_semantic_types=[SemanticDomainTypes.NUMERIC],
+            exclude_column_names=exclude_column_names,
         )
         assert isinstance(
             validator.active_batch, Batch
