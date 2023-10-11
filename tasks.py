@@ -1138,6 +1138,6 @@ def service(
             ctx.run(" ".join(cmds), echo=True, pty=pty)
         # TODO: remove this sleep. This is a temporary hack to give services enough
         #       time to come up to get ci merging again.
-        ctx.run("sleep 90")
+        ctx.run("sleep 15")
     else:
         print("  No matching services to start")

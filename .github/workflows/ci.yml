@@ -305,6 +305,8 @@ jobs:
           GX_CLOUD_ACCESS_TOKEN: ${{secrets.MERCURY_ACCESS_TOKEN}}
           SNOWFLAKE_CI_ACCOUNT: ${{secrets.SNOWFLAKE_CI_ACCOUNT}}
           SNOWFLAKE_CI_USER_PASSWORD: ${{secrets.SNOWFLAKE_CI_USER_PASSWORD}}
+          LOGGING_LEVEL: DEBUG
+          ENVIRONMENT: local
         run: invoke ci-tests 'mercury' --up-services --verbose
 
   marker-tests:
