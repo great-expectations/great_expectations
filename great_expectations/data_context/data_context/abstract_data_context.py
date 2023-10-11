@@ -379,9 +379,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _init_variables(self) -> DataContextVariables:
         raise NotImplementedError
 
-    def _save_project_config(
-        self, _fds_datasource: FluentDatasource | None = None
-    ) -> FluentDatasource | None:
+    def _save_project_config(self) -> None:
         """
         Each DataContext will define how its project_config will be saved through its internal 'variables'.
             - FileDataContext : Filesystem.
@@ -768,10 +766,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         self, datasource: Optional[FluentDatasource] = None, **kwargs
     ) -> FluentDatasource:
         if datasource:
-            from_config: bool = False
             datasource_name = datasource.name
         else:
-            from_config = True
             datasource_name = kwargs.get("name", "")
 
         if not datasource_name:
@@ -789,28 +785,20 @@ class AbstractDataContext(ConfigPeer, ABC):
         if not datasource:
             ds_type = _SourceFactories.type_lookup[kwargs["type"]]
             datasource = ds_type(**kwargs)
-
         assert isinstance(datasource, FluentDatasource)
 
-        datasource._data_context = self
-        datasource._data_context._save_project_config()
+        return_obj = self.datasources.set_datasource(
+            name=datasource_name, ds=datasource
+        )
+        assert isinstance(return_obj, FluentDatasource)
+        return_obj._data_context = self
+        self._save_project_config()
 
-        # temporary workaround while we update stores to work better with Fluent Datasources for all contexts
-        # Without this we end up with duplicate entries for datasources in both
-        # "fluent_datasources" and "datasources" config/yaml entries.
-        if self._datasource_store.cloud_mode and not from_config:
-            set_datasource = self._datasource_store.set(key=None, value=datasource)
-            if set_datasource.id:
-                logger.debug(f"Assigning `id` to '{datasource_name}'")
-                datasource.id = set_datasource.id
-
-        self.datasources[datasource_name] = datasource
-
-        return datasource
+        return return_obj
 
     def _update_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
-    ) -> None:
+    ) -> FluentDatasource:
         if datasource:
             datasource_name = datasource.name
         else:
@@ -827,14 +815,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             updated_datasource = datasource
 
-        updated_datasource._data_context = self
-
         updated_datasource._rebuild_asset_data_connectors()
 
-        updated_datasource.test_connection()
-        self._save_project_config(_fds_datasource=updated_datasource)
+        updated_datasource = self.datasources.set_datasource(
+            name=datasource_name, ds=updated_datasource
+        )
+        updated_datasource._data_context = self  # TODO: move from here?
+        self._save_project_config()
 
-        self.datasources[datasource_name] = updated_datasource
+        assert isinstance(updated_datasource, FluentDatasource)
+        return updated_datasource
 
     def _delete_fluent_datasource(
         self, datasource_name: str, _call_store: bool = True
