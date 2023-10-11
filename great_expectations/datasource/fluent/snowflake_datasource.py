@@ -127,6 +127,7 @@ class SnowflakeDatasource(SQLDatasource):
                 model_dict = self.dict(
                     exclude=self._get_exec_engine_excludes(),
                     config_provider=self._config_provider,
+                    raise_on_missing_config_provider=True,
                 )
 
                 kwargs = model_dict.pop("kwargs", {})
