@@ -10,14 +10,16 @@ from great_expectations.datasource.fluent import BatchRequest, SnowflakeDatasour
 from great_expectations.datasource.fluent.sql_datasource import TableAsset
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def creds_populated() -> bool:
     if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") or os.getenv("SNOWFLAKE_CI_ACCOUNT"):
         return True
     return False
 
 
-@pytest.fixture
+# this module scope should be removed once PP-692 is fixed
+# and the fixture can clean up after itself
+@pytest.fixture(scope="module")
 def datasource(
     context: CloudDataContext,
     creds_populated: bool,
@@ -49,10 +51,10 @@ def datasource(
     # context.delete_datasource(datasource_name=datasource_name)
 
 
-@pytest.fixture
-def data_asset(
-    context: CloudDataContext, datasource: SnowflakeDatasource, table_factory
-) -> TableAsset:
+# this module scope should be removed once PP-692 is fixed
+# and the fixture can clean up after itself
+@pytest.fixture(scope="module")
+def data_asset(datasource: SnowflakeDatasource, table_factory) -> TableAsset:
     schema_name = f"i{uuid.uuid4().hex}"
     table_name = "test_table"
     table_factory(
