@@ -1030,6 +1030,7 @@ class SQLDatasource(Datasource):
         model_dict = self.dict(
             exclude=self._get_exec_engine_excludes(),
             config_provider=self._config_provider,
+            raise_on_missing_config_provider=True,
         )
         connection_string = model_dict.pop("connection_string")
         kwargs = model_dict.pop("kwargs", {})

@@ -240,6 +240,7 @@ class FluentBaseModel(pydantic.BaseModel):
         skip_defaults: bool | None = None,
         # custom
         config_provider: _ConfigurationProvider | None = None,
+        raise_on_missing_config_provider: bool = False,
     ) -> dict[str, Any]:
         """
         Generate a dictionary representation of the model, optionally specifying which
@@ -265,6 +266,11 @@ class FluentBaseModel(pydantic.BaseModel):
                 f"{self.__class__.__name__}.dict() - substituting config values"
             )
             _recursively_set_config_value(result, config_provider)
+        elif raise_on_missing_config_provider:
+            raise ValueError(
+                f"{self.__class__.__name__}.dict() - config_provider must be provided if raise_on_missing_config_provider is True"
+            )
+
         return result
 
     @staticmethod
