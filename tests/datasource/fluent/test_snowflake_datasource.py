@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+import sqlalchemy as sa
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.snowflake import snowflake
@@ -9,6 +10,22 @@ from great_expectations.datasource.fluent.snowflake_datasource import (
     SnowflakeDatasource,
     SnowflakeDsn,
 )
+
+
+@pytest.mark.snowflake  # TODO: make this a unit test
+@pytest.mark.parametrize(
+    "config_kwargs",
+    [
+        {"connection_string": "snowflake://my_user:password@my_account"},
+        {"user": "my_user", "password": "password", "account": "my_account"},
+    ],
+)
+def test_valid_config(config_kwargs: dict):
+    my_sf_ds_1 = SnowflakeDatasource(name="my_sf_ds_1", **config_kwargs)
+    assert my_sf_ds_1
+
+    sql_engine = my_sf_ds_1.get_engine()
+    assert isinstance(sql_engine, sa.engine.Engine)
 
 
 @pytest.mark.unit
@@ -127,3 +144,7 @@ def test_get_execution_engine_succeeds():
     )
     # testing that this doesn't raise an exception
     datasource.get_execution_engine()
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-vv"])
