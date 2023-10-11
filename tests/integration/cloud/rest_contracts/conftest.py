@@ -1,16 +1,12 @@
 import os
 import pathlib
 from typing import Final
-from urllib import parse
 
 import pytest
 from pact import Consumer, Pact, Provider
 
 CONSUMER: Final[str] = "great_expectations"
 PROVIDER: Final[str] = "mercury"
-PACT_UPLOAD_URL: Final[
-    str
-] = f"https://greatexpectations.pactflow.io/pacts/provider/{PROVIDER}/consumer/{CONSUMER}/version"
 
 PACT_BROKER_BASE_URL: Final[str] = "https://greatexpectations.pactflow.io"
 PACT_BROKER_TOKEN: Final[str] = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN")
@@ -36,5 +32,5 @@ def pact(request) -> Pact:
 
 
 @pytest.fixture
-def pact_mock_mercury_url():
-    return parse.urlparse(f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}")
+def pact_mock_mercury_url() -> str:
+    return f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}"

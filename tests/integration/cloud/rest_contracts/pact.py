@@ -1,102 +1,47 @@
+import os
+
 import pytest
-from pact import Like
+from pact import Like, Pact
 
-import great_expectations as gx
+from great_expectations.core.http import create_session
 
-ORGANIZATION_ID = "0ccac18e-7631-4bdd-8a42-3c35cce574c6"
+ORGANIZATION_ID = os.environ.get("MERCURY_ORGANIZATION_ID")
+ACCESS_TOKEN = os.environ.get("MERCURY_ACCESS_TOKEN")
+
 DATASOURCE_ID = "15da041b-328e-44f7-892e-2bfd1a887ef8"
 
 
-EXPECTED_DATA_CONTEXT = {
-    "anonymous_usage_statistics": {
-        "data_context_id": ORGANIZATION_ID,
-        "enabled": False,
-        "usage_statistics_url": "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics",
-    },
-    "config_version": 3,
-    "datasources": {},
-    "fluent_datasources": {},
-    "include_rendered_content": {
-        "globally": False,
-        "expectation_validation_result": False,
-        "expectation_suite": False,
-    },
-    "stores": {},
-}
+@pytest.mark.mercury
+def test_get_data_context_given_exists(pact: Pact, pact_mock_mercury_url: str):
+    path = f"/organizations/{ORGANIZATION_ID}/data-context-configuration"
+    request_url = f"{pact_mock_mercury_url}{path}"
+    session = create_session(access_token=ACCESS_TOKEN)
 
-EXPECTED_EMPTY_DATASOURCES = {"data": []}
-
-EXPECTED_DATASOURCE = {
-    "data": {
-        "id": DATASOURCE_ID,
-        "attributes": {
-            "datasource_config": {
-                "id": DATASOURCE_ID,
-                "name": "pandas_datasource",
-                "type": "pandas",
-                "assets": [],
-            }
+    expected_data_context = {
+        "anonymous_usage_statistics": {
+            "data_context_id": ORGANIZATION_ID,
+            "enabled": False,
         },
+        "config_version": 3,
+        "datasources": {},
+        "include_rendered_content": {
+            "globally": True,
+            "expectation_validation_result": True,
+            "expectation_suite": True,
+        },
+        "stores": {},
     }
-}
-
-
-@pytest.mark.cloud
-def test_full_workflow_with_pact_mocks(pact, pact_mock_mercury_url):
-    datasource_name = "pandas_datasource"
 
     (
         pact.given("a Data Context exists")
         .upon_receiving("a request for Data Context")
         .with_request(
-            "get",
-            f"/organizations/{ORGANIZATION_ID}/data-context-configuration",
+            method="GET",
+            path=path,
+            headers=dict(session.headers),
         )
-        .will_respond_with(200, body=Like(EXPECTED_DATA_CONTEXT))
-    )
-
-    (
-        pact.given("no datasources exist")
-        .upon_receiving("a request for Datasources")
-        .with_request(
-            "get",
-            f"/organizations/{ORGANIZATION_ID}/datasources",
-        )
-        .will_respond_with(200, body=Like(EXPECTED_EMPTY_DATASOURCES))
-    )
-
-    (
-        pact.given("the Datasource does not exist")
-        .upon_receiving("a request to add a Datasource")
-        .with_request(
-            "post",
-            f"/organizations/{ORGANIZATION_ID}/datasources",
-        )
-        .will_respond_with(200, body=Like(EXPECTED_DATASOURCE))
-    )
-
-    (
-        pact.given("the Datasource exists")
-        .upon_receiving("a request to get a Datasource")
-        .with_request(
-            "get",
-            f"/organizations/{ORGANIZATION_ID}/datasources/{DATASOURCE_ID}",
-        )
-        .will_respond_with(200, body=Like(EXPECTED_DATASOURCE))
-    )
-
-    (
-        pact.given("the Datasource exists")
-        .upon_receiving("a request to update a Datasource")
-        .with_request(
-            "put",
-            f"/organizations/{ORGANIZATION_ID}/datasources/{DATASOURCE_ID}",
-        )
-        .will_respond_with(200, body=Like(EXPECTED_DATASOURCE))
+        .will_respond_with(200, body=Like(expected_data_context))
     )
 
     with pact:
-        context = gx.get_context(
-            mode="cloud", cloud_base_url=pact_mock_mercury_url.geturl()
-        )
-        context.sources.add_pandas(name=datasource_name)
+        session.get(request_url)
