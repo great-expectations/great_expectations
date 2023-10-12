@@ -38,6 +38,13 @@ from tests.datasource.fluent.integration.integration_test_utils import (
 if TYPE_CHECKING:
     from responses import RequestsMock
 
+    from great_expectations.datasource.fluent.pandas_datasource import (
+        DataFrameAsset as PandasDataFrameAsset,
+    )
+    from great_expectations.datasource.fluent.spark_datasource import (
+        DataFrameAsset as SparkDataFrameAsset,
+    )
+
 
 # This is marked by the various backend used in testing in the datasource_test_data fixture.
 @pytest.mark.parametrize("include_rendered_content", [False, True])
@@ -580,11 +587,11 @@ def test_pandas_data_adding_dataframe_in_cloud_context(
 
     context = empty_cloud_context_fluent
 
-    dataframe_asset = context.sources.add_or_update_pandas(
+    dataframe_asset: PandasDataFrameAsset = context.sources.add_or_update_pandas(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=df)
-    assert dataframe_asset.dataframe.equals(df)
+    assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined] # _PandasDataFrameT
 
 
 @pytest.mark.filesystem
@@ -596,16 +603,18 @@ def test_pandas_data_adding_dataframe_in_file_reloaded_context(
     context = empty_file_context
 
     datasource = context.sources.add_or_update_pandas(name="fluent_pandas_datasource")
-    dataframe_asset = datasource.add_dataframe_asset(name="my_df_asset")
+    dataframe_asset: PandasDataFrameAsset = datasource.add_dataframe_asset(
+        name="my_df_asset"
+    )
     _ = dataframe_asset.build_batch_request(dataframe=df)
-    assert dataframe_asset.dataframe.equals(df)
+    assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined] # _PandasDataFrameT
 
     context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
     dataframe_asset = context.get_datasource(  # type: ignore[union-attr]
         datasource_name="fluent_pandas_datasource"
     ).get_asset(asset_name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=df)
-    assert dataframe_asset.dataframe.equals(df)
+    assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined] # _PandasDataFrameT
 
 
 @pytest.mark.spark
@@ -620,11 +629,11 @@ def test_spark_data_adding_dataframe_in_cloud_context(
 
     context = empty_cloud_context_fluent
 
-    dataframe_asset = context.sources.add_or_update_spark(
+    dataframe_asset: SparkDataFrameAsset = context.sources.add_or_update_spark(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-    assert dataframe_asset.dataframe.toPandas().equals(df)
+    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
 
 
 @pytest.mark.spark
@@ -638,20 +647,20 @@ def test_spark_data_adding_dataframe_in_file_reloaded_context(
 
     context = empty_file_context
 
-    dataframe_asset = context.sources.add_or_update_spark(
+    dataframe_asset: SparkDataFrameAsset = context.sources.add_or_update_spark(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-    assert dataframe_asset.dataframe.toPandas().equals(df)
+    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
 
     datasource = context.sources.add_or_update_spark(name="fluent_pandas_datasource")
     dataframe_asset = datasource.add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-    assert dataframe_asset.dataframe.toPandas().equals(df)
+    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
 
     context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
     dataframe_asset = context.get_datasource(  # type: ignore[union-attr]
         datasource_name="fluent_pandas_datasource"
     ).get_asset(asset_name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-    assert dataframe_asset.dataframe.toPandas().equals(df)
+    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]

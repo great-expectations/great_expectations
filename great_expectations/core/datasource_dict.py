@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections import UserDict
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, TypeVar, overload, runtime_checkable
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
@@ -19,7 +19,11 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.datasource.fluent.interfaces import DataAsset
-    from great_expectations.datasource.new_datasource import BaseDatasource
+    from great_expectations.datasource.new_datasource import (
+        BaseDatasource,
+    )
+
+T = TypeVar("T", bound=FluentDatasource)
 
 logger = logging.getLogger(__name__)
 
@@ -92,17 +96,35 @@ class DatasourceDict(UserDict):
 
         return datasources
 
-    @override
-    def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
+    @overload
+    def set_datasource(self, name: str, ds: T) -> T:
+        ...
+
+    @overload
+    def set_datasource(self, name: str, ds: BaseDatasource) -> None:
+        ...
+
+    def set_datasource(
+        self, name: str, ds: FluentDatasource | BaseDatasource
+    ) -> FluentDatasource | None:
         config: FluentDatasource | DatasourceConfig
         if isinstance(ds, FluentDatasource):
-            config = self._prep_fds_config(name=name, ds=ds)
+            config = self._prep_fds_config_for_set(name=name, ds=ds)
         else:
-            config = self._prep_legacy_datasource_config(name=name, ds=ds)
+            config = self._prep_legacy_datasource_config_for_set(name=name, ds=ds)
 
-        self._datasource_store.set(key=None, value=config)
+        datasource = self._datasource_store.set(key=None, value=config)
+        if isinstance(datasource, FluentDatasource):
+            return self._init_fluent_datasource(name=name, ds=datasource)
+        return None
 
-    def _prep_fds_config(self, name: str, ds: FluentDatasource) -> FluentDatasource:
+    @override
+    def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
+        self.set_datasource(name=name, ds=ds)
+
+    def _prep_fds_config_for_set(
+        self, name: str, ds: FluentDatasource
+    ) -> FluentDatasource:
         if isinstance(ds, SupportsInMemoryDataAssets):
             for asset in ds.assets:
                 if asset.type == _IN_MEMORY_DATA_ASSET_TYPE:
@@ -115,7 +137,7 @@ class DatasourceDict(UserDict):
                     self._in_memory_data_assets[in_memory_asset_name] = asset
         return ds
 
-    def _prep_legacy_datasource_config(
+    def _prep_legacy_datasource_config_for_set(
         self, name: str, ds: BaseDatasource
     ) -> DatasourceConfig:
         config = ds.config
@@ -163,6 +185,10 @@ class DatasourceDict(UserDict):
                     )
                     if cached_data_asset:
                         asset.dataframe = cached_data_asset.dataframe
+                    else:
+                        # Asset is loaded into cache here (even without df) to enable loading of df at a later
+                        # time when DataframeAsset.build_batch_request(dataframe=df) is called
+                        self._in_memory_data_assets[in_memory_asset_name] = asset
         return ds
 
     # To be removed once block-style is fully removed (deprecated as of v0.17.2)
@@ -209,13 +235,24 @@ class CacheableDatasourceDict(DatasourceDict):
         except KeyError:
             return False
 
+    @overload
+    def set_datasource(self, name: str, ds: T) -> T:
+        ...
+
+    @overload
+    def set_datasource(self, name: str, ds: BaseDatasource) -> None:
+        ...
+
     @override
-    def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
+    def set_datasource(
+        self, name: str, ds: FluentDatasource | BaseDatasource
+    ) -> FluentDatasource | None:
         self.data[name] = ds
 
         # FDS do not use stores
         if not isinstance(ds, FluentDatasource):
-            super().__setitem__(name, ds)
+            return super().set_datasource(name=name, ds=ds)
+        return ds
 
     @override
     def __delitem__(self, name: str) -> None:
