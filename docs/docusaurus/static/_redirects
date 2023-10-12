@@ -398,6 +398,9 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 
 /docs/guides/validation/advanced/how_to_validate_data_without_a_checkpoint /docs/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint
 /docs/reference/expectations/implemented_expectations/ https://greatexpectations.io/expectations.html
+/docs/reference/expectations/implemented_expectations/ https://greatexpectations.io/expectations.html
+/docs/guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers /docs/guides/expectations/expectations_lp
+/docs/terms/profiler /docs/terms/data_assistant
 
 # Redirects for removed index pages and new landing pages
 
