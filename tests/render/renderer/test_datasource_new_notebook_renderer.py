@@ -11,7 +11,7 @@ from great_expectations.render.renderer.datasource_new_notebook_renderer import 
 if TYPE_CHECKING:
     import nbformat
 
-pytestmark = pytest.mark.filesystem
+pytestmark = pytest.mark.jupyter
 
 
 @pytest.fixture

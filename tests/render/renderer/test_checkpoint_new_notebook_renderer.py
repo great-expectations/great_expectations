@@ -19,6 +19,9 @@ if TYPE_CHECKING:
     import nbformat
 
 
+pytestmark = pytest.mark.jupyter
+
+
 @pytest.fixture
 def assetless_dataconnector_context(
     tmp_path_factory,
@@ -72,7 +75,6 @@ def assetless_dataconnector_context(
     return context
 
 
-@pytest.mark.filesystem
 def test_find_datasource_with_asset_on_context_with_no_datasources(
     empty_data_context,
 ):
@@ -84,7 +86,6 @@ def test_find_datasource_with_asset_on_context_with_no_datasources(
     assert obs is None
 
 
-@pytest.mark.filesystem
 def test_find_datasource_with_asset_on_context_with_a_datasource_with_no_dataconnectors(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
@@ -108,7 +109,6 @@ def test_find_datasource_with_asset_on_context_with_a_datasource_with_no_datacon
 
 
 @pytest.mark.slow  # 2.27s
-@pytest.mark.filesystem
 def test_find_datasource_with_asset_on_context_with_a_datasource_with_a_dataconnector_that_has_no_assets(
     assetless_dataconnector_context,
 ):
@@ -128,7 +128,6 @@ def test_find_datasource_with_asset_on_context_with_a_datasource_with_a_dataconn
     assert obs is None
 
 
-@pytest.mark.filesystem
 def test_find_datasource_with_asset_on_happy_path_context(
     deterministic_asset_data_connector_context,
 ):
@@ -145,7 +144,6 @@ def test_find_datasource_with_asset_on_happy_path_context(
     }
 
 
-@pytest.mark.filesystem
 def test_find_datasource_with_asset_on_context_with_a_full_datasource_and_one_with_no_dataconnectors(
     deterministic_asset_data_connector_context,
 ):
@@ -326,7 +324,6 @@ validations:
     }
 
 
-@pytest.mark.filesystem
 @pytest.mark.slow  # 1.10s
 def test_render_checkpoint_new_notebook_with_available_data_asset(
     deterministic_asset_data_connector_context,
@@ -381,7 +378,6 @@ def test_render_checkpoint_new_notebook_with_available_data_asset(
     assert obs == expected
 
 
-@pytest.mark.filesystem
 def test_render_checkpoint_new_notebook_with_unavailable_data_asset(
     assetless_dataconnector_context,
     checkpoint_new_notebook_assets,
