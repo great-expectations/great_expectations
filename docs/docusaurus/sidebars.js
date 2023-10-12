@@ -251,13 +251,13 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Profilers and Data Assistants',
+          label: 'Data Assistants',
           link: { type: 'doc', id: 'guides/expectations/data_assistants_lp' },
           items: [
             'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant',
             'guides/expectations/advanced/how_to_compare_two_tables_with_the_onboarding_data_assistant',
             'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant',
-            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers',
+            
           ]
         },
         {

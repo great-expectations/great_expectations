@@ -10,7 +10,7 @@ Data Assistants allow you to introspect multiple <TechnicalTag tag="batch" text=
 
 ## Relationships to other objects
 
-A Data Assistant implements a pre-configured <TechnicalTag tag="profiler" text="Profiler" /> in order to gather Metrics and propose an Expectation Suite based on the introspection of the Batch or Batches contained in a provided <TechnicalTag tag="batch_request" text="Batch Request" />.
+A Data Assistant implements gathers Metrics and proposes an Expectation Suite based on the introspection of the Batch or Batches contained in a provided <TechnicalTag tag="batch_request" text="Batch Request" />.
 
 ## Use cases
 
@@ -24,7 +24,7 @@ To provide a representative analysis of the provided data, a Data Assistant can 
 
 ## Multi-Batch introspection
 
-Data Assistants leverage the ability to process multiple Batches from a single Batch Request to provide a representative analysis of the provided data.  With previous Profilers you would only be able to introspect a single Batch at a time.  This meant that the Expectation Suite generated would only reflect a single Batch.  If you had many Batches of data that you wanted to build inter-related Expectations for, you would have needed to run each Batch individually and then manually compare and update the Expectation parameters that were generated.  With a Data Assistant, that process is automated.  You can provide a Data Assistant multiple Batches and get back Expectations that have parameters based on, for instance, the mean or median value of a column on a per-Batch basis. 
+Data Assistants leverage the ability to process multiple Batches from a single Batch Request to provide a representative analysis of the provided data.  Previously, you would only be able to introspect a single Batch at a time.  This meant that the Expectation Suite generated would only reflect a single Batch.  If you had many Batches of data that you wanted to build inter-related Expectations for, you would have needed to run each Batch individually and then manually compare and update the Expectation parameters that were generated.  With a Data Assistant, that process is automated.  You can provide a Data Assistant multiple Batches and get back Expectations that have parameters based on, for instance, the mean or median value of a column on a per-Batch basis. 
 
 ## Visual plots for Metrics
 

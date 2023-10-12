@@ -101,7 +101,7 @@ For more information, see [Create and manage Expectations and Expectation Suite]
 
 A Data Assistant is a utility that automates the process of building Expectations by asking questions about your data, gathering information to describe what is observed, and then presenting Metrics and proposed Expectations based on the answers it has determined.  This can accelerate the process of creating Expectations for the provided data.
 
-For more information, see [Profilers and Data Assistants](/docs/guides/expectations/data_assistants_lp).
+For more information, see [Data Assistants](/docs/guides/expectations/data_assistants_lp).
 
 ### Custom Expectations
 
