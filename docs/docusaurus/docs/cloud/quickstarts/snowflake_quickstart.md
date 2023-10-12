@@ -11,27 +11,9 @@ In this quickstart, you'll learn how to connect GX Cloud to Snowflake Data Asset
 
 - You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
 
-- You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with `ACCOUNTADMIN` access.
+- You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you know your password.
 
-## Prepare your environment
-
-1. Download and install Python. See [Active Python Releases](https://www.python.org/downloads/).
-
-2. Download and install pip. See the [pip documentation](https://pip.pypa.io/en/stable/cli/pip/).
-
-3. Run the following command in an empty base directory inside a Python virtual environment to install GX Cloud and its dependencies:
-
-    ```bash title="Terminal input"
-    pip install 'great_expectations[cloud,snowflake]'
-    ```
-
-    It can take several minutes for the installation to complete.
-
-    If you've previously installed GX Cloud, run the following command to upgrade to the latest version:
-
-    ```bash title="Terminal input"
-    pip install 'great_expectations[cloud,snowflake]' --upgrade
-    ```
+- You have a [Docker instance](https://docs.docker.com/get-docker/).
 
 ## Generate your user access token and copy your organization ID
 
@@ -59,25 +41,20 @@ You'll need your user access token and organization ID to set your environment v
 
 ## Set the environment variables and start the GX Cloud agent
 
-Environment variables securely store your GX Cloud and Snowflake access credentials.
+Environment variables securely store your GX Cloud and Snowflake access credentials. The GX Cloud agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. 
 
-1. Set the following environment variables:
+1. Start the Docker Engine.
 
-    - `GX_CLOUD_ORGANIZATION_ID` - The Organization ID you copied previously.
+2. Run the following code to set the `GX_CLOUD_ACCESS_TOKEN`, `GX_CLOUD_ORGANIZATION_ID`, and `GX_CLOUD_SNOWFLAKE_PASSWORD` environment variables, install GX Cloud and its dependencies, and start the GX Cloud agent:
 
-    - `GX_CLOUD_ACCESS_TOKEN` - The user access token you generated previously.
-
-    - `GX_CLOUD_SNOWFLAKE_PASSWORD` - The password you use to access your Snowflake account.
-
-    To set the environment variables, see the documentation specific to your operating system. 
-
-2. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
-
-3. Run the following code to start the GX Cloud agent:
-    
     ```bash title="Terminal input"
-    gx-agent
+    docker run -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" -e GX_CLOUD_SNOWFLAKE_PASSWORD="<snowflake_password>" greatexpectations/agent
     ```
+    Replace `user_access_token`, `organization_id`, and `snowflake_password` with your own values. 
+
+3. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
+
+4. Optional. Run `docker ps` or open Docker Desktop to confirm the agent is running.
 
     If you stop the GX Cloud agent, close the terminal, and open a new terminal you'll need to set the environment variables again.
 
@@ -148,4 +125,3 @@ An Expectation is a verifiable assertion about your data. They make implicit ass
 1. Click **Validate**.
 
 2. When the confirmation message appears, click **See results**, or click the **Validations** tab.
-
