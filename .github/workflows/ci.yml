@@ -314,7 +314,7 @@ jobs:
           - cli
           - databricks
           - filesystem
-          #- jupyter
+          - jupyter
           - mssql
           - mysql
           - postgresql
