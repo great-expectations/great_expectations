@@ -92,6 +92,28 @@ module.exports = {
         },
         {
           type: 'category',
+          label: 'Manage Expectation Suites',
+          link: { type: 'doc', id: 'cloud/expectation_suites/manage_expectation_suites' },
+          items: [
+            {
+              type: 'link',
+              label: 'Create an Expectation Suite with the Onboarding Data Assistant',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#create-an-expectation-suite-with-the-onboarding-data-assistant',
+            },
+            {
+              type: 'link',
+              label: 'Create an Expectation Suite with the Missingness Data Assistant',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#create-an-expectation-suite-with-the-missingness-data-assistant',
+            },
+            {
+              type: 'link',
+              label: 'Delete an Expectation Suite',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#delete-an-expectation-suite',
+            },
+          ]
+        },
+        {
+          type: 'category',
           label: 'Manage Validations',
           link: { type: 'doc', id: 'cloud/validations/manage_validations' },
           items: [
