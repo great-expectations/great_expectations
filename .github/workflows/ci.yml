@@ -297,9 +297,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Install mercury dependencies
-        run: |
-          pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
-          invoke deps --gx-install -m 'mercury' -r test
+        run: invoke deps --gx-install -m 'mercury' -r test
 
       - name: Run the mercury tests
         env:
