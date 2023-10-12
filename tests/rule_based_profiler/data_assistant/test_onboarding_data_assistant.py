@@ -553,8 +553,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
     )
 
 
-@pytest.mark.big
-@pytest.mark.slow  # 25.61s
+@pytest.mark.jupyter
 def test_onboarding_data_assistant_plot_descriptive_notebook_execution_fails(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -581,8 +580,7 @@ def test_onboarding_data_assistant_plot_descriptive_notebook_execution_fails(
         )
 
 
-@pytest.mark.big
-@pytest.mark.slow  # 28.73s
+@pytest.mark.jupyter
 def test_onboarding_data_assistant_plot_descriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -605,7 +603,7 @@ def test_onboarding_data_assistant_plot_descriptive_notebook_execution(
     )
 
 
-@pytest.mark.big
+@pytest.mark.jupyter
 @pytest.mark.slow  # 36.23s
 def test_onboarding_data_assistant_plot_prescriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
@@ -629,7 +627,7 @@ def test_onboarding_data_assistant_plot_prescriptive_notebook_execution(
     )
 
 
-@pytest.mark.big
+@pytest.mark.jupyter
 @pytest.mark.slow  # 27.95s
 def test_onboarding_data_assistant_plot_descriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
@@ -655,7 +653,7 @@ def test_onboarding_data_assistant_plot_descriptive_theme_notebook_execution(
     )
 
 
-@pytest.mark.big
+@pytest.mark.jupyter
 @pytest.mark.slow  # 35.34s
 def test_onboarding_data_assistant_plot_prescriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
@@ -962,7 +960,7 @@ def test_onboarding_data_assistant_plot_return_tooltip(
         assert tooltip in actual_tooltip
 
 
-@pytest.mark.big
+@pytest.mark.jupyter
 @pytest.mark.slow  # 27.11s
 def test_onboarding_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
@@ -986,7 +984,7 @@ def test_onboarding_data_assistant_metrics_plot_descriptive_non_sequential_noteb
     )
 
 
-@pytest.mark.big
+@pytest.mark.jupyter
 @pytest.mark.slow  # 34.85s
 def test_onboarding_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
