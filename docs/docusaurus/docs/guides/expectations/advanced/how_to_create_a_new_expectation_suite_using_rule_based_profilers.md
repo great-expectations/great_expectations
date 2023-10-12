@@ -12,7 +12,6 @@ In this tutorial, you will develop hands-on experience with configuring a Custom
 
 - A basic understanding of <TechnicalTag tag="metric" text="Metrics" /> in Great Expectations.
 - A basic understanding of [Expectation Configurations in Great Expectations](https://docs.greatexpectations.io/docs/reference/expectations/expectations).
-- Completion of the overview of <TechnicalTag tag="profiler" text="Profilers" /> and the  [Custom Profilers](../../../terms/profiler.md#rule-based-profilers) section.
 
 </Prerequisites>
 
