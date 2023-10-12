@@ -3,7 +3,6 @@ version: "3.4"
 services:
   db:
     image: postgres:13.7
-    platform: linux/amd64
     # Turn off db logs by default
     # https://postgresqlco.nf/doc/en/param/log_statement/
     command: [ "postgres", "-c", "log_statement=none" ]

@@ -274,7 +274,7 @@ jobs:
             reqs/requirements-dev-test.txt
             setup.py
 
-      - name: Install dependencies
+      - name: Install cloud dependencies
         run: |
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
           invoke deps --gx-install -m 'cloud' -r test
@@ -296,6 +296,11 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Install mercury dependencies
+        run: |
+          pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
+          invoke deps --gx-install -m 'mercury' -r test
+
       - name: Run the mercury tests
         env:
           AUTH0_DOMAIN: ${{secrets.AUTH0_DOMAIN}}
@@ -309,9 +314,7 @@ jobs:
           SNOWFLAKE_CI_USER_PASSWORD: ${{secrets.SNOWFLAKE_CI_USER_PASSWORD}}
           LOGGING_LEVEL: DEBUG
           ENVIRONMENT: local
-        run: |
-          pip install -r reqs/requirements-dev-snowflake.txt
-          invoke ci-tests 'mercury' --up-services --verbose
+        run: invoke ci-tests 'mercury' --up-services --verbose
 
   marker-tests:
     needs: [unit-tests, static-analysis]
