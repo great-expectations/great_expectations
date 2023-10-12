@@ -923,8 +923,7 @@ def test_complex_suite_with_batch_request(warning_suite, empty_data_context):
     assert obs == expected
 
 
-@pytest.mark.filesystem
-@pytest.mark.slow  # 9.72s
+@pytest.mark.jupyter
 def test_notebook_execution_with_pandas_backend(
     titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
