@@ -30,7 +30,10 @@ from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
 )
-from great_expectations.datasource.fluent.config_str import ConfigStr
+from great_expectations.datasource.fluent.config_str import (
+    ConfigStr,
+    _check_config_substitutions_needed,
+)
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
 from great_expectations.datasource.fluent.interfaces import (
@@ -1030,6 +1033,9 @@ class SQLDatasource(Datasource):
         model_dict = self.dict(
             exclude=self._get_exec_engine_excludes(),
             config_provider=self._config_provider,
+        )
+        _check_config_substitutions_needed(
+            self, model_dict, raise_warning_if_provider_not_present=True
         )
         connection_string = model_dict.pop("connection_string")
         kwargs = model_dict.pop("kwargs", {})
