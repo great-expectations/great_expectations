@@ -6,6 +6,7 @@ adding an exclude directive to docs/sphinx_api_docs_source/public_api_excludes.p
 
 ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/checkpoint/actions.py Name: _run",
+    "File: great_expectations/checkpoint/checkpoint.py Name: SimpleCheckpoint",
     "File: great_expectations/compatibility/not_imported.py Name: is_version_greater_or_equal",
     "File: great_expectations/core/batch.py Name: head",
     "File: great_expectations/core/batch_spec.py Name: to_json_dict",
@@ -78,6 +79,8 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/expectations/regex_based_column_map_expectation.py Name: register_metric",
     "File: great_expectations/expectations/set_based_column_map_expectation.py Name: register_metric",
     "File: great_expectations/expectations/set_based_column_map_expectation.py Name: validate_configuration",
+    "File: great_expectations/experimental/datasource/fabric.py Name: build_batch_request",
+    "File: great_expectations/experimental/datasource/fabric.py Name: get_batch_list_from_batch_request",
     "File: great_expectations/profile/base.py Name: validate",
     "File: great_expectations/render/renderer/email_renderer.py Name: EmailRenderer",
     "File: great_expectations/render/renderer/opsgenie_renderer.py Name: OpsgenieRenderer",
@@ -98,6 +101,4 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/util.py Name: get_context",
     "File: great_expectations/util.py Name: read_parquet",
     "File: great_expectations/validator/validation_graph.py Name: resolve",
-    "File: great_expectations/experimental/datasource/fabric.py Name: build_batch_request",
-    "File: great_expectations/experimental/datasource/fabric.py Name: get_batch_list_from_batch_request",
 ]

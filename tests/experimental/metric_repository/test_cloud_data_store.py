@@ -17,18 +17,11 @@ from great_expectations.experimental.metric_repository.metrics import (
     MetricRun,
 )
 
-# Import and use fixtures defined in tests/datasource/fluent/conftest.py
-from tests.datasource.fluent.conftest import (
-    cloud_api_fake,  # noqa: F401  # used as a fixture
-    cloud_details,  # noqa: F401  # used as a fixture
-    empty_cloud_context_fluent,  # noqa: F401  # used as a fixture
-)
-
 
 @pytest.mark.cloud
 class TestCloudDataStore:
     def test_add_expectation_suite_success(
-        self, empty_cloud_context_fluent: CloudDataContext  # noqa: F811
+        self, empty_cloud_context_fluent: CloudDataContext
     ):  # used as a fixture
         context = empty_cloud_context_fluent
         created_expectation_suite = context.add_expectation_suite("test_suite")
@@ -36,7 +29,7 @@ class TestCloudDataStore:
         assert created_expectation_suite == retrieved_expectation_suite
 
     def test_add_expectation_suite_name_collision_failure(
-        self, empty_cloud_context_fluent: CloudDataContext  # noqa: F811
+        self, empty_cloud_context_fluent: CloudDataContext
     ):  # used as a fixture
         context = empty_cloud_context_fluent
         created_expectation_suite = context.add_expectation_suite("test_suite")
@@ -46,11 +39,11 @@ class TestCloudDataStore:
             context.add_expectation_suite("test_suite")
 
 
+@pytest.mark.cloud  # NOTE: needs orjson dependency
 class TestCloudDataStoreMetricRun:
-    @pytest.mark.unit
     def test_add_metric_run_non_generic_metric_type(
         self,
-        empty_cloud_context_fluent: CloudDataContext,  # noqa: F811  # used as a fixture
+        empty_cloud_context_fluent: CloudDataContext,  # used as a fixture
     ):
         cloud_data_store = CloudDataStore(context=empty_cloud_context_fluent)
         data_asset_id = UUID("4469ed3b-61d4-421f-9635-8339d2558b0f")
@@ -104,10 +97,9 @@ class TestCloudDataStoreMetricRun:
         )
         assert uuid_from_add == response_metric_run_id
 
-    @pytest.mark.unit
     def test_add_metric_run_generic_metric_type(
         self,
-        empty_cloud_context_fluent: CloudDataContext,  # noqa: F811  # used as a fixture
+        empty_cloud_context_fluent: CloudDataContext,  # used as a fixture
     ):
         cloud_data_store = CloudDataStore(context=empty_cloud_context_fluent)
         data_asset_id = UUID("4469ed3b-61d4-421f-9635-8339d2558b0f")
@@ -157,10 +149,9 @@ class TestCloudDataStoreMetricRun:
         )
         assert uuid_from_add == response_metric_run_id
 
-    @pytest.mark.unit
     def test_add_metric_run_generic_metric_type_with_exception(
         self,
-        empty_cloud_context_fluent: CloudDataContext,  # noqa: F811  # used as a fixture
+        empty_cloud_context_fluent: CloudDataContext,  # used as a fixture
     ):
         cloud_data_store = CloudDataStore(context=empty_cloud_context_fluent)
         data_asset_id = UUID("4469ed3b-61d4-421f-9635-8339d2558b0f")
@@ -215,10 +206,9 @@ class TestCloudDataStoreMetricRun:
         )
         assert uuid_from_add == response_metric_run_id
 
-    @pytest.mark.unit
     def test_add_metric_run_generic_metric_type_numpy(
         self,
-        empty_cloud_context_fluent: CloudDataContext,  # noqa: F811  # used as a fixture
+        empty_cloud_context_fluent: CloudDataContext,  # used as a fixture
     ):
         cloud_data_store = CloudDataStore(context=empty_cloud_context_fluent)
         data_asset_id = UUID("4469ed3b-61d4-421f-9635-8339d2558b0f")

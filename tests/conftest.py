@@ -82,6 +82,7 @@ from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
+from great_expectations.datasource.fluent import PandasDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
@@ -105,6 +106,13 @@ from great_expectations.util import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
+from tests.datasource.fluent._fake_cloud_api import (
+    DUMMY_JWT_TOKEN,
+    FAKE_ORG_ID,
+    GX_CLOUD_MOCK_BASE_URL,
+    CloudDetails,
+    gx_cloud_api_fake_ctx,
+)
 from tests.rule_based_profiler.parameter_builder.conftest import (
     RANDOM_SEED,
     RANDOM_STATE,
@@ -3458,17 +3466,17 @@ def ge_cloud_id():
 
 @pytest.fixture
 def ge_cloud_base_url() -> str:
-    return "https://app.test.greatexpectations.io"
+    return GX_CLOUD_MOCK_BASE_URL
 
 
 @pytest.fixture
 def ge_cloud_organization_id() -> str:
-    return "bd20fead-2c31-4392-bcd1-f1e87ad5a79c"
+    return FAKE_ORG_ID
 
 
 @pytest.fixture
 def ge_cloud_access_token() -> str:
-    return "6bb5b6f5c7794892a4ca168c65c2603e"
+    return DUMMY_JWT_TOKEN
 
 
 @pytest.fixture
@@ -3604,9 +3612,7 @@ def empty_base_data_context_in_cloud_mode(
             cloud_mode=True,
             cloud_config=ge_cloud_config,
         )
-    context._datasources = (
-        {}
-    )  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
+
     return context
 
 
@@ -3650,6 +3656,7 @@ def empty_data_context_in_cloud_mode(
 
 @pytest.fixture
 def empty_cloud_data_context(
+    cloud_api_fake,
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
@@ -3666,9 +3673,37 @@ def empty_cloud_data_context(
         cloud_organization_id=ge_cloud_config.organization_id,
     )
 
-    context._datasources = (
-        {}
-    )  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
+    return context
+
+
+@pytest.fixture
+def cloud_details(
+    ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token
+) -> CloudDetails:
+    return CloudDetails(
+        base_url=ge_cloud_base_url,
+        org_id=ge_cloud_organization_id,
+        access_token=ge_cloud_access_token,
+    )
+
+
+@pytest.fixture
+def cloud_api_fake(cloud_details: CloudDetails):
+    with gx_cloud_api_fake_ctx(cloud_details=cloud_details) as requests_mock:
+        yield requests_mock
+
+
+@pytest.fixture
+def empty_cloud_context_fluent(
+    cloud_api_fake, cloud_details: CloudDetails
+) -> CloudDataContext:
+    context = gx.get_context(
+        cloud_access_token=cloud_details.access_token,
+        cloud_organization_id=cloud_details.org_id,
+        cloud_base_url=cloud_details.base_url,
+        cloud_mode=True,
+    )
+
     return context
 
 
@@ -3709,36 +3744,9 @@ def cloud_data_context_with_datasource_pandas_engine(
     empty_cloud_data_context: CloudDataContext, db_file
 ):
     context: CloudDataContext = empty_cloud_data_context
-    config = yaml.load(
-        """
-    class_name: Datasource
-    execution_engine:
-        class_name: PandasExecutionEngine
-    data_connectors:
-        default_runtime_data_connector_name:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
-        """,
-    )
 
-    # DatasourceStore.set() in a Cloud-back env usually makes an external HTTP request
-    # and returns the config it persisted. This side effect enables us to mimick that
-    # behavior while avoiding requests.
-    def set_side_effect(key, value):
-        return value
-
-    with mock.patch(
-        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.list_keys"
-    ), mock.patch(
-        "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
-        side_effect=set_side_effect,
-    ):
-        with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
-            context.add_datasource(
-                "my_datasource",
-                **config,
-            )
+    fds = PandasDatasource(name="my_datasource")
+    context.add_datasource(datasource=fds)
     return context
 
 
