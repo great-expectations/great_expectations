@@ -310,8 +310,6 @@ jobs:
           LOGGING_LEVEL: DEBUG
           ENVIRONMENT: local
         run: |
-          echo ${MERCURY_BASE_URL}
-          echo ${GX_CLOUD_ORGANIZATION_ID}
           pip install -r reqs/requirements-dev-snowflake.txt
           invoke ci-tests 'mercury' --up-services --verbose
 
