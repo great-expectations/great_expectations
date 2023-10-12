@@ -833,6 +833,7 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "docs-creds-needed": TestDependencies(
         # these installs are handled by the CI
         requirement_files=(
+            "reqs/requirements-dev-test.txt",
             "reqs/requirements-dev-azure.txt",
             "reqs/requirements-dev-bigquery.txt",
             "reqs/requirements-dev-redshift.txt",
