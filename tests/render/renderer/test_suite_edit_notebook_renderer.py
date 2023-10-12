@@ -21,7 +21,7 @@ from great_expectations.render.renderer.suite_edit_notebook_renderer import (
 )
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 
-pytestmark = pytest.mark.filesystem
+pytestmark = pytest.mark.jupyter
 
 
 @pytest.fixture

@@ -299,6 +299,7 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
     ],
 )
 @pytest.mark.slow  # 1.20s
+@pytest.mark.jupyter
 def test_data_context_variables_get(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,

@@ -497,7 +497,7 @@ def warning_suite(empty_data_context) -> ExpectationSuite:
     return ExpectationSuite(**expectation_suite_dict, data_context=context)
 
 
-@pytest.mark.filesystem
+@pytest.mark.jupyter
 def test_render_with_no_column_cells_without_batch_request(
     critical_suite_with_citations, empty_data_context
 ):
@@ -581,7 +581,7 @@ def test_render_with_no_column_cells_without_batch_request(
     assert obs == expected
 
 
-@pytest.mark.filesystem
+@pytest.mark.jupyter
 def test_complex_suite_with_batch_request(warning_suite, empty_data_context):
     batch_request: dict = {
         "datasource_name": "files_datasource",
@@ -1099,7 +1099,7 @@ def test_notebook_execution_with_pandas_backend(
     assert suite == original_suite
 
 
-@pytest.mark.filesystem
+@pytest.mark.jupyter
 def test_notebook_execution_with_custom_notebooks_wrong_module(
     suite_with_multiple_citations, data_context_v3_custom_bad_notebooks
 ):
@@ -1114,7 +1114,7 @@ def test_notebook_execution_with_custom_notebooks_wrong_module(
         ).render(suite=suite_with_multiple_citations)
 
 
-@pytest.mark.filesystem
+@pytest.mark.jupyter
 def test_notebook_execution_with_custom_notebooks(
     suite_with_multiple_citations, data_context_v3_custom_notebooks
 ):
@@ -1236,7 +1236,7 @@ def test_notebook_execution_with_custom_notebooks(
     ],
 )
 @pytest.mark.slow  # 1.36s
-@pytest.mark.filesystem
+@pytest.mark.jupyter
 def test_raise_exception_quotes_or_space_with_row_condition(
     row_condition,
     titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
