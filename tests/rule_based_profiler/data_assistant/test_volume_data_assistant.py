@@ -49,7 +49,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context import FileDataContext
 
 # module level markers
-pytestmark = pytest.mark.big
 
 
 @pytest.fixture
@@ -1571,6 +1570,7 @@ def _assert_quentin_expected_metrics_by_domain_serialized(
     assert metrics_by_domain_serialized == expected_metrics_by_domain
 
 
+@pytest.mark.jupyter
 def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     context: FileDataContext,
     new_cell: str,
@@ -2148,6 +2148,7 @@ def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_
     )
 
 
+@pytest.mark.jupyter
 @pytest.mark.slow  # 13.77s
 def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
