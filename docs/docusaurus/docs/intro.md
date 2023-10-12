@@ -3,7 +3,7 @@ title: Welcome
 slug: /
 ---
 
-Great Expectations is the leading tool for [validating](./terms/validation.md) and [documenting](./terms/data_docs.md) your data to maintain quality and improve communication between teams. If you're ready to get started, see the [Quickstart](tutorials/quickstart/quickstart.md).
+Great Expectations is the leading tool for [validating](./terms/validation.md) and [documenting](./terms/data_docs.md) your data. If you're ready to get started, see the [Quickstart](tutorials/quickstart/quickstart.md).
 
 Software developers have long known that automated testing is essential for managing complex codebases. Great Expectations brings the same discipline, confidence, and acceleration to data science and data engineering teams.
 

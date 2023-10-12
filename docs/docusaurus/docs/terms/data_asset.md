@@ -12,7 +12,7 @@ Data Assets are usually tied to existing data that already has a name (e.g. “t
 
 The specifics of a filesystem Data Asset are defined by the parameters provided when it is created. With a SQL Data Asset, you can also add splitters after you have initially created the Data Asset.
 
-You can define multiple Data Assets built from the same underlying source data system to support different workflows such as interactive exploration and creation of <TechnicalTag relative="../" tag="expectation" text="Expectations" /> and ongoing <TechnicalTag relative="../" tag="validation" text="Validation" /> through <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" />.
+You can define multiple Data Assets from the same Data Source to support different workflows. For example,  interactive exploration and creation of <TechnicalTag relative="../" tag="expectation" text="Expectations" /> and  continuous<TechnicalTag relative="../" tag="validation" text="Validations" /> with <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" />.
 
 Great Expectations is designed to help you think and communicate clearly about your data. To do that, we need to rely on some specific ideas about *what* we're protecting with our Expectations. You usually do not need to think about these nuances to use Great Expectations, and many users never think about what *exactly* makes a Data Asset or Batch. But we think it can be extremely useful to understand the design decisions that guide Great Expectations.
 

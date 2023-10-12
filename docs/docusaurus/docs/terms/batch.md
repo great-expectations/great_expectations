@@ -7,7 +7,7 @@ import TechnicalTag from '../term_tags/_tag.mdx';
 
 A Batch is a selection of records from a <TechnicalTag relative="../" tag="data_asset" text="Data Asset" />.
 
-A Batch provides a consistent interface for describing specific data from any <TechnicalTag relative="../" tag="datasource" text="Data Source" />, to support building <TechnicalTag relative="../" tag="metric" text="Metrics" />, and <TechnicalTag relative="../" tag="validation" text="Validation" />.
+A Batch provides an interface for describing specific data from any <TechnicalTag relative="../" tag="datasource" text="Data Source" />, and supports the creation of <TechnicalTag relative="../" tag="metric" text="Metrics" />, and <TechnicalTag relative="../" tag="validation" text="Validations" />.
 
 Batches are designed to be "MECE" -- mutually exclusive and collectively exhaustive partitions of Data Assets. However, in many cases the same *underlying data* could be present in multiple batches, for example if an analyst runs an analysis against an entire table of data each day, with only a fraction of new records being added.
 
@@ -37,7 +37,7 @@ Once a Data Asset identifies the specific data that will be included in a Batch 
 
 ## Access
 
-You can access a Batch through the Data Asset `get_batch_list_from_batch_request` method. You typically will not need to access the Batch directly. Instead, you will pass a Batch Request to a Expectations object such as a Validator or Checkpoint, which will then do something in response to the Batch's data.
+You can use the `get_batch_list_from_batch_request` method to access a Batch through the Data Asset. You don't typically access the Batch directly. Instead, you pass a Batch Request to a Validator or a Checkpoint.
 
 ## Create
 
