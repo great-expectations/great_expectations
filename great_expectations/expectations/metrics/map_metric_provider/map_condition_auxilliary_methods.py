@@ -852,14 +852,15 @@ def _get_sqlalchemy_customized_unexpected_index_list(
         and len(query_result) != 0
         and len(unexpected_index_column_names) != 0
     ):
-        primary_key_dict: dict[str, List[Any]] = {
+        primary_key_dict_list: dict[str, List[Any]] = {
             idx_col: [] for idx_col in unexpected_index_column_names
         }
         for row in query_result:
             for index in range(len(unexpected_index_column_names)):
-                name: str = unexpected_index_column_names[index]
-                primary_key_dict[name].append(row[index])
-        unexpected_index_list.append(primary_key_dict)
+                primary_key_dict_list[unexpected_index_column_names[index]].append(
+                    row[index]
+                )
+        unexpected_index_list.append(primary_key_dict_list)
 
     else:
         for row in query_result:
@@ -883,13 +884,13 @@ def _get_spark_customized_unexpected_index_list(
     unexpected_index_list: List[Dict[str, Any]] = []
 
     if exclude_unexpected_values and not filtered.isEmpty():
-        dict_to_add: dict[str, List[Any]] = {
+        dict_list_to_add: dict[str, List[Any]] = {
             idx_col: [] for idx_col in unexpected_index_column_names
         }
         for row in filtered.collect():
             for col_name in unexpected_index_column_names:
-                dict_to_add[col_name].append(row[col_name])
-        unexpected_index_list.append(dict_to_add)
+                dict_list_to_add[col_name].append(row[col_name])
+        unexpected_index_list.append(dict_list_to_add)
 
     else:
         for row in filtered.collect():

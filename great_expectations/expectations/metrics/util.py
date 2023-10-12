@@ -1296,14 +1296,16 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
     unexpected_index_list: List[Dict[str, Any]] = list()
 
     if exclude_unexpected_values and len(unexpected_indices) != 0:
-        primary_key_dict: dict[str, List[Any]] = {
+        primary_key_dict_list: dict[str, List[Any]] = {
             idx_col: [] for idx_col in unexpected_index_column_names
         }
         for index in unexpected_indices:
             for column_name in unexpected_index_column_names:
-                primary_key_dict[column_name].append(index[tuple_index[column_name]])
+                primary_key_dict_list[column_name].append(
+                    index[tuple_index[column_name]]
+                )
 
-        unexpected_index_list.append(primary_key_dict)
+        unexpected_index_list.append(primary_key_dict_list)
 
     else:
         for index in unexpected_indices:
@@ -1353,11 +1355,12 @@ def get_unexpected_indices_for_single_pandas_named_index(
         )
 
     if exclude_unexpected_values and len(unexpected_index_values_by_named_index) != 0:
-        primary_key_dict: dict[str, List[Any]] = {unexpected_index_column_names[0]: []}
+        primary_key_dict_list: dict[str, List[Any]] = {
+            unexpected_index_column_names[0]: []
+        }
         for index in unexpected_index_values_by_named_index:
-            column_name: str = unexpected_index_column_names[0]
-            primary_key_dict[column_name].append(index)
-        unexpected_index_list.append(primary_key_dict)
+            primary_key_dict_list[unexpected_index_column_names[0]].append(index)
+        unexpected_index_list.append(primary_key_dict_list)
 
     else:
         for index in unexpected_index_values_by_named_index:
@@ -1435,7 +1438,7 @@ def compute_unexpected_pandas_indices(
             and len(unexpected_indices) != 0
             and len(unexpected_index_column_names) != 0
         ):
-            primary_key_dict: dict[str, List[Any]] = {
+            primary_key_dict_list: dict[str, List[Any]] = {
                 idx_col: [] for idx_col in unexpected_index_column_names
             }
             for index in unexpected_indices:
@@ -1445,10 +1448,10 @@ def compute_unexpected_pandas_indices(
                         batch_columns_list=metrics["table.columns"],
                         error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',
                     )
-                    primary_key_dict[column_name].append(
+                    primary_key_dict_list[column_name].append(
                         domain_records_df.at[index, column_name]
                     )
-            unexpected_index_list.append(primary_key_dict)
+            unexpected_index_list.append(primary_key_dict_list)
 
         else:
             for index in unexpected_indices:
