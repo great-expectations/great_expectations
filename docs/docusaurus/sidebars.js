@@ -252,7 +252,7 @@ module.exports = {
         {
           type: 'category',
           label: 'Profilers and Data Assistants',
-          link: { type: 'doc', id: 'guides/expectations/profilers_data_assistants_lp' },
+          link: { type: 'doc', id: 'guides/expectations/data_assistants_lp' },
           items: [
             'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant',
             'guides/expectations/advanced/how_to_compare_two_tables_with_the_onboarding_data_assistant',
@@ -427,7 +427,6 @@ module.exports = {
             'terms/metric',
             'conceptual_guides/metricproviders',
             'terms/metric',
-            'terms/profiler',
             {
               type: 'category',
               label: 'Stores',
