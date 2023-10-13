@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Callable
+from typing import Any, Callable, Final
 
 import pytest
 from pact import Like
 
-ORGANIZATION_ID = os.environ.get("GX_CLOUD_ORGANIZATION_ID")
+ORGANIZATION_ID: Final[str] = os.environ.get("GX_CLOUD_ORGANIZATION_ID")
 
 
 @pytest.mark.cloud
