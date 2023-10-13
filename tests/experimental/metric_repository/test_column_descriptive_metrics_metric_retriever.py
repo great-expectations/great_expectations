@@ -538,7 +538,9 @@ def test_get_metrics_with_column_type_missing():
             metric_name="table.column_types",
             value=[
                 {"name": "col1", "type": "float"},
-                {"name": "col2", "type": ""},
+                {
+                    "name": "col2",
+                },  # Note: No type for col2
             ],
             exception=None,
         ),
