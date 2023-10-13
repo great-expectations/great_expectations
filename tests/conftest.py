@@ -298,7 +298,9 @@ def pytest_addoption(parser):
         "--azure", action="store_true", help="If set, execute tests against Azure"
     )
     parser.addoption(
-        "--cloud", action="store_true", help="If set, execute tests against GX Cloud"
+        "--cloud",
+        action="store_true",
+        help="If set, execute tests against GX Cloud API",
     )
     parser.addoption(
         "--performance-tests",
