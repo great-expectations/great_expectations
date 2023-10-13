@@ -483,7 +483,7 @@ def test_cloud_get_dataframe_asset(test_df_pandas: pd.DataFrame):
     dataframe_asset_name = "test_df"
     datasource = context.sources.pandas_default
     _ = datasource.add_dataframe_asset(name=dataframe_asset_name)
-    dataframe_asset = datasource.get_asset(asset_name=dataframe_asset_name)  # type: ignore[union-attr]
+    dataframe_asset = datasource.get_asset(asset_name=dataframe_asset_name)
     dataframe_asset.build_batch_request(dataframe=test_df_pandas)
 
     for asset in context.datasources[datasource.name].assets:  # type: ignore[union-attr]
