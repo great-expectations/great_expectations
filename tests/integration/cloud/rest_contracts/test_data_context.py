@@ -11,7 +11,7 @@ ORGANIZATION_ID: Final[str] = os.environ.get("GX_CLOUD_ORGANIZATION_ID")
 
 @pytest.mark.cloud
 @pytest.mark.parametrize(
-    ["method", "upon_receiving", "given", "status", "body"],
+    ["method", "upon_receiving", "given", "response_status", "response_body"],
     [
         (
             "GET",
@@ -41,8 +41,8 @@ def test_data_context(
     method: str,
     upon_receiving: str,
     given: str,
-    status: int,
-    body: Any,
+    response_status: int,
+    response_body: Any,
     run_pact_test: Callable,
 ):
     path = f"/organizations/{ORGANIZATION_ID}/data-context-configuration"
@@ -51,6 +51,6 @@ def test_data_context(
         method=method,
         upon_receiving=upon_receiving,
         given=given,
-        status=status,
-        body=body,
+        response_status=response_status,
+        response_body=response_body,
     )

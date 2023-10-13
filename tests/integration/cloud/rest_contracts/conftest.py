@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import pathlib
-from typing import TYPE_CHECKING, Any, Callable, Final
+from typing import TYPE_CHECKING, Any, Callable, Final, Optional
 
 import pytest
 from pact import Consumer, Pact, Provider
@@ -26,14 +26,6 @@ PACT_MOCK_MERCURY_URL: Final[str] = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}"
 @pytest.fixture
 def session() -> Session:
     return create_session(access_token=os.environ.get("GX_CLOUD_ACCESS_TOKEN"))
-
-
-@pytest.fixture
-def headers(session: Session) -> dict:
-    headers = dict(session.headers)
-    headers.pop("Authorization")
-    headers.pop("Gx-Version")
-    return headers
 
 
 @pytest.fixture
@@ -61,20 +53,31 @@ def run_pact_test(
         method: str,
         upon_receiving: str,
         given: str,
-        status: int,
-        body: Any,
+        *,
+        request_body: Optional[Any] = None,
+        request_headers: Optional[Any] = None,
+        response_status: int,
+        response_body: Any,
     ):
+        request = {
+            "method": method,
+            "path": path,
+        }
+        if request_body is not None:
+            request["body"] = request_body
+        if request_headers is not None:
+            request["headers"] = request_headers
+
+        response = {
+            "status": response_status,
+            "body": response_body,
+        }
+
         (
             pact.given(given)
             .upon_receiving(upon_receiving)
-            .with_request(
-                method=method,
-                path=path,
-            )
-            .will_respond_with(
-                status=status,
-                body=body,
-            )
+            .with_request(**request)
+            .will_respond_with(**response)
         )
 
         request_url = f"{PACT_MOCK_MERCURY_URL}{path}"
