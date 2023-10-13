@@ -60,7 +60,7 @@ Environment variables securely store your GX Cloud access credentials. The GX Cl
 2. Run the following code to set the `GX_CLOUD_ACCESS_TOKEN` and `GX_CLOUD_ORGANIZATION_ID` environment variables, install GX Cloud and its dependencies, and start the GX Cloud agent:
 
     ```bash title="Terminal input"
-    docker run --rm -t -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" greatexpectations/agent
+    docker run --rm -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" greatexpectations/agent
     ```
     Replace `user_access_token` and `organization_id` with the values you copied previously. 
 
