@@ -20,17 +20,19 @@ To learn more about Expectations, see [Expectation](../../terms/expectation.md).
 
 2. In the **Data Assets** list, click the Data Asset name.
 
-3. Click **New Expectation**.
+3. Click the **Expectations** tab.
 
-4. Select an Expectation type, enter the column name, and then complete the optional fields.
+4. Click **New Expectation**.
+
+5. Select an Expectation type, enter the column name, and then complete the optional fields.
 
     If you prefer to work in a code editor, or you want to configure an Expectation from the [Expectations Gallery](https://greatexpectations.io/expectations/), click the **JSON Editor** tab and define your Expectation parameters in the code pane.
 
-5. Click **Save**.
+6. Click **Save**.
 
-6. Optional. Repeat steps 1 to 4 to add additional Expectations.
+7. Optional. Repeat steps 1 to 4 to add additional Expectations.
 
-7. Optional. Run a Validation. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
+8. Optional. Run a Validation. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
 
 ## Edit an Expectation
 
@@ -38,13 +40,15 @@ To learn more about Expectations, see [Expectation](../../terms/expectation.md).
 
 2. In the **Data Assets** list, click the Data Asset name.
 
-3. Click **Edit Expectations** for the Expectation that you want to edit.
+3. Click the **Expectations** tab.
 
-4. Edit the Expectation configuration.
+4. Click **Edit Expectations** for the Expectation that you want to edit.
+
+5. Edit the Expectation configuration.
 
     If you prefer to work in a code editor, or you configured an Expectation from the [Expectations Gallery](https://greatexpectations.io/expectations/), click the **JSON Editor** tab and edit the Expectation parameters in the code pane.
 
-5. Click **Save**.
+6. Click **Save**.
 
 ## Delete an Expectation
 
@@ -52,7 +56,12 @@ To learn more about Expectations, see [Expectation](../../terms/expectation.md).
 
 2. In the **Data Assets** list, click the Data Asset name.
 
-3. Click **Delete Expectation**. 
+3. Click the **Expectations** tab.
 
-4. Click **Yes, delete Expectation**. 
+4. Click **Delete Expectation** for the Expectation you want to delete. 
 
+5. Click **Yes, delete Expectation**. 
+
+## Related documentation
+
+- [Manage Expectation Suites](../expectation_suites/manage_expectation_suites.md)
