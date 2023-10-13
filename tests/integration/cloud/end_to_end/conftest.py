@@ -19,9 +19,9 @@ LOGGER: Final = logging.getLogger("tests")
 def context() -> CloudDataContext:
     context = gx.get_context(
         mode="cloud",
-        cloud_base_url=os.environ.get("MERCURY_BASE_URL"),
-        cloud_organization_id=os.environ.get("MERCURY_ORGANIZATION_ID"),
-        cloud_access_token=os.environ.get("MERCURY_ACCESS_TOKEN"),
+        cloud_base_url=os.environ.get("GX_CLOUD_BASE_URL"),
+        cloud_organization_id=os.environ.get("GX_CLOUD_ORGANIZATION_ID"),
+        cloud_access_token=os.environ.get("GX_CLOUD_ACCESS_TOKEN"),
     )
     assert isinstance(context, CloudDataContext)
     return context
