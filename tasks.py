@@ -810,7 +810,12 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "aws_deps": TestDependencies(("reqs/requirements-dev-lite.txt",)),
     "clickhouse": TestDependencies(("reqs/requirements-dev-clickhouse.txt",)),
     "cloud": TestDependencies(
-        ("reqs/requirements-dev-cloud.txt",), extra_pytest_args=("--cloud",)
+        (
+            "reqs/requirements-dev-cloud.txt",
+            "reqs/requirements-dev-snowflake.txt",
+        ),
+        services=("mercury",),
+        extra_pytest_args=("--cloud",),
     ),
     "databricks": TestDependencies(
         requirement_files=("reqs/requirements-dev-databricks.txt",),

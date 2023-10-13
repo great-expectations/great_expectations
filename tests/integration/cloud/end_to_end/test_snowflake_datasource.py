@@ -129,7 +129,7 @@ def checkpoint(
     )
 
 
-@pytest.mark.mercury
+@pytest.mark.cloud
 def test_interactive_validator(
     context: CloudDataContext,
     batch_request: BatchRequest,
@@ -153,7 +153,7 @@ def test_interactive_validator(
     assert len(expectation_suite.expectations) == expectation_count + 1
 
 
-@pytest.mark.mercury
+@pytest.mark.cloud
 def test_checkpoint_run(checkpoint: Checkpoint):
     checkpoint_result = checkpoint.run()
     assert checkpoint_result.success is True
