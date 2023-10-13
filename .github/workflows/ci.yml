@@ -274,18 +274,6 @@ jobs:
             reqs/requirements-dev-test.txt
             setup.py
 
-#      - name: Install cloud dependencies
-#        run: |
-#          pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
-#          invoke deps --gx-install -m 'cloud' -r test
-#
-#      - name: Run the cloud tests
-#        env:
-#          GX_CLOUD_BASE_URL: ${{secrets.GX_CLOUD_BASE_URL}}
-#          GX_CLOUD_ORGANIZATION_ID: ${{secrets.GX_CLOUD_ORGANIZATION_ID}}
-#          GX_CLOUD_ACCESS_TOKEN: ${{secrets.GX_CLOUD_ACCESS_TOKEN}}
-#        run: invoke ci-tests 'cloud' --up-services --verbose
-
       - name: Configure ECR AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -296,12 +284,12 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Install mercury dependencies
+      - name: Install dependencies
         run: |
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
           invoke deps --gx-install -m 'cloud' -r test
 
-      - name: Run the mercury tests
+      - name: Run the tests
         env:
           AUTH0_DOMAIN: ${{secrets.AUTH0_DOMAIN}}
           AUTH0_API_AUDIENCE: ${{secrets.AUTH0_API_AUDIENCE}}

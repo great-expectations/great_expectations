@@ -373,7 +373,6 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
     help={
         "unit": "Runs tests marked with the 'unit' marker. Default behavior.",
         "cloud": "Runs tests marked with the 'cloud' marker. Default behavior.",
-        "mercury": "Runs tests marked with the 'mercury' marker. Default behavior.",
         "ignore-markers": "Don't exclude any test by not passing any markers to pytest.",
         "slowest": "Report on the slowest n number of tests",
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
@@ -390,7 +389,6 @@ def tests(  # noqa: PLR0913
     ci: bool = False,
     html: bool = False,
     cloud: bool = True,
-    mercury: bool = True,
     slowest: int = 5,
     timeout: float = UNIT_TEST_DEFAULT_TIMEOUT,
     package: str | None = None,
@@ -434,8 +432,6 @@ def tests(  # noqa: PLR0913
 
     if cloud:
         cmds += ["--cloud"]
-    if mercury:
-        cmds += ["--mercury"]
     if ci:
         cmds += ["--cov-report", "xml"]
     if html:
@@ -867,13 +863,6 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         ),
         services=("spark",),
         extra_pytest_args=("--spark", "--docs-tests"),
-    ),
-    "mercury": TestDependencies(
-        requirement_files=(
-            "reqs/requirements-dev-cloud.txt",
-            "reqs/requirements-dev-snowflake.txt",
-        ),
-        services=("mercury",),
     ),
     "mssql": TestDependencies(
         ("reqs/requirements-dev-mssql.txt",),

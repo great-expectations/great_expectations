@@ -540,7 +540,6 @@ markers = [
     "e2e: mark test as an E2E test.",
     "external_sqldialect: mark test as requiring install of an external sql dialect.",
     "filesystem: mark tests using the filesystem as the storage backend.",
-    "mercury: mark tests as using the mercury container locally.",
     "mssql: mark a test as mssql-dependent.",
     "mysql: mark a test as mysql-dependent.",
     "openpyxl: mark a test for openpyxl-dependent, which is for Excel files.",

@@ -145,7 +145,6 @@ REQUIRED_MARKERS: Final[set[str]] = {
     "databricks",
     "docs",
     "filesystem",
-    "mercury",
     "mssql",
     "mysql",
     "openpyxl",
@@ -302,11 +301,6 @@ def pytest_addoption(parser):
         "--cloud",
         action="store_true",
         help="If set, execute tests against GX Cloud API",
-    )
-    parser.addoption(
-        "--mercury",
-        action="store_true",
-        help="If set, execute tests against local Mercury API",
     )
     parser.addoption(
         "--performance-tests",
