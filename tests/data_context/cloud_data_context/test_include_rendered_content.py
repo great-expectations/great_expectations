@@ -98,57 +98,29 @@ def test_cloud_backed_data_context_add_or_update_expectation_suite_include_rende
 
 @pytest.mark.cloud
 def test_cloud_backed_data_context_expectation_validation_result_include_rendered_content(
-    empty_cloud_data_context: CloudDataContext,
+    empty_cloud_context_fluent: CloudDataContext,
 ) -> None:
     """
     All CloudDataContexts should save an ExpectationValidationResult with rendered_content by default.
     """
-    context = empty_cloud_data_context
+    context = empty_cloud_context_fluent
+    context.config.include_rendered_content.globally = True
 
     df = pd.DataFrame([1, 2, 3, 4, 5])
     suite_name = f"test_suite_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
-    mock_datasource_get_response = {
-        "data": {
-            "id": "6ca2ab40-bb82-49f4-bba2-33484c8ada80",
-            "attributes": {
-                "datasource_config": {
-                    "assets": [
-                        {
-                            "batch_metadata": {},
-                            "id": "e1fe603d-0dd4-44d1-8737-5914d8bd6244",
-                            "name": "my_dataframe_asset",
-                            "type": "dataframe",
-                        }
-                    ],
-                    "id": "6ca2ab40-bb82-49f4-bba2-33484c8ada80",
-                    "name": "default_pandas_datasource",
-                    "type": "pandas",
-                },
-            },
-        },
-    }
 
-    with mock.patch(
-        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.has_key",
-        return_value=False,
-    ), mock.patch(
-        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.set"
-    ), mock.patch(
-        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.get",
-        return_value=mock_datasource_get_response,
-    ):
-        data_asset = context.sources.pandas_default.add_dataframe_asset(
-            name="my_dataframe_asset",
-            dataframe=df,
-        )
-        validator: Validator = context.get_validator(
-            batch_request=data_asset.build_batch_request(),
-            create_expectation_suite_with_name=suite_name,
-        )
+    data_asset = context.sources.pandas_default.add_dataframe_asset(
+        name="my_dataframe_asset",
+        dataframe=df,
+    )
+    validator: Validator = context.get_validator(
+        batch_request=data_asset.build_batch_request(),
+        create_expectation_suite_with_name=suite_name,
+    )
 
-        expectation_validation_result: ExpectationValidationResult = (
-            validator.expect_table_row_count_to_equal(value=10)
-        )
+    expectation_validation_result: ExpectationValidationResult = (
+        validator.expect_table_row_count_to_equal(value=10)
+    )
 
     for rendered_content in expectation_validation_result.rendered_content:
         assert isinstance(rendered_content, RenderedAtomicContent)

@@ -25,6 +25,7 @@ from typing import (
     Optional,
     Tuple,
     Type,
+    TypeVar,
     Union,
     cast,
 )
@@ -32,6 +33,7 @@ from typing import (
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
+from typing_extensions import ParamSpec
 
 import great_expectations.compatibility.bigquery as BigQueryDialect
 from great_expectations.compatibility import aws, pyspark, snowflake, sqlalchemy, trino
@@ -95,6 +97,9 @@ if TYPE_CHECKING:
         ExpectationExecutionEngineDiagnostics,
     )
     from great_expectations.data_context import AbstractDataContext
+
+P = ParamSpec("P")
+T = TypeVar("T")
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
@@ -1153,9 +1158,9 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     )
 
 
-def modify_locale(func):
+def modify_locale(func: Callable[P, None]) -> Callable[P, None]:
     @wraps(func)
-    def locale_wrapper(*args, **kwargs) -> None:
+    def locale_wrapper(*args: P.args, **kwargs: P.kwargs) -> None:
         old_locale = locale.setlocale(locale.LC_TIME, None)
         print(old_locale)
         # old_locale = locale.getlocale(locale.LC_TIME) Why not getlocale? not sure
@@ -2950,9 +2955,9 @@ def _get_snowflake_connection_string() -> str:
     sfPswd = os.environ.get("SNOWFLAKE_PW")  # noqa: TID251
     sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")  # noqa: TID251
     sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")  # noqa: TID251
-    sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")  # noqa: TID251
+    sfSchema = os.environ.get("SNOWFLAKE_SCHEMA", "")  # noqa: TID251
     sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")  # noqa: TID251
-    sfRole = os.environ.get("SNOWFLAKE_ROLE") or "PUBLIC"  # noqa: TID251
+    sfRole = os.environ.get("SNOWFLAKE_ROLE", "PUBLIC")  # noqa: TID251
 
     url = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}&role={sfRole}"
 

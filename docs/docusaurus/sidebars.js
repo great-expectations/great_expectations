@@ -4,6 +4,7 @@ module.exports = {
     {
       type: 'category',
       label: 'GX Cloud',
+      link: { type: 'doc', id: 'cloud/gx_cloud_lp' },
       items: [
         {
           type: 'category',
@@ -40,8 +41,134 @@ module.exports = {
         {
           type: 'category',
           label: 'Quickstarts',
+          link: { type: 'doc', id: 'cloud/quickstarts/quickstart_lp' },
           items: [
             'cloud/quickstarts/snowflake_quickstart',
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Manage Data Assets',
+          link: { type: 'doc', id: 'cloud/data_assets/manage_data_assets' },
+          items: [
+            {
+              type: 'link',
+              label: 'Create a Data Asset',
+              href: '/docs/cloud/data_assets/manage_data_assets#create-a-data-asset',
+            },
+            {
+              type: 'link',
+              label: 'Edit a Data Asset',
+              href: '/docs/cloud/data_assets/manage_data_assets#edit-a-data-asset',
+            },
+            {
+              type: 'link',
+              label: 'Delete a Data Asset',
+              href: '/docs/cloud/data_assets/manage_data_assets#delete-a-data-asset',
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Manage Expectations',
+          link: { type: 'doc', id: 'cloud/expectations/manage_expectations' },
+          items: [
+            {
+              type: 'link',
+              label: 'Add an Expectation',
+              href: '/docs/cloud/expectations/manage_expectations#create-an-expectation',
+            },
+            {
+              type: 'link',
+              label: 'Edit an Expectation',
+              href: '/docs/cloud/expectations/manage_expectations#edit-an-expectation',
+            },
+            {
+              type: 'link',
+              label: 'Delete an Expectation',
+              href: '/docs/cloud/expectations/manage_expectations#delete-an-expectation',
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Manage Validations',
+          link: { type: 'doc', id: 'cloud/validations/manage_validations' },
+          items: [
+            {
+              type: 'link',
+              label: 'Run a Validation',
+              href: '/docs/cloud/validations/manage_validations#run-a-validation',
+            },
+            {
+              type: 'link',
+              label: 'View Validation run history',
+              href: '/docs/cloud/validations/manage_validations#view-validation-run-history',
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Manage Checkpoints',
+          link: { type: 'doc', id: 'cloud/checkpoints/manage_checkpoints' },
+          items: [
+            {
+              type: 'link',
+              label: 'Add a Checkpoint',
+              href: '/docs/cloud/checkpoints/manage_checkpoints#add-a-checkpoint',
+            },
+            {
+              type: 'link',
+              label: 'Run a Checkpoint',
+              href: '/docs/cloud/checkpoints/manage_checkpoints#run-a-checkpoint',
+            },
+            {
+              type: 'link',
+              label: 'Edit a Checkpoint configuration',
+              href: '/docs/cloud/checkpoints/manage_checkpoints#edit-a-checkpoint-configuration',
+            },
+            {
+              type: 'link',
+              label: 'Delete a Checkpoint',
+              href: '/docs/cloud/checkpoints/manage_checkpoints#delete-a-checkpoint',
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Manage users and access tokens',
+          link: { type: 'doc', id: 'cloud/users/manage_users' },
+          items: [
+            {
+              type: 'link',
+              label: 'Invite a user',
+              href: '/docs/cloud/users/manage_users#invite-a-user',
+            },
+            {
+              type: 'link',
+              label: 'Edit a user role',
+              href: '/docs/cloud/users/manage_users#edit-a-user-role',
+            },
+            {
+              type: 'link',
+              label: 'Delete a user',
+              href: '/docs/cloud/users/manage_users#delete-a-user',
+            },
+            {
+              type: 'link',
+              label: 'Create a user access token',
+              href: '/docs/cloud/users/manage_users#create-a-user-access-token',
+            },
+            {
+              type: 'link',
+              label: 'Create an organization access token',
+              href: '/docs/cloud/users/manage_users#create-an-organization-access-token',
+            },
+            {
+              type: 'link',
+              label: 'Delete a user or organization access token',
+              href: '/docs/cloud/users/manage_users#delete-a-user-or-organization-access-token',
+            },
           ]
         },
       ]

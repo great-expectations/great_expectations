@@ -28,11 +28,13 @@ from typing import (
     Set,
     Tuple,
     Type,
+    TypeVar,
     Union,
 )
 
 import pandas as pd
 from dateutil.parser import parse
+from typing_extensions import ParamSpec
 
 from great_expectations import __version__ as ge_version
 from great_expectations.compatibility.typing_extensions import override
@@ -143,9 +145,12 @@ _TEST_DEFS_DIR: Final = pathlib.Path(
     __file__, "..", "..", "..", "tests", "test_definitions"
 ).resolve()
 
+P = ParamSpec("P")
+T = TypeVar("T", List[RenderedStringTemplateContent], RenderedAtomicContent)
+
 
 @public_api
-def render_evaluation_parameter_string(render_func) -> Callable:
+def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]:
     """Decorator for Expectation classes that renders evaluation parameters as strings.
 
     allows Expectations that use Evaluation Parameters to render the values
@@ -158,17 +163,13 @@ def render_evaluation_parameter_string(render_func) -> Callable:
         GreatExpectationsError: If runtime_configuration with evaluation_parameters is not provided.
     """
 
-    def inner_func(
-        *args: Tuple[MetaExpectation], **kwargs: dict
-    ) -> Union[List[RenderedStringTemplateContent], RenderedAtomicContent]:
-        rendered_string_template: Union[
-            List[RenderedStringTemplateContent], RenderedAtomicContent
-        ] = render_func(*args, **kwargs)
-        current_expectation_params = list()
+    def inner_func(*args: P.args, **kwargs: P.kwargs) -> T:
+        rendered_string_template = render_func(*args, **kwargs)
+        current_expectation_params: list = []
         app_template_str = (
             "\n - $eval_param = $eval_param_value (at time of validation)."
         )
-        configuration: Optional[dict] = kwargs.get("configuration")
+        configuration: dict | None = kwargs.get("configuration")  # type: ignore[assignment] # could be object?
         if configuration:
             kwargs_dict: dict = configuration.get("kwargs", {})
             for key, value in kwargs_dict.items():
@@ -180,7 +181,7 @@ def render_evaluation_parameter_string(render_func) -> Callable:
         if current_expectation_params and not isinstance(
             rendered_string_template, RenderedAtomicContent
         ):
-            runtime_configuration: Optional[dict] = kwargs.get("runtime_configuration")
+            runtime_configuration: Optional[dict] = kwargs.get("runtime_configuration")  # type: ignore[assignment] # could be object?
             if runtime_configuration:
                 eval_params = runtime_configuration.get("evaluation_parameters", {})
                 styling = runtime_configuration.get("styling")
@@ -3601,7 +3602,8 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
         "unexpected_percent": unexpected_percent_nonmissing,
     }
 
-    if unexpected_list is not None:
+    exclude_unexpected_values = result_format.get("exclude_unexpected_values", False)
+    if unexpected_list is not None and not exclude_unexpected_values:
         return_obj["result"]["partial_unexpected_list"] = unexpected_list[
             : result_format["partial_unexpected_count"]
         ]
@@ -3629,7 +3631,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     if result_format["result_format"] == "BASIC":
         return return_obj
 
-    if unexpected_list is not None:
+    if unexpected_list is not None and not exclude_unexpected_values:
         if len(unexpected_list) and isinstance(unexpected_list[0], dict):
             # in the case of multicolumn map expectations `unexpected_list` contains dicts,
             # which will throw an exception when we hash it to count unique members.
@@ -3647,15 +3649,19 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     partial_unexpected_counts: Optional[List[Dict[str, Any]]] = None
     if partial_unexpected_count is not None and 0 < partial_unexpected_count:
         try:
-            partial_unexpected_counts = [
-                {"value": key, "count": value}
-                for key, value in sorted(
-                    Counter(immutable_unexpected_list).most_common(
-                        result_format["partial_unexpected_count"]
-                    ),
-                    key=lambda x: (-x[1], x[0]),
+            if not exclude_unexpected_values:
+                partial_unexpected_counts = [
+                    {"value": key, "count": value}
+                    for key, value in sorted(
+                        Counter(immutable_unexpected_list).most_common(
+                            result_format["partial_unexpected_count"]
+                        ),
+                        key=lambda x: (-x[1], x[0]),
+                    )
+                ]
+                return_obj["result"].update(
+                    {"partial_unexpected_counts": partial_unexpected_counts}
                 )
-            ]
         except TypeError:
             partial_unexpected_counts = [
                 {"error": "partial_exception_counts requires a hashable type"}
@@ -3669,14 +3675,11 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
                         ],
                     }
                 )
-            return_obj["result"].update(
-                {"partial_unexpected_counts": partial_unexpected_counts}
-            )
 
     if result_format["result_format"] == "SUMMARY":
         return return_obj
 
-    if unexpected_list is not None:
+    if unexpected_list is not None and not exclude_unexpected_values:
         return_obj["result"].update({"unexpected_list": unexpected_list})
     if unexpected_index_list is not None:
         return_obj["result"].update({"unexpected_index_list": unexpected_index_list})

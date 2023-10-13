@@ -1,9 +1,8 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Optional
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -28,6 +27,10 @@ except ImportError:
     pass
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -94,6 +97,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
     }
     args_keys = ("column",)
 
+    @override
     @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -135,6 +139,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -166,11 +171,12 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
         return renderer_configuration
 
     @classmethod
+    @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
-    def _prescriptive_renderer(
+    def _prescriptive_renderer(  # type: ignore[override] # TODO: Fix this type ignore
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
+        configuration: ExpectationConfiguration,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
@@ -209,13 +215,11 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]

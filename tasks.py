@@ -243,6 +243,7 @@ def type_check(  # noqa: PLR0913, PLR0912
     install_types: bool = False,
     pretty: bool = False,
     warn_unused_ignores: bool = False,
+    disallow_untyped_decorators: bool = True,
     daemon: bool = False,
     clear_cache: bool = False,
     report: bool = False,
@@ -263,6 +264,7 @@ def type_check(  # noqa: PLR0913, PLR0912
             install_types=True,
             pretty=pretty,
             warn_unused_ignores=True,
+            disallow_untyped_decorators=True,
             daemon=daemon,
             clear_cache=clear_cache,
             report=report,
@@ -311,6 +313,8 @@ def type_check(  # noqa: PLR0913, PLR0912
         cmds.extend(["--pretty"])
     if warn_unused_ignores:
         cmds.extend(["--warn-unused-ignores"])
+    if disallow_untyped_decorators:
+        cmds.extend(["--disallow-untyped-decorators"])
     if python_version:
         cmds.extend(["--python-version", python_version])
     # use pseudo-terminal for colorized output
@@ -368,6 +372,7 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
     aliases=["test"],
     help={
         "unit": "Runs tests marked with the 'unit' marker. Default behavior.",
+        "cloud": "Runs tests marked with the 'cloud' marker. Default behavior.",
         "ignore-markers": "Don't exclude any test by not passing any markers to pytest.",
         "slowest": "Report on the slowest n number of tests",
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
@@ -801,7 +806,12 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "aws_deps": TestDependencies(("reqs/requirements-dev-lite.txt",)),
     "clickhouse": TestDependencies(("reqs/requirements-dev-clickhouse.txt",)),
     "cloud": TestDependencies(
-        ("reqs/requirements-dev-cloud.txt",), extra_pytest_args=("--cloud",)
+        (
+            "reqs/requirements-dev-cloud.txt",
+            "reqs/requirements-dev-snowflake.txt",
+        ),
+        services=("mercury",),
+        extra_pytest_args=("--cloud",),
     ),
     "databricks": TestDependencies(
         requirement_files=("reqs/requirements-dev-databricks.txt",),
@@ -829,6 +839,7 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "docs-creds-needed": TestDependencies(
         # these installs are handled by the CI
         requirement_files=(
+            "reqs/requirements-dev-test.txt",
             "reqs/requirements-dev-azure.txt",
             "reqs/requirements-dev-bigquery.txt",
             "reqs/requirements-dev-redshift.txt",
@@ -888,7 +899,13 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
 def _add_all_backends_marker(marker_string: str) -> bool:
     # We should generalize this, possibly leveraging MARKER_DEPENDENCY_MAP, but for now
     # right I've hardcoded all the containerized backend services we support in testing.
-    return marker_string in ["postgresql", "mssql", "mysql", "spark", "trino"]
+    return marker_string in [
+        "postgresql",
+        "mssql",
+        "mysql",
+        "spark",
+        "trino",
+    ]
 
 
 def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
@@ -1110,6 +1127,8 @@ def service(
                 "up",
                 "-d",
                 "--quiet-pull",
+                "--wait",
+                "--wait-timeout 90",
             ]
             ctx.run(" ".join(cmds), echo=True, pty=pty)
         # TODO: remove this sleep. This is a temporary hack to give services enough
