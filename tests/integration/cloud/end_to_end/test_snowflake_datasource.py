@@ -1,13 +1,17 @@
+from __future__ import annotations
+
 import os
 import uuid
+from typing import TYPE_CHECKING
 
 import pytest
 
-from great_expectations.checkpoint import Checkpoint
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite
-from great_expectations.data_context import CloudDataContext
-from great_expectations.datasource.fluent import BatchRequest, SnowflakeDatasource
-from great_expectations.datasource.fluent.sql_datasource import TableAsset
+if TYPE_CHECKING:
+    from great_expectations.checkpoint import Checkpoint
+    from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+    from great_expectations.data_context import CloudDataContext
+    from great_expectations.datasource.fluent import BatchRequest, SnowflakeDatasource
+    from great_expectations.datasource.fluent.sql_datasource import TableAsset
 
 
 @pytest.fixture

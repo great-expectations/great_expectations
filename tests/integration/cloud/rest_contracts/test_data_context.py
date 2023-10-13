@@ -4,14 +4,13 @@ import os
 from typing import TYPE_CHECKING
 
 import pytest
-from pact import Like, Pact
+from pact import Like
 
 if TYPE_CHECKING:
     import requests
+    from pact import Pact
 
 ORGANIZATION_ID = os.environ.get("GX_CLOUD_ORGANIZATION_ID")
-
-DATASOURCE_ID = "15da041b-328e-44f7-892e-2bfd1a887ef8"
 
 
 @pytest.mark.cloud
@@ -39,7 +38,7 @@ def test_get_data_context_given_exists(
     }
 
     (
-        pact.given("a Data Context exists")
+        pact.given("the Data Context exists")
         .upon_receiving("a request for Data Context")
         .with_request(
             method="GET",
