@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import pathlib
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Any, Callable, Final
 
 import pytest
 from pact import Consumer, Pact, Provider
@@ -10,7 +10,7 @@ from pact import Consumer, Pact, Provider
 from great_expectations.core.http import create_session
 
 if TYPE_CHECKING:
-    import requests
+    from requests import Session
 
 CONSUMER: Final[str] = "great_expectations"
 PROVIDER: Final[str] = "mercury"
@@ -20,8 +20,20 @@ PACT_BROKER_TOKEN: Final[str] = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN")
 PACT_MOCK_HOST: Final[str] = "localhost"
 PACT_MOCK_PORT: Final[int] = 9292
 PACT_DIR: Final[str] = str(pathlib.Path(__file__).parent.resolve())
+PACT_MOCK_MERCURY_URL: Final[str] = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}"
 
-GX_CLOUD_ACCESS_TOKEN = os.environ.get("GX_CLOUD_ACCESS_TOKEN")
+
+@pytest.fixture
+def session() -> Session:
+    return create_session(access_token=os.environ.get("GX_CLOUD_ACCESS_TOKEN"))
+
+
+@pytest.fixture
+def headers(session: Session) -> dict:
+    headers = dict(session.headers)
+    headers.pop("Authorization")
+    headers.pop("Gx-Version")
+    return headers
 
 
 @pytest.fixture
@@ -40,18 +52,34 @@ def pact(request) -> Pact:
 
 
 @pytest.fixture
-def pact_mock_mercury_url() -> str:
-    return f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}"
+def run_pact_test(
+    session: Session,
+    pact: Pact,
+) -> Callable:
+    def _run_pact_test(
+        path: str,
+        method: str,
+        upon_receiving: str,
+        given: str,
+        status: int,
+        body: Any,
+    ):
+        (
+            pact.given(given)
+            .upon_receiving(upon_receiving)
+            .with_request(
+                method=method,
+                path=path,
+            )
+            .will_respond_with(
+                status=status,
+                body=body,
+            )
+        )
 
+        request_url = f"{PACT_MOCK_MERCURY_URL}{path}"
 
-@pytest.fixture
-def session() -> requests.Session:
-    return create_session(access_token=GX_CLOUD_ACCESS_TOKEN)
+        with pact:
+            session.get(request_url)
 
-
-@pytest.fixture
-def headers(session: requests.Session) -> dict:
-    headers = dict(session.headers)
-    headers.pop("Authorization")
-    headers.pop("Gx-Version")
-    return headers
+    return _run_pact_test

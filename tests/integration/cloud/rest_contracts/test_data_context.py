@@ -1,54 +1,56 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING
+from typing import Any, Callable
 
 import pytest
 from pact import Like
-
-if TYPE_CHECKING:
-    import requests
-    from pact import Pact
 
 ORGANIZATION_ID = os.environ.get("GX_CLOUD_ORGANIZATION_ID")
 
 
 @pytest.mark.cloud
-def test_get_data_context_given_exists(
-    session: requests.Session,
-    pact: Pact,
-    pact_mock_mercury_url: str,
+@pytest.mark.parametrize(
+    ["method", "upon_receiving", "given", "status", "body"],
+    [
+        (
+            "GET",
+            "a request for a Data Context",
+            "the Data Context exists",
+            200,
+            Like(
+                {
+                    "anonymous_usage_statistics": {
+                        "data_context_id": ORGANIZATION_ID,
+                        "enabled": False,
+                    },
+                    "config_version": 3,
+                    "datasources": {},
+                    "include_rendered_content": {
+                        "globally": True,
+                        "expectation_validation_result": True,
+                        "expectation_suite": True,
+                    },
+                    "stores": {},
+                }
+            ),
+        ),
+    ],
+)
+def test_data_context(
+    method: str,
+    upon_receiving: str,
+    given: str,
+    status: int,
+    body: Any,
+    run_pact_test: Callable,
 ):
     path = f"/organizations/{ORGANIZATION_ID}/data-context-configuration"
-    request_url = f"{pact_mock_mercury_url}{path}"
-
-    expected_data_context = {
-        "anonymous_usage_statistics": {
-            "data_context_id": ORGANIZATION_ID,
-            "enabled": False,
-        },
-        "config_version": 3,
-        "datasources": {},
-        "include_rendered_content": {
-            "globally": True,
-            "expectation_validation_result": True,
-            "expectation_suite": True,
-        },
-        "stores": {},
-    }
-
-    (
-        pact.given("the Data Context exists")
-        .upon_receiving("a request for Data Context")
-        .with_request(
-            method="GET",
-            path=path,
-        )
-        .will_respond_with(
-            status=200,
-            body=Like(expected_data_context),
-        )
+    run_pact_test(
+        path=path,
+        method=method,
+        upon_receiving=upon_receiving,
+        given=given,
+        status=status,
+        body=body,
     )
-
-    with pact:
-        session.get(request_url)
