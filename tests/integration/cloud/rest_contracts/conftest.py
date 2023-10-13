@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import os
 import pathlib
-from typing import TYPE_CHECKING, Any, Callable, Final, Optional
+from typing import TYPE_CHECKING, Callable, Final, Union
 
+import pydantic
 import pytest
 from pact import Consumer, Pact, Provider
+from pact.matchers import Matcher
 
 from great_expectations.core.http import create_session
 
@@ -43,6 +45,19 @@ def pact(request) -> Pact:
     pact.stop_service()
 
 
+class ContractInteraction(pydantic.BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
+    method: str
+    upon_receiving: str
+    given: str
+    request_body: Union[dict, Matcher, None] = None
+    request_headers: Union[dict, None] = None
+    response_status: int
+    response_body: Union[dict, Matcher]
+
+
 @pytest.fixture
 def run_pact_test(
     session: Session,
@@ -50,32 +65,25 @@ def run_pact_test(
 ) -> Callable:
     def _run_pact_test(
         path: str,
-        method: str,
-        upon_receiving: str,
-        given: str,
-        *,
-        request_body: Optional[Any] = None,
-        request_headers: Optional[Any] = None,
-        response_status: int,
-        response_body: Any,
+        contract_interaction: ContractInteraction,
     ):
         request = {
-            "method": method,
+            "method": contract_interaction.method,
             "path": path,
         }
-        if request_body is not None:
-            request["body"] = request_body
-        if request_headers is not None:
-            request["headers"] = request_headers
+        if contract_interaction.request_body is not None:
+            request["body"] = contract_interaction.request_body
+        if contract_interaction.request_headers is not None:
+            request["headers"] = contract_interaction.request_headers
 
         response = {
-            "status": response_status,
-            "body": response_body,
+            "status": contract_interaction.response_status,
+            "body": contract_interaction.response_body,
         }
 
         (
-            pact.given(given)
-            .upon_receiving(upon_receiving)
+            pact.given(provider_state=contract_interaction.given)
+            .upon_receiving(scenario=contract_interaction.upon_receiving)
             .with_request(**request)
             .will_respond_with(**response)
         )
