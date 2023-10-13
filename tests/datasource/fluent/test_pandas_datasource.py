@@ -480,14 +480,13 @@ def test_read_dataframe(
 def test_cloud_get_dataframe_asset(test_df_pandas: pd.DataFrame):
     # this test runs end-to-end in a real Cloud Data Context
     context = gx.get_context(mode="cloud")
-    datasource_name = "pandas_debugging_datasource"
     dataframe_asset_name = "test_df"
-
-    datasource = context.get_datasource(datasource_name=datasource_name)
+    datasource = context.sources.pandas_default
+    _ = datasource.add_dataframe_asset(name=dataframe_asset_name)
     dataframe_asset = datasource.get_asset(asset_name=dataframe_asset_name)  # type: ignore[union-attr]
     dataframe_asset.build_batch_request(dataframe=test_df_pandas)
 
-    for asset in context.datasources[datasource_name].assets:  # type: ignore[union-attr]
+    for asset in context.datasources[datasource.name].assets:  # type: ignore[union-attr]
         if asset.name == dataframe_asset_name:
             assert dataframe_asset.dataframe.equals(asset.dataframe)
 
@@ -496,10 +495,9 @@ def test_cloud_get_dataframe_asset(test_df_pandas: pd.DataFrame):
 def test_cloud_get_csv_asset_not_in_memory():
     # this test runs end-to-end in a real Cloud Data Context
     context = gx.get_context(mode="cloud")
-    datasource_name = "pandas_debugging_datasource"
     csv_asset_name = "test_csv"
-
-    datasource = context.get_datasource(datasource_name=datasource_name)
+    datasource = context.sources.pandas_default
+    _ = datasource.add_csv_asset(name=csv_asset_name)
     csv_asset = datasource.get_asset(asset_name=csv_asset_name)
     csv_asset.build_batch_request()
 
