@@ -1,0 +1,49 @@
+{
+  "consumer": {
+    "name": "great_expectations"
+  },
+  "provider": {
+    "name": "mercury"
+  },
+  "interactions": [
+    {
+      "description": "a request for Data Context",
+      "providerState": "a Data Context exists",
+      "request": {
+        "method": "GET",
+        "path": "/organizations/0ccac18e-7631-4bdd-8a42-3c35cce574c6/data-context-configuration"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+        },
+        "body": {
+          "anonymous_usage_statistics": {
+            "data_context_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+            "enabled": false
+          },
+          "config_version": 3,
+          "datasources": {
+          },
+          "include_rendered_content": {
+            "globally": true,
+            "expectation_validation_result": true,
+            "expectation_suite": true
+          },
+          "stores": {
+          }
+        },
+        "matchingRules": {
+          "$.body": {
+            "match": "type"
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "2.0.0"
+    }
+  }
+}
