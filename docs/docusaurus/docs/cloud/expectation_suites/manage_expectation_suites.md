@@ -30,7 +30,7 @@ Use the Missingness Data Assistant to quickly create an Expectation Suite that y
 
     A new Missingness Expectation Suite appears in the Expectation Suites pane.
 
-6. Optional. Run a Validation on the Expectation Suite. See [Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset).
+6. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
 
 ## Delete an Expectation Suite
 
