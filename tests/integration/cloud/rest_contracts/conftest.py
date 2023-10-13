@@ -22,7 +22,6 @@ PACT_BROKER_TOKEN: Final[str] = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN")
 PACT_MOCK_HOST: Final[str] = "localhost"
 PACT_MOCK_PORT: Final[int] = 9292
 PACT_DIR: Final[str] = str(pathlib.Path(__file__).parent.resolve())
-PACT_MOCK_MERCURY_URL: Final[str] = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}"
 
 
 @pytest.fixture
@@ -64,12 +63,12 @@ def run_pact_test(
     pact: Pact,
 ) -> Callable:
     def _run_pact_test(
-        path: str,
+        path: pathlib.Path,
         contract_interaction: ContractInteraction,
     ):
         request = {
             "method": contract_interaction.method,
-            "path": path,
+            "path": str(path),
         }
         if contract_interaction.request_body is not None:
             request["body"] = contract_interaction.request_body
@@ -88,9 +87,9 @@ def run_pact_test(
             .will_respond_with(**response)
         )
 
-        request_url = f"{PACT_MOCK_MERCURY_URL}{path}"
+        request_url = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}{path!s}"
 
         with pact:
-            session.get(request_url)
+            session.get(str(request_url))
 
     return _run_pact_test

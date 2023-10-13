@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import pathlib
 from typing import Callable, Final
 
 import pytest
@@ -39,11 +40,13 @@ ORGANIZATION_ID: Final[str] = os.environ.get("GX_CLOUD_ORGANIZATION_ID")
         ),
     ],
 )
-def test_data_context(
+def test_data_context_configuration(
     contract_interaction: ContractInteraction,
     run_pact_test: Callable,
 ):
-    path = f"/organizations/{ORGANIZATION_ID}/data-context-configuration"
+    path = pathlib.Path(
+        "/", "organizations", ORGANIZATION_ID, "data-context-configuration"
+    )
     run_pact_test(
         path=path,
         contract_interaction=contract_interaction,
