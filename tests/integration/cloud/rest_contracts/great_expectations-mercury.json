@@ -20,7 +20,7 @@
         "body": {
           "anonymous_usage_statistics": {
             "data_context_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-            "enabled": false
+            "enabled": true
           },
           "datasources": {
           },

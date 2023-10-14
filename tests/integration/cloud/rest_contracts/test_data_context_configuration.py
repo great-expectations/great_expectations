@@ -25,7 +25,7 @@ ORGANIZATION_ID: Final[str] = os.environ.get("GX_CLOUD_ORGANIZATION_ID")
                 "anonymous_usage_statistics": Like(
                     {
                         "data_context_id": ORGANIZATION_ID,
-                        "enabled": False,
+                        "enabled": True,
                     }
                 ),
                 "datasources": Like({}),
