@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import os
 import pathlib
-from typing import TYPE_CHECKING, Callable, Final, Union
+from typing import TYPE_CHECKING, Callable, Final, Literal, Union
 
 import pydantic
 import pytest
 from pact import Consumer, Pact, Provider
 from pact.matchers import Matcher
+from pydantic import StrictStr
+from typing_extensions import Annotated
 
 from great_expectations.core.http import create_session
 
@@ -22,6 +24,14 @@ PACT_BROKER_TOKEN: Final[str] = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN")
 PACT_MOCK_HOST: Final[str] = "localhost"
 PACT_MOCK_PORT: Final[int] = 9292
 PACT_DIR: Final[str] = str(pathlib.Path(__file__).parent.resolve())
+
+REQUEST_METHODS = Literal[
+    "DELETE",
+    "GET",
+    "PATCH",
+    "POST",
+    "PUT",
+]
 
 
 @pytest.fixture
@@ -48,12 +58,12 @@ class ContractInteraction(pydantic.BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    method: str
-    upon_receiving: str
-    given: str
+    method: REQUEST_METHODS
+    upon_receiving: StrictStr
+    given: StrictStr
     request_body: Union[dict, Matcher, None] = None
     request_headers: Union[dict, None] = None
-    response_status: int
+    response_status: Annotated[int, pydantic.Field(strict=True, ge=100, lt=600)]
     response_body: Union[dict, Matcher]
 
 
