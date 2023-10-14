@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import enum
 import os
 import pathlib
-from typing import TYPE_CHECKING, Callable, Final, Literal, Union
+from typing import TYPE_CHECKING, Callable, Final, Union
 
 import pydantic
 import pytest
@@ -25,13 +26,13 @@ PACT_MOCK_HOST: Final[str] = "localhost"
 PACT_MOCK_PORT: Final[int] = 9292
 PACT_DIR: Final[str] = str(pathlib.Path(__file__).parent.resolve())
 
-REQUEST_METHODS = Literal[
-    "DELETE",
-    "GET",
-    "PATCH",
-    "POST",
-    "PUT",
-]
+
+class RequestMethods(str, enum.Enum):
+    DELETE = "DELETE"
+    GET = "GET"
+    PATCH = "PATCH"
+    POST = "POST"
+    PUT = "PUT"
 
 
 @pytest.fixture
@@ -57,7 +58,7 @@ def pact(request) -> Pact:
 class ContractInteraction(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
 
-    method: REQUEST_METHODS
+    method: RequestMethods
     upon_receiving: StrictStr
     given: StrictStr
     request_body: Union[dict, Matcher, None] = None
