@@ -55,8 +55,7 @@ def pact(request) -> Pact:
 
 
 class ContractInteraction(pydantic.BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
 
     method: REQUEST_METHODS
     upon_receiving: StrictStr
