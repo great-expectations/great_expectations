@@ -64,7 +64,7 @@ class ContractInteraction(pydantic.BaseModel):
     Args:
         method: A string (e.g. "GET" or "POST") or attribute of the RequestMethods class representing a request method.
         upon_receiving: A string description of the type of request being made.
-        given: A string description of the state of the Cloud backend data.
+        given: A string description of the state of the Cloud backend data requested.
         response_status: The status code associated with the response. An integer between 100 and 599.
         response_body: A dictionary or Pact Matcher object representing the response body.
         request_body (Optional): A dictionary or Pact Matcher object representing the request body.
