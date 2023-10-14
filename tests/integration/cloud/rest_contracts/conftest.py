@@ -56,15 +56,33 @@ def pact(request) -> Pact:
 
 
 class ContractInteraction(pydantic.BaseModel):
+    """Represents a Python API (Consumer) request and expected minimal response,
+       given a state in the Cloud backend (Provider).
+
+    The given state is something you know to be true about the Cloud backend data.
+
+    Args:
+        method: A string (e.g. "GET" or "POST") or attribute of the RequestMethods class representing a request method.
+        upon_receiving: A string description of the type of request being made.
+        given: A string description of the state of the Cloud backend data.
+        response_status: The status code associated with the response. An integer between 100 and 599.
+        response_body: A dictionary or Pact Matcher object representing the response body.
+        request_body (Optional): A dictionary or Pact Matcher object representing the request body.
+        request_headers (Optional): A dictionary representing the request headers.
+
+    Returns:
+        ContractInteraction
+    """
+
     model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
 
     method: RequestMethods
     upon_receiving: StrictStr
     given: StrictStr
-    request_body: Union[dict, Matcher, None] = None
-    request_headers: Union[dict, None] = None
     response_status: Annotated[int, pydantic.Field(strict=True, ge=100, lt=600)]
     response_body: Union[dict, Matcher]
+    request_body: Union[dict, Matcher, None] = None
+    request_headers: Union[dict, None] = None
 
 
 @pytest.fixture

@@ -7,10 +7,7 @@ from typing import Callable, Final
 import pytest
 from pact import Like
 
-from tests.integration.cloud.rest_contracts.conftest import (
-    ContractInteraction,
-    RequestMethods,
-)
+from tests.integration.cloud.rest_contracts.conftest import ContractInteraction
 
 ORGANIZATION_ID: Final[str] = os.environ.get("GX_CLOUD_ORGANIZATION_ID")
 
@@ -20,7 +17,7 @@ ORGANIZATION_ID: Final[str] = os.environ.get("GX_CLOUD_ORGANIZATION_ID")
     "contract_interaction",
     [
         ContractInteraction(
-            method=RequestMethods.GET,
+            method="GET",
             upon_receiving="a request for a Data Context",
             given="the Data Context exists",
             response_status=200,
