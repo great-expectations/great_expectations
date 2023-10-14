@@ -21,22 +21,20 @@ ORGANIZATION_ID: Final[str] = os.environ.get("GX_CLOUD_ORGANIZATION_ID")
             upon_receiving="a request for a Data Context",
             given="the Data Context exists",
             response_status=200,
-            response_body=Like(
-                {
-                    "anonymous_usage_statistics": {
+            response_body={
+                "anonymous_usage_statistics": Like(
+                    {
                         "data_context_id": ORGANIZATION_ID,
                         "enabled": False,
-                    },
-                    "config_version": 3,
-                    "datasources": {},
-                    "include_rendered_content": {
-                        "globally": True,
-                        "expectation_validation_result": True,
-                        "expectation_suite": True,
-                    },
-                    "stores": {},
-                }
-            ),
+                    }
+                ),
+                "datasources": Like({}),
+                "include_rendered_content": {
+                    "globally": True,
+                    "expectation_validation_result": True,
+                    "expectation_suite": True,
+                },
+            },
         ),
     ],
 )

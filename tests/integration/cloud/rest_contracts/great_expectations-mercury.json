@@ -22,19 +22,19 @@
             "data_context_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
             "enabled": false
           },
-          "config_version": 3,
           "datasources": {
           },
           "include_rendered_content": {
             "globally": true,
             "expectation_validation_result": true,
             "expectation_suite": true
-          },
-          "stores": {
           }
         },
         "matchingRules": {
-          "$.body": {
+          "$.body.anonymous_usage_statistics": {
+            "match": "type"
+          },
+          "$.body.datasources": {
             "match": "type"
           }
         }
