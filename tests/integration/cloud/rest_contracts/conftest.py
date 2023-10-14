@@ -59,7 +59,7 @@ class ContractInteraction(pydantic.BaseModel):
     """Represents a Python API (Consumer) request and expected minimal response,
        given a state in the Cloud backend (Provider).
 
-    The given state is something you know to be true about the Cloud backend data.
+    The given state is something you know to be true about the Cloud backend data requested.
 
     Args:
         method: A string (e.g. "GET" or "POST") or attribute of the RequestMethods class representing a request method.
