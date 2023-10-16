@@ -12,7 +12,7 @@ GX Cloud builds on the innovative features of GX open source software (OSS). Its
 
 With GX Cloud you can quickly identify your Data Source, connect to a Data Asset, create Expectations, and then run Validations without running a single line of Python code. 
 
-- Your Expectations can be reused or modified as your business requirements change. This modular approach avoids 
+- Your Expectations can be reused or modified as your business requirements change. This modular approach removes the need to create new Expectations every time you need to validate your data.
 
 - Validations can be executed with the click of a button and return results immediately.
 
@@ -50,7 +50,7 @@ The following table lists the tasks that you complete in a typical GX Cloud work
 |------------------------------------------|--------------------------------------------------------------------|-----------------------------|
 | Set up GX Cloud                          | Set up your environment to get the most out of GX Cloud. Do it once, and you don't need to do it again.           | [Set up GX Cloud](set_up_gx_cloud.md)                         | 
 | Connect to a Data Asset on a Data Source | The Data Asset contains the data you want to examine and Validate. | [Create a Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset)                           | 
-| Create Expectations                      | Define verifiable assertion about your data.                       | [Create an Expectation](/docs/cloud/expectations/manage_expectations)                            | 
+| Create Expectations                      | Define verifiable assertions about your data.                       | [Create an Expectation](/docs/cloud/expectations/manage_expectations)                            | 
 | Run Validations                          | Run a Validation to determine if your data meets the assertions in the Expectation.                       | [Run a Validation](/docs/cloud/validations/manage_validations)                            |
 | (Optional) Add and run Checkpoints       | Add and run Checkpoints to refine and confirm your Data Validations. | [Manage Checkpoints](checkpoints/manage_checkpoints.md)                            |
 
