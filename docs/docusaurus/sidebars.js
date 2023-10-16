@@ -97,11 +97,6 @@ module.exports = {
           items: [
             {
               type: 'link',
-              label: 'Create an Expectation Suite with the Onboarding Data Assistant',
-              href: '/docs/cloud/expectation_suites/manage_expectation_suites#create-an-expectation-suite-with-the-onboarding-data-assistant',
-            },
-            {
-              type: 'link',
               label: 'Create an Expectation Suite with the Missingness Data Assistant',
               href: '/docs/cloud/expectation_suites/manage_expectation_suites#create-an-expectation-suite-with-the-missingness-data-assistant',
             },
