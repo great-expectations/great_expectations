@@ -10,11 +10,13 @@ GX Cloud builds on the innovative features of GX open source software (OSS). Its
 
 ## Workflow optimization
 
-With GX Cloud you can quickly identify your Data Source, connect to a Data Asset, create Expectations, and then run Validations without running a single line of Python code. 
+- You can quickly identify your Data Source, connect to a Data Asset, create Expectations, and then run Validations without running a single line of Python code. 
 
 - Your Expectations can be reused or modified as your business requirements change. This modular approach removes the need to create new Expectations every time you need to validate your data.
 
 - Validations can be executed with the click of a button and return results immediately.
+
+- Validation data is easier to share and is accessible to technical and non=technical users.
 
 ## Benefits
 
