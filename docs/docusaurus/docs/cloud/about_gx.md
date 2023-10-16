@@ -16,15 +16,17 @@ With GX Cloud you can quickly identify your Data Source, connect to a Data Asset
 
 - Validations can be executed with the click of a button and return results immediately.
 
-# Product offerings
+## Benefits
 
-GX Core is an OSS product and the foundation on which GX Cloud is built. GX Cloud offers the following benefits over GX OSS:
+GX Cloud offers the following benefits over GX OSS:
 
 - It is web-based and browser and platform-independent.
 
 - A hosted and intuitive environment makes it faster to set up and run your Data Validations.
 
 - Unique features such as Validation run histories, Data Asset metrics, and more.
+
+- Eliminates the need to create, run, and maintain complex code for your data queries.
 
 ## Roles and responsibilities
 
@@ -46,13 +48,11 @@ The following table lists the tasks that you complete in a typical GX Cloud work
 
 | Task                                     | Description                                                        | Related topic               |
 |------------------------------------------|--------------------------------------------------------------------|-----------------------------|
-| Set up GX Cloud                          | Set up your environment to get the most out of GX Cloud.           | [Set up GX Cloud](set_up_gx_cloud.md)                         | 
+| Set up GX Cloud                          | Set up your environment to get the most out of GX Cloud. Do it once, and you don't need to do it again.           | [Set up GX Cloud](set_up_gx_cloud.md)                         | 
 | Connect to a Data Asset on a Data Source | The Data Asset contains the data you want to examine and Validate. | [Create a Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset)                           | 
 | Create Expectations                      | Define verifiable assertion about your data.                       | [Create an Expectation](/docs/cloud/expectations/manage_expectations)                            | 
 | Run Validations                          | Run a Validation to determine if your data meets the assertions in the Expectation.                       | [Run a Validation](/docs/cloud/validations/manage_validations)                            |
 | (Optional) Add and run Checkpoints       | Add and run Checkpoints to refine and confirm your Data Validations. | [Manage Checkpoints](checkpoints/manage_checkpoints.md)                            |
-
-The GX Cloud web interface makes it easier to view and share your Validations. In addition, the interface allows you to focus on your data and not the complex code required to create and maintain your data queries.
 
 ## Supported browsers
 
