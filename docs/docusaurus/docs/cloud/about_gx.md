@@ -33,7 +33,7 @@ How you interact with GX Cloud is dependent on the role you are assigned by your
 | Role          | Responsibilities                                  |
 |---------------|---------------------------------------------------|
 | Viewer        | - View Checkpoints and Validation Results           | 
-| Editor        | - Create and edit Expectations</br>- Create access tokens |
+| Editor        | - Create and edit Expectations<br/>- Create access tokens |
 | Admin         | - Performs all GX Cloud administrative functions including user and role assignment |
 
 ## GX Cloud workflow
