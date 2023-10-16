@@ -121,7 +121,7 @@ def _recursively_convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     if isinstance(test_obj, (str, int, float, bool)):
         # No problem to encode json
         if isinstance(test_obj, str):
-            test_obj = test_obj.lower()  # SLK fixes issue#8619
+            test_obj = test_obj.lower()
         return test_obj
 
     elif isinstance(test_obj, dict):
