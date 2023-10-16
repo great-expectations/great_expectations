@@ -8,7 +8,7 @@ toc_max_heading_level: 2
 
 GX Cloud builds on the innovative features of GX open source software (OSS). Its easy-to-use web interface lets you quickly validate your data without creating and running complex Python code. With GX Cloud you can work collaboratively with your teammates to define and test reusable data queries that alert you to changes in your data.  
 
-## Workflow optimization
+## Workflow optimization 
 
 - You can quickly identify your Data Source, connect to a Data Asset, create Expectations, and then run Validations without running a single line of Python code. 
 
@@ -16,7 +16,7 @@ GX Cloud builds on the innovative features of GX open source software (OSS). Its
 
 - Validations can be executed with the click of a button and return results immediately.
 
-- Validation data is easier to share and is accessible to technical and non=technical users.
+- Validation data is easier to share and is accessible to all users regardless of their technical knowledge.
 
 ## Benefits
 
