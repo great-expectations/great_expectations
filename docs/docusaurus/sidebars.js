@@ -58,6 +58,11 @@ module.exports = {
             },
             {
               type: 'link',
+              label: 'View Data Asset metrics',
+              href: '/docs/cloud/data_assets/manage_data_assets#view-data-asset-metrics',
+            },
+            {
+              type: 'link',
               label: 'Edit a Data Asset',
               href: '/docs/cloud/data_assets/manage_data_assets#edit-a-data-asset',
             },
