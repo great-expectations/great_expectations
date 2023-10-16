@@ -21,7 +21,7 @@ import Tabs from '@theme/Tabs';
 
 An Expectation Store is a connector to store and retrieve information about collections of verifiable assertions about data.
 
-By default, new <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the `expectations/` subdirectory of your `gx/` folder. Use the information provided here to configure a store for your Expectations.
+By default, new <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the `expectations/` subdirectory of your `gx/` folder. Use the information provided here to configure a store for your Expectations.
 
 <Tabs
   groupId="configure-expectation-stores"
