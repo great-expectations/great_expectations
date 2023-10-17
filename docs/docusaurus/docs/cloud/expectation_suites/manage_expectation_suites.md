@@ -40,7 +40,6 @@ Automatically create an Expectation Suite that you can use to determine if your 
     import great_expectations as gx
     context = gx.get_context()
     ```
-
 2. Run the following code to create an empty Expectation Suite:
 
     ```python title="Jupyter Notebook"
