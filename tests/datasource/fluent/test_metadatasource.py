@@ -94,8 +94,13 @@ class DataContext:
     def datasources(self) -> DatasourceDict:
         return self._datasources
 
-    def _add_fluent_datasource(self, datasource: Datasource) -> None:
+    def _add_fluent_datasource(self, datasource: Datasource) -> Datasource:
         self._datasources[datasource.name] = datasource
+        return datasource
+
+    def _update_fluent_datasource(self, datasource: Datasource) -> Datasource:
+        self._datasources[datasource.name] = datasource
+        return datasource
 
     def get_datasource(self, datasource_name: str) -> Datasource:
         # NOTE: this same method exists on AbstractDataContext
@@ -107,7 +112,7 @@ class DataContext:
                 f"'{datasource_name}' not found. Available datasources are {list(self._datasources.keys())}"
             ) from exc
 
-    def _save_project_config(self, _fs_datasource=None) -> None:
+    def _save_project_config(self) -> None:
         ...
 
 

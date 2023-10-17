@@ -2955,9 +2955,9 @@ def _get_snowflake_connection_string() -> str:
     sfPswd = os.environ.get("SNOWFLAKE_PW")  # noqa: TID251
     sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")  # noqa: TID251
     sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")  # noqa: TID251
-    sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")  # noqa: TID251
+    sfSchema = os.environ.get("SNOWFLAKE_SCHEMA", "")  # noqa: TID251
     sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")  # noqa: TID251
-    sfRole = os.environ.get("SNOWFLAKE_ROLE") or "PUBLIC"  # noqa: TID251
+    sfRole = os.environ.get("SNOWFLAKE_ROLE", "PUBLIC")  # noqa: TID251
 
     url = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}&role={sfRole}"
 

@@ -4,6 +4,26 @@
 Changelog
 #########
 
+0.17.22
+-----------------
+* [BUGFIX] Column Descriptive Metrics: Skip finding semantic type info for UNKNOWN columns ([#8815](https://github.com/great-expectations/great_expectations/pull/8815))
+* [BUGFIX] Column Descriptive Metrics: Convert table name to lowercase for snowflake ([#8817](https://github.com/great-expectations/great_expectations/pull/8817))
+* [BUGFIX] Improve datasource crud ([#8773](https://github.com/great-expectations/great_expectations/pull/8773))
+* [BUGFIX] Fix Snowflake `'connection_string'` `TestConnectionError` ([#8816](https://github.com/great-expectations/great_expectations/pull/8816))
+* [BUGFIX] Fix missing `config_provider` ([#8822](https://github.com/great-expectations/great_expectations/pull/8822))
+* [DOCS] Minor Syntax Update ([#8806](https://github.com/great-expectations/great_expectations/pull/8806))
+* [DOCS] Update docs to reference new `gx/` dir instead of `great_expectations/` ([#8717](https://github.com/great-expectations/great_expectations/pull/8717))
+* [MAINTENANCE] Remove `ge_cloud_mode` from `Store` ([#8747](https://github.com/great-expectations/great_expectations/pull/8747))
+* [MAINTENANCE] Bump urllib3 from 1.26.5 to 1.26.17 in /docs_rtd ([#8802](https://github.com/great-expectations/great_expectations/pull/8802))
+* [MAINTENANCE] Delete legacy `JsonSchemaProfiler` ([#8807](https://github.com/great-expectations/great_expectations/pull/8807))
+* [MAINTENANCE] Column Descriptive Metrics: Default to UNKNOWN if type is not found ([#8810](https://github.com/great-expectations/great_expectations/pull/8810))
+* [MAINTENANCE] Column Descriptive Metrics: Empty string instead of UNKNOWN if table column type introspection fails ([#8819](https://github.com/great-expectations/great_expectations/pull/8819))
+* [MAINTENANCE] Delete outdated context fixtures ([#8809](https://github.com/great-expectations/great_expectations/pull/8809))
+* [MAINTENANCE] Bump gitpython from 3.1.35 to 3.1.37 in /docs_rtd ([#8818](https://github.com/great-expectations/great_expectations/pull/8818))
+* [MAINTENANCE] Fix `docs-snippets` CI step ([#8827](https://github.com/great-expectations/great_expectations/pull/8827))
+* [CONTRIB] Updates to MulticolumnValuesSumValuesEqualToSingleColumn ([#8798](https://github.com/great-expectations/great_expectations/pull/8798)) (thanks @calvingdu)
+* [CONTRIB] New MulticolumnValuesProductEqualToSingleColumn Expectation ([#8799](https://github.com/great-expectations/great_expectations/pull/8799)) (thanks @calvingdu)
+
 0.17.21
 -----------------
 * [FEATURE] DataDocs Renderer for `ExpectMulticolumnSumToEqual` and `LikePattern` Expectations ([#8739](https://github.com/great-expectations/great_expectations/pull/8739))

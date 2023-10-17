@@ -1,0 +1,84 @@
+version: "3.4"
+
+services:
+  db:
+    image: postgres:13.7
+    # Turn off db logs by default
+    # https://postgresqlco.nf/doc/en/param/log_statement/
+    command: [ "postgres", "-c", "log_statement=none" ]
+    environment:
+      POSTGRES_DB: mercury
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U postgres -d mercury'"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+  mq:
+    image: rabbitmq:3.10.20-management
+    hostname: gx-bunny
+    environment:
+      RABBITMQ_DEFAULT_USER: gx_prod
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - 8042:15672
+      - 5672:5672
+  db-provisioner:
+    image: 258143015559.dkr.ecr.us-east-1.amazonaws.com/mercury/provisioner:0.4.1
+    platform: linux/amd64
+    environment:
+      PGPASSWORD: postgres
+      APP_DB_API_USER: postgres
+      APP_DB_API_USER_PASSWORD: postgres
+      APP_DB_ADDR: db
+    # Note: We are overwriting the existing command, just adding a retry
+    #       In Cloud environment, we connect to RDS so no need to worry about starting up
+    #       In local, the DB needs a few seconds to boot up and listen
+    command: 'bash -c "until ./init-db.sh; do sleep 5; done;"'
+    depends_on:
+      db:
+        condition: service_healthy
+  mercury-service-api:
+    image: 258143015559.dkr.ecr.us-east-1.amazonaws.com/mercury/api:latest
+    platform: linux/amd64
+    restart: always
+    ports:
+      - 5000:5000
+    environment:
+      LOGGING_LEVEL: ${LOGGING_LEVEL}
+      ENVIRONMENT: ${ENVIRONMENT}
+      MERCURY_DIALECT: postgresql
+      MERCURY_USER: gx_mercury_user
+      MERCURY_PASSWORD: postgres
+      MERCURY_HOST: db
+      MERCURY_DATABASE: mercury
+      GE_USAGE_STATISTICS_URL: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
+      AMQP_CONNECTION_STRING: amqp://gx_prod:password@mq:5672
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      AUTH0_API_AUDIENCE: ${AUTH0_API_AUDIENCE}
+      AUTH0_MERCURY_API_CLIENT_ID: ${AUTH0_MERCURY_API_CLIENT_ID}
+      AUTH0_MERCURY_API_CLIENT_SECRET: ${AUTH0_MERCURY_API_CLIENT_SECRET}
+      SENDGRID_API_KEY: fake_key
+      LD_SDK_KEY: ${LD_SDK_KEY}
+    # TODO replace migtrations with ./scripts/automated_migrations.sh
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        sed -i 's/localhost/db/g' /app/services/ge_cloud/mercury/alembic.ini
+        cd /app/services/ge_cloud/mercury
+        alembic upgrade head
+        cd /app/services/ge_cloud
+        python -m tests.utils.dev_db_seed_script
+        gunicorn mercury.api:get_app\(\) --config ./gunicorn.conf.py --workers=1
+    healthcheck:
+      test: timeout 10s bash -c ':> /dev/tcp/0.0.0.0/5000' || exit 1
+      interval: 5s
+      timeout: 2s
+      retries: 10
+    depends_on:
+      db-provisioner:
+        condition: service_completed_successfully

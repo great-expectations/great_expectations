@@ -148,4 +148,3 @@ metastore_db
 # dependency management
 Pipfile
 Pipfile.lock
-
