@@ -270,6 +270,7 @@ jobs:
       GX_CLOUD_ORGANIZATION_ID: ${{secrets.MERCURY_ORGANIZATION_ID}}
       GX_CLOUD_ACCESS_TOKEN: ${{secrets.MERCURY_ACCESS_TOKEN}}
       PACT_BROKER_READ_WRITE_TOKEN: ${{secrets.PACT_BROKER_READ_WRITE_TOKEN}}
+      PACT_DO_NOT_TRACK: true
       SNOWFLAKE_CI_ACCOUNT: ${{secrets.SNOWFLAKE_CI_ACCOUNT}}
       SNOWFLAKE_CI_USER_PASSWORD: ${{secrets.SNOWFLAKE_CI_USER_PASSWORD}}
       LOGGING_LEVEL: DEBUG
@@ -302,11 +303,12 @@ jobs:
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
           invoke deps --gx-install -m 'cloud' -r test
 
-      - name: Verify Pact contracts
-        run: pact-verifier --provider-base-url=${GX_CLOUD_BASE_URL} --pact-url=tests/integration/cloud/rest_contracts/great_expectations-mercury.json --pact-broker-url=https://greatexpectations.pactflow.io/ --pact-broker-token=${PACT_BROKER_READ_WRITE_TOKEN} --provider-version-tag=a230c2be583800846b08f49aa86196ae6ed2defe --provider=mercury --publish-verification-results --provider-app-version=0.0.0
-
       - name: Run the tests
         run: invoke ci-tests 'cloud' --up-services --verbose
+
+      - name: Verify endpoint contracts
+        run: pact-verifier --provider-base-url=${GX_CLOUD_BASE_URL} --pact-url=tests/integration/cloud/rest_contracts/great_expectations-mercury.json --pact-broker-url=https://greatexpectations.pactflow.io/ --pact-broker-token=${PACT_BROKER_READ_WRITE_TOKEN} --provider-version-tag=a230c2be583800846b08f49aa86196ae6ed2defe --provider=mercury --publish-verification-results --provider-app-version=0.0.0
+
 
   marker-tests:
     needs: [unit-tests, static-analysis]
