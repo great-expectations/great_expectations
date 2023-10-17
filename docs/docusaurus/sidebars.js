@@ -102,8 +102,13 @@ module.exports = {
           items: [
             {
               type: 'link',
-              label: 'Create an Expectation Suite with the Missingness Data Assistant',
-              href: '/docs/cloud/expectation_suites/manage_expectation_suites#create-an-expectation-suite-with-the-missingness-data-assistant',
+              label: 'Create an Expectation Suite automatically',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#create-an-expectation-suite-automatically',
+            },
+            {
+              type: 'link',
+              label: 'Create an empty Expectation Suite manually',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#create-an-empty-expectation-suite-manually',
             },
             {
               type: 'link',
