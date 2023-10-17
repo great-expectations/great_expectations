@@ -190,7 +190,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev-athena.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
         ("requirements-dev-contrib.txt", "adr-tools-python", (("==", "1.0.3"),)),
         ("requirements-dev-contrib.txt", "black", (("==", "23.3.0"),)),
-        ("requirements-dev-contrib.txt", "mypy", (("==", "1.5.1"),)),
+        ("requirements-dev-contrib.txt", "mypy", (("==", "1.6"),)),
         ("requirements-dev-contrib.txt", "ruff", (("==", "0.0.290"),)),
         ("requirements-dev-dremio.txt", "sqlalchemy-dremio", (("==", "1.2.1"),)),
         ("requirements-dev-excel.txt", "xlrd", (("<", "2.0.0"), (">=", "1.1.0"))),
