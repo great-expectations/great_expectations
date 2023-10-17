@@ -6,33 +6,33 @@ toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
-GX Cloud builds on the innovative features of GX open source software (OSS). Its easy-to-use web interface lets you quickly validate your data without creating and running complex Python code. With GX Cloud you can work collaboratively with your teammates to define and test reusable data queries that alert you to changes in your data.  
+GX Cloud builds on the innovative features of GX open source software (OSS). Its easy-to-use web interface lets you quickly validate your data without creating and running complex Python code. With GX Cloud you can work collaboratively with your teammates to define and test reusable data queries that alert you to changes in your data.
 
-## Workflow optimization 
+Here are just a few of the benefits you'll get with GX Cloud: 
 
-- Identify your Data Source, connect to a Data Asset, create Expectations, and then run Validations without running a single line of Python code. 
+- It's web-based and browser and platform-independent.
 
-- Reuse or modify your Expectations as your business requirements change. No need to create new Expectations every time you need to validate your data.
-
-- Execute Validations with the click of a button and get your results immediately.
-
-- Share Validation data quickly and make it accessible to all users regardless of their technical knowledge.
-
-## Benefits
-
-GX Cloud offers the following benefits over GX OSS:
-
-- It is web-based and browser and platform-independent.
-
-- A hosted and intuitive environment makes it faster to set up and run your Data Validations.
+- A hosted environment and intuitive interface makes it faster to set up and run your Data Validations.
 
 - Unique features such as Validation run histories, Data Asset metrics, and more.
 
 - Eliminates the need to create, run, and maintain complex code for your data queries.
 
+## Workflow optimization
+
+GX Cloud is intended to get you started faster than GX OSS and to simplify your Data Validation workflows. Here's how it's done:
+
+- You can identify your Data Source, connect to a Data Asset, create Expectations, and then run Validations without running a single line of Python code. 
+
+- You can reuse or modify your Expectations as your business requirements change. No need to create new Expectations every time you need to validate your data.
+
+- You can execute Validations with the click of a button and get your results immediately.
+
+- You can share Validation data quickly and make it accessible to all users regardless of their technical knowledge.
+
 ## Roles and responsibilities
 
-How you interact with GX Cloud is dependent on the role you are assigned by your Admin. 
+How you interact with GX Cloud is dependent on the role you're assigned by your Admin. 
 
 | Role          | Responsibilities                                  |
 |---------------|---------------------------------------------------|
@@ -70,7 +70,7 @@ The following browsers are supported by GX Cloud:
 
 ### Browser session duration
 
-A session is the period of time that you’re signed in to your GX Cloud account from a browser. If you close your browser, your session ends you're signed out. You'll need to sign in again when you access GX Cloud.
+A session is the period of time that you’re signed in to your GX Cloud account from a browser. If you close the browser, your session ends you're signed out. You'll need to sign in again to access GX Cloud.
 
 ## Get support
 
