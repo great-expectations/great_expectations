@@ -60,13 +60,13 @@ The following table lists the tasks that you complete in a typical GX Cloud work
 
 The following browsers are supported by GX Cloud:
 
-- Google Chrome — the latest version is fully supported
+- [Google Chrome](https://www.google.com/chrome/) — the latest version is fully supported
 
-- Mozilla Firefox — the latest version is fully supported
+- [Mozilla Firefox](https://www.mozilla.org/en-US/firefox/) — the latest version is fully supported
 
-- Apple Safari — the latest version is fully supported
+- [Apple Safari](https://www.apple.com/safari/) — the latest version is fully supported
 
-- Microsoft Edge — the latest version is fully supported
+- [Microsoft Edge](https://www.microsoft.com/en-us/edge?ep=82&form=MA13KI&es=24) — the latest version is fully supported
 
 ### Browser session duration
 
