@@ -28,7 +28,7 @@ Automatically create an Expectation Suite that you can use to determine if your 
 
 5. Click **Generate Expectations**. 
 
-    A new Expectation Suite appears in the Expectation Suites pane.
+    It can take several minutes to create the Expectation Suite. When the process is complete, a new Expectation Suite appears in the **Expectation Suites** pane.
 
 6. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
 
