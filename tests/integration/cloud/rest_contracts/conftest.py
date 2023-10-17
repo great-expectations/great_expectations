@@ -115,7 +115,7 @@ def run_pact_test(
             .will_respond_with(**response)
         )
 
-        request_url = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}{path!s}"
+        request_url = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}{path}"
 
         with pact:
             session.get(str(request_url))
