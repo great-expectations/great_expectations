@@ -234,7 +234,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev.txt", "makefun", (("<", "2"), (">=", "1.7.0"))),
         ("requirements-dev.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),
         ("requirements-dev.txt", "moto", (("<", "3.0.0"), (">=", "2.0.0"))),
-        ("requirements-dev.txt", "mypy", (("==", "1.5.1"),)),
+        ("requirements-dev.txt", "mypy", (("==", "1.6"),)),
         ("requirements-dev.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
         ("requirements-dev.txt", "pypd", (("==", "1.1.0"),)),
         ("requirements-dev.txt", "ruamel.yaml", (("<", "0.17.18"), (">=", "0.16"))),
