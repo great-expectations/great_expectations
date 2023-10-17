@@ -10,7 +10,7 @@ To learn more about Expectation Suites, see [Expectation Suites](../../terms/exp
 
 ## Prerequisites
 
-- You have [set up your environment](../set_up_gx_cloud.md). 
+- You have [set up your environment](../set_up_gx_cloud.md) and the GX Agent is running. 
 
 - You have a [Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset).
 
@@ -32,7 +32,7 @@ Automatically create an Expectation Suite that you can use to determine if your 
 
 6. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
 
-## Create an empty Expectation Suite manually
+## Manually create an empty Expectation Suite 
 
 1. In Jupyter Notebook, run the following code to import the `great_expectations` module and the existing Data Context:
 

@@ -102,13 +102,13 @@ module.exports = {
           items: [
             {
               type: 'link',
-              label: 'Create an Expectation Suite automatically',
-              href: '/docs/cloud/expectation_suites/manage_expectation_suites#create-an-expectation-suite-automatically',
+              label: 'Automatically create an Expectation Suite that tests for missing data',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#automatically-create-an-expectation-suite-that-tests-for-missing-data',
             },
             {
               type: 'link',
-              label: 'Create an empty Expectation Suite manually',
-              href: '/docs/cloud/expectation_suites/manage_expectation_suites#create-an-empty-expectation-suite-manually',
+              label: 'Manually create an empty Expectation Suite ',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#manually-create-an-empty-expectation-suite',
             },
             {
               type: 'link',

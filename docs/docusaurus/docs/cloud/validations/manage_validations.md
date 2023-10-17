@@ -10,7 +10,7 @@ To learn more about Validations, see [Validator](../../terms/validator.md).
 
 ## Prerequisites
 
-- You have [set up your environment](../set_up_gx_cloud.md). 
+- You have [set up your environment](../set_up_gx_cloud.md) and the GX Agent is running. 
 
 - You have created an [Expectation](/docs/cloud/expectations/manage_expectations#create-an-expectation).
 
