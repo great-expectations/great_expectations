@@ -59,24 +59,15 @@ Download the file, place it in the appropriate directory, and rename it to the a
 cp query_expectation_template.py /SOME_DIRECTORY/expect_queried_table_row_count_to_equal.py
 ```
 
-<details>
-  <summary>Where should I put my Expectation file?</summary>
-  <div>
-  <br/>
-    <p>
-        Within a development environment, you don't need to put the file in a specific folder. The Expectation itself should be self-contained, and can be executed anywhere as long as <code>great_expectations</code> is installed, which is sufficient for development and testing. However, to use your new Expectation alongside the other components of Great Expectations (as one would for production purposes), you'll need to make sure the file is in the right place. Where the right place is will depend on what you intend to use it for.
-    </p>
-    <p>
-        <ul>
-            <li>If you're building a <TechnicalTag tag="custom_expectation" text="Custom Expectation" /> for personal use, you'll need to put it in the <code>great_expectations/plugins/expectations</code> folder of your Great Expectations deployment, and import your Custom Expectation from that directory whenever it will be used. When you instantiate the corresponding <code>DataContext</code>, it will automatically make all <TechnicalTag tag="plugin" text="Plugins" /> in the directory available for use.</li>
-            <li>If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.</li>
-        </ul>
-    </p>
-	<p>
-		See our <a href="how_to_use_custom_expectations"> guide on how to use a Custom Expectation</a> for more!
-	</p>
-  </div>
-</details>
+### Storing Expectation files
+
+During development, you don't need to store Expectation files in a specific location. Expectation files are self-contained and can be executed anywhere as long as GX is installed However, to use your new Expectation with other GX components, you'll need to make sure the file is stored one of the following locations:
+
+- If you're building a <TechnicalTag tag="custom_expectation" text="Custom Expectation" /> for personal use, you'll need to put it in the <code>great_expectations/plugins/expectations</code> folder of your GX deployment, and import your Custom Expectation from that directory whenever it will be used. When you instantiate the corresponding <code>DataContext</code>, it will automatically make all <TechnicalTag tag="plugin" text="Plugins" /> in the directory available for use.
+
+- If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.
+
+For more information about Custom Expectations, see [Use a Custom Expectation](./how_to_use_custom_expectations.md).
 
 ## Generate a diagnostic checklist for your Expectation
 
@@ -151,24 +142,22 @@ Completeness checklist for ExpectQueriedTableRowCountToBe:
 ...
 ```
 
-Congratulations! You're one step closer to implementing a Custom Query Expectation.
+### Metric classes
 
-<details>
-<summary>What about my Metric?</summary>
 If you've built a Custom Expectation before, you may have noticed that the template doesn't contain a <TechnicalTag tag="metric" text="Metric"/> class.
 
 While you are still able to create a Custom Metric for your Custom Expectation if needed, the nature of `QueryExpectations`
-allows us to provide a small number of generic `query.*` Metrics capable of supporting many use-cases.
-</details>
+allows us to provide a small number of generic `query.*` Metrics are capable of supporting many use-cases.
 
 ## Add example cases
 
-Next, we're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve a dual purpose:
+You're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve the following purposes:
 
-1. They provide test fixtures that Great Expectations can execute automatically via `pytest`.
-2. They help users understand the logic of your Expectation by providing tidy examples of paired input and output. If you contribute your Expectation to open source, these examples will appear in the Gallery.
+- They provide test fixtures that Great Expectations can execute automatically with `pytest`.
 
-Your examples will look something like this:
+- They help users understand the logic of your Expectation by providing tidy examples of paired input and output. If you contribute your Expectation to open source, these examples will appear in the Gallery.
+
+Your examples will look similar to this example:
 
 ```python name="expect_queried_table_row_count_to_be.py examples"
 ```
@@ -183,10 +172,9 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 	* `out` is based on the <TechnicalTag tag="validation_result" text="Validation Result" /> returned when executing the Expectation.
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
 
-<details>
-<summary><code>only_for</code>?</summary>
+### The only_for key
+
 <code>only_for</code> is an optional key you can pass to offer more granular control over which backends and SQL dialects your tests are run against.
-</details>
 
 If you run your Expectation file again, you won't see any new checkmarks, as the logic for your Custom Expectation hasn't been implemented yet.
 However, you should see that the tests you've written are now being caught and reported in your checklist:
@@ -205,8 +193,7 @@ Completeness checklist for ExpectQueriedTableRowCountToBe:
 ```
 
 :::note
-For more information on tests and example cases, <br/>
-see our guide on [how to create example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
+For more information on tests and example cases, see [how to create example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
 :::
 
 ## Implement a Query & Connect a Metric to your Expectation
@@ -258,20 +245,13 @@ Becomes:
 ```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py metric_dependencies"
 ```
 
-<details>
-  <summary>Other parameters</summary>
-  <div>
-    <p>
-        <b>Expectation Success Keys</b> - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success. <code>QueryExpectations</code> must include <code>"query"</code> in <code>success_keys</code>.
-    </p>
-    <p>
-        <b>Expectation Default Kwarg Values</b> (Optional) - Default values for success keys and the defined domain, among other values.
-    </p>
-    <p>
-        <b>Metric Value Keys</b> (Optional) - Contains any additional arguments passed as parameters to compute the Metric.
-    </p>
-  </div>
-</details>
+### Other parameters
+
+Expectation Success Keys - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
+
+Expectation Default Kwarg Values (Optional) - Default values for success keys and the defined domain, among other values.
+
+Metric Condition Value Keys (Optional) - Contains any additional arguments passed as parameters to compute the Metric.
 
 ## Validate
 
@@ -357,24 +337,15 @@ Download the file, place it in the appropriate directory, and rename it to the a
 cp query_expectation_template.py /SOME_DIRECTORY/expect_queried_column_value_frequency_to_meet_threshold.py
 ```
 
-<details>
-  <summary>Where should I put my Expectation file?</summary>
-  <div>
-  <br/>
-    <p>
-        Within a development environment, you don't need to put the file in a specific folder. The Expectation itself should be self-contained, and can be executed anywhere as long as <code>great_expectations</code> is installed, which is sufficient for development and testing. However, to use your new Expectation alongside the other components of Great Expectations (as one would for production purposes), you'll need to make sure the file is in the right place. Where the right place is will depend on what you intend to use it for.
-    </p>
-    <p>
-        <ul>
-            <li>If you're building a <TechnicalTag tag="custom_expectation" text="Custom Expectation" /> for personal use, you'll need to put it in the <code>great_expectations/plugins/expectations</code> folder of your Great Expectations deployment, and import your Custom Expectation from that directory whenever it will be used. When you instantiate the corresponding <code>DataContext</code>, it will automatically make all <TechnicalTag tag="plugin" text="Plugins" /> in the directory available for use.</li>
-            <li>If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.</li>
-        </ul>
-    </p>
-	<p>
-		See our <a href="how_to_use_custom_expectations"> guide on how to use a Custom Expectation</a> for more!
-	</p>
-  </div>
-</details>
+### Storing Expectation files
+
+During development, you don't need to store Expectation files in a specific location. Expectation files are self-contained and can be executed anywhere as long as GX is installed However, to use your new Expectation with other GX components, you'll need to make sure the file is stored one of the following locations:
+
+- If you're building a <TechnicalTag tag="custom_expectation" text="Custom Expectation" /> for personal use, you'll need to put it in the <code>great_expectations/plugins/expectations</code> folder of your GX deployment, and import your Custom Expectation from that directory whenever it will be used. When you instantiate the corresponding <code>DataContext</code>, it will automatically make all <TechnicalTag tag="plugin" text="Plugins" /> in the directory available for use.
+
+- If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.
+
+For more information about Custom Expectations, see [Use a Custom Expectation](./how_to_use_custom_expectations.md).
 
 ## Generate a diagnostic checklist for your Expectation
 
@@ -449,17 +420,14 @@ Completeness checklist for ExpectQueriedColumnValueFrequencyToMeetThreshold:
 ...
 ```
 
-Congratulations! You're one step closer to implementing a Custom Query Expectation.
+### Metric classes
 
-<details>
-<summary>What about my Metric?</summary>
 If you've built a Custom Expectation before, you may have noticed that the template doesn't contain a <TechnicalTag tag="metric" text="Metric"/> class.
 
 While you are still able to create a Custom Metric for your Custom Expectation if needed, the nature of `QueryExpectations`
-allows us to provide a small number of generic `query.*` Metrics capable of supporting many use-cases.
-</details>
+allows us to provide a small number of generic `query.*` Metrics are capable of supporting many use-cases.
 
-### 5. Add example cases
+### Add example cases
 
 Next, we're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve a dual purpose:
 
@@ -481,10 +449,9 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 	* `out` is based on the <TechnicalTag tag="validation_result" text="Validation Result" /> returned when executing the Expectation.
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
 
-<details>
-<summary><code>only_for</code>?</summary>
+### The only_for key
+
 <code>only_for</code> is an optional key you can pass to offer more granular control over which backends and SQL dialects your tests are run against.
-</details>
 
 If you run your Expectation file again, you won't see any new checkmarks, as the logic for your Custom Expectation hasn't been implemented yet.
 However, you should see that the tests you've written are now being caught and reported in your checklist:
@@ -503,8 +470,7 @@ Completeness checklist for ExpectQueriedColumnValueFrequencyToMeetThreshold:
 ```
 
 :::note
-For more information on tests and example cases, <br/>
-see our guide on [how to create example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
+For more information on tests and example cases, see our guide on [how to create example cases for a Custom Expectation](./how_to_use_custom_expectations.md).
 :::
 
 ## Implement a Query & Connect a Metric to your Expectation
@@ -559,20 +525,13 @@ Becomes:
 ```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py metric_dependencies"
 ```
 
-<details>
-  <summary>Other parameters</summary>
-  <div>
-    <p>
-        <b>Expectation Success Keys</b> - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success. <code>QueryExpectations</code> must include <code>"query"</code> in <code>success_keys</code>.
-    </p>
-    <p>
-        <b>Expectation Default Kwarg Values</b> (Optional) - Default values for success keys and the defined domain, among other values.
-    </p>
-    <p>
-        <b>Metric Value Keys</b> (Optional) - Contains any additional arguments passed as parameters to compute the Metric.
-    </p>
-  </div>
-</details>
+### Other parameters
+
+Expectation Success Keys - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
+
+Expectation Default Kwarg Values (Optional) - Default values for success keys and the defined domain, among other values.
+
+Metric Condition Value Keys (Optional) - Contains any additional arguments passed as parameters to compute the Metric.
 
 ## Validate
 
@@ -605,7 +564,7 @@ Completeness checklist for ExpectQueriedColumnValueFrequencyToMeetThreshold:
 ...
 ```
 
-### 8. Linting
+### Linting
 
 Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, and `ruff`.
 
@@ -638,11 +597,13 @@ Completeness checklist for ExpectQueriedColumnValueFrequencyToMeetThreshold:
 
 </Tabs>
 
-<div style={{"text-align":"center"}}>
-<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
-Congratulations!<br/>&#127881; You've just built your first Custom QueryExpectation! &#127881;
-</b></p>
-</div>
+### Other parameters
+
+Expectation Success Keys - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
+
+Expectation Default Kwarg Values (Optional) - Default values for success keys and the defined domain, among other values.
+
+Metric Condition Value Keys (Optional) - Contains any additional arguments passed as parameters to compute the Metric.
 
 ## Contribute (Optional)
 

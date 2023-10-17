@@ -52,8 +52,8 @@ The following diagram shows the recommended components for a Great Expectations 
 
 Relevant documentation for the components can also be found here:
 
-- [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md)
-- [How to configure a Validation Result store in GCS](../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.md)
+- [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/configure_expectation_stores.md)
+- [How to configure a Validation Result store in GCS](../guides/setup/configuring_metadata_stores/configure_result_stores.md)
 - [How to host and share Data Docs on GCS](../guides/setup/configuring_data_docs/host_and_share_data_docs.md)
 - Optionally, you can also use a [Secret Manager for GCP Credentials](../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
 
@@ -91,7 +91,7 @@ The full configuration used in this guide can be found in the [`great-expectatio
 :::
 
 #### Add Expectations Store
-By default, newly profiled Expectations are stored in JSON format in the `expectations/` subdirectory of your `great_expectations/` folder. A new Expectations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
+By default, newly profiled Expectations are stored in JSON format in the `expectations/` subdirectory of your `gx/` folder. A new Expectations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
 
 ```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py expected_expectation_store"
 ```
@@ -101,10 +101,10 @@ Great Expectations can then be configured to use this new Expectations Store, `e
 ```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_expectation_store"
 ```
 
-For additional details and example configurations, please refer to [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md).
+For additional details and example configurations, see [Configure Expectation Stores](../guides/setup/configuring_metadata_stores/configure_expectation_stores.md).
 
 #### Add Validations Store
-By default, Validations are stored in JSON format in the `uncommitted/validations/` subdirectory of your `great_expectations/` folder. A new Validations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
+By default, Validations are stored in JSON format in the `uncommitted/validations/` subdirectory of your `gx/` folder. A new Validations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
 
 ```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py expected_validations_store"
 ```
@@ -114,7 +114,7 @@ Great Expectations can then be configured to use this new Validations Store, `va
 ```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_validations_store"
 ```
 
-For additional details and example configurations, please refer to  [How to configure an Validation Result store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.md).
+For additional details and example configurations, see [Configure Validation Result Stores](../guides/setup/configuring_metadata_stores/configure_result_stores.md).
 
 #### Add Data Docs Store
 To host and share Datadocs on GCS, we recommend using the [following guide](../guides/setup/configuring_data_docs/host_and_share_data_docs.md), which will explain how to host and share Data Docs on Google Cloud Storage using IP-based access.
@@ -240,7 +240,7 @@ In the second example, a query `Asset` named `my_query_asset` is built by submit
   ]}>
 <TabItem value="gcs">
 
-For our example, we will be creating an ExpectationSuite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), which we will describe in our `BatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md) or using a DataAssistant or a Custom Profiler, please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`.
+In the following example, you'll create an Expectation Suite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), that you'll describe in your `BatchRequest.` To create Expectation Suites, using domain knowledge or a Data Assistant, see (../guides/expectations/expectations/expectations_lp.md).
 
 First create an ExpectationSuite by using the `add_or_update_expectation_suite` method on our DataContext. Then use it to get a `Validator`. 
 
@@ -291,7 +291,7 @@ To configure the BatchRequest and learn how you can load data by specifying a ta
 
 ### 5. Build and Run a Checkpoint
 
-In the following example, you'll create a basic Checkpoint configuration. For [additional examples](../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md), information on [how to add validations, data, or suites to existing checkpoints](../guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md), and [more complex configurations](../guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md) please refer to the documentation under `How to Guides` -> `Validating your data` -> `Checkpoints`.
+In the following example, you'll create a basic Checkpoint configuration. For more information about data validation, see [Validate Data](../guides/validation/validate_data_lp.md).
 
 <Tabs
   groupId="connect-to-data-gcs-bigquery"
@@ -395,15 +395,15 @@ If you run into trouble while installing Great Expectations in Cloud Composer, t
 
 Cloud Composer uses Cloud Storage to store Apache Airflow DAGs (also known as workflows), with each Environment having an associated Cloud Storage bucket (typically the name of the bucket will follow the pattern `[region]-[composer environment name]-[UUID]-bucket`).
 
-The simplest way to perform the migration is to move the entire local `great_expectations/` folder from [Part 1](#part-1-local-configuration-of-great-expectations-that-connects-to-google-cloud-platform) to the Cloud Storage bucket where Composer can access the configuration.
+The simplest way to perform the migration is to move the entire local `gx/` folder from [Part 1](#part-1-local-configuration-of-great-expectations-that-connects-to-google-cloud-platform) to the Cloud Storage bucket where Composer can access the configuration.
 
 First open the Environments page in the Cloud Console, then click on the name of the environment to open the Environment details page. In the Configuration tab, the name of the Cloud Storage bucket can be found to the right of the DAGs folder.
 
-This will take you to the folder where DAGs are stored, which can be accessed from the Airflow worker nodes at: `/home/airflow/gcsfuse/dags`. The location we want to uploads `great_expectations/` is **one level above the `/dags` folder**.
+This will take you to the folder where DAGs are stored, which can be accessed from the Airflow worker nodes at: `/home/airflow/gcsfuse/dags`. The location we want to upload the `gx/` folder to is **one level above the `/dags` folder**.
 
-Upload the local `great_expectations/` folder either dragging and dropping it into the window, using [`gsutil cp`](https://cloud.google.com/storage/docs/gsutil/commands/cp), or by clicking the `Upload Folder` button.
+Upload the local `gx/` folder either dragging and dropping it into the window, using [`gsutil cp`](https://cloud.google.com/storage/docs/gsutil/commands/cp), or by clicking the `Upload Folder` button.
 
-Once the `great_expectations/` folder is uploaded to the Cloud Storage bucket, it will be mapped to the Airflow instances in your Cloud Composer and be accessible from the Airflow Worker nodes at the location: `/home/airflow/gcsfuse/great_expectations`.
+Once the `gx/` folder is uploaded to the Cloud Storage bucket, it will be mapped to the Airflow instances in your Cloud Composer and be accessible from the Airflow Worker nodes at the location: `/home/airflow/gcsfuse/great_expectations`.
 
 ### 5. Write DAG and Add to Cloud Composer
 <Tabs
@@ -420,7 +420,7 @@ We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`
 ```python name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py full"
 ```
 
-The `BashOperator` will first change directories to `/home/airflow/gcsfuse/great_expectations`, where we have uploaded our local configuration.
+The `BashOperator` will first change directories to `/home/airflow/gcsfuse/gx`, where we have uploaded our local configuration.
 Then we will run the Checkpoint using same CLI command we used to run the Checkpoint locally:
 
 ```bash
@@ -441,7 +441,7 @@ We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`
 ```python name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py full"
 ```
 
-The `BashOperator` will first change directories to `/home/airflow/gcsfuse/great_expectations`, where we have uploaded our local configuration.
+The `BashOperator` will first change directories to `/home/airflow/gcsfuse/gx`, where we have uploaded our local configuration.
 Then we will run the Checkpoint using same CLI command we used to run the Checkpoint locally:
 
 

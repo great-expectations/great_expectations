@@ -1,14 +1,18 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Optional
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.data_context_key import DataContextVariableKey
-from great_expectations.data_context.data_context_variables import (
-    DataContextVariableSchema,
-)
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.resource_identifiers import DataContextKey
 from great_expectations.exceptions import InvalidKeyError
 from great_expectations.util import filter_properties_dict
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context_variables import (
+        DataContextVariableSchema,
+    )
 
 
 class InMemoryStoreBackend(StoreBackend):
@@ -52,6 +56,12 @@ class InMemoryStoreBackend(StoreBackend):
             return self._store[key]
         except KeyError as e:
             raise InvalidKeyError(f"{e!s}")
+
+    @override
+    def _get_all(self) -> list[Any]:
+        return [
+            val for key, val in self._store.items() if key != self.STORE_BACKEND_ID_KEY
+        ]
 
     @override
     def _set(self, key, value, **kwargs) -> None:

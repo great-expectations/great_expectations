@@ -31,9 +31,9 @@ from great_expectations.datasource.fluent.signatures import _merge_signatures
 from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
-    import pydantic
     from typing_extensions import TypeAlias
 
+    from great_expectations.compatibility import pydantic
     from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.datasource.fluent import PandasDatasource
     from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
@@ -463,15 +463,15 @@ class _SourceFactories:
                     datasource_type, name_or_datasource, **kwargs
                 )
             ) or (
-                datasource_type(name=name_or_datasource, **kwargs)  # type: ignore[arg-type] # could be Datasource - expect str
+                datasource_type(name=name_or_datasource, **kwargs)
                 if name_or_datasource
                 else datasource_type(**kwargs)
             )
             logger.debug(f"Adding {datasource_type} with {datasource.name}")
             datasource._data_context = self._data_context
             datasource.test_connection()
-            self._data_context._add_fluent_datasource(datasource)
-            self._data_context._save_project_config()
+            datasource = self._data_context._add_fluent_datasource(datasource)
+
             return datasource
 
         add_datasource.__doc__ = doc_string
@@ -492,15 +492,20 @@ class _SourceFactories:
         def update_datasource(
             name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs
         ) -> Datasource:
-            new_datasource: Optional[Datasource] = self._datasource_passed_in(
-                datasource_type, name_or_datasource, **kwargs
+            # circular import
+            from great_expectations.datasource.fluent.interfaces import Datasource
+
+            updated_datasource = (
+                self._datasource_passed_in(
+                    datasource_type, name_or_datasource, **kwargs
+                )
+            ) or (
+                datasource_type(name=name_or_datasource, **kwargs)
+                if name_or_datasource
+                else datasource_type(**kwargs)
             )
-            # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg
-            datasource_name: str = (
-                new_datasource.name  # type: ignore[assignment] # always a str
-                if new_datasource
-                else name_or_datasource or kwargs["name"]
-            )
+
+            datasource_name: str = updated_datasource.name
             logger.debug(f"Updating {datasource_type} with {datasource_name}")
             self._validate_current_datasource_type(
                 datasource_name,
@@ -512,21 +517,15 @@ class _SourceFactories:
                 self._data_context.datasources.get(datasource_name), "id", None
             )
             if id_:
-                # if not a str `name_or_datasource` is a datasource and `id` can be directly attached
-                if name_or_datasource and not isinstance(name_or_datasource, str):
-                    name_or_datasource.id = id_
-                else:
-                    kwargs["id"] = id_
+                updated_datasource.id = id_
 
-            # local delete only, don't update the persisted store entry
-            self._data_context._delete_fluent_datasource(
-                datasource_name=datasource_name, _call_store=False
+            updated_datasource._data_context = self._data_context
+            updated_datasource.test_connection()
+            return_obj = self._data_context._update_fluent_datasource(
+                datasource=updated_datasource
             )
-            # Now that the input is validated and the old datasource is deleted we pass the
-            # original arguments to the add method (ie name and not datasource_name).
-            return self.create_add_crud_method(datasource_type)(
-                name_or_datasource, **kwargs
-            )
+            assert isinstance(return_obj, Datasource)
+            return return_obj
 
         update_datasource.__doc__ = doc_string
         # attr-defined issue https://github.com/python/mypy/issues/12472
@@ -546,15 +545,21 @@ class _SourceFactories:
         def add_or_update_datasource(
             name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs
         ) -> Datasource:
-            new_datasource: Optional[Datasource] = self._datasource_passed_in(
-                datasource_type, name_or_datasource, **kwargs
+            # circular import
+            from great_expectations.datasource.fluent.interfaces import Datasource
+
+            new_datasource = (
+                self._datasource_passed_in(
+                    datasource_type, name_or_datasource, **kwargs
+                )
+            ) or (
+                datasource_type(name=name_or_datasource, **kwargs)
+                if name_or_datasource
+                else datasource_type(**kwargs)
             )
+
             # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg
-            datasource_name: str = (
-                new_datasource.name  # type: ignore[assignment] # will be a str
-                if new_datasource
-                else name_or_datasource or kwargs["name"]
-            )
+            datasource_name: str = new_datasource.name
             logger.debug(
                 f"Adding or updating {datasource_type.__name__} with '{datasource_name}'"
             )
@@ -567,21 +572,20 @@ class _SourceFactories:
                 self._data_context.datasources.get(datasource_name), "id", None
             )
             if id_:
-                # if not a str `name_or_datasource` is a datasource and `id` can be directly attached
-                if name_or_datasource and not isinstance(name_or_datasource, str):
-                    name_or_datasource.id = id_
-                else:
-                    kwargs["id"] = id_
+                new_datasource.id = id_
 
-            # local delete only, don't update the persisted store entry
-            self._data_context._delete_fluent_datasource(
-                datasource_name=datasource_name, _call_store=False
-            )
-            # Now that the input is validated and the old datasource is deleted we pass the
-            # original arguments to the add method (ie name and not datasource_name).
-            return self.create_add_crud_method(datasource_type)(
-                name_or_datasource, **kwargs
-            )
+            new_datasource._data_context = self._data_context
+            new_datasource.test_connection()
+            if datasource_name in self._data_context.datasources:
+                return_obj = self._data_context._update_fluent_datasource(
+                    datasource=new_datasource
+                )
+            else:
+                return_obj = self._data_context._add_fluent_datasource(
+                    datasource=new_datasource
+                )
+            assert isinstance(return_obj, Datasource)
+            return return_obj
 
         add_or_update_datasource.__doc__ = doc_string
         # attr-defined issue https://github.com/python/mypy/issues/12472

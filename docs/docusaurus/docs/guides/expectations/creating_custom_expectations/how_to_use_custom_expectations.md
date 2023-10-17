@@ -11,6 +11,14 @@ Custom <TechnicalTag tag="expectation" text="Expectations"/> extend the core fun
 When you instantiate your <TechnicalTag tag="data_context" text="Data Context"/>, all plugins in the `great_expectations/plugins` directory are automatically available,
 and this allows you to import your Custom Expectation from other locations.
 
+:::note Custom Expectations without a Filesystem Data Context
+
+If you're using a Custom Expectation without a Filesystem Data Context, you'll need to package and install the Custom Expectation as a Python package, or you'll need to make the complete code for the Custom Expectation available locally where it is executed. For example, if you're creating a Validator, setting Expectations or Custom Expectations, and executing a Checkpoint in a Databricks notebook, the Metric and Expectation class for your Custom Expectation must be defined within the same notebook before calling `get_context()`.
+
+:::
+
+
+
 ## Prerequisites
 
 <Prerequisites>

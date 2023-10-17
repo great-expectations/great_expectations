@@ -379,9 +379,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _init_variables(self) -> DataContextVariables:
         raise NotImplementedError
 
-    def _save_project_config(
-        self, _fds_datasource: FluentDatasource | None = None
-    ) -> FluentDatasource | None:
+    def _save_project_config(self) -> None:
         """
         Each DataContext will define how its project_config will be saved through its internal 'variables'.
             - FileDataContext : Filesystem.
@@ -768,10 +766,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         self, datasource: Optional[FluentDatasource] = None, **kwargs
     ) -> FluentDatasource:
         if datasource:
-            from_config: bool = False
             datasource_name = datasource.name
         else:
-            from_config = True
             datasource_name = kwargs.get("name", "")
 
         if not datasource_name:
@@ -789,28 +785,20 @@ class AbstractDataContext(ConfigPeer, ABC):
         if not datasource:
             ds_type = _SourceFactories.type_lookup[kwargs["type"]]
             datasource = ds_type(**kwargs)
-
         assert isinstance(datasource, FluentDatasource)
 
-        datasource._data_context = self
-        datasource._data_context._save_project_config()
+        return_obj = self.datasources.set_datasource(
+            name=datasource_name, ds=datasource
+        )
+        assert isinstance(return_obj, FluentDatasource)
+        return_obj._data_context = self
+        self._save_project_config()
 
-        # temporary workaround while we update stores to work better with Fluent Datasources for all contexts
-        # Without this we end up with duplicate entries for datasources in both
-        # "fluent_datasources" and "datasources" config/yaml entries.
-        if self._datasource_store.cloud_mode and not from_config:
-            set_datasource = self._datasource_store.set(key=None, value=datasource)
-            if set_datasource.id:
-                logger.debug(f"Assigning `id` to '{datasource_name}'")
-                datasource.id = set_datasource.id
-
-        self.datasources[datasource_name] = datasource
-
-        return datasource
+        return return_obj
 
     def _update_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
-    ) -> None:
+    ) -> FluentDatasource:
         if datasource:
             datasource_name = datasource.name
         else:
@@ -827,14 +815,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             updated_datasource = datasource
 
-        updated_datasource._data_context = self
-
         updated_datasource._rebuild_asset_data_connectors()
 
-        updated_datasource.test_connection()
-        self._save_project_config(_fds_datasource=updated_datasource)
+        updated_datasource = self.datasources.set_datasource(
+            name=datasource_name, ds=updated_datasource
+        )
+        updated_datasource._data_context = self  # TODO: move from here?
+        self._save_project_config()
 
-        self.datasources[datasource_name] = updated_datasource
+        assert isinstance(updated_datasource, FluentDatasource)
+        return updated_datasource
 
     def _delete_fluent_datasource(
         self, datasource_name: str, _call_store: bool = True
@@ -962,12 +952,19 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _validate_add_datasource_args(
         name: str | None,
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None,
+        **kwargs,
     ) -> None:
         if not ((datasource is None) ^ (name is None)):
             error_message = "Must either pass in an existing 'datasource' or individual constructor arguments"
             if datasource and name:
                 error_message += " (but not both)"
             raise TypeError(error_message)
+
+        # "type" is only used in FDS so we check for its existence (equivalent for block-style would be "class_name" and "module_name")
+        if "type" in kwargs:
+            raise TypeError(
+                "Creation of fluent-datasources with individual arguments is not supported and should be done through the `context.sources` API."
+            )
 
     def _add_datasource(
         self,
@@ -977,7 +974,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
-        self._validate_add_datasource_args(name=name, datasource=datasource)
+        self._validate_add_datasource_args(name=name, datasource=datasource, **kwargs)
         if isinstance(datasource, FluentDatasource):
             self._add_fluent_datasource(
                 datasource=datasource,
@@ -3210,7 +3207,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         ...
 
-    @public_api
     @new_argument(
         argument_name="profiler",
         version="0.15.48",
@@ -3265,7 +3261,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 profiler=profiler,
             )
 
-    @public_api
     @new_argument(
         argument_name="id",
         version="0.15.48",
@@ -3301,7 +3296,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             id=id,
         )
 
-    @public_api
     @new_argument(
         argument_name="id",
         version="0.15.48",
@@ -3333,7 +3327,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             id=id,
         )
 
-    @public_api
     @new_method_or_class(version="0.15.48")
     def update_profiler(self, profiler: RuleBasedProfiler) -> RuleBasedProfiler:
         """Update a Profiler that already exists.
@@ -3353,9 +3346,10 @@ class AbstractDataContext(ConfigPeer, ABC):
     @overload
     def add_or_update_profiler(  # noqa: PLR0913
         self,
-        name: str,
-        config_version: float,
-        rules: dict[str, dict],
+        name: str = ...,
+        id: str | None = ...,
+        config_version: float = ...,
+        rules: dict[str, dict] = ...,
         variables: dict | None = ...,
         profiler: None = ...,
     ) -> RuleBasedProfiler:
@@ -3369,6 +3363,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_or_update_profiler(  # noqa: PLR0913
         self,
         name: None = ...,
+        id: None = ...,
         config_version: None = ...,
         rules: None = ...,
         variables: None = ...,
@@ -3380,7 +3375,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         ...
 
-    @public_api
     @new_method_or_class(version="0.15.48")
     def add_or_update_profiler(  # noqa: PLR0913
         self,
@@ -5147,7 +5141,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         --Documentation--
             - https://docs.greatexpectations.io/docs/terms/data_context
-            - https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config
 
         Args:
             yaml_config: A string containing the yaml config to be tested

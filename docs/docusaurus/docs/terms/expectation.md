@@ -23,7 +23,7 @@ Great Expectations is a framework for defining Expectations and running them aga
 
 ## Relationship to other objects
 
-Expectations are grouped into <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />, which are in turn stored and retrieved through an <TechnicalTag relative="../" tag="expectation_store" text="Expectation Store" />.  <TechnicalTag relative="../" tag="profiler" text="Profilers" /> will analyze data in order to generate Expectations, and <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> rely on Expectation Suites (and the Expectations contained therein) to <TechnicalTag relative="../" tag="validation" text="Validate" /> data.
+Expectations are grouped into <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />, and are stored in an <TechnicalTag relative="../" tag="expectation_store" text="Expectation Store" />. <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> rely on Expectation Suites to <TechnicalTag relative="../" tag="validation" text="Validate" /> data.
 
 ## Use cases
 
@@ -77,7 +77,7 @@ did.
 
 There are several paths to generating Expectations:
 
-- Automated inspection of datasets. Currently, the profiler mechanism in Great Expectations produces Expectation Suites that can be used for validation. In some cases, the goal is [profiling](../terms/profiler.md) your data, and in other cases automated inspection can produce Expectations that will be used in validating future batches of data.
+- Automated inspection of datasets. Data Assistants produce Expectation Suites for data validation. The goal is automated inspection, which can produce Expectations that can be used to validate future batches of data.
 - Expertise. Rich experience from subject-matter experts, Analysts, and data owners is often a critical source of Expectations. Interviewing experts and encoding their tacit knowledge of common distributions, values, or failure conditions can be can excellent way to generate Expectations.
 - Exploratory Analysis. Using Great Expectations in an exploratory analysis workflow (e.g. within Jupyter Notebooks)is an important way to develop experience with both raw and derived datasets and generate useful and testable Expectations about characteristics that may be important for the data's eventual purpose, whether reporting or feeding another downstream model or data system.
 

@@ -66,7 +66,7 @@ def check_dependencies(*deps: str) -> None:
 
 def get_test_files(target_dir: pathlib.Path) -> Set[str]:
     try:
-        res_snippets = subprocess.run(
+        res_snippets = subprocess.run(  # noqa: PLW1510
             [
                 "grep",
                 "--recursive",
@@ -83,7 +83,7 @@ def get_test_files(target_dir: pathlib.Path) -> Set[str]:
         pwd = subprocess.run(
             ["pwd"], text=True, capture_output=True, check=True
         ).stdout.strip("\n")
-        res_test_files = subprocess.run(
+        res_test_files = subprocess.run(  # noqa: PLW1510
             ["sed", f"s/:.*//;s?{pwd}??"],
             text=True,
             input=res_snippets.stdout,
@@ -98,7 +98,7 @@ def get_test_files(target_dir: pathlib.Path) -> Set[str]:
 
 def get_test_files_in_test_suite(target_dir: pathlib.Path) -> Set[str]:
     try:
-        res_test_fixtures = subprocess.run(
+        res_test_fixtures = subprocess.run(  # noqa: PLW1510
             [
                 "grep",
                 "--recursive",
@@ -112,19 +112,19 @@ def get_test_files_in_test_suite(target_dir: pathlib.Path) -> Set[str]:
             text=True,
             capture_output=True,
         )
-        res_test_fixture_files = subprocess.run(
+        res_test_fixture_files = subprocess.run(  # noqa: PLW1510
             ["sed", "s/:.*//"],
             text=True,
             input=res_test_fixtures.stdout,
             capture_output=True,
         )
-        res_unique_test_fixture_files = subprocess.run(
+        res_unique_test_fixture_files = subprocess.run(  # noqa: PLW1510
             ["sort", "--unique"],
             text=True,
             input=res_test_fixture_files.stdout,
             capture_output=True,
         )
-        res_test_fixture_definitions = subprocess.run(
+        res_test_fixture_definitions = subprocess.run(  # noqa: PLW1510
             [
                 "xargs",
                 "grep",
@@ -139,7 +139,7 @@ def get_test_files_in_test_suite(target_dir: pathlib.Path) -> Set[str]:
             input=res_unique_test_fixture_files.stdout,
             capture_output=True,
         )
-        res_test_files_with_fixture_definitions = subprocess.run(
+        res_test_files_with_fixture_definitions = subprocess.run(  # noqa: PLW1510
             ["sed", 's/user_flow_script="//;s/",//'],
             text=True,
             input=res_test_fixture_definitions.stdout,

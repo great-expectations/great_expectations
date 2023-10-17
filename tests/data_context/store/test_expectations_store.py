@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from unittest import mock
 
 import pytest
@@ -240,25 +242,56 @@ store_backend:
 
 
 @pytest.mark.cloud
-def test_ge_cloud_response_json_to_object_dict() -> None:
-    store = ExpectationsStore(store_name="expectations_store")
-
-    suite_id = "03d61d4e-003f-48e7-a3b2-f9f842384da3"
-    suite_config = {
-        "expectation_suite_name": "my_suite",
-    }
-    response_json = {
-        "data": {
-            "id": suite_id,
-            "attributes": {
-                "suite": suite_config,
+@pytest.mark.parametrize(
+    "response_json, expected, error_type",
+    [
+        pytest.param(
+            {
+                "data": {
+                    "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                    "attributes": {
+                        "suite": {
+                            "expectation_suite_name": "my_suite",
+                        },
+                    },
+                }
             },
-        }
-    }
-
-    expected = suite_config
-    expected["ge_cloud_id"] = suite_id
-
-    actual = store.ge_cloud_response_json_to_object_dict(response_json)
-
-    assert actual == expected
+            {
+                "expectation_suite_name": "my_suite",
+                "ge_cloud_id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+            },
+            None,
+            id="single_config",
+        ),
+        pytest.param({"data": []}, None, ValueError, id="empty_payload"),
+        pytest.param(
+            {
+                "data": [
+                    {
+                        "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                        "attributes": {
+                            "suite": {
+                                "expectation_suite_name": "my_suite",
+                            },
+                        },
+                    }
+                ]
+            },
+            {
+                "expectation_suite_name": "my_suite",
+                "ge_cloud_id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+            },
+            None,
+            id="single_config_in_list",
+        ),
+    ],
+)
+def test_gx_cloud_response_json_to_object_dict(
+    response_json: dict, expected: dict | None, error_type: Exception | None
+) -> None:
+    if error_type:
+        with pytest.raises(error_type):
+            _ = ExpectationsStore.gx_cloud_response_json_to_object_dict(response_json)
+    else:
+        actual = ExpectationsStore.gx_cloud_response_json_to_object_dict(response_json)
+        assert actual == expected

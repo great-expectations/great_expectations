@@ -61,11 +61,10 @@ def get_extras_require():
     lite = results.pop("lite")
     contrib = results.pop("contrib")
     docs_test = results.pop("api-docs-test")
-    cloud = results["cloud"]
     arrow = results["arrow"]
     results["boto"] = [req for req in lite if req.startswith("boto")]
     results["sqlalchemy2"] = [req for req in lite if req.startswith("sqlalchemy")]
-    results["test"] = lite + contrib + docs_test + cloud + arrow
+    results["test"] = lite + contrib + docs_test + arrow
 
     for new_key, existing_key in extra_key_mapping.items():
         results[new_key] = results[existing_key]
@@ -105,7 +104,6 @@ config = {
     "entry_points": {
         "console_scripts": [
             "great_expectations=great_expectations.cli:main",
-            "gx-agent=great_expectations.agent:run_agent",
         ]
     },
     "package_data": {"great_expectations": ["**/py.typed", "**/*.pyi"]},

@@ -2,7 +2,18 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple, overload
+from collections import UserDict
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    overload,
+)
 
 import numpy as np
 from dateutil.parser import parse
@@ -13,6 +24,7 @@ from great_expectations.compatibility import aws, sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.execution_engine import (
     PandasExecutionEngine,  # noqa: TCH001
     SqlAlchemyExecutionEngine,  # noqa: TCH001
@@ -20,9 +32,10 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import (
+    GXSqlDialect,
+)
 from great_expectations.execution_engine.util import check_sql_engine_dialect
-from great_expectations.util import get_sqlalchemy_inspector
 
 try:
     import psycopg2  # noqa: F401
@@ -85,19 +98,22 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
     # redshift
     # noinspection PyUnresolvedReferences
-    if hasattr(dialect, "RedshiftDialect") or (
-        aws.redshiftdialect
-        and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)
-    ):
-        if positive:
-            return sqlalchemy.BinaryExpression(
-                column, sqlalchemy.literal(regex), sqlalchemy.custom_op("~")
-            )
+    try:
+        if hasattr(dialect, "RedshiftDialect") or (
+            aws.redshiftdialect
+            and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)
+        ):
+            if positive:
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("~")
+                )
+            else:
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("!~")
+                )
         else:
-            return sqlalchemy.BinaryExpression(
-                column, sqlalchemy.literal(regex), sqlalchemy.custom_op("!~")
-            )
-    else:
+            pass
+    except AttributeError:
         pass
 
     try:
@@ -306,46 +322,84 @@ def attempt_allowing_relative_error(dialect):
     return detected_redshift or detected_psycopg2
 
 
-def is_column_present_in_table(
-    engine: sqlalchemy.Engine,
-    table_selectable: sqlalchemy.Select,
-    column_name: str,
-    schema_name: Optional[str] = None,
-) -> bool:
-    all_columns_metadata: List[Dict[str, Any]] = (
-        get_sqlalchemy_column_metadata(
-            engine=engine, table_selectable=table_selectable, schema_name=schema_name
-        )
-        or []
-    )
-    # Purposefully do not check for a NULL "all_columns_metadata" to insure that it must never happen.
-    column_names: List[str] = [col_md["name"] for col_md in all_columns_metadata]
-    return column_name in column_names
+class CaseInsensitiveString(str):
+    """
+    A string that compares equal to another string regardless of case,
+    unless it is quoted.
+    """
+
+    def __init__(self, string: str):
+        # TODO: check if string is already a CaseInsensitiveString?
+        self._original = string
+        self._lower = string.lower()
+        self._quote_string = '"'
+
+    @override
+    def __eq__(self, other: CaseInsensitiveString | str | object):
+        if self.is_quoted():
+            return self._original == str(other)
+        if isinstance(other, CaseInsensitiveString):
+            return self._lower == other._lower
+        elif isinstance(other, str):
+            return self._lower == other.lower()
+        else:
+            return False
+
+    def __hash__(self):
+        return hash(self._lower)
+
+    @override
+    def __str__(self) -> str:
+        return self._original
+
+    def is_quoted(self):
+        return self._original.startswith(self._quote_string)
+
+
+class CaseInsensitiveNameDict(UserDict):
+    """Normal dict except it returns a case-insensitive string for any `name` key values."""
+
+    def __init__(self, data: dict[str, Any]):
+        self.data = data
+
+    @override
+    def __getitem__(self, key: Any) -> Any:
+        item = self.data[key]
+        if key == "name":
+            logger.debug(f"CaseInsensitiveNameDict.__getitem__ - {key}:{item}")
+            return CaseInsensitiveString(item)
+        return item
 
 
 def get_sqlalchemy_column_metadata(
-    engine: sqlalchemy.Engine,
+    execution_engine: SqlAlchemyExecutionEngine,
     table_selectable: sqlalchemy.Select,
     schema_name: Optional[str] = None,
-) -> Optional[List[Dict[str, Any]]]:
+) -> Sequence[Mapping[str, Any]] | None:
     try:
-        columns: List[Dict[str, Any]]
+        columns: Sequence[Dict[str, Any]]
 
-        inspector: sqlalchemy.reflection.Inspector = get_sqlalchemy_inspector(engine)
+        engine = execution_engine.engine
+        inspector = execution_engine.get_inspector()
         try:
             # if a custom query was passed
             if sqlalchemy.TextClause and isinstance(
                 table_selectable, sqlalchemy.TextClause
             ):
                 if hasattr(table_selectable, "selected_columns"):
+                    # New in version 1.4.
                     columns = table_selectable.selected_columns.columns
                 else:
-                    columns = table_selectable.columns().columns
+                    # Implicit subquery for columns().column was deprecated in SQLAlchemy 1.4
+                    # We must explicitly create a subquery
+                    columns = table_selectable.columns().subquery().columns
             else:
+                # TODO: remove cast to a string once [this](https://github.com/snowflakedb/snowflake-sqlalchemy/issues/157) issue is resovled
+                table_name = str(table_selectable)
+                if execution_engine.dialect_name == GXSqlDialect.SNOWFLAKE:
+                    table_name = table_name.lower()
                 columns = inspector.get_columns(
-                    str(
-                        table_selectable
-                    ),  # TODO: remove cast to a string once [this](https://github.com/snowflakedb/snowflake-sqlalchemy/issues/157) issue is resovled
+                    table_name=table_name,
                     schema=schema_name,
                 )
         except (
@@ -353,7 +407,13 @@ def get_sqlalchemy_column_metadata(
             AttributeError,
             sa.exc.NoSuchTableError,
             sa.exc.ProgrammingError,
-        ):
+        ) as exc:
+            logger.debug(
+                f"{type(exc).__name__} while introspecting columns", exc_info=exc
+            )
+            logger.info(
+                f"While introspecting columns {exc!r}; attempting reflection fallback"
+            )
             # we will get a KeyError for temporary tables, since
             # reflection will not find the temporary schema
             columns = column_reflection_fallback(
@@ -370,9 +430,17 @@ def get_sqlalchemy_column_metadata(
                 sqlalchemy_engine=engine,
             )
 
+        dialect_name = execution_engine.dialect.name
+        if dialect_name == GXSqlDialect.SNOWFLAKE:
+            return [
+                # TODO: SmartColumn should know the dialect and do lookups based on that
+                CaseInsensitiveNameDict(column)
+                for column in columns
+            ]
+
         return columns
     except AttributeError as e:
-        logger.debug(f"Error while introspecting columns: {e!s}")
+        logger.debug(f"Error while introspecting columns: {e!r}", exc_info=e)
         return None
 
 
@@ -590,6 +658,8 @@ def column_reflection_fallback(  # noqa: PLR0915
             # if a custom query was passed
             if sqlalchemy.TextClause and isinstance(selectable, sqlalchemy.TextClause):
                 query: sqlalchemy.TextClause = selectable
+            elif sqlalchemy.Table and isinstance(selectable, sqlalchemy.Table):
+                query = sa.select(sa.text("*")).select_from(selectable).limit(1)
             else:  # noqa: PLR5501
                 # noinspection PyUnresolvedReferences
                 if dialect.name.lower() == GXSqlDialect.REDSHIFT:
@@ -600,7 +670,11 @@ def column_reflection_fallback(  # noqa: PLR0915
                         .limit(1)
                     )
                 else:
-                    query = sa.select(sa.text("*")).select_from(selectable).limit(1)
+                    query = (
+                        sa.select(sa.text("*"))
+                        .select_from(sa.text(selectable))
+                        .limit(1)
+                    )
 
             result_object = connection.execute(query)
             # noinspection PyProtectedMember
@@ -1184,6 +1258,7 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
     domain_records_df: pd.DataFrame,
     unexpected_index_column_names: List[str],
     expectation_domain_column_list: List[str],
+    exclude_unexpected_values: bool = False,
 ) -> List[Dict[str, Any]]:
     """
     Builds unexpected_index list for Pandas Dataframe in situation where the named
@@ -1220,15 +1295,29 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
 
     unexpected_index_list: List[Dict[str, Any]] = list()
 
-    for index in unexpected_indices:
-        primary_key_dict: Dict[str, Any] = dict()
-        for domain_column_name in expectation_domain_column_list:
-            primary_key_dict[domain_column_name] = domain_records_df.at[
-                index, domain_column_name
-            ]
+    if exclude_unexpected_values and len(unexpected_indices) != 0:
+        primary_key_dict_list: dict[str, List[Any]] = {
+            idx_col: [] for idx_col in unexpected_index_column_names
+        }
+        for index in unexpected_indices:
             for column_name in unexpected_index_column_names:
-                primary_key_dict[column_name] = index[tuple_index[column_name]]
-        unexpected_index_list.append(primary_key_dict)
+                primary_key_dict_list[column_name].append(
+                    index[tuple_index[column_name]]
+                )
+
+        unexpected_index_list.append(primary_key_dict_list)
+
+    else:
+        for index in unexpected_indices:
+            primary_key_dict: Dict[str, Any] = dict()
+            for domain_column_name in expectation_domain_column_list:
+                primary_key_dict[domain_column_name] = domain_records_df.at[
+                    index, domain_column_name
+                ]
+                for column_name in unexpected_index_column_names:
+                    primary_key_dict[column_name] = index[tuple_index[column_name]]
+            unexpected_index_list.append(primary_key_dict)
+
     return unexpected_index_list
 
 
@@ -1236,6 +1325,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
     domain_records_df: pd.DataFrame,
     unexpected_index_column_names: List[str],
     expectation_domain_column_list: List[str],
+    exclude_unexpected_values: bool = False,
 ) -> List[Dict[str, Any]]:
     """
     Builds unexpected_index list for Pandas Dataframe in situation where the named
@@ -1263,13 +1353,26 @@ def get_unexpected_indices_for_single_pandas_named_index(
             message=f"Error: The column {unexpected_index_column_names[0] if unexpected_index_column_names else '<no column specified>'} does not exist in the named indices. Please check your configuration",
             failed_metrics=["unexpected_index_list"],
         )
-    for index in unexpected_index_values_by_named_index:
-        primary_key_dict: Dict[str, Any] = dict()
-        for domain_column in expectation_domain_column_list:
-            primary_key_dict[domain_column] = domain_records_df.at[index, domain_column]
-        column_name: str = unexpected_index_column_names[0]
-        primary_key_dict[column_name] = index
-        unexpected_index_list.append(primary_key_dict)
+
+    if exclude_unexpected_values and len(unexpected_index_values_by_named_index) != 0:
+        primary_key_dict_list: dict[str, List[Any]] = {
+            unexpected_index_column_names[0]: []
+        }
+        for index in unexpected_index_values_by_named_index:
+            primary_key_dict_list[unexpected_index_column_names[0]].append(index)
+        unexpected_index_list.append(primary_key_dict_list)
+
+    else:
+        for index in unexpected_index_values_by_named_index:
+            primary_key_dict: Dict[str, Any] = dict()
+            for domain_column in expectation_domain_column_list:
+                primary_key_dict[domain_column] = domain_records_df.at[
+                    index, domain_column
+                ]
+            column_name: str = unexpected_index_column_names[0]
+            primary_key_dict[column_name] = index
+            unexpected_index_list.append(primary_key_dict)
+
     return unexpected_index_list
 
 
@@ -1297,6 +1400,10 @@ def compute_unexpected_pandas_indices(
     """
     unexpected_index_column_names: List[str]
     unexpected_index_list: List[Dict[str, Any]]
+    exclude_unexpected_values: bool = result_format.get(
+        "exclude_unexpected_values", False
+    )
+
     if domain_records_df.index.name is not None:
         unexpected_index_column_names = result_format.get(
             "unexpected_index_column_names", [domain_records_df.index.name]
@@ -1305,6 +1412,7 @@ def compute_unexpected_pandas_indices(
             domain_records_df=domain_records_df,
             unexpected_index_column_names=unexpected_index_column_names,
             expectation_domain_column_list=expectation_domain_column_list,
+            exclude_unexpected_values=exclude_unexpected_values,
         )
     # multiple named indices
     elif domain_records_df.index.names[0] is not None:
@@ -1316,6 +1424,7 @@ def compute_unexpected_pandas_indices(
                 domain_records_df=domain_records_df,
                 unexpected_index_column_names=unexpected_index_column_names,
                 expectation_domain_column_list=expectation_domain_column_list,
+                exclude_unexpected_values=exclude_unexpected_values,
             )
         )
     # named columns
@@ -1323,25 +1432,48 @@ def compute_unexpected_pandas_indices(
         unexpected_index_column_names = result_format["unexpected_index_column_names"]
         unexpected_index_list = []
         unexpected_indices: List[int | str] = list(domain_records_df.index)
-        for index in unexpected_indices:
-            primary_key_dict: Dict[str, Any] = dict()
-            assert (
-                expectation_domain_column_list
-            ), "`expectation_domain_column_list` was not provided"
-            for domain_column_name in expectation_domain_column_list:
-                primary_key_dict[domain_column_name] = domain_records_df.at[
-                    index, domain_column_name
-                ]
+
+        if (
+            exclude_unexpected_values
+            and len(unexpected_indices) != 0
+            and len(unexpected_index_column_names) != 0
+        ):
+            primary_key_dict_list: dict[str, List[Any]] = {
+                idx_col: [] for idx_col in unexpected_index_column_names
+            }
+            for index in unexpected_indices:
                 for column_name in unexpected_index_column_names:
                     column_name = get_dbms_compatible_column_names(  # noqa: PLW2901
                         column_names=column_name,
                         batch_columns_list=metrics["table.columns"],
                         error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',
                     )
-                    primary_key_dict[column_name] = domain_records_df.at[
-                        index, column_name
+                    primary_key_dict_list[column_name].append(
+                        domain_records_df.at[index, column_name]
+                    )
+            unexpected_index_list.append(primary_key_dict_list)
+
+        else:
+            for index in unexpected_indices:
+                primary_key_dict: Dict[str, Any] = dict()
+                assert (
+                    expectation_domain_column_list
+                ), "`expectation_domain_column_list` was not provided"
+                for domain_column_name in expectation_domain_column_list:
+                    primary_key_dict[domain_column_name] = domain_records_df.at[
+                        index, domain_column_name
                     ]
-            unexpected_index_list.append(primary_key_dict)
+                    for column_name in unexpected_index_column_names:
+                        column_name = get_dbms_compatible_column_names(  # noqa: PLW2901
+                            column_names=column_name,
+                            batch_columns_list=metrics["table.columns"],
+                            error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',
+                        )
+                        primary_key_dict[column_name] = domain_records_df.at[
+                            index, column_name
+                        ]
+                unexpected_index_list.append(primary_key_dict)
+
     else:
         unexpected_index_list = list(domain_records_df.index)
 

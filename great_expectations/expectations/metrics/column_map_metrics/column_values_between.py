@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 from typing import Optional, Union
 
@@ -29,7 +31,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         "allow_cross_type_comparisons",
     )
 
-    @column_condition_partial(engine=PandasExecutionEngine)
+    @column_condition_partial(engine=PandasExecutionEngine)  # type: ignore[misc] # untyped-decorator
     def _pandas(  # noqa: C901, PLR0912, PLR0913
         cls,
         column,
@@ -184,7 +186,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         else:
             return (min_value <= column) & (column <= max_value)
 
-    @column_condition_partial(engine=SqlAlchemyExecutionEngine)
+    @column_condition_partial(engine=SqlAlchemyExecutionEngine)  # type: ignore[misc] # untyped-decorator
     def _sqlalchemy(  # noqa: PLR0911, PLR0912, PLR0913
         cls,
         column,
@@ -252,7 +254,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
                 column <= sa.literal(max_value),
             )
 
-    @column_condition_partial(engine=SparkDFExecutionEngine)
+    @column_condition_partial(engine=SparkDFExecutionEngine)  # type: ignore[misc] # untyped-decorator
     def _spark(  # noqa: PLR0911, PLR0912, PLR0913
         cls,
         column,
