@@ -14,7 +14,7 @@ To learn more about Expectation Suites, see [Expectation Suites](../../terms/exp
 
 - You have a [Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset).
 
-## Create an Expectation Suite automatically
+## Automatically create an Expectation Suite that tests for missing data
 
 Automatically create an Expectation Suite that you can use to determine if your Data Asset contains missing data (null values). Creating Expectation Suites automatically saves you writing and then running the same code for each column in your Data Asset.
 
