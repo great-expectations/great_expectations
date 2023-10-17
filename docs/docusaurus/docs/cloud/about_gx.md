@@ -30,16 +30,6 @@ GX Cloud is intended to get you started faster than GX OSS and to simplify your 
 
 - You can share Validation data quickly and make it accessible to all users regardless of their technical knowledge.
 
-## Roles and responsibilities
-
-How you interact with GX Cloud is dependent on the role you're assigned by your Admin. 
-
-| Role          | Responsibilities                                  |
-|---------------|---------------------------------------------------|
-| Viewer        | - View Checkpoints and Validation Results           | 
-| Editor        | - Create and edit Expectations<br/>- Create access tokens |
-| Admin         | - Performs all GX Cloud administrative functions including user and role assignment |
-
 ## GX Cloud workflow
 
 The GX Cloud workflow is a sequence of tasks you complete to perform Data Validations. 
@@ -55,6 +45,16 @@ The following table lists the tasks that you complete in a typical GX Cloud work
 | Create Expectations                      | Define verifiable assertions about your data.                       | [Create an Expectation](/docs/cloud/expectations/manage_expectations)                            | 
 | Run Validations                          | Run a Validation to determine if your data meets the assertions in the Expectation.                       | [Run a Validation](/docs/cloud/validations/manage_validations)                            |
 | (Optional) Add and run Checkpoints       | Add and run Checkpoints to refine and confirm your Data Validations. | [Manage Checkpoints](/docs/cloud/checkpoints/manage_checkpoints)                            |
+
+## Roles and responsibilities
+
+How you interact with GX Cloud is dependent on the role you're assigned by your Admin. 
+
+| Role          | Responsibilities                                  |
+|---------------|---------------------------------------------------|
+| Viewer        | - View Checkpoints and Validation Results           | 
+| Editor        | - Create and edit Expectations<br/>- Create access tokens |
+| Admin         | - Performs all GX Cloud administrative functions including user and role assignment |
 
 ## Supported browsers
 
