@@ -17,6 +17,13 @@ from great_expectations.core.http import create_session
 if TYPE_CHECKING:
     from requests import Session
 
+
+try:
+    ORGANIZATION_ID: Final[str] = os.environ["GX_CLOUD_ORGANIZATION_ID"]
+except KeyError as e:
+    raise OSError("GX_CLOUD_ORGANIZATION_ID is not set in this environment.") from e
+
+
 PACT_MOCK_HOST: Final[str] = "localhost"
 PACT_MOCK_PORT: Final[int] = 9292
 PACT_DIR: Final[str] = str(

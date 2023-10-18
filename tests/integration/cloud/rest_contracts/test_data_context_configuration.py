@@ -1,18 +1,15 @@
 from __future__ import annotations
 
-import os
 import pathlib
-from typing import Callable, Final
+from typing import Callable
 
 import pytest
 from pact import Like
 
-from tests.integration.cloud.rest_contracts.conftest import ContractInteraction
-
-try:
-    ORGANIZATION_ID: Final[str] = os.environ["GX_CLOUD_ORGANIZATION_ID"]
-except KeyError as e:
-    raise OSError("GX_CLOUD_ORGANIZATION_ID is not set in this environment.") from e
+from tests.integration.cloud.rest_contracts.conftest import (
+    ORGANIZATION_ID,
+    ContractInteraction,
+)
 
 
 @pytest.mark.cloud
