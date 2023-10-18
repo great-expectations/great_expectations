@@ -108,9 +108,7 @@ def run_pact_test(
         if contract_interaction.request_body is not None:
             request["body"] = contract_interaction.request_body
 
-        request["headers"] = {
-            "Authorization": dict(session.headers).pop("Authorization")
-        }
+        request["headers"] = dict(session.headers)
         if contract_interaction.request_headers is not None:
             request["headers"].update(contract_interaction.request_headers)
 
