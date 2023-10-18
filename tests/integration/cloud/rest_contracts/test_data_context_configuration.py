@@ -7,8 +7,8 @@ import pytest
 from pact import Like
 
 from tests.integration.cloud.rest_contracts.conftest import (
-    ORGANIZATION_ID,
     ContractInteraction,
+    organization_id,
 )
 
 
@@ -24,7 +24,7 @@ from tests.integration.cloud.rest_contracts.conftest import (
             response_body={
                 "anonymous_usage_statistics": Like(
                     {
-                        "data_context_id": ORGANIZATION_ID,
+                        "data_context_id": organization_id(),
                         "enabled": True,
                     }
                 ),
@@ -41,9 +41,10 @@ from tests.integration.cloud.rest_contracts.conftest import (
 def test_data_context_configuration(
     contract_interaction: ContractInteraction,
     run_pact_test: Callable,
+    organziation_id: str,
 ):
     path = pathlib.Path(
-        "/", "organizations", ORGANIZATION_ID, "data-context-configuration"
+        "/", "organizations", organziation_id, "data-context-configuration"
     )
     run_pact_test(
         path=path,
