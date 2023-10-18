@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pathlib
+import uuid
 from typing import Callable
 
 import pytest
@@ -8,7 +9,6 @@ from pact import Like
 
 from tests.integration.cloud.rest_contracts.conftest import (
     ContractInteraction,
-    organization_id,
 )
 
 
@@ -24,7 +24,7 @@ from tests.integration.cloud.rest_contracts.conftest import (
             response_body={
                 "anonymous_usage_statistics": Like(
                     {
-                        "data_context_id": organization_id(),
+                        "data_context_id": uuid.uuid4(),
                         "enabled": True,
                     }
                 ),
