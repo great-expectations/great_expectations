@@ -40,7 +40,8 @@ jobs:
     # job only runs on main repo where we have access to credentials, or as part of the release
     if: |
       github.event.pull_request.head.repo.full_name == github.repository ||
-      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/')) ||
+      github.event_name == 'merge_group'
     steps:
       - run: echo "This CI step only runs on the main repo, where we have access to credentials."
 
