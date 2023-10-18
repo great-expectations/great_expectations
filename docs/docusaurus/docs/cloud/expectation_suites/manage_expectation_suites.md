@@ -34,7 +34,9 @@ Automatically create an Expectation Suite that you can use to determine if your 
 
 7. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
 
-## Manually create an empty Expectation Suite 
+## Create an empty Expectation Suite
+
+If you have specific business requirements, or you want to examine specific data, you can create an empty Expectation Suite and then add Expectations individually.
 
 1. In GX Cloud, click **Data Assets** and select a Data Asset in the **Data Assets** list.
 
