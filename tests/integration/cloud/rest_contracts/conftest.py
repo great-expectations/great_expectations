@@ -22,7 +22,6 @@ CONSUMER: Final[str] = "great_expectations"
 PROVIDER: Final[str] = "mercury"
 
 PACT_BROKER_BASE_URL: Final[str] = "https://greatexpectations.pactflow.io"
-PACT_BROKER_TOKEN: Final[str] = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN")
 PACT_MOCK_HOST: Final[str] = "localhost"
 PACT_MOCK_PORT: Final[int] = 9292
 PACT_DIR: Final[str] = str(
@@ -45,18 +44,33 @@ def session() -> Session:
 
 @pytest.fixture
 def pact(request) -> Pact:
-    pact: Pact = Consumer(
+    consumer = Consumer(
         name=CONSUMER,
-        tag_with_git_branch=True,
         version=gx_version,
-    ).has_pact_with(
-        Provider(name=PROVIDER),
-        broker_base_url=PACT_BROKER_BASE_URL,
-        broker_token=PACT_BROKER_TOKEN,
-        host_name=PACT_MOCK_HOST,
-        port=PACT_MOCK_PORT,
-        pact_dir=PACT_DIR,
+        auto_detect_version_properties=True,
     )
+
+    pact: Pact
+    if os.environ.get("PACT_BROKER_READ_WRITE_TOKEN"):
+        pact = consumer.has_pact_with(
+            Provider(name=PROVIDER),
+            broker_base_url=PACT_BROKER_BASE_URL,
+            broker_token=os.environ.get("PACT_BROKER_READ_WRITE_TOKEN"),
+            host_name=PACT_MOCK_HOST,
+            port=PACT_MOCK_PORT,
+            pact_dir=PACT_DIR,
+            publish_to_broker=True,
+        )
+    else:
+        pact = consumer.has_pact_with(
+            Provider(name=PROVIDER),
+            broker_base_url=PACT_BROKER_BASE_URL,
+            broker_token=os.environ.get("PACT_BROKER_READ_ONLY_TOKEN"),
+            host_name=PACT_MOCK_HOST,
+            port=PACT_MOCK_PORT,
+            pact_dir=PACT_DIR,
+        )
+
     pact.start_service()
     yield pact
     pact.stop_service()
@@ -107,10 +121,8 @@ def run_pact_test(
         }
         if contract_interaction.request_body is not None:
             request["body"] = contract_interaction.request_body
-
-        request["headers"] = dict(session.headers)
         if contract_interaction.request_headers is not None:
-            request["headers"].update(contract_interaction.request_headers)
+            request["headers"] = contract_interaction.request_headers
 
         response = {
             "status": contract_interaction.response_status,
