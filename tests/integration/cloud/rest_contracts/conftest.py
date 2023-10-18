@@ -12,6 +12,7 @@ from pact.matchers import Matcher
 from pydantic import StrictStr
 from typing_extensions import Annotated
 
+from great_expectations import __version__ as gx_version
 from great_expectations.core.http import create_session
 
 if TYPE_CHECKING:
@@ -44,8 +45,12 @@ def session() -> Session:
 
 @pytest.fixture
 def pact(request) -> Pact:
-    pact: Pact = Consumer(CONSUMER).has_pact_with(
-        Provider(PROVIDER),
+    pact: Pact = Consumer(
+        name=CONSUMER,
+        tag_with_git_branch=True,
+        version=gx_version,
+    ).has_pact_with(
+        Provider(name=PROVIDER),
         broker_base_url=PACT_BROKER_BASE_URL,
         broker_token=PACT_BROKER_TOKEN,
         host_name=PACT_MOCK_HOST,
