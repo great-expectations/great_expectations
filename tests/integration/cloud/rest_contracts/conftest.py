@@ -143,6 +143,6 @@ def run_pact_test(
         request_url = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}{path}"
 
         with pact:
-            session.get(str(request_url))
+            session.get(request_url)
 
     return _run_pact_test
