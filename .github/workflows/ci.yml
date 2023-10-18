@@ -317,7 +317,7 @@ jobs:
       - name: Get mercury version
         run: |
           curl -s ''${GX_CLOUD_BASE_URL}'/status' | \
-            python3 -c "import sys, json; api_version=json.load(sys.stdin)['api_version']; print(f'api_version={api_version}');"
+            python3 -c "import os, sys, json; api_version=json.load(sys.stdin)['api_version']; os.system(f'echo api_version={api_version}');"
         id: get_mercury_version
 
       - name: Verify endpoint contracts
