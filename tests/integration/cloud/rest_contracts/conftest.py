@@ -122,8 +122,10 @@ def run_pact_test(
         }
         if contract_interaction.request_body is not None:
             request["body"] = contract_interaction.request_body
+
+        request["headers"] = dict(session.headers)
         if contract_interaction.request_headers is not None:
-            request["headers"] = contract_interaction.request_headers
+            request["headers"].update(contract_interaction.request_headers)
 
         response = {
             "status": contract_interaction.response_status,
