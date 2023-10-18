@@ -97,6 +97,28 @@ module.exports = {
         },
         {
           type: 'category',
+          label: 'Manage Expectation Suites',
+          link: { type: 'doc', id: 'cloud/expectation_suites/manage_expectation_suites' },
+          items: [
+            {
+              type: 'link',
+              label: 'Automatically create an Expectation Suite that tests for missing data',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#automatically-create-an-expectation-suite-that-tests-for-missing-data',
+            },
+            {
+              type: 'link',
+              label: 'Manually create an empty Expectation Suite ',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#manually-create-an-empty-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Delete an Expectation Suite',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#delete-an-expectation-suite',
+            },
+          ]
+        },
+        {
+          type: 'category',
           label: 'Manage Validations',
           link: { type: 'doc', id: 'cloud/validations/manage_validations' },
           items: [
