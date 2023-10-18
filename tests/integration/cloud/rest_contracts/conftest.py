@@ -90,7 +90,8 @@ class ContractInteraction(pydantic.BaseModel):
         ContractInteraction
     """
 
-    model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
+    class Config:
+        arbitrary_types_allowed = True
 
     method: RequestMethods
     upon_receiving: pydantic.StrictStr
