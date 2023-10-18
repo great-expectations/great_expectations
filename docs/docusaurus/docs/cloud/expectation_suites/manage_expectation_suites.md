@@ -50,8 +50,6 @@ If you have specific business requirements, or you want to examine specific data
 
 6. Click **Generate Expectations**. 
 
-    It might take several minutes to create the Expectation Suite. When the process is complete, a new Expectation Suite appears in the **Expectation Suites** pane.
-
 7. Add Expectations to the Expectation Suite. See [Create an Expectation](/docs/cloud/expectations/manage_expectations#create-an-expectation).
 
 8. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
