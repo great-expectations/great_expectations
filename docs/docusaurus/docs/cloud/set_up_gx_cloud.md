@@ -60,7 +60,7 @@ Environment variables securely store your GX Cloud access credentials. The GX Cl
 2. Run the following code to set the `GX_CLOUD_ACCESS_TOKEN` and `GX_CLOUD_ORGANIZATION_ID` environment variables, install GX Cloud and its dependencies, and start the GX Cloud agent:
 
     ```bash title="Terminal input"
-    docker run -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" greatexpectations/agent
+    docker run --rm -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" greatexpectations/agent
     ```
     Replace `user_access_token` and `organization_id` with the values you copied previously. 
 
@@ -72,18 +72,3 @@ Environment variables securely store your GX Cloud access credentials. The GX Cl
 
     To edit an environment variable, stop the GX Cloud agent, edit the environment variable, save the change, and then restart the GX Cloud agent.
 
-## Troubleshoot
-
-Use the following information to help resolve issues with the GX Cloud agent installation.
-
-**Error: `great_expectations.agent.agent.GXAgentError: Missing or badly formed environment variable`**
-
-Confirm the `GX_CLOUD_ACCESS_TOKEN` and `GX_CLOUD_ORGANIZATION_ID` environment variables are set and available in your local environment. For example, on Unix systems, you can run `echo $GX_CLOUD_ORGANIZATION_ID` to confirm that your organization ID is present and set.
-
-**Error: `pika not found`**
-
-Run the following command:
-
-```bash title="Terminal input"
-    pip install 'great_expectations[cloud,snowflake]'
-```
