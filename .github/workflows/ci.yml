@@ -314,6 +314,12 @@ jobs:
       - name: Run the tests
         run: invoke ci-tests 'cloud' --up-services --verbose
 
+      - name: Get mercury version
+        run: |
+          curl -s '${GX_CLOUD_BASE_URL}/status' | \
+            python3 -c "import sys, json; api_version=json.load(sys.stdin)['api_version']; print(f'api_version={api_version}');"
+        id: get_mercury_version
+
       - name: Verify endpoint contracts
         run: |
           pact-verifier -r --provider-base-url=${GX_CLOUD_BASE_URL} \
@@ -322,7 +328,7 @@ jobs:
             --pact-broker-token=${PACT_BROKER_READ_WRITE_TOKEN} \
             --provider=mercury \
             --provider-version-branch=develop \
-            --provider-app-version=0.0.2
+            --provider-app-version=${{ steps.get_mercury_version.api_version }}
 
 
   marker-tests:
