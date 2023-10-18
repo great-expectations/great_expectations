@@ -5,14 +5,13 @@ import os
 import pathlib
 from typing import TYPE_CHECKING, Callable, Final, Union
 
-import pydantic
 import pytest
 from pact import Consumer, Pact, Provider
-from pact.matchers import Matcher
-from pydantic import StrictStr
-from typing_extensions import Annotated
+from pact.matchers import Matcher  # noqa: TCH002
+from typing_extensions import Annotated  # noqa: TCH002
 
 from great_expectations import __version__ as gx_version
+from great_expectations.compatibility import pydantic
 from great_expectations.core.http import create_session
 
 if TYPE_CHECKING:
@@ -94,8 +93,8 @@ class ContractInteraction(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
 
     method: RequestMethods
-    upon_receiving: StrictStr
-    given: StrictStr
+    upon_receiving: pydantic.StrictStr
+    given: pydantic.StrictStr
     response_status: Annotated[int, pydantic.Field(strict=True, ge=100, lt=600)]
     response_body: Union[dict, Matcher]
     request_body: Union[dict, Matcher, None] = None
