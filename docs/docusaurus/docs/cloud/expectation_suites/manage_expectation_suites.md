@@ -24,34 +24,35 @@ Automatically create an Expectation Suite that you can use to determine if your 
 
 3. Click **Create New Suite** in the **Expectation Suites** pane.
 
-4. Click **Missingness** and then enter a name for the Expectation Suite in the **Suite name** field.
+4. Click **Automatic (Experimental)**.
 
-5. Click **Generate Expectations**. 
+5. Click **Missingness** and then enter a name for the Expectation Suite in the **Suite name** field.
 
-    It can take several minutes to create the Expectation Suite. When the process is complete, a new Expectation Suite appears in the **Expectation Suites** pane.
+6. Click **Generate Expectations**. 
 
-6. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
+    It might take several minutes to create the Expectation Suite. When the process is complete, a new Expectation Suite appears in the **Expectation Suites** pane.
+
+7. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
 
 ## Manually create an empty Expectation Suite 
 
-1. In Jupyter Notebook, run the following code to import the `great_expectations` module and the existing Data Context:
+1. In GX Cloud, click **Data Assets** and select a Data Asset in the **Data Assets** list.
 
-    ```python title="Jupyter Notebook"
-    import great_expectations as gx
-    context = gx.get_context()
-    ```
-2. Run the following code to create an empty Expectation Suite:
+2. Click the **Expectations** tab.
 
-    ```python title="Jupyter Notebook"
-    expectation_suite = context.add_expectation_suite(
-    expectation_suite_name="<expectation_suite_name>"
-    )
-    ```
-    Replace `<expectation_suite_name>` with a meaningful name for the Expectation Suite.
+3. Click **Create New Suite** in the **Expectation Suites** pane.
 
-3. Add Expectations to the Expectation Suite. See [Create an Expectation](/docs/cloud/expectations/manage_expectations#create-an-expectation).
+4. Click **Manual**.
 
-4. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
+5. Enter a name for the Expectation Suite in the **Suite name** field.
+
+6. Click **Generate Expectations**. 
+
+    It might take several minutes to create the Expectation Suite. When the process is complete, a new Expectation Suite appears in the **Expectation Suites** pane.
+
+7. Add Expectations to the Expectation Suite. See [Create an Expectation](/docs/cloud/expectations/manage_expectations#create-an-expectation).
+
+8. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
 
 ## Delete an Expectation Suite
 
