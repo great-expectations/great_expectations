@@ -322,7 +322,7 @@ jobs:
             --pact-broker-token=${PACT_BROKER_READ_WRITE_TOKEN} \
             --provider=mercury \
             --provider-version-branch=develop \
-            --provider-application-version=0.0.0 \
+            --provider-app-version=0.0.0 \
 
 
   marker-tests:
