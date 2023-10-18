@@ -18,10 +18,6 @@ from great_expectations.core.http import create_session
 if TYPE_CHECKING:
     from requests import Session
 
-CONSUMER: Final[str] = "great_expectations"
-PROVIDER: Final[str] = "mercury"
-
-PACT_BROKER_BASE_URL: Final[str] = "https://greatexpectations.pactflow.io"
 PACT_MOCK_HOST: Final[str] = "localhost"
 PACT_MOCK_PORT: Final[int] = 9292
 PACT_DIR: Final[str] = str(
@@ -44,6 +40,10 @@ def session() -> Session:
 
 @pytest.fixture
 def pact(request) -> Pact:
+    pact_broker_base_url = "https://greatexpectations.pactflow.io"
+    consumer_name = "great_expectations"
+    provider_name = "mercury"
+
     broker_token: str
     publish_to_broker: bool
     if os.environ.get("PACT_BROKER_READ_WRITE_TOKEN"):
@@ -54,12 +54,12 @@ def pact(request) -> Pact:
         publish_to_broker = False
 
     pact: Pact = Consumer(
-        name=CONSUMER,
+        name=consumer_name,
         version=gx_version,
         tag_with_git_branch=True,
     ).has_pact_with(
-        Provider(name=PROVIDER),
-        broker_base_url=PACT_BROKER_BASE_URL,
+        Provider(name=provider_name),
+        broker_base_url=pact_broker_base_url,
         broker_token=broker_token,
         host_name=PACT_MOCK_HOST,
         port=PACT_MOCK_PORT,
