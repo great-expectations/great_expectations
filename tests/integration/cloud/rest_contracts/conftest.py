@@ -24,7 +24,9 @@ PACT_BROKER_BASE_URL: Final[str] = "https://greatexpectations.pactflow.io"
 PACT_BROKER_TOKEN: Final[str] = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN")
 PACT_MOCK_HOST: Final[str] = "localhost"
 PACT_MOCK_PORT: Final[int] = 9292
-PACT_DIR: Final[str] = str(pathlib.Path(__file__).parent.resolve())
+PACT_DIR: Final[str] = str(
+    pathlib.Path(pathlib.Path(__file__).parent, "pacts").resolve()
+)
 
 
 class RequestMethods(str, enum.Enum):
@@ -101,7 +103,9 @@ def run_pact_test(
         if contract_interaction.request_body is not None:
             request["body"] = contract_interaction.request_body
 
-        request["headers"] = dict(session.headers)
+        request["headers"] = {
+            "Authorization": dict(session.headers).pop("Authorization")
+        }
         if contract_interaction.request_headers is not None:
             request["headers"].update(contract_interaction.request_headers)
 

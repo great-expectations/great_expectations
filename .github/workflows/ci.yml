@@ -315,7 +315,7 @@ jobs:
         run: invoke ci-tests 'cloud' --up-services --verbose
 
       - name: Verify endpoint contracts
-        run: pact-verifier -r --provider-base-url=${GX_CLOUD_BASE_URL} --pact-url=tests/integration/cloud/rest_contracts/great_expectations-mercury.json --pact-broker-url=https://greatexpectations.pactflow.io/ --pact-broker-token=${PACT_BROKER_READ_WRITE_TOKEN} --provider-version-tag=a230c2be583800846b08f49aa86196ae6ed2defe --provider=mercury --provider-app-version=0.0.0
+        run: pact-verifier -r --provider-base-url=${GX_CLOUD_BASE_URL} --pact-url=tests/integration/cloud/rest_contracts/pacts/great_expectations-mercury.json --pact-broker-url=https://greatexpectations.pactflow.io/ --pact-broker-token=${PACT_BROKER_READ_WRITE_TOKEN} --provider-version-tag=a230c2be583800846b08f49aa86196ae6ed2defe --provider=mercury --provider-app-version=0.0.0
 
 
   marker-tests:
