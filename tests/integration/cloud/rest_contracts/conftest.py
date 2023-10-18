@@ -3,6 +3,7 @@ from __future__ import annotations
 import enum
 import os
 import pathlib
+import subprocess
 from typing import TYPE_CHECKING, Callable, Final, Union
 
 import pytest
@@ -10,7 +11,6 @@ from pact import Consumer, Pact, Provider
 from pact.matchers import Matcher  # noqa: TCH002
 from typing_extensions import Annotated  # noqa: TCH002
 
-from great_expectations import __version__ as gx_version
 from great_expectations.compatibility import pydantic
 from great_expectations.core.http import create_session
 
@@ -37,6 +37,10 @@ def session() -> Session:
     return create_session(access_token=os.environ.get("GX_CLOUD_ACCESS_TOKEN"))
 
 
+def get_git_commit_hash() -> str:
+    return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
+
+
 @pytest.fixture
 def pact(request) -> Pact:
     pact_broker_base_url = "https://greatexpectations.pactflow.io"
@@ -54,8 +58,9 @@ def pact(request) -> Pact:
 
     pact: Pact = Consumer(
         name=consumer_name,
-        version=gx_version,
+        version=get_git_commit_hash(),
         tag_with_git_branch=True,
+        auto_detect_version_properties=True,
     ).has_pact_with(
         Provider(name=provider_name),
         broker_base_url=pact_broker_base_url,
