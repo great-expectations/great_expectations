@@ -9,7 +9,10 @@ from pact import Like
 
 from tests.integration.cloud.rest_contracts.conftest import ContractInteraction
 
-ORGANIZATION_ID: Final[str] = os.environ.get("GX_CLOUD_ORGANIZATION_ID")
+try:
+    ORGANIZATION_ID: Final[str] = os.environ["GX_CLOUD_ORGANIZATION_ID"]
+except KeyError as e:
+    raise OSError("GX_CLOUD_ORGANIZATION_ID is not set in this environment.") from e
 
 
 @pytest.mark.cloud

@@ -34,7 +34,11 @@ class RequestMethods(str, enum.Enum):
 
 @pytest.fixture
 def session() -> Session:
-    return create_session(access_token=os.environ.get("GX_CLOUD_ACCESS_TOKEN"))
+    try:
+        access_token = os.environ["GX_CLOUD_ACCESS_TOKEN"]
+    except KeyError as e:
+        raise OSError("GX_CLOUD_ACCESS_TOKEN is not set in this environment.") from e
+    return create_session(access_token=access_token)
 
 
 def get_git_commit_hash() -> str:
