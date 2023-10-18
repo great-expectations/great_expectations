@@ -150,4 +150,4 @@ Pipfile
 Pipfile.lock
 
 # contract testing files
-tests/integration/cloud/rest_contracts/pacts/great_expectations-mercury.json
+tests/integration/cloud/rest_contracts/pacts
