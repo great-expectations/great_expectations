@@ -26,7 +26,7 @@ PACT_DIR: Final[str] = str(
 
 
 @pytest.fixture
-def organization_id() -> str:
+def existing_organization_id() -> str:
     try:
         return os.environ["GX_CLOUD_ORGANIZATION_ID"]
     except KeyError as e:
@@ -125,27 +125,28 @@ def run_pact_test(
     session: Session,
     pact: Pact,
 ) -> Callable:
+    """Runs a contract test and produces a Pact contract json file in directory:
+        - tests/integration/cloud/rest_contracts/pacts
+
+    Args:
+        path: A pathlib.Path to the endpoint relative to the base url.
+            e.g.
+                ```
+                path = pathlib.Path(
+                    "/", "organizations", organization_id, "data-context-configuration"
+                )
+                ```
+        contract_interaction: A ContractInteraction object which represents a Python API (Consumer) request
+                              and expected minimal response, given a state in the Cloud backend (Provider).
+
+    Returns:
+        None
+    """
+
     def _run_pact_test(
         path: pathlib.Path,
         contract_interaction: ContractInteraction,
     ) -> None:
-        """Runs a contract test and produces a Pact contract json file in directory:
-            - tests/integration/cloud/rest_contracts/pacts
-
-        Args:
-            path: A pathlib.Path representing the route from the base API URL.
-                e.g.
-                    ```
-                    path = pathlib.Path(
-                        "/", "organizations", organization_id, "data-context-configuration"
-                    )
-                    ```
-            contract_interaction: A ContractInteraction object which represents a Python API (Consumer) request
-                                  and expected minimal response, given a state in the Cloud backend (Provider).
-
-        Returns:
-            None
-        """
         request = {
             "method": contract_interaction.method,
             "path": str(path),
