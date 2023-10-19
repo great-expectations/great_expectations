@@ -40,13 +40,10 @@ from tests.integration.cloud.rest_contracts.conftest import (
 )
 def test_data_context_configuration(
     contract_interaction: ContractInteraction,
-    run_pact_test: Callable,
+    run_pact_test: Callable[[pathlib.Path, ContractInteraction], None],
     organization_id: str,
-):
+) -> None:
     path = pathlib.Path(
         "/", "organizations", organization_id, "data-context-configuration"
     )
-    run_pact_test(
-        path=path,
-        contract_interaction=contract_interaction,
-    )
+    run_pact_test(path, contract_interaction)
