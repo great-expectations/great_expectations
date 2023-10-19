@@ -122,6 +122,19 @@ def checkpoint(
             {
                 "expectation_suite_name": expectation_suite.expectation_suite_name,
                 "batch_request": batch_request,
+            },
+            {
+                "expectation_suite_name": expectation_suite.expectation_suite_name,
+                "batch_request": batch_request,
+            },
+        ],
+    )
+    _ = context.add_or_update_checkpoint(
+        name=checkpoint_name,
+        validations=[
+            {
+                "expectation_suite_name": expectation_suite.expectation_suite_name,
+                "batch_request": batch_request,
             }
         ],
     )
