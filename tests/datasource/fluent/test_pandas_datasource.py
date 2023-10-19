@@ -4,6 +4,7 @@ import copy
 import inspect
 import logging
 import pathlib
+import uuid
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Callable, Type
 
@@ -480,7 +481,7 @@ def test_read_dataframe(
 def test_cloud_get_dataframe_asset(test_df_pandas: pd.DataFrame):
     # this test runs end-to-end in a real Cloud Data Context
     context = gx.get_context(mode="cloud")
-    dataframe_asset_name = "test_df"
+    dataframe_asset_name = f"DA_{uuid.uuid4().hex}"
     datasource = context.sources.pandas_default
     _ = datasource.add_dataframe_asset(name=dataframe_asset_name)
     dataframe_asset = datasource.get_asset(asset_name=dataframe_asset_name)
@@ -495,7 +496,7 @@ def test_cloud_get_dataframe_asset(test_df_pandas: pd.DataFrame):
 def test_cloud_get_csv_asset_not_in_memory(valid_file_path: pathlib.Path):
     # this test runs end-to-end in a real Cloud Data Context
     context = gx.get_context(mode="cloud")
-    csv_asset_name = "test_csv"
+    csv_asset_name = f"DA_{uuid.uuid4().hex}"
     datasource = context.sources.pandas_default
     _ = datasource.add_csv_asset(
         name=csv_asset_name,
