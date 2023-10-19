@@ -41,10 +41,10 @@ from tests.integration.cloud.rest_contracts.conftest import (
 def test_data_context_configuration(
     contract_interaction: ContractInteraction,
     run_pact_test: Callable,
-    organziation_id: str,
+    organization_id: str,
 ):
     path = pathlib.Path(
-        "/", "organizations", organziation_id, "data-context-configuration"
+        "/", "organizations", organization_id, "data-context-configuration"
     )
     run_pact_test(
         path=path,
