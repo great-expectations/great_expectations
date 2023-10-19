@@ -4,6 +4,7 @@ import enum
 import os
 import pathlib
 import subprocess
+import uuid
 from typing import TYPE_CHECKING, Callable, Final, Union
 
 import pytest
@@ -73,9 +74,14 @@ def pact(request) -> Pact:
             "no pact credentials: set PACT_BROKER_READ_ONLY_TOKEN from greatexpectations.pactflow.io"
         )
 
+    # adding random id to the commit hash allows us to run the build
+    # and publish the contract more than once. we need this ability due to
+    # the ability to trigger re-run of tests in GH or release build process
+    version = f"{get_git_commit_hash()}_{uuid.uuid4()[:5]}"
+
     pact: Pact = Consumer(
         name=consumer_name,
-        version=get_git_commit_hash(),
+        version=version,
         tag_with_git_branch=True,
         auto_detect_version_properties=True,
     ).has_pact_with(
