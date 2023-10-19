@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterator
 
 import pytest
 
@@ -27,7 +27,7 @@ def creds_populated() -> bool:
 def datasource(
     context: CloudDataContext,
     creds_populated: bool,
-) -> SnowflakeDatasource:
+) -> Iterator[SnowflakeDatasource]:
     if not creds_populated:
         pytest.skip("no snowflake credentials")
 
@@ -56,7 +56,7 @@ def datasource(
 
 
 @pytest.fixture
-def data_asset(datasource: SnowflakeDatasource, table_factory) -> TableAsset:
+def data_asset(datasource: SnowflakeDatasource, table_factory) -> Iterator[TableAsset]:
     schema_name = f"i{uuid.uuid4().hex}"
     table_name = f"i{uuid.uuid4().hex}"
     table_factory(
@@ -86,7 +86,7 @@ def batch_request(data_asset: TableAsset) -> BatchRequest:
 def expectation_suite(
     context: CloudDataContext,
     data_asset: TableAsset,
-) -> ExpectationSuite:
+) -> Iterator[ExpectationSuite]:
     expectation_suite_name = f"{data_asset.datasource.name} | {data_asset.name}"
     expectation_suite = context.add_expectation_suite(
         expectation_suite_name=expectation_suite_name,
@@ -114,7 +114,7 @@ def checkpoint(
     data_asset: TableAsset,
     batch_request: BatchRequest,
     expectation_suite: ExpectationSuite,
-) -> Checkpoint:
+) -> Iterator[Checkpoint]:
     checkpoint_name = f"{data_asset.datasource.name} | {data_asset.name}"
     _ = context.add_checkpoint(
         name=checkpoint_name,

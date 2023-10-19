@@ -63,11 +63,14 @@ def pact(request) -> Pact:
     broker_token: str
     publish_to_broker: bool
     if os.environ.get("PACT_BROKER_READ_WRITE_TOKEN"):
-        broker_token = os.environ.get("PACT_BROKER_READ_WRITE_TOKEN")
+        broker_token = os.environ.get("PACT_BROKER_READ_WRITE_TOKEN", "")
         publish_to_broker = True
     else:
-        broker_token = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN")
+        broker_token = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN", "")
         publish_to_broker = False
+
+    if not broker_token:
+        raise OSError("No Pact broker token was found in the environment.")
 
     pact: Pact = Consumer(
         name=consumer_name,
@@ -111,7 +114,7 @@ class ContractInteraction(pydantic.BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    method: RequestMethods
+    method: Union[RequestMethods, pydantic.StrictStr]
     upon_receiving: pydantic.StrictStr
     given: pydantic.StrictStr
     response_status: Annotated[int, pydantic.Field(strict=True, ge=100, lt=600)]
@@ -147,7 +150,7 @@ def run_pact_test(
             None
         """
 
-        request = {
+        request: dict[str, str | dict] = {
             "method": contract_interaction.method,
             "path": str(path),
         }
@@ -156,10 +159,10 @@ def run_pact_test(
 
         request["headers"] = dict(gx_cloud_session.headers)
         if contract_interaction.request_headers is not None:
-            request["headers"].update(contract_interaction.request_headers)
+            request["headers"].update(contract_interaction.request_headers)  # type: ignore[union-attr]
             gx_cloud_session.headers.update(contract_interaction.request_headers)
 
-        response = {
+        response: dict[str, str | dict | Matcher] = {
             "status": contract_interaction.response_status,
             "body": contract_interaction.response_body,
         }
