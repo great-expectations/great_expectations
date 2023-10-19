@@ -75,7 +75,7 @@ def pact(request) -> Pact:
         )
 
     # adding random id to the commit hash allows us to run the build
-    # and publish the contract more than once. we need this ability due to
+    # and publish the contract more than once. we need this because we have
     # the ability to trigger re-run of tests in GH or release build process
     version = f"{get_git_commit_hash()}_{uuid.uuid4()[:5]}"
 
