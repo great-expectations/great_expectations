@@ -125,28 +125,28 @@ def run_pact_test(
     session: Session,
     pact: Pact,
 ) -> Callable:
-    """Runs a contract test and produces a Pact contract json file in directory:
-        - tests/integration/cloud/rest_contracts/pacts
-
-    Args:
-        path: A pathlib.Path to the endpoint relative to the base url.
-            e.g.
-                ```
-                path = pathlib.Path(
-                    "/", "organizations", organization_id, "data-context-configuration"
-                )
-                ```
-        contract_interaction: A ContractInteraction object which represents a Python API (Consumer) request
-                              and expected minimal response, given a state in the Cloud backend (Provider).
-
-    Returns:
-        None
-    """
-
     def _run_pact_test(
         path: pathlib.Path,
         contract_interaction: ContractInteraction,
     ) -> None:
+        """Runs a contract test and produces a Pact contract json file in directory:
+            - tests/integration/cloud/rest_contracts/pacts
+
+        Args:
+            path: A pathlib.Path to the endpoint relative to the base url.
+                e.g.
+                    ```
+                    path = pathlib.Path(
+                        "/", "organizations", organization_id, "data-context-configuration"
+                    )
+                    ```
+            contract_interaction: A ContractInteraction object which represents a Python API (Consumer) request
+                                  and expected minimal response, given a state in the Cloud backend (Provider).
+
+        Returns:
+            None
+        """
+
         request = {
             "method": contract_interaction.method,
             "path": str(path),
