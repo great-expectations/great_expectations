@@ -5547,7 +5547,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             input value with all `$` characters replaced with the escape string
         """
         if isinstance(value, dict) or isinstance(value, OrderedDict):  # noqa: PLR1701
-            return {  # type: ignore[return-value] # recursive call expects str
+            return {
                 k: self.escape_all_config_variables(
                     value=v,
                     dollar_sign_escape_string=dollar_sign_escape_string,

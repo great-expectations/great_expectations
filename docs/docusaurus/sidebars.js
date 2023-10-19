@@ -31,11 +31,6 @@ module.exports = {
               label: 'Set the environment variables and start the GX Cloud agent',
               href: '/docs/cloud/set_up_gx_cloud#set-the-environment-variables-and-start-the-gx-cloud-agent',
             },
-            {
-              type: 'link',
-              label: 'Troubleshoot',
-              href: '/docs/cloud/set_up_gx_cloud#troubleshoot',
-            },
           ]
         },
         {
@@ -92,6 +87,28 @@ module.exports = {
               type: 'link',
               label: 'Delete an Expectation',
               href: '/docs/cloud/expectations/manage_expectations#delete-an-expectation',
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Manage Expectation Suites',
+          link: { type: 'doc', id: 'cloud/expectation_suites/manage_expectation_suites' },
+          items: [
+            {
+              type: 'link',
+              label: 'Automatically create an Expectation Suite that tests for missing data',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#automatically-create-an-expectation-suite-that-tests-for-missing-data',
+            },
+            {
+              type: 'link',
+              label: 'Manually create an empty Expectation Suite ',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#manually-create-an-empty-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Delete an Expectation Suite',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#delete-an-expectation-suite',
             },
           ]
         },
