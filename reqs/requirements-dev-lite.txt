@@ -5,6 +5,7 @@ freezegun>=0.3.15
 ipykernel<=6.17.1 # Newest version (6.19.0 released on 12/7/2022) causes "WARNING  traitlets:client.py:1181 No handler found for comm target 'comm'" by "https://github.com/jupyter/nbclient/blob/main/nbclient/client.py" (version 0.7.2) to be emitted.
 moto>=2.0.0,<3.0.0
 nbconvert>=5
+pact-python>=2.0.1
 pyfakefs>=4.5.1
 pytest>=6.2.0
 pytest-benchmark>=3.4.1
