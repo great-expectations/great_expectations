@@ -4,6 +4,7 @@ import enum
 import os
 import pathlib
 import subprocess
+import uuid
 from typing import TYPE_CHECKING, Callable, Final, Union
 
 import pytest
@@ -65,16 +66,22 @@ def pact(request) -> Pact:
     if os.environ.get("PACT_BROKER_READ_WRITE_TOKEN"):
         broker_token = os.environ.get("PACT_BROKER_READ_WRITE_TOKEN", "")
         publish_to_broker = True
-    else:
+    elif os.environ.get("PACT_BROKER_READ_ONLY_TOKEN"):
         broker_token = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN", "")
         publish_to_broker = False
+    else:
+        pytest.skip(
+            "no pact credentials: set PACT_BROKER_READ_ONLY_TOKEN from greatexpectations.pactflow.io"
+        )
 
-    if not broker_token:
-        raise OSError("No Pact broker token was found in the environment.")
+    # adding random id to the commit hash allows us to run the build
+    # and publish the contract more than once. we need this because we have
+    # the ability to trigger re-run of tests in GH or release build process
+    version = f"{get_git_commit_hash()}_{str(uuid.uuid4())[:5]}"
 
     pact: Pact = Consumer(
         name=consumer_name,
-        version=get_git_commit_hash(),
+        version=version,
         tag_with_git_branch=True,
         auto_detect_version_properties=True,
     ).has_pact_with(
