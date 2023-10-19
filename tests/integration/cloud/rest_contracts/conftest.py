@@ -63,14 +63,15 @@ def pact(request) -> Pact:
     broker_token: str
     publish_to_broker: bool
     if os.environ.get("PACT_BROKER_READ_WRITE_TOKEN"):
-        broker_token = os.environ.get("PACT_BROKER_READ_WRITE_TOKEN", "")
+        broker_token = os.environ.get("PACT_BROKER_READ_WRITE_TOKEN")
         publish_to_broker = True
-    else:
-        broker_token = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN", "")
+    elif os.environ.get("PACT_BROKER_READ_ONLY_TOKEN"):
+        broker_token = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN")
         publish_to_broker = False
-
-    if not broker_token:
-        raise OSError("No Pact broker token was found in the environment.")
+    else:
+        pytest.skip(
+            "no pact credentials: set PACT_BROKER_READ_ONLY_TOKEN from greatexpectations.pactflow.io"
+        )
 
     pact: Pact = Consumer(
         name=consumer_name,
