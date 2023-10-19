@@ -24,7 +24,7 @@ from tests.integration.cloud.rest_contracts.conftest import (
             response_body={
                 "anonymous_usage_statistics": Like(
                     {
-                        "data_context_id": uuid.uuid4(),
+                        "data_context_id": str(uuid.uuid4()),
                         "enabled": True,
                     }
                 ),
