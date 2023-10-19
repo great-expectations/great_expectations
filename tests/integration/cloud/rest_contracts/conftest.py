@@ -63,10 +63,10 @@ def pact(request) -> Pact:
     broker_token: str
     publish_to_broker: bool
     if os.environ.get("PACT_BROKER_READ_WRITE_TOKEN"):
-        broker_token = os.environ.get("PACT_BROKER_READ_WRITE_TOKEN")
+        broker_token = os.environ.get("PACT_BROKER_READ_WRITE_TOKEN", "")
         publish_to_broker = True
     elif os.environ.get("PACT_BROKER_READ_ONLY_TOKEN"):
-        broker_token = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN")
+        broker_token = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN", "")
         publish_to_broker = False
     else:
         pytest.skip(
