@@ -1043,6 +1043,7 @@ def ci_tests(  # noqa: PLR0913
     ctx: Context,
     marker: str,
     up_services: bool = False,
+    restart_services: bool = False,
     verbose: bool = False,
     reports: bool = False,
     slowest: int = 5,
@@ -1059,6 +1060,8 @@ def ci_tests(  # noqa: PLR0913
 
     `up_services` is False by default to avoid starting services which may already be up
     when running tests locally.
+
+    `restart_services` is False by default to avoid always restarting the services.
 
     Defined this as a new invoke task to avoid some of the baggage of our old test setup.
     """
@@ -1077,8 +1080,14 @@ def ci_tests(  # noqa: PLR0913
         pytest_options.append("-vv")
 
     for test_deps in _get_marker_dependencies(marker):
-        if up_services:
-            service(ctx, names=test_deps.services, markers=test_deps.services, pty=pty)
+        if restart_services or up_services:
+            service(
+                ctx,
+                names=test_deps.services,
+                markers=test_deps.services,
+                restart_services=restart_services,
+                pty=pty,
+            )
 
         for extra_pytest_arg in test_deps.extra_pytest_args:
             pytest_options.append(extra_pytest_arg)
@@ -1099,12 +1108,18 @@ def ci_tests(  # noqa: PLR0913
     iterable=["names", "markers"],
 )
 def service(
-    ctx: Context, names: Sequence[str], markers: Sequence[str], pty: bool = True
+    ctx: Context,
+    names: Sequence[str],
+    markers: Sequence[str],
+    restart_services: bool = False,
+    pty: bool = True,
 ):
     """
     Startup a service, by referencing its name directly or by looking up a pytest marker.
 
     If a marker is specified, the services listed in `MARKER_DEPENDENCY_MAP` will be used.
+
+    If restart_services was passed, the containers will be stopped and re-built.
 
     Note:
         The main reason this is a separate task is to make it easy to start services
@@ -1119,17 +1134,43 @@ def service(
     if service_names:
         print(f"  Starting services for {', '.join(service_names)} ...")
         for service_name in service_names:
-            cmds = [
-                "docker",
-                "compose",
-                "-f",
-                f"assets/docker/{service_name}/docker-compose.yml",
-                "up",
-                "-d",
-                "--quiet-pull",
-                "--wait",
-                "--wait-timeout 90",
-            ]
+            cmds = []
+            if restart_services:
+                print(
+                    f"  Removing existing containers and building latest for {service_name} ..."
+                )
+                cmds.extend(
+                    [
+                        "docker",
+                        "compose",
+                        "-f",
+                        f"assets/docker/{service_name}/docker-compose.yml",
+                        "rm",
+                        "-fsv",
+                        "&&",
+                        "docker",
+                        "compose",
+                        "-f",
+                        f"assets/docker/{service_name}/docker-compose.yml",
+                        "build",
+                        "--pull",
+                        "&&",
+                    ]
+                )
+
+            cmds.extend(
+                [
+                    "docker",
+                    "compose",
+                    "-f",
+                    f"assets/docker/{service_name}/docker-compose.yml",
+                    "up",
+                    "-d",
+                    "--quiet-pull",
+                    "--wait",
+                    "--wait-timeout 90",
+                ]
+            )
             ctx.run(" ".join(cmds), echo=True, pty=pty)
         # TODO: remove this sleep. This is a temporary hack to give services enough
         #       time to come up to get ci merging again.
