@@ -41,8 +41,8 @@ class RequestMethods(str, enum.Enum):
     PUT = "PUT"
 
 
-@pytest.fixture
-def session() -> Session:
+@pytest.fixture(scope="module")
+def gx_cloud_session() -> Session:
     try:
         access_token = os.environ["GX_CLOUD_ACCESS_TOKEN"]
     except KeyError as e:
@@ -122,7 +122,7 @@ class ContractInteraction(pydantic.BaseModel):
 
 @pytest.fixture
 def run_pact_test(
-    session: Session,
+    gx_cloud_session: Session,
     pact: Pact,
 ) -> Callable:
     def _run_pact_test(
@@ -154,10 +154,10 @@ def run_pact_test(
         if contract_interaction.request_body is not None:
             request["body"] = contract_interaction.request_body
 
-        request["headers"] = dict(session.headers)
+        request["headers"] = dict(gx_cloud_session.headers)
         if contract_interaction.request_headers is not None:
             request["headers"].update(contract_interaction.request_headers)
-            session.headers.update(contract_interaction.request_headers)
+            gx_cloud_session.headers.update(contract_interaction.request_headers)
 
         response = {
             "status": contract_interaction.response_status,
@@ -174,6 +174,8 @@ def run_pact_test(
         request_url = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}{path}"
 
         with pact:
-            session.request(method=contract_interaction.method, url=request_url)
+            gx_cloud_session.request(
+                method=contract_interaction.method, url=request_url
+            )
 
     return _run_pact_test
