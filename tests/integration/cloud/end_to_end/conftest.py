@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import os
 from pprint import pformat as pf
-from typing import Final, Generator, Literal, Protocol
+from typing import TYPE_CHECKING, Final, Generator, Literal, Protocol
 
 import pytest
 
@@ -11,6 +11,9 @@ import great_expectations as gx
 from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.data_context import CloudDataContext
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+
+if TYPE_CHECKING:
+    from great_expectations.compatibility.sqlalchemy import engine
 
 LOGGER: Final = logging.getLogger("tests")
 
@@ -45,7 +48,7 @@ def table_factory() -> Generator[TableFactory, None, None]:
     create the table if it does not exist and drop it after the test class.
     """
     all_created_tables: dict[
-        str, list[dict[Literal["table_name", "schema"], str | None]]
+        str, list[dict[Literal["table_name", "schema_name"], str | None]]
     ] = {}
     engines: dict[str, engine.Engine] = {}
 
