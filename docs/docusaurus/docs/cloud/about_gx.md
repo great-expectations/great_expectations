@@ -14,13 +14,13 @@ Here are just a few of the benefits you'll get with GX Cloud:
 
 - A hosted environment and intuitive interface makes it faster to set up and run your Data Validations.
 
-- Unique features such as Validation run histories, Data Asset metrics, and more.
+- Features such as Validation run histories, Data Asset metrics, and more.
 
 - Eliminates the need to create, run, and maintain complex code for your data queries.
 
 ## Workflow optimization
 
-GX Cloud is intended to get you started faster than GX OSS and to simplify your Data Validation workflows. Here's how it's done:
+GX Cloud is intended to help you get started faster than GX OSS and to simplify your Data Validation workflows. Here's how it's done:
 
 - You can identify your Data Source, connect to a Data Asset, create Expectations, and then run Validations without running a single line of Python code. 
 
