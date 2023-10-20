@@ -10,6 +10,26 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.17.23
+* [FEATURE] Unexpected index list with/without values - New parameter in result_format ([#8785](GxURL.PULL_REQUESTS/8785)) (thanks @MMoussabbih)
+* [DOCS] Update Cloud Docs to Include Docker Methodology ([#8820](GxURL.PULL_REQUESTS/8820))
+* [DOCS] Updated language & code refs for Databricks Getting Started ([#8751](GxURL.PULL_REQUESTS/8751))
+* [DOCS] Remove all mentions of profilers in public docs ([#8825](GxURL.PULL_REQUESTS/8825))
+* [DOCS] Create New Content for Column Descriptive Metrics in GX Cloud ([#8814](GxURL.PULL_REQUESTS/8814))
+* [DOCS] Document GX Cloud Data Assistant Functionality ([#8829](GxURL.PULL_REQUESTS/8829))
+* [DOCS] Update set_up_gx_cloud.md ([#8832](GxURL.PULL_REQUESTS/8832))
+* [DOCS] Update Manage Expectation Suites in GX Cloud Docs ([#8842](GxURL.PULL_REQUESTS/8842))
+* [DOCS] Remove Troubleshooting Entry from GX Cloud TOC ([#8846](GxURL.PULL_REQUESTS/8846))
+* [MAINTENANCE] Column Descriptive Metrics: Don't add empty string for type ([#8830](GxURL.PULL_REQUESTS/8830))
+* [MAINTENANCE] Add cloud api via docker compose for testing ([#8803](GxURL.PULL_REQUESTS/8803))
+* [MAINTENANCE] Remove public_api decorators from RBP ([#8812](GxURL.PULL_REQUESTS/8812))
+* [MAINTENANCE] mypy 1.6 ([#8837](GxURL.PULL_REQUESTS/8837))
+* [MAINTENANCE] Delete legacy `BasicSuiteBuilderProfiler` ([#8808](GxURL.PULL_REQUESTS/8808))
+* [MAINTENANCE] Run ci-is-on-main-repo in merge queue. ([#8839](GxURL.PULL_REQUESTS/8839))
+* [MAINTENANCE] Add pact contract testing with GX Cloud ([#8831](GxURL.PULL_REQUESTS/8831))
+* [MAINTENANCE] Allow re-publishing Pact on same commit ([#8851](GxURL.PULL_REQUESTS/8851))
+* [CONTRIB] Also run CI when a PR becomes Ready for Review ([#8833](GxURL.PULL_REQUESTS/8833))
+
 ### 0.17.22
 * [BUGFIX] Column Descriptive Metrics: Skip finding semantic type info for UNKNOWN columns ([#8815](https://github.com/great-expectations/great_expectations/pull/8815))
 * [BUGFIX] Column Descriptive Metrics: Convert table name to lowercase for snowflake ([#8817](https://github.com/great-expectations/great_expectations/pull/8817))
