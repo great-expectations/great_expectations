@@ -5,7 +5,7 @@ import os
 import pathlib
 import subprocess
 import uuid
-from typing import TYPE_CHECKING, Callable, Final, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Final, List, Union
 
 import pytest
 from pact import Consumer, Pact, Provider
@@ -26,7 +26,9 @@ PACT_DIR: Final[str] = str(
 )
 
 
-MinimumResponseBody: TypeAlias = Union[dict[str, Union[str, dict, Matcher]], Matcher]
+JsonType: TypeAlias = Union[None, int, str, bool, List[Any], Dict[str, Any]]
+
+PactBody: TypeAlias = Union[Dict[str, Union[JsonType, Matcher]], Matcher]
 
 
 @pytest.fixture
@@ -129,8 +131,8 @@ class ContractInteraction(pydantic.BaseModel):
     upon_receiving: pydantic.StrictStr
     given: pydantic.StrictStr
     response_status: Annotated[int, pydantic.Field(strict=True, ge=100, lt=600)]
-    response_body: Union[dict, Matcher]
-    request_body: Union[dict, Matcher, None] = None
+    response_body: PactBody
+    request_body: Union[PactBody, None] = None
     request_headers: Union[dict, None] = None
 
 
@@ -161,7 +163,7 @@ def run_pact_test(
             None
         """
 
-        request: dict[str, str | dict] = {
+        request: dict[str, str | PactBody] = {
             "method": contract_interaction.method,
             "path": str(path),
         }
@@ -173,7 +175,7 @@ def run_pact_test(
             request["headers"].update(contract_interaction.request_headers)  # type: ignore[union-attr]
             gx_cloud_session.headers.update(contract_interaction.request_headers)
 
-        response: dict[str, int | MinimumResponseBody] = {
+        response: dict[str, int | PactBody] = {
             "status": contract_interaction.response_status,
             "body": contract_interaction.response_body,
         }
