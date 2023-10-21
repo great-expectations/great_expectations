@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING, Callable, Final, Union
 
 import pytest
 from pact import Consumer, Pact, Provider
-from pact.matchers import Matcher  # noqa: TCH002
-from typing_extensions import Annotated  # noqa: TCH002
+from pact.matchers import Matcher
+from typing_extensions import Annotated, TypeAlias  # noqa: TCH002
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.http import create_session
@@ -24,6 +24,9 @@ PACT_MOCK_PORT: Final[int] = 9292
 PACT_DIR: Final[str] = str(
     pathlib.Path(pathlib.Path(__file__).parent, "pacts").resolve()
 )
+
+
+MinimumResponseBody: TypeAlias = Union[dict[str, Union[str, dict, Matcher]], Matcher]
 
 
 @pytest.fixture
@@ -170,7 +173,7 @@ def run_pact_test(
             request["headers"].update(contract_interaction.request_headers)  # type: ignore[union-attr]
             gx_cloud_session.headers.update(contract_interaction.request_headers)
 
-        response: dict[str, str | dict | Matcher] = {
+        response: dict[str, int | MinimumResponseBody] = {
             "status": contract_interaction.response_status,
             "body": contract_interaction.response_body,
         }
