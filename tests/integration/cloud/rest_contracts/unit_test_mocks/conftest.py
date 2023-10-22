@@ -1,10 +1,12 @@
+import json
+import uuid
 from unittest import mock
 
 import pytest
+import requests
 from pact.matchers import Matcher
 
 import great_expectations as gx
-from great_expectations.core.datasource_dict import DatasourceDict
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource.fluent import PandasDatasource
 from tests.integration.cloud.rest_contracts.conftest import JsonData, PactBody
@@ -41,22 +43,24 @@ def _reify_pact_body(
         return body
 
 
-@mock.patch(target="requests.Session.get")
 @pytest.fixture
 def mock_cloud_data_context() -> CloudDataContext:
     response_body: JsonData = _reify_pact_body(
         body=DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY
     )
+    mock_response = requests.Response()
+    mock_response.status_code = 200
+    mock_response._content = json.dumps(response_body).encode("utf-8")
     with mock.patch(
-        target="requests.Response.json",
-        return_value=response_body,
+        target="requests.Session.get",
+        return_value=mock_response,
     ):
-        mock_cloud_data_context = gx.get_context(mode="cloud")
-        mock_cloud_data_context.datasources.return_value = DatasourceDict(
-            context=mock_cloud_data_context,
-            datasource_store=mock_cloud_data_context._datasource_store,
+        return gx.get_context(
+            mode="cloud",
+            cloud_base_url="https://fake-host.io",
+            cloud_organization_id=str(uuid.uuid4()),
+            cloud_access_token="not a real token",
         )
-        return mock_cloud_data_context
 
 
 @pytest.fixture
