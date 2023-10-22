@@ -1,4 +1,3 @@
-from typing import Any
 from unittest import mock
 
 import pytest
@@ -12,7 +11,7 @@ from tests.integration.cloud.rest_contracts.test_data_context_configuration impo
 )
 
 
-def _convert_matcher_to_value(matcher: Matcher) -> Any:
+def _convert_matcher_to_value(matcher: Matcher) -> JsonType:
     return matcher.generate()["contents"]
 
 
