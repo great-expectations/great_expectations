@@ -14,7 +14,7 @@ DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[dict] = {
     "anonymous_usage_statistics": Like(
         {
             "data_context_id": Format().uuid,
-            "enabled": True,
+            "enabled": False,
         }
     ),
     "datasources": Like({}),
