@@ -1,6 +1,9 @@
+import json
+import uuid
 from unittest import mock
 
 import pytest
+import requests
 from pact.matchers import Matcher
 
 import great_expectations as gx
@@ -36,14 +39,23 @@ def _reify_pact_body(
         return body
 
 
-@mock.patch(target="requests.Session.get")
 @pytest.fixture
 def mock_cloud_data_context() -> CloudDataContext:
     mock_cloud_data_context_response_body: JsonData = _reify_pact_body(
         body=DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY
     )
+    mock_response = requests.Response()
+    mock_response.status_code = 200
+    mock_response._content = json.dumps(mock_cloud_data_context_response_body).encode(
+        "utf-8"
+    )
     with mock.patch(
-        target="requests.Response.json",
-        return_value=mock_cloud_data_context_response_body,
+        target="requests.Session.get",
+        return_value=mock_response,
     ):
-        return gx.get_context(mode="cloud")
+        return gx.get_context(
+            mode="cloud",
+            cloud_base_url="https://fake-host.io",
+            cloud_organization_id=str(uuid.uuid4()),
+            cloud_access_token="not a real token",
+        )
