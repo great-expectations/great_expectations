@@ -26,9 +26,9 @@ PACT_DIR: Final[str] = str(
 )
 
 
-JsonType: TypeAlias = Union[None, int, str, bool, List[Any], Dict[str, Any]]
+JsonData: TypeAlias = Union[None, int, str, bool, List[Any], Dict[str, Any]]
 
-PactBody: TypeAlias = Union[Dict[str, Union[JsonType, Matcher]], Matcher]
+PactBody: TypeAlias = Union[Dict[str, Union[JsonData, Matcher]], Matcher]
 
 
 @pytest.fixture

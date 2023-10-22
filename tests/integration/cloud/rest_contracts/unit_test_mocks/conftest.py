@@ -5,19 +5,19 @@ from pact.matchers import Matcher
 
 import great_expectations as gx
 from great_expectations.data_context import CloudDataContext
-from tests.integration.cloud.rest_contracts.conftest import JsonType, PactBody
+from tests.integration.cloud.rest_contracts.conftest import JsonData, PactBody
 from tests.integration.cloud.rest_contracts.test_data_context_configuration import (
     DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY,
 )
 
 
-def _convert_matcher_to_value(matcher: Matcher) -> JsonType:
+def _convert_matcher_to_value(matcher: Matcher) -> JsonData:
     return matcher.generate()["contents"]
 
 
 def _reify_pact_body(
     body: PactBody,
-) -> JsonType:
+) -> JsonData:
     if isinstance(body, list):
         for index, item in enumerate(body):
             if isinstance(item, Matcher):
@@ -39,7 +39,7 @@ def _reify_pact_body(
 @mock.patch(target="requests.Session.get")
 @pytest.fixture
 def mock_cloud_data_context() -> CloudDataContext:
-    mock_cloud_data_context_response_body: JsonType = _reify_pact_body(
+    mock_cloud_data_context_response_body: JsonData = _reify_pact_body(
         body=DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY
     )
     with mock.patch(

@@ -4,7 +4,7 @@ import pathlib
 from typing import Callable, Final
 
 import pytest
-from pact import Like
+from pact import Format, Like
 
 from tests.integration.cloud.rest_contracts.conftest import (
     ContractInteraction,
@@ -13,7 +13,7 @@ from tests.integration.cloud.rest_contracts.conftest import (
 DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[dict] = {
     "anonymous_usage_statistics": Like(
         {
-            "data_context_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+            "data_context_id": Format().uuid,
             "enabled": True,
         }
     ),
