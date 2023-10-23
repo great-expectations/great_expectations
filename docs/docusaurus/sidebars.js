@@ -39,6 +39,7 @@ module.exports = {
           link: { type: 'doc', id: 'cloud/quickstarts/quickstart_lp' },
           items: [
             'cloud/quickstarts/snowflake_quickstart',
+            'cloud/quickstarts/airflow_quickstart',
           ]
         },
         {
