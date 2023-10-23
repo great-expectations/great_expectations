@@ -14,7 +14,7 @@ Data is always viewed through the lens of an Execution Engine in Great Expectati
 
 ## Relationship to other objects
 
-Execution Engines are components of <TechnicalTag relative="../" tag="datasource" text="Datasources" />.  They accept <TechnicalTag relative="../" tag="batch_request" text="Batch Requests" /> and deliver Batches.  The Execution Engine is an underlying component of the Data Source, and when you interact with the Data Source it will handle the Execution Engine for you.
+Execution Engines are components of <TechnicalTag relative="../" tag="datasource" text="Data Sources" />.  They accept <TechnicalTag relative="../" tag="batch_request" text="Batch Requests" /> and deliver Batches.  The Execution Engine is an underlying component of the Data Source, and when you interact with the Data Source it will handle the Execution Engine for you.
 
 ## Use cases
 

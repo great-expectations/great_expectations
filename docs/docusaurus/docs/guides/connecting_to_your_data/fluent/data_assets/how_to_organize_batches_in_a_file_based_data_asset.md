@@ -24,7 +24,7 @@ import AfterCreateAndConfigureDataAsset from '/docs/components/connect_to_data/n
 
 This guide demonstrates how to organize Batches in a file-based Data Asset. This includes how to use a regular expression to indicate which files should be returned as Batches and how to add Batch Sorters to a Data Asset to specify the order in which Batches are returned.
 
-:::caution Datasources defined with the block-config method
+:::caution Data Sources defined with the block-config method
 
 If you are using a Data Source that was created with the advanced block-config method, see the following resources:
 - [How to configure a Spark Data Source](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)

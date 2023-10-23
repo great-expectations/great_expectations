@@ -34,7 +34,7 @@ The Data Context provides a primary entry point to the GX API.  Your Data Contex
 
 ### Configuration management
 
-A Data Context includes basic create, read, update, and delete (CRUD) operations for the core components of a GX deployment. This includes Datasources, Expectation Suites, and Checkpoints. In addition, a Data Context allows you to access and integrate Data Docs, Stores, Plugins, and so on.
+A Data Context includes basic create, read, update, and delete (CRUD) operations for the core components of a GX deployment. This includes Data Sources, Expectation Suites, and Checkpoints. In addition, a Data Context allows you to access and integrate Data Docs, Stores, Plugins, and so on.
 
 ### Component management and config storage
 

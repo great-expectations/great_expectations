@@ -82,7 +82,7 @@ For instance, imagine you are doing analysis on sales data for cars.  You could 
 
 ## Access
 
-You will not typically need to directly access a Data Asset.  Great Expectations validates Batches, and your Data Assets will be used behind the scenes in conjunction with Datasources and Batch Requests to provide those Batches.  However, you yourself will not need to work with the Data Asset beyond configuring it in a Data Source.
+You will not typically need to directly access a Data Asset.  Great Expectations validates Batches, and your Data Assets will be used behind the scenes in conjunction with Data Sources and Batch Requests to provide those Batches.  However, you yourself will not need to work with the Data Asset beyond configuring it in a Data Source.
 
 ## Create
 

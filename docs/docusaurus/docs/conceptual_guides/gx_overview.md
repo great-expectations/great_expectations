@@ -93,9 +93,9 @@ For more information, see [Create Expectations](/docs/guides/expectations/expect
 
 Expectation Suites are collections of Expectations describing your data.  When GX validates data, an Expectation Suite helps streamline the process by running all of the contained Expectations against that data.  In almost all cases, when you create an Expectation you will be creating it inside of an Expectation Suite object.
 
-You can define multiple Expectation Suites for the same data to cover different use cases.  An example could be having one Expectation Suite for raw data, and a more strict Expectation Suite for that same data post-processing.  Because an Expectation Suite is decoupled from a specific source of data, you can apply the same Expectation Suite against multiple, disparate Datasources.  For instance, you can reuse an Expectation Suite that was created around an older set of data to validate the quality of a new set of data.
+You can define multiple Expectation Suites for the same data to cover different use cases.  An example could be having one Expectation Suite for raw data, and a more strict Expectation Suite for that same data post-processing.  Because an Expectation Suite is decoupled from a specific source of data, you can apply the same Expectation Suite against multiple, disparate Data Sources.  For instance, you can reuse an Expectation Suite that was created around an older set of data to validate the quality of a new set of data.
 
-For more information, see [Create and manage Expectations and Expectation Suite](/docs/guides/expectations/create_manage_expectations_lp).
+For more information, see [Create and manage Expectations and Expectation Suites](/docs/guides/expectations/create_manage_expectations_lp).
 
 ### Data Assistants
 
