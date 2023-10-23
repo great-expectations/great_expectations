@@ -4858,6 +4858,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         datasource = self._instantiate_datasource_from_config(
             raw_config=config, substituted_config=substituted_config
         )
+        name = datasource.name
 
         # TODO: also unlikely desired as "testing" whether we can instantiate an object should not update
         # caches or config, but keeping existing behavior for now
