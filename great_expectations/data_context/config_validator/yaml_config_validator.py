@@ -12,7 +12,7 @@ This validator evaluates YAML configurations of core Great Expectations componen
 from __future__ import annotations
 
 import traceback
-from typing import TYPE_CHECKING, Any, List, Literal, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, List, Literal, Optional, Tuple, Union
 
 from ruamel.yaml import YAML
 
@@ -31,7 +31,6 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.rule_based_profiler import RuleBasedProfiler  # noqa: TCH001
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.util import filter_properties_dict
@@ -40,6 +39,7 @@ if TYPE_CHECKING:
     from ruamel.yaml.comments import CommentedMap
 
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.datasource import DataConnector, Datasource
 
 
 # TODO: check if this can be refactored to use YAMLHandler class
@@ -405,11 +405,10 @@ class _YamlConfigValidator:
         datasource_name: str = name or config.get("name") or "my_temp_datasource"
         datasource_config = datasourceConfigSchema.load(config)
         datasource_config.name = datasource_name
-        instantiated_class = cast(
-            Datasource,
+        instantiated_class = (
             self._data_context._instantiate_datasource_from_config_with_substitution(
-                config=datasource_config,
-            ),
+                config=datasource_config
+            )
         )
 
         anonymizer = Anonymizer(self._data_context.data_context_id)

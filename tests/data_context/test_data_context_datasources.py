@@ -22,6 +22,7 @@ from great_expectations.data_context.types.base import (
     InMemoryStoreBackendDefaults,
 )
 from great_expectations.datasource import Datasource
+from great_expectations.exceptions import DatasourceNotFoundError
 
 
 @pytest.fixture
@@ -197,7 +198,7 @@ def test_BaseDataContext_update_datasource_updates_existing_data_source(
 
 
 @pytest.mark.unit
-def test_BaseDataContext_update_datasource_creates_new_data_source(
+def test_BaseDataContext_update_datasource_fails_when_datsource_does_not_exist(
     in_memory_runtime_context: EphemeralDataContext,
     pandas_enabled_datasource_config: dict,
 ) -> None:
@@ -214,9 +215,8 @@ def test_BaseDataContext_update_datasource_creates_new_data_source(
 
     assert name not in context.datasources
 
-    context.update_datasource(datasource)
-
-    assert name in context.datasources
+    with pytest.raises(DatasourceNotFoundError):
+        context.update_datasource(datasource)
 
 
 @pytest.mark.unit
