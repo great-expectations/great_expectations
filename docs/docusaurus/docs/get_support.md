@@ -4,7 +4,7 @@ title: 'Get support'
 description: Learn what resources are avialable to help you resolve issues with GX Core.
 ---
 
-GX Core is open source software (OSS) and relies on an active user community for its continued success. Input from users like you help GX and the community build its collective knowledge and improve GX Core. Knowing how and where to seek support will help you get the answers you need to resolve issues quickly.
+GX Core is open source software (OSS) and relies on an active user community for its continued success. Input from users like you help GX and the community build its collective knowledge and improve GX Core. Knowing how and where to seek support will help you get the answers you need to resolve issues.
 
 ## Try solving your issue first
 
@@ -24,11 +24,11 @@ If you're wondering what might happen when you implement a solution, try it out!
 
 ## Ask the right questions and provide the right information
 
-Taking the time to formulate your questions properly and providing all the relevant background information can save time and improve response times. The following are some recommendations that will help the GX Developer Advocates (DAs) help you. 
+Taking the time to formulate your questions properly and providing all the relevant background information can save time and improve response times. The following are some recommendations that will help the GX Developer Advocates (DAs) and other community members help you. 
 
 ### Include all the relevant information
 
-Tell the GX DAs exactly what issue you're experiencing, or the problem you're trying to solve. When asking questions, you should provide the following:
+Clearly explain the issue you're experiencing, or the problem you're trying to solve. When asking questions, you should provide the following:
 
 - The complete error log or logs.
 
@@ -44,7 +44,7 @@ When posting questions or asking for help in one of the GX Slack channels, don't
 
 ### Don't tag single or multiple users
 
-If you've developed a rapport with a specific GX DA, or a community member, don't tag them in Slack posts. You never know who is available or who has the knowledge to solve your issue. Tagging specific users can limit the scope of the response. Also, the community is typically very responsive and helpful. If you don't get a response within a reasonable time, review your post and make sure you've framed your questions correctly and provided the necessary background information. If you don't get a response, or it's unhelpful, try an alternate medium to resolve your issue.
+Even if you've previously developed a rapport with a specific GX DA, or a community member, don't tag them in new Slack posts. You never know who is available or who has the knowledge to solve your issue. Tagging specific users can limit the scope of the response. Also, the community is typically very responsive and helpful. If you don't get a response within a reasonable time, review your post and make sure you've framed your questions correctly and provided the necessary background information. If you don't get a response, or it's unhelpful, try an alternate medium to resolve your issue.
 
 ## Select the correct medium for questions and support
 
