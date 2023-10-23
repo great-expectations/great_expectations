@@ -53,11 +53,12 @@ def _get_mock_response_from_pact_response_body(
 @pytest.fixture
 def mock_cloud_data_context() -> CloudDataContext:
     response_body: JsonData = _reify_pact_body(
-        body=DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY
+        body=DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY,
     )
     mock_response = requests.Response()
     mock_response.status_code = 200
     mock_response._content = json.dumps(response_body).encode("utf-8")
+
     with mock.patch(
         target="requests.Session.get",
         return_value=mock_response,
