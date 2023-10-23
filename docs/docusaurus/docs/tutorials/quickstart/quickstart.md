@@ -52,7 +52,6 @@ flowchart LR
 click Configure_A "https://docs.greatexpectations.io/docs/guides/setup/installation/install_gx"
 click Configure_B "https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context/"
 click Connect_A "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_lp"
-click Connect_B "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_lp"
 click Define_A "https://docs.greatexpectations.io/docs/terms/validator"
 click Define_B "https://docs.greatexpectations.io/docs/guides/expectations/expectations_lp"
 click Validate_A "https://docs.greatexpectations.io/docs/guides/validation/checkpoints/checkpoint_lp"
