@@ -43,6 +43,13 @@ def _reify_pact_body(
         return body
 
 
+def _get_mock_response_from_pact_response_body(
+    status_code: int,
+    content: JsonData,
+) -> str:
+    ...
+
+
 @pytest.fixture
 def mock_cloud_data_context() -> CloudDataContext:
     response_body: JsonData = _reify_pact_body(
