@@ -1,15 +1,29 @@
 from __future__ import annotations
 
 import pathlib
-import uuid
-from typing import Callable
+from typing import Callable, Final
 
 import pytest
-from pact import Like
+from pact import Format, Like
 
 from tests.integration.cloud.rest_contracts.conftest import (
     ContractInteraction,
 )
+
+DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[dict] = {
+    "anonymous_usage_statistics": Like(
+        {
+            "data_context_id": Format().uuid,
+            "enabled": False,
+        }
+    ),
+    "datasources": Like({}),
+    "include_rendered_content": {
+        "globally": True,
+        "expectation_validation_result": True,
+        "expectation_suite": True,
+    },
+}
 
 
 @pytest.mark.cloud
@@ -21,20 +35,7 @@ from tests.integration.cloud.rest_contracts.conftest import (
             upon_receiving="a request for a Data Context",
             given="the Data Context exists",
             response_status=200,
-            response_body={
-                "anonymous_usage_statistics": Like(
-                    {
-                        "data_context_id": str(uuid.uuid4()),
-                        "enabled": True,
-                    }
-                ),
-                "datasources": Like({}),
-                "include_rendered_content": {
-                    "globally": True,
-                    "expectation_validation_result": True,
-                    "expectation_suite": True,
-                },
-            },
+            response_body=DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY,
         ),
     ],
 )
