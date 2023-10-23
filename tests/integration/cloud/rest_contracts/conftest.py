@@ -4,12 +4,12 @@ import enum
 import os
 import pathlib
 import subprocess
-from typing import TYPE_CHECKING, Callable, Final, Union
+import uuid
+from typing import TYPE_CHECKING, Any, Callable, Dict, Final, List, Union
 
+import pact
 import pytest
-from pact import Consumer, Pact, Provider
-from pact.matchers import Matcher  # noqa: TCH002
-from typing_extensions import Annotated  # noqa: TCH002
+from typing_extensions import Annotated, TypeAlias  # noqa: TCH002
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.http import create_session
@@ -23,6 +23,13 @@ PACT_MOCK_PORT: Final[int] = 9292
 PACT_DIR: Final[str] = str(
     pathlib.Path(pathlib.Path(__file__).parent, "pacts").resolve()
 )
+
+
+JsonData: TypeAlias = Union[None, int, str, bool, List[Any], Dict[str, Any]]
+
+PactBody: TypeAlias = Union[
+    Dict[str, Union[JsonData, pact.matchers.Matcher]], pact.matchers.Matcher
+]
 
 
 @pytest.fixture
@@ -55,7 +62,7 @@ def get_git_commit_hash() -> str:
 
 
 @pytest.fixture
-def pact(request) -> Pact:
+def pact_test(request) -> pact.Pact:
     pact_broker_base_url = "https://greatexpectations.pactflow.io"
     consumer_name = "great_expectations"
     provider_name = "mercury"
@@ -65,20 +72,27 @@ def pact(request) -> Pact:
     if os.environ.get("PACT_BROKER_READ_WRITE_TOKEN"):
         broker_token = os.environ.get("PACT_BROKER_READ_WRITE_TOKEN", "")
         publish_to_broker = True
-    else:
+    elif os.environ.get("PACT_BROKER_READ_ONLY_TOKEN"):
         broker_token = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN", "")
         publish_to_broker = False
+    else:
+        pytest.skip(
+            "no pact credentials: set PACT_BROKER_READ_ONLY_TOKEN from greatexpectations.pactflow.io"
+        )
 
-    if not broker_token:
-        raise OSError("No Pact broker token was found in the environment.")
+    # Adding random id to the commit hash allows us to run the build
+    # and publish the contract more than once for a given commit.
+    # We need this because we have the ability to trigger re-run of tests
+    # in GH, and we run the release build process on the tagged commit.
+    version = f"{get_git_commit_hash()}_{str(uuid.uuid4())[:5]}"
 
-    pact: Pact = Consumer(
+    pact_test: pact.Pact = pact.Consumer(
         name=consumer_name,
-        version=get_git_commit_hash(),
+        version=version,
         tag_with_git_branch=True,
         auto_detect_version_properties=True,
     ).has_pact_with(
-        Provider(name=provider_name),
+        pact.Provider(name=provider_name),
         broker_base_url=pact_broker_base_url,
         broker_token=broker_token,
         host_name=PACT_MOCK_HOST,
@@ -87,9 +101,9 @@ def pact(request) -> Pact:
         publish_to_broker=publish_to_broker,
     )
 
-    pact.start_service()
-    yield pact
-    pact.stop_service()
+    pact_test.start_service()
+    yield pact_test
+    pact_test.stop_service()
 
 
 class ContractInteraction(pydantic.BaseModel):
@@ -118,15 +132,15 @@ class ContractInteraction(pydantic.BaseModel):
     upon_receiving: pydantic.StrictStr
     given: pydantic.StrictStr
     response_status: Annotated[int, pydantic.Field(strict=True, ge=100, lt=600)]
-    response_body: Union[dict, Matcher]
-    request_body: Union[dict, Matcher, None] = None
+    response_body: PactBody
+    request_body: Union[PactBody, None] = None
     request_headers: Union[dict, None] = None
 
 
 @pytest.fixture
 def run_pact_test(
     gx_cloud_session: Session,
-    pact: Pact,
+    pact_test: pact.Pact,
 ) -> Callable:
     def _run_pact_test(
         path: pathlib.Path,
@@ -150,7 +164,7 @@ def run_pact_test(
             None
         """
 
-        request: dict[str, str | dict] = {
+        request: dict[str, str | PactBody] = {
             "method": contract_interaction.method,
             "path": str(path),
         }
@@ -162,13 +176,13 @@ def run_pact_test(
             request["headers"].update(contract_interaction.request_headers)  # type: ignore[union-attr]
             gx_cloud_session.headers.update(contract_interaction.request_headers)
 
-        response: dict[str, str | dict | Matcher] = {
+        response: dict[str, int | PactBody] = {
             "status": contract_interaction.response_status,
             "body": contract_interaction.response_body,
         }
 
         (
-            pact.given(provider_state=contract_interaction.given)
+            pact_test.given(provider_state=contract_interaction.given)
             .upon_receiving(scenario=contract_interaction.upon_receiving)
             .with_request(**request)
             .will_respond_with(**response)
@@ -176,7 +190,7 @@ def run_pact_test(
 
         request_url = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}{path}"
 
-        with pact:
+        with pact_test:
             gx_cloud_session.request(
                 method=contract_interaction.method, url=request_url
             )
