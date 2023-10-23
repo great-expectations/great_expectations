@@ -31,11 +31,6 @@ module.exports = {
               label: 'Set the environment variables and start the GX Cloud agent',
               href: '/docs/cloud/set_up_gx_cloud#set-the-environment-variables-and-start-the-gx-cloud-agent',
             },
-            {
-              type: 'link',
-              label: 'Troubleshoot',
-              href: '/docs/cloud/set_up_gx_cloud#troubleshoot',
-            },
           ]
         },
         {
@@ -55,6 +50,11 @@ module.exports = {
               type: 'link',
               label: 'Create a Data Asset',
               href: '/docs/cloud/data_assets/manage_data_assets#create-a-data-asset',
+            },
+            {
+              type: 'link',
+              label: 'View Data Asset metrics',
+              href: '/docs/cloud/data_assets/manage_data_assets#view-data-asset-metrics',
             },
             {
               type: 'link',
@@ -87,6 +87,28 @@ module.exports = {
               type: 'link',
               label: 'Delete an Expectation',
               href: '/docs/cloud/expectations/manage_expectations#delete-an-expectation',
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Manage Expectation Suites',
+          link: { type: 'doc', id: 'cloud/expectation_suites/manage_expectation_suites' },
+          items: [
+            {
+              type: 'link',
+              label: 'Automatically create an Expectation Suite that tests for missing data',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#automatically-create-an-expectation-suite-that-tests-for-missing-data',
+            },
+            {
+              type: 'link',
+              label: 'Manually create an empty Expectation Suite ',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#manually-create-an-empty-expectation-suite',
+            },
+            {
+              type: 'link',
+              label: 'Delete an Expectation Suite',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#delete-an-expectation-suite',
             },
           ]
         },
@@ -251,13 +273,13 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Profilers and Data Assistants',
-          link: { type: 'doc', id: 'guides/expectations/profilers_data_assistants_lp' },
+          label: 'Data Assistants',
+          link: { type: 'doc', id: 'guides/expectations/data_assistants_lp' },
           items: [
             'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant',
             'guides/expectations/advanced/how_to_compare_two_tables_with_the_onboarding_data_assistant',
             'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant',
-            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers',
+            
           ]
         },
         {
@@ -427,7 +449,6 @@ module.exports = {
             'terms/metric',
             'conceptual_guides/metricproviders',
             'terms/metric',
-            'terms/profiler',
             {
               type: 'category',
               label: 'Stores',
