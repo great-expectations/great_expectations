@@ -4864,6 +4864,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         self.datasources[name] = datasource
         self.config.datasources[name] = config  # type: ignore[index,assignment]
 
+        return datasource
+
     def _construct_data_context_id(self) -> str:
         # Choose the id of the currently-configured expectations store, if it is a persistent store
         expectations_store = self.stores[self.expectations_store_name]

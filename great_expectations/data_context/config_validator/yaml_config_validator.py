@@ -407,9 +407,8 @@ class _YamlConfigValidator:
         datasource_config.name = datasource_name
         instantiated_class = cast(
             Datasource,
-            self._data_context._instantiate_datasource_from_config_and_update_project_config(
+            self._data_context._instantiate_datasource_from_config_with_substitution(
                 config=datasource_config,
-                initialize=True,
             ),
         )
 
