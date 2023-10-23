@@ -132,7 +132,7 @@ class ContractInteraction(pydantic.BaseModel):
     given: pydantic.StrictStr
     response_status: Annotated[int, pydantic.Field(strict=True, ge=100, lt=600)]
     response_body: PactBody
-    request_body: Union[PactBody, None] = None
+    request_body: PactBody | None = None
     request_headers: Union[dict, None] = None
 
 
