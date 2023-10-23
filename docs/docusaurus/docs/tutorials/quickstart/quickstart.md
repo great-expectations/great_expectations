@@ -28,7 +28,7 @@ Windows support for the open source Python version of GX is currently unavailabl
 
 ## Data validation workflow
 
-The following diagram illustrates the end-to-end GX data validation workflow used in this quickstart. Click a workflow step to view related documentation.
+The following diagram illustrates the end-to-end GX data validation workflow implemented by the quickstart code. Click a workflow step to view related documentation.
 
 ```mermaid
 flowchart LR
@@ -38,11 +38,11 @@ flowchart LR
 
     Configure_B --> Connect_A
 
-    Connect_A("Connect\nto Data</b>"):::gxWorkflowStep
+    Connect_A("Connect\nto data</b>"):::gxWorkflowStep
 
     Connect_A --> Define_A
 
-    Define_A("Create a\n<b>Validator</b>"):::gxWorkflowStep --> Define_B("Add\n<b>Expectations</b>"):::gxWorkflowStep
+    Define_A("Create a\n<b>Validator</b>"):::gxWorkflowStep --> Define_B("Create\n<b>Expectations</b>"):::gxWorkflowStep
 
     Define_B --> Validate_A
 
