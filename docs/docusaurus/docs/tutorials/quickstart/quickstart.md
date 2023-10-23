@@ -25,47 +25,28 @@ Windows support for the open source Python version of GX is currently unavailabl
 
 :::
 
-## Prerequisites
 
-- <PrereqPython />
-- pip
-- An internet browser
+## Data validation workflow
 
-## Quickstart Workflow
-
-This quickstart walks you through the steps required to implement a simple, end-to-end GX workflow.
+The following diagram illustrates the end-to-end GX data validation workflow used in this quickstart. Click a workflow step to view related documentation.
 
 ```mermaid
 flowchart LR
+%%{init: {"themeVariables": {"fontSize" : "24px"}}}%%
 
-    subgraph Configure["<b>CONFIGURE</b>"]
-        Configure_A(Install\n<b>GX</b>):::gxWorkflowStep --> Configure_B("Create a\n<b>Data Context</b>"):::gxWorkflowStep
-    end
+    Configure_A(Install\n<b>GX</b>):::gxWorkflowStep --> Configure_B("Create a\n<b>Data Context</b>"):::gxWorkflowStep
 
     Configure_B --> Connect_A
 
-    subgraph Connect["<b>CONNECT</b>"]
-        Connect_A("Add a\n<b>Data Source</b>"):::gxWorkflowStep --> Connect_B("Add a\n<b>Data Asset</b>"):::gxWorkflowStep
-    end
+    Connect_A("Connect\nto Data</b>"):::gxWorkflowStep
 
-    Connect_B --> Define_A
+    Connect_A --> Define_A
 
-    subgraph Define["<b>DEFINE</b>"]
-        Define_A("Create a\n<b>Validator</b>"):::gxWorkflowStep --> Define_B("Add\n<b>Expectations</b>"):::gxWorkflowStep
-    end
+    Define_A("Create a\n<b>Validator</b>"):::gxWorkflowStep --> Define_B("Add\n<b>Expectations</b>"):::gxWorkflowStep
 
     Define_B --> Validate_A
 
-    subgraph Validate["<b>VALIDATE</b>"]
-        Validate_A("Run a\n<b>Checkpoint</b>"):::gxWorkflowStep --> Validate_B("View\n<b>ValidationResults</b>"):::gxWorkflowStep
-    end
-
-%% Define styles for workflow step nodes and container subgraphs.
-classDef gxWorkflowStep fill:#FF9B67,stroke-width:0px
-style Configure fill:#E6E7E8,stroke-width:0px
-style Connect fill:#E6E7E8,stroke-width:0px
-style Define fill:#E6E7E8,stroke-width:0px
-style Validate fill:#E6E7E8,stroke-width:0px
+    Validate_A("Run a\n<b>Checkpoint</b>"):::gxWorkflowStep --> Validate_B("View\n<b>Validation Results</b>"):::gxWorkflowStep
 
 %% Link each workflow step to underlying documentation.
 click Configure_A "https://docs.greatexpectations.io/docs/guides/setup/installation/install_gx"
@@ -78,7 +59,12 @@ click Validate_A "https://docs.greatexpectations.io/docs/guides/validation/check
 click Validate_B "https://docs.greatexpectations.io/docs/terms/data_docs"
 ```
 
-*Click on any individual workflow step to explore additional documentation for that step.*
+## Prerequisites
+
+- <PrereqPython />
+- pip
+- An internet browser
+
 
 ## Install GX
 
@@ -100,14 +86,14 @@ click Validate_B "https://docs.greatexpectations.io/docs/terms/data_docs"
 
     ```python name="tutorials/quickstart/quickstart.py get_context"
     ```
-## Connect to Data
+## Connect to data
 
 - Run the following command to connect to existing `.csv` data stored in the `great_expectations` GitHub repository and create a <TechnicalTag tag="validator" text="Validator"/> object:
 
     ```python name="tutorials/quickstart/quickstart.py connect_to_data"
     ```
 
-    This example code uses the default <TechnicalTag tag="data_context" text="Data Context"/> <TechnicalTag tag="datasource" text="Data Source"/> for Pandas to access the `.csv` data from the file at specified URL path.
+    The code example uses the default <TechnicalTag tag="data_context" text="Data Context"/> <TechnicalTag tag="datasource" text="Data Source"/> for Pandas to access the `.csv` data from the file at the specified URL path.
 
 ## Create Expectations
 
