@@ -74,7 +74,7 @@ def test_save_datasource_empty_store(datasource_config_with_names: DatasourceCon
 
     # add_datasource used to create a datasource object for use in save_datasource
     datasource_to_save = context.add_datasource(
-        **datasource_config_with_names.to_json_dict(), save_changes=False
+        **datasource_config_with_names.to_json_dict()
     )
 
     with mock.patch(
@@ -113,7 +113,7 @@ def test_save_datasource_overwrites_on_name_collision(
 
     # add_datasource used to create a datasource object for use in save_datasource
     datasource_to_save = context.add_datasource(
-        **datasource_config_with_names.to_json_dict(), save_changes=False
+        **datasource_config_with_names.to_json_dict()
     )
 
     with mock.patch(
@@ -155,9 +155,7 @@ def test_add_datasource_sanitizes_instantiated_objs_config(
         "base_directory"
     ] = f"${variable}"
 
-    instantiated_datasource = context.add_datasource(
-        **datasource_config_dict, save_changes=False
-    )
+    instantiated_datasource = context.add_datasource(**datasource_config_dict)
 
     # Runtime object should have the substituted value for downstream usage
     assert instantiated_datasource.data_connectors[
