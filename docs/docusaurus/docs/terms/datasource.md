@@ -28,7 +28,7 @@ Datasources are also used to obtain Batches for <TechnicalTag relative="../" tag
 
 ## Standard API
 
-Datasources support connecting to a variety of different data backends. No matter which source data system you employ, the Data Source's API will remain the same.
+Datasources support connecting to a variety of different data backends. No matter which Data Source you use, the Data Source's API remains the same.
 
 ## No unexpected modifications
 

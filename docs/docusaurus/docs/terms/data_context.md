@@ -22,7 +22,7 @@ When you configure your GX environment, you'll instantiate a Data Context. See [
 
 You can also use the Data Context to manage optional configurations for your Stores, Plugins, and Data Docs.  To configure Stores, see [Configure your GX environment](../guides/setup/setup_overview_lp.md). To host and share Data Docs, see [Host and share Data Docs](../guides/setup/configuring_data_docs/host_and_share_data_docs.md).
 
-When you connect to data, you use your Data Context to create and configure Data Sources.  For more information on how to create and configure Data Sources, see [Connect to source data](../guides/connecting_to_your_data/connect_to_data_lp.md).
+When you connect to data, you use your Data Context to create and configure Data Sources.  For more information on how to create and configure Data Sources, see [Connect to a Data Source](../guides/connecting_to_your_data/connect_to_data_lp.md).
 
 When creating Expectations, you'll use your Data Context to create <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" /> and Expectations, and then save them to an <TechnicalTag relative="../" tag="expectation_store" text="Expectations Store" />. The Data Context also manages Metrics and Validation Results. The Data Context manages the content of your Data Docs (displaying such things as the Validation Results and Expectations).  For more information about creating Expectations, see [Create Expectations](../guides/expectations/expectations_lp.md). 
 
@@ -40,13 +40,13 @@ A Data Context includes basic create, read, update, and delete (CRUD) operations
 
 The Data Context helps you create components such as Data Sources, Checkpoints, and Expectation Suites and manage where the information about those components is stored.  
 
-For production deployments, you will want to define these components according to your source data systems and production environment. This may include storing information about those components in something other than your local environment. To view implementation examples for specific environments and source data systems, see [Integrations](https://docs.greatexpectations.io/docs/category/integrations).
+For production deployments, you will want to define these components according to your Data Source and production environment. This may include storing information about those components in something other than your local environment. To view implementation examples for specific environments and Data Sources, see [Integrations](https://docs.greatexpectations.io/docs/category/integrations).
 
-## GX Cloud compatability
+## GX Cloud compatibility
 
 Because your Data Context contains the entirety of your GX project, GX Cloud can reference it to permit seamless upgrading from open source GX to GX Cloud.
 
-## Instantiating a DataContext
+## Instantiating a Data Context
 
 After you've created a Data Context, you'll likely start future work by instantiating a `DataContext` in Python. For example:
 

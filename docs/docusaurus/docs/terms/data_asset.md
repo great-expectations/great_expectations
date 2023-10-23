@@ -70,15 +70,15 @@ Data Assets can be configured to cover a variety of use cases.  For example:
 
 - When you are working with dynamic datasets such as database tables, you will configure a Data Asset that defines a Batch as the state of the table at the time of Validation. Because you usually cannot access previous states of the such a table, only a single Batch from that Data Asset will be available at any given time. In that case, you have a few options:
     - You can profile the data using a single Batch of data.  While you may not have as much statistical power in the estimated Expectations as if you had historical data available, this allows you to get started immediately, and you can build up a collection of Metrics over time that Great Expectations can use to refine the Expectations.
-    - You can configure another Data Asset from the same source Data that randomly assigns data to different batches to bootstrap the refinement of Expectations by providing a random sampling of records.
-    - You can configure another Data Asset from the same source data that splits the data into batches based on some keys in the data, such as load times or update times.
+    - You can configure another Data Asset from the same Data Source that randomly assigns data to different batches to bootstrap the refinement of Expectations by providing a random sampling of records.
+    - You can configure another Data Asset from the same Data Source that splits the data into batches based on some keys in the data, such as load times or update times.
 - For working with *streaming* data, we recommend that you pull a sample of data into a permanent store and first profile your data using that data sample.  You will be able to configure a Data Asset for the data sample just as you would for an append-only dataset.  When it is time to Validate the data, you will use a second Data Asset that is configured to directly connect to your streaming data platform.
 
 ## Flexibility
 
-Data Assets are logical constructs based around how you want to define and subdivide your data.  Generally speaking, a collection of data that you want to collect metadata about can be considered a Data Asset.  As a rule of thumb: a set of data is a Data Asset when it is *worth giving a name.*  Because of this, it is entirely possible to define multiple Data Assets to subdivide the same set of data in different ways, or even that exclude some of the source data.
+Data Assets are logical constructs based around how you want to define and subdivide your data.  Generally speaking, a collection of data that you want to collect metadata about can be considered a Data Asset.  As a rule of thumb: a set of data is a Data Asset when it is *worth giving a name.*  Because of this, it is entirely possible to define multiple Data Assets to subdivide the same set of data in different ways, or even that exclude some data.
 
-For instance, imagine you are doing analysis on sales data for cars.  You could create a Data Asset named "recent_sales" that only provides a batch for the most recent group of sold cars.  Or a Data Asset named "monthly_reports" that groups your source data system's records into Batches by month.  That same data could also be included in a Data Asset called "yearly_reports" that groups the data by year, and another Data Asset called "make_and_model" that groups records by those criteria, or a Data Asset called "local_sales" that groups records by dealership.  However it is that you want to analyze your data, you can configure a Data Asset to do so.
+For instance, imagine you are doing analysis on sales data for cars.  You could create a Data Asset named "recent_sales" that only provides a batch for the most recent group of sold cars.  Or a Data Asset named "monthly_reports" that groups your Data Source records into Batches by month.  That same data could also be included in a Data Asset called "yearly_reports" that groups the data by year, and another Data Asset called "make_and_model" that groups records by those criteria, or a Data Asset called "local_sales" that groups records by dealership.  However, it is that you want to analyze your data, you can configure a Data Asset to do so.
 
 ## Access
 
@@ -90,4 +90,4 @@ You will not need to manually create a Data Asset.  Instead, they will be create
 
 ## Configure
 
-Data Assets are configured by providing parameters when they are created.  SQL-based Data Assets can be further configured after creation by calling their methods for adding splitters. To configure Data Assets for various environments and source data systems, see [Connect to source data](../guides/connecting_to_your_data/connect_to_data_lp.md).
+Data Assets are configured by providing parameters when they are created.  SQL-based Data Assets can be further configured after creation by calling their methods for adding splitters. To configure Data Assets for various environments and Data Sources, see [Connect to a Data Source](../guides/connecting_to_your_data/connect_to_data_lp.md).

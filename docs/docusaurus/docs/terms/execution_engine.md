@@ -28,7 +28,7 @@ When creating Custom Expectations and Metrics, often Execution Engine-specific l
 
 ## Standardized data and Expectations
 
-Execution engines handle the interactions with the source data.  They also wrap data from those source data systems with metadata that allows Great Expectations to read it regardless of its native format. Additionally, Execution Engines enable the calculations of Metrics used by Expectations so that they can operate in a format appropriate to their associated source data system.  Because of this, the same Expectations can be used to validate data from different Datasources, even if those Datasources interact with source data systems so different in nature that they require different Execution Engines to access their data. 
+Execution engines handle the interactions with the Data Source.  They also wrap data from the Data Source with metadata that allows Great Expectations to read it regardless of its native format. Additionally, Execution Engines enable the calculations of Metrics used by Expectations so that they can operate in a format appropriate to their associated Data Source.  Because of this, the same Expectations can be used to validate data from different Data Sources, even if those Data Sources interact with Data Sources so different in nature that they require different Execution Engines to access their data. 
 
 ## Deferred Metrics
 
