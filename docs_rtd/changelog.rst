@@ -4,6 +4,27 @@
 Changelog
 #########
 
+0.17.23
+-----------------
+* [FEATURE] Unexpected index list with/without values - New parameter in result_format ([#8785](https://github.com/great-expectations/great_expectations/pull/8785)) (thanks @MMoussabbih)
+* [DOCS] Update Cloud Docs to Include Docker Methodology ([#8820](https://github.com/great-expectations/great_expectations/pull/8820))
+* [DOCS] Updated language & code refs for Databricks Getting Started ([#8751](https://github.com/great-expectations/great_expectations/pull/8751))
+* [DOCS] Remove all mentions of profilers in public docs ([#8825](https://github.com/great-expectations/great_expectations/pull/8825))
+* [DOCS] Create New Content for Column Descriptive Metrics in GX Cloud ([#8814](https://github.com/great-expectations/great_expectations/pull/8814))
+* [DOCS] Document GX Cloud Data Assistant Functionality ([#8829](https://github.com/great-expectations/great_expectations/pull/8829))
+* [DOCS] Update set_up_gx_cloud.md ([#8832](https://github.com/great-expectations/great_expectations/pull/8832))
+* [DOCS] Update Manage Expectation Suites in GX Cloud Docs ([#8842](https://github.com/great-expectations/great_expectations/pull/8842))
+* [DOCS] Remove Troubleshooting Entry from GX Cloud TOC ([#8846](https://github.com/great-expectations/great_expectations/pull/8846))
+* [MAINTENANCE] Column Descriptive Metrics: Don't add empty string for type ([#8830](https://github.com/great-expectations/great_expectations/pull/8830))
+* [MAINTENANCE] Add cloud api via docker compose for testing ([#8803](https://github.com/great-expectations/great_expectations/pull/8803))
+* [MAINTENANCE] Remove public_api decorators from RBP ([#8812](https://github.com/great-expectations/great_expectations/pull/8812))
+* [MAINTENANCE] mypy 1.6 ([#8837](https://github.com/great-expectations/great_expectations/pull/8837))
+* [MAINTENANCE] Delete legacy `BasicSuiteBuilderProfiler` ([#8808](https://github.com/great-expectations/great_expectations/pull/8808))
+* [MAINTENANCE] Run ci-is-on-main-repo in merge queue. ([#8839](https://github.com/great-expectations/great_expectations/pull/8839))
+* [MAINTENANCE] Add pact contract testing with GX Cloud ([#8831](https://github.com/great-expectations/great_expectations/pull/8831))
+* [MAINTENANCE] Allow re-publishing Pact on same commit ([#8851](https://github.com/great-expectations/great_expectations/pull/8851))
+* [CONTRIB] Also run CI when a PR becomes Ready for Review ([#8833](https://github.com/great-expectations/great_expectations/pull/8833))
+
 0.17.22
 -----------------
 * [BUGFIX] Column Descriptive Metrics: Skip finding semantic type info for UNKNOWN columns ([#8815](https://github.com/great-expectations/great_expectations/pull/8815))
