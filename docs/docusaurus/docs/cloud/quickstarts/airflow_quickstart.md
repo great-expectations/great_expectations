@@ -13,11 +13,11 @@ In this quickstart, you'll learn how to use GX Cloud with Apache Airflow. Apache
 
 - You have the [Astro CLI](https://docs.astronomer.io/astro/cli/overview) installed.
 
-- You have [connected GX Cloud to a Data Asset on a Data Source](../data_assets/manage_data_assets#create-a-data-asset).
+- You have [connected GX Cloud to a Data Asset on a Data Source](/docs/data_assets/manage_data_assets#create-a-data-asset).
 
-- You have [created an Expectation Suite](../expectation_suites/manage_expectation_suites.md) and [added Expectations](../expectations/manage_expectations#create-an-expectation).
+- You have [created an Expectation Suite](/docs/expectation_suites/manage_expectation_suites.md) and [added Expectations](/docs/expectations/manage_expectations#create-an-expectation).
 
-- You have [added a Checkpoint to your Expectation](../checkpoints/manage_checkpoints#add-a-checkpoint).
+- You have [added a Checkpoint to your Expectation](/docs/checkpoints/manage_checkpoints#add-a-checkpoint).
 
 
 ## Create a local Airflow project and set dependencies
