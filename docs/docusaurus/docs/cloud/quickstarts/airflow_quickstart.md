@@ -111,4 +111,4 @@ In this quickstart, you'll learn how to use GX Cloud with Apache Airflow. Apache
 
 2. Sign in to Airflow. The default username and password are `admin`.
 
-3. In the **Actions** column, click **Play** for `gx_airflow` and confirm your DAG runs as expected.
+3. In the **Actions** column, click **Trigger DAG** for `gx_airflow` and confirm your DAG runs as expected.
