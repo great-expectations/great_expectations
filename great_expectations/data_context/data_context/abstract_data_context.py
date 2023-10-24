@@ -40,7 +40,6 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
-    deprecated_method_or_class,
     new_argument,
     new_method_or_class,
     public_api,
@@ -94,7 +93,6 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.refs import (
     GXCloudIDAwareRef,
-    GXCloudResourceRef,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -402,86 +400,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         self.config.update(project_config)
         return self.config
-
-    @public_api
-    @deprecated_method_or_class(
-        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
-    )
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
-        args_payload_fn=save_expectation_suite_usage_statistics,
-    )
-    def save_expectation_suite(
-        self,
-        expectation_suite: ExpectationSuite,
-        expectation_suite_name: Optional[str] = None,
-        overwrite_existing: bool = True,
-        include_rendered_content: Optional[bool] = None,
-        **kwargs: Optional[dict],
-    ) -> None:
-        """Save the provided ExpectationSuite into the DataContext using the configured ExpectationStore.
-
-        Args:
-            expectation_suite: The ExpectationSuite to save.
-            expectation_suite_name: The name of this ExpectationSuite. If no name is provided, the name will be read
-                from the suite.
-            overwrite_existing: Whether to overwrite the suite if it already exists.
-            include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
-            kwargs: Additional parameters, unused
-
-        Returns:
-            None
-
-        Raises:
-            DataContextError: If a suite with the same name exists and `overwrite_existing` is set to `False`.
-        """
-        # deprecated-v0.15.48
-        warnings.warn(
-            "save_expectation_suite is deprecated as of v0.15.48 and will be removed in v0.18. "
-            "Please use update_expectation_suite or add_or_update_expectation_suite instead.",
-            DeprecationWarning,
-        )
-        return self._save_expectation_suite(
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            overwrite_existing=overwrite_existing,
-            include_rendered_content=include_rendered_content,
-            **kwargs,
-        )
-
-    def _save_expectation_suite(
-        self,
-        expectation_suite: ExpectationSuite,
-        expectation_suite_name: Optional[str] = None,
-        overwrite_existing: bool = True,
-        include_rendered_content: Optional[bool] = None,
-        **kwargs: Optional[dict],
-    ) -> None:
-        if expectation_suite_name is None:
-            key = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite.expectation_suite_name
-            )
-        else:
-            expectation_suite.expectation_suite_name = expectation_suite_name
-            key = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite_name
-            )
-        if self.expectations_store.has_key(key) and not overwrite_existing:  # : @601
-            raise gx_exceptions.DataContextError(
-                "expectation_suite with name {} already exists. If you would like to overwrite this "
-                "expectation_suite, set overwrite_existing=True.".format(
-                    expectation_suite_name
-                )
-            )
-        self._evaluation_parameter_dependencies_compiled = False
-        include_rendered_content = (
-            self._determine_if_expectation_suite_include_rendered_content(
-                include_rendered_content=include_rendered_content
-            )
-        )
-        if include_rendered_content:
-            expectation_suite.render()
-        return self.expectations_store.set(key, expectation_suite, **kwargs)
 
     # Properties
     @property
@@ -846,34 +764,6 @@ class AbstractDataContext(ConfigPeer, ABC):
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
         self.variables.config = project_config
-
-    @deprecated_method_or_class(
-        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
-    )
-    def save_datasource(
-        self, datasource: BaseDatasource | FluentDatasource | LegacyDatasource
-    ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
-        """Save a Datasource to the configured DatasourceStore.
-
-        Stores the underlying DatasourceConfig in the store and Data Context config,
-        updates the cached Datasource and returns the Datasource.
-        The cached and returned Datasource is re-constructed from the config
-        that was stored as some store implementations make edits to the stored
-        config (e.g. adding identifiers).
-
-        Args:
-            datasource: Datasource to store.
-
-        Returns:
-            The datasource, after storing and retrieving the stored config.
-        """
-        # deprecated-v0.15.48
-        warnings.warn(
-            "save_datasource is deprecated as of v0.15.48 and will be removed in v0.18. "
-            "Please use update_datasource or add_or_update_datasource instead.",
-            DeprecationWarning,
-        )
-        return self.add_or_update_datasource(datasource=datasource)
 
     @overload
     def add_datasource(
@@ -1308,42 +1198,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             Either a list of strings or ConfigurationIdentifiers depending on the environment and context type.
         """
         return RuleBasedProfiler.list_profilers(self.profiler_store)
-
-    @deprecated_method_or_class(
-        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
-    )
-    def save_profiler(
-        self,
-        profiler: RuleBasedProfiler,
-    ) -> RuleBasedProfiler:
-        """Save an existing Profiler object utilizing the context's underlying ProfilerStore.
-
-        Args:
-            profiler: The Profiler object to persist.
-
-        Returns:
-            The input profiler - may be modified with an id depending on the backing store.
-        """
-        # deprecated-v0.15.48
-        warnings.warn(
-            "save_profiler is deprecated as of v0.15.48 and will be removed in v0.18. "
-            "Please use update_profiler or add_or_update_profiler instead.",
-            DeprecationWarning,
-        )
-        name = profiler.name
-        ge_cloud_id = profiler.ge_cloud_id
-        key = self._determine_key_for_profiler_save(name=name, id=ge_cloud_id)
-
-        response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
-        if isinstance(response, GXCloudResourceRef):
-            ge_cloud_id = response.id
-
-        # If an id is present, we want to prioritize that as our key for object retrieval
-        if ge_cloud_id:
-            name = None  # type: ignore[assignment]
-
-        profiler = self.get_profiler(name=name, ge_cloud_id=ge_cloud_id)
-        return profiler
 
     def _determine_key_for_profiler_save(
         self, name: str, id: Optional[str]
@@ -2721,65 +2575,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return datasource.get_batch_list_from_batch_request(batch_request=result)
 
-    @public_api
-    @deprecated_method_or_class(
-        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
-    )
-    def create_expectation_suite(
-        self,
-        expectation_suite_name: str,
-        overwrite_existing: bool = False,
-        **kwargs: Optional[dict],
-    ) -> ExpectationSuite:
-        """Build a new ExpectationSuite and save it utilizing the context's underlying ExpectationsStore.
-
-        Note that this method can be called by itself or run within the get_validator workflow.
-
-        When run with create_expectation_suite():
-
-        ```python
-        expectation_suite_name = "genres_movies.fkey"
-        context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
-        batch = context.get_batch_list(
-            expectation_suite_name=expectation_suite_name
-        )[0]
-        ```
-
-        When run as part of get_validator():
-
-        ```python
-        validator = context.get_validator(
-            datasource_name="my_datasource",
-            data_connector_name="whole_table",
-            data_asset_name="my_table",
-            create_expectation_suite_with_name="my_expectation_suite",
-        )
-        validator.expect_column_values_to_be_in_set("c1", [4,5,6])
-        ```
-
-        Args:
-            expectation_suite_name: The name of the suite to create.
-            overwrite_existing: Whether to overwrite if a suite with the given name already exists.
-            **kwargs: Any key-value arguments to pass to the store when persisting.
-
-        Returns:
-            A new (empty) ExpectationSuite.
-
-        Raises:
-            ValueError: The input `overwrite_existing` is of the wrong type.
-            DataContextError: A suite with the same name already exists (and `overwrite_existing` is not enabled).
-        """
-        # deprecated-v0.15.48
-        warnings.warn(
-            "create_expectation_suite is deprecated as of v0.15.48 and will be removed in v0.18. "
-            "Please use add_expectation_suite or add_or_update_expectation_suite instead.",
-            DeprecationWarning,
-        )
-        return self._add_expectation_suite(
-            expectation_suite_name=expectation_suite_name,
-            overwrite_existing=overwrite_existing,
-        )
-
     @overload
     def add_expectation_suite(  # noqa: PLR0913
         self,
@@ -3119,12 +2914,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         self.expectations_store.remove_key(key)
 
     @public_api
-    @deprecated_argument(argument_name="ge_cloud_id", version="0.15.45")
     def get_expectation_suite(
         self,
         expectation_suite_name: str | None = None,
         include_rendered_content: bool | None = None,
-        ge_cloud_id: str | None = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name.
 
@@ -3132,7 +2925,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name (str): The name of the Expectation Suite
             include_rendered_content (bool): Whether to re-populate rendered_content for each
                 ExpectationConfiguration.
-            ge_cloud_id (str): The GX Cloud ID for the Expectation Suite (unused)
 
         Returns:
             An existing ExpectationSuite
@@ -3140,14 +2932,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             DataContextError: There is no expectation suite with the name provided
         """
-        if ge_cloud_id is not None:
-            # deprecated-v0.15.45
-            warnings.warn(
-                "ge_cloud_id is deprecated as of v0.15.45 and will be removed in v0.16. Please use"
-                "expectation_suite_name instead",
-                DeprecationWarning,
-            )
-
         if expectation_suite_name:
             key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
@@ -3234,32 +3018,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The persisted Profiler constructed by the input arguments.
         """
-        try:
-            return RuleBasedProfiler.add_profiler(
-                data_context=self,
-                profiler_store=self.profiler_store,
-                name=name,
-                config_version=config_version,
-                rules=rules,
-                variables=variables,
-                profiler=profiler,
-            )
-        except gx_exceptions.ProfilerError as e:
-            # deprecated-v0.15.50
-            warnings.warn(
-                f"{e.message}; using add_profiler to overwrite an existing value is deprecated as of v0.15.50 "
-                "and will be removed in v0.18. Please use add_or_update_profiler instead.",
-                DeprecationWarning,
-            )
-            return RuleBasedProfiler.add_or_update_profiler(
-                data_context=self,
-                profiler_store=self.profiler_store,
-                name=name,
-                config_version=config_version,
-                rules=rules,
-                variables=variables,
-                profiler=profiler,
-            )
+        return RuleBasedProfiler.add_profiler(
+            data_context=self,
+            profiler_store=self.profiler_store,
+            name=name,
+            config_version=config_version,
+            rules=rules,
+            variables=variables,
+            profiler=profiler,
+        )
 
     @new_argument(
         argument_name="id",
