@@ -808,6 +808,7 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "cloud": TestDependencies(
         (
             "reqs/requirements-dev-cloud.txt",
+            "reqs/requirements-dev-cloud-tests.txt",
             "reqs/requirements-dev-snowflake.txt",
         ),
         services=("mercury",),
