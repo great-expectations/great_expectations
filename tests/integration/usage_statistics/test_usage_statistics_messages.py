@@ -2894,6 +2894,7 @@ def test_usage_statistics_message(
     message: dict, requests_session_with_retries: requests.Session
 ):
     """known message formats should be valid"""
+    # TODO: test against the mercury container
     res = requests_session_with_retries.post(
         USAGE_STATISTICS_QA_URL, json=message, timeout=4
     )
