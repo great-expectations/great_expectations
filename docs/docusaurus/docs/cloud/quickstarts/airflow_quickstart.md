@@ -2,10 +2,10 @@
 sidebar_label: 'Quickstart for GX Cloud and Airflow'
 title: 'Quickstart for GX Cloud and Airflow'
 id: airflow_quickstart
-description: Connect Great Expectations to an Airflow Orchestrator.
+description: Connect GX Cloud to an Airflow Orchestrator.
 ---
 
-In this quickstart, you'll learn how to use GX Cloud with an Airfow instance.
+In this quickstart, you'll learn how to use GX Cloud with Apache Airflow. Apache Airflow is an orchestration tool that allows you to schedule and monitor your data pipelines. For more information about Apache Airflow, see the [Apache Airflow documentation](https://airflow.apache.org/docs/apache-airflow/stable/index.html).
 
 ## Prerequisites
 
@@ -13,121 +13,121 @@ In this quickstart, you'll learn how to use GX Cloud with an Airfow instance.
 
 - You have the [Astro CLI](https://docs.astronomer.io/astro/cli/overview) installed.
 
-- You have created at least one [Data Asset](https://google.com), [Expectation Suite](https://google.com), [Expectation](https://google.com) and [Checkpoint](https://google.com) within GX Cloud.
+- You have [connected GX Cloud to a Data Asset on a Data Source](../data_assets/manage_data_assets#create-a-data-asset).
 
-:::note Great Expectations Cloud
+- You have [created an Expectation Suite](../expectation_suites/manage_expectation_suites.md) and [added Expectations](../expectations/manage_expectations#create-an-expectation).
 
-If you are new to GX Cloud and have not yet set up any Checkpoints, refer to this [Quickstart Guide](https://google.com)
+- You have [added a Checkpoint to your Expectation](../checkpoints/manage_checkpoints#add-a-checkpoint).
 
-:::
 
 ## Create a local Airflow project and set dependencies
 
-In your terminal, navigate to the directory where you would like to create your Airflow project. Run the following commands to create a new directory, navigate into that directory, and then initialize a new Airflow project:
+1. Open a terminal, navigate to the directory where you want to create your Airflow project, and then run the following code:
 
-```bash title="Terminal input"
-mkdir gx-cloud-airflow && cd gx-cloud-airflow
-astro dev init
-```
+    ```bash title="Terminal input"
+    mkdir gx-cloud-airflow && cd gx-cloud-airflow
+    astro dev init
+    ```
+    After running the code, a new directory is created, you're taken to that directory, and a new Airflow project is initialized.
 
-Once the project has been created, open the `requirements.txt` file and add the GX Airflow Provider as a new line and save the file:
+2. Browse to the directory where you created your Airflow project, open the `requirements.txt` file, and then add the following text as a new line: 
 
-```
-airflow-provider-great-expectations==0.2.7
-```
+    ```
+    airflow-provider-great-expectations==0.2.7
+    ```
 
-Open the `packages.txt` file in the root directory of your project and add the `libgeos-c1v5` library as a new line and save the file:
+    This text adds the GX Airflow Provider to the Airflow project.
+    
+3. Save your changes and close the `requirements.txt` file.
 
-```
-libgeos-c1v5
-```
+4. Open the `packages.txt` file and add the following text as a new line:
 
-## Create a DAG file for your GX checkpoint
+    ```
+    libgeos-c1v5
+    ```
+    This text adds the `libgeos-c1v5` library to the Airflow project.
 
-Inside of the `dags` folder in the root folder of your Airflow project, create a new file:
+5. Save your changes and close the `packages.txt` file.
 
-```bash title="Terminal input"
-touch gx_dag.py
-```
+## Create a DAG file for your GX Cloud checkpoint
 
-Open the file and start by importing the dependencies we'll need to run our DAG:
+1. In the `dags` folder of your Airflow project, run the following code to create a new DAG:
 
-```python
-import os
-import great_expectations as gx
+    ```bash title="Terminal input"
+    touch gx_dag.py
+    ```
 
-from airflow import DAG
-from airflow.operators.python import PythonOperator
-from datetime import datetime
-```
+2. In Jupyter Notebook, run the following code to import the dependencies you'll need to run your DAG:
 
-Define the main method with which we will run our GX checkpoint and set our environment variables to use your GX User Access Token and Cloud Organization ID:
+    ```python title="Jupyter Notebook"
+    import os
+    import great_expectations as gx
+    from airflow import DAG
+    from airflow.operators.python import PythonOperator
+    from datetime import datetime
+    ```
 
-```python
-def run_gx_airflow():
-    os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<YOUR_ACCESS_TOKEN>"
-    os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<YOUR_CLOUD_ORGANIZATION_ID>"
-```
+2. Run the following code to define the method you'll use to run your Checkpoint and set your environment variables:
 
-:::note How to find your access credentials
+    ```python title="Jupyter Notebook"
+    def run_gx_airflow():
+        os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<YOUR_ACCESS_TOKEN>"
+        os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<YOUR_CLOUD_ORGANIZATION_ID>"
+    ```
 
-Refer to our documentation on how to [Get your user access token and organization ID](/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id)
+    To locate your users access token and organization ID, see [Get your user access token and organization ID](/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id).
 
-:::
 
-Complete the method by accessing a GX context and running a checkpoint based on the name that you have previously given it:
+3. Run the following code to import the existing `DataContext` object and run the Checkpoint:
 
-```python
+    ```python title="Jupyter Notebook"
     context = gx.get_context()
-
     checkpoint_name = '<YOUR_CHECKPOINT_NAME>' 
-
     checkpoint = context.get_checkpoint(name = checkpoint_name)
-
     checkpoint.run()
-```
+    ```
 
-Define the default arugments for the DAG:
+4. Run the following code to define the default arguments for the DAG:
 
-```python
-default_args = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'start_date': datetime(2023, 8, 9),  # Adjust start date
-}
-```
+    ```python title="Jupyter Notebook"
+    default_args = {
+        'owner': 'airflow',
+        'depends_on_past': False,
+        'start_date': datetime(2023, 8, 9),  # Adjust start date
+    }
+    ```
 
-Create the DAG instance:
+5. Run the following code to create the DAG instance:
 
-```python
-gx_dag = DAG(
-    'gx_dag',  
-    default_args=default_args,
-    schedule_interval= '59 23 * * 0',    
-    catchup=False
-)
-```
+    ```python title="Jupyter Notebook"
+    gx_dag = DAG(
+        'gx_dag',  
+        default_args=default_args,
+        schedule_interval= '59 23 * * 0',    
+        catchup=False
+    )
+    ```
 
-Finally, use a `PythonOperator` to create a task:
+6. Run the following code to use the `PythonOperator` to create a task:
 
-```python
-run_data_wrangling_task = PythonOperator(
-    task_id='gx_airflow',
-    python_callable=run_gx_airflow,
-    dag=gx_dag,
-)
+    ```python title="Jupyter Notebook"
+    run_data_wrangling_task = PythonOperator(
+        task_id='gx_airflow',
+        python_callable=run_gx_airflow,
+        dag=gx_dag,
+    )
 
-run_data_wrangling_task
-```
+    run_data_wrangling_task
+    ```
 
-## Open the Airflow Dashboard and run the DAG
+## Run the DAG
 
-Run the following command in the root directory of your Airflow project to start the server:
+1. Run the following command in the root directory of your Airflow project to start the server:
 
-```bash title="Terminal input"
-astro dev start
-```
+    ```bash title="Terminal input"
+    astro dev start
+    ```
 
-By default, a new browser window will open that will allow you to login. By default, the username and password are `admin/admin`.
+2. Sign in to Airflow. The default username and password are `admin`.
 
-Once you are logged in,, you will see the new DAG that we have defined earlier called `gx_airflow`. Under the Actions column, click the Play button to verify that your DAG is set up and running correctly.
+3. In the **Actions** column, click **Play** for `gx_airflow` and confirm your DAG runs as expected.
