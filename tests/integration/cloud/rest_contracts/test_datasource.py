@@ -2,15 +2,23 @@ from __future__ import annotations
 
 import pathlib
 import uuid
-from typing import Callable, Final
+from typing import TYPE_CHECKING, Callable, Final
 
+import pact
 import pytest
 
-from tests.integration.cloud.rest_contracts.conftest import (
-    ContractInteraction,
-)
+from tests.integration.cloud.rest_contracts.conftest import ContractInteraction
 
-DATASOURCE_MIN_RESPONSE_BODY: Final[dict] = {}
+if TYPE_CHECKING:
+    from tests.integration.cloud.rest_contracts.conftest import PactBody
+
+DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
+    "data": pact.Like(
+        {
+            "id": pact.Format().uuid,
+        }
+    )
+}
 
 
 @pytest.mark.cloud

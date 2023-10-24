@@ -1,23 +1,24 @@
 from __future__ import annotations
 
 import pathlib
-from typing import Callable, Final
+from typing import TYPE_CHECKING, Callable, Final
 
+import pact
 import pytest
-from pact import Format, Like
 
-from tests.integration.cloud.rest_contracts.conftest import (
-    ContractInteraction,
-)
+from tests.integration.cloud.rest_contracts.conftest import ContractInteraction
 
-DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[dict] = {
-    "anonymous_usage_statistics": Like(
+if TYPE_CHECKING:
+    from tests.integration.cloud.rest_contracts.conftest import PactBody
+
+DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[PactBody] = {
+    "anonymous_usage_statistics": pact.Like(
         {
-            "data_context_id": Format().uuid,
+            "data_context_id": pact.Format().uuid,
             "enabled": False,
         }
     ),
-    "datasources": Like({}),
+    "datasources": pact.Like({}),
     "include_rendered_content": {
         "globally": True,
         "expectation_validation_result": True,

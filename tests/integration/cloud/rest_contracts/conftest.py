@@ -15,7 +15,7 @@ from great_expectations.compatibility import pydantic
 from great_expectations.core.http import create_session
 
 if TYPE_CHECKING:
-    from requests import Session
+    import requests
 
 
 PACT_MOCK_HOST: Final[str] = "localhost"
@@ -49,7 +49,7 @@ class RequestMethods(str, enum.Enum):
 
 
 @pytest.fixture(scope="module")
-def gx_cloud_session() -> Session:
+def gx_cloud_session() -> requests.Session:
     try:
         access_token = os.environ["GX_CLOUD_ACCESS_TOKEN"]
     except KeyError as e:
@@ -139,7 +139,7 @@ class ContractInteraction(pydantic.BaseModel):
 
 @pytest.fixture
 def run_pact_test(
-    gx_cloud_session: Session,
+    gx_cloud_session: requests.Session,
     pact_test: pact.Pact,
 ) -> Callable:
     def _run_pact_test(
