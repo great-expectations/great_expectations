@@ -49,68 +49,47 @@ In this quickstart, you'll learn how to use GX Cloud with Apache Airflow. Apache
 
 5. Save your changes and close the `packages.txt` file.
 
-## Create a DAG file for your GX Cloud checkpoint
+## Create a DAG file for your GX Cloud Checkpoint
 
-1. In the `dags` folder of your Airflow project, run the following code to create a new DAG:
+1. Open a terminal, browse to the `dags` folder of your Airflow project, and then run the following code to create a new DAG named `gx_dag`:
 
     ```bash title="Terminal input"
     touch gx_dag.py
     ```
 
-2. In Jupyter Notebook, run the following code to import the dependencies you'll need to run your DAG:
+2. Open the `gx_dag` DAG file and add the following code:
 
-    ```python title="Jupyter Notebook"
+    ```python 
     import os
     import great_expectations as gx
     from airflow import DAG
     from airflow.operators.python import PythonOperator
     from datetime import datetime
-    ```
 
-2. Run the following code to define the method you'll use to run your Checkpoint and set your environment variables:
-
-    ```python title="Jupyter Notebook"
     def run_gx_airflow():
         os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<YOUR_ACCESS_TOKEN>"
         os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<YOUR_CLOUD_ORGANIZATION_ID>"
-    ```
 
-    To locate your users access token and organization ID, see [Get your user access token and organization ID](/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id).
+    # Replace YOUR_ACCESS_TOKEN and YOUR_CLOUD_ORGANIZATION_ID with your values. See [Get your user access token and organization ID](/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id).
 
-
-3. Run the following code to import the existing `DataContext` object and run the Checkpoint:
-
-    ```python title="Jupyter Notebook"
     context = gx.get_context()
     checkpoint_name = '<YOUR_CHECKPOINT_NAME>' 
     checkpoint = context.get_checkpoint(name = checkpoint_name)
     checkpoint.run()
-    ```
 
-4. Run the following code to define the default arguments for the DAG:
-
-    ```python title="Jupyter Notebook"
-    default_args = {
+     default_args = {
         'owner': 'airflow',
         'depends_on_past': False,
-        'start_date': datetime(2023, 8, 9),  # Adjust start date
+        'start_date': datetime(2023, 8, 9),  # Adjust the start date as needed
     }
-    ```
 
-5. Run the following code to create the DAG instance:
-
-    ```python title="Jupyter Notebook"
     gx_dag = DAG(
         'gx_dag',  
         default_args=default_args,
         schedule_interval= '59 23 * * 0',    
         catchup=False
     )
-    ```
 
-6. Run the following code to use the `PythonOperator` to create a task:
-
-    ```python title="Jupyter Notebook"
     run_data_wrangling_task = PythonOperator(
         task_id='gx_airflow',
         python_callable=run_gx_airflow,
@@ -119,6 +98,8 @@ In this quickstart, you'll learn how to use GX Cloud with Apache Airflow. Apache
 
     run_data_wrangling_task
     ```
+
+3. Save your changes and close the `gx_dag` DAG file.
 
 ## Run the DAG
 
