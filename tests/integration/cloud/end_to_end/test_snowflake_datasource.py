@@ -37,11 +37,33 @@ def datasource(
         connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
         # NOTE: uncomment this and set SNOWFLAKE_USER to run tests against your own snowflake account
         # connection_string="snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
+        create_temp_table=False,
     )
+    datasource.create_temp_table = True
+    datasource = context.sources.add_or_update_snowflake(datasource=datasource)
+    assert (
+        datasource.create_temp_table is True
+    ), "The datasource was not updated in the previous method call."
     datasource.create_temp_table = False
-    # _ = context.sources.add_or_update_snowflake(datasource)
-    _ = context.add_or_update_datasource(datasource=datasource)
+    datasource = context.add_or_update_datasource(datasource=datasource)
+    assert (
+        datasource.create_temp_table is False
+    ), "The datasource was not updated in the previous method call."
+    datasource.create_temp_table = True
+    datasource_dict = datasource.dict()
+    datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
+    datasource = context.sources.add_or_update_snowflake(**datasource_dict)
+    assert (
+        datasource.create_temp_table is True
+    ), "The datasource was not updated in the previous method call."
+    datasource.create_temp_table = False
+    datasource_dict = datasource.dict()
+    datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
+    _ = context.add_or_update_datasource(**datasource_dict)
     datasource = context.get_datasource(datasource_name=datasource_name)
+    assert (
+        datasource.create_temp_table is False
+    ), "The datasource was not updated in the previous method call."
     yield datasource
     # PP-692: this doesn't work due to a bug
     # calling delete_datasource() will fail with:
