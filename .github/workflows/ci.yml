@@ -92,7 +92,6 @@ jobs:
             - 'tests/test_sets/**'
 
   docs-snippets:
-    name: docs-snippets
     needs: [unit-tests, doc-checks, ci-is-on-main-repo]
     # run on non-draft PRs with docs changes
     if: |
