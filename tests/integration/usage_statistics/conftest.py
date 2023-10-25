@@ -5,7 +5,8 @@ from typing import Final
 
 import pytest
 import requests
-from requests.adapters import HTTPAdapter, Request, Response, Retry
+from requests import PreparedRequest, Response
+from requests.adapters import HTTPAdapter, Retry
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ def requests_session_with_retries() -> requests.Session:
     retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504])
     session.mount("https://", HTTPAdapter(max_retries=retries))
 
-    previous_requests: list[Request] = []
+    previous_requests: list[PreparedRequest] = []
 
     def _log_retries(r: Response, *args, **kwargs) -> None:
         if not previous_requests:
