@@ -45,7 +45,7 @@ def datasource(
         datasource.create_temp_table is True
     ), "The datasource was not updated in the previous method call."
     datasource.create_temp_table = False
-    datasource = context.add_or_update_datasource(datasource=datasource)
+    datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
     assert (
         datasource.create_temp_table is False
     ), "The datasource was not updated in the previous method call."
@@ -66,7 +66,7 @@ def datasource(
     # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
     _ = context.add_or_update_datasource(**datasource_dict)
-    datasource = context.get_datasource(datasource_name=datasource_name)
+    datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
     assert (
         datasource.create_temp_table is False
     ), "The datasource was not updated in the previous method call."
