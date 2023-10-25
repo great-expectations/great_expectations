@@ -93,7 +93,9 @@ def test_column_partition_metric(
             "allow_relative_error": False,
         },
     )
-    results = metrics_calculator.compute_metrics(metric_configurations=[desired_metric])
+    results, _ = metrics_calculator.compute_metrics(
+        metric_configurations=[desired_metric]
+    )
 
     increment = float(n_bins + 1) / n_bins
     assert all(
@@ -112,7 +114,9 @@ def test_column_partition_metric(
             "allow_relative_error": False,
         },
     )
-    results = metrics_calculator.compute_metrics(metric_configurations=[desired_metric])
+    results, _ = metrics_calculator.compute_metrics(
+        metric_configurations=[desired_metric]
+    )
 
     increment = datetime.timedelta(
         seconds=(seconds_in_week * float(n_bins + 1) / n_bins)
