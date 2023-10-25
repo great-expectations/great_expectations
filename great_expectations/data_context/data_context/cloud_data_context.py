@@ -618,6 +618,57 @@ class CloudDataContext(SerializableDataContext):
         return expectation_suite
 
     @override
+    def _save_expectation_suite(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_suite_name: Optional[str] = None,
+        overwrite_existing: bool = True,
+        include_rendered_content: Optional[bool] = None,
+        **kwargs: Optional[dict],
+    ) -> None:
+        id = expectation_suite.ge_cloud_id
+        key = GXCloudIdentifier(
+            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
+            id=id,
+            resource_name=expectation_suite.expectation_suite_name,
+        )
+
+        if not overwrite_existing:
+            self._validate_suite_unique_constaints_before_save(key)
+
+        self._evaluation_parameter_dependencies_compiled = False
+        include_rendered_content = (
+            self._determine_if_expectation_suite_include_rendered_content(
+                include_rendered_content=include_rendered_content
+            )
+        )
+        if include_rendered_content:
+            expectation_suite.render()
+
+        response = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
+        if isinstance(response, GXCloudResourceRef):
+            expectation_suite.ge_cloud_id = response.id
+
+    def _validate_suite_unique_constaints_before_save(
+        self, key: GXCloudIdentifier
+    ) -> None:
+        ge_cloud_id = key.id
+        if ge_cloud_id:
+            if self.expectations_store.has_key(key):
+                raise gx_exceptions.DataContextError(
+                    f"expectation_suite with GX Cloud ID {ge_cloud_id} already exists. "
+                    f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."
+                )
+
+        suite_name = key.resource_name
+        existing_suite_names = self.list_expectation_suite_names()
+        if suite_name in existing_suite_names:
+            raise gx_exceptions.DataContextError(
+                f"expectation_suite '{suite_name}' already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True."
+            )
+
+    @override
     def add_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
