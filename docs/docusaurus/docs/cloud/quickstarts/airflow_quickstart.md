@@ -72,12 +72,12 @@ In this quickstart, you'll learn how to use GX Cloud with Apache Airflow. Apache
 
     # Replace YOUR_ACCESS_TOKEN and YOUR_CLOUD_ORGANIZATION_ID with your values. See [Get your user access token and organization ID](/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id).
 
-    context = gx.get_context()
-    checkpoint_name = '<YOUR_CHECKPOINT_NAME>' 
-    checkpoint = context.get_checkpoint(name = checkpoint_name)
-    checkpoint.run()
+        context = gx.get_context()
+        checkpoint_name = '<YOUR_CHECKPOINT_NAME>' 
+        checkpoint = context.get_checkpoint(name = checkpoint_name)
+        checkpoint.run()
 
-     default_args = {
+    default_args = {
         'owner': 'airflow',
         'depends_on_past': False,
         'start_date': datetime(2023, 8, 9),  # Adjust the start date as needed
@@ -90,13 +90,13 @@ In this quickstart, you'll learn how to use GX Cloud with Apache Airflow. Apache
         catchup=False
     )
 
-    run_data_wrangling_task = PythonOperator(
+    run_gx_task = PythonOperator(
         task_id='gx_airflow',
         python_callable=run_gx_airflow,
         dag=gx_dag,
     )
 
-    run_data_wrangling_task
+    run_gx_task
     ```
 
 3. Save your changes and close the `gx_dag.py` DAG file.
