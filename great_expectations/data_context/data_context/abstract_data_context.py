@@ -847,34 +847,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._project_config = project_config
         self.variables.config = project_config
 
-    @deprecated_method_or_class(
-        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
-    )
-    def save_datasource(
-        self, datasource: BaseDatasource | FluentDatasource | LegacyDatasource
-    ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
-        """Save a Datasource to the configured DatasourceStore.
-
-        Stores the underlying DatasourceConfig in the store and Data Context config,
-        updates the cached Datasource and returns the Datasource.
-        The cached and returned Datasource is re-constructed from the config
-        that was stored as some store implementations make edits to the stored
-        config (e.g. adding identifiers).
-
-        Args:
-            datasource: Datasource to store.
-
-        Returns:
-            The datasource, after storing and retrieving the stored config.
-        """
-        # deprecated-v0.15.48
-        warnings.warn(
-            "save_datasource is deprecated as of v0.15.48 and will be removed in v0.18. "
-            "Please use update_datasource or add_or_update_datasource instead.",
-            DeprecationWarning,
-        )
-        return self.add_or_update_datasource(datasource=datasource)
-
     @overload
     def add_datasource(
         self,
@@ -1779,17 +1751,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             checkpoint=checkpoint,
         )
 
-        result: Checkpoint | CheckpointConfig
-        try:
-            result = self.checkpoint_store.add_checkpoint(checkpoint)
-        except gx_exceptions.CheckpointError as e:
-            # deprecated-v0.15.50
-            warnings.warn(
-                f"{e.message}; using add_checkpoint to overwrite an existing value is deprecated as of v0.15.50 "
-                "and will be removed in v0.18. Please use add_or_update_checkpoint instead.",
-                DeprecationWarning,
-            )
-            result = self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+        result: Checkpoint = self.checkpoint_store.add_checkpoint(checkpoint)
 
         if isinstance(result, CheckpointConfig):
             result = Checkpoint.instantiate_from_config_with_runtime_args(
@@ -3234,32 +3196,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The persisted Profiler constructed by the input arguments.
         """
-        try:
-            return RuleBasedProfiler.add_profiler(
-                data_context=self,
-                profiler_store=self.profiler_store,
-                name=name,
-                config_version=config_version,
-                rules=rules,
-                variables=variables,
-                profiler=profiler,
-            )
-        except gx_exceptions.ProfilerError as e:
-            # deprecated-v0.15.50
-            warnings.warn(
-                f"{e.message}; using add_profiler to overwrite an existing value is deprecated as of v0.15.50 "
-                "and will be removed in v0.18. Please use add_or_update_profiler instead.",
-                DeprecationWarning,
-            )
-            return RuleBasedProfiler.add_or_update_profiler(
-                data_context=self,
-                profiler_store=self.profiler_store,
-                name=name,
-                config_version=config_version,
-                rules=rules,
-                variables=variables,
-                profiler=profiler,
-            )
+        return RuleBasedProfiler.add_profiler(
+            data_context=self,
+            profiler_store=self.profiler_store,
+            name=name,
+            config_version=config_version,
+            rules=rules,
+            variables=variables,
+            profiler=profiler,
+        )
 
     @new_argument(
         argument_name="id",
