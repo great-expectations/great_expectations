@@ -16,6 +16,9 @@ DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
     "data": pact.Like(
         {
             "id": pact.Format().uuid,
+            "attributes": {
+                "datasource_config": {},
+            },
         }
     )
 }

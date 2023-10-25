@@ -98,7 +98,13 @@ def mock_cloud_datasource(
 ) -> PandasDatasource:
     datasource_name = "mock_cloud_datasource"
 
-    mock_response: requests.Response = _get_mock_response_from_pact_response_body(
+    mock_post_response: requests.Response = _get_mock_response_from_pact_response_body(
+        status_code=200,
+        pact_response_body=DATASOURCE_MIN_RESPONSE_BODY,
+    )
+
+    # add_datasource results in a round-trip meaning get will be called afterward
+    mock_get_response: requests.Response = _get_mock_response_from_pact_response_body(
         status_code=200,
         pact_response_body=DATASOURCE_MIN_RESPONSE_BODY,
     )
@@ -109,11 +115,15 @@ def mock_cloud_datasource(
     ):
         with mock.patch(
             target="requests.Session.post",
-            return_value=mock_response,
+            return_value=mock_post_response,
         ):
-            mock_cloud_datasource: PandasDatasource = (
-                mock_cloud_data_context.sources.add_pandas(name=datasource_name)
-            )
+            with mock.patch(
+                target="requests.Session.get",
+                return_value=mock_get_response,
+            ):
+                mock_cloud_datasource: PandasDatasource = (
+                    mock_cloud_data_context.sources.add_pandas(name=datasource_name)
+                )
 
     assert isinstance(mock_cloud_datasource, PandasDatasource)
     assert mock_cloud_datasource.name == datasource_name
