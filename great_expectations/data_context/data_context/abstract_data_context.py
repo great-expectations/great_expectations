@@ -2683,65 +2683,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return datasource.get_batch_list_from_batch_request(batch_request=result)
 
-    @public_api
-    @deprecated_method_or_class(
-        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
-    )
-    def create_expectation_suite(
-        self,
-        expectation_suite_name: str,
-        overwrite_existing: bool = False,
-        **kwargs: Optional[dict],
-    ) -> ExpectationSuite:
-        """Build a new ExpectationSuite and save it utilizing the context's underlying ExpectationsStore.
-
-        Note that this method can be called by itself or run within the get_validator workflow.
-
-        When run with create_expectation_suite():
-
-        ```python
-        expectation_suite_name = "genres_movies.fkey"
-        context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
-        batch = context.get_batch_list(
-            expectation_suite_name=expectation_suite_name
-        )[0]
-        ```
-
-        When run as part of get_validator():
-
-        ```python
-        validator = context.get_validator(
-            datasource_name="my_datasource",
-            data_connector_name="whole_table",
-            data_asset_name="my_table",
-            create_expectation_suite_with_name="my_expectation_suite",
-        )
-        validator.expect_column_values_to_be_in_set("c1", [4,5,6])
-        ```
-
-        Args:
-            expectation_suite_name: The name of the suite to create.
-            overwrite_existing: Whether to overwrite if a suite with the given name already exists.
-            **kwargs: Any key-value arguments to pass to the store when persisting.
-
-        Returns:
-            A new (empty) ExpectationSuite.
-
-        Raises:
-            ValueError: The input `overwrite_existing` is of the wrong type.
-            DataContextError: A suite with the same name already exists (and `overwrite_existing` is not enabled).
-        """
-        # deprecated-v0.15.48
-        warnings.warn(
-            "create_expectation_suite is deprecated as of v0.15.48 and will be removed in v0.18. "
-            "Please use add_expectation_suite or add_or_update_expectation_suite instead.",
-            DeprecationWarning,
-        )
-        return self._add_expectation_suite(
-            expectation_suite_name=expectation_suite_name,
-            overwrite_existing=overwrite_existing,
-        )
-
     @overload
     def add_expectation_suite(  # noqa: PLR0913
         self,
