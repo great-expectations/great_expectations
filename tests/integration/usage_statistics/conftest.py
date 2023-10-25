@@ -21,9 +21,10 @@ def requests_session_with_retries() -> requests.Session:
     previous_requests: list[PreparedRequest] = []
 
     def _log_retries(r: Response, *args, **kwargs) -> None:
-        if not previous_requests:
-            return
-        LOGGER.info(f"{r.request.method} was retried - {len(previous_requests)} times")
+        if previous_requests:
+            LOGGER.info(
+                f"{r.request.method} was retried - {len(previous_requests)} times"
+            )
         previous_requests.append(r.request)
 
     session.hooks["response"].append(_log_retries)
