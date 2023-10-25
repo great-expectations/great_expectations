@@ -580,7 +580,7 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
 
     profiler_name = profiler.name
 
-    context.save_profiler(
+    context.add_profiler(
         profiler=profiler,
     )
 

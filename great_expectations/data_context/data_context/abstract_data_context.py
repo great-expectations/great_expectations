@@ -94,7 +94,6 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.refs import (
     GXCloudIDAwareRef,
-    GXCloudResourceRef,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -1280,42 +1279,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             Either a list of strings or ConfigurationIdentifiers depending on the environment and context type.
         """
         return RuleBasedProfiler.list_profilers(self.profiler_store)
-
-    @deprecated_method_or_class(
-        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
-    )
-    def save_profiler(
-        self,
-        profiler: RuleBasedProfiler,
-    ) -> RuleBasedProfiler:
-        """Save an existing Profiler object utilizing the context's underlying ProfilerStore.
-
-        Args:
-            profiler: The Profiler object to persist.
-
-        Returns:
-            The input profiler - may be modified with an id depending on the backing store.
-        """
-        # deprecated-v0.15.48
-        warnings.warn(
-            "save_profiler is deprecated as of v0.15.48 and will be removed in v0.18. "
-            "Please use update_profiler or add_or_update_profiler instead.",
-            DeprecationWarning,
-        )
-        name = profiler.name
-        ge_cloud_id = profiler.ge_cloud_id
-        key = self._determine_key_for_profiler_save(name=name, id=ge_cloud_id)
-
-        response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
-        if isinstance(response, GXCloudResourceRef):
-            ge_cloud_id = response.id
-
-        # If an id is present, we want to prioritize that as our key for object retrieval
-        if ge_cloud_id:
-            name = None  # type: ignore[assignment]
-
-        profiler = self.get_profiler(name=name, ge_cloud_id=ge_cloud_id)
-        return profiler
 
     def _determine_key_for_profiler_save(
         self, name: str, id: Optional[str]

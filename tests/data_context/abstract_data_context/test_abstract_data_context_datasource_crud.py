@@ -83,9 +83,7 @@ def test_add_datasource_sanitizes_instantiated_objs_config(
         "base_directory"
     ] = f"${variable}"
 
-    instantiated_datasource = context.add_datasource(
-        **datasource_config_dict, save_changes=False
-    )
+    instantiated_datasource = context.add_datasource(**datasource_config_dict)
 
     # Runtime object should have the substituted value for downstream usage
     assert instantiated_datasource.data_connectors[
