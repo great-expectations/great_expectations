@@ -21,6 +21,9 @@ class StubDatasourceStore(DatasourceStore):
     def __init__(self):
         pass
 
+    def set(self, key, value):
+        return value
+
 
 class StubConfigurationProvider(_ConfigurationProvider):
     def __init__(self, config_values=None) -> None:
