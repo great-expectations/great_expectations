@@ -51,7 +51,7 @@ def datasource(
     ), "The datasource was not updated in the previous method call."
     datasource.create_temp_table = True
     datasource_dict = datasource.dict()
-    # this is a bug
+    # this is a bug - LATIKU-448
     # call to datasource.dict() results in a ConfigStr that fails pydantic
     # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
@@ -61,7 +61,7 @@ def datasource(
     ), "The datasource was not updated in the previous method call."
     datasource.create_temp_table = False
     datasource_dict = datasource.dict()
-    # this is a bug
+    # this is a bug - LATIKU-448
     # call to datasource.dict() results in a ConfigStr that fails pydantic
     # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
