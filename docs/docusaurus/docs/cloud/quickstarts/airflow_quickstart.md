@@ -51,13 +51,13 @@ In this quickstart, you'll learn how to use GX Cloud with Apache Airflow. Apache
 
 ## Create a DAG file for your GX Cloud Checkpoint
 
-1. Open a terminal, browse to the `dags` folder of your Airflow project, and then run the following code to create a new DAG named `gx_dag`:
+1. Open a terminal, browse to the `dags` folder of your Airflow project, and then run the following code to create a new DAG named `gx_dag.py`:
 
     ```bash title="Terminal input"
     touch gx_dag.py
     ```
 
-2. Open the `gx_dag` DAG file and add the following code:
+2. Open the `gx_dag.py` DAG file and add the following code:
 
     ```python 
     import os
@@ -99,7 +99,7 @@ In this quickstart, you'll learn how to use GX Cloud with Apache Airflow. Apache
     run_data_wrangling_task
     ```
 
-3. Save your changes and close the `gx_dag` DAG file.
+3. Save your changes and close the `gx_dag.py` DAG file.
 
 ## Run the DAG
 
