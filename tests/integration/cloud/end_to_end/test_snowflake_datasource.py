@@ -50,18 +50,20 @@ def datasource(
         datasource.create_temp_table is False
     ), "The datasource was not updated in the previous method call."
     datasource.create_temp_table = True
-    # call to datasource.dict() results in a connection_string of ConfigStr,
-    # but ConfigStr is not an API-level class
     datasource_dict = datasource.dict()
+    # this is a bug
+    # call to datasource.dict() results in a ConfigStr that fails pydantic
+    # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
     datasource = context.sources.add_or_update_snowflake(**datasource_dict)
     assert (
         datasource.create_temp_table is True
     ), "The datasource was not updated in the previous method call."
     datasource.create_temp_table = False
-    # call to datasource.dict() results in a connection_string of ConfigStr,
-    # but ConfigStr is not an API-level class
     datasource_dict = datasource.dict()
+    # this is a bug
+    # call to datasource.dict() results in a ConfigStr that fails pydantic
+    # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
     _ = context.add_or_update_datasource(**datasource_dict)
     datasource = context.get_datasource(datasource_name=datasource_name)
