@@ -86,7 +86,7 @@ In this quickstart, you'll learn how to use GX Cloud with Apache Airflow. Apache
     gx_dag = DAG(
         'gx_dag',  
         default_args=default_args,
-        schedule_interval= '59 23 * * 0',    
+        schedule_interval= '0 0 * * *', # This is set to run daily at midnight. Adjust as needed.
         catchup=False
     )
 
