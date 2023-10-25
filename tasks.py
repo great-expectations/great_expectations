@@ -1168,7 +1168,7 @@ def service(
                     "-d",
                     "--quiet-pull",
                     "--wait",
-                    "--wait-timeout 90",
+                    "--wait-timeout 120",
                 ]
             )
             ctx.run(" ".join(cmds), echo=True, pty=pty)
