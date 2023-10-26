@@ -21,7 +21,7 @@ To learn more about Data Assets, see [Data Asset](../../terms/data_asset.md).
 
 ## Create a Data Asset
 
-Create a Data Asset to define the data you want GX Cloud to access. Currently, the GX Cloud user interface is configured for Snowflake. To connect to Data Assets on another Data Source, see [Connect to source data](https://deploy-preview-8760.docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_lp) in the GX OSS documentation. 
+Create a Data Asset to define the data you want GX Cloud to access. Currently, the GX Cloud user interface is configured for Snowflake. To connect to Data Assets on another Data Source, see [Connect to a Data Source](https://deploy-preview-8760.docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_lp) in the GX OSS documentation. 
 
 1. In GX Cloud, click **Data Assets** > **New Asset**.
 
