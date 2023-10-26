@@ -234,7 +234,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Connect to source data',
+      label: 'Connect to a Data Source',
       link: { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_lp' },
       items: [
         'guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data',
