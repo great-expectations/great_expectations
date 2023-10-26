@@ -70,19 +70,20 @@ In this quickstart, you'll learn how to use GX Cloud with Apache Airflow. Apache
         os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<YOUR_ACCESS_TOKEN>"
         os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<YOUR_CLOUD_ORGANIZATION_ID>"
 
-    # Replace YOUR_ACCESS_TOKEN and YOUR_CLOUD_ORGANIZATION_ID with your values.
+    # Replace <YOUR_ACCESS_TOKEN> and <YOUR_CLOUD_ORGANIZATION_ID> with your credentials.
     # To get your user access token and organization ID, see:
     # (https://docs.greatexpectations.io/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id).
 
         context = gx.get_context()
         checkpoint_name = '<YOUR_CHECKPOINT_NAME>' 
+    # Replace <YOUR_CHECKPOINT_NAME> with the name of the Checkpoint you'd like to run.
         checkpoint = context.get_checkpoint(name = checkpoint_name)
         checkpoint.run()
 
     default_args = {
         'owner': 'airflow',
         'depends_on_past': False,
-        'start_date': datetime(2023, 8, 9),  # Adjust the start date as needed
+        'start_date': datetime(2023, 8, 9),  
     }
 
     gx_dag = DAG(
