@@ -2,12 +2,12 @@
 
 ## Starting Services and Running Tests
 
-- Set the environment variables for the Mercury service. The org ID and access token exist in the Mercury dev seed data and this is what is used in OSS CI:
+- Set the environment variables for the Mercury service. The org ID and access token only exist in dev seed data:
 
 ```shell
 export GX_CLOUD_BASE_URL=http://localhost:5000
-export GX_CLOUD_ORGANIZATION_ID=
-export GX_CLOUD_ACCESS_TOKEN=
+export GX_CLOUD_ORGANIZATION_ID=0ccac18e-7631-4bdd-8a42-3c35cce574c6
+export GX_CLOUD_ACCESS_TOKEN=5266c9ac7a844b91994e7bfc443bdeae.V1.UB3fpuYpsqxVX3XSXipYgfzPrvOG7jAhXE
 ```
 
 - Install cloud testing dependencies by running:
