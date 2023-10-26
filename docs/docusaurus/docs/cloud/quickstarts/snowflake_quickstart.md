@@ -2,7 +2,7 @@
 sidebar_label: 'Quickstart for GX Cloud and Snowflake'
 title: 'Quickstart for GX Cloud and Snowflake'
 id: snowflake_quickstart
-description: Connect Great Expectations to Snowflake Data Assets.
+description: Connect GX Cloud to Snowflake Data Assets.
 ---
 
 In this quickstart, you'll learn how to connect GX Cloud to Snowflake Data Assets.
