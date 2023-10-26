@@ -1,8 +1,8 @@
 ---
-sidebar_label: "Connect to in-memory source data"
-title: "Connect to in-memory source data"
+sidebar_label: "Connect to in-memory Data Assets"
+title: "Connect to in-memory Data Assets"
 id: connect_in_memory_data
-description: Connect to source data stored in-memory.
+description: Connect to in-memory Data Assets.
 toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
@@ -13,7 +13,7 @@ import AfterCreateInMemoryDataAsset from '/docs/components/connect_to_data/next_
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-Use the information provided here to connect to an in-memory pandas or Spark DataFrame. Great Expectations (GX) uses the term source data when referring to data in its original format, and the term source data system when referring to the storage location for source data.
+Use the information provided here to connect to an in-memory pandas or Spark DataFrame. Great Expectations (GX) uses the term Data Asset when referring to data in its original format, and the term Data Source when referring to the storage location for Data Assets.
 
 <Tabs
   groupId="connect-in-memory-source-data"
@@ -47,7 +47,7 @@ Run the following Python code to create a Pandas Data Source:
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py datasource"
 ```
 
-### Read your source data into a Pandas DataFrame
+### Read your data into a Pandas DataFrame
 
 In the following example, a parquet file is read into a Pandas DataFrame that will be used in subsequent code examples.
 
@@ -62,7 +62,7 @@ The following information is required when you create a Pandas DataFrame Data As
 
 - `name`: The Data Source name.
 
-- `dataframe`: The Pandas DataFrame containing the source data.
+- `dataframe`: The Pandas DataFrame containing the Data Assets.
 
 The DataFrame you created previously is the value you'll enter for `dataframe` parameter.  
 
@@ -94,7 +94,7 @@ For more information on Pandas read methods, see [the Pandas Input/Output docume
 
 ## Spark
 
-Connect to in-memory source data using Spark. 
+Connect to in-memory Data Assets using Spark. 
 
 ### Prerequisites
 
@@ -116,7 +116,7 @@ Run the following Python code to create a Spark Data Source:
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_spark.py datasource"
 ```
 
-### Read your source data into a Spark DataFrame
+### Read your data into a Spark DataFrame
 
 In the following example, you'll create a simple Spark DataFrame that is used in the following code examples.
 
@@ -125,13 +125,13 @@ Run the following Python code to create the Spark DataFrame:
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_spark.py dataframe"
 ```
 
-### Add a Data Asset to the Datasource
+### Add a Data Asset to the Data Source
 
 The following information is required when you create a Spark DataFrame Data Asset:
 
-- `name`: The Datasource name.
+- `name`: The Data Source name.
 
-- `dataframe`: The Spark DataFrame containing the source data.
+- `dataframe`: The Spark DataFrame containing the Data Assets.
 
 The DataFrame you created previously is the value you'll enter for `dataframe` parameter.  
 
