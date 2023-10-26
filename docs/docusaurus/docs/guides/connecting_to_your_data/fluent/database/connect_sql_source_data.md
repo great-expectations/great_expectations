@@ -1,6 +1,6 @@
 ---
 sidebar_label: "Connect to SQL database Data Assets"
-title: "Connect to SQL databaseData Assets"
+title: "Connect to SQL database Data Assets"
 id: connect_sql_source_data
 description: Connect to Data Assets stored on SQL databases.
 toc_min_heading_level: 2
