@@ -332,7 +332,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                         "_amount",
                     ],
                 },
-                "variables": {},
+                "variables": None,
                 "parameter_builders": [
                     {
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
