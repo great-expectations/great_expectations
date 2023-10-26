@@ -354,6 +354,8 @@ filterwarnings = [
     # Ignores in this section are for items in Great Expectations that are deprecated but not yet removed. Once the
     # relevant code is removed, the warning ignore should also be removed.
     # By ignoring these warnings, we will be able to turn on "warnings are errors" in our pipelines.
+    # Example Actual Warning: great_expectations.exceptions.exceptions.MetricResolutionError: The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, please see: https://greatexpectations.io/blog/why-we-dont-do-transformations-for-expectations-and-when-we-do
+    # Example warning location: test_column_partition_metric_pd
     'ignore: The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in v0.16.:DeprecationWarning',
     # Example Actual Warning: UserWarning: Your query appears to have hard-coded references to your data. By not parameterizing your query with `{active_batch}`, {col}, etc., you may not be validating against your intended data asset, or the expectation may fail.
     'ignore: Your query appears to have hard-coded references to your data. By not parameterizing your query with `{active_batch}`, {col}, etc., you may not be validating against your intended data asset, or the expectation may fail.:UserWarning',

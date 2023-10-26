@@ -605,6 +605,7 @@ class CloudDataContext(SerializableDataContext):
     ) -> bool:
         ...
 
+    @public_api
     @override
     def delete_expectation_suite(
         self,
@@ -740,7 +741,7 @@ class CloudDataContext(SerializableDataContext):
     def add_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
-        config_version: int | float = 1.0,  # noqa: PYI041
+        config_version: float = 1.0,
         template_name: str | None = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: str = "Checkpoint",
@@ -964,7 +965,6 @@ class CloudDataContext(SerializableDataContext):
         self,
         name: str | None = None,
         initialize: bool = True,
-        save_changes: bool | None = None,
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
@@ -975,7 +975,6 @@ class CloudDataContext(SerializableDataContext):
         return super()._add_datasource(
             name=name,
             initialize=initialize,
-            save_changes=save_changes,
             datasource=datasource,
             **kwargs,
         )
