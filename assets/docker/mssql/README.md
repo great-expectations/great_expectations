@@ -4,25 +4,25 @@ A second service will create the `test_ci` database required for the tests. This
 
 You should now be able to run the tests via `pytest --mssql`
 
-## If your Mac computer has an Apple M1 chip, you might need to 
-    
+## If your Mac computer has an Apple M1 chip, you might need to
+
 1. specify additional compiler or linker options. For example:
 
     ```sh
     export LDFLAGS="-L/opt/homebrew/Cellar/unixodbc/[your version]/lib"
     export CPPFLAGS="-I/opt/homebrew/Cellar/unixodbc/[your version]/include"
-    ``` 
+    ```
 
 2. Turn on `activate Rosetta emulation (beta feature)` within docker desktop
 
     See: https://github.com/microsoft/mssql-docker/issues/668#issuecomment-1420259510
 
-3. Install the ODSBC 17 driver: 
+3. Install the ODSBC 17 driver:
 
     https://learn.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos?view=sql-server-ver15
 
 ### Trouble shooting for Apple Silicon Macs
-    
+
 1. If you are seeing the following error:
 
     ```
@@ -39,8 +39,7 @@ You should now be able to run the tests via `pytest --mssql`
 2. If you are getting `Login timeout expired` when using localhost, try setting:
 
     ```sh
-    export GE_TEST_LOCAL_DB_HOSTNAME=127.0.0.1 
+    export GE_TEST_LOCAL_DB_HOSTNAME=127.0.0.1
     ```
 
-    
 
