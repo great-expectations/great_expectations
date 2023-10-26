@@ -1135,6 +1135,26 @@ def service(
         print(f"  Starting services for {', '.join(service_names)} ...")
         for service_name in service_names:
             cmds = []
+
+            if service_name == "mercury":
+                cmds.extend(
+                    [
+                        "FORCE_NO_ALIAS=true",
+                        "assumego",
+                        "dev",
+                        "--exec",
+                        "'aws ecr get-login-password --region us-east-1'",
+                        "|",
+                        "docker",
+                        "login",
+                        "--username",
+                        "AWS",
+                        "--password-stdin",
+                        "258143015559.dkr.ecr.us-east-1.amazonaws.com",
+                        "&&",
+                    ]
+                )
+
             if restart_services:
                 print(
                     f"  Removing existing containers and building latest for {service_name} ..."
