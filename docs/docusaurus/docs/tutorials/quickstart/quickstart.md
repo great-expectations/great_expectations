@@ -126,5 +126,5 @@ click Validate_B "https://docs.greatexpectations.io/docs/terms/data_docs"
 
 If you're ready to continue your Great Expectations journey, the following topics can help you implement a tailored solution for your specific environment and business requirements:
 
-- [Install GX in a specific environment with support for a specific source data system](/docs/guides/setup/installation/install_gx).
+- [Install GX in a specific environment with support for a specific Data Source](/docs/guides/setup/installation/install_gx).
 - [Initialize, instantiate, and save a Data Context](/docs/guides/setup/configure_data_contexts_lp).
