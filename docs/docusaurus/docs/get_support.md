@@ -1,7 +1,7 @@
 ---
 sidebar_label: 'Get support'
 title: 'Get support'
-description: Learn what resources are available to help you resolve issues with GX Core.
+description: Learn what resources are available to help you resolve issues with GX OSS.
 ---
 
 GX is open source software (OSS) and relies on an active user community for its continued success. Input from users like you helps Great Expectations and the community build its collective knowledge and improve GX OSS. Knowing how and where to seek support will help you get the answers you need to resolve issues.
