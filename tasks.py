@@ -1136,7 +1136,10 @@ def service(
         for service_name in service_names:
             cmds = []
 
-            if service_name == "mercury":
+            if (
+                service_name == "mercury"
+                and os.environ.get("CI") is False  # noqa: TID251
+            ):
                 cmds.extend(
                     [
                         "FORCE_NO_ALIAS=true",
