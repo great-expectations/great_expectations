@@ -5,7 +5,7 @@ id: airflow_quickstart
 description: Connect GX Cloud to an Airflow Orchestrator.
 ---
 
-In this quickstart, you'll learn how to use GX Cloud with Apache Airflow. Apache Airflow is an orchestration tool that allows you to schedule and monitor your data pipelines. For more information about Apache Airflow, see the [Apache Airflow documentation](https://airflow.apache.org/docs/apache-airflow/stable/index.html).
+In this quickstart, you'll create an Airflow DAG that runs an existing GX Cloud Checkpoint on a schedule. Apache Airflow is an orchestration tool that allows you to schedule and monitor your data pipelines. For more information about Apache Airflow, see the [Apache Airflow documentation](https://airflow.apache.org/docs/apache-airflow/stable/index.html). 
 
 ## Prerequisites
 
@@ -70,7 +70,8 @@ In this quickstart, you'll learn how to use GX Cloud with Apache Airflow. Apache
         os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<YOUR_ACCESS_TOKEN>"
         os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<YOUR_CLOUD_ORGANIZATION_ID>"
 
-    # Replace YOUR_ACCESS_TOKEN and YOUR_CLOUD_ORGANIZATION_ID with your values. See [Get your user access token and organization ID](/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id).
+    # Replace YOUR_ACCESS_TOKEN and YOUR_CLOUD_ORGANIZATION_ID with your values.
+    # To get your user access token and organization ID, see (https://docs.greatexpectations.io/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id).
 
         context = gx.get_context()
         checkpoint_name = '<YOUR_CHECKPOINT_NAME>' 
