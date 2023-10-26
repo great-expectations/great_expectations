@@ -44,7 +44,7 @@ When posting questions or asking for help in one of the GX Slack channels, don't
 
 ### Don't tag individual users
 
-Even if you've previously developed a rapport with a specific GX DA, or a community member, don't tag them in new Slack posts. GX DA and community member availability varies. The GX DAs operate on a rotation schedule to ensure equal time working with the open source community, and you never know who is available or who has the knowledge to solve your issue. Tagging specific users can limit the scope of the response. Also, the community is typically very responsive and helpful. If you don't get a response within a reasonable time, review your post and ensure you've framed your questions correctly and provided the necessary background information. If you don't get a response, or it's unhelpful, try an alternate medium to resolve your issue.
+Even if you've previously developed a rapport with a specific GX DA, or a community member, don't tag them in new Slack posts. GX DA and community member availability varies. Also, the GX DAs operate on a rotation schedule to ensure equal time working with the open source community, and you never know who is available or who has the knowledge to solve your issue. Tagging specific users can limit the scope of the response. Also, the community is typically very responsive and helpful. If you don't get a response within a reasonable time, review your post and ensure you've framed your questions correctly and provided the necessary background information. If you don't get a response, or it's unhelpful, try an alternate medium to resolve your issue.
 
 ## Select the correct medium for questions and support
 
