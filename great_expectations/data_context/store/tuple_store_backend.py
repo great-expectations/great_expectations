@@ -1152,10 +1152,10 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
     def get_url_for_key(self, key, protocol=None):
         az_blob_key = self._convert_key_to_filepath(key)
         az_blob_path = os.path.join(  # noqa: PTH118
-            self.container, self.prefix, az_blob_key
+            self.prefix, az_blob_key
         )
 
-        return "https://{}.blob.core.windows.net/{}".format(
+        return "https://{}.z16.web.core.windows.net/{}".format(
             self._container_client.account_name,
             az_blob_path,
         )
