@@ -38,7 +38,7 @@ ci:
         [pre-commit.ci] auto fixes from pre-commit.com hooks
 
         for more information, see https://pre-commit.ci
-    autofix_prs: false
+    autofix_prs: true
     autoupdate_branch: 'develop'
     autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
     autoupdate_schedule: monthly
