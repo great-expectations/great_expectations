@@ -61,7 +61,7 @@ Please reference the appropriate one of these guides:
 </details>
 -->
 
-:::caution Datasources defined with the block-config method
+:::caution Data Sources defined with the block-config method
 
 If you're using a Data Source that was created with the advanced block-config method, see [How to configure a SQL Data Source with the block-config method](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource).
 
