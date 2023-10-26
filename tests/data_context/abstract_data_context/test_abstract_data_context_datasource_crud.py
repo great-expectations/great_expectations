@@ -4,15 +4,17 @@ from unittest import mock
 import pytest
 
 from great_expectations.core.config_provider import _ConfigurationProvider
+from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.data_context_variables import (
     DataContextVariables,
     EphemeralDataContextVariables,
 )
-from great_expectations.data_context.store import DatasourceStore
+from great_expectations.data_context.store import DatasourceStore, InMemoryStoreBackend
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
+    DatasourceConfigSchema,
 )
 from great_expectations.datasource import BaseDatasource, LegacyDatasource
 
@@ -21,6 +23,11 @@ class StubDatasourceStore(DatasourceStore):
     """Used for mocking the set() call."""
 
     def __init__(self):
+        datasourceConfigSchema = DatasourceConfigSchema()
+        self._store_backend = InMemoryStoreBackend()
+        self._use_fixed_length_key = self._store_backend.fixed_length_key
+        self._schema = datasourceConfigSchema
+        self._serializer = DictConfigSerializer(schema=datasourceConfigSchema)
         pass
 
 
@@ -74,7 +81,7 @@ def test_save_datasource_empty_store(datasource_config_with_names: DatasourceCon
 
     # add_datasource used to create a datasource object for use in save_datasource
     datasource_to_save = context.add_datasource(
-        **datasource_config_with_names.to_json_dict(), save_changes=False
+        **datasource_config_with_names.to_json_dict()
     )
 
     with mock.patch(
@@ -113,7 +120,7 @@ def test_save_datasource_overwrites_on_name_collision(
 
     # add_datasource used to create a datasource object for use in save_datasource
     datasource_to_save = context.add_datasource(
-        **datasource_config_with_names.to_json_dict(), save_changes=False
+        **datasource_config_with_names.to_json_dict()
     )
 
     with mock.patch(
@@ -155,9 +162,7 @@ def test_add_datasource_sanitizes_instantiated_objs_config(
         "base_directory"
     ] = f"${variable}"
 
-    instantiated_datasource = context.add_datasource(
-        **datasource_config_dict, save_changes=False
-    )
+    instantiated_datasource = context.add_datasource(**datasource_config_dict)
 
     # Runtime object should have the substituted value for downstream usage
     assert instantiated_datasource.data_connectors[
