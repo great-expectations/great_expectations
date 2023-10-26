@@ -5,12 +5,12 @@ Note: Running Mercury services locally requires access to the GX private docker 
 
 ## Starting Services and Running Tests
 
-- Set the environment variables for the Mercury service. The org ID and access token only exist in dev seed data:
+- Set the environment variables for the Mercury service. The org ID and access token only exist in dev seed data. Get the variable values from DevOps.:
 
 ```shell
 export GX_CLOUD_BASE_URL=http://localhost:5000
-export GX_CLOUD_ORGANIZATION_ID=0ccac18e-7631-4bdd-8a42-3c35cce574c6
-export GX_CLOUD_ACCESS_TOKEN=5266c9ac7a844b91994e7bfc443bdeae.V1.UB3fpuYpsqxVX3XSXipYgfzPrvOG7jAhXE
+export GX_CLOUD_ORGANIZATION_ID=
+export GX_CLOUD_ACCESS_TOKEN=
 ```
 
 - Install cloud testing dependencies by running:
