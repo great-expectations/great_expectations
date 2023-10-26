@@ -1,5 +1,8 @@
 # Mercury Services
 
+Note: Running Mercury services locally requires access to the GX private docker registry.
+      External contributors will not be able to follow these instructions and will only be able to run these tests in CI.
+
 ## Starting Services and Running Tests
 
 - Set the environment variables for the Mercury service. The org ID and access token only exist in dev seed data:
@@ -17,11 +20,7 @@ pip install invoke
 invoke deps --gx-install -m 'cloud' -r test
 ```
 
-- Run the following `assume` command to authenticate with ECR so you can pull and run the Mercury services from AWS:
-
-```shell
-assume dev --exec 'aws ecr get-login-password --region us-east-1' | docker login --username AWS --password-stdin 258143015559.dkr.ecr.us-east-1.amazonaws.com
-```
+- Ensure you have `granted` installed and configured. Follow the instructions at [this confluence page](https://greatexpectations.atlassian.net/wiki/spaces/SUP/pages/450068501/Granted+for+AWS+Access).
 
 - You must have installed a docker compose version of at least 2.17.0 to use the invoke task. Check your version by running:
 
