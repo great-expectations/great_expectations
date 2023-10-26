@@ -10,17 +10,17 @@ GX Cloud builds on the innovative features of GX open source software (OSS). Its
 
 Here are just a few of the benefits you'll get with GX Cloud: 
 
-- It's web-based and browser and platform-independent.
+- It's web-based and browser- and platform-independent.
 
-- A hosted environment and intuitive interface makes it faster to set up and run your Data Validations.
+- A hosted environment and intuitive interface makes it faster to set up and run your data Validations.
 
 - Features such as Validation run histories, Data Asset metrics, and more.
 
-- Eliminates the need to create, run, and maintain complex code for your data queries.
+- No more need to create, run, and maintain complex code for your data queries.
 
 ## Workflow optimization
 
-GX Cloud is intended to help you get started faster than GX OSS and to simplify your Data Validation workflows. Here's how it's done:
+GX Cloud helps you get started faster and simplifies your data Validation workflows. Here's how:
 
 - You can identify your Data Source, connect to a Data Asset, create Expectations, and then run Validations without running a single line of Python code. 
 
@@ -70,7 +70,7 @@ The following browsers are supported by GX Cloud:
 
 ### Browser session duration
 
-A session is the period of time that you’re signed in to your GX Cloud account from a browser. If you close the browser, your session ends you're signed out. You'll need to sign in again to access GX Cloud.
+A session is the period of time that you’re signed in to your GX Cloud account from a browser. If you close the browser, your session ends and you're signed out. You'll need to sign in again to access GX Cloud.
 
 ## Get support
 
