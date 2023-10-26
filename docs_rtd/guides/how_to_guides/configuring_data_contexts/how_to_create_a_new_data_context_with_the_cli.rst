@@ -13,4 +13,3 @@ Please see the :ref:`Getting Started <tutorials__getting_started__initialize_a_d
 
 .. discourse::
     :topic_identifier: 160
-

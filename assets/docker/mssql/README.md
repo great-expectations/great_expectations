@@ -41,5 +41,3 @@ You should now be able to run the tests via `pytest --mssql`
     ```sh
     export GE_TEST_LOCAL_DB_HOSTNAME=127.0.0.1
     ```
-
-
