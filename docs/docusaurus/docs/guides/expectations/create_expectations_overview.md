@@ -27,11 +27,11 @@ GX recommends using the Onboarding Data Assistant to create an Expectation Suite
 
 ### Manually define Expectations
 
-Advanced users can use a manual process to create Expectations. This workflow does not require source data to work against, but it does require knowledge of the configurations available for Expectations. To create Expectations manually, see [how to create and edit expectations based on domain knowledge without inspecting data directly](./how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md).
+Advanced users can use a manual process to create Expectations. This workflow does not require Data Assets, but it does require knowledge of the configurations available for Expectations. To create Expectations manually, see [how to create and edit expectations based on domain knowledge without inspecting data directly](./how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md).
 
 ### Create Expectations with custom methods
 
-Advanced users can use custom methods to generate Expectations that are based on source data system metadata. If you want to use custom methods to create Expectations, [contact a member of the support team on Slack](https://greatexpectations.io/slack).
+Advanced users can use custom methods to generate Expectations that are based on Data Source metadata. If you want to use custom methods to create Expectations, [contact a member of the support team on Slack](https://greatexpectations.io/slack).
 
 ### Test your Expectation Suite
 
