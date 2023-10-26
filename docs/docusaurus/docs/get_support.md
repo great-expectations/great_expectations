@@ -50,7 +50,7 @@ Even if you've previously developed a rapport with a specific GX DA, or a commun
 
 GX provides the following resources for questions and support:
 
-- If you've encountered an error and are stuck, get support on the [GX Discourse forum](https://discourse.greatexpectations.io/c/cloud-support/17)
+- If you've encountered an error and are stuck, get support on the [GX Discourse forum](https://discourse.greatexpectations.io/c/oss-support/11)
 
 - If you've found a bug, open an issue in one of the [GX GitHub repositories](https://github.com/great-expectations)
 

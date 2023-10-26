@@ -193,6 +193,7 @@ module.exports = {
             },
           ]
         },
+        { type: 'doc', id: 'cloud/get_support' },
       ]
     },
     {
@@ -206,7 +207,6 @@ module.exports = {
         },
         'tutorials/getting_started/how_to_use_great_expectations_in_databricks',
         'tutorials/getting_started/how_to_use_great_expectations_with_sql',
-        'get_support',
       ]
     },
     {
@@ -473,6 +473,7 @@ module.exports = {
     },
     { type: 'doc', id: 'changelog' },
     { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
+    'get_support',
     'contributing/contributing',
   ]
 }
