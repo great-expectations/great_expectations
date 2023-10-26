@@ -71,7 +71,8 @@ In this quickstart, you'll create an Airflow DAG that runs an existing GX Cloud 
         os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<YOUR_CLOUD_ORGANIZATION_ID>"
 
     # Replace YOUR_ACCESS_TOKEN and YOUR_CLOUD_ORGANIZATION_ID with your values.
-    # To get your user access token and organization ID, see (https://docs.greatexpectations.io/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id).
+    # To get your user access token and organization ID, see:
+    # (https://docs.greatexpectations.io/docs/cloud/set_up_gx_cloud#get-your-user-access-token-and-organization-id).
 
         context = gx.get_context()
         checkpoint_name = '<YOUR_CHECKPOINT_NAME>' 
