@@ -1,10 +1,10 @@
 ---
 sidebar_label: 'Get support'
 title: 'Get support'
-description: Learn what resources are avialable to help you resolve issues with GX Core.
+description: Learn what resources are available to help you resolve issues with GX Core.
 ---
 
-GX Core is open source software (OSS) and relies on an active user community for its continued success. Input from users like you help GX and the community build its collective knowledge and improve GX Core. Knowing how and where to seek support will help you get the answers you need to resolve issues.
+GX is open source software (OSS) and relies on an active user community for its continued success. Input from users like you helps Great Expectations and the community build its collective knowledge and improve GX OSS. Knowing how and where to seek support will help you get the answers you need to resolve issues.
 
 ## Try solving your issue first
 
@@ -12,7 +12,7 @@ The following are some recommendations for resolving issues on your own. Resolvi
 
 ### Search the GX documentation
 
-Search the docs you're using currently for an answer to your issue or question. If you're new to GX Core, try the [Quickstart](tutorials/quickstart/quickstart.md) or one of the specific getting started guides such as [Get started with Great Expectations and Databricks](tutorials/getting_started/how_to_use_great_expectations_in_databricks.md), or [Get started with Great Expectations and SQL](tutorials/getting_started/how_to_use_great_expectations_with_sql.md).  
+Search the docs you're using currently for an answer to your issue or question. If you're new to GX OSS, try the [Quickstart](tutorials/quickstart/quickstart.md) or one of the specific getting started guides such as [Get started with Great Expectations and Databricks](tutorials/getting_started/how_to_use_great_expectations_in_databricks.md), or [Get started with Great Expectations and SQL](tutorials/getting_started/how_to_use_great_expectations_with_sql.md).  
 
 ### Search with your favorite browser
 
@@ -34,7 +34,7 @@ Clearly explain the issue you're experiencing, or the problem you're trying to s
 
 - The relevant code you're trying to run.
 
-- The version of GX Core you're using.
+- The version of GX OSS you're using.
 
 - A detailed explanation of what you're trying to resolve including what attempts you've made on your own to date.
 
@@ -42,9 +42,9 @@ Clearly explain the issue you're experiencing, or the problem you're trying to s
 
 When posting questions or asking for help in one of the GX Slack channels, don't post in multiple channels. Instead, select a single, relevant channel and post your message there. When responding to a post, use threads. If you need to post large code blocks, post them in a thread to avoid overwhelming the channel.
 
-### Don't tag single or multiple users
+### Don't tag individual users
 
-Even if you've previously developed a rapport with a specific GX DA, or a community member, don't tag them in new Slack posts. You never know who is available or who has the knowledge to solve your issue. Tagging specific users can limit the scope of the response. Also, the community is typically very responsive and helpful. If you don't get a response within a reasonable time, review your post and make sure you've framed your questions correctly and provided the necessary background information. If you don't get a response, or it's unhelpful, try an alternate medium to resolve your issue.
+Even if you've previously developed a rapport with a specific GX DA, or a community member, don't tag them in new Slack posts. GX DA and community member availability varies. The GX DAs operate on a rotation schedule to ensure equal time working with the open source community, and you never know who is available or who has the knowledge to solve your issue. Tagging specific users can limit the scope of the response. Also, the community is typically very responsive and helpful. If you don't get a response within a reasonable time, review your post and ensure you've framed your questions correctly and provided the necessary background information. If you don't get a response, or it's unhelpful, try an alternate medium to resolve your issue.
 
 ## Select the correct medium for questions and support
 
