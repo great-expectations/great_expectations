@@ -6,13 +6,14 @@
 
 ```shell
 export GX_CLOUD_BASE_URL=http://localhost:5000
-export GX_CLOUD_ORGANIZATION_ID=0ccac18e-7631-4bdd-8a42-3c35cce574c6
-export GX_CLOUD_ACCESS_TOKEN=5266c9ac7a844b91994e7bfc443bdeae.V1.UB3fpuYpsqxVX3XSXipYgfzPrvOG7jAhXE
+export GX_CLOUD_ORGANIZATION_ID=
+export GX_CLOUD_ACCESS_TOKEN=
 ```
 
 - Install cloud testing dependencies by running:
 
 ```shell
+pip install invoke
 invoke deps --gx-install -m 'cloud' -r test
 ```
 
