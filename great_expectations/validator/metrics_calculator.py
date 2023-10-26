@@ -138,7 +138,8 @@ class MetricsCalculator:
         Returns:
             Return Dictionary with requested metrics resolved, with metric_name as key and computed metric as value.
         """
-        resolved_metrics: _MetricsDict = self.compute_metrics(
+        resolved_metrics: _MetricsDict
+        resolved_metrics, _ = self.compute_metrics(
             metric_configurations=list(metrics.values()),
             runtime_configuration=None,
             min_graph_edges_pbar_enable=0,
@@ -148,7 +149,7 @@ class MetricsCalculator:
             for metric_configuration in metrics.values()
         }
 
-    def compute_metrics_with_aborted_metrics(
+    def compute_metrics(
         self,
         metric_configurations: List[MetricConfiguration],
         runtime_configuration: Optional[dict] = None,
@@ -162,7 +163,9 @@ class MetricsCalculator:
             min_graph_edges_pbar_enable: Minumum number of graph edges to warrant showing progress bars.
 
         Returns:
-            Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
+            Tuple of two elements, the first is a dictionary with requested metrics resolved,
+            with unique metric ID as key and computed metric as value. The second is a dictionary of the
+            aborted metrics information, with metric ID as key if any metrics were aborted.
         """
         graph: ValidationGraph = self.build_metric_dependency_graph(
             metric_configurations=metric_configurations,
@@ -172,39 +175,13 @@ class MetricsCalculator:
         aborted_metrics_info: _AbortedMetricsInfoDict
         (
             resolved_metrics,
-            aborted_metrics_info,
+            aborted_metrics,
         ) = self.resolve_validation_graph_and_handle_aborted_metrics_info(
             graph=graph,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
         )
-        return resolved_metrics, aborted_metrics_info
-
-    def compute_metrics(
-        self,
-        metric_configurations: List[MetricConfiguration],
-        runtime_configuration: Optional[dict] = None,
-        min_graph_edges_pbar_enable: int = 0,
-        # Set to low number (e.g., 3) to suppress progress bar for small graphs.
-    ) -> _MetricsDict:
-        """
-        Args:
-            metric_configurations: List of desired MetricConfiguration objects to be resolved.
-            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
-            min_graph_edges_pbar_enable: Minumum number of graph edges to warrant showing progress bars.
-
-        Returns:
-            Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
-        """
-
-        # Note: Dropping aborted metrics for backward compatibility.
-        # This is a temporary solution until we can change all the callers to handle aborted metrics.
-        resolved_metrics, _ = self.compute_metrics_with_aborted_metrics(
-            metric_configurations=metric_configurations,
-            runtime_configuration=runtime_configuration,
-            min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
-        )
-        return resolved_metrics
+        return resolved_metrics, aborted_metrics
 
     def build_metric_dependency_graph(
         self,
