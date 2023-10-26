@@ -5,7 +5,7 @@ id: airflow_quickstart
 description: Connect GX Cloud to an Airflow Orchestrator.
 ---
 
-In this quickstart, you'll create an Airflow DAG that runs an existing GX Cloud Checkpoint on a schedule. Apache Airflow is an orchestration tool that allows you to schedule and monitor your data pipelines. For more information about Apache Airflow, see the [Apache Airflow documentation](https://airflow.apache.org/docs/apache-airflow/stable/index.html). 
+In this quickstart, you'll learn how to use GX Cloud with Apache Airflow. Apache Airflow is an orchestration tool that allows you to schedule and monitor your data pipelines. For more information about Apache Airflow, see the [Apache Airflow documentation](https://airflow.apache.org/docs/apache-airflow/stable/index.html). You'll create a simple DAG that runs a Checkpoint that you have already set up in GX Cloud and trigger it through a local installation of an Airflow server.
 
 ## Prerequisites
 
