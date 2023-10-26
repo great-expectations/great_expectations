@@ -880,7 +880,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str = ...,
         initialize: bool = ...,
-        save_changes: bool | None = ...,
         datasource: None = ...,
         **kwargs,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
@@ -895,7 +894,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: None = ...,
         initialize: bool = ...,
-        save_changes: bool | None = ...,
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource = ...,
         **kwargs,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
@@ -906,7 +904,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @public_api
-    @deprecated_argument(argument_name="save_changes", version="0.15.32")
     @new_argument(
         argument_name="datasource",
         version="0.15.49",
@@ -920,7 +917,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         initialize: bool = True,
-        save_changes: bool | None = None,
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
@@ -933,7 +929,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             name: the name of the new Datasource to add
             initialize: if False, add the Datasource to the config, but do not
                 initialize it, for example if a user needs to debug database connectivity.
-            save_changes: should GX save the Datasource config?
             datasource: an existing Datasource you wish to persist
             kwargs: the configuration for the new Datasource
 
@@ -943,7 +938,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._add_datasource(
             name=name,
             initialize=initialize,
-            save_changes=save_changes,
             datasource=datasource,
             **kwargs,
         )
@@ -970,7 +964,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         initialize: bool = True,
-        save_changes: bool | None = None,
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
@@ -983,7 +976,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             datasource = self._add_block_config_datasource(
                 name=name,
                 initialize=initialize,
-                save_changes=save_changes,
                 datasource=datasource,
                 **kwargs,
             )
@@ -993,12 +985,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         initialize: bool = True,
-        save_changes: bool | None = None,
         datasource: BaseDatasource | LegacyDatasource | None = None,
         **kwargs,
     ) -> BaseDatasource | LegacyDatasource | None:
-        save_changes = self._determine_save_changes_flag(save_changes)
-
         logger.debug(f"Starting AbstractDataContext.add_datasource for {name}")
 
         if datasource:
@@ -1028,37 +1017,30 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._instantiate_datasource_from_config_and_update_project_config(
             config=datasource_config,
             initialize=initialize,
-            save_changes=save_changes,
         )
 
     @public_api
     def update_datasource(
         self,
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource,
-        save_changes: bool | None = None,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
         """Updates a Datasource that already exists in the store.
 
         Args:
             datasource: The Datasource object to update.
-            save_changes: do I save changes to disk?
 
         Returns:
             The updated Datasource.
         """
-        save_changes = self._determine_save_changes_flag(save_changes)
         if isinstance(datasource, FluentDatasource):
             self._update_fluent_datasource(datasource=datasource)
         else:
-            datasource = self._update_block_config_datasource(
-                datasource=datasource, save_changes=save_changes
-            )
+            datasource = self._update_block_config_datasource(datasource=datasource)
         return datasource
 
     def _update_block_config_datasource(
         self,
         datasource: LegacyDatasource | BaseDatasource,
-        save_changes: bool,
     ) -> BaseDatasource | LegacyDatasource:
         name = datasource.name
         config = datasource.config
@@ -1068,16 +1050,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource_config_dict: dict = datasourceConfigSchema.dump(config)
         datasource_config = DatasourceConfig(**datasource_config_dict)
 
-        if save_changes:
-            self._datasource_store.update_by_name(
-                datasource_name=name, datasource_config=datasource_config
-            )
+        self._datasource_store.update_by_name(
+            datasource_name=name, datasource_config=datasource_config
+        )
 
         updated_datasource = (
             self._instantiate_datasource_from_config_and_update_project_config(
                 config=datasource_config,
                 initialize=True,
-                save_changes=False,
             )
         )
 
@@ -1559,24 +1539,17 @@ class AbstractDataContext(ConfigPeer, ABC):
         return datasources
 
     @public_api
-    @deprecated_argument(argument_name="save_changes", version="0.15.32")
-    def delete_datasource(
-        self, datasource_name: Optional[str], save_changes: Optional[bool] = None
-    ) -> None:
+    def delete_datasource(self, datasource_name: Optional[str]) -> None:
         """Delete a given Datasource by name.
 
         Note that this method causes deletion from the underlying DatasourceStore.
-        This can be overridden to only impact the Datasource cache through the deprecated
-        `save_changes` argument.
 
         Args:
             datasource_name: The name of the target datasource.
-            save_changes: Should this change be persisted by the DatasourceStore?
 
         Raises:
             ValueError: The `datasource_name` isn't provided or cannot be found.
         """
-        save_changes = self._determine_save_changes_flag(save_changes)
 
         if not datasource_name:
             raise ValueError("Datasource names must be a datasource name")
@@ -1586,19 +1559,18 @@ class AbstractDataContext(ConfigPeer, ABC):
         if isinstance(datasource, FluentDatasource):
             # Note: this results in some unnecessary dict lookups
             self._delete_fluent_datasource(datasource_name)
-        elif save_changes:
+        else:
             self.datasources.pop(datasource_name, None)
 
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
-        if save_changes:
-            self._save_project_config()
+        self._save_project_config()
 
     @overload
     def add_checkpoint(  # noqa: PLR0913
         self,
         name: str = ...,
-        config_version: int | float = ...,  # noqa: PYI041
+        config_version: float = ...,
         template_name: str | None = ...,
         module_name: str = ...,
         class_name: str = ...,
@@ -1633,7 +1605,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_checkpoint(  # noqa: PLR0913
         self,
         name: None = ...,
-        config_version: int | float = ...,  # noqa: PYI041
+        config_version: float = ...,
         template_name: None = ...,
         module_name: str = ...,
         class_name: str = ...,
@@ -1687,7 +1659,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
-        config_version: int | float = 1.0,  # noqa: PYI041
+        config_version: float = 1.0,
         template_name: str | None = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: str = "Checkpoint",
@@ -1829,7 +1801,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str = ...,
         id: str | None = ...,
-        config_version: int | float = ...,  # noqa: PYI041
+        config_version: float = ...,
         template_name: str | None = ...,
         module_name: str = ...,
         class_name: str = ...,
@@ -1861,7 +1833,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: None = ...,
         id: None = ...,
-        config_version: int | float = ...,  # noqa: PYI041
+        config_version: float = ...,
         template_name: None = ...,
         module_name: str = ...,
         class_name: str = ...,
@@ -1899,7 +1871,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         id: str | None = None,
-        config_version: int | float = 1.0,  # noqa: PYI041
+        config_version: float = 1.0,
         template_name: str | None = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: str = "Checkpoint",
@@ -1990,7 +1962,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         id: str | None = None,
-        config_version: int | float = 1.0,  # noqa: PYI041
+        config_version: float = 1.0,
         template_name: str | None = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: str = "Checkpoint",
@@ -2159,7 +2131,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
         profilers: list[dict] | None = None,
-        run_id: str | int | float | None = None,  # noqa: PYI041
+        run_id: str | float | None = None,
         run_name: str | None = None,
         run_time: datetime.datetime | None = None,
         result_format: str | None = None,
@@ -2235,7 +2207,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
         profilers: list[dict] | None = None,
-        run_id: str | int | float | None = None,  # noqa: PYI041
+        run_id: str | float | None = None,
         run_name: str | None = None,
         run_time: datetime.datetime | None = None,
         result_format: str | None = None,
@@ -4814,14 +4786,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         self,
         config: DatasourceConfig,
         initialize: bool,
-        save_changes: bool,
     ) -> Optional[Datasource]:
         """Perform substitutions and optionally initialize the Datasource and/or store the config.
 
         Args:
             config: Datasource Config to initialize and/or store.
             initialize: Whether to initialize the datasource, alternatively you can store without initializing.
-            save_changes: Whether to store the configuration in your configuration store (GX cloud or great_expectations.yml)
 
         Returns:
             Datasource object if initialized.
@@ -4838,8 +4808,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         # Note that the call to `DatasourceStore.set` may alter the config object's state
         # As such, we invoke it at the top of our function so any changes are reflected downstream
-        if save_changes:
-            config = self._datasource_store.set(key=None, value=config)
+        config = self._datasource_store.set(key=None, value=config)
 
         datasource: Optional[Datasource] = None
         if initialize:
@@ -4854,10 +4823,46 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 name = datasource.name
                 self.datasources[name] = datasource
             except gx_exceptions.DatasourceInitializationError as e:
-                if save_changes:
-                    self._datasource_store.delete(config)
+                self._datasource_store.delete(config)
                 raise e
 
+        self.config.datasources[name] = config  # type: ignore[index,assignment]
+
+        return datasource
+
+    # TODO: this should just be _instantiate_datasource_from_config after BDS is removed
+    def _instantiate_datasource_from_config_with_substitution(
+        self, config: DatasourceConfig
+    ) -> Datasource:
+        """Perform substitutions and initialize the Datasource without storing configuration.
+
+        Args:
+            config: Datasource Config to initialize and/or store.
+
+        Returns:
+            Datasource object.
+
+        Raises:
+            DatasourceInitializationError
+        """
+        # TODO: Pulling IDs of existing entities is likely not what we want when testing configuration, but keeping
+        # existing behavior for now
+        name = config.name
+        if not config.id and name and name in self.datasources:
+            existing_datasource = self.datasources[name]
+            if isinstance(existing_datasource, BaseDatasource):
+                config.id = existing_datasource.id
+
+        substituted_config = self._perform_substitutions_on_datasource_config(config)
+
+        datasource = self._instantiate_datasource_from_config(
+            raw_config=config, substituted_config=substituted_config
+        )
+        name = datasource.name
+
+        # TODO: also unlikely desired as "testing" whether we can instantiate an object should not update
+        # caches or config, but keeping existing behavior for now
+        self.datasources[name] = datasource
         self.config.datasources[name] = config  # type: ignore[index,assignment]
 
         return datasource
@@ -5091,28 +5096,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             else:
                 return False
         return include_rendered_content
-
-    @staticmethod
-    def _determine_save_changes_flag(save_changes: Optional[bool]) -> bool:
-        """
-        This method is meant to enable the gradual deprecation of the `save_changes` boolean
-        flag on various Datasource CRUD methods. Moving forward, we will always persist changes
-        made by these CRUD methods (a.k.a. the behavior created by save_changes=True).
-
-        As part of this effort, `save_changes` has been set to `None` as a default value
-        and will be automatically converted to `True` within this method. If a user passes in a boolean
-        value (thereby bypassing the default arg of `None`), a deprecation warning will be raised.
-        """
-        if save_changes is not None:
-            # deprecated-v0.15.32
-            warnings.warn(
-                'The parameter "save_changes" is deprecated as of v0.15.32; moving forward, '
-                "changes made to Datasources will always be persisted by Store implementations. "
-                "As support will be removed in v0.18, please omit the argument moving forward.",
-                DeprecationWarning,
-            )
-            return save_changes
-        return True
 
     @public_api
     def test_yaml_config(  # noqa: PLR0913
