@@ -41,7 +41,7 @@ context = gx.get_context(
 
 In order to profile our first table and validate our second table, we need to set up our Batch Requests pointing to each set of data.
 
-In this guide, we will use a MySQL <TechnicalTag tag="datasource" text= "Data Source" /> as our Data Source -- the data we trust to be correct.
+In this guide, you'll use a MySQL <TechnicalTag tag="datasource" text= "Data Source" />.
 
 ```python name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py mysql_batch_request"
 ```
