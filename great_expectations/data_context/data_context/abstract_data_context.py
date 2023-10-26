@@ -1714,7 +1714,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             checkpoint=checkpoint,
         )
 
-        result: Checkpoint = self.checkpoint_store.add_checkpoint(checkpoint)
+        result = self.checkpoint_store.add_checkpoint(checkpoint)
 
         if isinstance(result, CheckpointConfig):
             result = Checkpoint.instantiate_from_config_with_runtime_args(
