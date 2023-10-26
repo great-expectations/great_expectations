@@ -887,19 +887,6 @@ class CloudDataContext(SerializableDataContext):
             resource_name=name,
         )
 
-    @override
-    def _determine_key_for_profiler_save(
-        self, name: str, id: Optional[str]
-    ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
-        """
-        Note that this explicitly overriding the `AbstractDataContext` helper method called
-        in `self.save_profiler()`.
-
-        The only difference here is the creation of a Cloud-specific `GXCloudIdentifier`
-        instead of the usual `ConfigurationIdentifier` for `Store` interaction.
-        """
-        return GXCloudIdentifier(resource_type=GXCloudRESTResource.PROFILER, id=id)
-
     @classmethod
     def _load_cloud_backed_project_config(
         cls,

@@ -1260,11 +1260,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         return RuleBasedProfiler.list_profilers(self.profiler_store)
 
-    def _determine_key_for_profiler_save(
-        self, name: str, id: Optional[str]
-    ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
-        return ConfigurationIdentifier(configuration_key=name)
-
     @public_api
     def get_datasource(
         self, datasource_name: str = "default"
