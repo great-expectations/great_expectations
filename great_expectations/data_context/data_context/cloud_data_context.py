@@ -606,6 +606,7 @@ class CloudDataContext(SerializableDataContext):
     ) -> bool:
         ...
 
+    @public_api
     @override
     def delete_expectation_suite(
         self,
