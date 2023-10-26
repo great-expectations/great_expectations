@@ -308,7 +308,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
         "variables": {},
     }
     my_rbp.add_rule(rule=simple_variables_rule)
-    context.save_profiler(profiler=my_rbp)
+    context.add_profiler(profiler=my_rbp)
 
     # load profiler from store
     my_loaded_profiler: RuleBasedProfiler = context.get_profiler(name="my_rbp")
@@ -332,7 +332,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                         "_amount",
                     ],
                 },
-                "variables": {},
+                "variables": None,
                 "parameter_builders": [
                     {
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
