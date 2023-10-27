@@ -317,7 +317,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         (
             computed_metrics,
             aborted_metrics,
-        ) = validator.compute_metrics_with_aborted_metrics(
+        ) = validator.compute_metrics(
             metric_configurations=metric_configs,
             runtime_configuration={"catch_exceptions": True},
         )

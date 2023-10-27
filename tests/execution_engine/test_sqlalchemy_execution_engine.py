@@ -218,7 +218,7 @@ def test_instantiation_via_fluent_data_source__trino_add_sql(sa, empty_data_cont
     )
 
     # add (save) the checkpoint to the data context
-    context.add_checkpoint(checkpoint=checkpoint)
+    context.add_or_update_checkpoint(checkpoint=checkpoint)
     cp = context.get_checkpoint(name="my_checkpoint")
     assert cp.name == "my_checkpoint"
 
