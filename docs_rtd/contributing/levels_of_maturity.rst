@@ -26,7 +26,7 @@ For contributors to Great Expectations, our goal is to channel creativity by alw
 This grid provides guidelines for how the maintainers of Great Expectations evaluate levels of maturity. Maintainers will always exercise some discretion in determining when any given feature is ready to graduate to the next level. If you have ideas or suggestions for leveling up a specific feature, please raise them in Github issues, and we'll work with you to get there.
 
 .. raw:: html
-        
+
     <table class="legend-table">
     <tr>
         <td><br/><b>Criteria</b></td>
@@ -73,7 +73,7 @@ This grid provides guidelines for how the maintainers of Great Expectations eval
     </table>
     <br/>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">            
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
     <style>
         .text-danger {
             color: #dc3545;
@@ -93,4 +93,3 @@ This grid provides guidelines for how the maintainers of Great Expectations eval
 \* Experimental classes log warning-level messages when initialized: “Warning: great_expectations.some_module.SomeClass is experimental. Methods, APIs, and core behavior may change in the future.”
 
 ** In the special case of Expectations, some gaps in implementation are allowed in beta (e.g. works in pandas and Spark, but not yet in SQLAlchemy; validation and rendering work, but not profiling yet)
-
