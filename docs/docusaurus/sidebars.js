@@ -36,11 +36,6 @@ module.exports = {
               label: 'Supported browsers',
               href: '/docs/cloud/about_gx#supported-browsers',
             },
-            {
-              type: 'link',
-              label: 'Get support',
-              href: '/docs/cloud/about_gx#get-support',
-            },
           ]
         },
         {
