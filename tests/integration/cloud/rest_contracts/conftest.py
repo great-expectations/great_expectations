@@ -198,9 +198,7 @@ def run_pact_test(
         try:
             provider_base_url: Final[str] = os.environ["GX_CLOUD_BASE_URL"]
         except KeyError as e:
-            raise OSError(
-                "GX_CLOUD_ACCESS_TOKEN is not set in this environment."
-            ) from e
+            raise OSError("GX_CLOUD_BASE_URL is not set in this environment.") from e
 
         verifier = pact.Verifier(
             provider=PROVIDER_NAME,
