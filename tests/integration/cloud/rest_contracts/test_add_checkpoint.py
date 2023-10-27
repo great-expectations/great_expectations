@@ -15,35 +15,17 @@ if TYPE_CHECKING:
     from tests.integration.cloud.rest_contracts.conftest import PactBody
 
 NON_EXISTING_CHECKPOINT_ID: Final[str] = "68058949-f9c2-47b1-922a-a89c23ffad99"
-
-PUT_CHECKPOINT_MIN_REQUEST_BODY: Final[PactBody] = {
-    "data": pact.Like(
+PUT_CHECKPOINT_MIN_RESPONSE_BODY: Final[PactBody] = pact.Like("204 string")
+PUT_CHECKPOINTS_MIN_REQUEST_BODY = {
+    "data":
         {
-            "id": pact.Format().uuid,
+            "id": '123',
             "type": "checkpoint",
             "attributes": {
                 "checkpoint_config": {},
             },
         },
-    )
-}
 
-PUT_CHECKPOINT_MIN_RESPONSE_BODY: Final[PactBody] = {
-    "data": pact.Like(
-        {
-            "id": pact.Format().uuid,
-            "type": "checkpoint",
-            "attributes": {
-                "checkpoint_config": {
-                    "validations": [
-                        {
-                            "id": pact.Format().uuid,
-                        }
-                    ]
-                },
-            },
-        },
-    )
 }
 
 
@@ -73,11 +55,11 @@ PUT_CHECKPOINT_MIN_RESPONSE_BODY: Final[PactBody] = {
                 "checkpoints",
                 NON_EXISTING_CHECKPOINT_ID,
             ),
-            request_body=PUT_CHECKPOINT_MIN_REQUEST_BODY,
+            request_body=PUT_CHECKPOINTS_MIN_REQUEST_BODY,
             upon_receiving="a request to create a Checkpoint",
             given="the Checkpoint is created",
-            response_status=200,
-            response_body=PUT_CHECKPOINT_MIN_RESPONSE_BODY,
+            response_status=204,
+            response_body="",
         ),
     ],
 )

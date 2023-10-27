@@ -187,7 +187,7 @@ def run_pact_test(
 
         with pact_test:
             gx_cloud_session.request(
-                method=contract_interaction.method, url=request_url
+                method=contract_interaction.method, url=request_url, json=contract_interaction.request_body
             )
 
     return _run_pact_test
