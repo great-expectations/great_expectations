@@ -32,12 +32,7 @@ PactBody: TypeAlias = Union[
 ]
 
 
-@pytest.fixture
-def existing_organization_id() -> str:
-    try:
-        return os.environ["GX_CLOUD_ORGANIZATION_ID"]
-    except KeyError as e:
-        raise OSError("GX_CLOUD_ORGANIZATION_ID is not set in this environment.") from e
+EXISTING_ORGANIZATION_ID: Final[str] = os.environ.get("GX_CLOUD_ORGANIZATION_ID") or ""
 
 
 class RequestMethods(str, enum.Enum):
@@ -114,6 +109,13 @@ class ContractInteraction(pydantic.BaseModel):
 
     Args:
         method: A string (e.g. "GET" or "POST") or attribute of the RequestMethods class representing a request method.
+        request_path: A pathlib.Path to the endpoint relative to the base url.
+                        e.g.
+                            ```
+                            path = pathlib.Path(
+                                "/", "organizations", organization_id, "data-context-configuration"
+                            )
+                            ```
         upon_receiving: A string description of the type of request being made.
         given: A string description of the state of the Cloud backend data requested.
         response_status: The status code associated with the response. An integer between 100 and 599.
@@ -129,6 +131,7 @@ class ContractInteraction(pydantic.BaseModel):
         arbitrary_types_allowed = True
 
     method: Union[RequestMethods, pydantic.StrictStr]
+    request_path: pathlib.Path
     upon_receiving: pydantic.StrictStr
     given: pydantic.StrictStr
     response_status: Annotated[int, pydantic.Field(strict=True, ge=100, lt=600)]
@@ -150,13 +153,6 @@ def run_pact_test(
             - tests/integration/cloud/rest_contracts/pacts
 
         Args:
-            path: A pathlib.Path to the endpoint relative to the base url.
-                e.g.
-                    ```
-                    path = pathlib.Path(
-                        "/", "organizations", organization_id, "data-context-configuration"
-                    )
-                    ```
             contract_interaction: A ContractInteraction object which represents a Python API (Consumer) request
                                   and expected minimal response, given a state in the Cloud backend (Provider).
 
@@ -166,7 +162,7 @@ def run_pact_test(
 
         request: dict[str, str | PactBody] = {
             "method": contract_interaction.method,
-            "path": str(path),
+            "path": str(contract_interaction.request_path),
         }
         if contract_interaction.request_body is not None:
             request["body"] = contract_interaction.request_body
