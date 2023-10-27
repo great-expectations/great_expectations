@@ -45,6 +45,10 @@ GET_CHECKPOINTS_MIN_RESPONSE_BODY: Final[PactBody] = {
     ),
 }
 
+# Delete Checkpoint
+DELETE_CHECKPOINT_MIN_RESPONSE_BODY: Final[PactBody] = pact.Like("204 string")
+DELETE_CHECKPOINT_NOT_FOUND_RESPONSE_BODY: Final[PactBody] = pact.Like("404 string")
+
 
 @pytest.mark.cloud
 @pytest.mark.parametrize(
@@ -90,6 +94,34 @@ GET_CHECKPOINTS_MIN_RESPONSE_BODY: Final[PactBody] = {
             given="the Checkpoints exist",
             response_status=200,
             response_body=GET_CHECKPOINTS_MIN_RESPONSE_BODY,
+        ),
+        ContractInteraction(
+            method="DELETE",
+            request_path=pathlib.Path(
+                "/",
+                "organizations",
+                EXISTING_ORGANIZATION_ID,
+                "checkpoints",
+                EXISTING_CHECKPOINT_ID,
+            ),
+            upon_receiving="a request to delete an existing Checkpoint",
+            given="the Checkpoint exists",
+            response_status=204,
+            response_body=DELETE_CHECKPOINT_MIN_RESPONSE_BODY,
+        ),
+        ContractInteraction(
+            method="DELETE",
+            request_path=pathlib.Path(
+                "/",
+                "organizations",
+                EXISTING_ORGANIZATION_ID,
+                "checkpoints",
+                NON_EXISTENT_CHECKPOINT_ID,
+            ),
+            upon_receiving="a request to delete a non existent Checkpoint",
+            given="the Checkpoint does not exist",
+            response_status=404,
+            response_body=DELETE_CHECKPOINT_NOT_FOUND_RESPONSE_BODY,
         ),
     ],
 )
