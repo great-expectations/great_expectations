@@ -53,9 +53,22 @@ def mock_cloud_data_context() -> CloudDataContext:
         target="requests.Session.get",
         return_value=mock_response,
     ):
-        return gx.get_context(
+        context = gx.get_context(
             mode="cloud",
             cloud_base_url="https://fake-host.io",
             cloud_organization_id=str(uuid.uuid4()),
             cloud_access_token="not a real token",
         )
+
+    assert isinstance(mock_cloud_data_context, CloudDataContext)
+    assert mock_cloud_data_context.variables.include_rendered_content.globally is True
+    assert (
+        mock_cloud_data_context.variables.include_rendered_content.expectation_suite
+        is True
+    )
+    assert (
+        mock_cloud_data_context.variables.include_rendered_content.expectation_validation_result
+        is True
+    )
+
+    return context
