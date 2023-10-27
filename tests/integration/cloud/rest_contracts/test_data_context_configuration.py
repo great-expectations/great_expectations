@@ -7,10 +7,11 @@ import pytest
 from pact import Format, Like
 
 from tests.integration.cloud.rest_contracts.conftest import (
+    EXISTING_ORGANIZATION_ID,
     ContractInteraction,
 )
 
-DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[dict] = {
+GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[dict] = {
     "anonymous_usage_statistics": Like(
         {
             "data_context_id": Format().uuid,
@@ -32,20 +33,21 @@ DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[dict] = {
     [
         ContractInteraction(
             method="GET",
+            request_path=pathlib.Path(
+                "/",
+                "organizations",
+                EXISTING_ORGANIZATION_ID,
+                "data-context-configuration",
+            ),
             upon_receiving="a request for a Data Context",
             given="the Data Context exists",
             response_status=200,
-            response_body=DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY,
+            response_body=GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY,
         ),
     ],
 )
 def test_data_context_configuration(
     contract_interaction: ContractInteraction,
-    run_pact_test: Callable[[pathlib.Path, ContractInteraction], None],
-    existing_organization_id: str,
+    run_pact_test: Callable[[ContractInteraction], None],
 ) -> None:
-    # the path to the endpoint relative to the base url
-    path = pathlib.Path(
-        "/", "organizations", existing_organization_id, "data-context-configuration"
-    )
-    run_pact_test(path, contract_interaction)
+    run_pact_test(contract_interaction)
