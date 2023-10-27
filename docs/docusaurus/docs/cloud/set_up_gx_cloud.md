@@ -55,7 +55,7 @@ You'll need your user access token and organization ID to set your environment v
 
 Environment variables securely store your GX Cloud access credentials. The GX Cloud agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. 
 
- Currently, the GX Cloud user interface is configured for Snowflake and this procedure assumes you have a Snowflake Data Source. If you don't have a Snowflake Data Source, you won't be able to connect to Data Assets, create Expectations and Expectation Suites, run Validations, or create Checkpoints. 
+Currently, the GX Cloud user interface is configured for Snowflake and this procedure assumes you have a Snowflake Data Source. If you don't have a Snowflake Data Source, you won't be able to connect to Data Assets, create Expectations and Expectation Suites, run Validations, or create Checkpoints. 
 
 1. Start the Docker Engine.
 
