@@ -4,7 +4,7 @@ title: 'Set up GX Cloud'
 description: Set up GX Cloud.
 ---
 
-To get the most out of GX Cloud, you'll need to request a GX Cloud Beta account, generate and record access tokens, set environment variables, and then install and start the GX Cloud agent.
+To get the most out of GX Cloud, you'll need to request a GX Cloud Beta account, generate and record access tokens, set environment variables, and then install and start the GX Cloud agent. If you're using Snowflake, see [Quickstart for GX Cloud and Snowflake](/docs/cloud/quickstarts/snowflake_quickstart).
 
 ## Request a GX Cloud Beta account
 
@@ -57,12 +57,12 @@ Environment variables securely store your GX Cloud access credentials. The GX Cl
 
 1. Start the Docker Engine.
 
-2. Run the following code to set the `GX_CLOUD_ACCESS_TOKEN` and `GX_CLOUD_ORGANIZATION_ID` environment variables, install GX Cloud and its dependencies, and start the GX Cloud agent:
+2. Run the following code to set the `GX_CLOUD_ACCESS_TOKEN`, `GX_CLOUD_ORGANIZATION_ID`, and `GX_CLOUD_SNOWFLAKE_PASSWORD` environment variables, install GX Cloud and its dependencies, and start the GX Cloud agent:
 
     ```bash title="Terminal input"
-    docker run --rm -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" greatexpectations/agent
-    ```
-    Replace `user_access_token` and `organization_id` with the values you copied previously. 
+    docker run --rm -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" -e GX_CLOUD_SNOWFLAKE_PASSWORD="<snowflake_password>" greatexpectations/agent
+    ```      
+    Replace `user_access_token` and `organization_id` with the values you copied previously, and `snowflake_password` with your own value.
 
 3. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
 
@@ -72,3 +72,6 @@ Environment variables securely store your GX Cloud access credentials. The GX Cl
 
     To edit an environment variable, stop the GX Cloud agent, edit the environment variable, save the change, and then restart the GX Cloud agent.
 
+## Next steps
+
+ - [Create a Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset)
