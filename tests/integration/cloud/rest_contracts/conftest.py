@@ -63,7 +63,7 @@ def get_git_commit_hash() -> str:
     return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def pact_test(request) -> pact.Pact:
     pact_broker_base_url = "https://greatexpectations.pactflow.io"
 
