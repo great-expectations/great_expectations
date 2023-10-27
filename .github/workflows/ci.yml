@@ -298,7 +298,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Start services
-        run: docker compose -f assets/docker/mercury/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 90
+        run: docker compose -f assets/docker/mercury/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 120
 
       - name: Run the tests
         env:
