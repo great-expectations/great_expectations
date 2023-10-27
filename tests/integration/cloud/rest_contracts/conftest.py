@@ -105,10 +105,8 @@ class ContractInteraction(pydantic.BaseModel):
         if self.request_body is not None:
             request["body"] = self.request_body
 
-        request["headers"] = dict(gx_cloud_session.headers)
         if self.request_headers is not None:
-            request["headers"].update(self.request_headers)  # type: ignore[union-attr]
-            gx_cloud_session.headers.update(self.request_headers)
+            request["headers"] = self.request_headers
 
         response: dict[str, int | PactBody] = {
             "status": self.response_status,
