@@ -58,7 +58,7 @@ def _reify_pact_body(
 
 @pytest.fixture
 def requests_mocker() -> Generator[responses.RequestsMock, None, None]:
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as rsps:
+    with responses.RequestsMock(assert_all_requests_are_fired=True) as rsps:
         yield rsps
 
 
