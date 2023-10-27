@@ -14,7 +14,8 @@ from tests.integration.cloud.rest_contracts.test_data_context_configuration impo
     DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY,
 )
 from tests.integration.cloud.rest_contracts.test_datasource import (
-    DATASOURCE_MIN_RESPONSE_BODY,
+    GET_DATASOURCE_MIN_RESPONSE_BODY,
+    POST_DATASOURCE_MIN_RESPONSE_BODY,
 )
 
 
@@ -93,20 +94,19 @@ def mock_cloud_data_context() -> CloudDataContext:
 
 
 @pytest.fixture
-def mock_cloud_datasource(
+def mock_cloud_pandas_datasource(
     mock_cloud_data_context: CloudDataContext,
 ) -> PandasDatasource:
-    datasource_name = "mock_cloud_datasource"
+    datasource_name = "mock_cloud_pandas_datasource"
 
     mock_post_response: requests.Response = _get_mock_response_from_pact_response_body(
         status_code=200,
-        pact_response_body=DATASOURCE_MIN_RESPONSE_BODY,
+        pact_response_body=POST_DATASOURCE_MIN_RESPONSE_BODY,
     )
 
-    # add_datasource results in a round-trip meaning get will be called afterward
     mock_get_response: requests.Response = _get_mock_response_from_pact_response_body(
         status_code=200,
-        pact_response_body=DATASOURCE_MIN_RESPONSE_BODY,
+        pact_response_body=GET_DATASOURCE_MIN_RESPONSE_BODY,
     )
 
     with mock.patch(
@@ -121,11 +121,11 @@ def mock_cloud_datasource(
                 target="requests.Session.get",
                 return_value=mock_get_response,
             ):
-                mock_cloud_datasource: PandasDatasource = (
+                mock_cloud_pandas_datasource: PandasDatasource = (
                     mock_cloud_data_context.sources.add_pandas(name=datasource_name)
                 )
 
-    assert isinstance(mock_cloud_datasource, PandasDatasource)
-    assert mock_cloud_datasource.name == datasource_name
+    assert isinstance(mock_cloud_pandas_datasource, PandasDatasource)
+    assert mock_cloud_pandas_datasource.name == datasource_name
 
-    return mock_cloud_datasource
+    return mock_cloud_pandas_datasource

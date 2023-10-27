@@ -235,7 +235,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         else:
             params = None
 
-        payload = self._send_get_request_to_api(url=url, params=params)
+        payload: dict = self._send_get_request_to_api(url=url, params=params)
 
         # Requests using query params may return {"data": []} if the object doesn't exist
         # We need to validate that even if we have a 200, there are contents to support existence

@@ -12,14 +12,27 @@ from tests.integration.cloud.rest_contracts.conftest import ContractInteraction
 if TYPE_CHECKING:
     from tests.integration.cloud.rest_contracts.conftest import PactBody
 
-DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
+POST_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
     "data": pact.Like(
         {
             "id": pact.Format().uuid,
             "attributes": {
                 "datasource_config": {},
             },
-        }
+        },
+    )
+}
+
+GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
+    "data": pact.Like(
+        [
+            {
+                "id": pact.Format().uuid,
+                "attributes": {
+                    "datasource_config": {},
+                },
+            },
+        ]
     )
 }
 
@@ -29,11 +42,18 @@ DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
     "contract_interaction",
     [
         ContractInteraction(
-            method="PUT",
+            method="POST",
             upon_receiving="a request to add a Data Source",
             given="the Data Source does not exist",
             response_status=200,
-            response_body=DATASOURCE_MIN_RESPONSE_BODY,
+            response_body=POST_DATASOURCE_MIN_RESPONSE_BODY,
+        ),
+        ContractInteraction(
+            method="GET",
+            upon_receiving="a request to get a Data Source",
+            given="the Data Source exists",
+            response_status=200,
+            response_body=GET_DATASOURCE_MIN_RESPONSE_BODY,
         ),
     ],
 )
