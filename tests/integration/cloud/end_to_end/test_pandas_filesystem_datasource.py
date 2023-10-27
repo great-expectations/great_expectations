@@ -4,6 +4,7 @@ import pathlib
 import uuid
 from typing import TYPE_CHECKING, Iterator
 
+import pandas as pd
 import pytest
 
 from great_expectations.core import ExpectationConfiguration
@@ -22,11 +23,21 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
+def base_dir(tmp_dir) -> pathlib.Path:
+    dir_path = tmp_dir / "data"
+    df = pd.DataFrame({"name": ["bob", "alice"]})
+    csv_path = dir_path / "data.csv"
+    df.to_csv(csv_path)
+    return dir_path
+
+
+@pytest.fixture
 def datasource(
     context: CloudDataContext,
+    base_dir: pathlib.Path,
 ) -> Iterator[PandasFilesystemDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
-    original_base_dir = pathlib.Path("./data/")
+    original_base_dir = base_dir
     updated_base_dir = pathlib.Path("./other_data/")
 
     datasource = context.sources.add_pandas_filesystem(
