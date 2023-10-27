@@ -36,7 +36,7 @@ The GX Cloud workflow is a sequence of tasks you complete to perform Data Valida
 
 You connect GX Cloud to a Data Asset stored on your Data Source, you define and create an Expectation, and then you run a Validation on the data defined in the Expectation. Knowing that your data meets your Expectations helps you ensure your data is accurate and reliable and alerts you to issues before they become problematic.
 
-The following table lists the tasks that you complete in a typical GX Cloud workflow. A brief description of the task and links to the relevant topics are provided.
+The following table lists the sequence of tasks that you complete in a typical GX Cloud workflow. A brief description of the task and links to the relevant topics are provided.
 
 | Task                                     | Description                                                        |
 |------------------------------------------|--------------------------------------------------------------------|
@@ -48,13 +48,13 @@ The following table lists the tasks that you complete in a typical GX Cloud work
 
 ## Roles and responsibilities
 
-How you interact with GX Cloud is dependent on the role you're assigned by your Admin. 
+How you interact with GX Cloud is dependent on the role you're assigned by your Admin. The following table lists GX Cloud roles and responsibilities. 
 
 | Role          | Responsibilities                                  |
 |---------------|---------------------------------------------------|
 | Viewer        | View Checkpoints and Validation Results           | 
 | Editor        | Create and edit Expectations<br/>Create access tokens |
-| Admin         | Perform all GX Cloud administrative functions including user and role assignment |
+| Admin         | Full access<br/>Perform all GX Cloud administrative functions including user and role assignment |
 
 ## Supported browsers
 
@@ -70,7 +70,7 @@ The following browsers are supported by GX Cloud:
 
 ### Browser session duration
 
-A session is the period of time that you’re signed in to your GX Cloud account from a browser. If you close the browser, your session ends and you're signed out. You'll need to sign in again to access GX Cloud.
+A session is the period of time that you’re signed in to your GX Cloud account from a browser. If you close the browser, your session ends, and you're signed out. You'll need to sign in again to access GX Cloud.
 
 ## Get support
 
