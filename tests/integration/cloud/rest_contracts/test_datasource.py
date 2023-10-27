@@ -31,6 +31,8 @@ POST_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
     )
 }
 
+POST_DATASOURCE_REQUEST_BODY = POST_DATASOURCE_MIN_RESPONSE_BODY
+
 GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
     "data": pact.Like(
         {
@@ -65,6 +67,7 @@ GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
             given="the Data Source does not exist",
             response_status=200,
             response_body=POST_DATASOURCE_MIN_RESPONSE_BODY,
+            request_body=POST_DATASOURCE_REQUEST_BODY,
         ),
         ContractInteraction(
             method="GET",

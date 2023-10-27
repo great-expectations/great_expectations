@@ -71,7 +71,6 @@ class ContractInteraction(pydantic.BaseModel):
         response_status: The status code associated with the response. An integer between 100 and 599.
         response_body: A dictionary or Pact Matcher object representing the response body.
         request_body (Optional): A dictionary or Pact Matcher object representing the request body.
-        request_headers (Optional): A dictionary representing the request headers.
 
     Returns:
         ContractInteraction
@@ -87,7 +86,6 @@ class ContractInteraction(pydantic.BaseModel):
     response_status: Annotated[int, pydantic.Field(strict=True, ge=100, lt=600)]
     response_body: PactBody
     request_body: Union[PactBody, None] = None
-    request_headers: Union[dict, None] = None
 
     def run(self, gx_cloud_session: requests.Session) -> None:
         """Produces a Pact contract json file in the following directory:
