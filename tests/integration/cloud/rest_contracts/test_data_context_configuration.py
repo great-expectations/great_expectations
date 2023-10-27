@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pathlib
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Callable, Final
 
 import pact
 import pytest
@@ -51,5 +51,6 @@ GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[PactBody] = {
 )
 def test_data_context_configuration(
     contract_interaction: ContractInteraction,
+    run_pact_test: Callable[[ContractInteraction], None],
 ) -> None:
-    contract_interaction.run()
+    run_pact_test(contract_interaction)

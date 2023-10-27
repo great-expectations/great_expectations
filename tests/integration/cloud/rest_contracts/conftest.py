@@ -5,7 +5,7 @@ import os
 import pathlib
 import subprocess
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, Final, Iterator, List, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Final, Iterator, List, Union
 
 import pact
 import pytest
@@ -36,6 +36,16 @@ PactBody: TypeAlias = Union[
 
 
 EXISTING_ORGANIZATION_ID: Final[str] = os.environ.get("GX_CLOUD_ORGANIZATION_ID") or ""
+
+
+@pytest.fixture(scope="module")
+def gx_cloud_session() -> requests.Session:
+    try:
+        access_token = os.environ["GX_CLOUD_ACCESS_TOKEN"]
+    except KeyError as e:
+        raise OSError("GX_CLOUD_ACCESS_TOKEN is not set in this environment.") from e
+
+    return create_session(access_token=access_token)
 
 
 class RequestMethods(str, enum.Enum):
@@ -79,7 +89,7 @@ class ContractInteraction(pydantic.BaseModel):
     request_body: Union[PactBody, None] = None
     request_headers: Union[dict, None] = None
 
-    def run(self) -> None:
+    def run(self, gx_cloud_session: requests.Session) -> None:
         """Produces a Pact contract json file in the following directory:
              - tests/integration/cloud/rest_contracts/pacts
            and verifies the contract against Mercury.
@@ -87,15 +97,6 @@ class ContractInteraction(pydantic.BaseModel):
         Returns:
             None
         """
-
-        try:
-            access_token = os.environ["GX_CLOUD_ACCESS_TOKEN"]
-        except KeyError as e:
-            raise OSError(
-                "GX_CLOUD_ACCESS_TOKEN is not set in this environment."
-            ) from e
-
-        gx_cloud_session: requests.Session = create_session(access_token=access_token)
 
         request: dict[str, str | PactBody] = {
             "method": self.method,
@@ -204,3 +205,19 @@ class ContractInteraction(pydantic.BaseModel):
             verbose=False,
         )
         assert success == 0
+
+
+@pytest.fixture
+def run_pact_test(gx_cloud_session: requests.Session) -> Callable:
+    def _run_pact_test(contract_interaction: ContractInteraction) -> None:
+        """Runs a contract test and produces a Pact contract json file in directory:
+            - tests/integration/cloud/rest_contracts/pacts
+        Args:
+            contract_interaction: A ContractInteraction object which represents a Python API (Consumer) request
+                                  and expected minimal response, given a state in the Cloud backend (Provider).
+        Returns:
+            None
+        """
+        contract_interaction.run(gx_cloud_session=gx_cloud_session)
+
+    return _run_pact_test

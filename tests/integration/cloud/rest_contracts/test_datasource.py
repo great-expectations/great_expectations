@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pathlib
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Callable, Final
 
 import pact
 import pytest
@@ -36,8 +36,12 @@ GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
         [
             {
                 "id": pact.Format().uuid,
+                "type": "pandas",
+                "name": "datasource_name",
                 "attributes": {
-                    "datasource_config": {},
+                    "datasource_config": {
+                        "assets": [],
+                    },
                 },
             },
         ]
@@ -81,5 +85,6 @@ GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
 )
 def test_datasource(
     contract_interaction: ContractInteraction,
+    run_pact_test: Callable[[ContractInteraction], None],
 ) -> None:
-    contract_interaction.run()
+    run_pact_test(contract_interaction)
