@@ -19,7 +19,7 @@ from tests.integration.cloud.rest_contracts.test_datasource import (
 )
 
 
-def _convert_matcher_to_value(matcher: pact.Matcher) -> JsonData:
+def _convert_matcher_to_value(matcher: pact.matchers.Matcher) -> JsonData:
     return matcher.generate()["contents"]
 
 
