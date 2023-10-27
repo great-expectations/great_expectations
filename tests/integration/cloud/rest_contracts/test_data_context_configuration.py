@@ -11,7 +11,7 @@ from tests.integration.cloud.rest_contracts.conftest import (
     ContractInteraction,
 )
 
-DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[dict] = {
+GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[dict] = {
     "anonymous_usage_statistics": Like(
         {
             "data_context_id": Format().uuid,
@@ -42,7 +42,7 @@ DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[dict] = {
             upon_receiving="a request for a Data Context",
             given="the Data Context exists",
             response_status=200,
-            response_body=DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY,
+            response_body=GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY,
         ),
     ],
 )

@@ -59,7 +59,6 @@ GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
                 "organizations",
                 EXISTING_ORGANIZATION_ID,
                 "datasources",
-                NON_EXISTENT_DATASOURCE_ID,
             ),
             upon_receiving="a request to add a Data Source",
             given="the Data Source does not exist",
