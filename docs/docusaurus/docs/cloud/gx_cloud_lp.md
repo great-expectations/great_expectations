@@ -1,5 +1,5 @@
 ---
-sidebar_label: 'GX Cloud'
+sidebar_label: 'GX Cloud support'
 title: 'GX Cloud'
 description: Get started with GX Cloud and learn more about GX Cloud features and functionality.
 ---
@@ -24,4 +24,5 @@ If you're eager to try GX Cloud, and you haven't requested a GX Cloud Beta accou
   <LinkCard topIcon label="Manage Validations" description="Run a Validation, or view the Validation run history." href="/docs/cloud/validations/manage_validations" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage Checkpoints" description="Add, run, edit, or delete a Checkpoint." href="/docs/cloud/checkpoints/manage_checkpoints" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage users and access tokens" description="Manage GX Cloud users and access tokens." href="/docs/cloud/users/manage_users" icon="/img/small_gx_logo.png" />
+  <LinkCard topIcon label="Get support" description="Get support when you encounter issues with GX Cloud." href="/docs/cloud/get_support" icon="/img/small_gx_logo.png" />
 </LinkCardGrid>

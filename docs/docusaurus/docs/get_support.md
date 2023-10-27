@@ -1,6 +1,6 @@
 ---
-sidebar_label: 'Get support'
-title: 'Get support'
+sidebar_label: 'Get GX OSS support'
+title: 'Get GX OSS support'
 description: Learn what resources are available to help you resolve issues with GX OSS.
 ---
 

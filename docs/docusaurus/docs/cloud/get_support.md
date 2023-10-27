@@ -1,6 +1,6 @@
 ---
-sidebar_label: 'Get support'
-title: 'Get support'
+sidebar_label: 'Get GX Cloud support'
+title: 'Get GX Cloud support'
 description: Learn what resources are available to help you resolve issues with GX Cloud.
 ---
 
