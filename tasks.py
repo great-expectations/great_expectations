@@ -181,7 +181,7 @@ def hooks(
         # used in CI - runs faster and only checks files that have changed
         cmds.extend(["--from-ref", "origin/HEAD", "--to-ref", "HEAD"])
 
-    ctx.run(" ".join(cmds))
+    ctx.run(" ".join(cmds), echo=True, pty=True)
 
     if sync:
         print("  Re-installing hooks ...")
