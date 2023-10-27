@@ -35,7 +35,7 @@ PactBody: TypeAlias = Union[
 ]
 
 
-EXISTING_ORGANIZATION_ID: Final[str] = os.environ.get("GX_CLOUD_ORGANIZATION_ID")
+EXISTING_ORGANIZATION_ID: Final[str] = os.environ.get("GX_CLOUD_ORGANIZATION_ID") or ""
 
 
 class RequestMethods(str, enum.Enum):
@@ -179,7 +179,7 @@ class ContractInteraction(pydantic.BaseModel):
         pact_test.stop_service()
 
         try:
-            ContractInteraction._verify_pact(provider_name=PROVIDER_NAME)
+            ContractInteraction._verify_pact()
         except AssertionError as e:
             raise AssertionError("Pact verification failed") from e
 
@@ -195,7 +195,7 @@ class ContractInteraction(pydantic.BaseModel):
             provider_base_url=provider_base_url,
         )
 
-        pacts: tuple[str] = tuple(
+        pacts: tuple[str, ...] = tuple(
             str(file.resolve()) for file in PACT_DIR.glob("*.json")
         )
 
