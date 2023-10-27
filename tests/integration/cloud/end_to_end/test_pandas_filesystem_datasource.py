@@ -23,8 +23,9 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def base_dir(tmp_dir) -> pathlib.Path:
-    dir_path = tmp_dir / "data"
+def base_dir(tmpdir) -> pathlib.Path:
+    dir_path = tmpdir / "data"
+    dir_path.mkdir()
     df = pd.DataFrame({"name": ["bob", "alice"]})
     csv_path = dir_path / "data.csv"
     df.to_csv(csv_path)
