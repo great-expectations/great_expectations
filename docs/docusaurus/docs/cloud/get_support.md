@@ -4,7 +4,7 @@ title: 'Get support'
 description: Learn what resources are available to help you resolve issues with GX Cloud.
 ---
 
-Use the information provided here to help you resolve GX Cloud issues.
+The information provided here is intended to help you resolve GX Cloud issues. Several resources are available, including the collective knowledge of a very active community and experienced GX Developer Advocates (DAs). Knowing what resources are available and how to ask questions will simplify your support experience.
 
 ## Try solving your issue first
 
@@ -20,7 +20,7 @@ It's very likely that someone, somewhere has previously encountered or solved th
 
 ## Ask the right questions and provide the right information
 
-Taking the time to formulate your questions properly and providing all the relevant background information can save time and improve response times. The following are some recommendations that will help the GX Developer Advocates (DAs) and other community members help you. 
+Taking the time to formulate your questions properly and providing all the relevant background information can save time and improve response times. The following are some recommendations that will help the DAs and other community members help you. 
 
 ### Include all the relevant information
 
