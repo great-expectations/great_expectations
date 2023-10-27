@@ -112,7 +112,7 @@ class ContractInteraction(pydantic.BaseModel):
             "body": self.response_body,
         }
 
-        pact_test: pact.Pact = next(ContractInteraction._pact_test())
+        pact_test: pact.Pact = next(ContractInteraction._get_pact_test())
 
         (
             pact_test.given(provider_state=self.given)
@@ -135,7 +135,7 @@ class ContractInteraction(pydantic.BaseModel):
         )
 
     @staticmethod
-    def _pact_test() -> Iterator[pact.Pact]:
+    def _get_pact_test() -> Iterator[pact.Pact]:
         broker_token: str
         publish_to_broker: bool
         if os.environ.get("PACT_BROKER_READ_WRITE_TOKEN"):
