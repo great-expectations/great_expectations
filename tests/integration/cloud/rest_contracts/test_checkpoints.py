@@ -19,18 +19,25 @@ NON_EXISTENT_CHECKPOINT_ID: Final[str] = "6ed9a340-8469-4ee2-a300-ffbe5d09b49d"
 
 EXISTING_CHECKPOINT_ID: Final[str] = "051a1f4d-6276-484a-81e5-3df4fadd5154"
 
+GET_CHECKPOINT_MIN_CHECKPOINT_BODY: Final[PactBody] = {
+    "id": pact.Format().uuid,
+    "type": "checkpoint",
+    "attributes": {
+        "id": pact.Format().uuid,
+        "name": pact.Like("test_checkpoint"),
+        "config": {},
+    },
+}
+
 GET_CHECKPOINT_MIN_RESPONSE_BODY: Final[PactBody] = {
-    "data": pact.Like(
-        {
-            "id": pact.Format().uuid,
-            "type": "checkpoint",
-            "attributes": {
-                "id": pact.Format().uuid,
-                "name": pact.Like("test_checkpoint"),
-                "config": {},
-            },
-        },
-    )
+    "data": pact.Like(GET_CHECKPOINT_MIN_CHECKPOINT_BODY)
+}
+
+GET_CHECKPOINTS_MIN_RESPONSE_BODY: Final[PactBody] = {
+    "data": pact.EachLike(
+        GET_CHECKPOINT_MIN_CHECKPOINT_BODY,
+        minimum=1,  # Default but writing it out for clarity
+    ),
 }
 
 
@@ -65,6 +72,19 @@ GET_CHECKPOINT_MIN_RESPONSE_BODY: Final[PactBody] = {
             given="the Checkpoint does not exist",
             response_status=404,
             response_body=GET_CHECKPOINT_MIN_RESPONSE_BODY,
+        ),
+        ContractInteraction(
+            method="GET",
+            request_path=pathlib.Path(
+                "/",
+                "organizations",
+                EXISTING_ORGANIZATION_ID,
+                "checkpoints",
+            ),
+            upon_receiving="a request to get all Checkpoints",
+            given="the Checkpoints exist",
+            response_status=200,
+            response_body=GET_CHECKPOINTS_MIN_RESPONSE_BODY,
         ),
     ],
 )
