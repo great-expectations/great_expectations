@@ -1,16 +1,24 @@
 from __future__ import annotations
 
 import pathlib
-import uuid
-from typing import TYPE_CHECKING, Callable, Final
+from typing import TYPE_CHECKING, Final
 
 import pact
 import pytest
 
-from tests.integration.cloud.rest_contracts.conftest import ContractInteraction
+from tests.integration.cloud.rest_contracts.conftest import (
+    EXISTING_ORGANIZATION_ID,
+    ContractInteraction,
+)
 
 if TYPE_CHECKING:
     from tests.integration.cloud.rest_contracts.conftest import PactBody
+
+
+NON_EXISTENT_DATASOURCE_ID: Final[str] = "6ed9a340-8469-4ee2-a300-ffbe5d09b49d"
+
+EXISTING_DATASOURCE_ID: Final[str] = "15da041b-328e-44f7-892e-2bfd1a887ef8"
+
 
 POST_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
     "data": pact.Like(
@@ -43,6 +51,13 @@ GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
     [
         ContractInteraction(
             method="POST",
+            request_path=pathlib.Path(
+                "/",
+                "organizations",
+                EXISTING_ORGANIZATION_ID,
+                "datasources",
+                NON_EXISTENT_DATASOURCE_ID,
+            ),
             upon_receiving="a request to add a Data Source",
             given="the Data Source does not exist",
             response_status=200,
@@ -50,6 +65,13 @@ GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
         ),
         ContractInteraction(
             method="GET",
+            request_path=pathlib.Path(
+                "/",
+                "organizations",
+                EXISTING_ORGANIZATION_ID,
+                "datasources",
+                EXISTING_DATASOURCE_ID,
+            ),
             upon_receiving="a request to get a Data Source",
             given="the Data Source exists",
             response_status=200,
@@ -59,11 +81,5 @@ GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
 )
 def test_datasource(
     contract_interaction: ContractInteraction,
-    run_pact_test: Callable[[pathlib.Path, ContractInteraction], None],
-    existing_organization_id: str,
 ) -> None:
-    # the path to the endpoint relative to the base url
-    path = pathlib.Path(
-        "/", "organizations", existing_organization_id, "datasources", str(uuid.uuid4())
-    )
-    run_pact_test(path, contract_interaction)
+    contract_interaction.run()

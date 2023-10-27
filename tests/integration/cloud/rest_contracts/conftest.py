@@ -5,7 +5,7 @@ import os
 import pathlib
 import subprocess
 import uuid
-from typing import TYPE_CHECKING, Any, Callable, Dict, Final, List, Union
+from typing import TYPE_CHECKING, Any, Dict, Final, Iterator, List, Union
 
 import pact
 import pytest
@@ -20,9 +20,12 @@ if TYPE_CHECKING:
 
 PACT_MOCK_HOST: Final[str] = "localhost"
 PACT_MOCK_PORT: Final[int] = 9292
-PACT_DIR: Final[str] = str(
-    pathlib.Path(pathlib.Path(__file__).parent, "pacts").resolve()
-)
+PACT_DIR: Final[pathlib.Path] = pathlib.Path(pathlib.Path(__file__).parent, "pacts")
+
+PACT_BROKER_BASE_URL: Final[str] = "https://greatexpectations.pactflow.io"
+
+CONSUMER_NAME: Final[str] = "great_expectations"
+PROVIDER_NAME: Final[str] = "mercury"
 
 
 JsonData: TypeAlias = Union[None, int, str, bool, List[Any], Dict[str, Any]]
@@ -32,12 +35,10 @@ PactBody: TypeAlias = Union[
 ]
 
 
-@pytest.fixture
-def existing_organization_id() -> str:
-    try:
-        return os.environ["GX_CLOUD_ORGANIZATION_ID"]
-    except KeyError as e:
-        raise OSError("GX_CLOUD_ORGANIZATION_ID is not set in this environment.") from e
+try:
+    EXISTING_ORGANIZATION_ID: Final[str] = os.environ["GX_CLOUD_ORGANIZATION_ID"]
+except KeyError as e:
+    raise OSError("GX_CLOUD_ORGANIZATION_ID is not set in this environment.") from e
 
 
 class RequestMethods(str, enum.Enum):
@@ -48,64 +49,6 @@ class RequestMethods(str, enum.Enum):
     PUT = "PUT"
 
 
-@pytest.fixture(scope="module")
-def gx_cloud_session() -> requests.Session:
-    try:
-        access_token = os.environ["GX_CLOUD_ACCESS_TOKEN"]
-    except KeyError as e:
-        raise OSError("GX_CLOUD_ACCESS_TOKEN is not set in this environment.") from e
-    return create_session(access_token=access_token)
-
-
-def get_git_commit_hash() -> str:
-    return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
-
-
-@pytest.fixture
-def pact_test(request) -> pact.Pact:
-    pact_broker_base_url = "https://greatexpectations.pactflow.io"
-    consumer_name = "great_expectations"
-    provider_name = "mercury"
-
-    broker_token: str
-    publish_to_broker: bool
-    if os.environ.get("PACT_BROKER_READ_WRITE_TOKEN"):
-        broker_token = os.environ.get("PACT_BROKER_READ_WRITE_TOKEN", "")
-        publish_to_broker = True
-    elif os.environ.get("PACT_BROKER_READ_ONLY_TOKEN"):
-        broker_token = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN", "")
-        publish_to_broker = False
-    else:
-        pytest.skip(
-            "no pact credentials: set PACT_BROKER_READ_ONLY_TOKEN from greatexpectations.pactflow.io"
-        )
-
-    # Adding random id to the commit hash allows us to run the build
-    # and publish the contract more than once for a given commit.
-    # We need this because we have the ability to trigger re-run of tests
-    # in GH, and we run the release build process on the tagged commit.
-    version = f"{get_git_commit_hash()}_{str(uuid.uuid4())[:5]}"
-
-    pact_test: pact.Pact = pact.Consumer(
-        name=consumer_name,
-        version=version,
-        tag_with_git_branch=True,
-        auto_detect_version_properties=True,
-    ).has_pact_with(
-        pact.Provider(name=provider_name),
-        broker_base_url=pact_broker_base_url,
-        broker_token=broker_token,
-        host_name=PACT_MOCK_HOST,
-        port=PACT_MOCK_PORT,
-        pact_dir=PACT_DIR,
-        publish_to_broker=publish_to_broker,
-    )
-
-    pact_test.start_service()
-    yield pact_test
-    pact_test.stop_service()
-
-
 class ContractInteraction(pydantic.BaseModel):
     """Represents a Python API (Consumer) request and expected minimal response,
        given a state in the Cloud backend (Provider).
@@ -114,6 +57,8 @@ class ContractInteraction(pydantic.BaseModel):
 
     Args:
         method: A string (e.g. "GET" or "POST") or attribute of the RequestMethods class representing a request method.
+        request_path: A pathlib.Path to the endpoint relative to the base url
+              e.g. pathlib.Path("/", "organizations", organization_id, "data-context-configuration"))
         upon_receiving: A string description of the type of request being made.
         given: A string description of the state of the Cloud backend data requested.
         response_status: The status code associated with the response. An integer between 100 and 599.
@@ -129,6 +74,7 @@ class ContractInteraction(pydantic.BaseModel):
         arbitrary_types_allowed = True
 
     method: Union[RequestMethods, pydantic.StrictStr]
+    request_path: pathlib.Path
     upon_receiving: pydantic.StrictStr
     given: pydantic.StrictStr
     response_status: Annotated[int, pydantic.Field(strict=True, ge=100, lt=600)]
@@ -136,63 +82,128 @@ class ContractInteraction(pydantic.BaseModel):
     request_body: Union[PactBody, None] = None
     request_headers: Union[dict, None] = None
 
-
-@pytest.fixture
-def run_pact_test(
-    gx_cloud_session: requests.Session,
-    pact_test: pact.Pact,
-) -> Callable:
-    def _run_pact_test(
-        path: pathlib.Path,
-        contract_interaction: ContractInteraction,
-    ) -> None:
-        """Runs a contract test and produces a Pact contract json file in directory:
-            - tests/integration/cloud/rest_contracts/pacts
-
-        Args:
-            path: A pathlib.Path to the endpoint relative to the base url.
-                e.g.
-                    ```
-                    path = pathlib.Path(
-                        "/", "organizations", organization_id, "data-context-configuration"
-                    )
-                    ```
-            contract_interaction: A ContractInteraction object which represents a Python API (Consumer) request
-                                  and expected minimal response, given a state in the Cloud backend (Provider).
+    def run(self) -> None:
+        """Produces a Pact contract json file in the following directory:
+             - tests/integration/cloud/rest_contracts/pacts
+           and verifies the contract against Mercury.
 
         Returns:
             None
         """
 
+        try:
+            access_token = os.environ["GX_CLOUD_ACCESS_TOKEN"]
+        except KeyError as e:
+            raise OSError(
+                "GX_CLOUD_ACCESS_TOKEN is not set in this environment."
+            ) from e
+
+        gx_cloud_session: requests.Session = create_session(access_token=access_token)
+
         request: dict[str, str | PactBody] = {
-            "method": contract_interaction.method,
-            "path": str(path),
+            "method": self.method,
+            "path": str(self.request_path),
         }
-        if contract_interaction.request_body is not None:
-            request["body"] = contract_interaction.request_body
+        if self.request_body is not None:
+            request["body"] = self.request_body
 
         request["headers"] = dict(gx_cloud_session.headers)
-        if contract_interaction.request_headers is not None:
-            request["headers"].update(contract_interaction.request_headers)  # type: ignore[union-attr]
-            gx_cloud_session.headers.update(contract_interaction.request_headers)
+        if self.request_headers is not None:
+            request["headers"].update(self.request_headers)  # type: ignore[union-attr]
+            gx_cloud_session.headers.update(self.request_headers)
 
         response: dict[str, int | PactBody] = {
-            "status": contract_interaction.response_status,
-            "body": contract_interaction.response_body,
+            "status": self.response_status,
+            "body": self.response_body,
         }
 
+        pact_test: pact.Pact = next(ContractInteraction._pact_test())
+
         (
-            pact_test.given(provider_state=contract_interaction.given)
-            .upon_receiving(scenario=contract_interaction.upon_receiving)
+            pact_test.given(provider_state=self.given)
+            .upon_receiving(scenario=self.upon_receiving)
             .with_request(**request)
             .will_respond_with(**response)
         )
 
-        request_url = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}{path}"
+        request_url = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}{self.request_path}"
 
         with pact_test:
-            gx_cloud_session.request(
-                method=contract_interaction.method, url=request_url
+            gx_cloud_session.request(method=self.method, url=request_url)
+
+    @staticmethod
+    def _get_git_commit_hash() -> str:
+        return (
+            subprocess.check_output(["git", "rev-parse", "HEAD"])
+            .decode("ascii")
+            .strip()
+        )
+
+    @staticmethod
+    def _pact_test() -> Iterator[pact.Pact]:
+        broker_token: str
+        publish_to_broker: bool
+        if os.environ.get("PACT_BROKER_READ_WRITE_TOKEN"):
+            broker_token = os.environ.get("PACT_BROKER_READ_WRITE_TOKEN", "")
+            publish_to_broker = True
+        elif os.environ.get("PACT_BROKER_READ_ONLY_TOKEN"):
+            broker_token = os.environ.get("PACT_BROKER_READ_ONLY_TOKEN", "")
+            publish_to_broker = False
+        else:
+            pytest.skip(
+                "no pact credentials: set PACT_BROKER_READ_ONLY_TOKEN from greatexpectations.pactflow.io"
             )
 
-    return _run_pact_test
+        # Adding random id to the commit hash allows us to run the build
+        # and publish the contract more than once for a given commit.
+        # We need this because we have the ability to trigger re-run of tests
+        # in GH, and we run the release build process on the tagged commit.
+        version = (
+            f"{ContractInteraction._get_git_commit_hash()}_{str(uuid.uuid4())[:5]}"
+        )
+
+        pact_test: pact.Pact = pact.Consumer(
+            name=CONSUMER_NAME,
+            version=version,
+            tag_with_git_branch=True,
+            auto_detect_version_properties=True,
+        ).has_pact_with(
+            pact.Provider(name=PROVIDER_NAME),
+            broker_base_url=PACT_BROKER_BASE_URL,
+            broker_token=broker_token,
+            host_name=PACT_MOCK_HOST,
+            port=PACT_MOCK_PORT,
+            pact_dir=str(PACT_DIR.resolve()),
+            publish_to_broker=publish_to_broker,
+        )
+
+        pact_test.start_service()
+        yield pact_test
+        pact_test.stop_service()
+
+        try:
+            ContractInteraction._verify_pact(provider_name=PROVIDER_NAME)
+        except AssertionError as e:
+            raise AssertionError("Pact verification failed") from e
+
+    @staticmethod
+    def _verify_pact() -> None:
+        try:
+            provider_base_url: str = os.environ["GX_CLOUD_BASE_URL"]
+        except KeyError as e:
+            raise OSError("GX_CLOUD_BASE_URL is not set in this environment.") from e
+
+        verifier = pact.Verifier(
+            provider=PROVIDER_NAME,
+            provider_base_url=provider_base_url,
+        )
+
+        pacts: tuple[str] = tuple(
+            str(file.resolve()) for file in PACT_DIR.glob("*.json")
+        )
+
+        success, logs = verifier.verify_pacts(
+            *pacts,
+            verbose=False,
+        )
+        assert success == 0

@@ -11,7 +11,7 @@ from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource.fluent import PandasDatasource
 from tests.integration.cloud.rest_contracts.conftest import JsonData, PactBody
 from tests.integration.cloud.rest_contracts.test_data_context_configuration import (
-    DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY,
+    GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY,
 )
 from tests.integration.cloud.rest_contracts.test_datasource import (
     GET_DATASOURCE_MIN_RESPONSE_BODY,
@@ -66,7 +66,7 @@ def _get_mock_response_from_pact_response_body(
 def mock_cloud_data_context() -> CloudDataContext:
     mock_response: requests.Response = _get_mock_response_from_pact_response_body(
         status_code=200,
-        pact_response_body=DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY,
+        pact_response_body=GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY,
     )
 
     with mock.patch(

@@ -1,17 +1,20 @@
 from __future__ import annotations
 
 import pathlib
-from typing import TYPE_CHECKING, Callable, Final
+from typing import TYPE_CHECKING, Final
 
 import pact
 import pytest
 
-from tests.integration.cloud.rest_contracts.conftest import ContractInteraction
+from tests.integration.cloud.rest_contracts.conftest import (
+    EXISTING_ORGANIZATION_ID,
+    ContractInteraction,
+)
 
 if TYPE_CHECKING:
     from tests.integration.cloud.rest_contracts.conftest import PactBody
 
-DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[PactBody] = {
+GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[PactBody] = {
     "anonymous_usage_statistics": pact.Like(
         {
             "data_context_id": pact.Format().uuid,
@@ -33,20 +36,20 @@ DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[PactBody] = {
     [
         ContractInteraction(
             method="GET",
+            request_path=pathlib.Path(
+                "/",
+                "organizations",
+                EXISTING_ORGANIZATION_ID,
+                "data-context-configuration",
+            ),
             upon_receiving="a request for a Data Context",
             given="the Data Context exists",
             response_status=200,
-            response_body=DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY,
+            response_body=GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY,
         ),
     ],
 )
 def test_data_context_configuration(
     contract_interaction: ContractInteraction,
-    run_pact_test: Callable[[pathlib.Path, ContractInteraction], None],
-    existing_organization_id: str,
 ) -> None:
-    # the path to the endpoint relative to the base url
-    path = pathlib.Path(
-        "/", "organizations", existing_organization_id, "data-context-configuration"
-    )
-    run_pact_test(path, contract_interaction)
+    contract_interaction.run()
