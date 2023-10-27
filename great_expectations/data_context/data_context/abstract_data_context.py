@@ -789,7 +789,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         return_obj = self.datasources.set_datasource(
             name=datasource_name, ds=datasource
         )
-        assert isinstance(return_obj, FluentDatasource)
+        assert isinstance(
+            return_obj, FluentDatasource
+        ), f"Expected {FluentDatasource} got {type(return_obj)}"
         return_obj._data_context = self
         self._save_project_config()
 
