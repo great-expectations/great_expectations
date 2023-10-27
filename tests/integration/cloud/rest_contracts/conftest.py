@@ -146,7 +146,6 @@ def run_pact_test(
     pact_test: pact.Pact,
 ) -> Callable:
     def _run_pact_test(
-        path: pathlib.Path,
         contract_interaction: ContractInteraction,
     ) -> None:
         """Runs a contract test and produces a Pact contract json file in directory:
@@ -184,7 +183,7 @@ def run_pact_test(
             .will_respond_with(**response)
         )
 
-        request_url = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}{path}"
+        request_url = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}{contract_interaction.request_path}"
 
         with pact_test:
             gx_cloud_session.request(
