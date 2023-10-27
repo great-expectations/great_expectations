@@ -8,5 +8,3 @@ Table of contents for Releasing:
    :maxdepth: 1
 
    /releasing/docker_release_process
-
-
