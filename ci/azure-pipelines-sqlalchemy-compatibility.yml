@@ -142,7 +142,7 @@ stages:
               cp constraints-dev.txt constraints-dev-temp.txt
               echo "SQLAlchemy$(comparison)2.0.0" >> constraints-dev-temp.txt
               echo "pandas$(comparison)2.0.0" >> constraints-dev-temp.txt
-              
+
               pip install --constraint constraints-dev-temp.txt ".[test, postgresql]" pytest-azurepipelines
             displayName: 'Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)'
 
@@ -182,7 +182,7 @@ stages:
               comparison: '>='
 
         services:
-          mssql: mssql 
+          mssql: mssql
 
         steps:
           - task: UsePythonVersion@0
@@ -200,7 +200,7 @@ stages:
               cp constraints-dev.txt constraints-dev-temp.txt
               echo "SQLAlchemy$(comparison)2.0.0" >> constraints-dev-temp.txt
               echo "pandas$(comparison)2.0.0" >> constraints-dev-temp.txt
-              
+
               pip install --constraint constraints-dev-temp.txt ".[test, mssql]" pytest-azurepipelines
             displayName: 'Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)'
 
