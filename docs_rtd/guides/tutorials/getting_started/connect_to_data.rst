@@ -6,9 +6,9 @@ Connect to data
 Once you have a DataContext, you'll want to connect to data.  In Great Expectations, :ref:`Datasources <reference__core_concepts__datasources>` simplify connections, by managing configuration and providing a consistent, cross-platform API for referencing data.
 
 Let's configure your first Datasource: a connection to the data directory we've provided in the repo. This could also be a database connection, but for now we're just using a simple file store:
-    
+
 .. code-block:: bash
-    
+
     Would you like to configure a Datasource? [Y/n]: <press enter>
 
     What data would you like Great Expectations to connect to?
