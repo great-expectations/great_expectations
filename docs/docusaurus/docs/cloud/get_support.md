@@ -12,7 +12,7 @@ The following are some recommendations for resolving issues on your own. Resolvi
 
 ### Search the GX Cloud documentation
 
-Search the docs you're using currently for an answer to your issue or question. If you're new to GX Cloud and are using Snowflake, try the [Quickstart for GX Cloud and Snowflake](quickstarts/snowflake_quickstart.md). If you're interested in reviewing features and functionality, see [Set up GX Cloud](set_up_gx_cloud.md).  
+Search the docs you're using currently for an answer to your issue or question. If you're new to GX Cloud and are using Snowflake, try the [Quickstart for GX Cloud and Snowflake](quickstarts/snowflake_quickstart.md). If you're interested in reviewing features and functionality, see [Set up GX Cloud](/docs/cloud/set_up_gx_cloud).  
 
 ### Search with your favorite browser
 
