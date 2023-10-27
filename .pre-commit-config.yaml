@@ -4,6 +4,7 @@ repos:
     hooks:
       - id: check-ast
       - id: check-json
+        exclude: invalid_json_file.json|tests/test_sets/fixed_distributional_test_dataset.json|tests/test_sets/expected_cli_results_default.json
       - id: check-yaml
         exclude: docs/.*|tests/data_context/fixtures/bad_yml/great_expectations\.yml
       - id: end-of-file-fixer
@@ -15,6 +16,7 @@ repos:
       - id: no-commit-to-branch
         args: [--branch, develop, --branch, main]
       - id: detect-private-key
+        exclude: tests/test_fixtures/database_key_test*
   - repo: https://github.com/psf/black
     rev: 23.3.0
     hooks:
@@ -38,7 +40,7 @@ ci:
         [pre-commit.ci] auto fixes from pre-commit.com hooks
 
         for more information, see https://pre-commit.ci
-    autofix_prs: false
+    autofix_prs: true
     autoupdate_branch: 'develop'
     autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
     autoupdate_schedule: monthly
