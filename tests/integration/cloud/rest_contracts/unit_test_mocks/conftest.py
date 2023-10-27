@@ -1,10 +1,12 @@
 import json
 import uuid
+from typing import Generator
 from unittest import mock
 
 import pact
 import pytest
 import requests
+import responses
 
 import great_expectations as gx
 from great_expectations.data_context import CloudDataContext
@@ -63,22 +65,25 @@ def _get_mock_response_from_pact_response_body(
 
 
 @pytest.fixture
-def mock_cloud_data_context() -> CloudDataContext:
-    mock_response: requests.Response = _get_mock_response_from_pact_response_body(
-        status_code=200,
-        pact_response_body=GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY,
+def responses_mocker() -> Generator[responses.RequestsMock, None, None]:
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as rsps:
+        yield rsps
+
+
+@pytest.fixture
+def mock_cloud_data_context(
+    responses_mocker: responses.RequestsMock,
+) -> CloudDataContext:
+    responses_mocker.get(
+        "https://fake-host.io", json=GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY
     )
 
-    with mock.patch(
-        target="requests.Session.get",
-        return_value=mock_response,
-    ):
-        mock_cloud_data_context: CloudDataContext = gx.get_context(
-            mode="cloud",
-            cloud_base_url="https://fake-host.io",
-            cloud_organization_id=str(uuid.uuid4()),
-            cloud_access_token="not a real token",
-        )
+    mock_cloud_data_context: CloudDataContext = gx.get_context(
+        mode="cloud",
+        cloud_base_url="https://fake-host.io",
+        cloud_organization_id=str(uuid.uuid4()),
+        cloud_access_token="not a real token",
+    )
 
     assert isinstance(mock_cloud_data_context, CloudDataContext)
     assert mock_cloud_data_context.variables.include_rendered_content.globally is True
