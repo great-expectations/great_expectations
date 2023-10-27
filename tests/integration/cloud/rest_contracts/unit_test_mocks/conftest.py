@@ -129,3 +129,8 @@ def mock_cloud_pandas_datasource(
     assert mock_cloud_pandas_datasource.name == datasource_name
 
     return mock_cloud_pandas_datasource
+
+
+# @pytest.mark.cloud
+# def test_mock_cloud_pandas_datasource(mock_cloud_pandas_datasource: PandasDatasource):
+#     assert isinstance(mock_cloud_pandas_datasource, PandasDatasource)
