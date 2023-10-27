@@ -35,10 +35,7 @@ PactBody: TypeAlias = Union[
 ]
 
 
-try:
-    EXISTING_ORGANIZATION_ID: Final[str] = os.environ["GX_CLOUD_ORGANIZATION_ID"]
-except KeyError as e:
-    raise OSError("GX_CLOUD_ORGANIZATION_ID is not set in this environment.") from e
+EXISTING_ORGANIZATION_ID: Final[str] = os.environ.get("GX_CLOUD_ORGANIZATION_ID")
 
 
 class RequestMethods(str, enum.Enum):
