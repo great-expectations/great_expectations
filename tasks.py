@@ -18,12 +18,13 @@ import shutil
 import sys
 from collections.abc import Generator, Mapping, Sequence
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Final, NamedTuple, Union
+from typing import TYPE_CHECKING, Final, NamedTuple, Optional, Union
 
 import invoke
 
 from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
 from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
+from great_expectations.compatibility.pydantic import BaseSettings
 
 if TYPE_CHECKING:
     from invoke.context import Context
@@ -1125,6 +1126,10 @@ def service(
         The main reason this is a separate task is to make it easy to start services
         when running tests locally.
     """
+
+    class EnvVars(BaseSettings):
+        ci: Optional[bool] = None
+
     service_names = set(names)
 
     if markers:
@@ -1135,11 +1140,8 @@ def service(
         print(f"  Starting services for {', '.join(service_names)} ...")
         for service_name in service_names:
             cmds = []
-
-            if (
-                service_name == "mercury"
-                and os.environ.get("CI") != "true"  # noqa: TID251
-            ):
+            EnvVars.update_forward_refs()
+            if service_name == "mercury" and EnvVars().ci is not True:
                 cmds.extend(
                     [
                         "FORCE_NO_ALIAS=true",
