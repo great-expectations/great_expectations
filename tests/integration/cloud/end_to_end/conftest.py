@@ -16,6 +16,7 @@ from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark
+    from great_expectations.compatibility.sqlalchemy import engine
 
 LOGGER: Final = logging.getLogger("tests")
 
@@ -137,7 +138,7 @@ def spark_session(test_backends) -> pyspark.SparkSession:
 
     from great_expectations.compatibility import pyspark
 
-    if pyspark.SparkSession:
+    if pyspark.SparkSession:  # type: ignore[truthy-function]
         return get_or_create_spark_application(
             spark_config={
                 "spark.sql.catalogImplementation": "hive",

@@ -26,7 +26,7 @@ def datasource(
     )
     datasource_name = f"i{uuid.uuid4().hex}"
     datasource.name = datasource_name
-    datasource = context.sources.add_or_update_spark(datasource=datasource)
+    datasource = context.sources.add_or_update_spark(datasource=datasource)  # type: ignore[call-arg]
     assert (
         datasource.name == datasource_name
     ), "The datasource was not updated in the previous method call."
