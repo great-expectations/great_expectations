@@ -9,7 +9,7 @@ import json
 import logging
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
-import requests
+import httpx
 
 from great_expectations.compatibility.typing_extensions import override
 
@@ -1323,10 +1323,10 @@ class APINotificationAction(ValidationAction):
             f"Successfully Posted results to API, status code - {response.status_code}"
         )
 
-    def send_results(self, payload) -> requests.Response:
+    def send_results(self, payload) -> httpx.Response:
         try:
             headers = {"Content-Type": "application/json"}
-            return requests.post(self.url, headers=headers, data=payload)
+            return httpx.post(self.url, headers=headers, data=payload)
         except Exception as e:
             print(f"Exception when sending data to API - {e}")
             raise e

@@ -12,8 +12,8 @@ from functools import wraps
 from queue import Queue
 from typing import TYPE_CHECKING, Callable
 
+import httpx
 import jsonschema
-import requests
 
 from great_expectations import __version__ as gx_version
 from great_expectations.core import ExpectationSuite
@@ -115,7 +115,7 @@ class UsageStatisticsHandler:
         self._worker.join()
 
     def _requests_worker(self) -> None:
-        session = requests.Session()
+        session = httpx.Client()
         while True:
             message = self._message_queue.get()
             if message == STOP_SIGNAL:
@@ -130,7 +130,7 @@ class UsageStatisticsHandler:
                     logger.debug(  # noqa: PLE1205
                         "Server rejected message: ", json.dumps(message, indent=2)
                     )
-            except requests.exceptions.Timeout:
+            except httpx.exceptions.Timeout:
                 logger.debug("Timeout while sending usage stats message.")
             except Exception as e:
                 logger.debug("Unexpected error posting message: " + str(e))

@@ -8,9 +8,9 @@ from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
 
+import httpx
 import pandas as pd
 import pytest
-import requests
 
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
@@ -209,7 +209,7 @@ def test_context_add_or_update_datasource(
             2,
         )
 
-        response = requests.get(
+        response = httpx.get(
             f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}"
         )
         response.raise_for_status()
@@ -303,7 +303,7 @@ def test_cloud_context_delete_datasource(
     )
 
     # check cloud_api_fake items
-    response1 = requests.get(
+    response1 = httpx.get(
         f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}",
     )
     print(f"Before Delete -> {response1}\n{pf(response1.json())}\n")
@@ -321,7 +321,7 @@ def test_cloud_context_delete_datasource(
         2,
     )
 
-    response2 = requests.get(
+    response2 = httpx.get(
         f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}",
     )
     print(f"After Delete -> {response2}\n{pf(response2.json())}")

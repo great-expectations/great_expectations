@@ -4,7 +4,7 @@ import json
 import logging
 from typing import ClassVar
 
-import requests
+import httpx
 from packaging import version
 from typing_extensions import TypedDict
 
@@ -48,16 +48,16 @@ class _VersionChecker:
     def _get_latest_version_from_pypi(self) -> version.Version | None:
         response_json: _PyPIPackageData | None = None
         try:
-            response = requests.get(self._PYPI_GX_ENDPOINT)
+            response = httpx.get(self._PYPI_GX_ENDPOINT)
             response.raise_for_status()
             response_json = response.json()
         except json.JSONDecodeError as jsonError:
             logger.debug(f"Failed to parse PyPI API response into JSON: {jsonError}")
-        except requests.HTTPError as http_err:
+        except httpx.HTTPError as http_err:
             logger.debug(
                 f"An HTTP error occurred when trying to hit PyPI API: {http_err}"
             )
-        except requests.Timeout as timeout_exc:
+        except httpx.Timeout as timeout_exc:
             logger.debug(
                 f"Failed to hit the PyPI API due a timeout error: {timeout_exc}"
             )

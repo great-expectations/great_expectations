@@ -19,7 +19,7 @@ import re
 from typing import List, Optional
 
 import click
-import requests
+import httpx
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
@@ -118,7 +118,7 @@ class LinkChecker:
         logger.debug(f"Checking external link {link} in file {file}", link, file)
 
         try:
-            response = requests.get(link)
+            response = httpx.get(link)
 
             if 400 <= response.status_code < 500:
                 logger.info(
@@ -134,7 +134,7 @@ class LinkChecker:
                     f"External link {link} successful in file {file}, response code: {response.status_code}",
                 )
                 return None
-        except requests.exceptions.ConnectionError as err:
+        except httpx.exceptions.ConnectionError as err:
             logger.info(
                 f"External link {link} in file {file} raised a connection error"
             )

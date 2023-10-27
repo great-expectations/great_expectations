@@ -1,4 +1,4 @@
-import requests
+import httpx
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
@@ -27,11 +27,11 @@ class ColumnValuesValidWikipediaArticles(ColumnMapMetricProvider):
         def is_valid_wikipedia_article(title):
             url = "https://en.wikipedia.org/wiki/" + title
             try:
-                r = requests.head(url)
+                r = httpx.head(url)
                 # print(r.status_code)
                 if r.status_code == 200:
                     return True
-            except requests.ConnectionError:
+            except httpx.ConnectionError:
                 print("failed to connect")
             return False
 

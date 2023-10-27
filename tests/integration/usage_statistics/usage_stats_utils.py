@@ -1,6 +1,6 @@
 from typing import List
 
-import requests
+import httpx
 
 from tests.integration.usage_statistics.test_usage_statistics_messages import (
     valid_usage_statistics_messages,
@@ -26,4 +26,4 @@ def get_gx_version() -> str:
     git_file = "great_expectations/develop/great_expectations/deployment_version"
     path = f"{git_raw}/{git_repo}/{git_file}"
 
-    return requests.get(path).text.replace(".", "").replace("\n", "")
+    return httpx.get(path).text.replace(".", "").replace("\n", "")

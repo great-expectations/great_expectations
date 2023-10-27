@@ -9,7 +9,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import List, Optional, Union
 
-import requests
+import httpx
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import aws
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 def send_slack_notification(
     query, slack_webhook=None, slack_channel=None, slack_token=None
 ):
-    session = requests.Session()
+    session = httpx.Client()
     url = slack_webhook
     headers = None
 
@@ -50,7 +50,7 @@ def send_slack_notification(
             ok_status = response.text == "ok"
         else:
             ok_status = response.json()["ok"]
-    except requests.ConnectionError:
+    except httpx.ConnectionError:
         logger.warning(f"Failed to connect to Slack webhook after {10} retries.")
     except Exception as e:
         logger.error(str(e))
@@ -81,11 +81,11 @@ def send_opsgenie_alert(query, suite_name, settings):
         "tags": settings["tags"],
     }
 
-    session = requests.Session()
+    session = httpx.Client()
 
     try:
         response = session.post(url, headers=headers, json=payload)
-    except requests.ConnectionError:
+    except httpx.ConnectionError:
         logger.warning("Failed to connect to Opsgenie")
     except Exception as e:
         logger.error(str(e))
@@ -101,10 +101,10 @@ def send_opsgenie_alert(query, suite_name, settings):
 
 
 def send_microsoft_teams_notifications(query, microsoft_teams_webhook):
-    session = requests.Session()
+    session = httpx.Client()
     try:
         response = session.post(url=microsoft_teams_webhook, json=query)
-    except requests.ConnectionError:
+    except httpx.ConnectionError:
         logger.warning("Failed to connect to Microsoft Teams webhook after 10 retries.")
 
     except Exception as e:
@@ -121,10 +121,10 @@ def send_microsoft_teams_notifications(query, microsoft_teams_webhook):
 
 
 def send_webhook_notifications(query, webhook, target_platform):
-    session = requests.Session()
+    session = httpx.Client()
     try:
         response = session.post(url=webhook, json=query)
-    except requests.ConnectionError:
+    except httpx.ConnectionError:
         logger.warning(
             f"Failed to connect to {target_platform} webhook after 10 retries."
         )

@@ -6,7 +6,7 @@ from abc import ABCMeta
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urljoin
 
-import requests
+import httpx
 from typing_extensions import TypedDict
 
 from great_expectations.compatibility.typing_extensions import override
@@ -97,11 +97,11 @@ def construct_json_payload(
 
 
 def get_user_friendly_error_message(
-    http_exc: requests.exceptions.HTTPError, log_level: int = logging.WARNING
+    http_exc: httpx.exceptions.HTTPError, log_level: int = logging.WARNING
 ) -> str:
     # TODO: define a GeCloud service/client for this & other related behavior
     support_message = []
-    response: requests.Response = http_exc.response
+    response: httpx.Response = http_exc.response
 
     logger.log(log_level, f"{http_exc.__class__.__name__}:{http_exc} - {response}")
 
@@ -275,11 +275,11 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             raise StoreBackendError(
                 f"Unable to get object in GX Cloud Store Backend: {jsonError}"
             )
-        except requests.HTTPError as http_err:
+        except httpx.HTTPError as http_err:
             raise StoreBackendError(
                 f"Unable to get object in GX Cloud Store Backend: {get_user_friendly_error_message(http_err)}"
             )
-        except requests.Timeout as timeout_exc:
+        except httpx.Timeout as timeout_exc:
             logger.exception(timeout_exc)
             raise StoreBackendTransientError(
                 "Unable to get object in GX Cloud Store Backend: This is likely a transient error. Please try again."
@@ -329,11 +329,11 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response.raise_for_status()
             return True
 
-        except requests.HTTPError as http_exc:
+        except httpx.HTTPError as http_exc:
             raise StoreBackendError(
                 f"Unable to update object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
             )
-        except requests.Timeout as timeout_exc:
+        except httpx.Timeout as timeout_exc:
             logger.exception(timeout_exc)
             raise StoreBackendTransientError(
                 "Unable to update object in GX Cloud Store Backend: This is likely a transient error. Please try again."
@@ -422,11 +422,11 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 url=object_url,
                 response_json=response_json,
             )
-        except requests.HTTPError as http_exc:
+        except httpx.HTTPError as http_exc:
             raise StoreBackendError(
                 f"Unable to set object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
             ) from http_exc
-        except requests.Timeout as timeout_exc:
+        except httpx.Timeout as timeout_exc:
             logger.exception(timeout_exc)
             raise StoreBackendTransientError(
                 "Unable to set object in GX Cloud Store Backend: This is likely a transient error. Please try again."
@@ -553,12 +553,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 )
                 response.raise_for_status()
                 return True
-        except requests.HTTPError as http_exc:
+        except httpx.HTTPError as http_exc:
             logger.exception(http_exc)
             raise StoreBackendError(
                 f"Unable to delete object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
             )
-        except requests.Timeout as timeout_exc:
+        except httpx.Timeout as timeout_exc:
             logger.exception(timeout_exc)
             raise StoreBackendTransientError(
                 "Unable to delete object in GX Cloud Store Backend: This is likely a transient error. Please try again."

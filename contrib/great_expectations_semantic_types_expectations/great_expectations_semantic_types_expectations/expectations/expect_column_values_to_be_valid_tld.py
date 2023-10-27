@@ -5,7 +5,7 @@ For detailed instructions on how to use it, please see:
 """
 from typing import Optional
 
-import requests as req
+import httpx as req
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine

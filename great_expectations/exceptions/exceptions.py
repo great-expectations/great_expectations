@@ -11,7 +11,7 @@ from marshmallow import ValidationError
 from great_expectations.compatibility.typing_extensions import override
 
 if TYPE_CHECKING:
-    import requests
+    import httpx
 
 
 class GreatExpectationsError(Exception):
@@ -461,9 +461,9 @@ class GXCloudError(GreatExpectationsError):
     Generic error used to provide additional context around Cloud-specific issues.
     """
 
-    response: requests.Response
+    response: httpx.Response
 
-    def __init__(self, message: str, response: requests.Response) -> None:
+    def __init__(self, message: str, response: httpx.Response) -> None:
         super().__init__(message)
         self.response = response
 

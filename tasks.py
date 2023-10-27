@@ -764,10 +764,10 @@ def link_checker(ctx: Context, skip_external: bool = True):
 )
 def show_automerges(ctx: Context):
     """Show github pull requests currently in automerge state."""
-    import requests
+    import httpx
 
     url = "https://api.github.com/repos/great-expectations/great_expectations/pulls"
-    response = requests.get(
+    response = httpx.get(
         url,
         params={
             "state": "open",
@@ -778,7 +778,7 @@ def show_automerges(ctx: Context):
     )
     LOGGER.debug(f"{response.request.method} {response.request.url} - {response}")
 
-    if response.status_code != requests.codes.ok:
+    if response.status_code != httpx.codes.ok:
         print(f"Error: {response.reason}\n{pf(response.json(), depth=2)}")
         response.raise_for_status()
 
