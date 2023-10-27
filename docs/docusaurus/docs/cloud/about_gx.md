@@ -78,4 +78,4 @@ Use the following resources when you have questions or encounter issues with GX 
 
 - [GX Cloud support on Discourse](https://discourse.greatexpectations.io/c/cloud-support/17)
 
-- [Discuss your issue with GX community members on Slack](https://greatexpectationstalk.slack.com/archives/CUTCNHN82)
+- [Discuss your issue with GX community members on Slack](https://greatexpectationstalk.slack.com/archives/C051D941XAL)
