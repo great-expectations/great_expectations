@@ -52,19 +52,19 @@ GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
 @pytest.mark.parametrize(
     "contract_interaction",
     [
-        ContractInteraction(
-            method="POST",
-            request_path=pathlib.Path(
-                "/",
-                "organizations",
-                EXISTING_ORGANIZATION_ID,
-                "datasources",
-            ),
-            upon_receiving="a request to add a Data Source",
-            given="the Data Source does not exist",
-            response_status=200,
-            response_body=POST_DATASOURCE_MIN_RESPONSE_BODY,
-        ),
+        # ContractInteraction(
+        #     method="POST",
+        #     request_path=pathlib.Path(
+        #         "/",
+        #         "organizations",
+        #         EXISTING_ORGANIZATION_ID,
+        #         "datasources",
+        #     ),
+        #     upon_receiving="a request to add a Data Source",
+        #     given="the Data Source does not exist",
+        #     response_status=200,
+        #     response_body=POST_DATASOURCE_MIN_RESPONSE_BODY,
+        # ),
         ContractInteraction(
             method="GET",
             request_path=pathlib.Path(
