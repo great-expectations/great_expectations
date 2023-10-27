@@ -28,7 +28,7 @@ PACT_DIR: Final[str] = str(
 JsonData: TypeAlias = Union[None, int, str, bool, List[Any], Dict[str, Any]]
 
 PactBody: TypeAlias = Union[
-    Dict[str, Union[JsonData, pact.matchers.Matcher]], pact.matchers.Matcher
+    Dict[str, Union[JsonData, pact.matchers.Matcher]], pact.matchers.Matcher, None
 ]
 
 
@@ -122,6 +122,7 @@ class ContractInteraction(pydantic.BaseModel):
         response_body: A dictionary or Pact Matcher object representing the response body.
         request_body (Optional): A dictionary or Pact Matcher object representing the request body.
         request_headers (Optional): A dictionary representing the request headers.
+        request_parmas (Optional): A dictionary representing the request parameters.
 
     Returns:
         ContractInteraction
@@ -138,6 +139,7 @@ class ContractInteraction(pydantic.BaseModel):
     response_body: PactBody
     request_body: Union[PactBody, None] = None
     request_headers: Union[dict, None] = None
+    request_params: Union[dict, None] = None
 
 
 @pytest.fixture
@@ -165,6 +167,8 @@ def run_pact_test(
         }
         if contract_interaction.request_body is not None:
             request["body"] = contract_interaction.request_body
+        if contract_interaction.request_params is not None:
+            request["query"] = contract_interaction.request_params
 
         request["headers"] = dict(gx_cloud_session.headers)
         if contract_interaction.request_headers is not None:
@@ -173,8 +177,9 @@ def run_pact_test(
 
         response: dict[str, int | PactBody] = {
             "status": contract_interaction.response_status,
-            "body": contract_interaction.response_body,
         }
+        if contract_interaction.response_body is not None:
+            response["body"] = contract_interaction.response_body
 
         (
             pact_test.given(provider_state=contract_interaction.given)
@@ -187,7 +192,10 @@ def run_pact_test(
 
         with pact_test:
             gx_cloud_session.request(
-                method=contract_interaction.method, url=request_url
+                method=contract_interaction.method,
+                url=request_url,
+                json=contract_interaction.request_body,
+                params=contract_interaction.request_params,
             )
 
     return _run_pact_test
