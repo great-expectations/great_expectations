@@ -39,7 +39,7 @@ def datasource(
         name=datasource_name,
     )
     assert datasource.name == datasource_name
-    return datasource
+    yield datasource
 
 
 @pytest.fixture
