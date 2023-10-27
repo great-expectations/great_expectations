@@ -444,15 +444,15 @@ def test_get_expectation_suite_nonexistent_suite_raises_error(
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
-    suite_id = "abc123"
+    suite_name = "suite123"
 
     with pytest.raises(DataContextError) as e:
         with mock.patch(
             "requests.Session.get", autospec=True, side_effect=mocked_404_response
         ):
-            context.get_expectation_suite(ge_cloud_id=suite_id)
+            context.get_expectation_suite(suite_name)
 
-    assert "abc123" in str(e.value)
+    assert suite_name in str(e.value)
 
 
 @pytest.mark.cloud

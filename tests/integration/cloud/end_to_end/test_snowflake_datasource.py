@@ -17,26 +17,24 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def creds_populated() -> bool:
-    if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") or os.getenv("SNOWFLAKE_CI_ACCOUNT"):
-        return True
-    return False
+def connection_string() -> str:
+    if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
+        return "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci"
+    elif os.getenv("SNOWFLAKE_USER") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
+        return "snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser"
+    else:
+        pytest.skip("no snowflake credentials")
 
 
 @pytest.fixture
 def datasource(
     context: CloudDataContext,
-    creds_populated: bool,
+    connection_string: str,
 ) -> Iterator[SnowflakeDatasource]:
-    if not creds_populated:
-        pytest.skip("no snowflake credentials")
-
     datasource_name = f"i{uuid.uuid4().hex}"
     datasource = context.sources.add_snowflake(
         name=datasource_name,
-        connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
-        # NOTE: uncomment this and set SNOWFLAKE_USER to run tests against your own snowflake account
-        # connection_string="snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
+        connection_string=connection_string,
         create_temp_table=False,
     )
     datasource.create_temp_table = True
