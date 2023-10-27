@@ -18,11 +18,13 @@ if TYPE_CHECKING:
     from requests import Session
 
 
+CONSUMER_NAME: Final[str] = "great_expectations"
+PROVIDER_NAME: Final[str] = "mercury"
+
+
 PACT_MOCK_HOST: Final[str] = "localhost"
 PACT_MOCK_PORT: Final[int] = 9292
-PACT_DIR: Final[str] = str(
-    pathlib.Path(pathlib.Path(__file__).parent, "pacts").resolve()
-)
+PACT_DIR: Final[pathlib.Path] = pathlib.Path(pathlib.Path(__file__).parent, "pacts")
 
 
 JsonData: TypeAlias = Union[None, int, str, bool, List[Any], Dict[str, Any]]
@@ -64,8 +66,6 @@ def get_git_commit_hash() -> str:
 @pytest.fixture
 def pact_test(request) -> pact.Pact:
     pact_broker_base_url = "https://greatexpectations.pactflow.io"
-    consumer_name = "great_expectations"
-    provider_name = "mercury"
 
     broker_token: str
     publish_to_broker: bool
@@ -87,17 +87,17 @@ def pact_test(request) -> pact.Pact:
     version = f"{get_git_commit_hash()}_{str(uuid.uuid4())[:5]}"
 
     pact_test: pact.Pact = pact.Consumer(
-        name=consumer_name,
+        name=CONSUMER_NAME,
         version=version,
         tag_with_git_branch=True,
         auto_detect_version_properties=True,
     ).has_pact_with(
-        pact.Provider(name=provider_name),
+        pact.Provider(name=PROVIDER_NAME),
         broker_base_url=pact_broker_base_url,
         broker_token=broker_token,
         host_name=PACT_MOCK_HOST,
         port=PACT_MOCK_PORT,
-        pact_dir=PACT_DIR,
+        pact_dir=str(PACT_DIR.resolve()),
         publish_to_broker=publish_to_broker,
     )
 
@@ -194,5 +194,27 @@ def run_pact_test(
             gx_cloud_session.request(
                 method=contract_interaction.method, url=request_url
             )
+
+        try:
+            provider_base_url: Final[str] = os.environ["GX_CLOUD_BASE_URL"]
+        except KeyError as e:
+            raise OSError(
+                "GX_CLOUD_ACCESS_TOKEN is not set in this environment."
+            ) from e
+
+        verifier = pact.Verifier(
+            provider=PROVIDER_NAME,
+            provider_base_url=provider_base_url,
+        )
+
+        pacts: tuple[str, ...] = tuple(
+            str(file.resolve()) for file in PACT_DIR.glob("*.json")
+        )
+
+        success, logs = verifier.verify_pacts(
+            *pacts,
+            verbose=False,
+        )
+        assert success == 0
 
     return _run_pact_test
