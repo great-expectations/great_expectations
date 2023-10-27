@@ -21,7 +21,7 @@ from tests.integration.cloud.rest_contracts.test_datasource import (
 
 DUMMY_BASE_URL: Final[str] = "https://fake-host.io"
 DUMMY_ORG_ID: Final[str] = str(uuid.uuid4())
-DUMMY_ORG_REGEX: Final[re.Pattern] = re.compile(
+DUMMY_ORG_URL_REGEX: Final[re.Pattern] = re.compile(
     f"{DUMMY_BASE_URL}/organizations/{DUMMY_ORG_ID}"
 )
 
@@ -67,7 +67,7 @@ def mock_cloud_data_context(
     requests_mocker: responses.RequestsMock,
 ) -> CloudDataContext:
     requests_mocker.get(
-        DUMMY_ORG_REGEX,
+        DUMMY_ORG_URL_REGEX,
         json=_reify_pact_body(GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY),
     )
 
@@ -99,10 +99,10 @@ def mock_cloud_pandas_datasource(
     datasource_name = "mock_cloud_pandas_datasource"
 
     requests_mocker.get(
-        DUMMY_ORG_REGEX, json=_reify_pact_body(GET_DATASOURCE_MIN_RESPONSE_BODY)
+        DUMMY_ORG_URL_REGEX, json=_reify_pact_body(GET_DATASOURCE_MIN_RESPONSE_BODY)
     )
     requests_mocker.post(
-        DUMMY_ORG_REGEX, json=_reify_pact_body(POST_DATASOURCE_MIN_RESPONSE_BODY)
+        DUMMY_ORG_URL_REGEX, json=_reify_pact_body(POST_DATASOURCE_MIN_RESPONSE_BODY)
     )
 
     with mock.patch(
