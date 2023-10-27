@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pathlib
 import uuid
 from typing import TYPE_CHECKING, Iterator
 
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
         BatchRequest,
         PandasFilesystemDatasource,
     )
-    from great_expectations.datasource.fluent.pandas_filesystem_datasource import (
+    from great_expectations.datasource.fluent.pandas_file_path_datasource import (
         CSVAsset,
     )
 
@@ -25,8 +26,8 @@ def datasource(
     context: CloudDataContext,
 ) -> Iterator[PandasFilesystemDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
-    original_base_dir = "./data/"
-    updated_base_dir = "./other_data/"
+    original_base_dir = pathlib.Path("./data/")
+    updated_base_dir = pathlib.Path("./other_data/")
 
     datasource = context.sources.add_pandas_filesystem(
         name=datasource_name, base_directory=original_base_dir
@@ -41,7 +42,7 @@ def datasource(
     datasource.base_directory = original_base_dir
     datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
     assert (
-        datasource.base_dir == original_base_dir
+        datasource.base_directory == original_base_dir
     ), "The datasource was not updated in the previous method call."
 
     datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
