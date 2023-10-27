@@ -43,7 +43,7 @@ class RequestMethods(str, enum.Enum):
     PUT = "PUT"
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def gx_cloud_session() -> Session:
     try:
         access_token = os.environ["GX_CLOUD_ACCESS_TOKEN"]
@@ -56,7 +56,7 @@ def get_git_commit_hash() -> str:
     return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def pact_test(request) -> pact.Pact:
     pact_broker_base_url = "https://greatexpectations.pactflow.io"
     consumer_name = "great_expectations"
