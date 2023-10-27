@@ -2895,7 +2895,7 @@ def test_usage_statistics_message(
 ):
     """known message formats should be valid"""
     res = requests_session_with_retries.post(
-        USAGE_STATISTICS_QA_URL, json=message, timeout=4
+        USAGE_STATISTICS_QA_URL, json=message, timeout=1
     )
     assert res.status_code == 201
     assert res.json() == {"event_count": 1}
