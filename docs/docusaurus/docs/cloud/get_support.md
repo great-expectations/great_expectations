@@ -26,9 +26,7 @@ Taking the time to formulate your questions properly and providing all the relev
 
 Clearly explain the issue you're experiencing, or the problem you're trying to solve. When asking questions, you should provide the following:
 
-- The complete error log or logs.
-
-- The relevant code you're trying to run.
+- The complete error log or logs. 
 
 - The version of GX Cloud you're using.
 
