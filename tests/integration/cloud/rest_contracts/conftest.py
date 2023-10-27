@@ -166,6 +166,10 @@ def run_pact_test(
         if contract_interaction.request_body is not None:
             request["body"] = contract_interaction.request_body
 
+        # Gx-Version changes, but Pact expects you to treat the request as static
+        gx_cloud_session.headers.update(
+            {"Gx-Version": "testing"},
+        )
         request["headers"] = dict(gx_cloud_session.headers)
         if contract_interaction.request_headers is not None:
             request["headers"].update(contract_interaction.request_headers)  # type: ignore[union-attr]
