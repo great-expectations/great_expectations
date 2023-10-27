@@ -32,7 +32,7 @@ PactBody: TypeAlias = Union[
 ]
 
 
-EXISTING_ORGANIZATION_ID: Final[str] = os.environ.get("GX_CLOUD_ORGANIZATION_ID") or ""
+EXISTING_ORGANIZATION_ID: Final[str] = os.environ.get("GX_CLOUD_ORGANIZATION_ID", "")
 
 
 class RequestMethods(str, enum.Enum):
