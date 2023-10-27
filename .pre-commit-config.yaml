@@ -4,9 +4,7 @@ repos:
     hooks:
       - id: check-ast
       - id: check-json
-        exclude: invalid_json_file.json |
-              tests/test_sets/fixed_distributional_test_dataset.json |
-              tests/test_sets/expected_cli_results_default.json
+        exclude: invalid_json_file.json|tests/test_sets/fixed_distributional_test_dataset.json|tests/test_sets/expected_cli_results_default.json
       - id: check-yaml
         exclude: docs/.*|tests/data_context/fixtures/bad_yml/great_expectations\.yml
       - id: end-of-file-fixer
