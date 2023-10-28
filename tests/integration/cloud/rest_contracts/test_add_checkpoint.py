@@ -18,33 +18,29 @@ NON_EXISTING_CHECKPOINT_ID: Final[str] = "68058949-f9c2-47b1-922a-a89c23ffad99"
 EXISTING_CHECKPOINT_ID: Final[str] = "68058949-f9c2-47b1-922a-a89c23ffad99"
 PUT_CHECKPOINT_MIN_RESPONSE_BODY: Final[PactBody] = pact.Like("204 string")
 PUT_CHECKPOINTS_MIN_REQUEST_BODY = {
-    "data":
-        {
-            "id": '123',
-            "type": "checkpoint",
-            "attributes": {
-                "checkpoint_config": {},
-            },
+    "data": {
+        "id": "123",
+        "type": "checkpoint",
+        "attributes": {
+            "checkpoint_config": {},
         },
-
+    },
 }
 
 GET_CHECKPOINTS_MIN_RESPONSE_BODY: Final[dict] = {
-    "data":
-        {
-            "id": pact.Format().uuid,
-            "type": "checkpoint",
-            "attributes": {
-                "checkpoint_config": {
-                    "validations": [
-                        {
-                            "id": pact.Format().uuid,
-                        }
-                    ]
-                },
+    "data": {
+        "id": pact.Format().uuid,
+        "type": "checkpoint",
+        "attributes": {
+            "checkpoint_config": {
+                "validations": [
+                    {
+                        "id": pact.Format().uuid,
+                    }
+                ]
             },
         },
-
+    },
 }
 
 
