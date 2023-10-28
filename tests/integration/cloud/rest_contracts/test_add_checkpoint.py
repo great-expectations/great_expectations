@@ -19,62 +19,60 @@ NON_EXISTING_CHECKPOINT_ID: Final[str] = "68058949-f9c2-47b1-922a-a89c23ffad99"
 EXISTING_CHECKPOINT_ID: Final[str] = "68058949-f9c2-47b1-922a-a89c23ffad99"
 PUT_CHECKPOINT_MIN_RESPONSE_BODY: Final[PactBody] = pact.Like("204 string")
 PUT_CHECKPOINTS_MIN_REQUEST_BODY = {
-        "data": {
-            "attributes": {
-                "checkpoint_config": OrderedDict(
-                    [
-                        ("name", "my_checkpoint"),
-                        ("config_version", 1.0),
-                        ("template_name", None),
-                        ("module_name", "great_expectations.checkpoint"),
-                        ("class_name", "Checkpoint"),
-                        ("run_name_template", None),
-                        ("expectation_suite_name", None),
-                        (
-                            "action_list",
-                            [
-                                {
-                                    "name": "store_validation_result",
-                                    "action": {
-                                        "class_name": "StoreValidationResultAction"
-                                    },
+    "data": {
+        "attributes": {
+            "checkpoint_config": OrderedDict(
+                [
+                    ("name", "my_checkpoint"),
+                    ("config_version", 1.0),
+                    ("template_name", None),
+                    ("module_name", "great_expectations.checkpoint"),
+                    ("class_name", "Checkpoint"),
+                    ("run_name_template", None),
+                    ("expectation_suite_name", None),
+                    (
+                        "action_list",
+                        [
+                            {
+                                "name": "store_validation_result",
+                                "action": {"class_name": "StoreValidationResultAction"},
+                            },
+                            {
+                                "name": "store_evaluation_params",
+                                "action": {
+                                    "class_name": "StoreEvaluationParametersAction"
                                 },
-                                {
-                                    "name": "store_evaluation_params",
-                                    "action": {
-                                        "class_name": "StoreEvaluationParametersAction"
-                                    },
-                                }
-                            ],
-                        ),
-                        ("evaluation_parameters", {}),
-                        ("runtime_configuration", {}),
-                        (
-                            "validations",
-                            [
-                                {
-                                    "batch_request": {
-                                        "datasource_name": "My_Datasource",
-                                        "data_connector_name": "default_runtime_data_connector",
-                                        "data_asset_name": "My_data_asset",
-                                        "data_connector_query": {"index": 0},
-                                    },
-                                    "expectation_suite_name": "My_Expectation_Suite",
-                                    "id": "1d8bc783-6444-437c-b008-ccfb7c8ce964",
+                            },
+                        ],
+                    ),
+                    ("evaluation_parameters", {}),
+                    ("runtime_configuration", {}),
+                    (
+                        "validations",
+                        [
+                            {
+                                "batch_request": {
+                                    "datasource_name": "My_Datasource",
+                                    "data_connector_name": "default_runtime_data_connector",
+                                    "data_asset_name": "My_data_asset",
+                                    "data_connector_query": {"index": 0},
                                 },
-                            ],
-                        ),
-                        ("profilers", []),
-                        ("ge_cloud_id", "68058949-f9c2-47b1-922a-a89c23ffad99"),
-                        (
-                            "expectation_suite_ge_cloud_id",
-                            "3705d38a-0eec-4bd8-9956-fdb34df924b6",
-                        ),
-                    ]
-                )
-            },
-            "type": "checkpoint",
-        }
+                                "expectation_suite_name": "My_Expectation_Suite",
+                                "id": "1d8bc783-6444-437c-b008-ccfb7c8ce964",
+                            },
+                        ],
+                    ),
+                    ("profilers", []),
+                    ("ge_cloud_id", "68058949-f9c2-47b1-922a-a89c23ffad99"),
+                    (
+                        "expectation_suite_ge_cloud_id",
+                        "3705d38a-0eec-4bd8-9956-fdb34df924b6",
+                    ),
+                ]
+            )
+        },
+        "type": "checkpoint",
+    }
 }
 
 GET_CHECKPOINTS_MIN_RESPONSE_BODY: Final[dict] = {
