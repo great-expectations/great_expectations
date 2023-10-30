@@ -40,7 +40,7 @@ def datasource(
     datasource_name = f"i{uuid.uuid4().hex}"
     original_base_dir = base_dir
     updated_base_dir = (
-        base_dir.parent
+        pathlib.Path.cwd()
     )  # Any arbitrary dir that exists for purposes of test_connection
 
     datasource = context.sources.add_pandas_filesystem(
