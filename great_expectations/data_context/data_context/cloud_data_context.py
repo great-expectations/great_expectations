@@ -226,7 +226,7 @@ class CloudDataContext(SerializableDataContext):
         )
         if context_root_dir is None:
             context_root_dir = os.getcwd()  # noqa: PTH109
-            logger.info(
+            logger.debug(
                 f'context_root_dir was not provided - defaulting to current working directory "'
                 f'{context_root_dir}".'
             )

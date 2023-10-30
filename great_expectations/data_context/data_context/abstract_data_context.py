@@ -4148,7 +4148,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)
         usage_stats_enabled: bool = self._is_usage_stats_enabled()
         if not usage_stats_enabled:
-            logger.info(
+            logger.debug(
                 "Usage statistics is disabled globally. Applying override to project_config."
             )
             config_with_global_config_overrides.anonymous_usage_statistics.enabled = (
@@ -4179,7 +4179,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 {"usage_statistics_url": global_usage_statistics_url}
             )
             if not usage_statistics_url_errors:
-                logger.info(
+                logger.debug(
                     "usage_statistics_url is defined globally. Applying override to project_config."
                 )
                 config_with_global_config_overrides.anonymous_usage_statistics.usage_statistics_url = (
@@ -5450,7 +5450,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _load_fluent_config(self, config_provider: _ConfigurationProvider) -> GxConfig:
         """Called at beginning of DataContext __init__ after config_providers init."""
-        logger.info(
+        logger.debug(
             f"{self.__class__.__name__} has not implemented `_load_fluent_config()` returning empty `GxConfig`"
         )
         return GxConfig(fluent_datasources=[])
