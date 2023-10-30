@@ -512,13 +512,6 @@ class _SourceFactories:
                 datasource_type,
             )
 
-            # preserve any pre-existing id for usage with cloud
-            id_: uuid.UUID | None = getattr(
-                self._data_context.datasources.get(datasource_name), "id", None
-            )
-            if id_:
-                updated_datasource.id = id_
-
             updated_datasource._data_context = self._data_context
             updated_datasource.test_connection()
             return_obj = self._data_context._update_fluent_datasource(
@@ -566,13 +559,6 @@ class _SourceFactories:
             self._validate_current_datasource_type(
                 datasource_name, datasource_type, raise_if_none=False
             )
-
-            # preserve any pre-existing id for usage with cloud
-            id_: uuid.UUID | None = getattr(
-                self._data_context.datasources.get(datasource_name), "id", None
-            )
-            if id_:
-                new_datasource.id = id_
 
             new_datasource._data_context = self._data_context
             new_datasource.test_connection()

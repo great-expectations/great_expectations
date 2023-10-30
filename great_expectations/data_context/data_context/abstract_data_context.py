@@ -816,6 +816,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         updated_datasource._rebuild_asset_data_connectors()
 
+        # preserve any pre-existing id for usage with cloud
+        existing_datasource = self.datasources.get(datasource_name)
+        id_: uuid.UUID | None = getattr(existing_datasource, "id", None)
+        if id_:
+            updated_datasource.id = id_
+
         updated_datasource = self.datasources.set_datasource(
             name=datasource_name, ds=updated_datasource
         )
