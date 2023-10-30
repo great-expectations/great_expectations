@@ -48,7 +48,7 @@ When you create your how-to guide, you can make the following assumptions:
 
 - The user has a working deployment of Great Expectations.
 
-- The user is already familiar with Great Expectations core concepts including Expectations, Data Contexts, Validation, and Datasources.
+- The user is already familiar with Great Expectations core concepts including Expectations, Data Contexts, Validation, and Data Sources.
 
 - The user is familiar with the application being integrated with Great Expectations. For example, if you’re creating a how-to for configuring a Snowflake Data Source, you don’t need to provide a detailed explanation of Snowflake or its core concepts.
 

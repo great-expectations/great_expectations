@@ -517,7 +517,6 @@ class CloudDataContext(SerializableDataContext):
 
         return DataContextConfig(**self.config_provider.substitute_config(config))
 
-    @override
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
@@ -606,6 +605,7 @@ class CloudDataContext(SerializableDataContext):
     ) -> bool:
         ...
 
+    @public_api
     @override
     def delete_expectation_suite(
         self,
@@ -741,7 +741,7 @@ class CloudDataContext(SerializableDataContext):
     def add_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
-        config_version: int | float = 1.0,  # noqa: PYI041
+        config_version: float = 1.0,
         template_name: str | None = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: str = "Checkpoint",
@@ -887,19 +887,6 @@ class CloudDataContext(SerializableDataContext):
             resource_name=name,
         )
 
-    @override
-    def _determine_key_for_profiler_save(
-        self, name: str, id: Optional[str]
-    ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
-        """
-        Note that this explicitly overriding the `AbstractDataContext` helper method called
-        in `self.save_profiler()`.
-
-        The only difference here is the creation of a Cloud-specific `GXCloudIdentifier`
-        instead of the usual `ConfigurationIdentifier` for `Store` interaction.
-        """
-        return GXCloudIdentifier(resource_type=GXCloudRESTResource.PROFILER, id=id)
-
     @classmethod
     def _load_cloud_backed_project_config(
         cls,
@@ -941,28 +928,16 @@ class CloudDataContext(SerializableDataContext):
         return expectation_suite
 
     @override
-    def _save_project_config(
-        self, _fds_datasource: FluentDatasource | None = None
-    ) -> FluentDatasource | None:
+    def _save_project_config(self) -> None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
 
         Explicitly override base class implementation to retain legacy behavior.
         """
-        # 042723 kilo59
-        # Currently CloudDataContext and FileDataContext diverge in how FDS are persisted.
-        # FileDataContexts don't use the DatasourceStore at all to save or hydrate FDS configs.
-        # CloudDataContext does use DatasourceStore in order to make use of the Cloud http clients.
-        # The intended future state is for a new FluentDatasourceStore that can fully encapsulate
-        # the different requirements for FDS vs BDS.
-        # At which time `_save_project_config` will revert to being a no-op operation on the CloudDataContext.
-        if _fds_datasource:
-            return self._datasource_store.set(key=None, value=_fds_datasource)
-        else:
-            logger.debug(
-                "CloudDataContext._save_project_config() has no `fds_datasource` to update"
-            )
-            return None
+        logger.debug(
+            "CloudDataContext._save_project_config() was called. Base class impl was override to be no-op to retain "
+            "legacy behavior."
+        )
 
     @override
     def _view_validation_result(self, result: CheckpointResult) -> None:
@@ -977,7 +952,6 @@ class CloudDataContext(SerializableDataContext):
         self,
         name: str | None = None,
         initialize: bool = True,
-        save_changes: bool | None = None,
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
@@ -988,7 +962,6 @@ class CloudDataContext(SerializableDataContext):
         return super()._add_datasource(
             name=name,
             initialize=initialize,
-            save_changes=save_changes,
             datasource=datasource,
             **kwargs,
         )

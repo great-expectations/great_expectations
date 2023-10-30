@@ -2,6 +2,8 @@
 sidebar_label: 'Manage Data Assets'
 title: 'Manage Data Assets'
 description: Create and manage Data Assets in GX Cloud.
+toc_min_heading_level: 2
+toc_max_heading_level: 2
 ---
 
 A Data Asset is a collection of records that you create when you connect to your Data Source. When you connect to your Data Source, you define a minimum of one Data Asset. You use these Data Assets to create the Batch Requests that select the data that is provided to your Expectations.
@@ -12,14 +14,14 @@ To learn more about Data Assets, see [Data Asset](../../terms/data_asset.md).
 
 - You have a [GX Cloud Beta account](https://greatexpectations.io/cloud).
 
-- You have [set up your environment](../set_up_gx_cloud.md) including setting the `GX_CLOUD_SNOWFLAKE_PASSWORD` environment variable. 
+- You have [set up GX Cloud](../set_up_gx_cloud.md) including setting the `GX_CLOUD_SNOWFLAKE_PASSWORD` environment variable, and the GX Agent is running. 
 
-- You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with `ACCOUNTADMIN` access.
+- You have a [Snowflake account](https://docs.snowflake.com/en/user-guide-admin) with USAGE privileges on the table, database, and schema you are validating, and you know your password.
 
 
 ## Create a Data Asset
 
-Create a Data Asset to define the data you want GX Cloud to access. Currently, the GX Cloud user interface is configured for Snowflake. To connect to Data Assets on another Data Source, see [Connect to source data](https://deploy-preview-8760.docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_lp) in the GX OSS documentation. 
+Create a Data Asset to define the data you want GX Cloud to access. Currently, the GX Cloud user interface is configured for Snowflake. To connect to Data Assets on another Data Source, see [Connect to a Data Source](https://deploy-preview-8760.docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_lp) in the GX OSS documentation. 
 
 1. In GX Cloud, click **Data Assets** > **New Asset**.
 
@@ -62,6 +64,36 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 8. Click **Finish**.
 
 9. Create an Expectation. See [Create an Expectation](/docs/cloud/expectations/manage_expectations#create-an-expectation).
+
+## View Data Asset metrics
+
+Data Asset metrics provide you with insight into the data you can use for your data validations. 
+
+1. In GX Cloud, click **Data Assets** and then select a Data Asset in the **Data Assets** list.
+
+2. Click the **Overview** tab.
+
+3. Select one of the following options: 
+
+    - If you have not previously generated Data Asset metrics, click **Fetch Metrics**. 
+
+    - If you previously generated Data Asset metrics, click **Refresh** to refresh the metrics.
+
+### Available Data Asset metrics
+
+The following table lists the available Data Asset metrics.
+
+| Column                                   | Description                                               | 
+|------------------------------------------|-----------------------------------------------------------|
+| **Row Count**                            | The number of rows within a Data Asset.                   | 
+| **Column**                               | A column within your Data Asset.                          | 
+| **Type**                                 | The data storage type in the Data Asset column.           | 
+| **Min**                                  | For numeric columns the lowest value in the column.       | 
+| **Max**                                  | For numeric columns, the highest value in the column.     | 
+| **Mean**                                 | For numeric columns, the average value with the column.<br/> This is determined by dividing the sum of all values in the Data Asset by the number of values.  |
+| **Median**                                 | For numeric columns, the value in the middle of a data set.<br/> 50% of the data within the Data Asset has a value smaller or equal to the median, and 50% of the data within the Data Asset has a value that is higher or equal to the median.  |
+| **Null %**                                | The percentage of missing values in a column.             |
+
 
 ## Edit a Data Asset
 

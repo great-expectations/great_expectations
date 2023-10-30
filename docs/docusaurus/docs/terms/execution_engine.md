@@ -14,13 +14,13 @@ Data is always viewed through the lens of an Execution Engine in Great Expectati
 
 ## Relationship to other objects
 
-Execution Engines are components of <TechnicalTag relative="../" tag="datasource" text="Datasources" />.  They accept <TechnicalTag relative="../" tag="batch_request" text="Batch Requests" /> and deliver Batches.  The Execution Engine is an underlying component of the Data Source, and when you interact with the Data Source it will handle the Execution Engine for you.
+Execution Engines are components of <TechnicalTag relative="../" tag="datasource" text="Data Sources" />.  They accept <TechnicalTag relative="../" tag="batch_request" text="Batch Requests" /> and deliver Batches.  The Execution Engine is an underlying component of the Data Source, and when you interact with the Data Source it will handle the Execution Engine for you.
 
 ## Use cases
 
 You define the Execution Engine that you want to use to process data to compute Metrics in the Data Source configuration.  After you define the Execution Engine, you don't need to interact with it because the Data Source it is configured for uses it automatically.
 
-If a <TechnicalTag relative="../" tag="profiler" text="Profiler" /> is used to create Expectations, or if you use the [interactive workflow for creating Expectations](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), an Execution Engine will be involved as part of the Data Source used to provide data from a source data system for introspection.
+If you use the [interactive workflow for creating Expectations](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), an Execution Engine and the Data Source provide the data for introspection.
 
 When a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> Validates data, it uses a Data Source (and therefore an Execution Engine) to execute one or more Batch Requests and acquire the data that the Validation is run on.
 
@@ -28,7 +28,7 @@ When creating Custom Expectations and Metrics, often Execution Engine-specific l
 
 ## Standardized data and Expectations
 
-Execution engines handle the interactions with the source data.  They also wrap data from those source data systems with metadata that allows Great Expectations to read it regardless of its native format. Additionally, Execution Engines enable the calculations of Metrics used by Expectations so that they can operate in a format appropriate to their associated source data system.  Because of this, the same Expectations can be used to validate data from different Datasources, even if those Datasources interact with source data systems so different in nature that they require different Execution Engines to access their data. 
+Execution engines handle the interactions with the Data Source.  They also wrap data from the Data Source with metadata that allows Great Expectations to read it regardless of its native format. Additionally, Execution Engines enable the calculations of Metrics used by Expectations so that they can operate in a format appropriate to their associated Data Source.  Because of this, the same Expectations can be used to validate data from different Data Sources, even if those Data Sources interact with Data Sources so different in nature that they require different Execution Engines to access their data. 
 
 ## Deferred Metrics
 

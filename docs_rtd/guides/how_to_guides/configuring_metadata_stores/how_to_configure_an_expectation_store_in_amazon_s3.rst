@@ -184,7 +184,7 @@ Steps
                 store_backend:
                     class_name: TupleS3StoreBackend
                     bucket: '<your_s3_bucket_name>'
-                    prefix: '<your_s3_bucket_folder_name>'  
+                    prefix: '<your_s3_bucket_folder_name>'
 
 
         6. **Confirm that Expectations can be accessed from Amazon S3 by running** ``great_expectations --v3-api suite list``.

@@ -4,7 +4,7 @@ title: 'Set up GX Cloud'
 description: Set up GX Cloud.
 ---
 
-To get the most out of GX Cloud, you'll need to request a GX Cloud Beta account, install GX Cloud, generate and record access tokens, set environment variables, and then start the GX Cloud agent.
+To get the most out of GX Cloud, you'll need to request a GX Cloud Beta account, generate and record access tokens, set environment variables, and then install and start the GX Cloud agent. If you're using Snowflake, see [Quickstart for GX Cloud and Snowflake](/docs/cloud/quickstarts/snowflake_quickstart).
 
 ## Request a GX Cloud Beta account
 
@@ -25,19 +25,7 @@ To get the most out of GX Cloud, you'll need to request a GX Cloud Beta account,
 
 2. Download and install pip. See the [pip documentation](https://pip.pypa.io/en/stable/cli/pip/).
 
-3. Run the following command in an empty base directory inside a Python virtual environment to install GX Cloud and its dependencies:
-
-    ```bash title="Terminal input"
-    pip install 'great_expectations[cloud,snowflake]'
-    ```
-
-    It can take several minutes for the installation to complete.
-
-    If you've previously installed GX Cloud, run the following command to upgrade to the latest version:
-
-    ```bash title="Terminal input"
-    pip install 'great_expectations[cloud,snowflake]' --upgrade
-    ```
+3. Download and install Docker. See [Get Docker](https://docs.docker.com/get-docker/).
 
 ## Get your user access token and organization ID
 
@@ -67,38 +55,25 @@ You'll need your user access token and organization ID to set your environment v
 
 Environment variables securely store your GX Cloud access credentials. The GX Cloud agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. 
 
-1. Set the following environment variables:
+Currently, the GX Cloud user interface is configured for Snowflake and this procedure assumes you have a Snowflake Data Source. If you don't have a Snowflake Data Source, you won't be able to connect to Data Assets, create Expectations and Expectation Suites, run Validations, or create Checkpoints. 
 
-    - `GX_CLOUD_ACCESS_TOKEN` - The user access token you generated previously.
-    
-    - `GX_CLOUD_ORGANIZATION_ID` - The Organization ID you copied previously.
+1. Start the Docker Engine.
 
-    To set the environment variables, see the documentation specific to your operating system. 
+2. Run the following code to set the `GX_CLOUD_ACCESS_TOKEN`, `GX_CLOUD_ORGANIZATION_ID`, and `GX_CLOUD_SNOWFLAKE_PASSWORD` environment variables, install GX Cloud and its dependencies, and start the GX Cloud agent:
 
-2. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
-
-3. Run the following code to start the GX Cloud agent:
-    
     ```bash title="Terminal input"
-    gx-agent
-    ```
+    docker run --rm -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" -e GX_CLOUD_SNOWFLAKE_PASSWORD="<snowflake_password>" greatexpectations/agent
+    ```      
+    Replace `user_access_token` and `organization_id` with the values you copied previously, and `snowflake_password` with your own value.
+
+3. Optional. If you created a temporary file to record your user access token and Organization ID, delete it.
+
+4. Optional. Run `docker ps` or open Docker Desktop to confirm the agent is running.
 
     If you stop the GX Cloud agent, close the terminal, and open a new terminal you'll need to set the environment variables again.
 
     To edit an environment variable, stop the GX Cloud agent, edit the environment variable, save the change, and then restart the GX Cloud agent.
 
-## Troubleshoot
+## Next steps
 
-Use the following information to help resolve issues with the GX Cloud agent installation.
-
-**Error: `great_expectations.agent.agent.GXAgentError: Missing or badly formed environment variable`**
-
-Confirm the `GX_CLOUD_ACCESS_TOKEN` and `GX_CLOUD_ORGANIZATION_ID` environment variables are set and available in your local environment. For example, on Unix systems, you can run `echo $GX_CLOUD_ORGANIZATION_ID` to confirm that your organization ID is present and set.
-
-**Error: `pika not found`**
-
-Run the following command:
-
-```bash title="Terminal input"
-    pip install 'great_expectations[cloud,snowflake]'
-```
+ - [Create a Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset)

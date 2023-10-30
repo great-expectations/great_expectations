@@ -31,7 +31,7 @@ checkpoint.run()
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/reference/glossary/checkpoints.py save">
-context.add_checkpoint(checkpoint=checkpoint)
+context.add_or_update_checkpoint(checkpoint=checkpoint)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/reference/glossary/checkpoints.py retrieve_and_run">

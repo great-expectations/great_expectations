@@ -4,6 +4,47 @@
 Changelog
 #########
 
+0.17.23
+-----------------
+* [FEATURE] Unexpected index list with/without values - New parameter in result_format ([#8785](https://github.com/great-expectations/great_expectations/pull/8785)) (thanks @MMoussabbih)
+* [DOCS] Update Cloud Docs to Include Docker Methodology ([#8820](https://github.com/great-expectations/great_expectations/pull/8820))
+* [DOCS] Updated language & code refs for Databricks Getting Started ([#8751](https://github.com/great-expectations/great_expectations/pull/8751))
+* [DOCS] Remove all mentions of profilers in public docs ([#8825](https://github.com/great-expectations/great_expectations/pull/8825))
+* [DOCS] Create New Content for Column Descriptive Metrics in GX Cloud ([#8814](https://github.com/great-expectations/great_expectations/pull/8814))
+* [DOCS] Document GX Cloud Data Assistant Functionality ([#8829](https://github.com/great-expectations/great_expectations/pull/8829))
+* [DOCS] Update set_up_gx_cloud.md ([#8832](https://github.com/great-expectations/great_expectations/pull/8832))
+* [DOCS] Update Manage Expectation Suites in GX Cloud Docs ([#8842](https://github.com/great-expectations/great_expectations/pull/8842))
+* [DOCS] Remove Troubleshooting Entry from GX Cloud TOC ([#8846](https://github.com/great-expectations/great_expectations/pull/8846))
+* [MAINTENANCE] Column Descriptive Metrics: Don't add empty string for type ([#8830](https://github.com/great-expectations/great_expectations/pull/8830))
+* [MAINTENANCE] Add cloud api via docker compose for testing ([#8803](https://github.com/great-expectations/great_expectations/pull/8803))
+* [MAINTENANCE] Remove public_api decorators from RBP ([#8812](https://github.com/great-expectations/great_expectations/pull/8812))
+* [MAINTENANCE] mypy 1.6 ([#8837](https://github.com/great-expectations/great_expectations/pull/8837))
+* [MAINTENANCE] Delete legacy `BasicSuiteBuilderProfiler` ([#8808](https://github.com/great-expectations/great_expectations/pull/8808))
+* [MAINTENANCE] Run ci-is-on-main-repo in merge queue. ([#8839](https://github.com/great-expectations/great_expectations/pull/8839))
+* [MAINTENANCE] Add pact contract testing with GX Cloud ([#8831](https://github.com/great-expectations/great_expectations/pull/8831))
+* [MAINTENANCE] Allow re-publishing Pact on same commit ([#8851](https://github.com/great-expectations/great_expectations/pull/8851))
+* [CONTRIB] Also run CI when a PR becomes Ready for Review ([#8833](https://github.com/great-expectations/great_expectations/pull/8833))
+
+0.17.22
+-----------------
+* [BUGFIX] Column Descriptive Metrics: Skip finding semantic type info for UNKNOWN columns ([#8815](https://github.com/great-expectations/great_expectations/pull/8815))
+* [BUGFIX] Column Descriptive Metrics: Convert table name to lowercase for snowflake ([#8817](https://github.com/great-expectations/great_expectations/pull/8817))
+* [BUGFIX] Improve datasource crud ([#8773](https://github.com/great-expectations/great_expectations/pull/8773))
+* [BUGFIX] Fix Snowflake `'connection_string'` `TestConnectionError` ([#8816](https://github.com/great-expectations/great_expectations/pull/8816))
+* [BUGFIX] Fix missing `config_provider` ([#8822](https://github.com/great-expectations/great_expectations/pull/8822))
+* [DOCS] Minor Syntax Update ([#8806](https://github.com/great-expectations/great_expectations/pull/8806))
+* [DOCS] Update docs to reference new `gx/` dir instead of `great_expectations/` ([#8717](https://github.com/great-expectations/great_expectations/pull/8717))
+* [MAINTENANCE] Remove `ge_cloud_mode` from `Store` ([#8747](https://github.com/great-expectations/great_expectations/pull/8747))
+* [MAINTENANCE] Bump urllib3 from 1.26.5 to 1.26.17 in /docs_rtd ([#8802](https://github.com/great-expectations/great_expectations/pull/8802))
+* [MAINTENANCE] Delete legacy `JsonSchemaProfiler` ([#8807](https://github.com/great-expectations/great_expectations/pull/8807))
+* [MAINTENANCE] Column Descriptive Metrics: Default to UNKNOWN if type is not found ([#8810](https://github.com/great-expectations/great_expectations/pull/8810))
+* [MAINTENANCE] Column Descriptive Metrics: Empty string instead of UNKNOWN if table column type introspection fails ([#8819](https://github.com/great-expectations/great_expectations/pull/8819))
+* [MAINTENANCE] Delete outdated context fixtures ([#8809](https://github.com/great-expectations/great_expectations/pull/8809))
+* [MAINTENANCE] Bump gitpython from 3.1.35 to 3.1.37 in /docs_rtd ([#8818](https://github.com/great-expectations/great_expectations/pull/8818))
+* [MAINTENANCE] Fix `docs-snippets` CI step ([#8827](https://github.com/great-expectations/great_expectations/pull/8827))
+* [CONTRIB] Updates to MulticolumnValuesSumValuesEqualToSingleColumn ([#8798](https://github.com/great-expectations/great_expectations/pull/8798)) (thanks @calvingdu)
+* [CONTRIB] New MulticolumnValuesProductEqualToSingleColumn Expectation ([#8799](https://github.com/great-expectations/great_expectations/pull/8799)) (thanks @calvingdu)
+
 0.17.21
 -----------------
 * [FEATURE] DataDocs Renderer for `ExpectMulticolumnSumToEqual` and `LikePattern` Expectations ([#8739](https://github.com/great-expectations/great_expectations/pull/8739))

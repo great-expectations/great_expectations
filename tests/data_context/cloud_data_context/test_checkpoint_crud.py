@@ -1,13 +1,11 @@
 import copy
-from typing import Callable, Optional, Tuple
+from typing import Callable, Tuple
 from unittest import mock
 
-import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint
-from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context import get_context
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
@@ -295,62 +293,6 @@ def test_cloud_backed_data_context_add_checkpoint(
 
     assert checkpoint.config.validations[1]["id"] == validation_id_2
     assert checkpoint.validations[1]["id"] == validation_id_2
-
-
-@pytest.mark.cloud
-def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
-    empty_cloud_data_context: CloudDataContext,
-    checkpoint_config: dict,
-    checkpoint_id: str,
-    mocked_post_response: Callable[[], MockResponse],
-    mocked_put_response: Callable[[], MockResponse],
-    mocked_get_response: Callable[[], MockResponse],
-    ge_cloud_base_url: str,
-    ge_cloud_organization_id: str,
-) -> None:
-    context = empty_cloud_data_context
-
-    with mock.patch(
-        "requests.Session.put", autospec=True, side_effect=mocked_put_response
-    ) as mock_put, mock.patch(
-        "requests.Session.get", autospec=True, side_effect=mocked_get_response
-    ) as mock_get:
-        checkpoint = context.add_checkpoint(
-            ge_cloud_id=checkpoint_id, **checkpoint_config
-        )
-
-        # Round trip through schema to mimic updates made during store serialization process
-        expected_checkpoint_config = checkpointConfigSchema.dump(
-            CheckpointConfig(**checkpoint_config)
-        )
-
-        # Always called by store after POST and PATCH calls
-        assert mock_get.call_count == 3
-        mock_get.assert_called_with(
-            mock.ANY,  # requests.Session object
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints",
-            params={"name": "oss_test_checkpoint"},
-        )
-
-        expected_checkpoint_config["ge_cloud_id"] = checkpoint_id
-
-        # Called during creation of `checkpoint` (which is `checkpoint_1` but updated)
-        mock_put.assert_called_once_with(
-            mock.ANY,  # requests.Session object
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
-            json={
-                "data": {
-                    "type": "checkpoint",
-                    "attributes": {
-                        "checkpoint_config": expected_checkpoint_config,
-                        "organization_id": ge_cloud_organization_id,
-                    },
-                    "id": checkpoint_id,
-                },
-            },
-        )
-
-    assert checkpoint.ge_cloud_id == checkpoint_id
 
 
 @pytest.mark.cloud
@@ -772,101 +714,6 @@ def test_cloud_backed_data_context_add_checkpoint_e2e(
         checkpoint.config.to_json_dict()
         == checkpoint_stored_in_cloud.config.to_json_dict()
     )
-
-
-@pytest.mark.xfail(
-    reason="GX Cloud E2E tests are currently failing due to a migration to a new CI environment",
-)
-@pytest.mark.e2e
-@pytest.mark.cloud
-def test_cloud_data_context_run_checkpoint_e2e():
-    """
-    What does this test do and why?
-
-    Tests the `run_checkpoint` method against the GX Cloud dev environment.
-    Note that this test relies on some prerequisite state (which has be configured
-    externally of this test).
-
-    For reference, the following scripts were run to:
-
-    === Set up the prerequisite Datasource ===
-    ```
-    datasource_yaml = '''
-    name: nathan_test_pandas_datasource
-    class_name: Datasource
-    execution_engine:
-        class_name: PandasExecutionEngine
-    data_connectors:
-        runtime_data_connector:
-            class_name: RuntimeDataConnector
-            batch_identifiers: ["test_identifier"]
-    '''
-
-    datasource = context.test_yaml_config(datasource_yaml)
-    datasource = context.add_datasource(datasource=datasource)
-    ```
-
-    === Set up the prerequisite Checkpoint ===
-    ```
-    batch_request = {
-        "datasource_name": "oss_test_pandas_datasource",
-        "data_connector_name": "runtime_data_connector",
-        "data_asset_name": "test_df",
-    }
-
-    config = {
-        "action_list": [
-            {
-                "action": {"class_name": "StoreValidationResultAction"},
-                "name": "store_validation_result",
-            },
-            {
-                "action": {"class_name": "StoreEvaluationParametersAction"},
-                "name": "store_evaluation_params",
-            },
-        ],
-        "batch_request": batch_request,
-        "class_name": "Checkpoint",
-        "config_version": 1.0,
-        "evaluation_parameters": {"table_row_count": 3},
-        "expectation_suite_name": "evaluation_parameters_rendering",
-        "module_name": "great_expectations.checkpoint",
-        "name": "OSS_E2E_run_checkpoint",
-    }
-
-    checkpoint = context.add_checkpoint(**config)
-    ```
-    """
-    context = get_context(cloud_mode=True)
-
-    checkpoint_name = "OSS_E2E_run_checkpoint"
-
-    cloud_id: Optional[str] = None
-    checkpoint_identifiers = context.list_checkpoints()
-    for identifier in checkpoint_identifiers:
-        if identifier.resource_name == checkpoint_name:
-            cloud_id = identifier.id
-            break
-
-    assert cloud_id, f"Could not find checkpoint '{checkpoint_name}' in Cloud"
-
-    test_df = pd.DataFrame(
-        {
-            "a": [1, 2, 3],
-            "b": [4, 5, 6],
-        }
-    )
-    # The datasource/data_connector/data_asset are all preconfigured in Cloud
-    batch_request = RuntimeBatchRequest(
-        datasource_name="oss_test_pandas_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="test_df",
-        runtime_parameters={"batch_data": test_df},
-        batch_identifiers={"test_identifier": "my_id"},
-    )
-
-    result = context.run_checkpoint(ge_cloud_id=cloud_id, batch_request=batch_request)
-    assert result.success
 
 
 @pytest.fixture

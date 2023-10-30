@@ -5,7 +5,7 @@ title: Add validation data or Expectation suites to a Checkpoint
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-Add validation data or <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> to an existing <TechnicalTag tag="checkpoint" text="Checkpoint" /> to aggregate individual validations across Expectation Suites or <TechnicalTag tag="datasource" text="Datasources" /> into a single Checkpoint. You can also use this process to <TechnicalTag tag="validation" text="Validate" /> multiple source files before and after their ingestion into your data lake.
+Add validation data or <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> to an existing <TechnicalTag tag="checkpoint" text="Checkpoint" /> to aggregate individual validations across Expectation Suites or <TechnicalTag tag="datasource" text="Data Sources" /> into a single Checkpoint. You can also use this process to <TechnicalTag tag="validation" text="Validate" /> multiple source files before and after their ingestion into your data lake.
 
 ## Prerequisites
 

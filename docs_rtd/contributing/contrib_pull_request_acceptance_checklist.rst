@@ -84,7 +84,7 @@ Both contributors and reviewers should follow this checklist:
 
     * The tests included in the module must pass for the PR to be approved.
 
- * Verify that changes to existing renderers (or new renderers) make sense--the language needs to accurately describe the semantics and behavior of the Expectation. 
+ * Verify that changes to existing renderers (or new renderers) make sense--the language needs to accurately describe the semantics and behavior of the Expectation.
 
 * Clarification about imports, renderers
     * At this time, unused module imports and commented out renderer code from the template should not be removed if left in by the contributor. However if the contributor has already removed it, please do not put it back in.

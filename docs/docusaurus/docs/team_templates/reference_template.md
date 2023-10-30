@@ -38,6 +38,6 @@ title: <!-- Add the topic title here -->
 
 <!-- List the secondary resources that can help a user get a better understanding of the subject matter discussed in this reference. Don't add an introductory statement for the list. What follows is an example provided for your reference. If there aren't any secondary resources, remove this section.-->
 
-- [Install Great Expectations with source data system dependencies](../guides/setup/installation/install_gx.md)
+- [Install Great Expectations with Data Source dependencies](../guides/setup/installation/install_gx.md)
 - [Instantiate a Data Context on an EMR Spark Cluster](../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
 - [Use Great Expectations with Databricks](../tutorials/getting_started/how_to_use_great_expectations_in_databricks.md)
