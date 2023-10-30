@@ -21,38 +21,32 @@ def datasource(
     context: CloudDataContext,
 ) -> Iterator[SparkDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
-    my_hex = f"i{uuid.uuid4().hex}"
-    batch_metadata = {"my_hex": my_hex}
     datasource = context.sources.add_spark(
         name=datasource_name,
-        batch_metadata=batch_metadata,
+        persist=True,
     )
-    batch_metadata = {"my_hex": f"i{uuid.uuid4().hex}"}
-    datasource.batch_metadata = batch_metadata
+    datasource.persist = False
     datasource = context.sources.add_or_update_spark(datasource=datasource)  # type: ignore[call-arg]
     assert (
-        datasource.batch_metadata == batch_metadata
-    ), "The batch_metadata was not updated in the previous method call."
-    batch_metadata = {"my_hex": f"i{uuid.uuid4().hex}"}
-    datasource.batch_metadata = batch_metadata
+        datasource.persist is False
+    ), "The datasource was not updated in the previous method call."
+    datasource.persist = True
     datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
     assert (
-        datasource.batch_metadata == batch_metadata
-    ), "The batch_metadata was not updated in the previous method call."
-    batch_metadata = {"my_hex": f"i{uuid.uuid4().hex}"}
-    datasource.batch_metadata = batch_metadata
+        datasource.persist is True
+    ), "The datasource was not updated in the previous method call."
+    datasource.persist = False
     datasource_dict = datasource.dict()
     datasource = context.sources.add_or_update_spark(**datasource_dict)
     assert (
-        datasource.batch_metadata == batch_metadata
-    ), "The batch_metadata was not updated in the previous method call."
-    batch_metadata = {"my_hex": f"i{uuid.uuid4().hex}"}
-    datasource.batch_metadata = batch_metadata
+        datasource.persist is False
+    ), "The datasource was not updated in the previous method call."
+    datasource.persist = True
     _ = context.add_or_update_datasource(**datasource_dict)
     datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
     assert (
-        datasource.batch_metadata == batch_metadata
-    ), "The batch_metadata was not updated in the previous method call."
+        datasource.persist is True
+    ), "The datasource was not updated in the previous method call."
     yield datasource
     # PP-692: this doesn't work due to a bug
     # calling delete_datasource() will fail with:
