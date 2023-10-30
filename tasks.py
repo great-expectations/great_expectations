@@ -1103,6 +1103,10 @@ def ci_tests(  # noqa: PLR0913
     ctx.run(" ".join(pytest_cmd), echo=True, pty=pty)
 
 
+class EnvVars(BaseSettings):
+    ci: Optional[bool] = None
+
+
 @invoke.task(
     aliases=("services",),
     help={"pty": _PTY_HELP_DESC},
@@ -1126,10 +1130,6 @@ def service(
         The main reason this is a separate task is to make it easy to start services
         when running tests locally.
     """
-
-    class EnvVars(BaseSettings):
-        ci: Optional[bool] = None
-
     service_names = set(names)
 
     if markers:
@@ -1140,7 +1140,6 @@ def service(
         print(f"  Starting services for {', '.join(service_names)} ...")
         for service_name in service_names:
             cmds = []
-            EnvVars.update_forward_refs()
             if service_name == "mercury" and EnvVars().ci is not True:
                 cmds.extend(
                     [
