@@ -45,8 +45,8 @@ def datasource(
     ), "The datasource was not updated in the previous method call."
     datasource_name = f"i{uuid.uuid4().hex}"
     datasource.name = datasource_name
-    _ = context.add_or_update_datasource(**datasource_dict)
-    datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
+    datasource = context.add_or_update_datasource(**datasource_dict)
+    # datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
     assert (
         datasource.name == datasource_name
     ), "The datasource was not updated in the previous method call."
