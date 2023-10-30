@@ -21,10 +21,10 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, Final, NamedTuple, Optional, Union
 
 import invoke
+from pydantic.v1 import BaseSettings  # noqa: TID251
 
 from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
 from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
-from great_expectations.compatibility.pydantic import BaseSettings
 
 if TYPE_CHECKING:
     from invoke.context import Context
