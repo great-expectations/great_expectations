@@ -21,35 +21,38 @@ def datasource(
     context: CloudDataContext,
 ) -> Iterator[SparkDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
+    my_hex = f"i{uuid.uuid4().hex}"
+    batch_metadata = {"my_hex": my_hex}
     datasource = context.sources.add_spark(
         name=datasource_name,
+        batch_metadata=batch_metadata,
     )
-    datasource_name = f"i{uuid.uuid4().hex}"
-    datasource.name = datasource_name
+    batch_metadata = {"my_hex": f"i{uuid.uuid4().hex}"}
+    datasource.batch_metadata = batch_metadata
     datasource = context.sources.add_or_update_spark(datasource=datasource)  # type: ignore[call-arg]
     assert (
-        datasource.name == datasource_name
-    ), "The datasource was not updated in the previous method call."
-    datasource_name = f"i{uuid.uuid4().hex}"
-    datasource.name = datasource_name
+        datasource.batch_metadata == batch_metadata
+    ), "The batch_metadata was not updated in the previous method call."
+    batch_metadata = {"my_hex": f"i{uuid.uuid4().hex}"}
+    datasource.batch_metadata = batch_metadata
     datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
     assert (
-        datasource.name == datasource_name
-    ), "The datasource was not updated in the previous method call."
-    datasource_name = f"i{uuid.uuid4().hex}"
-    datasource.name = datasource_name
+        datasource.batch_metadata == batch_metadata
+    ), "The batch_metadata was not updated in the previous method call."
+    batch_metadata = {"my_hex": f"i{uuid.uuid4().hex}"}
+    datasource.batch_metadata = batch_metadata
     datasource_dict = datasource.dict()
     datasource = context.sources.add_or_update_spark(**datasource_dict)
     assert (
-        datasource.name == datasource_name
-    ), "The datasource was not updated in the previous method call."
-    datasource_name = f"i{uuid.uuid4().hex}"
-    datasource.name = datasource_name
-    datasource = context.add_or_update_datasource(**datasource_dict)
-    # datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
+        datasource.batch_metadata == batch_metadata
+    ), "The batch_metadata was not updated in the previous method call."
+    batch_metadata = {"my_hex": f"i{uuid.uuid4().hex}"}
+    datasource.batch_metadata = batch_metadata
+    _ = context.add_or_update_datasource(**datasource_dict)
+    datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
     assert (
-        datasource.name == datasource_name
-    ), "The datasource was not updated in the previous method call."
+        datasource.batch_metadata == batch_metadata
+    ), "The batch_metadata was not updated in the previous method call."
     yield datasource
     # PP-692: this doesn't work due to a bug
     # calling delete_datasource() will fail with:
