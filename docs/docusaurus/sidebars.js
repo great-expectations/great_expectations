@@ -8,6 +8,23 @@ module.exports = {
       items: [
         {
           type: 'category',
+          label: 'GX Cloud Architecture and Deployment Patterns',
+          link: { type: 'doc', id: 'cloud/gx_cloud_architecture_and_deployment_patterns' },
+          items: [
+            {
+              type: 'link',
+              label: 'Architecture',
+              href: '/docs/cloud/gx_cloud_architecture_and_deployment_patterns#architecture',
+            },
+            {
+              type: 'link',
+              label: 'Deployment Patterns',
+              href: '/docs/cloud/gx_cloud_architecture_and_deployment_patterns#deployment-patterns',
+            }
+          ]
+        },
+        {
+          type: 'category',
           label: 'Set up GX Cloud',
           link: { type: 'doc', id: 'cloud/set_up_gx_cloud' },
           items: [

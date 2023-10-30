@@ -15,6 +15,7 @@ If you're eager to try GX Cloud, and you haven't requested a GX Cloud Beta accou
 
 
 <LinkCardGrid>
+  <LinkCard topIcon label="GX Cloud Architecture and Deployment Patterns" description="Learn more about the components of GX Cloud architecture and deployment patterns." href="/docs/cloud/gx_cloud_architecture_and_deployment_patterns" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Set up GX Cloud" description="To get the most from GX Cloud, configure your environment first." href="/docs/cloud/set_up_gx_cloud" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Quickstarts" description="Quickly connect GX Cloud to Data Assets stored on your Snowflake instance." href="/docs/cloud/quickstarts/snowflake_quickstart" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage Data Assets" description="Create, edit, or delete a Data Asset." href="/docs/cloud/data_assets/manage_data_assets" icon="/img/small_gx_logo.png" />
