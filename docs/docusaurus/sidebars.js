@@ -1,6 +1,6 @@
 module.exports = {
   docs: [
-    'intro',
+    'gx_welcome',
     {
       type: 'category',
       label: 'GX Cloud',
