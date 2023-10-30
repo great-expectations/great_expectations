@@ -7,82 +7,56 @@ import pandas as pd
 import pytest
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.datasource.fluent.pandas_datasource import DataFrameAsset
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.core import ExpectationSuite
     from great_expectations.data_context import CloudDataContext
-    from great_expectations.datasource.fluent import BatchRequest, SparkDatasource
-    from great_expectations.datasource.fluent.spark_datasource import DataFrameAsset
+    from great_expectations.datasource.fluent import BatchRequest, PandasDatasource
+
+
+@pytest.fixture
+def pandas_test_df() -> pd.DataFrame:
+    d = {
+        "string": ["a", "b", "c"],
+        "datetime": [
+            pd.to_datetime("2020-01-01"),
+            pd.to_datetime("2020-01-02"),
+            pd.to_datetime("2020-01-03"),
+        ],
+    }
+    df = pd.DataFrame(data=d)
+    return df
 
 
 @pytest.fixture
 def datasource(
     context: CloudDataContext,
-) -> Iterator[SparkDatasource]:
+) -> Iterator[PandasDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
-    datasource = context.sources.add_spark(
+    datasource = context.sources.add_pandas(
         name=datasource_name,
-        persist=True,
     )
-    datasource.persist = False
-    datasource = context.sources.add_or_update_spark(datasource=datasource)  # type: ignore[call-arg]
-    assert (
-        datasource.persist is False
-    ), "The datasource was not updated in the previous method call."
-    datasource.persist = True
-    datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
-    assert (
-        datasource.persist is True
-    ), "The datasource was not updated in the previous method call."
-    datasource.persist = False
-    datasource_dict = datasource.dict()
-    datasource = context.sources.add_or_update_spark(**datasource_dict)
-    assert (
-        datasource.persist is False
-    ), "The datasource was not updated in the previous method call."
-    datasource.persist = True
-    datasource_dict = datasource.dict()
-    _ = context.add_or_update_datasource(**datasource_dict)
-    datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
-    assert (
-        datasource.persist is True
-    ), "The datasource was not updated in the previous method call."
+    assert datasource.name == datasource_name
     yield datasource
-    # PP-692: this doesn't work due to a bug
-    # calling delete_datasource() will fail with:
-    # Datasource is used by Checkpoint <LONG HASH>
-    # This is confirmed to be the default Checkpoint,
-    # but error message is not specific enough to know without additional inspection
-    # context.delete_datasource(datasource_name=datasource_name)
 
 
 @pytest.fixture
-def data_asset(datasource: SparkDatasource, table_factory) -> Iterator[DataFrameAsset]:
+def data_asset(datasource: PandasDatasource) -> Iterator[DataFrameAsset]:
     asset_name = f"i{uuid.uuid4().hex}"
-    _ = datasource.add_dataframe_asset(name=asset_name)
-    dataframe_asset = datasource.get_asset(asset_name=asset_name)
-    yield dataframe_asset
-    # PP-692: this doesn't work due to a bug
-    # calling delete_asset() will fail with:
-    # Cannot perform action because Asset is used by Checkpoint:
-    # end-to-end_snowflake_asset <SHORT HASH> - Default Checkpoint
-    # datasource.delete_asset(asset_name=asset_name)
+    _ = datasource.add_dataframe_asset(
+        name=asset_name,
+    )
+    data_asset = datasource.get_asset(asset_name=asset_name)
+    yield data_asset
 
 
 @pytest.fixture
 def batch_request(
-    data_asset: DataFrameAsset,
-    spark_session,
-    spark_df_from_pandas_df,
+    data_asset: DataFrameAsset, pandas_test_df: pd.DataFrame
 ) -> BatchRequest:
-    pandas_df = pd.DataFrame(
-        {
-            "name": [1, 2, 3, 4],
-        },
-    )
-    spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
-    return data_asset.build_batch_request(dataframe=spark_df)
+    return data_asset.build_batch_request(dataframe=pandas_test_df)
 
 
 @pytest.fixture
@@ -98,7 +72,7 @@ def expectation_suite(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
             kwargs={
-                "column": "name",
+                "column": "string",
                 "mostly": 1,
             },
         )
@@ -152,6 +126,51 @@ def checkpoint(
 
 
 @pytest.mark.cloud
+def test_datasource_crud(
+    context: CloudDataContext,
+):
+    datasource_name = f"i{uuid.uuid4().hex}"
+    # add_or_update
+    datasource = context.sources.add_or_update_pandas(
+        name=datasource_name,
+    )
+    assert datasource.name == datasource_name
+
+    # delete
+    _ = context.delete_datasource(datasource_name=datasource_name)
+
+    # get after delete
+    with pytest.raises(ValueError):
+        context.get_datasource(datasource_name=datasource_name)
+
+
+@pytest.mark.cloud
+def test_dataasset_crud(
+    context: CloudDataContext,
+):
+    # start with fresh datasource
+    datasource_name = f"i{uuid.uuid4().hex}"
+    datasource = context.sources.add_or_update_pandas(
+        name=datasource_name,
+    )
+    asset_name = f"i{uuid.uuid4().hex}"
+    _ = datasource.add_dataframe_asset(
+        name=asset_name,
+    )
+
+    # PP-692: this doesn't work due to a bug
+    # calling delete_datasource() will fail with:
+    # Datasource is used by Checkpoint <LONG HASH>
+    # This is confirmed to be the default Checkpoint,
+    # but error message is not specific enough to know without additional inspection
+    # delete
+    # datasource.delete_asset(asset_name=asset_name)
+    # get after delete
+    # with pytest.raises(ValueError):
+    #    _ = datasource.get_asset(asset_name=asset_name)
+
+
+@pytest.mark.cloud
 def test_interactive_validator(
     context: CloudDataContext,
     batch_request: BatchRequest,
@@ -165,7 +184,7 @@ def test_interactive_validator(
     )
     validator.head()
     validator.expect_column_values_to_not_be_null(
-        column="id",
+        column="datetime",
         mostly=1,
     )
     validator.save_expectation_suite()
