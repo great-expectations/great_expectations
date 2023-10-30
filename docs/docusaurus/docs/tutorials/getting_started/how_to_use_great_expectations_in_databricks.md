@@ -77,7 +77,7 @@ DBFS is a distributed file system mounted in a Databricks workspace and availabl
   ]}>
   <TabItem value="file">
 
-Run the following command with [dbutils](https://docs.databricks.com/dev-tools/databricks-utils.html) to copy existing example csv taxi data to your DBFS folder:
+Run the following command with [dbutils](https://docs.databricks.com/dev-tools/databricks-utils.html) to copy existing example `.csv` taxi data to your DBFS folder:
 
 ```python
 # Copy 3 months of data
@@ -213,13 +213,17 @@ Your Checkpoint contained an `UpdateDataDocsAction`, so your <TechnicalTag tag="
 
 Because you used the DBFS for your Data Docs store, you need to download your Data Docs locally to view them. If you use a different store, you can host your data docs in a place where they can be accessed directly by your organization. 
 
-Run the following [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html) command to download your data docs and open the local copy of `index.html` to view your updated Data Docs:
+If you have the [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html) installed and configured locally, run the following commands from your local terminal to download your data docs and open the local copy of `index.html` to view your updated Data Docs:
 
 ```bash
 databricks fs cp -r dbfs:/great_expectations/uncommitted/data_docs/local_site/ great_expectations/uncommitted/data_docs/local_site/
+
+cd great_expectations/uncommitted/data_docs/local_site
+
+open -a "<YOUR_PREFERRED_BROWSER_NAME_HERE>" index.html
 ```
 
-The `displayHTML` command is another option for displaying Data Docs in a Databricks notebook. There is a restriction, though, in that clicking a link in the displayed data documents returns an empty page. To view some validation results, use this method. For example:
+The `displayHTML` command is another option you can use to display Data Docs in a Databricks notebook. However, when you use this option, an empty page is returned when you click a link in the displayed data documents. To view validation results, use the following method:
 
 ```python 
 html = '/dbfs/great_expectations/uncommitted/data_docs/local_site/index.html'
@@ -230,5 +234,5 @@ displayHTML(data)
 
 ## Next steps
 
-Now that you've created and saved a Data Context, Data Source, Data Asset, Expectation Suite, and Checkpoint, see [Validate data by running a Checkpoint](https://docs.greatexpectations.io/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) 
+Now that you've created and saved a Data Context, Data Source, Data Asset, Expectation Suite, and Checkpoint, see [Validate data with Expectations and Checkpoints](https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint) 
 to create a script to run the Checkpoint without the need to recreate your Data Assets and Expectations. To move Databricks notebooks to production, see [Software Engineering Best Practices With Databricks Notebooks](https://www.databricks.com/blog/2022/06/25/software-engineering-best-practices-with-databricks-notebooks.html) from Databricks.

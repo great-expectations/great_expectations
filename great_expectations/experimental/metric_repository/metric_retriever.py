@@ -11,7 +11,8 @@ if TYPE_CHECKING:
 
 
 class MetricRetriever(abc.ABC):
-    # TODO: Docstrings
+    """A MetricRetriever is responsible for retrieving metrics for a batch of data."""
+
     def __init__(self, context: AbstractDataContext):
         self._context = context
 

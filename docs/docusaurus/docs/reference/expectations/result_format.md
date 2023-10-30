@@ -3,67 +3,66 @@ title: Result format
 ---
 
 
-The `result_format` parameter may be either a string or a dictionary which specifies the fields to return in `result`.
-  * The following string values are supported:
-    * `"BOOLEAN_ONLY"`, `"BASIC"`, `"SUMMARY"`, or `"COMPLETE"`. The default is `"SUMMARY"`. The behavior of each setting is described in the [examples](#examples) below.
-  * For dictionary usage, `result_format` may include the following keys:
-    * `result_format`: Sets the fields to return in result.
-    * `unexpected_index_column_names`: Defines columns that can be used to identify unexpected results, for example primary key (PK) column(s) or other columns with unique identifiers. Supports multiple column names as a list.
-    * `return_unexpected_index_query`: When running validations, a query (or a set of indices) will be returned that will
-      allow you to retrieve the full set of unexpected results including any columns identified in `unexpected_index_column_names`.  Setting this value to `False` will 
-      suppress the output (default is `True`).
-    * `partial_unexpected_count`: Sets the number of results to include in partial_unexpected_count, if applicable. If 
-      set to 0, this will suppress the unexpected counts.
-    * `include_unexpected_rows`: When running validations, this will return the entire row for each unexpected value in
-      dictionary form. When using `include_unexpected_rows`, you must explicitly specify `result_format` as well, and
-      `result_format` must be more verbose than `BOOLEAN_ONLY`. *WARNING: *
-  
-  :::warning
-  `include_unexpected_rows` returns EVERY row for each unexpected value; for large tables, this could return an 
-  unwieldy amount of data.
-  :::
+You can use the `result_format` parameter to define the level of detail for Validation Results in your Data Docs. For example, you can return a success or failure message, a summary of observed values, a list of failing values, or you can add a query or a filter function that returns all failing rows. Typical use cases for this parameter include cleaning data and excluding Validation Result data in published Data Docs.
+
+The `result_format` parameter can be a string or a dictionary which specifies the fields to return in `result`. 
+
+The string values `"BOOLEAN_ONLY"`, `"BASIC"`, `"SUMMARY"`, and `"COMPLETE"` are supported. The default is `"SUMMARY"`. The behavior of each setting is described in [examples](#examples).
+
+When using a dictionary, `result_format` can include the following keys:
+
+- `result_format`: Sets the fields to return in results.
+
+- `unexpected_index_column_names`: Defines the columns that can be used to identify unexpected results. For example, primary key (PK) column(s) or other columns with unique identifiers. Supports multiple column names as a list.
+
+- `return_unexpected_index_query`: When running validations, a query (or a set of indices) is returned that allows you to retrieve the full set of unexpected results including any columns identified in `unexpected_index_column_names`.  Setting this value to `False` suppresses the output (default is `True`).
+
+- `partial_unexpected_count`: Sets the number of results to include in `partial_unexpected_count``, if applicable. Set the value to zero to suppress the unexpected counts.
+
+- `exclude_unexpected_values`: When running validations, a set of unexpected results' indices and values is returned.  Setting this value to `True` suppresses values from the output to only have indices (default is `False`).
+
+- `include_unexpected_rows`: When running validations, this returns the entire row for each unexpected value in dictionary form. When using `include_unexpected_rows`, you must explicitly specify `result_format` and `result_format` must be more verbose than `BOOLEAN_ONLY`.
+
+    :::note
+    `include_unexpected_rows` returns EVERY row for each unexpected value. In large tables, this could result in an unmanageable amount of data.
+    :::
 
 ## Configure result format
-`result_format` can be specified for either a single Expectation or an entire Checkpoint. When configured at the Expectation-level, 
-the configuration will not be persisted, and you will receive a `UserWarning`. We therefore recommend that the Expectation-level
-configuration be used for exploratory analysis, with the final configuration added at the Checkpoint-level.
+
+You can specify `result_format` for a single Expectation, or an entire Checkpoint. When configured at the Expectation-level, 
+the configuration is not persisted, and you'll receive a `UserWarning`. GX recommends that you use an Expectation-level configuration for exploratory analysis, and add the final configuration at the Checkpoint-level.
 
 ### Expectation-level configuration
-To apply `result_format` to an Expectation, pass it into the Expectation. We will first need to obtain a Validator object instance (e.g. by running the `$ great_expectations suite new` command).
 
-```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_set"
-```
+To apply `result_format` to an Expectation, you pass it into the Expectation configuration on your Validator:
+
+    ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_set"
+    ```
 
 ### Checkpoint-level configuration
-To apply `result_format` to every Expectation in a Suite, define it in your Checkpoint configuration under the `runtime_configuration` key.
+
+Run the following code to apply `result_format` to every Expectation in a Suite:
 
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_checkpoint_example"
 ```
+Your Checkpoint configuration is defined below the `runtime_configuration` key. 
 
-The results will then be stored in the Validation Result after running the Checkpoint.
+The results are stored in the Validation Result after running the Checkpoint.
+
 :::note
 The `unexpected_index_list`, as represented by primary key (PK) columns, is 
-rendered in DataDocs when `COMPLETE` is selected. 
+rendered in Data Docs when `COMPLETE` is selected. 
 
-The `unexpected_index_query`, which for `SQL` and `Spark` is a query that allows you to retrieve the full set of 
-unexpected values from the dataset, is also rendered by default when `COMPLETE` is selected. For `Pandas`, this parameter 
-returns the full set of unexpected indices, which can also be used to retrieve the full set of unexpected values. This is returned
-whether or not the `unexpected_index_column_names` are defined. 
+The `unexpected_index_query`, which for `SQL` and `Spark` is a query that allows you to retrieve the full set of unexpected values from the dataset, is also rendered by default when `COMPLETE` is selected. For `Pandas`, this parameter returns the full set of unexpected indices, which can also be used to retrieve the full set of unexpected values. This is returned
+whether the `unexpected_index_column_names` are defined. 
 
-To suppress this output, the `return_unexpected_index_query` parameter can be set to `False`. 
+To suppress this output, set the `return_unexpected_index_query` parameter to `False`. 
 
 Regardless of how Result Format is configured, `unexpected_list` is never rendered in Data Docs.
 :::
 
-## Result format values and fields
+## Column Map Expectations result format values and fields
 
-
-
-### All Expectations
-| Fields within `result`                | BOOLEAN_ONLY                       |BASIC           |SUMMARY         |COMPLETE        |
-----------------------------------------|------------------------------------|----------------|----------------|-----------------
-|    details (dictionary)               | Defined on a per-Expectation basis |
-### Column map Expectations (e.g. `ColumnMapExpectation`, `ColumnPairMapExpectation`, `MulticolumnMapExpectation`)
 | Fields within `result`                |BOOLEAN_ONLY    |BASIC           |SUMMARY         |COMPLETE        |
 ----------------------------------------|----------------|----------------|----------------|-----------------
 |    element_count                      |no              |yes             |yes             |yes             |
@@ -78,12 +77,14 @@ Regardless of how Result Format is configured, `unexpected_list` is never render
 |    unexpected_index_list              |no              |no              |no              |yes             |
 |    unexpected_index_query             |no              |no              |no              |yes             |
 |    unexpected_list                    |no              |no              |no              |yes             |
-### Column aggregate Expectations
+
+## Column Aggregate Expectations result format values and fields
+
 | Fields within `result`                |BOOLEAN_ONLY    |BASIC           |SUMMARY         |COMPLETE        |
 ----------------------------------------|----------------|----------------|----------------|-----------------
 |    observed_value                     |no              |yes             |yes             |yes             |
 
-### Example use cases for different result_format values
+## Example use cases for different result_format values
 
 | `result_format` Setting               | Example use case                                             |
 ----------------------------------------|---------------------------------------------------------------
@@ -94,36 +95,32 @@ Regardless of how Result Format is configured, `unexpected_list` is never render
 
 ## Examples
 
-The following examples will use the data defined in the following Pandas DataFrame:
+The following examples use the data defined in the following Pandas DataFrame:
 
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/pandas_df_for_result_format"
 ```
 
 ### Behavior for `BOOLEAN_ONLY`
 
-When the `result_format` is `BOOLEAN_ONLY`, no `result` is returned. The result of evaluating the Expectation is  
-exclusively returned via the value of the `success` parameter.
+When the `result_format` is `BOOLEAN_ONLY`, no `result` is returned. The result of evaluating the Expectation is exclusively returned via the value of the `success` parameter.
 
 For example:
 
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_boolean_example"
 ```
 
-Will return the following output:
+Returns the following output:
 
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_boolean_example_output"
 ```
 
 ### Behavior for `BASIC`
 
-For `BASIC` format, a `result` is generated with a basic justification for why an Expectation was met or not. The format is intended 
-for quick, at-a-glance feedback. For example, it tends to work well in Jupyter Notebooks.
+For `BASIC` format, a `result` is generated with a basic justification for why an Expectation failed or succeeded. The format is intended for quick feedback and it works well in Jupyter Notebooks.
 
-Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
-`ColumnAggregateExpectation` Expectations.
+GX has standard behavior for describing the results of `column_map_expectation` and `ColumnAggregateExpectation` Expectations.
 
-`column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of  
-unexpected values to justify the Expectation result.
+`column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of unexpected values to justify the Expectation result.
 
 The basic `result` includes:
 
@@ -139,14 +136,14 @@ The basic `result` includes:
 }
 ```
 
-**Note:** When unexpected values are duplicated, `unexpected_list` will contain multiple copies of the value.
+**Note:** When unexpected values are duplicated, `unexpected_list` contains multiple copies of the value.
 
 For example:
 
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_set"
 ```
 
-Will return the following output:
+Returns the following output:
 
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_set_output"
 ```
@@ -170,22 +167,18 @@ For example:
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_agg"
 ```
 
-Will return the following output:
+Returns the following output:
 
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_agg_output"
 ```
 
 ### Behavior for `SUMMARY`
 
-A `result` is generated with a summary justification for why an Expectation was met or not. The format is intended  
-for more detailed exploratory work and includes additional information beyond what is included by `BASIC`.
-For example, it can support generating dashboard results of whether a set of Expectations are being met.
+A `result` is generated with a summary justification for why an Expectation was successful or unsuccessful. The format is intended for more detailed exploratory work and includes additional information beyond what is included by `BASIC`. For example, it can support generating dashboard results of whether a set of Expectations are being met.
 
-Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
-`ColumnAggregateExpectation` Expectations.
+GX has standard behavior for support for describing the results of `column_map_expectation` and `ColumnAggregateExpectation` Expectations.
 
-`column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of
-unexpected values to justify the Expectation result.
+`column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of unexpected values to justify the Expectation result.
 
 The summary `result` includes:
 
@@ -207,17 +200,16 @@ The summary `result` includes:
 ```
 
 For example:
+
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_set"
 ```
 
-Will return the following output:
+Returns the following output:
 
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_set_output"
 ```
 
-`ColumnAggregateExpectation` computes a single aggregate value for the column, and so returns a `observed_value` 
-to justify the Expectation result. It also includes additional information regarding observed values and counts, 
-depending on the specific Expectation.
+`ColumnAggregateExpectation` computes a single aggregate value for the column, and so returns a `observed_value` to justify the Expectation result. It also includes additional information regarding observed values and counts, depending on the specific Expectation.
 
 The summary `result` includes:
 
@@ -235,21 +227,19 @@ For example:
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_agg"
 ```
 
-Will return the following output:
+Returns the following output:
 
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_agg_output"
 ```
 
 
 ### Behavior for `COMPLETE`
-A `result` is generated with all available justification for why an Expectation was met or not. The format is  
-intended for debugging pipelines or developing detailed regression tests.
 
-Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
-`ColumnAggregateExpectation` Expectations.
+A `result` is generated with all available justification for why an Expectation was successful or unsuccessful. The format is intended for debugging pipelines or developing detailed regression tests.
 
-`column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of 
-unexpected values to justify the Expectation result.
+Great Expectations implements standard behaviors to support describing the results of `column_map_expectation` and `ColumnAggregateExpectation` Expectations.
+
+`column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of unexpected values to justify the Expectation result.
 
 The complete `result` includes:
 
@@ -271,17 +261,16 @@ The complete `result` includes:
 ```
 
 For example:
+
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_set"
 ```
 
-Will return the following output:
+Returns the following output:
 
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_set_output"
 ```
 
-`ColumnAggregateExpectation` computes a single aggregate value for the column, and so returns a `observed_value` 
-to justify the Expectation result. It also includes additional information regarding observed values and counts,  
-depending on the specific Expectation.
+`ColumnAggregateExpectation` computes a single aggregate value for the column, and so returns a `observed_value` to justify the Expectation result. It also includes additional information regarding observed values and counts, depending on the specific Expectation.
 
 The complete `result` includes:
 
@@ -296,10 +285,11 @@ The complete `result` includes:
 ```
 
 For example:
+
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_agg"
 ```
 
-Will return the following output:
+Returns the following output:
 
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_agg_output"
 ```

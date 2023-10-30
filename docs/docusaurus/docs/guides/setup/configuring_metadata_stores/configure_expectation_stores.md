@@ -21,7 +21,7 @@ import Tabs from '@theme/Tabs';
 
 An Expectation Store is a connector to store and retrieve information about collections of verifiable assertions about data.
 
-By default, new <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the `expectations/` subdirectory of your `great_expectations/` folder. Use the information provided here to configure a store for your Expectations.
+By default, new <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the `expectations/` subdirectory of your `gx/` folder. Use the information provided here to configure a store for your Expectations.
 
 <Tabs
   groupId="configure-expectation-stores"
@@ -68,7 +68,7 @@ Use the information provided here to configure a new storage location for Expect
 
 <Prerequisites>
 
-- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 - [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 - [An Azure Storage account](https://docs.microsoft.com/en-us/azure/storage/).
 - An Azure Blob container. If you need to [host and share Data Docs on Azure Blob Storage](../configuring_data_docs/host_and_share_data_docs.md), then you can set this up first and then use the ``$web`` existing container to store your Expectations.
@@ -133,7 +133,7 @@ You can use the ``az storage blob upload`` command to copy Expectations into Azu
 export AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
 az storage blob upload -f <local/path/to/expectation.json> -c <GREAT-EXPECTATION-DEDICATED-AZURE-BLOB-CONTAINER-NAME> -n <PREFIX>/<expectation.json>
 example :
-az storage blob upload -f great_expectations/expectations/exp1.json -c <blob-container> -n expectations/exp1.json
+az storage blob upload -f gx/expectations/exp1.json -c <blob-container> -n expectations/exp1.json
 
 Finished[#############################################################]  100.0000%
 {
@@ -179,7 +179,7 @@ To view all the code used in this topic, see [how_to_configure_an_expectation_st
 
 <Prerequisites>
 
-- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 - [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 - A GCP [service account](https://cloud.google.com/iam/docs/service-accounts) with credentials that allow access to GCP resources such as Storage Objects.
 - A GCP project, GCS bucket, and prefix to store Expectations.
@@ -213,7 +213,7 @@ In the following example, `expectations_store_name` is set to ``expectations_GCS
 ```
 
 :::warning
-If you are also storing [Validations in GCS](./how_to_configure_a_validation_result_store_in_gcs.md) or [DataDocs in GCS](../configuring_data_docs/host_and_share_data_docs.md), make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
+If you are also storing [Validations in GCS](./configure_result_stores.md) or [DataDocs in GCS](../configuring_data_docs/host_and_share_data_docs.md), make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
 :::
 
 ### Copy existing Expectation JSON files to the GCS bucket (Optional)
@@ -265,7 +265,7 @@ Use the information provided here to configure a new storage location for Expect
 
 <Prerequisites>
 
-- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 - [An Expectation Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 - A storage location for Expectations. This can be a local path, or a path to a network filesystem.
     
@@ -276,7 +276,7 @@ Use the information provided here to configure a new storage location for Expect
 Run the following command to create a new folder for your Expectations and move your existing Expectations to the new folder:
 
 ```bash
-# in the great_expectations/ folder
+# in the gx/ folder
 mkdir shared_expectations
 mv expectations/npi_expectations.json shared_expectations/
 ```
@@ -338,10 +338,10 @@ git log -p npi_expectations.json
 commit cbc127fb27095364c3c1fcbf6e7f078369b07455
   changed expect_table_column_count_to_equal to 331
 
-diff --git a/great_expectations/expectations/npi_expectations.json b/great_expectations/expectations/npi_expectations.json
+diff --git a/gx/expectations/npi_expectations.json b/great_expectations/expectations/npi_expectations.json
 
---- a/great_expectations/expectations/npi_expectations.json
-+++ b/great_expectations/expectations/npi_expectations.json
+--- a/gx/expectations/npi_expectations.json
++++ b/gx/expectations/npi_expectations.json
 @@ -17,7 +17,7 @@
    {
      "expectation_type": "expect_table_column_count_to_equal",
@@ -352,9 +352,9 @@ diff --git a/great_expectations/expectations/npi_expectations.json b/great_expec
 commit 05b3c8c1ed35d183bac1717d4877fe13bc574963
 changed expect_table_column_count_to_equal to 333
 
-diff --git a/great_expectations/expectations/npi_expectations.json b/great_expectations/expectations/npi_expectations.json
---- a/great_expectations/expectations/npi_expectations.json
-+++ b/great_expectations/expectations/npi_expectations.json
+diff --git a/gx/expectations/npi_expectations.json b/great_expectations/expectations/npi_expectations.json
+--- a/gx/expectations/npi_expectations.json
++++ b/gx/expectations/npi_expectations.json
    {
      "expectation_type": "expect_table_column_count_to_equal",
      "kwargs": {
@@ -374,7 +374,7 @@ Use the information provided here to configure an Expectations store in a Postgr
 
 <Prerequisites>
 
-- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context).
 - [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 - A [PostgreSQL](https://www.postgresql.org/) database with appropriate credentials.
 

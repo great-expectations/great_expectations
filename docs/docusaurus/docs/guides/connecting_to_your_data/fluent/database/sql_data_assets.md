@@ -21,9 +21,9 @@ import Tabs from '@theme/Tabs';
 
 A Data Asset is a collection of records within a Data Source that define how Great Expectations (GX) organizes data into Batches. Use the information provided here to connect GX to SQL tables and data returned by SQL database queries and learn how to organize Batches in a SQL Data Asset.
 
- Great Expectations (GX) uses SQLAlchemy to connect to SQL source data, and most of the SQL dialects supported by SQLAlchemy are also supported by GX. For more information about the SQL dialects supported by SQLAlchemy, see [Dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
+ Great Expectations (GX) uses SQLAlchemy to connect to SQL Data Assets, and most of the SQL dialects supported by SQLAlchemy are also supported by GX. For more information about the SQL dialects supported by SQLAlchemy, see [Dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
-:::caution Datasources defined with the block-config method
+:::caution Data Sources defined with the block-config method
 
 If you're using a Data Source created with the block-config method, see [How to configure a SQL Data Source with the block-config method](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource).
 
@@ -42,7 +42,7 @@ If you're using a Data Source created with the block-config method, see [How to 
 
 ## Connect to a SQL table
 
-Connect GX to a SQL table to access source data.
+Connect GX to a SQL table to access Data Assets.
 
 The following code examples use a previously defined Data Source named `"my_datasource"` to connect to a SQL database.
 
@@ -50,7 +50,7 @@ The following code examples use a previously defined Data Source named `"my_data
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- An installation of GX set up to work with SQL
+- [An installation of GX set up to work with SQL](/docs/guides/setup/installation/install_gx)
 - Source data stored in a SQL database
 - A SQL-based Data Source
 
@@ -100,7 +100,7 @@ The following code examples use a previously defined Data Source named `"my_data
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- An installation of GX set up to work with SQL. See [How to set up GX to work with SQL databases](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases).
+- [An installation of GX set up to work with SQL](/docs/guides/setup/installation/install_gx).
 - Source data stored in a SQL database.
 
 </Prerequisites> 

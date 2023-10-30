@@ -1,7 +1,16 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+)
 
 from typing_extensions import TypedDict
 
@@ -93,12 +102,21 @@ class Store:
             )
         self._use_fixed_length_key = self._store_backend.fixed_length_key
 
-    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
+    @staticmethod
+    def gx_cloud_response_json_to_object_dict(response_json: Dict) -> Dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
         """
         return response_json
+
+    @staticmethod
+    def gx_cloud_response_json_to_object_collection(response_json: Dict) -> List[Dict]:
+        """
+        This method takes full json response from GX cloud and outputs a list of dicts appropriate for
+        deserialization into a collection of GX objects
+        """
+        raise NotImplementedError
 
     def _validate_key(self, key: DataContextKey) -> None:
         # STORE_BACKEND_ID_KEY always validated
@@ -114,11 +132,6 @@ class Store:
     @property
     def cloud_mode(self) -> bool:
         return isinstance(self._store_backend, GXCloudStoreBackend)
-
-    @property
-    def ge_cloud_mode(self) -> bool:
-        # <GX_RENAME> Deprecated 0.15.37
-        return self.cloud_mode
 
     @property
     def store_backend(self) -> StoreBackend:
@@ -188,7 +201,7 @@ class Store:
             value = self._store_backend.get(self.key_to_tuple(key))
             # TODO [Robby] MER-285: Handle non-200 http errors
             if value:
-                value = self.ge_cloud_response_json_to_object_dict(response_json=value)
+                value = self.gx_cloud_response_json_to_object_dict(response_json=value)
         else:
             self._validate_key(key)
             value = self._store_backend.get(self.key_to_tuple(key))
@@ -197,6 +210,13 @@ class Store:
             return self.deserialize(value)
 
         return None
+
+    def get_all(self) -> list[Any]:
+        objs = self._store_backend.get_all()
+        if self.cloud_mode:
+            objs = self.gx_cloud_response_json_to_object_collection(objs)
+
+        return list(map(self.deserialize, objs))
 
     def set(self, key: DataContextKey, value: Any, **kwargs) -> None:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:

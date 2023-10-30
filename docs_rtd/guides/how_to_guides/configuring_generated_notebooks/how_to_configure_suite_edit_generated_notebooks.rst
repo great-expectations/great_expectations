@@ -88,7 +88,7 @@ Overwriting a section
 #. **For code**
 
     .. code-block:: yaml
-    
+
         notebooks:
             suite_edit:
                 custom_templates_module: notebook_assets.suite_edit

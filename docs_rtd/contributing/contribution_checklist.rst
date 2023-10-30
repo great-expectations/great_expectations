@@ -11,7 +11,7 @@ Following these instructions helps us make sure the code review and merge proces
 Before submitting a pull request
 --------------------------------
 
-Once your code is ready, please go through the following checklist before submitting a pull request. 
+Once your code is ready, please go through the following checklist before submitting a pull request.
 
 
 **1. Have you signed the CLA?**
@@ -75,12 +75,12 @@ When you’re done with your work...
     * Follow `these instructions <https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork>`__ to create a PR from your commit.
     * Provide background for reviewers so they can understand and approve your PR more quickly:
 
-        * Choose a short title which sums up the changes that you have made. 
+        * Choose a short title which sums up the changes that you have made.
         * Add a tag to help categorize the PR:
 
-            * [BUGFIX] for PRs that address minor bugs without changing behavior, 
+            * [BUGFIX] for PRs that address minor bugs without changing behavior,
             * [FEATURE] for significant PRs that add a new feature likely to require being added to our feature maturity matrix,
-            * [DOCS] for PRs that focus on improving documentation, or 
+            * [DOCS] for PRs that focus on improving documentation, or
             * [MAINTENANCE] for PRs that focus on updating repository settings or related chores. This status is used internally.
 
         * Summarize your changes using a few clear sentences (sometimes screenshots are nice too!). A good guide is to aim for a collection of commit message summaries that provide more details about what your changes do, like "Fixed handling of malformed datasource configuration" or "Improved docstrings for store module"

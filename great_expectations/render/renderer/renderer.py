@@ -1,5 +1,7 @@
 from functools import wraps
-from typing import Any
+from typing import Any, Callable, TypeVar
+
+from typing_extensions import ParamSpec
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -7,15 +9,20 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 
+P = ParamSpec("P")
+T = TypeVar("T")
 
-def renderer(renderer_type, **kwargs):
-    def wrapper(renderer_fn):
+
+def renderer(
+    renderer_type: str, **kwargs
+) -> Callable[[Callable[P, T]], Callable[P, T]]:
+    def wrapper(renderer_fn: Callable[P, T]) -> Callable[P, T]:
         @wraps(renderer_fn)
-        def inner_func(*args, **kwargs):
+        def inner_func(*args: P.args, **kwargs: P.kwargs):
             return renderer_fn(*args, **kwargs)
 
-        inner_func._renderer_type = renderer_type
-        inner_func._renderer_definition_kwargs = kwargs
+        inner_func._renderer_type = renderer_type  # type: ignore[attr-defined]
+        inner_func._renderer_definition_kwargs = kwargs  # type: ignore[attr-defined]
         return inner_func
 
     return wrapper

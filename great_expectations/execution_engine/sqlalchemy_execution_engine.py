@@ -10,7 +10,6 @@ import random
 import re
 import string
 import traceback
-import warnings
 from contextlib import contextmanager
 from pathlib import Path
 from typing import (
@@ -26,6 +25,8 @@ from typing import (
     Union,
     cast,
 )
+
+from packaging import version
 
 from great_expectations.compatibility.typing_extensions import override
 
@@ -324,6 +325,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # (e.g. for accessing temporary tables), if we don't keep a reference
         # then we get errors like sqlite3.ProgrammingError: Cannot operate on a closed database.
         self._connection = None
+
+        # Use a single instance of SQLAlchemy engine to avoid creating multiple engine instances
+        # for the same SQLAlchemy engine. This allows us to take advantage of SQLAlchemy's
+        # built-in caching.
+        self._inspector = None
 
         if engine is not None:
             if credentials is not None:
@@ -1351,16 +1357,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         source_schema_name: str = batch_spec.get("schema_name", None)
         source_table_name: str = batch_spec.get("table_name", None)
 
-        if batch_spec.get("bigquery_temp_table"):
-            # deprecated-v0.15.3
-            warnings.warn(
-                "BigQuery tables that are created as the result of a query are no longer created as "
-                "permanent tables. Thus, a named permanent table through the `bigquery_temp_table`"
-                "parameter is not required. The `bigquery_temp_table` parameter is deprecated as of"
-                "v0.15.3 and will be removed in v0.18.",
-                DeprecationWarning,
-            )
-
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
         )
@@ -1387,6 +1383,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         return batch_data, batch_markers
+
+    def get_inspector(self) -> sqlalchemy.engine.reflection.Inspector:
+        if self._inspector is None:
+            if version.parse(sa.__version__) < version.parse("1.4"):
+                # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
+                self._inspector = sqlalchemy.reflection.Inspector.from_engine(
+                    self.engine
+                )
+            else:
+                self._inspector = sa.inspect(self.engine)
+
+        return self._inspector
 
     @contextmanager
     def get_connection(self) -> sqlalchemy.Connection:

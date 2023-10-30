@@ -12,7 +12,7 @@ Start by running the following command:
 .. code-block:: bash
 
     great_expectations --v3-api datasource new
-    
+
 .. code-block:: bash
 
     What data would you like Great Expectations to connect to?

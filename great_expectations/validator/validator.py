@@ -73,6 +73,7 @@ from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metrics_calculator import (
     MetricsCalculator,
+    _AbortedMetricsInfoDict,
     _MetricKey,
     _MetricsDict,
 )
@@ -356,7 +357,7 @@ class Validator:
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
-    ) -> _MetricsDict:
+    ) -> tuple[_MetricsDict, _AbortedMetricsInfoDict]:
         """
         Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
 
@@ -366,7 +367,9 @@ class Validator:
             min_graph_edges_pbar_enable: Minumum number of graph edges to warrant showing progress bars.
 
         Returns:
-            Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
+            Tuple of two elements, the first is a dictionary with requested metrics resolved,
+            with unique metric ID as key and computed metric as value. The second is a dictionary of the
+            aborted metrics information, with metric ID as key if any metrics were aborted.
         """
         return self._metrics_calculator.compute_metrics(
             metric_configurations=metric_configurations,
@@ -1310,7 +1313,7 @@ class Validator:
 
     def discard_failing_expectations(self) -> None:
         """Removes any expectations from the validator where the validation has failed"""
-        res = self.validate(only_return_failures=True).results
+        res = self.validate(only_return_failures=True).results  # type: ignore[union-attr] # ExpectationValidationResult has no `.results` attr
         if any(res):
             for item in res:
                 self.remove_expectation(

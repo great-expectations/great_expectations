@@ -7,9 +7,13 @@ import pandas as pd
 import pytest
 from moto import mock_s3
 
+import great_expectations as gx
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.util import S3Url
+from great_expectations.data_context.store.tuple_store_backend import (
+    TupleS3StoreBackend,
+)
 from great_expectations.datasource.data_connector.util import (
     sanitize_prefix,
     sanitize_prefix_for_gcs_and_s3,
@@ -18,6 +22,7 @@ from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
 )
+from great_expectations.exceptions.exceptions import InvalidKeyError
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
@@ -919,3 +924,173 @@ def test_sanitize_prefix_behaves_the_same_as_local_files():
     check_sameness("a.x/b/c", "a.x/b/c/")
     check_sameness("path/to/folder.something/", "path/to/folder.something/")
     check_sameness("path/to/folder.something", "path/to/folder.something")
+
+
+@pytest.mark.aws_deps
+@mock_s3
+def test_s3_checkpoint_run_using_different_store_prefixes_successfully(
+    tmp_path_factory,
+):
+    region_name: str = "us-east-1"
+    bucket: str = "test_bucket"
+    conn = boto3.resource("s3", region_name=region_name)
+    conn.create_bucket(Bucket=bucket)
+    client: BaseClient = boto3.client("s3", region_name=region_name)
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    client.put_object(
+        Bucket=bucket,
+        Body=test_df.to_csv(index=False).encode("utf-8"),
+        Key="titanic.csv",
+    )
+
+    base_directory: str = str(tmp_path_factory.mktemp("test_s3_checkpoint_run"))
+    context = gx.data_context.FileDataContext.create(base_directory)
+    # Configure the stores
+    context.add_store(
+        "expectations_S3_store",
+        store_config={
+            "class_name": "ExpectationsStore",
+            "store_backend": {
+                "bucket": "test_bucket",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "gx_titanic_expectations",
+            },
+        },
+    )
+    context.add_store(
+        "validations_S3_store",
+        store_config={
+            "class_name": "ValidationsStore",
+            "store_backend": {
+                "bucket": "test_bucket",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "gx_titanic_validations",
+            },
+        },
+    )
+    context.validations_store_name = "validations_S3_store"
+    context.expectations_store_name = "expectations_S3_store"
+    assert len(context.stores) == 7
+    assert isinstance(context.expectations_store._store_backend, TupleS3StoreBackend)
+
+    datasource = context.sources.add_or_update_pandas_s3(
+        name="s3_datasource", bucket=bucket
+    )
+
+    asset = datasource.add_csv_asset(
+        name="titanic_dataset", batching_regex="titanic.csv"
+    )
+
+    request = asset.build_batch_request()
+
+    context.add_or_update_expectation_suite(expectation_suite_name="test_titanic")
+    validator = context.get_validator(
+        batch_request=request, expectation_suite_name="test_titanic"
+    )
+
+    validator.expect_column_values_to_be_between(
+        column="col1", min_value=0, max_value=120
+    )
+    validator.expect_column_values_to_be_between(
+        column="col2", min_value=0, max_value=1
+    )
+
+    validator.save_expectation_suite(discard_failed_expectations=False)
+
+    checkpoint = context.add_or_update_checkpoint(
+        name="my_checkpoint",
+        validations=[
+            {"batch_request": request, "expectation_suite_name": "test_titanic"}
+        ],
+    )
+
+    # Should not raise an error
+    context.build_data_docs()
+    checkpoint.run()
+
+
+@pytest.mark.aws_deps
+@mock_s3
+def test_s3_checkpoint_run_using_same_store_prefixes_errors(
+    tmp_path_factory,
+):
+    region_name: str = "us-east-1"
+    bucket: str = "test_bucket"
+    conn = boto3.resource("s3", region_name=region_name)
+    conn.create_bucket(Bucket=bucket)
+    client: BaseClient = boto3.client("s3", region_name=region_name)
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    client.put_object(
+        Bucket=bucket,
+        Body=test_df.to_csv(index=False).encode("utf-8"),
+        Key="titanic.csv",
+    )
+
+    base_directory: str = str(tmp_path_factory.mktemp("test_s3_checkpoint_run"))
+    context = gx.data_context.FileDataContext.create(base_directory)
+    # Configure the stores
+    context.add_store(
+        "expectations_S3_store",
+        store_config={
+            "class_name": "ExpectationsStore",
+            "store_backend": {
+                "bucket": "test_bucket",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "gx_titanic",
+            },
+        },
+    )
+    context.add_store(
+        "validations_S3_store",
+        store_config={
+            "class_name": "ValidationsStore",
+            "store_backend": {
+                "bucket": "test_bucket",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "gx_titanic",
+            },
+        },
+    )
+    context.validations_store_name = "validations_S3_store"
+    context.expectations_store_name = "expectations_S3_store"
+    assert len(context.stores) == 7
+    assert isinstance(context.expectations_store._store_backend, TupleS3StoreBackend)
+
+    datasource = context.sources.add_or_update_pandas_s3(
+        name="s3_datasource", bucket=bucket
+    )
+
+    asset = datasource.add_csv_asset(
+        name="titanic_dataset", batching_regex="titanic.csv"
+    )
+
+    request = asset.build_batch_request()
+
+    context.add_or_update_expectation_suite(expectation_suite_name="test_titanic")
+    validator = context.get_validator(
+        batch_request=request, expectation_suite_name="test_titanic"
+    )
+
+    validator.expect_column_values_to_be_between(
+        column="col1", min_value=0, max_value=120
+    )
+    validator.expect_column_values_to_be_between(
+        column="col2", min_value=0, max_value=1
+    )
+
+    validator.save_expectation_suite(discard_failed_expectations=False)
+
+    checkpoint = context.add_or_update_checkpoint(
+        name="my_checkpoint",
+        validations=[
+            {"batch_request": request, "expectation_suite_name": "test_titanic"}
+        ],
+    )
+
+    with pytest.raises(IndexError):
+        # Happens when an ExpectationIdentifier is being evaluated as ValidationResultIdentifier
+        context.build_data_docs()
+
+    with pytest.raises(InvalidKeyError):
+        # Happens when an ValidationResultIdentifier is being evaluated as ExpectationIdentifier
+        checkpoint.run()

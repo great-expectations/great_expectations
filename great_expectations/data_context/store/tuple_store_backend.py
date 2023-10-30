@@ -326,6 +326,10 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         return contents
 
+    @override
+    def _get_all(self) -> list[Any]:
+        raise NotImplementedError
+
     def _set(self, key, value, **kwargs):
         if not isinstance(key, tuple):
             key = key.to_tuple()
@@ -573,6 +577,10 @@ class TupleS3StoreBackend(TupleStoreBackend):
             .read()
             .decode(s3_response_object.get("ContentEncoding", "utf-8"))
         )
+
+    @override
+    def _get_all(self) -> list[Any]:
+        raise NotImplementedError
 
     def _set(
         self,
@@ -858,6 +866,10 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         else:
             return gcs_response_object.download_as_bytes().decode("utf-8")
 
+    @override
+    def _get_all(self) -> list[Any]:
+        raise NotImplementedError
+
     def _set(
         self,
         key,
@@ -998,6 +1010,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         self,
         container,
         connection_string=None,
+        credential=None,
         account_url=None,
         prefix=None,
         filepath_template=None,
@@ -1024,6 +1037,9 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         self.connection_string = connection_string or os.environ.get(  # noqa: TID251
             "AZURE_STORAGE_CONNECTION_STRING"
         )
+        self.credential = credential or os.environ.get(  # noqa: TID251
+            "AZURE_CREDENTIAL"
+        )
         self.prefix = prefix or ""
         self.container = container
         self.account_url = account_url or os.environ.get(  # noqa: TID251
@@ -1035,7 +1051,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
     def _container_client(self) -> Any:
         from great_expectations.compatibility import azure
 
-        # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
+        # Validate that "azure" libraries were successfully imported and attempt to create "azure_client" handle.
         if azure.BlobServiceClient:  # type: ignore[truthy-function] # False if NotImported
             try:
                 if self.connection_string:
@@ -1048,6 +1064,10 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
                     blob_service_client = azure.BlobServiceClient(
                         account_url=self.account_url,
                         credential=azure.DefaultAzureCredential(),
+                    )
+                elif self.credential and self.account_url:
+                    blob_service_client = azure.BlobServiceClient(
+                        account_url=self.account_url, credential=self.credential
                     )
                 else:
                     raise StoreBackendError(
@@ -1072,6 +1092,10 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         return (
             self._container_client.download_blob(az_blob_key).readall().decode("utf-8")
         )
+
+    @override
+    def _get_all(self) -> list[Any]:
+        raise NotImplementedError
 
     def _set(self, key, value, content_encoding="utf-8", **kwargs):
         from great_expectations.compatibility.azure import ContentSettings

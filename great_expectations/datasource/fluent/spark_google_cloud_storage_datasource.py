@@ -3,9 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Literal, Type, Union
 
-import pydantic
-
-from great_expectations.compatibility import google
+from great_expectations.compatibility import google, pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import GCSUrl

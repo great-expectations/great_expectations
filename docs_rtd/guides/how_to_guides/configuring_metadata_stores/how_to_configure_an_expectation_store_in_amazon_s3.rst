@@ -59,7 +59,7 @@ Steps
                         store_backend:
                             class_name: TupleS3StoreBackend
                             bucket: '<your_s3_bucket_name>'
-                            prefix: '<your_s3_bucket_folder_name>'
+                            prefix: '<your_s3_bucket_folder_name>'  # Bucket and prefix in combination must be unique across all stores
 
 
         4. **Copy existing Expectation JSON files to the S3 bucket**. (This step is optional).
@@ -93,7 +93,7 @@ Steps
                 store_backend:
                     class_name: TupleS3StoreBackend
                     bucket: '<your_s3_bucket_name>'
-                    prefix: '<your_s3_bucket_folder_name>'
+                    prefix: '<your_s3_bucket_folder_name>'  # Bucket and prefix in combination must be unique across all stores
 
 
         6. **Confirm that Expectations can be accessed from Amazon S3 by running** ``great_expectations suite list``.
@@ -150,7 +150,7 @@ Steps
                         store_backend:
                             class_name: TupleS3StoreBackend
                             bucket: '<your_s3_bucket_name>'
-                            prefix: '<your_s3_bucket_folder_name>'
+                            prefix: '<your_s3_bucket_folder_name>'  # Bucket and prefix in combination must be unique across all stores
 
 
         4. **Copy existing Expectation JSON files to the S3 bucket**. (This step is optional).

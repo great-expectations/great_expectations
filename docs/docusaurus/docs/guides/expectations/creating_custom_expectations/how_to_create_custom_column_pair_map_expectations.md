@@ -32,25 +32,15 @@ You can find the template file for a custom [`ColumnPairMapExpectation` here](ht
 ```bash
 cp column_pair_map_expectation_template.py /SOME_DIRECTORY/expect_column_pair_values_to_have_a_difference_of_three.py
 ```
+### Storing Expectation files
 
-<details>
-  <summary>Where should I put my Expectation file?</summary>
-  <div>
-  <br/>
-    <p>
-        Within a development environment, you don't need to put the file in a specific folder. The Expectation itself should be self-contained, and can be executed anywhere as long as <code>great_expectations</code> is installed, which is sufficient for development and testing. However, to use your new Expectation alongside the other components of Great Expectations (as one would for production purposes), you'll need to make sure the file is in the right place. Where the right place is will depend on what you intend to use it for.
-    </p>
-    <p>
-        <ul>
-            <li>If you're building a <TechnicalTag tag="custom_expectation" text="Custom Expectation" /> for personal use, you'll need to put it in the <code>great_expectations/plugins/expectations</code> folder of your Great Expectations deployment, and import your Custom Expectation from that directory whenever it will be used. When you instantiate the corresponding <code>DataContext</code>, it will automatically make all <TechnicalTag tag="plugin" text="Plugins" /> in the directory available for use.</li>
-            <li>If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.</li>
-        </ul>
-    </p>
-	<p>
-		See our <a href="how_to_use_custom_expectations"> guide on how to use a Custom Expectation</a> for more!
-	</p>
-  </div>
-</details>
+During development, you don't need to store Expectation files in a specific location. Expectation files are self-contained and can be executed anywhere as long as GX is installed However, to use your new Expectation with other GX components, you'll need to make sure the file is stored one of the following locations:
+
+- If you're building a <TechnicalTag tag="custom_expectation" text="Custom Expectation" /> for personal use, you'll need to put it in the <code>great_expectations/plugins/expectations</code> folder of your GX deployment, and import your Custom Expectation from that directory whenever it will be used. When you instantiate the corresponding <code>DataContext</code>, it will automatically make all <TechnicalTag tag="plugin" text="Plugins" /> in the directory available for use.
+
+- If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.
+
+For more information about Custom Expectations, see [Use a Custom Expectation](./how_to_use_custom_expectations.md).
 
 ## Generate a diagnostic checklist for your Expectation
 
@@ -128,13 +118,13 @@ Congratulations! You're one step closer to implementing a Custom Expectation.
 
 ## Add example cases
 
-Next, we're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve a dual purpose:
+You're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve the following purposes:
 
-1. They provide test fixtures that Great Expectations can execute automatically via pytest.
+- They provide test fixtures that Great Expectations can execute automatically with pytest.
 
-2. They help users understand the logic of your Expectation by providing tidy examples of paired input and output. If you contribute your Expectation to open source, these examples will appear in the Gallery.
+- They help users understand the logic of your Expectation by providing tidy examples of paired input and output. If you contribute your Expectation to open source, these examples will appear in the Gallery.
 
-Your examples will look something like this:
+Your examples will look similar to this example:
 
 ```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py completed_examples"
 ```
@@ -189,20 +179,13 @@ Your Metric function will have the `@column_pair_condition_partial` decorator, w
 
 This is all that you need to define for now. The `ColumnMapMetricProvider` and `ColumnMapExpectation` classes have built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
 
-<details>
-  <summary>Other parameters</summary>
-  <div>
-    <p>
-        <b>Expectation Success Keys</b> - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
-    </p>
-    <p>
-        <b>Expectation Default Kwarg Values</b> (Optional) - Default values for success keys and the defined domain, among other values.
-    </p>
-    <p>
-        <b>Metric Condition Value Keys</b> (Optional) - Contains any additional arguments passed as parameters to compute the Metric.
-    </p>
-  </div>
-</details>
+### Other parameters
+
+Expectation Success Keys - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
+
+Expectation Default Kwarg Values (Optional) - Default values for success keys and the defined domain, among other values.
+
+Metric Condition Value Keys (Optional) - Contains any additional arguments passed as parameters to compute the Metric.
 
 Next, choose a Metric Identifier for your Metric. By convention, Metric Identifiers for Column Pair Map Expectations start with `column_pair_values.`. The remainder of the Metric Identifier simply describes what the Metric computes, in snake case. For this example, we'll use `column_pair_values.diff_three`.
 
@@ -281,11 +264,6 @@ Completeness checklist for ExpectColumnPairValuesToHaveADifferenceOfThree:
   ✔ Passes all linting checks
 ...
 ```
-<div style={{"text-align":"center"}}>
-<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
-Congratulations!<br/>&#127881; You've just built your first Custom ColumnPairMapExpectation! &#127881;
-</b></p>
-</div>
 
 :::note
 If you've already built a [Custom Column Aggregate Expectation](./how_to_create_custom_column_aggregate_expectations.md),

@@ -4,6 +4,7 @@ import logging
 import pathlib
 import re
 import urllib.parse
+from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
 
@@ -22,10 +23,8 @@ from tests.datasource.fluent._fake_cloud_api import (
     GX_CLOUD_MOCK_BASE_URL,
     UUID_REGEX,
     CallbackResult,
-    CloudResponseSchema,
-)
-from tests.datasource.fluent.conftest import (
     CloudDetails,
+    CloudResponseSchema,
 )
 
 if TYPE_CHECKING:
@@ -68,7 +67,7 @@ def test_add_fluent_datasource_are_persisted(
     assert set_spy.call_count == 1
     cloud_api_fake.assert_call_count(
         f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources",
-        1,
+        2,
     )
 
 
@@ -150,6 +149,37 @@ def test_assets_are_persisted_on_creation_and_removed_on_deletion(
     assert asset_name not in fds_after_delete[datasource_name].get("assets", {})
 
 
+@pytest.mark.cloud
+def test_delete_asset_with_cloud_data_context(
+    seeded_cloud_context: CloudDataContext,
+    cloud_api_fake_db: FakeDBTypedDict,
+    cloud_api_fake: RequestsMock,
+    mocker: MockerFixture,
+):
+    context = seeded_cloud_context
+    remove_key_spy = mocker.spy(context._data_asset_store, "remove_key")
+
+    datasource_name = "my_pg_ds"
+    datasource = context.fluent_datasources[datasource_name]
+    asset_name = "my_table_asset_wo_splitters"
+    asset = [asset for asset in datasource.assets if asset.name == asset_name][0]
+    datasource.delete_asset(asset_name=asset_name)
+
+    cloud_api_fake.assert_call_count(
+        f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/data-assets/{asset.id}",
+        1,
+    )
+    assert remove_key_spy.call_count == 1
+
+    asset_names = [
+        asset["name"]
+        for asset in cloud_api_fake_db["datasources"][str(datasource.id)]["data"][
+            "attributes"
+        ]["datasource_config"]["assets"]
+    ]
+    assert asset_name not in asset_names
+
+
 # This test is parameterized by the fixture `empty_context`. This fixture will mark the test as
 # cloud or filesystem as appropriate
 def test_context_add_or_update_datasource(
@@ -172,7 +202,7 @@ def test_context_add_or_update_datasource(
         # TODO: adjust call counts as needed
         cloud_api_fake.assert_call_count(
             f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources",
-            1,
+            2,
         )
         cloud_api_fake.assert_call_count(
             f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}?name={datasource.name}",
@@ -284,7 +314,7 @@ def test_cloud_context_delete_datasource(
 
     cloud_api_fake.assert_call_count(
         f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources",
-        1,
+        3,
     )
     cloud_api_fake.assert_call_count(
         f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}",
@@ -365,6 +395,36 @@ class TestPandasDefaultWithCloud:
             f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources/{pandas_default_id}",
             1,
         )
+
+
+@pytest.mark.filesystem
+def test_data_connectors_are_built_on_config_load(
+    cloud_storage_get_client_doubles,
+    seeded_file_context: FileDataContext,
+):
+    """
+    Ensure that all Datasources that require data_connectors have their data_connectors
+    created when loaded from config.
+    """
+    context = seeded_file_context
+    dc_datasources: dict[str, list[str]] = defaultdict(list)
+
+    assert context.fluent_datasources
+    for datasource in context.fluent_datasources.values():
+        if datasource.data_connector_type:
+            print(f"class: {datasource.__class__.__name__}")
+            print(f"type: {datasource.type}")
+            print(f"data_connector: {datasource.data_connector_type.__name__}")
+            print(f"name: {datasource.name}", end="\n\n")
+
+            dc_datasources[datasource.type].append(datasource.name)
+
+            for asset in datasource.assets:
+                assert isinstance(asset._data_connector, datasource.data_connector_type)
+            print()
+
+    print(f"Datasources with DataConnectors\n{pf(dict(dc_datasources))}")
+    assert dc_datasources
 
 
 if __name__ == "__main__":
