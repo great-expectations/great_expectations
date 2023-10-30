@@ -4116,6 +4116,14 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         except ValidationError:
             raise
 
+    @overload
+    def _normalize_absolute_or_relative_path(self, path: str) -> str:
+        ...
+
+    @overload
+    def _normalize_absolute_or_relative_path(self, path: None) -> None:
+        ...
+
     def _normalize_absolute_or_relative_path(
         self, path: Optional[str]
     ) -> Optional[str]:
