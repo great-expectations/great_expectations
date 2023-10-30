@@ -24,5 +24,5 @@ import LinkCard from '/docs/components/LinkCard';
 #### Host and share
 
 <LinkCardGrid>
-  <LinkCard topIcon label="Host and share Data Docs" description="Host and share Data Docs stored on a filesystem or a source data system" href="/docs/guides/setup/configuring_data_docs/host_and_share_data_docs" icon="/img/host_and_share_icon.svg"  />
+  <LinkCard topIcon label="Host and share Data Docs" description="Host and share Data Docs stored on a filesystem or a Data Source" href="/docs/guides/setup/configuring_data_docs/host_and_share_data_docs" icon="/img/host_and_share_icon.svg"  />
 </LinkCardGrid>

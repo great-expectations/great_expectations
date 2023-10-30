@@ -36,5 +36,3 @@ Contribute code or documentation
 
 We welcome contributions to Great Expectations. Please start with our :ref:`contributing` guide and don't be shy
 with questions!
-
-

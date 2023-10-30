@@ -17,35 +17,57 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def creds_populated() -> bool:
-    if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") or os.getenv("SNOWFLAKE_CI_ACCOUNT"):
-        return True
-    return False
+def connection_string() -> str:
+    if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
+        return "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci"
+    elif os.getenv("SNOWFLAKE_USER") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
+        return "snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser"
+    else:
+        pytest.skip("no snowflake credentials")
 
 
 @pytest.fixture
 def datasource(
     context: CloudDataContext,
-    creds_populated: bool,
+    connection_string: str,
 ) -> Iterator[SnowflakeDatasource]:
-    if not creds_populated:
-        pytest.skip("no snowflake credentials")
-
     datasource_name = f"i{uuid.uuid4().hex}"
     datasource = context.sources.add_snowflake(
         name=datasource_name,
-        connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
-        # NOTE: uncomment this and set SNOWFLAKE_USER to run tests against your own snowflake account
-        # connection_string="snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
+        connection_string=connection_string,
+        create_temp_table=False,
     )
+    datasource.create_temp_table = True
+    datasource = context.sources.add_or_update_snowflake(datasource=datasource)
+    assert (
+        datasource.create_temp_table is True
+    ), "The datasource was not updated in the previous method call."
     datasource.create_temp_table = False
-    # PP-690: this doesn't work due to a bug
-    # calling add_or_update_<datasource>() results in the datasource being deleted from the store
-    # _ = context.sources.add_or_update_snowflake(datasource)
-    # get_datasource() works, but we don't use the return object here,
-    # because it won't have the create_temp_table attribute set to False
-    # once the add_or_update bug above is fixed, we can use the get_datasource() return object
-    _ = context.get_datasource(datasource_name=datasource_name)
+    datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
+    assert (
+        datasource.create_temp_table is False
+    ), "The datasource was not updated in the previous method call."
+    datasource.create_temp_table = True
+    datasource_dict = datasource.dict()
+    # this is a bug - LATIKU-448
+    # call to datasource.dict() results in a ConfigStr that fails pydantic
+    # validation on SnowflakeDatasource
+    datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
+    datasource = context.sources.add_or_update_snowflake(**datasource_dict)
+    assert (
+        datasource.create_temp_table is True
+    ), "The datasource was not updated in the previous method call."
+    datasource.create_temp_table = False
+    datasource_dict = datasource.dict()
+    # this is a bug - LATIKU-448
+    # call to datasource.dict() results in a ConfigStr that fails pydantic
+    # validation on SnowflakeDatasource
+    datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
+    _ = context.add_or_update_datasource(**datasource_dict)
+    datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
+    assert (
+        datasource.create_temp_table is False
+    ), "The datasource was not updated in the previous method call."
     yield datasource
     # PP-692: this doesn't work due to a bug
     # calling delete_datasource() will fail with:

@@ -1,8 +1,8 @@
 ---
-sidebar_label: "Connect to SQL database source data"
-title: "Connect to SQL database source data"
+sidebar_label: "Connect to SQL database Data Assets"
+title: "Connect to SQL database Data Assets"
 id: connect_sql_source_data
-description: Connect to source data stored on SQL databases.
+description: Connect to Data Assets stored on SQL databases.
 toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
@@ -17,7 +17,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-Use the information provided here to connect to source data stored in SQL databases. Great Expectations (GX) uses SQLAlchemy to connect to SQL source data, and most of the SQL dialects supported by SQLAlchemy are also supported by GX. For more information about the SQL dialects supported by SQLAlchemy, see [Dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
+Use the information provided here to connect to Data Assets stored in SQL databases. Great Expectations (GX) uses SQLAlchemy to connect to SQL Data Assets, and most of the SQL dialects supported by SQLAlchemy are also supported by GX. For more information about the SQL dialects supported by SQLAlchemy, see [Dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
 <Tabs
   groupId="connect-sql-source-data"
@@ -34,7 +34,7 @@ Use the information provided here to connect to source data stored in SQL databa
 
 ## SQL
 
-Connect GX to a SQL database to access source data.
+Connect GX to a SQL database to access Data Assets.
 
 ### Prerequisites
 
@@ -51,7 +51,7 @@ Connect GX to a SQL database to access source data.
 
 ### Determine your connection string
 
-GX supports numerous SQL source data systems.  However, most SQL dialects have their own specifications for defining a connection string. See the dialect documentation to determine the connection string for your SQL database.
+GX supports numerous SQL Data Sources.  However, most SQL dialects have their own specifications for defining a connection string. See the dialect documentation to determine the connection string for your SQL database.
 
 :::info Some examples of different connection strings:
 
@@ -99,7 +99,7 @@ Run the following Python code to create a SQL Data Source:
 
 ## PostgreSQL
 
-Connect GX to a PostgreSQL database to access source data.
+Connect GX to a PostgreSQL database to access Data Assets.
 
 ### Prerequisites
 
@@ -186,7 +186,7 @@ Repeat the previous steps to add additional Data Assets.
 
 ## SQLite
 
-Connect GX to a SQLite database to access source data.
+Connect GX to a SQLite database to access Data Assets.
 
 ### Prerequisites
 
@@ -228,7 +228,7 @@ The following code is an example of a SQLite connection string format:
 
     SQLite stores datetime values as strings.  Because of this, a general SQL Data Source sees datetime columns as string columns. A SQLite Data Source has additional handling in place for these fields, and also has additional error reporting for SQLite specific issues.
 
-    If you are working with SQLite source data, use `add_sqlite(...)` to create your Data Source.
+    If you are working with SQLite Data Source, use `add_sqlite(...)` to create your Data Source.
     :::
 
 ### Connect to the data in a table (Optional)
@@ -264,7 +264,7 @@ Repeat the previous steps to add additional Data Assets.
 
 ## Snowflake
 
-Connect GX to a Snowflake database to access source data.
+Connect GX to a Snowflake database to access Data Assets.
 
 ### Prerequisites
 
@@ -378,7 +378,7 @@ Repeat the previous steps to add additional Data Assets.
 
 ## Databricks SQL
 
-Connect GX to Databricks to access source data.
+Connect GX to Databricks to access Data Assets.
 
 ### Prerequisites
 
@@ -573,9 +573,9 @@ gcloud app browse
 
 The URL to your app appears and opens in a new browser window. You can view the index page of your Data Docs site.
 
-### Connect to source data
+### Connect to a Data Source
 
-Connect to source data stored on a GCS or .
+Connect to a GCS or BigQuery Data Source.
 
 <Tabs
   groupId="connect-to-data-gcs-bigquery"
@@ -626,7 +626,7 @@ To configure the BigQuery Data Source, see [How to connect to a BigQuery databas
   ]}>
 <TabItem value="gcs">
 
-Use the `add_csv_asset` function to add a CSV `Asset` to your `Datasource`.
+Use the `add_csv_asset` function to add a CSV `Asset` to your `Data Source`.
 
 Configure the `prefix` and `batching_regex`. The `prefix` is the path to the GCS bucket where the files are located. `batching_regex` is a regular expression that indicates which files should be treated as Batches in the Asset, and how to identify them. For example:
 
@@ -650,7 +650,7 @@ Run the following code to use the `add_csv_asset` function to add an `Asset` nam
 </TabItem>
 <TabItem value="bigquery">
 
-You can add a BigQuery `Asset` into your `Datasource` as a table asset or query asset.
+You can add a BigQuery `Asset` into your `Data Source` as a table asset or query asset.
 
 In the following example, a table `Asset` named `my_table_asset` is built by naming the table in your BigQuery Database. 
 

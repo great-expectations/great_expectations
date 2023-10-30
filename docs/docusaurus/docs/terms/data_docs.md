@@ -58,7 +58,7 @@ context.build_data_docs()
 
 Data Docs sites are configured under the `data_docs_sites` key in your deployment's `great_expectations.yml` file. Users can specify:
 
-- which <TechnicalTag relative="../" tag="datasource" text="Datasources" /> to document (by default, all)
+- which <TechnicalTag relative="../" tag="datasource" text="Data Sources" /> to document (by default, all)
 - whether to include Expectations, validations and profiling results sections
 - where the Expectations and validations should be read from (filesystem, S3, Azure, or GCS)
 - where the HTML files should be written (filesystem, S3, Azure, or GCS)

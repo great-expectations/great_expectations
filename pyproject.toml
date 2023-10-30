@@ -354,7 +354,6 @@ filterwarnings = [
     # Ignores in this section are for items in Great Expectations that are deprecated but not yet removed. Once the
     # relevant code is removed, the warning ignore should also be removed.
     # By ignoring these warnings, we will be able to turn on "warnings are errors" in our pipelines.
-    'ignore: The parameter "save_changes" is deprecated as of v0.15.32; moving forward, changes made to Datasources will always be persisted by Store implementations. As support will be removed in v0.18, please omit the argument moving forward.:DeprecationWarning',
     # Example Actual Warning: great_expectations.exceptions.exceptions.MetricResolutionError: The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, please see: https://greatexpectations.io/blog/why-we-dont-do-transformations-for-expectations-and-when-we-do
     # Example warning location: test_column_partition_metric_pd
     'ignore: The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in v0.16.:DeprecationWarning',
@@ -368,15 +367,6 @@ filterwarnings = [
     # Example Actual Warning: (found in test_expect_queried_column_value_frequency_to_meet_threshold_override_query_sqlite)
     # UserWarning: `row_condition` is an experimental feature. Combining this functionality with QueryExpectations may result in unexpected behavior.
     'ignore: `row_condition` is an experimental feature. Combining this functionality with QueryExpectations may result in unexpected behavior.:UserWarning',
-    # Example Actual Warning: (found in test_render_types_module_deprecation_warning)
-    # DeprecationWarning: Importing the class CollapseContent from great_expectations.render.types is deprecated as of v0.15.32 in v0.18. Please import class CollapseContent from great_expectations.render.
-    'ignore: Importing the class CollapseContent from great_expectations.render.types is deprecated as of v0.15.32 in v0.18.:DeprecationWarning',
-    # Example Actual Warning: (found in test_notebook_execution_rule_based_profiler_with_pandas_backend)
-    # DeprecationWarning: save_profiler is deprecated as of v0.15.48 and will be removed in v0.18. Please use update_profiler or add_or_update_profiler instead.
-    'ignore: save_profiler is deprecated as of v0.15.48 and will be removed in v0.18.:DeprecationWarning',
-    # Example Actual Warning: (found in test_render_types_module_deprecation_warning)
-    # DeprecationWarning: Importing the class RenderedContent from great_expectations.render.types is deprecated as of v0.15.32 in v0.18. Please import class RenderedContent from great_expectations.render.
-    'ignore: Importing the class RenderedContent from great_expectations.render.types is deprecated as of v0.15.32 in v0.18.:DeprecationWarning',
     # Example Actual Warning: (found in test_golden_path_sql_datasource_configuration)
     # DeprecationWarning: get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16. Please use get_batch_list instead.
     'ignore: get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16.:DeprecationWarning',
@@ -386,9 +376,6 @@ filterwarnings = [
     # Example Actual Warning: (found in test_data_context)
     # UserWarning: Warning. An existing `config_variables.yml` was found here
     'ignore: Warning. An existing `config_variables.yml` was found here:UserWarning',
-    # Example Actual Warning: DeprecationWarning: A Checkpoint named oss_test_checkpoint already exists.;
-    # using add_checkpoint to overwrite an existing value is deprecated as of v0.16.16 and will be removed in v0.18. Please use add_or_update_checkpoint instead.
-    'ignore: A Checkpoint named :DeprecationWarning',
     # --------------------------------------- Great Expectations Deprecation Warnings ----------------------------------
 
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------

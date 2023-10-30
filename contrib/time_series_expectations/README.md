@@ -78,7 +78,7 @@ As all of those use cases are realized, we imagine the full class hierarchy for 
                 ExpectBatchAggregateStatisticToMatchArimaModel (ABC)
                     expect_batch_row_count_to_match_arima_model
                     expect_batch_most_recent_update_to_match_arima_model
-                
+
                 ... for other types of models
 
         *ColumnAggregateExpectation* (ABC)
@@ -92,7 +92,7 @@ As all of those use cases are realized, we imagine the full class hierarchy for 
                 expect_column_pair_values_to_match_prophet_date_model (:white_check_mark:)
                 expect_column_pair_values_to_match_prophet_timestamp_model
                 expect_column_pair_values_to_match_arima_model
-        
+
 Formatting conventions for the nested hierarchy above:
 
 * Abstract base classes are in CamelCase, and marked with (ABC).

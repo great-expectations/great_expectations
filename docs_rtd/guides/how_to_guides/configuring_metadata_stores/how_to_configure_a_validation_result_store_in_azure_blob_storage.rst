@@ -106,7 +106,7 @@ Steps
                      connection_string: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
                      container: <blob-container>
                      prefix: validations
-             
+
     .. tab-container:: tab1
         :title: Show Docs for V3 (Batch Request) API
 

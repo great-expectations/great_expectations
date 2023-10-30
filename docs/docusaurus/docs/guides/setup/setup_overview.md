@@ -12,7 +12,7 @@ Setting up GX OSS includes installing GX OSS and initializing your deployment. O
 
 After you've completed the setup for your production deployment, you can access all GX OSS features from your <TechnicalTag relative="../" tag="data_context" text="Data Context" />. Also, your <TechnicalTag relative="../" tag="store" text="Stores" /> and <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> will be optimized for your business requirements.
 
-To set up <TechnicalTag relative="../" tag="datasource" text="Datasources" />, <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />, and <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> see the specific topics for these components. 
+To set up <TechnicalTag relative="../" tag="datasource" text="Data Sources" />, <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />, and <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> see the specific topics for these components. 
 
 If you don't want to manage your own configurations and infrastructure, then GX Cloud might be the solution. If you're interested in participating in the Great Expectations Cloud Beta program, or you want to receive progress updates, [**sign up for the Beta program**](https://greatexpectations.io/cloud).
 

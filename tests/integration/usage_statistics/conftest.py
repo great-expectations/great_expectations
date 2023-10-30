@@ -7,6 +7,7 @@ from requests.adapters import HTTPAdapter, Retry
 def requests_session_with_retries() -> requests.Session:
     # https://stackoverflow.com/a/35636367
     session = requests.Session()
-    retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504])
+    # backoff factor above 1.0 means increasing sleep time between retries
+    retries = Retry(total=5, backoff_factor=1.25, status_forcelist=[502, 503, 504])
     session.mount("https://", HTTPAdapter(max_retries=retries))
     return session

@@ -21,9 +21,9 @@ All the code used in the examples is available in GitHub at this location: [how_
 
 ## Prepare your Batch Request
 
-In the following examples, you'll be using a Batch Request with multiple Batches and the Datasource that the Batch Request queries uses existing New York taxi trip data.
+In the following examples, you'll be using a Batch Request with multiple Batches and the Data Source that the Batch Request queries uses existing New York taxi trip data.
 
-This is the `Datasource` configuration:
+This is the `Data Source` configuration:
 
 ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py datasource_config"
 ```
@@ -34,7 +34,7 @@ This is the `BatchRequest` configuration:
 ```
 
 :::caution
-The Onboarding Data Assistant runs multiple queries against your `Datasource`. Data Assistant performance can vary significantly depending on the number of Batches, the number of records per Batch, and network latency. If Data Assistant runtimes are too long, use a smaller `BatchRequest`. You can also run the Onboarding Data Assistant on a single Batch when you expect the number of null records to be similar across Batches.
+The Onboarding Data Assistant runs multiple queries against your `Data Source`. Data Assistant performance can vary significantly depending on the number of Batches, the number of records per Batch, and network latency. If Data Assistant runtimes are too long, use a smaller `BatchRequest`. You can also run the Onboarding Data Assistant on a single Batch when you expect the number of null records to be similar across Batches.
 :::
 
 ## Prepare a new Expectation Suite
