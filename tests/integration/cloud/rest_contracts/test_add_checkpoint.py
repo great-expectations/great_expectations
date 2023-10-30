@@ -97,18 +97,17 @@ GET_CHECKPOINTS_MIN_RESPONSE_BODY: Final[dict] = {
     "contract_interaction",
     [
         ContractInteraction(
-            method="PUT",
+            method="POST",
             request_path=pathlib.Path(
                 "/",
                 "organizations",
                 EXISTING_ORGANIZATION_ID,
                 "checkpoints",
-                NON_EXISTING_CHECKPOINT_ID,
             ),
             request_body=PUT_CHECKPOINTS_MIN_REQUEST_BODY,
             upon_receiving="a request to create a Checkpoint",
             given="the Checkpoint is created",
-            response_status=204,
+            response_status=201,
             response_body="",
         ),
         ContractInteraction(
