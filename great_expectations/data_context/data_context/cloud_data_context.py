@@ -517,7 +517,6 @@ class CloudDataContext(SerializableDataContext):
 
         return DataContextConfig(**self.config_provider.substitute_config(config))
 
-    @override
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
@@ -606,6 +605,7 @@ class CloudDataContext(SerializableDataContext):
     ) -> bool:
         ...
 
+    @public_api
     @override
     def delete_expectation_suite(
         self,
@@ -741,7 +741,7 @@ class CloudDataContext(SerializableDataContext):
     def add_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
-        config_version: int | float = 1.0,  # noqa: PYI041
+        config_version: float = 1.0,
         template_name: str | None = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: str = "Checkpoint",
@@ -887,19 +887,6 @@ class CloudDataContext(SerializableDataContext):
             resource_name=name,
         )
 
-    @override
-    def _determine_key_for_profiler_save(
-        self, name: str, id: Optional[str]
-    ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
-        """
-        Note that this explicitly overriding the `AbstractDataContext` helper method called
-        in `self.save_profiler()`.
-
-        The only difference here is the creation of a Cloud-specific `GXCloudIdentifier`
-        instead of the usual `ConfigurationIdentifier` for `Store` interaction.
-        """
-        return GXCloudIdentifier(resource_type=GXCloudRESTResource.PROFILER, id=id)
-
     @classmethod
     def _load_cloud_backed_project_config(
         cls,
@@ -965,7 +952,6 @@ class CloudDataContext(SerializableDataContext):
         self,
         name: str | None = None,
         initialize: bool = True,
-        save_changes: bool | None = None,
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
@@ -976,7 +962,6 @@ class CloudDataContext(SerializableDataContext):
         return super()._add_datasource(
             name=name,
             initialize=initialize,
-            save_changes=save_changes,
             datasource=datasource,
             **kwargs,
         )

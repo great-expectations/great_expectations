@@ -40,7 +40,8 @@ jobs:
     # job only runs on main repo where we have access to credentials, or as part of the release
     if: |
       github.event.pull_request.head.repo.full_name == github.repository ||
-      (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
+      (github.event_name == 'push' && contains(github.ref, 'refs/tags/')) ||
+      github.event_name == 'merge_group'
     steps:
       - run: echo "This CI step only runs on the main repo, where we have access to credentials."
 
@@ -91,7 +92,6 @@ jobs:
             - 'tests/test_sets/**'
 
   docs-snippets:
-    name: docs-snippets
     needs: [unit-tests, docs-changes, doc-checks, ci-is-on-main-repo]
     # run on non-draft PRs with docs changes
     if: |
@@ -266,6 +266,9 @@ jobs:
       id-token: write
       contents: read
     runs-on: ubuntu-latest
+    env:
+      GX_CLOUD_BASE_URL: ${{vars.MERCURY_BASE_URL}}
+      PACT_BROKER_READ_WRITE_TOKEN: ${{secrets.PACT_BROKER_READ_WRITE_TOKEN}}
 
     steps:
       - name: Checkout
@@ -279,6 +282,11 @@ jobs:
             reqs/requirements-dev-test.txt
             setup.py
 
+      - name: Install dependencies
+        run: |
+          pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
+          invoke deps --gx-install -m 'cloud' -r test
+
       - name: Configure ECR AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -289,10 +297,8 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Install dependencies
-        run: |
-          pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
-          invoke deps --gx-install -m 'cloud' -r test
+      - name: Start services
+        run: docker compose -f assets/docker/mercury/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 120
 
       - name: Run the tests
         env:
@@ -300,14 +306,32 @@ jobs:
           AUTH0_API_AUDIENCE: ${{secrets.AUTH0_API_AUDIENCE}}
           AUTH0_MERCURY_API_CLIENT_ID: ${{secrets.AUTH0_MERCURY_API_CLIENT_ID}}
           AUTH0_MERCURY_API_CLIENT_SECRET: ${{secrets.AUTH0_MERCURY_API_CLIENT_SECRET}}
-          GX_CLOUD_BASE_URL: ${{vars.MERCURY_BASE_URL}}
           GX_CLOUD_ORGANIZATION_ID: ${{secrets.MERCURY_ORGANIZATION_ID}}
           GX_CLOUD_ACCESS_TOKEN: ${{secrets.MERCURY_ACCESS_TOKEN}}
+          PACT_DO_NOT_TRACK: true
           SNOWFLAKE_CI_ACCOUNT: ${{secrets.SNOWFLAKE_CI_ACCOUNT}}
           SNOWFLAKE_CI_USER_PASSWORD: ${{secrets.SNOWFLAKE_CI_USER_PASSWORD}}
           LOGGING_LEVEL: DEBUG
           ENVIRONMENT: local
         run: invoke ci-tests 'cloud' --up-services --verbose
+
+      - name: Get mercury version
+        run: |
+          curl -s ''${GX_CLOUD_BASE_URL}'/status' | \
+            python3 -c "import os, sys, json; api_version=json.load(sys.stdin)['api_version']; os.system(f'echo api_version={api_version}');" \
+            >> $GITHUB_OUTPUT
+        id: get_mercury_version
+
+      - name: Verify endpoint contracts
+        run: |
+          pact-verifier -r --provider-base-url=${GX_CLOUD_BASE_URL} \
+            --pact-url=tests/integration/cloud/rest_contracts/pacts/great_expectations-mercury.json \
+            --pact-broker-url=https://greatexpectations.pactflow.io/ \
+            --pact-broker-token=${PACT_BROKER_READ_WRITE_TOKEN} \
+            --provider=mercury \
+            --provider-version-branch=develop \
+            --provider-app-version=${{ steps.get_mercury_version.outputs.api_version }}
+
 
   marker-tests:
     needs: [unit-tests, static-analysis]

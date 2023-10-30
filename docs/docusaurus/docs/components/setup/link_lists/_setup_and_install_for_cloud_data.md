@@ -1,2 +1,2 @@
-- [Install Great Expectations with source data system dependencies](/docs/guides/setup/installation/install_gx)
+- [Install Great Expectations with Data Source dependencies](/docs/guides/setup/installation/install_gx)
 

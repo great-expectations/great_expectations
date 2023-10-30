@@ -14,7 +14,7 @@ Data is always viewed through the lens of an Execution Engine in Great Expectati
 
 ## Relationship to other objects
 
-Execution Engines are components of <TechnicalTag relative="../" tag="datasource" text="Datasources" />.  They accept <TechnicalTag relative="../" tag="batch_request" text="Batch Requests" /> and deliver Batches.  The Execution Engine is an underlying component of the Data Source, and when you interact with the Data Source it will handle the Execution Engine for you.
+Execution Engines are components of <TechnicalTag relative="../" tag="datasource" text="Data Sources" />.  They accept <TechnicalTag relative="../" tag="batch_request" text="Batch Requests" /> and deliver Batches.  The Execution Engine is an underlying component of the Data Source, and when you interact with the Data Source it will handle the Execution Engine for you.
 
 ## Use cases
 
@@ -28,7 +28,7 @@ When creating Custom Expectations and Metrics, often Execution Engine-specific l
 
 ## Standardized data and Expectations
 
-Execution engines handle the interactions with the source data.  They also wrap data from those source data systems with metadata that allows Great Expectations to read it regardless of its native format. Additionally, Execution Engines enable the calculations of Metrics used by Expectations so that they can operate in a format appropriate to their associated source data system.  Because of this, the same Expectations can be used to validate data from different Datasources, even if those Datasources interact with source data systems so different in nature that they require different Execution Engines to access their data. 
+Execution engines handle the interactions with the Data Source.  They also wrap data from the Data Source with metadata that allows Great Expectations to read it regardless of its native format. Additionally, Execution Engines enable the calculations of Metrics used by Expectations so that they can operate in a format appropriate to their associated Data Source.  Because of this, the same Expectations can be used to validate data from different Data Sources, even if those Data Sources interact with Data Sources so different in nature that they require different Execution Engines to access their data. 
 
 ## Deferred Metrics
 

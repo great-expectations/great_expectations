@@ -45,7 +45,7 @@ def test_get_metrics():
         ("column_values.null.count", "column=col2", ()): 1,
     }
     aborted_metrics = {}
-    mock_validator.compute_metrics_with_aborted_metrics.return_value = (
+    mock_validator.compute_metrics.return_value = (
         computed_metrics,
         aborted_metrics,
     )
@@ -182,7 +182,7 @@ def test_get_metrics_metrics_missing():
         ("column_values.null.count", "column=col2", ()): 1,
     }
     mock_aborted_metrics = {}
-    mock_validator.compute_metrics_with_aborted_metrics.return_value = (
+    mock_validator.compute_metrics.return_value = (
         mock_computed_metrics,
         mock_aborted_metrics,
     )
@@ -344,7 +344,7 @@ def test_get_metrics_with_exception():
         ("column_values.null.count", "column=col1", ()): 1,
         ("column_values.null.count", "column=col2", ()): 1,
     }
-    mock_validator.compute_metrics_with_aborted_metrics.return_value = (
+    mock_validator.compute_metrics.return_value = (
         computed_metrics,
         aborted_metrics,
     )
@@ -502,7 +502,7 @@ def test_get_metrics_with_column_type_missing():
         ("column_values.null.count", "column=col1", ()): 1,
         ("column_values.null.count", "column=col2", ()): 1,
     }
-    mock_validator.compute_metrics_with_aborted_metrics.return_value = (
+    mock_validator.compute_metrics.return_value = (
         computed_metrics,
         aborted_metrics,
     )
@@ -642,7 +642,7 @@ def test_get_metrics_only_gets_a_validator_once():
         ("column_values.null.count", "column=col1", ()): 1,
         ("column_values.null.count", "column=col2", ()): 1,
     }
-    mock_validator.compute_metrics_with_aborted_metrics.return_value = (
+    mock_validator.compute_metrics.return_value = (
         computed_metrics,
         aborted_metrics,
     )
