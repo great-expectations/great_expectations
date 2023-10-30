@@ -13,7 +13,7 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
     - Configured an Azure `storage account <https://docs.microsoft.com/en-us/azure/storage>`_ and get the `connection string <https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal>`_
     - Create the Azure Blob container. If you also wish to :ref:`host and share data docs on azure blob storage <how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_azure_blob_storage>` then you may setup this first and then use the ``$web`` existing container to store your expectations.
     - Identify the prefix (folder) where Expectations will be stored (you don't need to create the folder, the prefix is just part of the Blob name).
-    
+
 Steps
 -----
 

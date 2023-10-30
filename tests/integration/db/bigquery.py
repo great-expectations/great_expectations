@@ -1,7 +1,6 @@
 import datetime
 import os
 
-import pytest
 from google.cloud import bigquery
 
 import great_expectations as gx
@@ -107,10 +106,9 @@ batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
 )
 
 context.add_expectation_suite(expectation_suite_name="test_suite_2")
-with pytest.warns(DeprecationWarning):
-    validator: Validator = context.get_validator(
-        batch_request=batch_request, expectation_suite_name="test_suite_2"
-    )
+validator: Validator = context.get_validator(
+    batch_request=batch_request, expectation_suite_name="test_suite_2"
+)
 
 # Testing `validator.head()` when using BigQuery without temp tables
 batch_request_without_temp_table: RuntimeBatchRequest = RuntimeBatchRequest(

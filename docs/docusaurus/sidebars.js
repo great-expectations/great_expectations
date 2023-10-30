@@ -8,6 +8,38 @@ module.exports = {
       items: [
         {
           type: 'category',
+          label: 'About GX Cloud',
+          link: { type: 'doc', id: 'cloud/about_gx' },
+          items: [
+            {
+              type: 'link',
+              label: 'Workflow optimization',
+              href: '/docs/cloud/about_gx#workflow-optimization',
+            },
+            {
+              type: 'link',
+              label: 'GX Cloud workflow',
+              href: '/docs/cloud/about_gx#gx-cloud-workflow',
+            },
+            {
+              type: 'link',
+              label: 'Roles and responsibilities',
+              href: '/docs/cloud/about_gx#roles-and-responsibilities',
+            },
+            {
+              type: 'link',
+              label: 'Supported browsers',
+              href: '/docs/cloud/about_gx#supported-browsers',
+            },
+            {
+              type: 'link',
+              label: 'Get support',
+              href: '/docs/cloud/about_gx#get-support',
+            },
+          ]
+        },
+        {
+          type: 'category',
           label: 'GX Cloud Architecture and Deployment Patterns',
           link: { type: 'doc', id: 'cloud/gx_cloud_architecture_and_deployment_patterns' },
           items: [
