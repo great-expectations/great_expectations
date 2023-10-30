@@ -42,7 +42,7 @@ The following table lists the sequence of tasks that you complete in a typical G
 |------------------------------------------|--------------------------------------------------------------------|
 |[Set up GX Cloud](/docs/cloud/set_up_gx_cloud) | Set up your environment to get the most out of GX Cloud. Do it once, and you don't need to do it again.                                    | 
 | [Connect to a Data Asset on a Data Source](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset) | The Data Asset contains the data you want to examine and validate, and the Data Source is where the Data Asset is located. | 
-| [Create an Expectations](/docs/cloud/expectations/manage_expectations)    | Define verifiable assertions about your data.                       |  
+| [Create an Expectation](/docs/cloud/expectations/manage_expectations)    | Define verifiable assertions about your data.                       |  
 | [Run Validations](/docs/cloud/validations/manage_validations)                          | Run a Validation to determine if your data meets the assertions in the Expectation.                       |
 | (Optional) [Add and run Checkpoints](/docs/cloud/checkpoints/manage_checkpoints)       | Add and run Checkpoints to refine and confirm your Data Validations. |
 
