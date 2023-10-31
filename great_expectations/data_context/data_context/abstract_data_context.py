@@ -827,12 +827,25 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
         if self._datasource_store.cloud_mode:
+            existing_assets = {
+                str(asset.id): asset for asset in existing_datasource.assets
+            }
             existing_asset_ids = [str(asset.id) for asset in existing_datasource.assets]
             updated_asset_ids = [str(asset.id) for asset in updated_datasource.assets]
             asset_ids_to_delete = set(existing_asset_ids) - set(updated_asset_ids)
-            for asset_id in asset_ids_to_delete:
-                self._delete_asset(id=asset_id)
 
+            try:
+                for asset_id in asset_ids_to_delete:
+                    self._delete_asset(id=asset_id)
+            except gx_exceptions.StoreBackendError as e:
+                # revert update
+                self.datasources.set_datasource(
+                    name=datasource_name, ds=existing_datasource
+                )
+                raise gx_exceptions.DataContextError(
+                    message=f"Unable to update Datasource - an error occurred while attempting to delete Asset "
+                    f"'{existing_assets[asset_id].name}': {e.message}"
+                ) from e
 
         updated_datasource._data_context = self  # TODO: move from here?
         self._save_project_config()
