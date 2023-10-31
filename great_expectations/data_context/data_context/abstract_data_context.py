@@ -822,6 +822,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         if id_:
             updated_datasource.id = id_
 
+        updated_datasource = self.datasources.set_datasource(
+            name=datasource_name, ds=updated_datasource
+        )
+
         if self._datasource_store.cloud_mode:
             existing_asset_ids = [str(asset.id) for asset in existing_datasource.assets]
             updated_asset_ids = [str(asset.id) for asset in updated_datasource.assets]
@@ -829,9 +833,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             for asset_id in asset_ids_to_delete:
                 self._delete_asset(id=asset_id)
 
-        updated_datasource = self.datasources.set_datasource(
-            name=datasource_name, ds=updated_datasource
-        )
 
         updated_datasource._data_context = self  # TODO: move from here?
         self._save_project_config()
