@@ -32,7 +32,8 @@ from great_expectations.render import (
 )
 
 if TYPE_CHECKING:
-    from jinja2 import BaseLoader, Template
+    from jinja2 import BaseLoader
+    from jinja2 import Template as jTemplate
 
 
 class NoOpTemplate:
@@ -117,7 +118,7 @@ class DefaultJinjaView:
             document = document.to_json_dict()
         return t.render(document, **kwargs)
 
-    def _get_template(self, template_str: str) -> Template:
+    def _get_template(self, template_str: str) -> jTemplate:
         template = self.env.get_template(template_str)
         template.globals["now"] = lambda: datetime.datetime.now(datetime.timezone.utc)
 
