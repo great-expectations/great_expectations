@@ -1,6 +1,7 @@
 ---
 title: Home
 hide_title: true
+hide_table_of_contents: true
 slug: /
 ---
 
@@ -8,10 +9,6 @@ import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
 import GXCard from '@site/src/components/GXCard';
 
-
-
-
-<img src="/img/gx-logo.png" width="145" height="48" style={{marginBottom: "0.5rem"}} />
 
 # GX Docs
 
