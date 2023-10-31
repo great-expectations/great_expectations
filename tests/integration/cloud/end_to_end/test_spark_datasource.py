@@ -78,6 +78,7 @@ def batch_request(
 ) -> BatchRequest:
     pandas_df = pd.DataFrame(
         {
+            "id": [1, 2, 3, 4],
             "name": [1, 2, 3, 4],
         },
     )
