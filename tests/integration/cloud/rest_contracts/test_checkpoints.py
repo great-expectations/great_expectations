@@ -19,6 +19,21 @@ NON_EXISTENT_CHECKPOINT_ID: Final[str] = "6ed9a340-8469-4ee2-a300-ffbe5d09b49d"
 
 EXISTING_CHECKPOINT_ID: Final[str] = "4d734009-2c50-4222-bd71-9660f5b05fff"
 
+GET_CHECKPOINT_MIN_RESPONSE_BODY: Final[PactBody] = {
+    "data": {
+        "id": pact.Format().uuid,
+        "type": "checkpoint",
+        "attributes": {
+            "id": pact.Format().uuid,
+            "name": pact.Like("string checkpoint name"),
+            "organization_id": pact.Format().uuid,
+            "checkpoint_config": {},
+        },
+    }
+}
+
+GET_CHECKPOINT_NOT_FOUND_RESPONSE_BODY: Final[PactBody] = pact.Like("404 string")
+
 
 # Get Checkpoint
 GET_CHECKPOINT_MIN_CHECKPOINT_BODY: Final[PactBody] = {
