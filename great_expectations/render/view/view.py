@@ -36,11 +36,6 @@ if TYPE_CHECKING:
     from jinja2 import Template as jTemplate
 
 
-class NoOpTemplate:
-    def render(self, document):
-        return document
-
-
 class PrettyPrintTemplate:
     def render(self, document, indent=2) -> None:
         print(json.dumps(document, indent=indent))
