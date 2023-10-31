@@ -19,6 +19,8 @@ NON_EXISTENT_CHECKPOINT_ID: Final[str] = "6ed9a340-8469-4ee2-a300-ffbe5d09b49d"
 
 EXISTING_CHECKPOINT_ID: Final[str] = "4d734009-2c50-4222-bd71-9660f5b05fff"
 
+CHECKPOINT_TO_DELETE: Final[str] = "5f3814d6-a2e2-40f9-ba75-87ddf485c3a8"
+
 # Get Checkpoint
 GET_CHECKPOINT_MIN_CHECKPOINT_BODY: Final[PactBody] = {
     "id": pact.Format().uuid,
@@ -101,7 +103,7 @@ DELETE_CHECKPOINT_NOT_FOUND_RESPONSE_BODY: Final[PactBody] = pact.Like("404 stri
                 "organizations",
                 EXISTING_ORGANIZATION_ID,
                 "checkpoints",
-                EXISTING_CHECKPOINT_ID,
+                CHECKPOINT_TO_DELETE,
             ),
             upon_receiving="a request to delete an existing Checkpoint",
             given="the Checkpoint exists",
