@@ -1,5 +1,5 @@
 adr-tools-python==1.0.3
-black[jupyter]==23.3.0
+black[jupyter]==23.10.1
 invoke>=2.0.0
 mypy==1.6
 pre-commit>=2.21.0
