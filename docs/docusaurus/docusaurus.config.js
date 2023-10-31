@@ -176,6 +176,16 @@ module.exports = {
         },
       ],
     },
+    sidebarNav: {
+      bottomNav: {
+        items: [
+          {
+            label: 'GX Cloud Status',
+            href: 'https://status.greatexpectations.io/',
+          }
+        ]
+      }
+    },
     footer: {
       style: 'light',
       logo: {

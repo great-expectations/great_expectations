@@ -12,7 +12,7 @@ import LinkCard from '/docs/components/LinkCard';
 If you're eager to try GX Cloud, and you haven't requested a GX Cloud Beta account, <a href='https://greatexpectations.io/cloud'>sign up here</a>.
 </p>
 
-#### Get started
+### Get started
 
 <LinkCardGrid>
    <LinkCard topIcon label="About GX Cloud" description="Learn more about GX Cloud features and functionality and why it's the best choice for data validation." href="/docs/cloud/about_gx" icon="/img/small_gx_logo.png" />
@@ -20,7 +20,7 @@ If you're eager to try GX Cloud, and you haven't requested a GX Cloud Beta accou
   <LinkCard topIcon label="Quickstarts" description="Quickly start using GX Cloud with data platforms and orchestration tools." href="/docs/cloud/quickstarts/snowflake_quickstart" icon="/img/small_gx_logo.png" />
 </LinkCardGrid>
 
-## Manage
+### Manage
 
 <LinkCardGrid>
   <LinkCard topIcon label="Manage Data Assets" description="Create, edit, or delete a Data Asset." href="/docs/cloud/data_assets/manage_data_assets" icon="/img/small_gx_logo.png" />
