@@ -181,7 +181,7 @@ module.exports = {
         items: [
           {
             label: 'GX Cloud status',
-            href: 'https://status.greatexpectations.io/',
+            href: 'https://status.greatexpectations.io/?referral=docs-sidebar',
           }
         ]
       }
