@@ -5,14 +5,17 @@ import os
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Final, Generator, Literal, Protocol
 
+import numpy as np
 import pytest
 
 import great_expectations as gx
 from great_expectations.compatibility.sqlalchemy import TextClause
+from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import CloudDataContext
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
+    from great_expectations.compatibility import pyspark
     from great_expectations.compatibility.sqlalchemy import engine
 
 LOGGER: Final = logging.getLogger("tests")
@@ -98,3 +101,49 @@ def table_factory() -> Generator[TableFactory, None, None]:
             if schema:
                 conn.execute(TextClause(f"DROP SCHEMA IF EXISTS {schema}"))
             transaction.commit()
+
+
+@pytest.fixture
+def spark_df_from_pandas_df():
+    """
+    Construct a spark dataframe from pandas dataframe.
+    Returns:
+        Function that can be used in your test e.g.:
+        spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
+    """
+
+    def _construct_spark_df_from_pandas(
+        spark_session,
+        pandas_df,
+    ):
+        spark_df = spark_session.createDataFrame(
+            [
+                tuple(
+                    None if isinstance(x, (float, int)) and np.isnan(x) else x
+                    for x in record.tolist()
+                )
+                for record in pandas_df.to_records(index=False)
+            ],
+            pandas_df.columns.tolist(),
+        )
+        return spark_df
+
+    return _construct_spark_df_from_pandas
+
+
+@pytest.fixture
+def spark_session(test_backends) -> pyspark.SparkSession:
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+
+    from great_expectations.compatibility import pyspark
+
+    if pyspark.SparkSession:  # type: ignore[truthy-function]
+        return get_or_create_spark_application(
+            spark_config={
+                "spark.sql.catalogImplementation": "hive",
+                "spark.executor.memory": "450m",
+            }
+        )
+
+    raise ValueError("spark tests are requested, but pyspark is not installed")
