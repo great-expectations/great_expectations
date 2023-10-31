@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import datetime
 import json
 import re
 from collections import OrderedDict
 from string import Template as pTemplate
+from typing import TYPE_CHECKING, ClassVar
 from uuid import uuid4
 
 import mistune
@@ -14,8 +17,10 @@ from jinja2 import (
     select_autoescape,
 )
 
+from great_expectations.compatibility.typing_extensions import override
+
 try:
-    from jinja2 import contextfilter
+    from jinja2 import contextfilter  # type: ignore[attr-defined] # for jinja 2.0
 except ImportError:
     from jinja2 import pass_context as contextfilter
 
@@ -25,6 +30,9 @@ from great_expectations.render import (
     RenderedContent,
     RenderedDocumentContent,
 )
+
+if TYPE_CHECKING:
+    from jinja2 import BaseLoader, Template
 
 
 class NoOpTemplate:
@@ -55,7 +63,7 @@ class DefaultJinjaView:
 
     """
 
-    _template = NoOpTemplate
+    _template: ClassVar[str]
 
     def __init__(
         self, custom_styles_directory=None, custom_views_directory=None
@@ -66,7 +74,7 @@ class DefaultJinjaView:
         templates_loader = PackageLoader("great_expectations", "render/view/templates")
         styles_loader = PackageLoader("great_expectations", "render/view/static/styles")
 
-        loaders = [templates_loader, styles_loader]
+        loaders: list[BaseLoader] = [templates_loader, styles_loader]
         if self.custom_styles_directory:
             loaders.append(FileSystemLoader(self.custom_styles_directory))
         if self.custom_views_directory:
@@ -109,11 +117,8 @@ class DefaultJinjaView:
             document = document.to_json_dict()
         return t.render(document, **kwargs)
 
-    def _get_template(self, template):
-        if template is None:
-            return NoOpTemplate
-
-        template = self.env.get_template(template)
+    def _get_template(self, template_str: str) -> Template:
+        template = self.env.get_template(template_str)
         template.globals["now"] = lambda: datetime.datetime.now(datetime.timezone.utc)
 
         return template
@@ -187,7 +192,7 @@ class DefaultJinjaView:
             template_filename = f"markdown_{content_block_type}.j2"
         else:
             template_filename = f"{content_block_type}.j2"
-        template = self._get_template(template=template_filename)
+        template = self._get_template(template_str=template_filename)
         if content_block_id:
             return template.render(
                 jinja_context,
@@ -435,6 +440,7 @@ class DefaultJinjaView:
 class DefaultJinjaPageView(DefaultJinjaView):
     _template = "page.j2"
 
+    @override
     def _validate_document(self, document) -> None:
         assert isinstance(document, RenderedDocumentContent)
 
@@ -446,6 +452,7 @@ class DefaultJinjaIndexPageView(DefaultJinjaPageView):
 class DefaultJinjaSectionView(DefaultJinjaView):
     _template = "section.j2"
 
+    @override
     def _validate_document(self, document) -> None:
         assert isinstance(
             document["section"], dict
@@ -455,6 +462,7 @@ class DefaultJinjaSectionView(DefaultJinjaView):
 class DefaultJinjaComponentView(DefaultJinjaView):
     _template = "component.j2"
 
+    @override
     def _validate_document(self, document) -> None:
         assert isinstance(
             document["content_block"], dict
@@ -466,7 +474,8 @@ class DefaultMarkdownPageView(DefaultJinjaView):
     Convert a document to markdown format.
     """
 
-    def _validate_document(self, document: RenderedDocumentContent) -> bool:
+    @override
+    def _validate_document(self, document: RenderedDocumentContent) -> None:
         """
         Validate that the document is of the appropriate type at runtime.
         """
@@ -490,7 +499,8 @@ class DefaultMarkdownPageView(DefaultJinjaView):
         else:
             return super().render(document=document, template=template, **kwargs)
 
-    def render_string_template(self, template: pTemplate) -> pTemplate:
+    @override
+    def render_string_template(self, template: pTemplate) -> pTemplate | str:
         """
         Render string for markdown rendering. Bold all parameters and perform substitution.
         Args:
@@ -547,10 +557,11 @@ class DefaultMarkdownPageView(DefaultJinjaView):
             "$PARAMETER", "$$PARAMETER"
         )
 
-        return pTemplate(template.get("template")).safe_substitute(
+        return pTemplate(template["template"]).safe_substitute(
             template.get("params", {})
         )
 
+    @override
     @contextfilter
     def render_content_block(  # noqa: PLR0913
         self,
