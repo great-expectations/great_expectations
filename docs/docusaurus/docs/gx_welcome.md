@@ -1,7 +1,6 @@
 ---
 title: Home
-hide_title: true
-description: Learn everything you need to know about GX GX Cloud and GX Open Source Software (OSS).
+slug: /
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
