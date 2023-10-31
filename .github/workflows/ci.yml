@@ -92,10 +92,10 @@ jobs:
             - 'tests/test_sets/**'
 
   docs-snippets:
-    needs: [unit-tests, doc-checks, ci-is-on-main-repo]
+    needs: [unit-tests, docs-changes, doc-checks, ci-is-on-main-repo]
     # run on non-draft PRs with docs changes
     if: |
-      (github.event.pull_request.draft == false) ||
+      (github.event.pull_request.draft == false && needs.docs-changes.outputs.docs == 'true') ||
       (github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     strategy:
@@ -298,7 +298,9 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Start services
-        run: docker compose -f assets/docker/mercury/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 120
+        run: |
+          docker compose -f assets/docker/mercury/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 120 && \
+          docker compose -f assets/docker/spark/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 120
 
       - name: Run the tests
         env:
