@@ -12,7 +12,7 @@ import LinkCard from '/docs/components/LinkCard';
  GX Cloud might be the solution if you don't want to manage your own configurations and infrastructure. <a href='https://greatexpectations.io/cloud'>Sign up here</a> to learn more and get early access to GX Cloud.
 </p>
 
-#### Prepare
+### Prepare
 
 <LinkCardGrid>
   <LinkCard topIcon label="Get started with GX OSS" description="This is a great place to start if you're unfamiliar with GX OSS, or you want to use GX OSS with Databricks or a SQL Data Source in a production environment." href="/docs/guides/setup/get_started_lp" icon="/img/small_gx_logo.png" />
@@ -20,7 +20,7 @@ import LinkCard from '/docs/components/LinkCard';
   <LinkCard topIcon label="Connect to source data" description="Connect to source data stored on databases and local filesystems, request data from a Data Source, organize Batches in a file-based Data Asset, and connect GX OSS to SQL tables and data returned by SQL database queries." href="/docs/guides/connecting_to_your_data/connect_to_data_lp" icon="/img/small_gx_logo.png" />
 </LinkCardGrid>
 
-#### Identify, validate, and integrate
+### Identify, validate, and integrate
 
 <LinkCardGrid>
   <LinkCard topIcon label="Create Expectations" description="Create and manage Expectations and Expectation Suites." href="/docs/guides/expectations/expectations_lp" icon="/img/small_gx_logo.png" />
@@ -28,7 +28,7 @@ import LinkCard from '/docs/components/LinkCard';
   <LinkCard topIcon label="Integrations" description="Integrate GX OSS with commonly used data engineering tools." href="/docs/category/integrations" icon="/img/small_gx_logo.png" />
 </LinkCardGrid>
 
-#### Learn and contribute
+### Learn and contribute
 
 <LinkCardGrid>
   <LinkCard topIcon label="Reference" description="Supplemental information that will help you get the most out of GX OSS." href="/docs/reference/reference_overview" icon="/img/small_gx_logo.png" />
