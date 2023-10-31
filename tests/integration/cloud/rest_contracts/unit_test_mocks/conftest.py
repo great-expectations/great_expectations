@@ -51,7 +51,7 @@ def _reify_pact_body(
 
 def _get_mock_response_from_pact_response_body(
     status_code: int,
-    pact_response_body: dict,
+    pact_response_body: PactBody,
 ) -> requests.Response:
     response_body: JsonData = _reify_pact_body(
         body=pact_response_body,
