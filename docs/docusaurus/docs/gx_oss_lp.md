@@ -2,6 +2,8 @@
 sidebar_label: 'GX OSS'
 title: 'GX OSS'
 description: Get started with GX OSS and learn more about GX OSS features and functionality.
+pagination_next: null
+pagination_prev: null
 ---
 
 import LinkCardGrid from '/docs/components/LinkCardGrid';

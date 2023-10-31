@@ -1,5 +1,7 @@
 ---
 title: GX API reference
+pagination_next: null
+pagination_prev: null
 ---
 
 Great Expectations (GX) API reference content is generated from classes and methods docstrings.

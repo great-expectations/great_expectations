@@ -1,6 +1,8 @@
 ---
 id: glossary
 title: "Glossary"
+pagination_next: null
+pagination_prev: null
 ---
 
 [**Action:**](./terms/action.md) A Python class with a run method that takes a Validation Result and does something with it
