@@ -9,10 +9,6 @@
         scrollbar-gutter: stable;
       }
     }
-  
-    .menuWithAnnouncementBar {
-      margin-bottom: var(--docusaurus-announcement-bar-height);
-    }
   }
   
   html[data-theme="light"] .menu__listBottom {
