@@ -44,32 +44,6 @@ GET_CHECKPOINTS_MIN_RESPONSE_BODY: Final[PactBody] = {
     ),
 }
 
-
-# Get Checkpoint
-GET_CHECKPOINT_MIN_CHECKPOINT_BODY: Final[PactBody] = {
-    "id": pact.Format().uuid,
-    "type": "checkpoint",
-    "attributes": {
-        "id": pact.Format().uuid,
-        "name": pact.Like("string checkpoint name"),
-        "organization_id": pact.Format().uuid,
-        "checkpoint_config": {},
-    },
-}
-
-GET_CHECKPOINT_MIN_RESPONSE_BODY: Final[PactBody] = {
-    "data": pact.Like(GET_CHECKPOINT_MIN_CHECKPOINT_BODY)
-}
-GET_CHECKPOINT_NOT_FOUND_RESPONSE_BODY: Final[PactBody] = pact.Like("404 string")
-
-# Get Checkpoints
-GET_CHECKPOINTS_MIN_RESPONSE_BODY: Final[PactBody] = {
-    "data": pact.EachLike(
-        GET_CHECKPOINT_MIN_CHECKPOINT_BODY,
-        minimum=1,  # Default but writing it out for clarity
-    ),
-}
-
 # Delete Checkpoint
 DELETE_CHECKPOINT_MIN_RESPONSE_BODY: Final[PactBody] = pact.Like("204 string")
 DELETE_CHECKPOINT_NOT_FOUND_RESPONSE_BODY: Final[PactBody] = pact.Like("404 string")
