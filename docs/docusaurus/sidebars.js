@@ -40,18 +40,18 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'GX Cloud Architecture and Deployment Patterns',
+          label: 'GX Cloud architecture and deployment patterns',
           link: { type: 'doc', id: 'cloud/gx_cloud_architecture_and_deployment_patterns' },
           items: [
             {
               type: 'link',
-              label: 'Architecture',
-              href: '/docs/cloud/gx_cloud_architecture_and_deployment_patterns#architecture',
+              label: 'GX Cloud architecture',
+              href: '/docs/cloud/gx_cloud_architecture_and_deployment_patterns#gx-cloud-architecture',
             },
             {
               type: 'link',
-              label: 'Deployment Patterns',
-              href: '/docs/cloud/gx_cloud_architecture_and_deployment_patterns#deployment-patterns',
+              label: 'GX Deployment patterns',
+              href: '/docs/cloud/gx_cloud_architecture_and_deployment_patterns#gx-deployment-patterns',
             }
           ]
         },
