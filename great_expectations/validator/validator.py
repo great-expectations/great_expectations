@@ -551,7 +551,7 @@ class Validator:
             try:
                 expectation = expectation_impl(configuration)
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
-
+                print("ss")
                 if not self.interactive_evaluation and not self._active_validation:
                     validation_result = ExpectationValidationResult(
                         expectation_config=copy.deepcopy(expectation.configuration)
@@ -1023,7 +1023,6 @@ class Validator:
         evrs: List[ExpectationValidationResult]
 
         processed_configurations: List[ExpectationConfiguration] = []
-
         (
             expectation_validation_graphs,
             evrs,
@@ -1044,18 +1043,24 @@ class Validator:
         resolved_metrics: _MetricsDict
 
         try:
+            # for the "correct" way, we should be failing here
+            # metrics are resolved here.
+            # and there are no errors. why is it that we get and error
+            (resolved_metrics, aborted_metrics_info) = self._resolve_suite_level_graph(
+                graph=graph, runtime_configuration=runtime_configuration
+            )
             (
                 resolved_metrics,
                 evrs,
                 processed_configurations,
-            ) = self._resolve_suite_level_graph_and_process_metric_evaluation_errors(
-                graph=graph,
-                runtime_configuration=runtime_configuration,
+            ) = self._process_metric_evaluation_errors(
+                resolved_metrics=resolved_metrics,
                 expectation_validation_graphs=expectation_validation_graphs,
+                aborted_metrics_info=aborted_metrics_info,
                 evrs=evrs,
                 processed_configurations=processed_configurations,
-                show_progress_bars=self._determine_progress_bars(),
             )
+
         except Exception as err:
             # If a general Exception occurs during the execution of "ValidationGraph.resolve()", then
             # all expectations in the suite are impacted, because it is impossible to attribute the failure to a metric.
@@ -1070,13 +1075,17 @@ class Validator:
                 return evrs
             else:
                 raise err
-
+        # processed_configurations = [{"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "name", "batch_id": "projects-projects"}, "meta": {}}]
         configuration: ExpectationConfiguration
         result: ExpectationValidationResult
         for configuration in processed_configurations:
+            # how do we know that DBMS has to be called?
             try:
+                # print("goodbye")
                 runtime_configuration_default = copy.deepcopy(runtime_configuration)
-
+                # this is where we are broken:
+                # this error should be a better message
+                # THIS IS WHERE WE NEED TO CHANGE THINGS!? MAKE IT BETTER OK?!
                 result = configuration.metrics_validate(
                     metrics=resolved_metrics,
                     execution_engine=self._execution_engine,
@@ -1084,6 +1093,7 @@ class Validator:
                 )
                 evrs.append(result)
             except Exception as err:
+                print("googdbye")
                 if catch_exceptions:
                     exception_traceback = traceback.format_exc()
                     evrs = self._catch_exceptions_in_failing_expectation_validations(
@@ -1097,6 +1107,7 @@ class Validator:
 
         return evrs
 
+    # this method does WAY too much
     def _generate_metric_dependency_subgraphs_for_each_expectation_configuration(
         self,
         expectation_configurations: List[ExpectationConfiguration],
@@ -1127,7 +1138,8 @@ class Validator:
 
             evaluated_config = copy.deepcopy(configuration)
             evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
-
+            # all i know is that this solved the problem
+            # evaluated_config.kwargs.update({"column": "name"})
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
             validation_dependencies: ValidationDependencies = (
                 expectation_impl().get_validation_dependencies(
@@ -1136,7 +1148,6 @@ class Validator:
                     runtime_configuration=runtime_configuration,
                 )
             )
-
             try:
                 expectation_validation_graph: ExpectationValidationGraph = ExpectationValidationGraph(
                     configuration=evaluated_config,
@@ -1185,6 +1196,76 @@ class Validator:
         )
         return validation_graph
 
+    def _resolve_suite_level_graph(
+        self,
+        graph: ValidationGraph,
+        runtime_configuration: dict,
+    ) -> Tuple[
+        _MetricsDict,
+        Dict[
+            _MetricKey,
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ],
+    ]:
+        resolved_metrics: _MetricsDict
+        # the resolution doesn't happen correctly because the
+        aborted_metrics_info: Dict[
+            _MetricKey,
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ]
+
+        (
+            resolved_metrics,
+            aborted_metrics_info,
+        ) = self._metrics_calculator.resolve_validation_graph(
+            graph=graph,
+            runtime_configuration=runtime_configuration,
+            min_graph_edges_pbar_enable=0,
+        )
+        return resolved_metrics, aborted_metrics_info
+
+    def _process_metric_evaluation_errors(  # noqa: PLR0913
+        self,
+        resolved_metrics: _MetricsDict,
+        expectation_validation_graphs: List[ExpectationValidationGraph],
+        aborted_metrics_info: Dict[
+            _MetricKey,
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ],
+        evrs: List[ExpectationValidationResult],
+        processed_configurations: List[ExpectationConfiguration],
+    ):
+        # Trace MetricResolutionError occurrences to expectations relying on corresponding malfunctioning metrics.
+        rejected_configurations: List[ExpectationConfiguration] = []
+        print("stop me here")
+        for expectation_validation_graph in expectation_validation_graphs:
+            metric_exception_info: Set[
+                ExceptionInfo
+            ] = expectation_validation_graph.get_exception_info(
+                metric_info=aborted_metrics_info
+            )
+            # Report all MetricResolutionError occurrences impacting expectation and append it to rejected list.
+            if len(metric_exception_info) > 0:
+                configuration = expectation_validation_graph.configuration
+                for exception_info in metric_exception_info:
+                    result = ExpectationValidationResult(
+                        success=False,
+                        exception_info=exception_info,
+                        expectation_config=configuration,
+                    )
+                    evrs.append(result)
+
+                if configuration not in rejected_configurations:
+                    rejected_configurations.append(configuration)
+
+        # Exclude all rejected expectations from list of expectations cleared for validation.
+        for configuration in rejected_configurations:
+            processed_configurations.remove(configuration)
+
+        return resolved_metrics, evrs, processed_configurations
+
+    # maybe this is the method that needs to be updated
+    # TODO: make this method better and actuall do the thing
     def _resolve_suite_level_graph_and_process_metric_evaluation_errors(  # noqa: PLR0913
         self,
         graph: ValidationGraph,
@@ -1198,8 +1279,10 @@ class Validator:
         List[ExpectationValidationResult],
         List[ExpectationConfiguration],
     ]:
+        print("hellos")
         # Resolve overall suite-level graph and process any MetricResolutionError type exceptions that might occur.
         resolved_metrics: _MetricsDict
+        # the resolution doesn't happen correctly because the
         aborted_metrics_info: Dict[
             _MetricKey,
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],

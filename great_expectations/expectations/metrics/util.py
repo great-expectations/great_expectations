@@ -704,6 +704,7 @@ def get_dbms_compatible_metric_domain_kwargs(
             column_names=metric_domain_kwargs["column"],
             batch_columns_list=batch_columns_list,
         )
+        # how do we know this is the right one
         metric_domain_kwargs["column"] = column_name
     elif "column_A" in metric_domain_kwargs and "column_B" in metric_domain_kwargs:
         column_A_name: str | sqlalchemy.quoted_name = metric_domain_kwargs["column_A"]
@@ -771,6 +772,8 @@ def get_dbms_compatible_column_names(
     Returns:
         Single property-typed column name object or list of property-typed column name objects (depending on input).
     """
+    print("do we get dbms here?")
+
     normalized_typed_batch_columns_mappings: List[
         Tuple[str, str | sqlalchemy.quoted_name]
     ] = (
@@ -781,14 +784,16 @@ def get_dbms_compatible_column_names(
         )
         or []
     )
-
     element: Tuple[str, str | sqlalchemy.quoted_name]
     typed_batch_column_names_list: List[str | sqlalchemy.quoted_name] = [
         element[1] for element in normalized_typed_batch_columns_mappings
     ]
+    # this is the map. that is correct
+    # typed_batch_column_names_list = ['name']
+    # this is the value that exists there
+    # breakpoint()
     if isinstance(column_names, list):
         return typed_batch_column_names_list
-
     return typed_batch_column_names_list[0]
 
 
@@ -797,6 +802,9 @@ def verify_column_names_exist(
     batch_columns_list: List[str | sqlalchemy.quoted_name],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
 ) -> None:
+    # print("do we get down here?")
+    # nothing happens to the normalized mapping
+    # this is the problem
     _ = _verify_column_names_exist_and_get_normalized_typed_column_names_map(
         column_names=column_names,
         batch_columns_list=batch_columns_list,
@@ -862,7 +870,9 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
     normalized_batch_columns_mappings: List[
         Tuple[str, str | sqlalchemy.quoted_name]
     ] = []
-
+    print("I want to be here instead")
+    # we want to normalized_column_name_mapping : ('NAME', 'name')
+    # this is works because of the check
     normalized_column_name_mapping: Tuple[str, str | sqlalchemy.quoted_name] | None
     column_name: str
     for column_name in column_names_list:

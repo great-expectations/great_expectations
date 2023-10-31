@@ -1052,14 +1052,36 @@ class Expectation(metaclass=MetaExpectation):
                 runtime_configuration=runtime_configuration,
             )
         )
+        print("break here me")
+
+        # check here
+        validation_dependency_metric_configurations = (
+            validation_dependencies.get_metric_configurations()
+        )
+        for config in validation_dependency_metric_configurations:
+            if config.id not in metrics:
+                raise InvalidExpectationConfigurationError(
+                    f"we ran into an issue with {configuration}. Please check the configuration and try again."
+                )
+
         runtime_configuration["result_format"] = validation_dependencies.result_format
 
         metric_name: str
         metric_configuration: MetricConfiguration
+        print("break me")
+        # configuration is the current ExpectationConfiguration
+        # domain is not there
+        (
+            metric_name,
+            metric_configuration,
+            _,
+        ) = validation_dependencies.metric_configurations.items()
+        # this needs to be checked better
         provided_metrics: Dict[str, MetricValue] = {
             metric_name: metrics[metric_configuration.id]
             for metric_name, metric_configuration in validation_dependencies.metric_configurations.items()
         }
+        print("break me")
 
         expectation_validation_result: Union[
             ExpectationValidationResult, dict
@@ -1118,6 +1140,7 @@ class Expectation(metaclass=MetaExpectation):
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
+        print("have we found the validation dependencies")
         result_format: dict = runtime_configuration["result_format"]
         result_format = parse_result_format(result_format=result_format)
         return ValidationDependencies(

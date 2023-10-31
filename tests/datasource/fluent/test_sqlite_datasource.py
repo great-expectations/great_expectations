@@ -3,11 +3,14 @@ from __future__ import annotations
 import pathlib
 from contextlib import _GeneratorContextManager, contextmanager
 from typing import TYPE_CHECKING, Any, Callable, Generator, Optional
+from unittest import mock
 
 import pytest
 
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.datasource.fluent import SqliteDatasource
+from great_expectations.datasource.fluent.sql_datasource import TableAsset
 from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
 
 if TYPE_CHECKING:
@@ -197,3 +200,41 @@ def test_create_temp_table(empty_data_context, create_sqlite_source):
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
         _ = asset.get_batch_list_from_batch_request(asset.build_batch_request())
         assert source._execution_engine._create_temp_table is False
+
+
+@pytest.mark.unit
+def test_table_quoted_name_type_all_upper_if_consistent_sqlite():
+    table_names_in_dbms_schema: list[str] = [
+        "ACTORS",
+        "ARTISTS",
+        "ATHLETES",
+        "BUSINESS_PEOPLE",
+        "HEALTHCARE_WORKERS",
+        "ENGINEERS",
+        "LAWYERS",
+        "MUSICIANS",
+        "SCIENTISTS",
+        "LITERARY_PROFESSIONALS",
+    ]
+
+    asset_name: str
+    table_name: str
+
+    with mock.patch(
+        "great_expectations.datasource.fluent.sql_datasource.TableAsset.datasource",
+        new_callable=mock.PropertyMock,
+        return_value=SqliteDatasource(
+            name="my_sqlite_datasource", connection_string="sqlite:///"
+        ),
+    ):
+        for table_name in table_names_in_dbms_schema:
+            asset_name = f"{table_name}_asset"
+            table_asset = TableAsset(
+                name=asset_name,
+                table_name=table_name,
+                schema_name="my_schema",
+            )
+            assert str(table_asset.table_name) == table_name
+            assert str(table_asset.table_name.casefold()) != table_name
+            assert isinstance(table_asset.table_name, sqlalchemy.quoted_name)
+            assert table_asset.table_name in table_names_in_dbms_schema

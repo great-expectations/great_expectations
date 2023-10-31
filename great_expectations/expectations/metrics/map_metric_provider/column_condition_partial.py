@@ -166,6 +166,9 @@ def column_condition_partial(  # noqa: C901, PLR0915
                 metrics: Dict[str, Any],
                 runtime_configuration: dict,
             ):
+                # this is for table domains. we are fine
+                # HERE IS WHERE WE ACTUALLY NEED THE FUNCTION
+                # breakpoint()
                 metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
                     metric_domain_kwargs=metric_domain_kwargs,
                     batch_columns_list=metrics["table.columns"],

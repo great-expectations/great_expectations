@@ -867,6 +867,7 @@ class TableAsset(_SQLAsset):
 
         from great_expectations.compatibility import sqlalchemy
 
+        # print("hello")
         if sqlalchemy.quoted_name:
             if isinstance(table_name, sqlalchemy.quoted_name):
                 return table_name
