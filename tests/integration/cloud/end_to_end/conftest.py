@@ -132,10 +132,7 @@ def spark_df_from_pandas_df():
 
 
 @pytest.fixture
-def spark_session(test_backends) -> pyspark.SparkSession:
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("No spark backend selected.")
-
+def spark_session() -> pyspark.SparkSession:
     from great_expectations.compatibility import pyspark
 
     if pyspark.SparkSession:  # type: ignore[truthy-function]
