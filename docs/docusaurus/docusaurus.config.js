@@ -180,7 +180,7 @@ module.exports = {
       bottomNav: {
         items: [
           {
-            label: 'GX Cloud Status',
+            label: 'GX Cloud status',
             href: 'https://status.greatexpectations.io/',
           }
         ]
