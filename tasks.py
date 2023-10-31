@@ -180,7 +180,7 @@ def hooks(
         # used in CI - runs faster and only checks files that have changed
         cmds.extend(["--from-ref", "origin/HEAD", "--to-ref", "HEAD"])
 
-    ctx.run(" ".join(cmds))
+    ctx.run(" ".join(cmds), echo=True, pty=True)
 
     if sync:
         print("  Re-installing hooks ...")
@@ -809,8 +809,12 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         (
             "reqs/requirements-dev-cloud.txt",
             "reqs/requirements-dev-snowflake.txt",
+            "reqs/requirements-dev-spark.txt",
         ),
-        services=("mercury",),
+        services=(
+            "mercury",
+            "spark",
+        ),
         extra_pytest_args=("--cloud",),
     ),
     "databricks": TestDependencies(

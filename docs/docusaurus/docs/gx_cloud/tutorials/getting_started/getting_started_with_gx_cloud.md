@@ -135,7 +135,7 @@ expectation_suite.add_expectation(
 print(expectation_suite)
 
 # Save the Expectation Suite
-context.save_expectation_suite(expectation_suite=expectation_suite)
+context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
 ```
 
 With the Expectation defined above, we are stating that we _expect_ the column of your choice to always be populated. That is: none of the column's values should be null.

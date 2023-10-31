@@ -226,7 +226,7 @@ class CloudDataContext(SerializableDataContext):
         )
         if context_root_dir is None:
             context_root_dir = os.getcwd()  # noqa: PTH109
-            logger.info(
+            logger.debug(
                 f'context_root_dir was not provided - defaulting to current working directory "'
                 f'{context_root_dir}".'
             )
@@ -503,17 +503,24 @@ class CloudDataContext(SerializableDataContext):
             ),
             "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL,
         }
+        missing_config_vars_and_subs: list[tuple[str, str]] = []
         for config_variable, value in cloud_config_variable_defaults.items():
             if substitutions.get(config_variable) is None:
-                logger.info(
-                    f'Config variable "{config_variable}" was not found in environment or global config ('
-                    f'{self.GLOBAL_CONFIG_PATHS}). Using default value "{value}" instead. If you would '
-                    f"like to "
-                    f"use a different value, please specify it in an environment variable or in a "
-                    f"great_expectations.conf file located at one of the above paths, in a section named "
-                    f'"ge_cloud_config".'
-                )
                 substitutions[config_variable] = value
+                missing_config_vars_and_subs.append((config_variable, value))
+
+        if missing_config_vars_and_subs:
+            missing_config_var_repr = ", ".join(
+                [f"{var}={sub}" for var, sub in missing_config_vars_and_subs]
+            )
+            logger.info(
+                "Config variables were not found in environment or global config ("
+                f"{self.GLOBAL_CONFIG_PATHS}). Using default values instead. {missing_config_var_repr} ;"
+                " If you would like to "
+                "use a different value, please specify it in an environment variable or in a "
+                "great_expectations.conf file located at one of the above paths, in a section named "
+                '"ge_cloud_config".'
+            )
 
         return DataContextConfig(**self.config_provider.substitute_config(config))
 

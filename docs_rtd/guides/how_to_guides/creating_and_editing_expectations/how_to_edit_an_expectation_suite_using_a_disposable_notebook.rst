@@ -4,7 +4,7 @@ How to edit an Expectation Suite using a disposable notebook
 ==========================================================================
 
 Editing :ref:`Expectations` in a notebook is usually much more convenient than editing them as raw JSON objects. You can evaluate them against real data, examine the results, and calibrate parameters. Often, you also learn about your data in the process.
-    
+
 To simplify this workflow, the CLI command ``suite edit`` takes a named :ref:`Expectation Suite <reference__core_concepts__expectations__expectation_suites>` and uses it to *generate* an equivalent Jupyter notebook. You can then use this notebook as a disposable interface to edit your Expectations and optionally explore data.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
