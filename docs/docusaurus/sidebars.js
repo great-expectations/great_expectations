@@ -422,7 +422,10 @@ module.exports = {
     {
       type: 'category',
       label: 'Concepts',
-      link: { type: 'doc', id: 'conceptual_guides/learn_lp' },
+      link: { 
+        type: 'doc', 
+        id: 'conceptual_guides/learn_lp' 
+      },
       items: [
         'conceptual_guides/expectation_classes',
         'conceptual_guides/metricproviders',
