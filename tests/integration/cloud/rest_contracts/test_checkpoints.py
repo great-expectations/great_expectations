@@ -19,7 +19,6 @@ NON_EXISTENT_CHECKPOINT_ID: Final[str] = "6ed9a340-8469-4ee2-a300-ffbe5d09b49d"
 
 EXISTING_CHECKPOINT_ID: Final[str] = "4d734009-2c50-4222-bd71-9660f5b05fff"
 
-
 # Get Checkpoint
 GET_CHECKPOINT_MIN_CHECKPOINT_BODY: Final[PactBody] = {
     "id": pact.Format().uuid,
