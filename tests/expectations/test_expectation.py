@@ -23,31 +23,66 @@ class FakeColumnPairMapExpectation(expectation.ColumnPairMapExpectation):
 
 @pytest.fixture
 def metric_config_exists():
-    return [
-        MetricConfiguration(
-            metric_name="table.row_count",
-            metric_domain_kwargs={"batch_id": "projects-projects", "table": None},
-            metric_value_kwargs={},
-            id=("table.row_count", "56f4c287ce8deb0e68b08d220f1c452d", []),
-        )
-    ]
+    temp_metrics_config = MetricConfiguration(
+        metric_name="table.row_count",
+        metric_domain_kwargs={
+            "batch_id": "projects-projects",
+            "table": None,
+            "column": "name",
+            "row_condition": None,
+            "condition_parser": None,
+        },
+        metric_value_kwargs={
+            "result_format": {
+                "result_format": "BASIC",
+                "partial_unexpected_count": 20,
+                "include_unexpected_rows": False,
+            }
+        },
+    )
+    return [temp_metrics_config]
 
 
 @pytest.fixture
 def metric_config_does_not_exist():
-    return [
-        MetricConfiguration(
-            metric_name="table.row_count",
-            metric_domain_kwargs={"batch_id": "projects-projects", "table": None},
-            metric_value_kwargs={},
-            id=("table.row_count", "11111111111111111111111111111111", []),
-        )
-    ]
+    temp_metrics_config = MetricConfiguration(
+        metric_name="table.row_count",
+        metric_domain_kwargs={
+            "batch_id": "projects-projects",
+            "table": None,
+            "column": None,
+            "row_condition": None,
+            "condition_parser": None,
+        },
+        metric_value_kwargs={
+            "result_format": {
+                "result_format": "BASIC",
+                "partial_unexpected_count": 20,
+                "include_unexpected_rows": False,
+            }
+        },
+    )
+    return [temp_metrics_config]
 
 
 @pytest.fixture
 def metrics_dict():
-    return {("table.row_count", "56f4c287ce8deb0e68b08d220f1c452d", []): ["i_exist"]}
+    return {
+        (
+            "table.row_count",
+            "9fb963653447edb4ae8538917d6915bc",
+            "result_format={'result_format': 'BASIC', 'partial_unexpected_count': 20, 'include_unexpected_rows': False}",
+        ): "i_exist"
+    }
+
+
+@pytest.fixture
+def real_expectation_configuration():
+    return ExpectationConfiguration(
+        expectation_type="expect_column_values_to_not_be_null",
+        kwargs={"column": "name", "batch_id": "projects-projects"},
+        meta={},
+    )
 
 
 @pytest.fixture
@@ -184,19 +219,20 @@ def test_multicolumn_expectation_validation_errors_with_bad_mostly(
 @pytest.mark.unit
 def test_validate_dependencies_against_available_metrics(
     metric_config_exists,
-    metrics_config_does_not_exist,
+    metric_config_does_not_exist,
     metrics_dict,
-    fake_config,
+    real_expectation_configuration,
+    fake_expectation_configuration,
 ):
     expectation._validate_dependencies_against_available_metrics(
         validation_dependencies=metric_config_exists,
         metrics=metrics_dict,
-        configuration=fake_config,
+        configuration=real_expectation_configuration,
     )
 
     with pytest.raises(InvalidExpectationConfigurationError):
         expectation._validate_dependencies_against_available_metrics(
-            validation_dependencies=metrics_config_does_not_exist,
+            validation_dependencies=metric_config_does_not_exist,
             metrics=metrics_dict,
-            configuration=fake_config,
+            configuration=fake_expectation_configuration,
         )
