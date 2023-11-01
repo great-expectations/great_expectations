@@ -26,7 +26,7 @@ Here are just a few of the benefits you'll get with GX Cloud:
 
 ## GX Cloud architecture
 
-The following diagram provides an overview of the key components of the GX Cloud architecture:
+The following diagram provides an overview of the key GX Cloud architecture components:
 
 ![GX Cloud Architecture and Components](./architecture_deployment_images/gx_cloud_architecture_components.png)
 
