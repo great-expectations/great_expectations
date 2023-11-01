@@ -30,9 +30,6 @@ class MulticolumnDatetimeDifferenceInMonths(MulticolumnMapMetricProvider):
 
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, dataframe, start_datetime, end_datetime, gap, threshold, **kwargs):
-        print(f"threshold: {threshold}")
-        print(kwargs)
-
         def date_diff_in_months(row):
             col_start = to_datetime(row[start_datetime])
             col_end = to_datetime(row[end_datetime])
@@ -43,8 +40,6 @@ class MulticolumnDatetimeDifferenceInMonths(MulticolumnMapMetricProvider):
             diff_months = (col_end.year - col_start.year) * 12 + (
                 col_end.month - col_start.month
             )
-            print(row)
-            print(diff_months)
             return col_gap == diff_months or abs(col_gap - diff_months) <= threshold
 
         if threshold is None:
