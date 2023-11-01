@@ -23,6 +23,9 @@ class FakeColumnPairMapExpectation(expectation.ColumnPairMapExpectation):
 
 @pytest.fixture
 def metrics_dict():
+    """
+    Fixture for metrics dict, which represents Metrics already calculated for given Batch
+    """
     return {
         (
             "column_values.nonnull.unexpected_count",
@@ -35,6 +38,9 @@ def metrics_dict():
 def fake_metrics_config_list(
     metric_name: str, metric_domain_kwargs: Dict[str, Any]
 ) -> List[MetricConfiguration]:
+    """
+    Helper method to generate list of MetricConfiguration objects for tests.
+    """
     return [
         MetricConfiguration(
             metric_name=metric_name,
@@ -47,6 +53,9 @@ def fake_metrics_config_list(
 def fake_expectation_config(
     expectation_type: str, config_kwargs: Dict[str, Any]
 ) -> ExpectationConfiguration:
+    """
+    Helper method to generate of ExpectationConfiguration objects for tests.
+    """
     return ExpectationConfiguration(
         expectation_type=expectation_type,
         kwargs=config_kwargs,
