@@ -25,7 +25,7 @@
         <mxCell id="TUDYuU7qML7kbOazX5dM-7" value="GX OSS Client" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="380" y="430" width="100" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="TUDYuU7qML7kbOazX5dM-8" value="Storage for GX Cloud Account Data: Configurations, Metadata, and History" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+        <mxCell id="TUDYuU7qML7kbOazX5dM-8" value="GX Cloud Data Storage: Configurations, Metadata, and History" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="265" y="60" width="260" height="50" as="geometry" />
         </mxCell>
         <mxCell id="TUDYuU7qML7kbOazX5dM-9" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#FF9B67;" vertex="1" parent="1">

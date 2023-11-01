@@ -13,6 +13,16 @@ module.exports = {
           items: [
             {
               type: 'link',
+              label: 'GX Cloud architecture',
+              href: '/docs/cloud/gx_cloud_architecture_and_deployment_patterns#gx-cloud-architecture',
+            },
+            {
+              type: 'link',
+              label: 'GX Cloud deployment patterns',
+              href: '/docs/cloud/gx_cloud_architecture_and_deployment_patterns#gx-deployment-patterns',
+            },
+            {
+              type: 'link',
               label: 'Workflow optimization',
               href: '/docs/cloud/about_gx#workflow-optimization',
             },
@@ -36,23 +46,6 @@ module.exports = {
               label: 'Get support',
               href: '/docs/cloud/about_gx#get-support',
             },
-          ]
-        },
-        {
-          type: 'category',
-          label: 'GX Cloud architecture and deployment patterns',
-          link: { type: 'doc', id: 'cloud/gx_cloud_architecture_and_deployment_patterns' },
-          items: [
-            {
-              type: 'link',
-              label: 'GX Cloud architecture',
-              href: '/docs/cloud/gx_cloud_architecture_and_deployment_patterns#gx-cloud-architecture',
-            },
-            {
-              type: 'link',
-              label: 'GX Deployment patterns',
-              href: '/docs/cloud/gx_cloud_architecture_and_deployment_patterns#gx-deployment-patterns',
-            }
           ]
         },
         {
