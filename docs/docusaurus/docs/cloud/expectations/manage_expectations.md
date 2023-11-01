@@ -14,7 +14,7 @@ To learn more about Expectations, see [Expectation](../../terms/expectation.md).
 
 - You have a [Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset).
 
-## Create an Expectation
+## Add an Expectation
 
 1. In GX Cloud, click **Data Assets**.
 
