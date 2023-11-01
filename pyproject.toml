@@ -85,6 +85,7 @@ exclude = [
     'render/renderer/suite_edit_notebook_renderer\.py',                  # 7 - This is legacy code and will not be typed.
     'render/renderer/suite_scaffold_notebook_renderer\.py',              # 7 - This is legacy code and will not be typed.
     'render/renderer/datasource_new_notebook_renderer\.py',              # 4 - This is legacy code and will not be typed.
+    'render/renderer/checkpoint_new_notebook_renderer\.py',              # 9 - This is legacy code and will not be typed.
     # END ALWAYS EXCLUDE SECTION ######################################################
     #
     # #################################################################################
@@ -139,7 +140,6 @@ exclude = [
     'expectations/regex_based_column_map_expectation\.py',                                                 # 3
     'expectations/row_conditions\.py',                                                                     # 4
     'expectations/set_based_column_map_expectation\.py',                                                   # 3
-    'render/renderer/checkpoint_new_notebook_renderer\.py',                                                # 9
     'render/renderer/content_block/content_block\.py',                                                     # 5
     'render/renderer/content_block/exception_list_content_block\.py',                                      # 4
     'render/renderer/page_renderer\.py',                                                                   # 10
