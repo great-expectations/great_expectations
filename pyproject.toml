@@ -91,7 +91,6 @@ exclude = [
     # #################################################################################
     # TODO: complete typing for the following modules and remove from exclude list
     # number is the current number of typing errors for the excluded pattern
-
     'expectations/core/expect_column_values_to_be_of_type\.py',                                            # 12
     'expectations/core/expect_column_values_to_not_match_regex_list\.py',                                  # 2
     'expectations/core/expect_column_values_to_not_match_regex\.py',                                       # 2
