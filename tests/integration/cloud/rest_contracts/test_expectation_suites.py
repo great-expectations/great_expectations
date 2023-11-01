@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-import pathlib
-from typing import TYPE_CHECKING, Callable, Final
+from typing import TYPE_CHECKING, Final
 
 import pact
 import pytest
 
+from great_expectations.core import ExpectationSuite
 from great_expectations.data_context import CloudDataContext
+from great_expectations.exceptions import DataContextError
 from tests.integration.cloud.rest_contracts.conftest import (
     EXISTING_ORGANIZATION_ID,
-    ContractInteraction,
 )
 
 if TYPE_CHECKING:
@@ -19,6 +19,26 @@ if TYPE_CHECKING:
 NON_EXISTENT_EXPECTATION_SUITE_ID: Final[str] = "6ed9a340-8469-4ee2-a300-ffbe5d09b49d"
 
 EXISTING_EXPECTATION_SUITE_ID: Final[str] = "3705d38a-0eec-4bd8-9956-fdb34df924b6"
+
+
+POST_EXPECTATION_SUITE_MIN_REQUEST_BODY: Final[PactBody] = {
+    "data": {
+        "type": "expectation_suite",
+        "attributes": {
+            "suite": {
+                "meta": {"great_expectations_version": "0.13.23"},
+                "expectations": [
+                    {
+                        "kwargs": {"max_value": 3, "min_value": 1},
+                        "meta": {},
+                        "expectation_type": "expect_table_row_count_to_be_between",
+                    },
+                ],
+                "expectation_suite_name": "brand new suite",
+            }
+        },
+    },
+}
 
 POST_EXPECTATION_SUITE_MIN_RESPONSE_BODY: Final[PactBody] = {
     "data": {
@@ -151,9 +171,10 @@ def test_get_non_existent_expectation_suite(
     )
 
     with pact_test:
-        cloud_data_context.get_expectation_suite(
-            ge_cloud_id=NON_EXISTENT_EXPECTATION_SUITE_ID
-        )
+        with pytest.raises(DataContextError):
+            cloud_data_context.get_expectation_suite(
+                ge_cloud_id=NON_EXISTENT_EXPECTATION_SUITE_ID
+            )
 
 
 @pytest.mark.cloud
@@ -186,245 +207,212 @@ def test_get_expectation_suites(
 
 
 @pytest.mark.cloud
-@pytest.mark.parametrize(
-    "contract_interaction",
-    [
-        ContractInteraction(
-            method="POST",
-            request_path=pathlib.Path(
-                "/",
-                "organizations",
-                EXISTING_ORGANIZATION_ID,
-                "expectation-suites",
-            ),
-            upon_receiving="a request to post an Expectation Suite",
-            given="the Expectation Suite does not exist",
-            request_body={
-                "data": {
-                    "type": "expectation_suite",
-                    "attributes": {
-                        "suite": {
-                            "meta": {"great_expectations_version": "0.13.23"},
-                            "expectations": [
-                                {
-                                    "kwargs": {"max_value": 3, "min_value": 1},
-                                    "meta": {},
-                                    "expectation_type": "expect_table_row_count_to_be_between",
-                                },
-                            ],
-                            "expectation_suite_name": "brand new suite",
-                        }
-                    },
-                },
-            },
-            response_status=201,
-            response_body=POST_EXPECTATION_SUITE_MIN_RESPONSE_BODY,
-        ),
-    ],
-)
 def test_post_expectation_suite(
-    contract_interaction: ContractInteraction,
-    run_pact_test: Callable[[ContractInteraction], None],
+    pact_test: pact.Pact,
+    cloud_data_context: CloudDataContext,
 ) -> None:
-    run_pact_test(contract_interaction)
+    provider_state = "the Expectation Suite does not exist"
+    scenario = "a request to post an Expectation Suite"
+    method = "POST"
+    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
+    request_body = POST_EXPECTATION_SUITE_MIN_REQUEST_BODY
+    status = 201
+    response_body = POST_EXPECTATION_SUITE_MIN_RESPONSE_BODY
+
+    (
+        pact_test.given(provider_state=provider_state)
+        .upon_receiving(scenario=scenario)
+        .with_request(
+            method=method,
+            path=path,
+            body=request_body,
+        )
+        .will_respond_with(
+            status=status,
+            body=response_body,
+        )
+    )
+
+    suite_dict = POST_EXPECTATION_SUITE_MIN_REQUEST_BODY["data"]["attributes"]["suite"]
+    expectation_suite = ExpectationSuite(**suite_dict)
+
+    with pact_test:
+        cloud_data_context.add_expectation_suite(expectation_suite=expectation_suite)
+    cloud_data_context.delete_expectation_suite(expectation_suite=expectation_suite)
 
 
 @pytest.mark.cloud
-@pytest.mark.parametrize(
-    "contract_interaction",
-    [
-        ContractInteraction(
-            method="POST",
-            request_path=pathlib.Path(
-                "/",
-                "organizations",
-                EXISTING_ORGANIZATION_ID,
-                "expectation-suites",
-            ),
-            upon_receiving="a request to post an Expectation Suite",
-            given="an Expectation Suite with same name exists",
-            request_body={
-                "data": {
-                    "type": "expectation_suite",
-                    "attributes": {
-                        "suite": {
-                            "meta": {"great_expectations_version": "0.13.23"},
-                            "expectations": [
-                                {
-                                    "kwargs": {"max_value": 3, "min_value": 1},
-                                    "meta": {},
-                                    "expectation_type": "expect_table_row_count_to_be_between",
-                                },
-                            ],
-                            "expectation_suite_name": "brand new suite",
-                        }
-                    },
-                },
-            },
-            response_status=400,
-            response_body={
-                "errors": [
-                    {
-                        "detail": pact.Like(
-                            "Expectation Suite with name brand new suite already exists."
-                        )
-                    }
-                ]
-            },
-        ),
-    ],
-)
 def test_post_expectation_suite_with_existing_name(
-    contract_interaction: ContractInteraction,
-    run_pact_test: Callable[[ContractInteraction], None],
+    pact_test: pact.Pact,
+    cloud_data_context: CloudDataContext,
 ) -> None:
-    run_pact_test(contract_interaction)
+    provider_state = "an Expectation Suite with same name exists"
+    scenario = "a request to post an Expectation Suite"
+    method = "POST"
+    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
+    request_body = POST_EXPECTATION_SUITE_MIN_REQUEST_BODY
+    status = 400
+    response_body = {
+        "errors": [
+            {
+                "detail": pact.Like(
+                    "Expectation Suite with name brand new suite already exists."
+                )
+            }
+        ]
+    }
+
+    (
+        pact_test.given(provider_state=provider_state)
+        .upon_receiving(scenario=scenario)
+        .with_request(
+            method=method,
+            path=path,
+            body=request_body,
+        )
+        .will_respond_with(
+            status=status,
+            body=response_body,
+        )
+    )
+
+    suite_dict = POST_EXPECTATION_SUITE_MIN_REQUEST_BODY["data"]["attributes"]["suite"]
+    expectation_suite = ExpectationSuite(**suite_dict)
+
+    with pact_test:
+        cloud_data_context.add_expectation_suite(expectation_suite=expectation_suite)
 
 
 @pytest.mark.cloud
-@pytest.mark.parametrize(
-    "contract_interaction",
-    [
-        ContractInteraction(
-            method="PUT",
-            request_path=pathlib.Path(
-                "/",
-                "organizations",
-                EXISTING_ORGANIZATION_ID,
-                "expectation-suites",
-                EXISTING_EXPECTATION_SUITE_ID,
-            ),
-            upon_receiving="a request to put an Expectation Suite",
-            given="the Expectation Suite does exist",
-            request_body={
-                "data": {
-                    "type": "expectation_suite",
-                    "attributes": {
-                        "suite": {
-                            "meta": {"great_expectations_version": "0.13.23"},
-                            "expectations": [
-                                {
-                                    "kwargs": {"max_value": 3, "min_value": 1},
-                                    "meta": {},
-                                    "expectation_type": "expect_table_row_count_to_be_between",
-                                },
-                            ],
-                            "expectation_suite_name": "renamed suite",
-                        }
-                    },
-                },
-            },
-            response_status=204,
-            response_body=None,
-        ),
-    ],
-)
 def test_put_expectation_suite(
-    contract_interaction: ContractInteraction,
-    run_pact_test: Callable[[ContractInteraction], None],
+    pact_test: pact.Pact,
+    cloud_data_context: CloudDataContext,
 ) -> None:
-    run_pact_test(contract_interaction)
+    provider_state = "the Expectation Suite does exist"
+    scenario = "a request to put an Expectation Suite"
+    method = "PUT"
+    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites/{EXISTING_EXPECTATION_SUITE_ID}"
+    request_body = POST_EXPECTATION_SUITE_MIN_REQUEST_BODY
+    status = 204
+
+    (
+        pact_test.given(provider_state=provider_state)
+        .upon_receiving(scenario=scenario)
+        .with_request(
+            method=method,
+            path=path,
+            body=request_body,
+        )
+        .will_respond_with(
+            status=status,
+        )
+    )
+
+    suite_dict = POST_EXPECTATION_SUITE_MIN_REQUEST_BODY["data"]["attributes"]["suite"]
+    expectation_suite = ExpectationSuite(**suite_dict)
+
+    with pact_test:
+        cloud_data_context.add_expectation_suite(expectation_suite=expectation_suite)
+    cloud_data_context.delete_expectation_suite(expectation_suite=expectation_suite)
 
 
 @pytest.mark.cloud
-@pytest.mark.parametrize(
-    "contract_interaction",
-    [
-        ContractInteraction(
-            method="PUT",
-            request_path=pathlib.Path(
-                "/",
-                "organizations",
-                EXISTING_ORGANIZATION_ID,
-                "expectation-suites",
-                NON_EXISTENT_EXPECTATION_SUITE_ID,
-            ),
-            upon_receiving="a request to put an Expectation Suite",
-            given="the Expectation Suite does not exist",
-            request_body={
-                "data": {
-                    "type": "expectation_suite",
-                    "attributes": {
-                        "suite": {
-                            "meta": {"great_expectations_version": "0.13.23"},
-                            "expectations": [
-                                {
-                                    "kwargs": {"max_value": 3, "min_value": 1},
-                                    "meta": {},
-                                    "expectation_type": "expect_table_row_count_to_be_between",
-                                },
-                            ],
-                            "expectation_suite_name": "renamed suite",
-                        }
-                    },
-                },
-            },
-            response_status=404,
-            response_body=None,
-        ),
-    ],
-)
 def test_put_non_existent_expectation_suite(
-    contract_interaction: ContractInteraction,
-    run_pact_test: Callable[[ContractInteraction], None],
+    pact_test: pact.Pact,
+    cloud_data_context: CloudDataContext,
 ) -> None:
-    run_pact_test(contract_interaction)
+    provider_state = "the Expectation Suite does not exist"
+    scenario = "a request to put an Expectation Suite"
+    method = "PUT"
+    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites/{NON_EXISTENT_EXPECTATION_SUITE_ID}"
+    request_body = POST_EXPECTATION_SUITE_MIN_REQUEST_BODY
+    status = 404
+
+    (
+        pact_test.given(provider_state=provider_state)
+        .upon_receiving(scenario=scenario)
+        .with_request(
+            method=method,
+            path=path,
+            body=request_body,
+        )
+        .will_respond_with(
+            status=status,
+        )
+    )
+
+    suite_dict = POST_EXPECTATION_SUITE_MIN_REQUEST_BODY["data"]["attributes"]["suite"]
+    expectation_suite = ExpectationSuite(**suite_dict)
+
+    with pact_test:
+        cloud_data_context.add_expectation_suite(expectation_suite=expectation_suite)
 
 
 @pytest.mark.cloud
-@pytest.mark.parametrize(
-    "contract_interaction",
-    [
-        ContractInteraction(
-            method="DELETE",
-            request_path=pathlib.Path(
-                "/",
-                "organizations",
-                EXISTING_ORGANIZATION_ID,
-                "expectation-suites",
-            ),
-            request_params={
-                "name": "brand new suite",
-            },
-            upon_receiving="a request to delete an Expectation Suite",
-            given="the Expectation Suite does exist",
-            response_status=204,
-            response_body=None,
-        ),
-    ],
-)
 def test_delete_expectation_suite(
-    contract_interaction: ContractInteraction,
-    run_pact_test: Callable[[ContractInteraction], None],
+    pact_test: pact.Pact,
+    cloud_data_context: CloudDataContext,
 ) -> None:
-    run_pact_test(contract_interaction)
+    provider_state = "the Expectation Suite does exist"
+    scenario = "a request to delete an Expectation Suite"
+    method = "DELETE"
+    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
+    query = {
+        "name": "brand new suite",
+    }
+    status = 204
+
+    (
+        pact_test.given(provider_state=provider_state)
+        .upon_receiving(scenario=scenario)
+        .with_request(
+            method=method,
+            path=path,
+            query=query,
+        )
+        .will_respond_with(
+            status=status,
+        )
+    )
+
+    suite_dict = POST_EXPECTATION_SUITE_MIN_REQUEST_BODY["data"]["attributes"]["suite"]
+
+    with pact_test:
+        cloud_data_context.delete_expectation_suite(
+            expectation_suite_name=suite_dict["expectation_suite_name"]
+        )
 
 
 @pytest.mark.cloud
-@pytest.mark.parametrize(
-    "contract_interaction",
-    [
-        ContractInteraction(
-            method="DELETE",
-            request_path=pathlib.Path(
-                "/",
-                "organizations",
-                EXISTING_ORGANIZATION_ID,
-                "expectation-suites",
-                NON_EXISTENT_EXPECTATION_SUITE_ID,
-            ),
-            request_params={
-                "name": "brand new suite",
-            },
-            upon_receiving="a request to delete an Expectation Suite",
-            given="the Expectation Suite does not exist",
-            response_status=404,
-            response_body=None,
-        ),
-    ],
-)
 def test_delete_non_existent_expectation_suite(
-    contract_interaction: ContractInteraction,
-    run_pact_test: Callable[[ContractInteraction], None],
+    pact_test: pact.Pact,
+    cloud_data_context: CloudDataContext,
 ) -> None:
-    run_pact_test(contract_interaction)
+    provider_state = "the Expectation Suite does not exist"
+    scenario = "a request to delete an Expectation Suite"
+    method = "DELETE"
+    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
+    query = {
+        "name": "brand new suite",
+    }
+    status = 404
+
+    (
+        pact_test.given(provider_state=provider_state)
+        .upon_receiving(scenario=scenario)
+        .with_request(
+            method=method,
+            path=path,
+            query=query,
+        )
+        .will_respond_with(
+            status=status,
+        )
+    )
+
+    suite_dict = POST_EXPECTATION_SUITE_MIN_REQUEST_BODY["data"]["attributes"]["suite"]
+
+    with pact_test:
+        cloud_data_context.delete_expectation_suite(
+            expectation_suite_name=suite_dict["expectation_suite_name"]
+        )
