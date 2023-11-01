@@ -1027,6 +1027,8 @@ class SQLDatasource(Datasource):
         if cls.__name__ != "SQLDatasource":
             # This is already subclass of SQLDatasource, so we don't need to warn
             return v
+        if isinstance(v, ConfigStr):
+            v = v.template_str
         connector = v.split("://")[0].split("+")[0]
         if connector:
             from great_expectations.datasource.fluent.sources import _SourceFactories
