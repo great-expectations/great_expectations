@@ -135,7 +135,7 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'Manually create an empty Expectation Suite ',
+              label: 'Create an empty Expectation Suite ',
               href: '/docs/cloud/expectation_suites/manage_expectation_suites#manually-create-an-empty-expectation-suite',
             },
             {

@@ -12,6 +12,32 @@ pagination_prev: null
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.0
+* [BUGFIX] Only update self.assets if cloud deletion successful ([#8894](https://github.com/great-expectations/great_expectations/pull/8894))
+* [DOCS] DSB-321: Add workflow diagram to OSS Quickstart ([#8804](https://github.com/great-expectations/great_expectations/pull/8804))
+* [DOCS] Add @public_api to Method ([#8870](https://github.com/great-expectations/great_expectations/pull/8870))
+* [DOCS] Update Instances of Source Data to Data Source ([#8857](https://github.com/great-expectations/great_expectations/pull/8857))
+* [DOCS] Airflow tutorial ([#8858](https://github.com/great-expectations/great_expectations/pull/8858)) (thanks @r34ctor)
+* [DOCS] Create About GX Cloud Content ([#8834](https://github.com/great-expectations/great_expectations/pull/8834))
+* [MAINTENANCE] Use contract test response bodies as unit test mocks ([#8855](https://github.com/great-expectations/great_expectations/pull/8855))
+* [MAINTENANCE] Flakey usage-stats test fixes ([#8861](https://github.com/great-expectations/great_expectations/pull/8861))
+* [MAINTENANCE] Run `docs-snippets` tests on every PR ([#8866](https://github.com/great-expectations/great_expectations/pull/8866))
+* [MAINTENANCE] Increase docker compose up services timeout ([#8864](https://github.com/great-expectations/great_expectations/pull/8864))
+* [MAINTENANCE] Remove `docs-snippets` `name` ([#8867](https://github.com/great-expectations/great_expectations/pull/8867))
+* [MAINTENANCE] Column Descriptive Metrics: Remove compute_metrics_with_aborted_metrics ([#8865](https://github.com/great-expectations/great_expectations/pull/8865))
+* [MAINTENANCE] Bump @babel/traverse from 7.23.0 to 7.23.2 in /docs/docusaurus ([#8838](https://github.com/great-expectations/great_expectations/pull/8838))
+* [MAINTENANCE] Improve Cloud update Snowflake Data Source tests ([#8868](https://github.com/great-expectations/great_expectations/pull/8868))
+* [MAINTENANCE] Remove the deprecated save_changes parameters on ADC data source crud methods ([#8859](https://github.com/great-expectations/great_expectations/pull/8859))
+* [MAINTENANCE] Bump urllib3 from 1.26.17 to 1.26.18 in /docs_rtd ([#8840](https://github.com/great-expectations/great_expectations/pull/8840))
+* [MAINTENANCE] Cloud integration tests documentation ([#8871](https://github.com/great-expectations/great_expectations/pull/8871))
+* [MAINTENANCE] Remove deprecated code in advance of v18 release ([#8863](https://github.com/great-expectations/great_expectations/pull/8863))
+* [MAINTENANCE] Add contract interactions for GET and POST datasource ([#8877](https://github.com/great-expectations/great_expectations/pull/8877))
+* [MAINTENANCE] Add pre-commit autofix to PRs ([#8873](https://github.com/great-expectations/great_expectations/pull/8873))
+* [MAINTENANCE] Only run `docs-snippets` on doc changes ([#8880](https://github.com/great-expectations/great_expectations/pull/8880))
+* [MAINTENANCE] Quieter logging ([#8892](https://github.com/great-expectations/great_expectations/pull/8892))
+* [MAINTENANCE] E2E Test - Pandas In Memory with Cloud ([#8887](https://github.com/great-expectations/great_expectations/pull/8887))
+* [MAINTENANCE] Add `SparkDatasource` End-to-End test ([#8879](https://github.com/great-expectations/great_expectations/pull/8879))
+
 ### 0.17.23
 * [FEATURE] Unexpected index list with/without values - New parameter in result_format ([#8785](https://github.com/great-expectations/great_expectations/pull/8785)) (thanks @MMoussabbih)
 * [DOCS] Update Cloud Docs to Include Docker Methodology ([#8820](https://github.com/great-expectations/great_expectations/pull/8820))

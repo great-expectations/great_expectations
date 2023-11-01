@@ -78,7 +78,7 @@ services:
       test: timeout 10s bash -c ':> /dev/tcp/0.0.0.0/5000' || exit 1
       interval: 5s
       timeout: 2s
-      retries: 10
+      retries: 20
     depends_on:
       db-provisioner:
         condition: service_completed_successfully
