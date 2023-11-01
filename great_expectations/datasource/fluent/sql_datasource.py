@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import warnings
 from datetime import date, datetime
 from pprint import pformat as pf
 from typing import (
@@ -1013,6 +1014,34 @@ class SQLDatasource(Datasource):
     def execution_engine_type(self) -> Type[SqlAlchemyExecutionEngine]:
         """Returns the default execution engine type."""
         return SqlAlchemyExecutionEngine
+
+    @pydantic.validator("connection_string")
+    @classmethod
+    def _warn_for_more_specific_datasource_type(
+        cls, v: str | ConfigStr
+    ) -> str | ConfigStr:
+        """
+        Warns if a more specific datasource type may be more appropriate based on the connection string connector prefix.
+        """
+        # TODO: do this when when creating the engine instead of here?
+        if cls.__name__ != "SQLDatasource":
+            # This is already subclass of SQLDatasource, so we don't need to warn
+            return v
+        connector = v.split("://")[0].split("+")[0]
+        if connector:
+            from great_expectations.datasource.fluent.sources import _SourceFactories
+
+            more_specific_datasource: type[
+                Datasource
+            ] = _SourceFactories.type_lookup.get(connector)
+            # TODO: handle postgresql vs postgres type
+            if more_specific_datasource:
+                warnings.warn(
+                    f"You a using a generic SQLDatasource but a more specific {more_specific_datasource.__name__} "
+                    "may be more appropriate"
+                    " https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data"
+                )
+        return v
 
     def get_engine(self) -> sqlalchemy.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
