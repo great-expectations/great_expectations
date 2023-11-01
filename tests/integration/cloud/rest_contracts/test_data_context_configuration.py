@@ -1,24 +1,27 @@
 from __future__ import annotations
 
-import pathlib
-from typing import Callable, Final
+import os
+from typing import TYPE_CHECKING, Final
 
+import pact
 import pytest
-from pact import Format, Like
 
+import great_expectations as gx
 from tests.integration.cloud.rest_contracts.conftest import (
     EXISTING_ORGANIZATION_ID,
-    ContractInteraction,
 )
 
+if TYPE_CHECKING:
+    import requests
+
 GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[dict] = {
-    "anonymous_usage_statistics": Like(
+    "anonymous_usage_statistics": pact.Like(
         {
-            "data_context_id": Format().uuid,
+            "data_context_id": pact.Format().uuid,
             "enabled": False,
         }
     ),
-    "datasources": Like({}),
+    "datasources": pact.Like({}),
     "include_rendered_content": {
         "globally": True,
         "expectation_validation_result": True,
@@ -27,27 +30,54 @@ GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[dict] = {
 }
 
 
+@pytest.fixture
+def cloud_base_url() -> str:
+    try:
+        return os.environ["GX_CLOUD_BASE_URL"]
+    except KeyError as e:
+        raise OSError("GX_CLOUD_BASE_URL is not set in this environment.") from e
+
+
+@pytest.fixture
+def cloud_access_token() -> str:
+    try:
+        return os.environ["GX_CLOUD_ACCESS_TOKEN"]
+    except KeyError as e:
+        raise OSError("GX_CLOUD_ACCESS_TOKEN is not set in this environment.") from e
+
+
 @pytest.mark.cloud
-@pytest.mark.parametrize(
-    "contract_interaction",
-    [
-        ContractInteraction(
-            method="GET",
-            request_path=pathlib.Path(
-                "/",
-                "organizations",
-                EXISTING_ORGANIZATION_ID,
-                "data-context-configuration",
-            ),
-            upon_receiving="a request for a Data Context",
-            given="the Data Context exists",
-            response_status=200,
-            response_body=GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY,
-        ),
-    ],
-)
 def test_data_context_configuration(
-    contract_interaction: ContractInteraction,
-    run_pact_test: Callable[[ContractInteraction], None],
+    gx_cloud_session: requests.Session,
+    cloud_base_url: str,
+    cloud_access_token: str,
+    pact_test: pact.Pact,
 ) -> None:
-    run_pact_test(contract_interaction)
+    provider_state = "the Data Context exists"
+    scenario = "a request for a Data Context"
+    method = "GET"
+    path = f"{cloud_base_url}/organizations/{EXISTING_ORGANIZATION_ID}/data-context-configuration"
+    status = 200
+    response_body = GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY
+
+    (
+        pact_test.given(provider_state=provider_state)
+        .upon_receiving(scenario=scenario)
+        .with_request(
+            headers=dict(gx_cloud_session.headers),
+            method=method,
+            path=path,
+        )
+        .will_respond_with(
+            status=status,
+            body=response_body,
+        )
+    )
+
+    with pact_test:
+        _ = gx.get_context(
+            mode="cloud",
+            cloud_base_url=cloud_base_url,
+            cloud_organization_id=EXISTING_ORGANIZATION_ID,
+            cloud_access_token=cloud_access_token,
+        )
