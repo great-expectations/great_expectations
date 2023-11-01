@@ -1043,7 +1043,7 @@ class SQLDatasource(Datasource):
             # TODO: handle postgresql vs postgres type
             if more_specific_datasource:
                 warnings.warn(
-                    f"You a using a generic SQLDatasource but a more specific {more_specific_datasource.__name__} "
+                    f"You are using a generic SQLDatasource but a more specific {more_specific_datasource.__name__} "
                     "may be more appropriate"
                     " https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data"
                 )
