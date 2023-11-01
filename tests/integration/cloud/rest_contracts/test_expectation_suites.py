@@ -12,6 +12,7 @@ from tests.integration.cloud.rest_contracts.conftest import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.data_context import CloudDataContext
     from tests.integration.cloud.rest_contracts.conftest import PactBody
 
 
@@ -96,83 +97,92 @@ GET_EXPECTATION_SUITES_MIN_RESPONSE_BODY: Final[PactBody] = {
 
 
 @pytest.mark.cloud
-@pytest.mark.parametrize(
-    "contract_interaction",
-    [
-        ContractInteraction(
-            method="GET",
-            request_path=pathlib.Path(
-                "/",
-                "organizations",
-                EXISTING_ORGANIZATION_ID,
-                "expectation-suites",
-                EXISTING_EXPECTATION_SUITE_ID,
-            ),
-            upon_receiving="a request to get an Expectation Suite",
-            given="the Expectation Suite does exist",
-            response_status=200,
-            response_body=GET_EXPECTATION_SUITE_MIN_RESPONSE_BODY,
-        ),
-    ],
-)
 def test_get_expectation_suite(
-    contract_interaction: ContractInteraction,
-    run_pact_test: Callable[[ContractInteraction], None],
+    pact_test: pact.Pact,
+    cloud_data_context: CloudDataContext,
 ) -> None:
-    run_pact_test(contract_interaction)
+    provider_state = "the Expectation Suite does exist"
+    scenario = "a request to get an Expectation Suite"
+    method = "GET"
+    path = f"{cloud_data_context._cloud_config.base_url}/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites/{EXISTING_EXPECTATION_SUITE_ID}"
+    status = 200
+    response_body = GET_EXPECTATION_SUITE_MIN_RESPONSE_BODY
+
+    (
+        pact_test.given(provider_state=provider_state)
+        .upon_receiving(scenario=scenario)
+        .with_request(
+            method=method,
+            path=path,
+        )
+        .will_respond_with(
+            status=status,
+            body=response_body,
+        )
+    )
+
+    with pact_test:
+        cloud_data_context.get_expectation_suite(
+            ge_cloud_id=EXISTING_EXPECTATION_SUITE_ID
+        )
 
 
 @pytest.mark.cloud
-@pytest.mark.parametrize(
-    "contract_interaction",
-    [
-        ContractInteraction(
-            method="GET",
-            request_path=pathlib.Path(
-                "/",
-                "organizations",
-                EXISTING_ORGANIZATION_ID,
-                "expectation-suites",
-                NON_EXISTENT_EXPECTATION_SUITE_ID,
-            ),
-            upon_receiving="a request to get an Expectation Suite",
-            given="the Expectation Suite does not exist",
-            response_status=404,
-            response_body=None,
-        ),
-    ],
-)
 def test_get_non_existent_expectation_suite(
-    contract_interaction: ContractInteraction,
-    run_pact_test: Callable[[ContractInteraction], None],
+    pact_test: pact.Pact,
+    cloud_data_context: CloudDataContext,
 ) -> None:
-    run_pact_test(contract_interaction)
+    provider_state = "the Expectation Suite does not exist"
+    scenario = "a request to get an Expectation Suite"
+    method = "GET"
+    path = f"{cloud_data_context._cloud_config.base_url}/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites/{NON_EXISTENT_EXPECTATION_SUITE_ID}"
+    status = 404
+
+    (
+        pact_test.given(provider_state=provider_state)
+        .upon_receiving(scenario=scenario)
+        .with_request(
+            method=method,
+            path=path,
+        )
+        .will_respond_with(
+            status=status,
+        )
+    )
+
+    with pact_test:
+        cloud_data_context.get_expectation_suite(
+            ge_cloud_id=NON_EXISTENT_EXPECTATION_SUITE_ID
+        )
 
 
 @pytest.mark.cloud
-@pytest.mark.parametrize(
-    "contract_interaction",
-    [
-        ContractInteraction(
-            method="GET",
-            request_path=pathlib.Path(
-                "/",
-                "organizations",
-                EXISTING_ORGANIZATION_ID,
-                "expectation-suites",
-            ),
-            upon_receiving="a request to get Expectation Suites",
-            given="Expectation Suite exist",
-            response_status=200,
-            response_body=GET_EXPECTATION_SUITES_MIN_RESPONSE_BODY,
-        ),
-    ],
-)
 def test_get_expectation_suites(
-    contract_interaction: ContractInteraction,
-    run_pact_test: Callable[[ContractInteraction], None],
+    pact_test: pact.Pact,
+    cloud_data_context: CloudDataContext,
 ) -> None:
-    run_pact_test(contract_interaction)
+    provider_state = "Expectation Suite exist"
+    scenario = "a request to get Expectation Suites"
+    method = "GET"
+    path = f"{cloud_data_context._cloud_config.base_url}/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
+    status = 200
+    response_body = GET_EXPECTATION_SUITES_MIN_RESPONSE_BODY
+
+    (
+        pact_test.given(provider_state=provider_state)
+        .upon_receiving(scenario=scenario)
+        .with_request(
+            method=method,
+            path=path,
+        )
+        .will_respond_with(
+            status=status,
+            body=response_body,
+        )
+    )
+
+    with pact_test:
+        cloud_data_context.list_expectation_suites()
 
 
 @pytest.mark.cloud

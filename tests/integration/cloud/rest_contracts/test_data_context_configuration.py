@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from typing import TYPE_CHECKING, Final
 
 import pact
@@ -28,22 +27,6 @@ GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[dict] = {
         "expectation_suite": True,
     },
 }
-
-
-@pytest.fixture
-def cloud_base_url() -> str:
-    try:
-        return os.environ["GX_CLOUD_BASE_URL"]
-    except KeyError as e:
-        raise OSError("GX_CLOUD_BASE_URL is not set in this environment.") from e
-
-
-@pytest.fixture
-def cloud_access_token() -> str:
-    try:
-        return os.environ["GX_CLOUD_ACCESS_TOKEN"]
-    except KeyError as e:
-        raise OSError("GX_CLOUD_ACCESS_TOKEN is not set in this environment.") from e
 
 
 @pytest.mark.cloud

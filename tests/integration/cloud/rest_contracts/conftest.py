@@ -13,6 +13,7 @@ from typing_extensions import Annotated, TypeAlias  # noqa: TCH002
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.http import create_session
+from great_expectations.data_context import CloudDataContext
 
 if TYPE_CHECKING:
     from requests import Session
@@ -41,6 +42,34 @@ class RequestMethods(str, enum.Enum):
     PATCH = "PATCH"
     POST = "POST"
     PUT = "PUT"
+
+
+@pytest.fixture
+def cloud_base_url() -> str:
+    try:
+        return os.environ["GX_CLOUD_BASE_URL"]
+    except KeyError as e:
+        raise OSError("GX_CLOUD_BASE_URL is not set in this environment.") from e
+
+
+@pytest.fixture
+def cloud_access_token() -> str:
+    try:
+        return os.environ["GX_CLOUD_ACCESS_TOKEN"]
+    except KeyError as e:
+        raise OSError("GX_CLOUD_ACCESS_TOKEN is not set in this environment.") from e
+
+
+@pytest.fixture
+def cloud_data_context(
+    cloud_base_url: str,
+    cloud_access_token: str,
+) -> CloudDataContext:
+    return CloudDataContext(
+        cloud_base_url=cloud_base_url,
+        cloud_organization_id=EXISTING_ORGANIZATION_ID,
+        cloud_access_token=cloud_access_token,
+    )
 
 
 @pytest.fixture(scope="session")
