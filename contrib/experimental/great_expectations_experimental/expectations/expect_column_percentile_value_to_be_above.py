@@ -141,7 +141,9 @@ class ExpectColumnPercentileToBeAbove(ColumnAggregateExpectation):
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {
-        "tags": ["column aggregate expectation"],  # Tags for this Expectation in the Gallery
+        "tags": [
+            "column aggregate expectation"
+        ],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@kurt1984",  # Don't forget to add your github handle here!
         ],
