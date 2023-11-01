@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 
 PACT_MOCK_HOST: Final[str] = "localhost"
 PACT_MOCK_PORT: Final[int] = 9292
+PACT_MOCK_SERVICE_URL: Final[str] = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}"
 PACT_DIR: Final[str] = str(
     pathlib.Path(pathlib.Path(__file__).parent, "pacts").resolve()
 )
@@ -61,18 +62,6 @@ def cloud_access_token() -> str:
 
 
 @pytest.fixture
-def cloud_data_context(
-    cloud_base_url: str,
-    cloud_access_token: str,
-) -> CloudDataContext:
-    return CloudDataContext(
-        cloud_base_url=cloud_base_url,
-        cloud_organization_id=EXISTING_ORGANIZATION_ID,
-        cloud_access_token=cloud_access_token,
-    )
-
-
-@pytest.fixture(scope="session")
 def gx_cloud_session() -> Session:
     try:
         access_token = os.environ["GX_CLOUD_ACCESS_TOKEN"]
@@ -81,11 +70,32 @@ def gx_cloud_session() -> Session:
     return create_session(access_token=access_token)
 
 
+@pytest.fixture
+def cloud_data_context(
+    cloud_base_url: str,
+    cloud_access_token: str,
+) -> CloudDataContext:
+    cloud_data_context = CloudDataContext(
+        cloud_base_url=cloud_base_url,
+        cloud_organization_id=EXISTING_ORGANIZATION_ID,
+        cloud_access_token=cloud_access_token,
+    )
+    # we can't override the base url to use the mock service due to
+    # reliance on env vars, so instead we override with a real project config
+    project_config = cloud_data_context.config
+    return CloudDataContext(
+        cloud_base_url=PACT_MOCK_SERVICE_URL,
+        cloud_organization_id=EXISTING_ORGANIZATION_ID,
+        cloud_access_token=cloud_access_token,
+        project_config=project_config,
+    )
+
+
 def get_git_commit_hash() -> str:
     return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def pact_test(request) -> pact.Pact:
     pact_broker_base_url = "https://greatexpectations.pactflow.io"
     consumer_name = "great_expectations"

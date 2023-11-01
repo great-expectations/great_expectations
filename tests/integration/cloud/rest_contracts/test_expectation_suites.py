@@ -6,13 +6,13 @@ from typing import TYPE_CHECKING, Callable, Final
 import pact
 import pytest
 
+from great_expectations.data_context import CloudDataContext
 from tests.integration.cloud.rest_contracts.conftest import (
     EXISTING_ORGANIZATION_ID,
     ContractInteraction,
 )
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import CloudDataContext
     from tests.integration.cloud.rest_contracts.conftest import PactBody
 
 
@@ -104,7 +104,7 @@ def test_get_expectation_suite(
     provider_state = "the Expectation Suite does exist"
     scenario = "a request to get an Expectation Suite"
     method = "GET"
-    path = f"{cloud_data_context._cloud_config.base_url}/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites/{EXISTING_EXPECTATION_SUITE_ID}"
+    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites/{EXISTING_EXPECTATION_SUITE_ID}"
     status = 200
     response_body = GET_EXPECTATION_SUITE_MIN_RESPONSE_BODY
 
@@ -135,7 +135,7 @@ def test_get_non_existent_expectation_suite(
     provider_state = "the Expectation Suite does not exist"
     scenario = "a request to get an Expectation Suite"
     method = "GET"
-    path = f"{cloud_data_context._cloud_config.base_url}/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites/{NON_EXISTENT_EXPECTATION_SUITE_ID}"
+    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites/{NON_EXISTENT_EXPECTATION_SUITE_ID}"
     status = 404
 
     (
@@ -164,7 +164,7 @@ def test_get_expectation_suites(
     provider_state = "Expectation Suite exist"
     scenario = "a request to get Expectation Suites"
     method = "GET"
-    path = f"{cloud_data_context._cloud_config.base_url}/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
+    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
     status = 200
     response_body = GET_EXPECTATION_SUITES_MIN_RESPONSE_BODY
 
