@@ -1,5 +1,5 @@
 import itertools
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import pytest
 
@@ -22,79 +22,29 @@ class FakeColumnPairMapExpectation(expectation.ColumnPairMapExpectation):
 
 
 @pytest.fixture
-def metric_config_exists():
-    temp_metrics_config = MetricConfiguration(
-        metric_name="table.row_count",
-        metric_domain_kwargs={
-            "batch_id": "projects-projects",
-            "table": None,
-            "column": "name",
-            "row_condition": None,
-            "condition_parser": None,
-        },
-        metric_value_kwargs={
-            "result_format": {
-                "result_format": "BASIC",
-                "partial_unexpected_count": 20,
-                "include_unexpected_rows": False,
-            }
-        },
-    )
-    return [temp_metrics_config]
-
-
-@pytest.fixture
-def metric_config_does_not_exist():
-    temp_metrics_config = MetricConfiguration(
-        metric_name="table.row_count",
-        metric_domain_kwargs={
-            "batch_id": "projects-projects",
-            "table": None,
-            "column": None,
-            "row_condition": None,
-            "condition_parser": None,
-        },
-        metric_value_kwargs={
-            "result_format": {
-                "result_format": "BASIC",
-                "partial_unexpected_count": 20,
-                "include_unexpected_rows": False,
-            }
-        },
-    )
-    return [temp_metrics_config]
-
-
-@pytest.fixture
 def metrics_dict():
     return {
         (
-            "table.row_count",
-            "9fb963653447edb4ae8538917d6915bc",
-            "result_format={'result_format': 'BASIC', 'partial_unexpected_count': 20, 'include_unexpected_rows': False}",
+            "column_values.nonnull.unexpected_count",
+            "e197e9d84e4f8aa077b8dd5f9042b382",
+            (),
         ): "i_exist"
     }
 
 
-@pytest.fixture
-def real_expectation_configuration():
-    return ExpectationConfiguration(
-        expectation_type="expect_column_values_to_not_be_null",
-        kwargs={"column": "name", "batch_id": "projects-projects"},
-        meta={},
-    )
+def fake_metrics_config_list(
+    metric_name: str, metric_domain_kwargs: Dict[str, Any]
+) -> List[MetricConfiguration]:
+    return [
+        MetricConfiguration(
+            metric_name=metric_name,
+            metric_domain_kwargs=metric_domain_kwargs,
+            metric_value_kwargs={},
+        )
+    ]
 
 
-@pytest.fixture
-def fake_expectation_configuration():
-    return ExpectationConfiguration(
-        expectation_type="expect_column_values_to_not_be_null",
-        kwargs={"column": "I_dont_exist_either", "batch_id": "projects-projects"},
-        meta={},
-    )
-
-
-def fake_config(
+def fake_expectation_config(
     expectation_type: str, config_kwargs: Dict[str, Any]
 ) -> ExpectationConfiguration:
     return ExpectationConfiguration(
@@ -109,15 +59,17 @@ def fake_config(
     [
         (
             FakeMulticolumnExpectation,
-            fake_config("fake_multicolumn_expectation", {"column_list": []}),
+            fake_expectation_config(
+                "fake_multicolumn_expectation", {"column_list": []}
+            ),
         ),
         (
             FakeColumnMapExpectation,
-            fake_config("fake_column_map_expectation", {"column": "col"}),
+            fake_expectation_config("fake_column_map_expectation", {"column": "col"}),
         ),
         (
             FakeColumnPairMapExpectation,
-            fake_config(
+            fake_expectation_config(
                 "fake_column_pair_map_expectation",
                 {"column_A": "colA", "column_B": "colB"},
             ),
@@ -144,7 +96,7 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
             [
                 (
                     FakeMulticolumnExpectation,
-                    fake_config(
+                    fake_expectation_config(
                         "fake_multicolumn_expectation", {"column_list": [], "mostly": x}
                     ),
                 )
@@ -153,7 +105,7 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
             [
                 (
                     FakeColumnMapExpectation,
-                    fake_config(
+                    fake_expectation_config(
                         "fake_column_map_expectation", {"column": "col", "mostly": x}
                     ),
                 )
@@ -162,7 +114,7 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
             [
                 (
                     FakeColumnPairMapExpectation,
-                    fake_config(
+                    fake_expectation_config(
                         "fake_column_pair_map_expectation",
                         {"column_A": "colA", "column_B": "colB", "mostly": x},
                     ),
@@ -190,19 +142,19 @@ def test_expectation_succeeds_with_valid_mostly(fake_expectation_cls, config):
     [
         (
             FakeMulticolumnExpectation,
-            fake_config(
+            fake_expectation_config(
                 "fake_multicolumn_expectation", {"column_list": [], "mostly": -0.5}
             ),
         ),
         (
             FakeColumnMapExpectation,
-            fake_config(
+            fake_expectation_config(
                 "fake_column_map_expectation", {"column": "col", "mostly": 1.5}
             ),
         ),
         (
             FakeColumnPairMapExpectation,
-            fake_config(
+            fake_expectation_config(
                 "fake_column_pair_map_expectation",
                 {"column_A": "colA", "column_B": "colB", "mostly": -1},
             ),
@@ -217,22 +169,41 @@ def test_multicolumn_expectation_validation_errors_with_bad_mostly(
 
 
 @pytest.mark.unit
-def test_validate_dependencies_against_available_metrics(
-    metric_config_exists,
-    metric_config_does_not_exist,
-    metrics_dict,
-    real_expectation_configuration,
-    fake_expectation_configuration,
-):
+def test_validate_dependencies_against_available_metrics_success(metrics_dict):
+    metric_config_list: List[MetricConfiguration] = fake_metrics_config_list(
+        metric_name="column_values.nonnull.unexpected_count",
+        metric_domain_kwargs={
+            "batch_id": "projects-projects",
+            "column": "i_exist",
+        },
+    )
+    expectation_configuration: ExpectationConfiguration = fake_expectation_config(
+        expectation_type="expect_column_values_to_not_be_null",
+        config_kwargs={"column": "i_exist", "batch_id": "projects-projects"},
+    )
     expectation._validate_dependencies_against_available_metrics(
-        validation_dependencies=metric_config_exists,
+        validation_dependencies=metric_config_list,
         metrics=metrics_dict,
-        configuration=real_expectation_configuration,
+        configuration=expectation_configuration,
     )
 
+
+@pytest.mark.unit
+def test_validate_dependencies_against_available_metrics_failure(metrics_dict):
+    metric_config_list: List[MetricConfiguration] = fake_metrics_config_list(
+        metric_name="column_values.nonnull.unexpected_count",
+        metric_domain_kwargs={
+            "batch_id": "projects-projects",
+            "column": "i_dont_exist",
+        },
+    )
+    expectation_configuration: ExpectationConfiguration = fake_expectation_config(
+        expectation_type="expect_column_values_to_not_be_null",
+        config_kwargs={"column": "i_dont_exist", "batch_id": "projects-projects"},
+    )
     with pytest.raises(InvalidExpectationConfigurationError):
         expectation._validate_dependencies_against_available_metrics(
-            validation_dependencies=metric_config_does_not_exist,
+            validation_dependencies=metric_config_list,
             metrics=metrics_dict,
-            configuration=fake_expectation_configuration,
+            configuration=expectation_configuration,
         )
