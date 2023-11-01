@@ -575,7 +575,7 @@ class DefaultMarkdownPageView(DefaultJinjaView):
         index: Any | None = None,
         content_block_id: str | None = None,
         render_to_markdown: bool = True,
-    ) -> str:
+    ) -> RenderedComponentContent | dict | str:
         """
         Render a content block to markdown using jinja templates.
         Args:
