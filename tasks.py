@@ -809,8 +809,12 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         (
             "reqs/requirements-dev-cloud.txt",
             "reqs/requirements-dev-snowflake.txt",
+            "reqs/requirements-dev-spark.txt",
         ),
-        services=("mercury",),
+        services=(
+            "mercury",
+            "spark",
+        ),
         extra_pytest_args=("--cloud",),
     ),
     "databricks": TestDependencies(

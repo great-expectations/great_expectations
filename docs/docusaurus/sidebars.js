@@ -135,7 +135,7 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'Manually create an empty Expectation Suite ',
+              label: 'Create an empty Expectation Suite ',
               href: '/docs/cloud/expectation_suites/manage_expectation_suites#manually-create-an-empty-expectation-suite',
             },
             {
@@ -422,7 +422,10 @@ module.exports = {
     {
       type: 'category',
       label: 'Concepts',
-      link: { type: 'doc', id: 'conceptual_guides/learn_lp' },
+      link: { 
+        type: 'doc', 
+        id: 'conceptual_guides/learn_lp' 
+      },
       items: [
         'conceptual_guides/expectation_classes',
         'conceptual_guides/metricproviders',
@@ -479,8 +482,6 @@ module.exports = {
               ]
             },
             'terms/expectation_suite',
-            'terms/metric',
-            'conceptual_guides/metricproviders',
             'terms/metric',
             {
               type: 'category',
