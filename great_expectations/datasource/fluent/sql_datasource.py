@@ -974,13 +974,24 @@ def _warn_for_more_specific_datasource_type(connection_string: str) -> None:
     from great_expectations.datasource.fluent.sources import _SourceFactories
 
     connector: str = connection_string.split("://")[0].split("+")[0]
-    more_specific_datasource: type[Datasource] = _SourceFactories.type_lookup.get(
-        connector
+
+    type_lookup_plus: dict[str, str] = {
+        n: _SourceFactories.type_lookup[n].__name__
+        for n in _SourceFactories.type_lookup.type_names()
+    }
+    # type names are not always exact match to connector strings
+    type_lookup_plus.update(
+        {
+            "postgresql": type_lookup_plus["postgres"],
+            "databricks": type_lookup_plus["databricks_sql"],
+        }
     )
+
+    more_specific_datasource: str | None = type_lookup_plus.get(connector)
     # TODO: handle postgresql vs postgres type
     if more_specific_datasource:
         warnings.warn(
-            f"You are using a generic SQLDatasource but a more specific {more_specific_datasource.__name__} "
+            f"You are using a generic SQLDatasource but a more specific {more_specific_datasource} "
             "may be more appropriate"
             " https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data",
             category=GxDatasourceWarning,
