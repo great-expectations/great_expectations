@@ -1,11 +1,12 @@
 import os
+import pathlib
 import subprocess
 
 import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations.core.yaml_handler import YAMLHandler
 
 yaml = YAMLHandler()
 context = gx.get_context()
@@ -20,7 +21,7 @@ if not gcp_project:
     )
 
 # parse great_expectations.yml for comparison
-great_expectations_yaml_file_path = os.path.join(
+great_expectations_yaml_file_path = pathlib.Path(
     context.root_directory, FileDataContext.GX_YML
 )
 with open(great_expectations_yaml_file_path) as f:
@@ -88,7 +89,7 @@ try:
         check=True,
         stderr=subprocess.PIPE,
     )
-except Exception as e:
+except Exception:
     pass
 
 # add and set the new expectation store
@@ -121,7 +122,7 @@ copy_expectation_command = """
 gsutil cp expectations/my_expectation_suite.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/my_expectation_suite.json
 """
 
-local_expectation_suite_file_path = os.path.join(
+local_expectation_suite_file_path = pathlib.Path(
     context.root_directory, "expectations", f"{expectation_suite_name}.json"
 )
 copy_expectation_command = copy_expectation_command.replace(

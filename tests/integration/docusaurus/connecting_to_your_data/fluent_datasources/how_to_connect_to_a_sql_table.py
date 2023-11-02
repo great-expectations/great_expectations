@@ -5,11 +5,8 @@ pytest -v --docs-tests -k "how_to_connect_to_a_sql_table" tests/integration/test
 ```
 """
 import pathlib
-import warnings
 
-import tests.test_utils as test_utils
 import great_expectations as gx
-from great_expectations.datasource.fluent import GxDatasourceWarning
 
 sqlite_database_path = str(
     pathlib.Path(
@@ -31,11 +28,9 @@ context = gx.get_context()
 
 connection_string = f"sqlite:///{sqlite_database_path}"
 
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=GxDatasourceWarning)
-    datasource = context.sources.add_sql(
-        name="my_datasource", connection_string=connection_string
-    )
+datasource = context.sources.add_sql(
+    name="my_datasource", connection_string=connection_string
+)
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py datasource">
