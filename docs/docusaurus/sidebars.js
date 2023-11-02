@@ -506,6 +506,7 @@ module.exports = {
     },
     { type: 'doc', id: 'changelog' },
     { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
+    'get_support',
     'contributing/contributing',
   ]
 }
