@@ -1057,6 +1057,21 @@ class Expectation(metaclass=MetaExpectation):
         validation_dependencies_metric_configurations: List[
             MetricConfiguration
         ] = validation_dependencies.get_metric_configurations()
+
+        # transition configuration
+        config_kwargs_new = {}
+        for k, v in configuration.kwargs.items():
+            if isinstance(v, str):
+                config_kwargs_new[k] = v.lower()
+            elif isinstance(v, list):
+                new_v = list()
+                for val in v:
+                    new_v.append(val.lower())
+                config_kwargs_new[k] = new_v
+            else:
+                config_kwargs_new[k] = v
+        configuration.kwargs = config_kwargs_new
+
         _validate_dependencies_against_available_metrics(
             validation_dependencies=validation_dependencies_metric_configurations,
             metrics=metrics,
