@@ -83,7 +83,14 @@ class TestConnectionError(Exception):
     pass
 
 
-class GxSerializationWarning(UserWarning):
+class GxDatasourceWarning(UserWarning):
+    """
+    Warning related to usage or configuration of a Datasource that could lead to
+    unexpected behavior.
+    """
+
+
+class GxSerializationWarning(GxDatasourceWarning):
     pass
 
 
