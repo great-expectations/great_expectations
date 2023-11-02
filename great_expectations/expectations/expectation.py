@@ -1054,11 +1054,7 @@ class Expectation(metaclass=MetaExpectation):
         )
         runtime_configuration["result_format"] = validation_dependencies.result_format
 
-        validation_dependencies_metric_configurations: List[
-            MetricConfiguration
-        ] = validation_dependencies.get_metric_configurations()
-
-        # transition configuration
+        # convert configuration
         config_kwargs_new = {}
         for k, v in configuration.kwargs.items():
             if isinstance(v, str):
@@ -1071,12 +1067,6 @@ class Expectation(metaclass=MetaExpectation):
             else:
                 config_kwargs_new[k] = v
         configuration.kwargs = config_kwargs_new
-
-        _validate_dependencies_against_available_metrics(
-            validation_dependencies=validation_dependencies_metric_configurations,
-            metrics=metrics,
-            configuration=configuration,
-        )
 
         metric_name: str
         metric_configuration: MetricConfiguration
@@ -3731,28 +3721,6 @@ def _validate_mostly_config(configuration: ExpectationConfiguration) -> None:
             mostly, (int, float)
         ), "'mostly' parameter must be an integer or float"
         assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
-
-
-def _validate_dependencies_against_available_metrics(
-    validation_dependencies: List[MetricConfiguration],
-    metrics: dict,
-    configuration: ExpectationConfiguration,
-) -> None:
-    """Check that validation_dependencies for current Expectations are available as Metrics.
-
-    Args:
-        validation_dependencies_as_metric_configurations: dependencies calculated for current Expectation.
-        metrics: dict of metrics available to current Expectation.
-        configuration: current ExpectationConfiguration
-
-    Raises:
-        InvalidExpectationConfigurationError: If a validation dependency is not available as a Metric.
-    """
-    for metric_config in validation_dependencies:
-        if metric_config.id not in metrics:
-            raise InvalidExpectationConfigurationError(
-                f"Metric {metric_config.id} is not available for validation of {configuration}. Please check your configuration."
-            )
 
 
 def _mostly_success(
