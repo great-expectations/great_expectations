@@ -31,7 +31,6 @@ class GXDependencies:
     GX_REQUIRED_DEPENDENCIES: List[str] = sorted(
         [
             "altair",
-            "Click",
             "colorama",
             "cryptography",
             "Ipython",
