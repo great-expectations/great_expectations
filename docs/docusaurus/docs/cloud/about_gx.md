@@ -10,7 +10,7 @@ GX Cloud builds on the innovative features of GX open source software (OSS). Its
 
 While it is possible to design and deploy a functioning data quality ecosystem with GX OSS, GX Cloud simplifies infrastructure and deployment significantly. With GX cloud, you'll save time, money, and effort implementing your data quality management and monitoring solution.
 
-Here are just a few of the benefits you'll get with GX Cloud: 
+Here are just a few of the benefits you'll get with GX Cloud:
 
 - It's web-based and browser- and platform-independent.
 
@@ -36,9 +36,9 @@ The following diagram provides an overview of the key GX Cloud architecture comp
 
 - **GX Cloud Web App** - Manages and validates your data without running Python code, and provides shared visibility into your Validation Results and Checkpoint run history. It's browser- and platform-independent.
 
-- **GX Cloud REST API** - Provides an interface to programmatically access and manage GX Cloud data and configurations. Both the GX open source software (OSS) client and the GX Agent use the GX Cloud REST API to query data from and send data to GX Cloud. Documentaion for the GX Cloud REST API is not currently available.
+- **GX Cloud API** - Provides a REST API to programmatically access and manage GX Cloud data and configurations. Both the GX open source software (OSS) client and the GX Agent use the GX Cloud API to query data from and send data to GX Cloud. Documentation for the GX Cloud API is not currently available, and it is not yet intended for use outside the GX OSS client.
 
-- **GX Cloud Advanced Message Queuing Protocol (AMQP) Broker** - Enables communication between GX Cloud and your local GX Agent.
+- **GX Cloud Message Broker** - Enables communication between GX Cloud and your local GX Agent.
 
 ### Local components
 
