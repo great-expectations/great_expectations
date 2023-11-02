@@ -64,7 +64,7 @@ def datasource(
         datasource.base_directory == updated_base_dir
     ), "The datasource was not updated in the previous method call."
 
-    datasource.base_directory = original_base_dir
+    datasource.base_directory = str(original_base_dir)
     datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
     assert (
         datasource.base_directory == original_base_dir
