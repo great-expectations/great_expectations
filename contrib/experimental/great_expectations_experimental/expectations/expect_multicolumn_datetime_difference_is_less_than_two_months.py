@@ -1,6 +1,6 @@
 from typing import Optional
+
 import pandas as pd
-from pandas import to_datetime
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -16,7 +16,9 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 
 # This class defines a Metric to support your Expectation.
 class MulticolumnDatetimeDifferenceIsLessThanTwoMonths(MulticolumnMapMetricProvider):
-    condition_metric_name = "multicolumn_values.column_datetime_difference_is_less_than_two_months"
+    condition_metric_name = (
+        "multicolumn_values.column_datetime_difference_is_less_than_two_months"
+    )
     # These point your metric at the provided keys to facilitate calculation
     condition_domain_keys = (
         "batch_id",
@@ -26,10 +28,7 @@ class MulticolumnDatetimeDifferenceIsLessThanTwoMonths(MulticolumnMapMetricProvi
         "condition_parser",
         "ignore_row_if",
     )
-    condition_value_keys = (
-        "start_datetime",
-        "end_datetime"
-    )
+    condition_value_keys = ("start_datetime", "end_datetime")
 
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, dataframe, start_datetime, end_datetime, **kwargs):
@@ -62,6 +61,7 @@ class ExpectMulticolumnDatetimeDifferenceIsLessThanTwoMonths(MulticolumnMapExpec
         end_datetime (datetime): The second datetime column to compare.
 
     """
+
     # This is the id string of the Metric used by this Expectation.
     map_metric = "multicolumn_values.column_datetime_difference_is_less_than_two_months"
 
@@ -114,6 +114,7 @@ class ExpectMulticolumnDatetimeDifferenceIsLessThanTwoMonths(MulticolumnMapExpec
         ],
         "contributors": ["@kcs-rohankolappa"],
     }
+
 
 if __name__ == "__main__":
     ExpectMulticolumnDatetimeDifferenceIsLessThanTwoMonths().print_diagnostic_checklist()
