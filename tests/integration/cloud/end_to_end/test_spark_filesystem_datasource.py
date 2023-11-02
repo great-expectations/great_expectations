@@ -8,6 +8,7 @@ import pandas as pd
 import pytest
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.datasource.data_connector.util import normalize_directory_path
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
@@ -59,22 +60,26 @@ def datasource(
         name=datasource_name, base_directory=original_base_dir
     )
 
-    # datasource.base_directory = updated_base_dir
-    # datasource = context.sources.add_or_update_spark_filesystem(datasource=datasource)
-    # assert (
-    #     datasource.base_directory == updated_base_dir
-    # ), "The datasource was not updated in the previous method call."
+    datasource.base_directory = normalize_directory_path(
+        updated_base_dir, context.root_directory
+    )
+    datasource = context.sources.add_or_update_spark_filesystem(datasource=datasource)
+    assert (
+        datasource.base_directory == updated_base_dir
+    ), "The datasource was not updated in the previous method call."
 
-    # datasource.base_directory = original_base_dir
-    # datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
-    # assert (
-    #     datasource.base_directory == original_base_dir
-    # ), "The datasource was not updated in the previous method call."
+    datasource.base_directory = normalize_directory_path(
+        original_base_dir, context.root_directory
+    )
+    datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
+    assert (
+        datasource.base_directory == original_base_dir
+    ), "The datasource was not updated in the previous method call."
 
-    # datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
-    # assert (
-    #     datasource.base_directory == original_base_dir
-    # ), "The datasource was not updated in the previous method call."
+    datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
+    assert (
+        datasource.base_directory == original_base_dir
+    ), "The datasource was not updated in the previous method call."
 
     yield datasource
     # PP-692: this doesn't work due to a bug
@@ -89,7 +94,7 @@ def datasource(
 def data_asset(datasource: SparkFilesystemDatasource) -> Iterator[CSVAsset]:
     asset_name = f"i{uuid.uuid4().hex}"
 
-    _ = datasource.add_csv_asset(name=asset_name)
+    _ = datasource.add_csv_asset(name=asset_name, header=True, infer_schema=True)
     csv_asset = datasource.get_asset(asset_name=asset_name)
 
     yield csv_asset
@@ -183,11 +188,9 @@ def test_interactive_validator(
         batch_request=batch_request,
         expectation_suite_name=expectation_suite_name,
     )
-    validator.head()
-    validator.expect_column_values_to_not_be_null(
-        column="name",
-        mostly=1,
-    )
+
+    print(validator.head())
+    validator.expect_column_mean_to_be_between(column="name", min_value=0, max_value=4)
     validator.save_expectation_suite()
     expectation_suite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
