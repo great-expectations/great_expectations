@@ -208,7 +208,7 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full():
             assert table_asset.table_name in quoted_table_names
 
 
-@pytest.mark.unit
+@pytest.mark.big
 @pytest.mark.parametrize(
     ["connection_string", "suggested_datasource_class"],
     [
@@ -216,26 +216,34 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full():
         ("sqlite:///", "SqliteDatasource"),
         ("snowflake+pyodbc://", "SnowflakeDatasource"),
         ("postgresql+psycopg2://bob:secret@localhost:5432/my_db", "PostgresDatasource"),
+        ("${MY_PG_CONN_STR}", "PostgresDatasource"),
         ("databricks://", "DatabricksSQLDatasource"),
     ],
 )
 def test_specific_datasource_warnings(
     create_engine_fake: None,
+    ephemeral_context_with_defaults: EphemeralDataContext,
+    monkeypatch: pytest.MonkeyPatch,
     connection_string: str,
     suggested_datasource_class: str | None,
 ):
     """
     This test ensures that a warning is raised when a specific datasource class is suggested.
     """
+    context = ephemeral_context_with_defaults
+    monkeypatch.setenv(
+        "MY_PG_CONN_STR", "postgresql://bob:secret@localhost:5432/bobs_db"
+    )
+
     if suggested_datasource_class:
         with pytest.warns(GxDatasourceWarning, match=suggested_datasource_class):
-            SQLDatasource(
+            context.sources.add_sql(
                 name="my_datasource", connection_string=connection_string
-            ).test_connection()
+            )
     else:
         with warnings.catch_warnings():
             warnings.simplefilter("error")  # should already be the default
-            SQLDatasource(
+            context.sources.add_sql(
                 name="my_datasource", connection_string=connection_string
             ).test_connection()
 
