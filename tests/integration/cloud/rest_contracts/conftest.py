@@ -212,11 +212,11 @@ def run_pact_test(
             str(file.resolve()) for file in PACT_DIR.glob("*.json")
         )
 
-        success, logs = verifier.verify_pacts(
+        exit_code, logs = verifier.verify_pacts(
             *pacts,
             verbose=False,
         )
-        if success == 1:
+        if exit_code == 1:
             raise AssertionError("Pact verifier reports failed interactions")
 
     return _run_pact_test
