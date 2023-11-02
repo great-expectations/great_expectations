@@ -112,21 +112,6 @@ class SnowflakeDatasource(SQLDatasource):
         "warehouse",
     }
 
-    @pydantic.root_validator
-    def _check_xor_input_args(cls, values: dict) -> dict:
-        # Method 1 - connection string
-        connection_string = values.get("connection_string")
-        # Method 2 - individual args (account, user, and password are bare minimum)
-        account = values.get("account")
-        user = values.get("user")
-        password = values.get("password")
-
-        if not bool(connection_string) ^ bool(account and user and password):
-            raise ValueError(
-                "Must provide either a connection string or a combination of account, user, and password."
-            )
-        return values
-
     def _get_connect_args(self) -> dict[str, str | bool]:
         excluded_fields: set[str] = set(SQLDatasource.__fields__.keys())
         # dump as json dict to force serialization of things like AnyUrl
@@ -145,14 +130,14 @@ class SnowflakeDatasource(SQLDatasource):
                 )
 
                 kwargs = model_dict.pop("kwargs", {})
-                connection_string: str | None = model_dict.pop(
-                    "connection_string", None
-                )
+                connection_string: str | dict = model_dict.pop("connection_string")
 
-                if connection_string:
+                if isinstance(connection_string, str):
                     self._engine = sa.create_engine(connection_string, **kwargs)
                 else:
-                    self._engine = self._build_engine_with_connect_args(**kwargs)
+                    self._engine = self._build_engine_with_connect_args(
+                        **connection_string
+                    )
 
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
@@ -163,7 +148,7 @@ class SnowflakeDatasource(SQLDatasource):
                     f"following exception: {e!s}"
                 ) from e
             # Since a connection string isn't strictly required for Snowflake, we conditionally cache
-            if self.connection_string:
+            if isinstance(self.connection_string, str):
                 self._cached_connection_string = self.connection_string
         return self._engine
 
