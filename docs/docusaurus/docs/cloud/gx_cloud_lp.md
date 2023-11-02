@@ -20,7 +20,7 @@ If you're eager to try GX Cloud, and you haven't requested a GX Cloud Beta accou
   <LinkCard topIcon label="Quickstarts" description="Quickly start using GX Cloud with data platforms and orchestration tools." href="/docs/cloud/quickstarts/snowflake_quickstart" icon="/img/small_gx_logo.png" />
 </LinkCardGrid>
 
-### Manage and get support
+### Manage
 
 <LinkCardGrid>
   <LinkCard topIcon label="Manage Data Assets" description="Create, edit, or delete a Data Asset." href="/docs/cloud/data_assets/manage_data_assets" icon="/img/small_gx_logo.png" />
@@ -29,5 +29,4 @@ If you're eager to try GX Cloud, and you haven't requested a GX Cloud Beta accou
   <LinkCard topIcon label="Manage Validations" description="Run a Validation, or view the Validation run history." href="/docs/cloud/validations/manage_validations" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage Checkpoints" description="Add, run, edit, or delete a Checkpoint." href="/docs/cloud/checkpoints/manage_checkpoints" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage users and access tokens" description="Manage GX Cloud users and access tokens." href="/docs/cloud/users/manage_users" icon="/img/small_gx_logo.png" />
-  <LinkCard topIcon label="Get GX Cloud support" description="Get support when you encounter issues with GX Cloud." href="/docs/cloud/get_support" icon="/img/small_gx_logo.png" />
 </LinkCardGrid>

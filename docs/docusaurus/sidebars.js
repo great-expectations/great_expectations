@@ -226,7 +226,6 @@ module.exports = {
             },
           ]
         },
-        { type: 'doc', id: 'cloud/get_support' },
       ]
     },
     {

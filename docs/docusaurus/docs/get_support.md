@@ -14,9 +14,9 @@ The following are some recommendations for resolving issues on your own. Resolvi
 
 Search the docs you're using currently for an answer to your issue or question. If you're new to GX OSS, try the [Quickstart](tutorials/quickstart/quickstart.md) or one of the specific getting started guides such as [Get started with Great Expectations and Databricks](tutorials/getting_started/how_to_use_great_expectations_in_databricks.md), or [Get started with Great Expectations and SQL](tutorials/getting_started/how_to_use_great_expectations_with_sql.md).  
 
-### Search with your favorite browser search engine
+### Search with your favorite search engine
 
-It's very likely that someone, somewhere has previously encountered or solved the issue you're currently experiencing. Perform a keyword search in your favorite browser search engine to discover resources outside GX documentation. 
+It's very likely that someone, somewhere has previously encountered or solved the issue you're currently experiencing. Open a browser and perform a keyword search in your preferred search engine to discover resources outside GX documentation. 
 
 ### Try it out
 
@@ -50,7 +50,7 @@ Even if you've previously developed a rapport with a specific GX DA, or a commun
 
 GX provides the following resources for questions and support:
 
-- If you've encountered an error and are stuck, get support on the [GX Discourse forum](https://discourse.greatexpectations.io/c/oss-support/11)
+- If you've encountered an error and are stuck, get support on the [GX Discourse forum](https://discourse.greatexpectations.io/c/oss-support/11). This is the recommended option as answers aren't removed after 90 days, and you're likely to get a quicker response. 
 
 - If you've found a bug, open an issue in one of the [GX GitHub repositories](https://github.com/great-expectations)
 
