@@ -33,20 +33,6 @@ class MetricConfiguration:
     ) -> None:
         self._metric_name = metric_name
 
-        # needs to happen at the metrics level too.
-        metric_domain_kwargs_new = {}
-        for k, v in metric_domain_kwargs.items():
-            if isinstance(v, str):
-                metric_domain_kwargs_new[k] = v.lower()
-            elif isinstance(v, list):
-                new_v = list()
-                for val in v:
-                    new_v.append(val.lower())
-                metric_domain_kwargs_new[k] = new_v
-            else:
-                metric_domain_kwargs_new[k] = v
-        metric_domain_kwargs = metric_domain_kwargs_new
-
         if not isinstance(metric_domain_kwargs, IDDict):
             metric_domain_kwargs = IDDict(metric_domain_kwargs)
 
