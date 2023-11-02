@@ -1,13 +1,14 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import logging
+from typing import TYPE_CHECKING, Generator
 from unittest import mock
 
 import pytest
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.datasource.fluent import SQLDatasource
+from great_expectations.datasource.fluent import GxDatasourceWarning, SQLDatasource
 from great_expectations.datasource.fluent.sql_datasource import TableAsset
 
 if TYPE_CHECKING:
@@ -16,9 +17,26 @@ if TYPE_CHECKING:
     from great_expectations.data_context import EphemeralDataContext
 
 
+LOGGER = logging.getLogger(__name__)
+
+
 @pytest.fixture
-def create_engine_spy(mocker: MockerFixture) -> mock.MagicMock:
-    return mocker.spy(sa, "create_engine")
+def create_engine_spy(mocker: MockerFixture) -> Generator[mock.MagicMock, None, None]:
+    spy = mocker.spy(sa, "create_engine")
+    yield spy
+    assert spy.call_count >= 1, "create_engine was not called"
+
+
+@pytest.fixture
+def create_engine_fake(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Monkeypatch sqlalchemy.create_engine to always return a in-memory sqlite engine."""
+    in_memory_sqlite_engine = sa.create_engine("sqlite:///")
+
+    def _fake_create_engine(*args, **kwargs) -> sa.engine.Engine:
+        LOGGER.info(f"Mock create_engine called with {args=} {kwargs=}")
+        return in_memory_sqlite_engine
+
+    monkeypatch.setattr(sa, "create_engine", _fake_create_engine, raising=True)
 
 
 @pytest.mark.unit
@@ -187,6 +205,28 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full():
             assert isinstance(table_asset.table_name, sqlalchemy.quoted_name)
             assert table_asset.table_name in table_names_in_dbms_schema
             assert table_asset.table_name in quoted_table_names
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ["connection_string", "suggested_datasource_class"],
+    [
+        ("sqlite:///", "SqliteDatasource"),
+        ("snowflake+pyodbc://", "SnowflakeDatasource"),
+        ("postgresql+psycopg2://bob:secret@localhost:5432/my_db", "PostgresDatasource"),
+        ("databricks://", "DatabricksSQLDatasource"),
+    ],
+)
+def test_specific_datasource_warnings(
+    create_engine_fake: None, connection_string: str, suggested_datasource_class: str
+):
+    """
+    This test ensures that a warning is raised when a specific datasource class is suggested.
+    """
+    with pytest.warns(GxDatasourceWarning, match=suggested_datasource_class):
+        SQLDatasource(
+            name="my_datasource", connection_string=connection_string
+        ).test_connection()
 
 
 if __name__ == "__main__":
