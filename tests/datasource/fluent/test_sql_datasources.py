@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import warnings
 from typing import TYPE_CHECKING, Generator
 from unittest import mock
 
@@ -211,6 +212,7 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full():
 @pytest.mark.parametrize(
     ["connection_string", "suggested_datasource_class"],
     [
+        ("gregshift://", None),
         ("sqlite:///", "SqliteDatasource"),
         ("snowflake+pyodbc://", "SnowflakeDatasource"),
         ("postgresql+psycopg2://bob:secret@localhost:5432/my_db", "PostgresDatasource"),
@@ -218,15 +220,24 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full():
     ],
 )
 def test_specific_datasource_warnings(
-    create_engine_fake: None, connection_string: str, suggested_datasource_class: str
+    create_engine_fake: None,
+    connection_string: str,
+    suggested_datasource_class: str | None,
 ):
     """
     This test ensures that a warning is raised when a specific datasource class is suggested.
     """
-    with pytest.warns(GxDatasourceWarning, match=suggested_datasource_class):
-        SQLDatasource(
-            name="my_datasource", connection_string=connection_string
-        ).test_connection()
+    if suggested_datasource_class:
+        with pytest.warns(GxDatasourceWarning, match=suggested_datasource_class):
+            SQLDatasource(
+                name="my_datasource", connection_string=connection_string
+            ).test_connection()
+    else:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")  # should already be the default
+            SQLDatasource(
+                name="my_datasource", connection_string=connection_string
+            ).test_connection()
 
 
 if __name__ == "__main__":
