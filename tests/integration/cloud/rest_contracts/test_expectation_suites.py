@@ -246,7 +246,7 @@ def test_post_expectation_suite(
                                     "expectation_type": "expect_table_row_count_to_be_between",
                                 },
                             ],
-                            "expectation_suite_name": "brand new suite",
+                            "expectation_suite_name": "david_expectation_suite",
                         }
                     },
                 },
@@ -256,7 +256,7 @@ def test_post_expectation_suite(
                 "errors": [
                     {
                         "detail": pact.Like(
-                            "Expectation Suite with name brand new suite already exists."
+                            "Expectation Suite with name david_expectation_suite already exists."
                         )
                     }
                 ]
