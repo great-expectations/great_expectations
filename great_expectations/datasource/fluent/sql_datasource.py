@@ -988,7 +988,6 @@ def _warn_for_more_specific_datasource_type(connection_string: str) -> None:
     )
 
     more_specific_datasource: str | None = type_lookup_plus.get(connector)
-    # TODO: handle postgresql vs postgres type
     if more_specific_datasource:
         warnings.warn(
             f"You are using a generic SQLDatasource but a more specific {more_specific_datasource} "
