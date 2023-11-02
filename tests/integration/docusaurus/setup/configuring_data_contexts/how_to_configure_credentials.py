@@ -75,7 +75,7 @@ pg_datasource.add_table_asset(
 
 assert context.list_datasources() == [
     {
-        "type": "sql",
+        "type": "postgres",
         "name": "my_postgres_db",
         "assets": [
             {
