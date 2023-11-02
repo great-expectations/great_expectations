@@ -250,7 +250,6 @@ extend-exclude = [
     "tests/data_asset",                                         # 10 warnings
     "tests/dataset",                                            # 10 warnings
     "tests/integration/docusaurus",                             # 208 warnings, 144 auto-fixable
-    "tests/test_fixtures/notebook_assets/suite_edit/footer.py", # 7 warnings
 ]
 
 [tool.ruff.per-file-ignores]
@@ -316,7 +315,7 @@ If you are working in a configuration file you may use the inline comment \
 [tool.pytest.ini_options]
 filterwarnings = [
     # Turn all warnings not explicitly filtered below into errors
-    # "error",
+    "error",
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would
     # be potentially overly resource intensive in standard operation
     "ignore:Setting result format to COMPLETE for a SqlAlchemyDataset:UserWarning",
