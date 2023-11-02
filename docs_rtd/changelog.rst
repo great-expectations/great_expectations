@@ -10,7 +10,7 @@ Changelog
 * [FEATURE] Warn users if more specific SQL Datasource is available. ([#8914](https://github.com/great-expectations/great_expectations/pull/8914))
 * [DOCS] Update Cloud Quickstart save expectation suite example ([#8893](https://github.com/great-expectations/great_expectations/pull/8893))
 * [DOCS] Update Section Title ([#8905](https://github.com/great-expectations/great_expectations/pull/8905))
-* [DOCS] add 'user' access token clarification to GX Cloud quickstart ([#8912](https://github.com/great-expectations/great_expectations/pull/8912)) (thanks @JennyTee)
+* [DOCS] add 'user' access token clarification to GX Cloud quickstart ([#8912](https://github.com/great-expectations/great_expectations/pull/8912))
 * [DOCS] Remove TOC  Content Duplication ([#8917](https://github.com/great-expectations/great_expectations/pull/8917))
 * [DOCS]  Create a New Get Support Topic ([#8849](https://github.com/great-expectations/great_expectations/pull/8849))
 * [MAINTENANCE] Get checkpoint endpoint contract test ([#8881](https://github.com/great-expectations/great_expectations/pull/8881))
