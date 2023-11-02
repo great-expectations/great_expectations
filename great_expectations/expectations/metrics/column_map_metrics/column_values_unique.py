@@ -58,11 +58,7 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
                 dialect_name = ""
         if sql_engine and dialect and dialect_name == "mysql":
             temp_table_name = generate_temporary_table_name()
-            temp_table_stmt = "CREATE TEMPORARY TABLE {new_temp_table} AS SELECT tmp.{column_name} FROM {source_table} tmp".format(
-                new_temp_table=temp_table_name,
-                source_table=_table,
-                column_name=column.name,
-            )
+            temp_table_stmt = f"CREATE TEMPORARY TABLE {temp_table_name} AS SELECT tmp.{column.name} FROM {_table} tmp"
             execution_engine.execute_query_in_transaction(sa.text(temp_table_stmt))
             dup_query = (
                 sa.select(column)
