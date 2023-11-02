@@ -41,6 +41,7 @@ from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
     Datasource,
+    GxDatasourceWarning,
     Sorter,
     SortersDefinition,
     TestConnectionError,
@@ -962,6 +963,27 @@ class TableAsset(_SQLAsset):
         return False
 
 
+def _warn_for_more_specific_datasource_type(connection_string: str) -> None:
+    """
+    Warns if a more specific datasource type may be more appropriate based on the connection string connector prefix.
+    """
+    connector = connection_string.split("://")[0].split("+")[0]
+    if connector:
+        from great_expectations.datasource.fluent.sources import _SourceFactories
+
+        more_specific_datasource: type[Datasource] = _SourceFactories.type_lookup.get(
+            connector
+        )
+        # TODO: handle postgresql vs postgres type
+        if more_specific_datasource:
+            warnings.warn(
+                f"You are using a generic SQLDatasource but a more specific {more_specific_datasource.__name__} "
+                "may be more appropriate"
+                " https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data",
+                category=GxDatasourceWarning,
+            )
+
+
 # This improves our error messages by providing a more specific type for pydantic to validate against
 # It also ensure the generated jsonschema has a oneOf instead of anyOf field for assets
 # https://docs.pydantic.dev/1.10/usage/types/#discriminated-unions-aka-tagged-unions
@@ -1015,40 +1037,6 @@ class SQLDatasource(Datasource):
         """Returns the default execution engine type."""
         return SqlAlchemyExecutionEngine
 
-    @pydantic.validator("connection_string")
-    @classmethod
-    def _warn_for_more_specific_datasource_type(
-        cls, v: str | ConfigStr
-    ) -> str | ConfigStr:
-        """
-        Warns if a more specific datasource type may be more appropriate based on the connection string connector prefix.
-        """
-        # TODO: do this when when creating the engine instead of here?
-        if cls.__name__ != "SQLDatasource":
-            # This is already subclass of SQLDatasource, so we don't need to warn
-            return v
-
-        if isinstance(v, ConfigStr):
-            connection_str = v.template_str
-        else:
-            connection_str = v
-
-        connector = connection_str.split("://")[0].split("+")[0]
-        if connector:
-            from great_expectations.datasource.fluent.sources import _SourceFactories
-
-            more_specific_datasource: type[
-                Datasource
-            ] = _SourceFactories.type_lookup.get(connector)
-            # TODO: handle postgresql vs postgres type
-            if more_specific_datasource:
-                warnings.warn(
-                    f"You are using a generic SQLDatasource but a more specific {more_specific_datasource.__name__} "
-                    "may be more appropriate"
-                    " https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data"
-                )
-        return v
-
     def get_engine(self) -> sqlalchemy.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
@@ -1072,7 +1060,10 @@ class SQLDatasource(Datasource):
         _check_config_substitutions_needed(
             self, model_dict, raise_warning_if_provider_not_present=True
         )
+        # the connection_string has had config substitutions applied
         connection_string = model_dict.pop("connection_string")
+        if self.__class__.__name__ == "SQLDatasource":
+            _warn_for_more_specific_datasource_type(connection_string)
         kwargs = model_dict.pop("kwargs", {})
         return sa.create_engine(connection_string, **kwargs)
 
