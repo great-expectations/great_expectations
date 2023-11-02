@@ -33,6 +33,16 @@ class MetricConfiguration:
     ) -> None:
         self._metric_name = metric_name
 
+        # does this work always?
+        metric_domain_kwargs_new = {}
+        for k, v in metric_domain_kwargs.items():
+            if v:
+                metric_domain_kwargs_new[k] = v.lower()
+            else:
+                metric_domain_kwargs_new[k] = v
+
+        metric_domain_kwargs = metric_domain_kwargs_new
+
         if not isinstance(metric_domain_kwargs, IDDict):
             metric_domain_kwargs = IDDict(metric_domain_kwargs)
 
