@@ -8,6 +8,7 @@ import pandas as pd
 import pytest
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.datasource.data_connector.util import normalize_directory_path
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
@@ -33,21 +34,31 @@ def base_dir(tmpdir) -> pathlib.Path:
 
 
 @pytest.fixture
+def updated_base_dir(tmpdir) -> Iterator[pathlib.Path]:
+    dir_path = tmpdir / "other_data"
+    dir_path.mkdir()
+    df = pd.DataFrame({"name": ["jim", "carol"]})
+    csv_path = dir_path / "data.csv"
+    df.to_csv(csv_path)
+    return dir_path
+
+
+@pytest.fixture
 def datasource(
     context: CloudDataContext,
     base_dir: pathlib.Path,
+    updated_base_dir: pathlib.Path,
 ) -> Iterator[PandasFilesystemDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
     original_base_dir = base_dir
-    updated_base_dir = (
-        pathlib.Path.cwd()
-    )  # Any arbitrary dir that exists for purposes of test_connection
 
     datasource = context.sources.add_pandas_filesystem(
         name=datasource_name, base_directory=original_base_dir
     )
 
-    datasource.base_directory = updated_base_dir
+    datasource.base_directory = normalize_directory_path(
+        updated_base_dir, context.root_directory
+    )
     datasource = context.sources.add_or_update_pandas_filesystem(datasource=datasource)
     assert (
         datasource.base_directory == updated_base_dir
