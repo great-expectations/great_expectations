@@ -68,9 +68,6 @@ exclude = [
     'v012',                                                              # legacy code
     'tests/datasource/fluent/test_metadatasource\.py',                   # metaprogramming leads to errors
     'datasource/data_connector/configured_asset_sql_data_connector\.py', # 37 - This is legacy code and will not be typed.
-    'cli/suite\.py',                                                     # 24 - This is legacy code and will not be typed.
-    'cli/upgrade_helpers/upgrade_helper_v11\.py',                        # 59 - This is legacy code and will not be typed.
-    'cli/upgrade_helpers/upgrade_helper_v13\.py',                        # 17 - This is legacy code and will not be typed.
     'dataset/sparkdf_dataset\.py',                                       #  3 - This is legacy code and will not be typed.
     'dataset/sqlalchemy_dataset\.py',                                    # 16 - This is legacy code and will not be typed.
     'core/usage_statistics/anonymizers/batch_anonymizer\.py',            # 10 - This code will be removed in 1.0
@@ -515,7 +512,6 @@ markers = [
     "aws_creds: mark all tests that require aws credentials",
     "aws_deps: mark tests that need aws dependencies like boto",
     "big: mark tests that don't have external dependencies but aren't unit tests",
-    "cli: mark all tests in the /cli directory.",
     "clickhouse: mark a test as Clickhouse-dependent.",
     "cloud: mark test as being relevant to Great Expectations Cloud.",
     "docs-basic: mark a test as a docs test, that does not require additional credentials.",
