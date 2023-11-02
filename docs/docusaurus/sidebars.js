@@ -483,8 +483,6 @@ module.exports = {
             },
             'terms/expectation_suite',
             'terms/metric',
-            'conceptual_guides/metricproviders',
-            'terms/metric',
             {
               type: 'category',
               label: 'Stores',
