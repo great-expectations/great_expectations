@@ -112,6 +112,12 @@ class SnowflakeDatasource(SQLDatasource):
         "warehouse",
     }
 
+    class Config:
+        @staticmethod
+        def schema_extra(schema: dict, model: type[SnowflakeDatasource]) -> None:
+            """Customize jsonschema for SnowflakeDatasource."""
+            print(schema)
+
     def _get_connect_args(self) -> dict[str, str | bool]:
         excluded_fields: set[str] = set(SQLDatasource.__fields__.keys())
         # dump as json dict to force serialization of things like AnyUrl
