@@ -170,10 +170,6 @@ def run_pact_test(
         if contract_interaction.request_params is not None:
             request["query"] = contract_interaction.request_params
 
-        # Gx-Version changes, but Pact expects you to treat the request as static
-        gx_cloud_session.headers.update(
-            {"Gx-Version": "testing"},
-        )
         request["headers"] = dict(gx_cloud_session.headers)
         if contract_interaction.request_headers is not None:
             request["headers"].update(contract_interaction.request_headers)  # type: ignore[union-attr]
@@ -220,6 +216,7 @@ def run_pact_test(
             *pacts,
             verbose=False,
         )
-        assert success == 0
+        if success == 1:
+            raise AssertionError("Pact verifier reports failed interactions")
 
     return _run_pact_test
