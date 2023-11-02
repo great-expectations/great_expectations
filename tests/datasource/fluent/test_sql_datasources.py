@@ -60,6 +60,7 @@ def test_kwargs_are_passed_to_create_engine(
     monkeypatch: pytest.MonkeyPatch,
     ephemeral_context_with_defaults: EphemeralDataContext,
     ds_kwargs: dict,
+    filter_gx_datasource_warnings: None,
 ):
     monkeypatch.setenv("MY_CONN_STR", "sqlite:///")
 
