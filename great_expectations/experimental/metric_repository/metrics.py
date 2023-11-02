@@ -15,7 +15,6 @@ from typing import (
     Union,
 )
 
-from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import BaseModel, Field
 from great_expectations.compatibility.typing_extensions import override
 
@@ -28,7 +27,7 @@ class MetricRepositoryBaseModel(BaseModel):
     """Base class for all MetricRepository related models."""
 
     class Config:
-        extra = pydantic.Extra.forbid
+        extra = "forbid"
 
 
 class MetricException(MetricRepositoryBaseModel):
