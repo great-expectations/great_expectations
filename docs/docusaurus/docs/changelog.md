@@ -10,6 +10,28 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.1
+* [FEATURE] Expect column specified percentile value to be above a given value. ([#8907](https://github.com/great-expectations/great_expectations/pull/8907)) (thanks @kurt1984)
+* [FEATURE] Warn users if more specific SQL Datasource is available. ([#8914](https://github.com/great-expectations/great_expectations/pull/8914))
+* [DOCS] Update Cloud Quickstart save expectation suite example ([#8893](https://github.com/great-expectations/great_expectations/pull/8893))
+* [DOCS] Update Section Title ([#8905](https://github.com/great-expectations/great_expectations/pull/8905))
+* [DOCS] add 'user' access token clarification to GX Cloud quickstart ([#8912](https://github.com/great-expectations/great_expectations/pull/8912))
+* [DOCS] Remove TOC  Content Duplication ([#8917](https://github.com/great-expectations/great_expectations/pull/8917))
+* [DOCS]  Create a New Get Support Topic ([#8849](https://github.com/great-expectations/great_expectations/pull/8849))
+* [MAINTENANCE] Get checkpoint endpoint contract test ([#8881](https://github.com/great-expectations/great_expectations/pull/8881))
+* [MAINTENANCE] Add Expectation Suite Pact tests ([#8885](https://github.com/great-expectations/great_expectations/pull/8885))
+* [MAINTENANCE] Do not skip spark tests in cloud stage ([#8901](https://github.com/great-expectations/great_expectations/pull/8901))
+* [MAINTENANCE] List checkpoints endpoint contract test ([#8886](https://github.com/great-expectations/great_expectations/pull/8886))
+* [MAINTENANCE] Adjust timeouts for cloud-tests services ([#8910](https://github.com/great-expectations/great_expectations/pull/8910))
+* [MAINTENANCE] Typing render/view ([#8903](https://github.com/great-expectations/great_expectations/pull/8903))
+* [MAINTENANCE] Better error msg for refrence environments ([#8913](https://github.com/great-expectations/great_expectations/pull/8913))
+* [MAINTENANCE] remove deprecated usage of pydantic Extra ([#8896](https://github.com/great-expectations/great_expectations/pull/8896))
+* [MAINTENANCE] E2E Test - Spark Filesystem with Cloud ([#8889](https://github.com/great-expectations/great_expectations/pull/8889))
+* [MAINTENANCE] Update ruff + black + mypy ([#8902](https://github.com/great-expectations/great_expectations/pull/8902))
+* [MAINTENANCE] Deal with `GxDatasourceWarning` warnings in docs-snippet tests ([#8924](https://github.com/great-expectations/great_expectations/pull/8924))
+* [MAINTENANCE] Add JennyTee as core contributor ([#8921](https://github.com/great-expectations/great_expectations/pull/8921))
+* [CONTRIB] [FEATURE]-add-threshold-parameter ([#8891](https://github.com/great-expectations/great_expectations/pull/8891)) (thanks @tb102122)
+
 ### 0.18.0
 * [BUGFIX] Only update self.assets if cloud deletion successful ([#8894](https://github.com/great-expectations/great_expectations/pull/8894))
 * [DOCS] DSB-321: Add workflow diagram to OSS Quickstart ([#8804](https://github.com/great-expectations/great_expectations/pull/8804))
