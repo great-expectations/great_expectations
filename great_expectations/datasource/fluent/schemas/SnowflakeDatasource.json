@@ -47,6 +47,9 @@
             "title": "Connection String",
             "anyOf": [
                 {
+                    "$ref": "#/definitions/ConnectionDetails"
+                },
+                {
                     "type": "string",
                     "writeOnly": true,
                     "format": "password"
@@ -79,52 +82,11 @@
                     {}
                 ]
             }
-        },
-        "account": {
-            "title": "Account",
-            "type": "string"
-        },
-        "user": {
-            "title": "User",
-            "type": "string"
-        },
-        "password": {
-            "title": "Password",
-            "anyOf": [
-                {
-                    "type": "string",
-                    "writeOnly": true,
-                    "format": "password"
-                },
-                {
-                    "type": "string"
-                }
-            ]
-        },
-        "database": {
-            "title": "Database",
-            "type": "string"
-        },
-        "schema": {
-            "title": "Schema",
-            "type": "string"
-        },
-        "warehouse": {
-            "title": "Warehouse",
-            "type": "string"
-        },
-        "role": {
-            "title": "Role",
-            "type": "string"
-        },
-        "numpy": {
-            "title": "Numpy",
-            "default": false,
-            "type": "boolean"
         }
     },
     "required": [
-        "name"
+        "name",
+        "connection_string"
     ],
     "additionalProperties": false,
     "definitions": {
@@ -501,6 +463,61 @@
             "required": [
                 "name",
                 "query"
+            ],
+            "additionalProperties": false
+        },
+        "ConnectionDetails": {
+            "title": "ConnectionDetails",
+            "description": "Information needed to connect to a Snowflake database.\nAlternative to a connection string.",
+            "type": "object",
+            "properties": {
+                "account": {
+                    "title": "Account",
+                    "type": "string"
+                },
+                "user": {
+                    "title": "User",
+                    "type": "string"
+                },
+                "password": {
+                    "title": "Password",
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "writeOnly": true,
+                            "format": "password"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "database": {
+                    "title": "Database",
+                    "type": "string"
+                },
+                "schema": {
+                    "title": "Schema",
+                    "type": "string"
+                },
+                "warehouse": {
+                    "title": "Warehouse",
+                    "type": "string"
+                },
+                "role": {
+                    "title": "Role",
+                    "type": "string"
+                },
+                "numpy": {
+                    "title": "Numpy",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "account",
+                "user",
+                "password"
             ],
             "additionalProperties": false
         }

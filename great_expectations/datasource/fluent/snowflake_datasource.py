@@ -13,6 +13,7 @@ from great_expectations.datasource.fluent.config_str import (
     _check_config_substitutions_needed,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
+    FluentBaseModel,
     SQLDatasource,
     SQLDatasourceError,
 )
@@ -66,6 +67,24 @@ class SnowflakeDsn(AnyUrl):
         return AnyUrl.validate_parts(parts=parts, validate_port=validate_port)
 
 
+class ConnectionDetails(FluentBaseModel):
+    """
+    Information needed to connect to a Snowflake database.
+    Alternative to a connection string.
+    """
+
+    account: str
+    user: str
+    password: Union[ConfigStr, str]
+    database: Optional[str] = None
+    schema_: Optional[str] = pydantic.Field(
+        None, alias="schema"
+    )  # schema is a reserved attr in BaseModel
+    warehouse: Optional[str] = None
+    role: Optional[str] = None
+    numpy: bool = False
+
+
 @public_api
 class SnowflakeDatasource(SQLDatasource):
     """Adds a Snowflake datasource to the data context.
@@ -79,18 +98,8 @@ class SnowflakeDatasource(SQLDatasource):
     """
 
     type: Literal["snowflake"] = "snowflake"  # type: ignore[assignment]
-    connection_string: Optional[Union[ConfigStr, SnowflakeDsn]] = None  # type: ignore[assignment] # Deviation from parent class as individual args are supported for connection
-    # connect_args
-    account: Optional[str] = None
-    user: Optional[str] = None
-    password: Optional[Union[ConfigStr, str]] = None
-    database: Optional[str] = None
-    schema_: Optional[str] = pydantic.Field(
-        None, alias="schema"
-    )  # schema is a reserved attr in BaseModel
-    warehouse: Optional[str] = None
-    role: Optional[str] = None
-    numpy: bool = False
+    # TODO: rename this to `connection`?
+    connection_string: Union[ConnectionDetails, ConfigStr, SnowflakeDsn]  # type: ignore[assignment] # Deviation from parent class as individual args are supported for connection
 
     _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
         "role",
