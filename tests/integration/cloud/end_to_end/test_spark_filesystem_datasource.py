@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def base_dir(tmpdir) -> pathlib.Path:
+def base_dir(tmpdir) -> Iterator[pathlib.Path]:
     dir_path = tmpdir / "data"
     dir_path.mkdir()
     df = pd.DataFrame(
@@ -36,7 +36,7 @@ def base_dir(tmpdir) -> pathlib.Path:
 
 
 @pytest.fixture
-def updated_base_dir(tmpdir) -> pathlib.Path:
+def updated_base_dir(tmpdir) -> Iterator[pathlib.Path]:
     dir_path = tmpdir / "other_data"
     dir_path.mkdir()
     df = pd.DataFrame(
