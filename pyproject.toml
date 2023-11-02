@@ -77,12 +77,6 @@ exclude = [
     'core/usage_statistics/anonymizers/datasource_anonymizer\.py',       # 9 - This code will be removed in 1.0
     'core/usage_statistics/anonymizers/expectation_anonymizer\.py',      # 6 - This code will be removed in 1.0
     'core/usage_statistics/anonymizers/validation_operator_anonymizer\.py',  # 5 - This code will be removed in 1.0
-    'render/renderer/v3/suite_edit_notebook_renderer\.py',               # 11 - This is legacy code and will not be typed.
-    'render/renderer/v3/suite_profile_notebook_renderer\.py',            # 4 - This is legacy code and will not be typed.
-    'render/renderer/suite_edit_notebook_renderer\.py',                  # 7 - This is legacy code and will not be typed.
-    'render/renderer/suite_scaffold_notebook_renderer\.py',              # 7 - This is legacy code and will not be typed.
-    'render/renderer/datasource_new_notebook_renderer\.py',              # 4 - This is legacy code and will not be typed.
-    'render/renderer/checkpoint_new_notebook_renderer\.py',              # 9 - This is legacy code and will not be typed.
     # END ALWAYS EXCLUDE SECTION ######################################################
     #
     # #################################################################################
