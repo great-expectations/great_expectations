@@ -24,7 +24,7 @@ Use Batches and Spark. See [Request data from a Data Asset](./guides/connecting_
 
 Confirm you're using Fluent Data Sources and you have installed the latest version of GX OSS. If you're using data connectors, or importing `RuntimeBatchRequest` or `BatchRequest` methods, it's likely you're using an outdated version of GX OSS. 
 
-To confirm you're using the latest version of GX OSS, see [Install GX](./tutorials/quickstart/quickstart#install-gx).
+To confirm you're using the latest version of GX OSS, see .
 
 
 ### How do I adjust the timezone and regional settings in my Data Docs?
