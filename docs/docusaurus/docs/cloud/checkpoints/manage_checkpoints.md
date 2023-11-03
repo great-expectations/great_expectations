@@ -36,7 +36,7 @@ To learn more about Checkpoints, see [Checkpoint](../../terms/checkpoint.md).
     checkpoint_name = <checkpoint_name> 
     ```
 
-4. Run the following code to define the Checkpoint configuration including the Data Source and Data Asset names. Note that the Data Source and Data Asset names must refer to records that been previously created (see [Managing Data Assets](/docs/cloud/data_assets/manage_data_assets) for more information):
+4. Run the following code to define the Checkpoint configuration including the Data Source and Data Asset names. Note that the Data Source and Data Asset names must refer to records that have been previously created (see [Managing Data Assets](/docs/cloud/data_assets/manage_data_assets) for more information):
 
     ```python title="Jupyter Notebook"
     checkpoint_config = {
