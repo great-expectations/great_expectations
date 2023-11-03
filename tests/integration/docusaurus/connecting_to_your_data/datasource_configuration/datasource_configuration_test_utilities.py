@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import operator
 from functools import reduce
 from typing import List, Tuple
@@ -9,12 +11,12 @@ from typing import List, Tuple
 def _get_items_by_path(root_dictionary: dict, keys: Tuple[str]) -> Tuple:
     try:
         return "/".join(keys), reduce(operator.getitem, keys, root_dictionary)
-    except:
+    except Exception:
         print(root_dictionary, keys)
 
 
 def _gather_key_paths_from_dict(
-    target_dict: dict, current_path: List[str] = None
+    target_dict: dict, current_path: List[str] | None = None
 ) -> Tuple[List[Tuple[str]], List[str]]:
     key_paths: List[Tuple[str]] = []
     full_paths: List[Tuple[str]] = []
@@ -37,15 +39,14 @@ def _gather_key_paths_from_dict(
                 # If this is an empty dictionary, then there will be no further nested keys to gather.
                 key_paths.append(tuple(next_path))
                 full_paths.append(tuple(next_path))
+        elif current_path:
+            next_path = current_path[:]
+            next_path.append(key)
+            key_paths.append(tuple(next_path))
+            full_paths.append(tuple(next_path))
         else:
-            if current_path:
-                next_path = current_path[:]
-                next_path.append(key)
-                key_paths.append(tuple(next_path))
-                full_paths.append(tuple(next_path))
-            else:
-                full_paths.append((key,))
-                key_paths.append((key,))
+            full_paths.append((key,))
+            key_paths.append((key,))
     return key_paths, full_paths
 
 

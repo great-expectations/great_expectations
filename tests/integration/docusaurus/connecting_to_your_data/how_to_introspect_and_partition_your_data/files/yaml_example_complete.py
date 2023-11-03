@@ -1,3 +1,4 @@
+# ruff: noqa: PTH118
 import os
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py imports">
