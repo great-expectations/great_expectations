@@ -15,6 +15,7 @@ from __future__ import annotations
 import glob
 import logging
 import os
+import pathlib
 import re
 import sys
 from typing import List, Optional
@@ -36,7 +37,7 @@ class LinkReport:
         message: A message describing the failure.
     """
 
-    def __init__(self, link: str, file: str, message: str):
+    def __init__(self, link: str, file: pathlib.Path, message: str):
         self.link = link
         self.file = file
         self.message = message
@@ -50,8 +51,8 @@ class LinkChecker:
 
     def __init__(
         self,
-        docs_path: str,
-        docs_root: str,
+        docs_path: pathlib.Path,
+        docs_root: pathlib.Path,
         site_prefix: str,
         skip_external: bool = False,
     ):
@@ -63,8 +64,8 @@ class LinkChecker:
             site_prefix: The top-level folder (ex: /docs) used to resolve absolute links to local files
             skip_external: Whether or not to skip checking external (http..) links
         """
-        self._docs_path = docs_path.strip(os.path.sep)
-        self._docs_root = docs_root.strip(os.path.sep)
+        self._docs_path = docs_path
+        self._docs_root = docs_root
         self._site_prefix = site_prefix.strip("/")
         self._skip_external = skip_external
 
@@ -112,7 +113,7 @@ class LinkChecker:
     def _is_anchor_link(self, link: str) -> bool:
         return link.startswith("#")
 
-    def _check_external_link(self, link: str, file: str) -> Optional[LinkReport]:
+    def _check_external_link(self, link: str, file: pathlib.Path) -> Optional[LinkReport]:
         if self._skip_external:
             return None
 
@@ -143,23 +144,19 @@ class LinkChecker:
                 link, file, f"External link raised a connection error {err.errno}"
             )
 
-    def _get_os_path(self, path: str) -> str:
-        """Gets an os-specific path from a path found in a markdown file"""
-        return path.replace("/", os.path.sep)
+    def _get_absolute_path(self, path: pathlib.Path) -> pathlib.Path:
+        return self._docs_root.joinpath(path).absolute()
 
-    def _get_absolute_path(self, path: str) -> str:
-        return os.path.join(self._docs_root, self._get_os_path(path))  # noqa: PTH118
-
-    def _get_relative_path(self, file: str, path: str) -> str:
+    def _get_relative_path(self, file: pathlib.Path, path: pathlib.Path) -> pathlib.Path:
         # link should be relative to the location of the current file
-        directory = os.path.dirname(file)  # noqa: PTH120
-        return os.path.join(directory, self._get_os_path(path))  # noqa: PTH118
+        directory = file.parent
+        return directory / path
 
-    def _get_docroot_path(self, path: str) -> str:
-        return os.path.join(self._docs_root, self._get_os_path(path))  # noqa: PTH118
+    def _get_docroot_path(self, path: pathlib.Path) -> pathlib.Path:
+        return self._docs_path / path
 
     def _check_absolute_link(
-        self, link: str, file: str, path: str, version: Optional[str]
+        self, link: str, file: pathlib.Path, path: pathlib.Path, version: Optional[str]
     ) -> Optional[LinkReport]:
         logger.debug(f"Checking absolute link {link} in file {file}")
 
@@ -168,10 +165,10 @@ class LinkChecker:
             return None
 
         # absolute links should point to files that exist (with the .md extension added)
-        md_file = self._get_absolute_path(path).rstrip("/") + ".md"
+        md_file = pathlib.Path(self._get_absolute_path(path).rstrip("/") + ".md")
         logger.debug(f"Absolute link {link} resolved to path {md_file}")
 
-        if not os.path.isfile(md_file):  # noqa: PTH113
+        if not md_file.is_file():
             logger.info(f"Absolute link {link} in file {file} was not found")
             return LinkReport(link, file, f"Linked file {md_file} not found")
         else:
@@ -179,7 +176,7 @@ class LinkChecker:
             return None
 
     def _check_absolute_image(
-        self, link: str, file: str, path: str
+        self, link: str, file: pathlib.Path, path: pathlib.Path
     ) -> Optional[LinkReport]:
         logger.debug(f"Checking absolute image {link} in file {file}")
 
