@@ -61,12 +61,14 @@ import sys
 from dataclasses import dataclass
 from typing import List, Set, Union, cast
 
+from docs.sphinx_api_docs_source import (
+    public_api_excludes,
+    public_api_includes,
+    public_api_missing_threshold,
+)
 from docs.sphinx_api_docs_source.include_exclude_definition import (
     IncludeExcludeDefinition,
 )
-from docs.sphinx_api_docs_source import public_api_excludes
-from docs.sphinx_api_docs_source import public_api_includes
-from docs.sphinx_api_docs_source import public_api_missing_threshold
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -513,7 +515,7 @@ class PublicAPIChecker:
 
         def flatten_attr(node):
             if isinstance(node, ast.Attribute):
-                return f"{str(flatten_attr(node.value))}.{node.attr}"
+                return f"{flatten_attr(node.value)!s}.{node.attr}"
             elif isinstance(node, ast.Name):
                 return str(node.id)
             else:

@@ -165,7 +165,7 @@ class SphinxInvokeDocsBuilder:
         # Read the generated html and process the content for conversion to mdx
         # Write out to .mdx file using the relative file directory structure
         for html_file_path in self._get_generated_html_file_paths():
-            logger.debug(f"Processing: {str(html_file_path.absolute())}")
+            logger.debug(f"Processing: {html_file_path.absolute()!s}")
             with open(html_file_path.absolute()) as f:
                 html_file_contents = f.read()
                 doc_str = self._parse_and_process_html_to_mdx(
@@ -177,7 +177,7 @@ class SphinxInvokeDocsBuilder:
                     sidebar_entry=self._get_sidebar_entry(html_file_path=html_file_path)
                 )
                 output_path.parent.mkdir(parents=True, exist_ok=True)
-                logger.debug(f"Writing out mdx file: {str(output_path.absolute())}")
+                logger.debug(f"Writing out mdx file: {output_path.absolute()!s}")
                 with open(output_path, "w") as fout:
                     fout.write(doc_str)
 
