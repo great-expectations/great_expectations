@@ -7,6 +7,8 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 Add validation data or <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> to an existing <TechnicalTag tag="checkpoint" text="Checkpoint" /> to aggregate individual validations across Expectation Suites or <TechnicalTag tag="datasource" text="Data Sources" /> into a single Checkpoint. You can also use this process to <TechnicalTag tag="validation" text="Validate" /> multiple source files before and after their ingestion into your data lake.
 
+**This topic will be updated.**
+
 ## Prerequisites
 
 <Prerequisites>
