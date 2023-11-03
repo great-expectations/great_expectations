@@ -95,17 +95,15 @@ Uncomment the next cell and set data_source_name to one of these names.
         if len(configured_datasources) == 0:
             display(
                 HTML(
-                    """
+                    f"""
 <p>
-No {:s} data sources found in the great_expectations.yml of your project.
+No {data_source_type:s} data sources found in the great_expectations.yml of your project.
 </p>
 
 <p>
 If you did not create the data source during init, here is how to add it now: <a href="https://great-expectations.readthedocs.io/en/latest/how_to_add_data_source.html">How To Add a Data Source</a>
 </p>
-""".format(
-                        data_source_type
-                    )
+"""
                 )
             )
         elif len(configured_datasources) > 1:

@@ -265,7 +265,7 @@ class SlackNotificationAction(ValidationAction):
         ):
             raise TypeError(
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
-                "not {}".format(type(validation_result_suite_identifier))
+                f"not {type(validation_result_suite_identifier)}"
             )
 
         validation_success = validation_result_suite.success
@@ -396,7 +396,7 @@ class PagerdutyAlertAction(ValidationAction):
         ):
             raise TypeError(
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
-                "not {}".format(type(validation_result_suite_identifier))
+                f"not {type(validation_result_suite_identifier)}"
             )
 
         validation_success = validation_result_suite.success
@@ -515,7 +515,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         ):
             raise TypeError(
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
-                "not {}".format(type(validation_result_suite_identifier))
+                f"not {type(validation_result_suite_identifier)}"
             )
         validation_success = validation_result_suite.success
         data_docs_pages = None
@@ -630,7 +630,7 @@ class OpsgenieAlertAction(ValidationAction):
         ):
             raise TypeError(
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
-                "not {}".format(type(validation_result_suite_identifier))
+                f"not {type(validation_result_suite_identifier)}"
             )
 
         validation_success = validation_result_suite.success
@@ -793,7 +793,7 @@ class EmailAction(ValidationAction):
         ):
             raise TypeError(
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
-                "not {}".format(type(validation_result_suite_identifier))
+                f"not {type(validation_result_suite_identifier)}"
             )
 
         validation_success = validation_result_suite.success
