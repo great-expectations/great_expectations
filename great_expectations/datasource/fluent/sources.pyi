@@ -50,6 +50,7 @@ from great_expectations.datasource.fluent.interfaces import (
 from great_expectations.datasource.fluent.snowflake_datasource import SnowflakeDsn
 from great_expectations.datasource.fluent.spark_datasource import SparkConfig
 from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
+from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
 SourceFactoryFn: TypeAlias = Callable[..., Datasource]
 logger: Logger
@@ -68,7 +69,7 @@ def _get_field_details(
 ) -> _FieldDetails: ...
 
 class _SourceFactories:
-    type_lookup: ClassVar
+    type_lookup: ClassVar[TypeLookup]
     def __init__(self, data_context: GXDataContext) -> None: ...
     @classmethod
     def register_datasource(
