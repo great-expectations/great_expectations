@@ -202,7 +202,7 @@ def test_get_expectation_suites(
                                     "expectation_type": "expect_table_row_count_to_be_between",
                                 },
                             ],
-                            "expectation_suite_name": "my new suite to post",
+                            "expectation_suite_name": "brand new suite",
                         }
                     },
                 },
@@ -246,7 +246,7 @@ def test_post_expectation_suite(
                                     "expectation_type": "expect_table_row_count_to_be_between",
                                 },
                             ],
-                            "expectation_suite_name": "david_expectation_suite",
+                            "expectation_suite_name": "brand new suite",
                         }
                     },
                 },
@@ -256,7 +256,7 @@ def test_post_expectation_suite(
                 "errors": [
                     {
                         "detail": pact.Like(
-                            "Expectation Suite with name david_expectation_suite already exists."
+                            "Expectation Suite with name brand new suite already exists."
                         )
                     }
                 ]
@@ -374,7 +374,7 @@ def test_put_non_existent_expectation_suite(
                 "expectation-suites",
             ),
             request_params={
-                "name": "raw_health.critical_5",
+                "name": "brand new suite",
             },
             upon_receiving="a request to delete an Expectation Suite",
             given="the Expectation Suite does exist",
