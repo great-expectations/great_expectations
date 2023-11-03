@@ -12,7 +12,7 @@ context = gx.get_context()
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py datasource_yaml">
-datasource_yaml = f"""
+datasource_yaml = """
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -42,7 +42,7 @@ context.test_yaml_config(datasource_yaml)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py buggy_data_connector_yaml">
-buggy_data_connector_yaml = f"""
+buggy_data_connector_yaml = """
     buggy_inferred_data_connector_name:
         class_name: InferredAssetFilesystemDataConnector
         base_directory: <PATH_TO_YOUR_DATA_HERE>
@@ -55,7 +55,7 @@ buggy_data_connector_yaml = f"""
 # </snippet>
 
 # noinspection PyRedeclaration
-buggy_datasource_yaml = f"""
+buggy_datasource_yaml = """
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -88,7 +88,7 @@ buggy_datasource_yaml = buggy_datasource_yaml.replace(
 context.test_yaml_config(buggy_datasource_yaml)
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py another_buggy_data_connector_yaml">
-another_buggy_data_connector_yaml = f"""
+another_buggy_data_connector_yaml = """
     buggy_inferred_data_connector_name:
         class_name: InferredAssetFilesystemDataConnector
         base_directory: <PATH_TO_BAD_DATA_DIRECTORY_HERE>
@@ -101,7 +101,7 @@ another_buggy_data_connector_yaml = f"""
 # </snippet>
 
 # noinspection PyRedeclaration
-buggy_datasource_yaml = f"""
+buggy_datasource_yaml = """
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -149,7 +149,7 @@ available_data_asset_names = context.datasources[
 assert len(available_data_asset_names) == 36
 # </snippet>
 
-bare_bones_configured_data_connector_yaml = f"""
+bare_bones_configured_data_connector_yaml = """
    configured_data_connector_name:
         class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: <PATH_TO_YOUR_DATA_HERE>
@@ -158,11 +158,11 @@ bare_bones_configured_data_connector_yaml = f"""
           pattern: (.*)
           group_names:
             - data_asset_name
-        assets: {{}}
+        assets: {}
 """
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py add configureed asset data connector to datasource">
-datasource_yaml = f"""
+datasource_yaml = """
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -178,7 +178,7 @@ data_connectors:
           pattern: (.*)
           group_names:
             - data_asset_name
-        assets: {{}}
+        assets: {}
 """
 # </snippet>
 
@@ -187,7 +187,7 @@ datasource_yaml = datasource_yaml.replace("<PATH_TO_YOUR_DATA_HERE>", data_dir_p
 context.test_yaml_config(datasource_yaml)
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py configured_data_connector_yaml only by filename and type">
-configured_data_connector_yaml = f"""
+configured_data_connector_yaml = """
     configured_data_connector_name:
         class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: <PATH_TO_YOUR_DATA_HERE>
@@ -205,7 +205,7 @@ configured_data_connector_yaml = f"""
 """
 # </snippet>
 
-datasource_yaml = f"""
+datasource_yaml = """
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -243,7 +243,7 @@ assert len(available_data_asset_names) == 1
 
 # noinspection PyRedeclaration
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py configured_data_connector_yaml add granular group_names">
-configured_data_connector_yaml = f"""
+configured_data_connector_yaml = """
     configured_data_connector_name:
         class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: <PATH_TO_YOUR_DATA_HERE>
@@ -260,7 +260,7 @@ configured_data_connector_yaml = f"""
               - filename
           taxi_data_year_month:
             base_directory: samples_2020
-            pattern: ([\\w]+)_tripdata_sample_(\\d{{4}})-(\\d{{2}})\\.csv
+            pattern: ([\\w]+)_tripdata_sample_(\\d{4})-(\\d{2})\\.csv
             group_names:
               - name
               - year
@@ -268,7 +268,7 @@ configured_data_connector_yaml = f"""
 """
 # </snippet>
 
-datasource_yaml = f"""
+datasource_yaml = """
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -301,7 +301,7 @@ data_connectors:
               - filename
           taxi_data_year_month:
             base_directory: samples_2020
-            pattern: ([\\w]+)_tripdata_sample_(\\d{{4}})-(\\d{{2}})\\.csv
+            pattern: ([\\w]+)_tripdata_sample_(\\d{4})-(\\d{2})\\.csv
             group_names:
               - name
               - year
