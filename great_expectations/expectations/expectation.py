@@ -1063,9 +1063,9 @@ class Expectation(metaclass=MetaExpectation):
                 new_v = list()
                 for val in v:
                     new_v.append(val.lower())
-                config_kwargs_new[k] = new_v
+                config_kwargs_new[k] = new_v  # type: ignore[assignment]
             else:
-                config_kwargs_new[k] = v
+                config_kwargs_new[k] = v  # type: ignore[assignment]
         configuration.kwargs = config_kwargs_new
 
         metric_name: str
