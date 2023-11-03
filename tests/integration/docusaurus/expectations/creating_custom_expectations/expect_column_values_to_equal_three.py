@@ -32,6 +32,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 # snippets reference this object without creating it
 result_dict = {}
 
+
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py ColumnValuesEqualThree class_def">
