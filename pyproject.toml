@@ -251,7 +251,6 @@ ignore = [
     "RUF015", # unnecessary-iterable-allocation-for-first-element - requires more careful review
 ]
 extend-exclude = [
-    "docs/*",
     "build/*",
     "versioneer*",
     "examples/*",
