@@ -207,7 +207,7 @@ class SphinxInvokeDocsBuilder:
         Returns:
             Content suitable for use in a docusaurus mdx file.
         """
-        from bs4 import (
+        from bs4 import (  # noqa: I001
             BeautifulSoup,
         )  # Importing here since it is not a library requirement
 
@@ -234,7 +234,9 @@ class SphinxInvokeDocsBuilder:
         doc["class"] = "sphinx-api-doc"
 
         # Change style to styles to avoid rendering errors
-        tags_with_style = doc.find_all("col", style=lambda value: value in value)
+        tags_with_style = doc.find_all(
+            "col", style=lambda value: value in value  # noqa: PLR0124
+        )
         for tag in tags_with_style:
             style = tag["style"]
             del tag["style"]
@@ -592,7 +594,10 @@ class SphinxInvokeDocsBuilder:
         """
         doc = doc.replace("&lt;", "<").replace("&gt;", ">")
         doc = (
-            doc.replace("“", '"').replace("”", '"').replace("‘", "'").replace("’", "'")
+            doc.replace("“", '"')
+            .replace("”", '"')
+            .replace("‘", "'")  # noqa: RUF001
+            .replace("’", "'")  # noqa: RUF001
         )
         doc = doc.replace("<cite>{", "`").replace("}</cite>", "`")
         doc = doc.replace("${", r"\${")

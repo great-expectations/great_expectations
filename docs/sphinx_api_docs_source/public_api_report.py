@@ -59,16 +59,18 @@ import pathlib
 import re
 import sys
 from dataclasses import dataclass
-from typing import List, Set, Union, cast
+from typing import TYPE_CHECKING, List, Set, Union, cast
 
 from docs.sphinx_api_docs_source import (
     public_api_excludes,
     public_api_includes,
     public_api_missing_threshold,
 )
-from docs.sphinx_api_docs_source.include_exclude_definition import (
-    IncludeExcludeDefinition,
-)
+
+if TYPE_CHECKING:
+    from docs.sphinx_api_docs_source.include_exclude_definition import (
+        IncludeExcludeDefinition,
+    )
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -540,7 +542,7 @@ class CodeReferenceFilter:
     DEFAULT_INCLUDES = public_api_includes.DEFAULT_INCLUDES
     DEFAULT_EXCLUDES = public_api_excludes.DEFAULT_EXCLUDES
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         repo_root: pathlib.Path,
         docs_example_parser: DocsExampleParser,

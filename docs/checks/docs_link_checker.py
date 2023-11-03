@@ -16,6 +16,7 @@ import glob
 import logging
 import os
 import re
+import sys
 from typing import List, Optional
 
 import click
@@ -231,7 +232,9 @@ class LinkChecker:
             logger.debug(f"Docroot link {link} in file {file} found")
             return None
 
-    def _check_link(self, match: re.Match, file: str) -> Optional[LinkReport]:
+    def _check_link(  # noqa: PLR0912 # too complex
+        self, match: re.Match, file: str
+    ) -> Optional[LinkReport]:
         """Checks that a link is valid. Valid links are:
         - Absolute links that begin with a forward slash and the specified site prefix (ex: /docs) with no suffix
         - Absolute images with an image suffix
@@ -342,7 +345,7 @@ def scan_docs_click(
 ) -> None:
     code, message = scan_docs(path, docs_root, site_prefix, skip_external)
     click.echo(message)
-    exit(code)
+    sys.exit(code)
 
 
 def scan_docs(

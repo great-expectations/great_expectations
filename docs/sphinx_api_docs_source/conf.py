@@ -50,7 +50,7 @@ html_static_path = []
 DOCUMENTATION_TAGS = ["---Documentation---", "--Documentation--"]
 
 
-def skip_if_not_whitelisted(app, what, name, obj, would_skip, options):
+def skip_if_not_whitelisted(app, what, name, obj, would_skip, options):  # noqa: PLR0913
     """Skip rendering documentation for docstrings that are empty or not whitelisted.
 
     Whitelisted docstrings contain the WHITELISTED_TAG.
@@ -60,7 +60,7 @@ def skip_if_not_whitelisted(app, what, name, obj, would_skip, options):
     return True
 
 
-def custom_process_docstring(app, what, name, obj, options, lines):
+def custom_process_docstring(app, what, name, obj, options, lines):  # noqa: PLR0913
     """Custom processing for use during docstring processing."""
     _remove_whitelist_tag(
         app=app, what=what, name=name, obj=obj, options=options, lines=lines
@@ -76,7 +76,7 @@ def custom_process_docstring(app, what, name, obj, options, lines):
     )
 
 
-def _remove_whitelist_tag(app, what, name, obj, options, lines):
+def _remove_whitelist_tag(app, what, name, obj, options, lines):  # noqa: PLR0913
     """Remove the whitelisted tag from documentation before rendering.
 
     Note: This method modifies lines in place per sphinx documentation.
@@ -87,7 +87,9 @@ def _remove_whitelist_tag(app, what, name, obj, options, lines):
             lines[idx] = trimmed_line
 
 
-def _process_relevant_documentation_tag(app, what, name, obj, options, lines):
+def _process_relevant_documentation_tag(  # noqa: PLR0913
+    app, what, name, obj, options, lines
+):
     """Remove and replace documentation tag from documentation before rendering.
 
     Note: This method modifies lines in place per sphinx documentation.
@@ -104,7 +106,9 @@ def _process_relevant_documentation_tag(app, what, name, obj, options, lines):
 FEATURE_MATURITY_INFO_TAG = "--ge-feature-maturity-info--"
 
 
-def _remove_feature_maturity_info(app, what, name, obj, options, lines):
+def _remove_feature_maturity_info(  # noqa: PLR0913
+    app, what, name, obj, options, lines
+):
     """Remove feature maturity info if there are starting and ending tags.
 
     Note: This method modifies lines in place per sphinx documentation.
@@ -122,7 +126,9 @@ def _remove_feature_maturity_info(app, what, name, obj, options, lines):
         del lines[feature_maturity_info_start : feature_maturity_info_end + 1]
 
 
-def _convert_code_snippets_to_docusaurus(app, what, name, obj, options, lines):
+def _convert_code_snippets_to_docusaurus(  # noqa: PLR0913
+    app, what, name, obj, options, lines
+):
     """Convert code snippets to docusaurus style using CodeBlock component.
 
     Code snippets
