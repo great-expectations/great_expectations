@@ -20,10 +20,17 @@ from great_expectations.expectations.metrics import (
     column_condition_partial,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_partial
-from great_expectations.render import CollapseContent, RenderedStringTemplateContent
+from great_expectations.render import (
+    CollapseContent,
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+)
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.util import num_to_str
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
+# snippets reference this object without creating it
+result_dict = {}
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
