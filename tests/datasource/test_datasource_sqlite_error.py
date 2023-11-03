@@ -51,6 +51,7 @@ def create_db():
         print("Error! cannot create the database connection.")
 
 
+@pytest.mark.sqlite
 def test_me_column_list():
     # TODO: this would need better messaging
     context = gx.get_context(cloud_mode=False)
