@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pathlib
 import uuid
 from typing import TYPE_CHECKING, Iterator
 
@@ -7,47 +8,79 @@ import pandas as pd
 import pytest
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.datasource.data_connector.util import normalize_directory_path
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.core import ExpectationSuite
     from great_expectations.data_context import CloudDataContext
-    from great_expectations.datasource.fluent import BatchRequest, SparkDatasource
-    from great_expectations.datasource.fluent.spark_datasource import DataFrameAsset
+    from great_expectations.datasource.fluent import (
+        BatchRequest,
+        SparkFilesystemDatasource,
+    )
+    from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+        CSVAsset,
+    )
+
+
+@pytest.fixture
+def base_dir(tmpdir) -> Iterator[pathlib.Path]:
+    dir_path = tmpdir / "data"
+    dir_path.mkdir()
+    df = pd.DataFrame(
+        {"name": [1, 2, 3, 4], "id": ["one", "two", "three", "four"]},
+    )
+    csv_path = dir_path / "data.csv"
+    df.to_csv(csv_path)
+    yield dir_path
+
+
+@pytest.fixture
+def updated_base_dir(tmpdir) -> Iterator[pathlib.Path]:
+    dir_path = tmpdir / "other_data"
+    dir_path.mkdir()
+    df = pd.DataFrame(
+        {"name": [1, 2, 3, 4], "id": ["one", "two", "three", "four"]},
+    )
+    csv_path = dir_path / "data.csv"
+    df.to_csv(csv_path)
+    yield dir_path
 
 
 @pytest.fixture
 def datasource(
     context: CloudDataContext,
-) -> Iterator[SparkDatasource]:
+    base_dir: pathlib.Path,
+    updated_base_dir: pathlib.Path,
+) -> Iterator[SparkFilesystemDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
-    datasource = context.sources.add_spark(
-        name=datasource_name,
-        persist=True,
+    original_base_dir = base_dir
+
+    datasource = context.sources.add_spark_filesystem(
+        name=datasource_name, base_directory=original_base_dir
     )
-    datasource.persist = False
-    datasource = context.sources.add_or_update_spark(datasource=datasource)  # type: ignore[call-arg]
+
+    datasource.base_directory = normalize_directory_path(
+        updated_base_dir, context.root_directory
+    )
+    datasource = context.sources.add_or_update_spark_filesystem(datasource=datasource)
     assert (
-        datasource.persist is False
+        datasource.base_directory == updated_base_dir
     ), "The datasource was not updated in the previous method call."
-    datasource.persist = True
+
+    datasource.base_directory = normalize_directory_path(
+        original_base_dir, context.root_directory
+    )
     datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
     assert (
-        datasource.persist is True
+        datasource.base_directory == original_base_dir
     ), "The datasource was not updated in the previous method call."
-    datasource.persist = False
-    datasource_dict = datasource.dict()
-    datasource = context.sources.add_or_update_spark(**datasource_dict)
-    assert (
-        datasource.persist is False
-    ), "The datasource was not updated in the previous method call."
-    datasource.persist = True
-    datasource_dict = datasource.dict()
-    _ = context.add_or_update_datasource(**datasource_dict)
+
     datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
     assert (
-        datasource.persist is True
+        datasource.base_directory == original_base_dir
     ), "The datasource was not updated in the previous method call."
+
     yield datasource
     # PP-692: this doesn't work due to a bug
     # calling delete_datasource() will fail with:
@@ -58,38 +91,29 @@ def datasource(
 
 
 @pytest.fixture
-def data_asset(datasource: SparkDatasource, table_factory) -> Iterator[DataFrameAsset]:
+def data_asset(datasource: SparkFilesystemDatasource) -> Iterator[CSVAsset]:
     asset_name = f"i{uuid.uuid4().hex}"
-    _ = datasource.add_dataframe_asset(name=asset_name)
-    dataframe_asset = datasource.get_asset(asset_name=asset_name)
-    yield dataframe_asset
+
+    _ = datasource.add_csv_asset(name=asset_name, header=True, infer_schema=True)
+    csv_asset = datasource.get_asset(asset_name=asset_name)
+
+    yield csv_asset
     # PP-692: this doesn't work due to a bug
     # calling delete_asset() will fail with:
     # Cannot perform action because Asset is used by Checkpoint:
-    # end-to-end_snowflake_asset <SHORT HASH> - Default Checkpoint
+    # end-to-end_pandas_filesystem_asset <SHORT HASH> - Default Checkpoint
     # datasource.delete_asset(asset_name=asset_name)
 
 
 @pytest.fixture
-def batch_request(
-    data_asset: DataFrameAsset,
-    spark_session,
-    spark_df_from_pandas_df,
-) -> BatchRequest:
-    pandas_df = pd.DataFrame(
-        {
-            "id": [1, 2, 3, 4],
-            "name": [1, 2, 3, 4],
-        },
-    )
-    spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
-    return data_asset.build_batch_request(dataframe=spark_df)
+def batch_request(data_asset: CSVAsset) -> BatchRequest:
+    return data_asset.build_batch_request()
 
 
 @pytest.fixture
 def expectation_suite(
     context: CloudDataContext,
-    data_asset: DataFrameAsset,
+    data_asset: CSVAsset,
 ) -> Iterator[ExpectationSuite]:
     expectation_suite_name = f"{data_asset.datasource.name} | {data_asset.name}"
     expectation_suite = context.add_expectation_suite(
@@ -115,7 +139,7 @@ def expectation_suite(
 @pytest.fixture
 def checkpoint(
     context: CloudDataContext,
-    data_asset: DataFrameAsset,
+    data_asset: CSVAsset,
     batch_request: BatchRequest,
     expectation_suite: ExpectationSuite,
 ) -> Iterator[Checkpoint]:
@@ -164,11 +188,9 @@ def test_interactive_validator(
         batch_request=batch_request,
         expectation_suite_name=expectation_suite_name,
     )
-    validator.head()
-    validator.expect_column_values_to_not_be_null(
-        column="id",
-        mostly=1,
-    )
+
+    print(validator.head())
+    validator.expect_column_mean_to_be_between(column="name", min_value=0, max_value=4)
     validator.save_expectation_suite()
     expectation_suite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name

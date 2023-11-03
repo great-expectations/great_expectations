@@ -31,9 +31,9 @@ Once you have completed this guide you will have a foundation in the basics of u
 
 ### 1. Setup
 
-#### 1.1 Generate access token
+#### 1.1 Generate user access token
 
-Go to [“Settings” > “Tokens”](https://app.greatexpectations.io/tokens) in the navigation panel and generate an access token. Both `admin` and `editor` roles will suffice for this guide.
+Go to [“Settings” > “Tokens”](https://app.greatexpectations.io/tokens) in the navigation panel and generate a user access token. Both `admin` and `editor` roles will suffice for this guide.
 These tokens are view-once and stored as a hash in Great Expectation Cloud's backend database. Once you copy the API key and close the dialog, the Cloud UI will never show the token value again.
 
 #### 1.2 Import modules
@@ -59,7 +59,7 @@ Please note that access tokens are sensitive information and should not be commi
 :::
 
 ```python title="Jupyter Notebook"
-os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<your_gx_cloud_access_token>"
+os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<your_gx_cloud_user_access_token>"
 # your organization_id is indicated on https://app.greatexpectations.io/tokens page
 os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<organization_id_from_the_app>"
 
@@ -135,7 +135,7 @@ expectation_suite.add_expectation(
 print(expectation_suite)
 
 # Save the Expectation Suite
-context.save_expectation_suite(expectation_suite=expectation_suite)
+context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
 ```
 
 With the Expectation defined above, we are stating that we _expect_ the column of your choice to always be populated. That is: none of the column's values should be null.
