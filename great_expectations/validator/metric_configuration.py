@@ -47,7 +47,7 @@ class MetricConfiguration:
                 metric_domain_kwargs_new[k] = new_v  # type: ignore[assignment]
             else:
                 # these are for None
-                metric_domain_kwargs_new[k] = v  # type: ignore[assignment]
+                metric_domain_kwargs_new[k] = v
         metric_domain_kwargs = metric_domain_kwargs_new
 
         if not isinstance(metric_domain_kwargs, IDDict):
