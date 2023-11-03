@@ -44,10 +44,10 @@ class MetricConfiguration:
                 new_v = list()
                 for val in v:
                     new_v.append(val.lower())
-                metric_domain_kwargs_new[k] = new_v
+                metric_domain_kwargs_new[k] = new_v  # type: ignore
             else:
                 # these are for None
-                metric_domain_kwargs_new[k] = v
+                metric_domain_kwargs_new[k] = v  # type: ignore
         metric_domain_kwargs = metric_domain_kwargs_new
 
         if not isinstance(metric_domain_kwargs, IDDict):
