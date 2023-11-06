@@ -113,7 +113,9 @@ class LinkChecker:
     def _is_anchor_link(self, link: str) -> bool:
         return link.startswith("#")
 
-    def _check_external_link(self, link: str, file: pathlib.Path) -> Optional[LinkReport]:
+    def _check_external_link(
+        self, link: str, file: pathlib.Path
+    ) -> Optional[LinkReport]:
         if self._skip_external:
             return None
 
@@ -147,7 +149,9 @@ class LinkChecker:
     def _get_absolute_path(self, path: pathlib.Path) -> pathlib.Path:
         return self._docs_root.joinpath(path).absolute()
 
-    def _get_relative_path(self, file: pathlib.Path, path: pathlib.Path) -> pathlib.Path:
+    def _get_relative_path(
+        self, file: pathlib.Path, path: pathlib.Path
+    ) -> pathlib.Path:
         # link should be relative to the location of the current file
         directory = file.parent
         return directory / path
