@@ -12,9 +12,7 @@ The above command:
 """
 from __future__ import annotations
 
-import glob
 import logging
-import os
 import pathlib
 import re
 import sys
@@ -169,7 +167,7 @@ class LinkChecker:
             return None
 
         # absolute links should point to files that exist (with the .md extension added)
-        md_file = pathlib.Path(self._get_absolute_path(path).rstrip("/") + ".md")
+        md_file = path.resolve().with_suffix(".md")
         logger.debug(f"Absolute link {link} resolved to path {md_file}")
 
         if not md_file.is_file():
@@ -185,7 +183,7 @@ class LinkChecker:
         logger.debug(f"Checking absolute image {link} in file {file}")
 
         image_file = self._get_absolute_path(path)
-        if not os.path.isfile(image_file):  # noqa: PTH113
+        if not image_file.is_file():
             logger.info(f"Absolute image {link} in file {file} was not found")
             return LinkReport(link, file, f"Image {image_file} not found")
         else:
@@ -193,14 +191,14 @@ class LinkChecker:
             return None
 
     def _check_relative_link(
-        self, link: str, file: str, path: str
+        self, link: str, file: pathlib.Path, path: pathlib.Path
     ) -> Optional[LinkReport]:
         logger.debug(f"Checking relative link {link} in file {file}")
 
         md_file = self._get_relative_path(file, path)
         logger.debug(f"Relative link {link} resolved to path {md_file}")
 
-        if not os.path.isfile(md_file):  # noqa: PTH113
+        if not md_file.is_file():
             logger.info(f"Relative link {link} in file {file} was not found")
             return LinkReport(link, file, f"Linked file {md_file} not found")
         else:
@@ -208,12 +206,12 @@ class LinkChecker:
             return None
 
     def _check_relative_image(
-        self, link: str, file: str, path: str
+        self, link: str, file: pathlib.Path, path: pathlib.Path
     ) -> Optional[LinkReport]:
         logger.debug(f"Checking relative image {link} in file {file}")
 
         image_file = self._get_relative_path(file, path)
-        if not os.path.isfile(image_file):  # noqa: PTH113
+        if not image_file.is_file():
             logger.info(f"Relative image {link} in file {file} was not found")
             return LinkReport(link, file, f"Image {image_file} not found")
         else:
@@ -221,12 +219,12 @@ class LinkChecker:
             return None
 
     def _check_docroot_link(
-        self, link: str, file: str, path: str
+        self, link: str, file: pathlib.Path, path: pathlib.Path
     ) -> Optional[LinkReport]:
         logger.debug(f"Checking docroot link {link} in file {file}")
 
         md_file = self._get_docroot_path(path)
-        if not os.path.isfile(md_file):  # noqa: PTH113
+        if not md_file.is_file():
             logger.info(f"Docroot link {link} in file {file} was not found")
             return LinkReport(link, file, f"Linked file {md_file} not found")
         else:
@@ -234,7 +232,7 @@ class LinkChecker:
             return None
 
     def _check_link(  # noqa: PLR0912 # too complex
-        self, match: re.Match, file: str
+        self, match: re.Match, file: pathlib.Path
     ) -> Optional[LinkReport]:
         """Checks that a link is valid. Valid links are:
         - Absolute links that begin with a forward slash and the specified site prefix (ex: /docs) with no suffix
@@ -289,7 +287,7 @@ class LinkChecker:
 
         return result
 
-    def check_file(self, file: str) -> List[LinkReport]:
+    def check_file(self, file: pathlib.Path) -> List[LinkReport]:
         """Looks for all the links in a file and checks them.
 
         Returns:
@@ -350,24 +348,28 @@ def scan_docs_click(
 
 
 def scan_docs(
-    path: str, docs_root: Optional[str], site_prefix: str, skip_external: bool
+    path: str | pathlib.Path, docs_root: str | pathlib.Path | None, site_prefix: str, skip_external: bool
 ) -> tuple[int, str]:
-    if docs_root is None:
+    path = pathlib.Path(path)
+    if docs_root:
+        docs_root = pathlib.Path(docs_root)
+    else:
         docs_root = path
-    elif not os.path.isdir(docs_root):  # noqa: PTH112
+
+    if not docs_root.is_dir():
         return 1, f"Docs root path: {docs_root} is not a directory"
 
     # prepare our return value
     result: List[LinkReport] = list()
     checker = LinkChecker(path, docs_root, site_prefix, skip_external)
 
-    if os.path.isdir(path):  # noqa: PTH112
+    if path.is_dir():
         # if the path is a directory, get all .md files within it
-        for file in glob.glob(f"{path}/**/*.md", recursive=True):
+        for file in path.rglob("*.md"):
             report = checker.check_file(file)
             if report:
                 result.extend(report)
-    elif os.path.isfile(path):  # noqa: PTH113
+    elif path.is_file():
         # else we support checking one file at a time
         result.extend(checker.check_file(path))
     else:
