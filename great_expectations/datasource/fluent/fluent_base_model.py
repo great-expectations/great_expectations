@@ -264,7 +264,7 @@ class FluentBaseModel(pydantic.BaseModel):
 
         class_name = self.__class__.__name__
         if config_provider:
-            logger.info(f"{class_name}.dict() - substituting config values")
+            logger.debug(f"{class_name}.dict() - substituting config values")
             _recursively_set_config_value(result, config_provider)
         elif raise_on_missing_config_provider:
             raise ValueError(

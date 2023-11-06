@@ -10,7 +10,7 @@ import random
 import shutil
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, Final, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Final, Generator, List, Optional
 from unittest import mock
 
 import numpy as np
@@ -82,7 +82,7 @@ from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
-from great_expectations.datasource.fluent import PandasDatasource
+from great_expectations.datasource.fluent import GxDatasourceWarning, PandasDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
@@ -8421,3 +8421,11 @@ def aws_credentials():
     os.environ["AWS_SECURITY_TOKEN"] = "testing"
     os.environ["AWS_SESSION_TOKEN"] = "testing"
     os.environ["AWS_DEFAULT_REGION"] = "testing"
+
+
+@pytest.fixture(scope="function")
+def filter_gx_datasource_warnings() -> Generator[None, None, None]:
+    """Filter out GxDatasourceWarning warnings."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=GxDatasourceWarning)
+        yield

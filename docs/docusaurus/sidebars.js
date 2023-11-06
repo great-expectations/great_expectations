@@ -13,6 +13,16 @@ module.exports = {
           items: [
             {
               type: 'link',
+              label: 'GX Cloud architecture',
+              href: '/docs/cloud/about_gx#gx-cloud-architecture',
+            },
+            {
+              type: 'link',
+              label: 'GX Cloud deployment patterns',
+              href: '/docs/cloud/about_gx#gx-cloud-deployment-patterns',
+            },
+            {
+              type: 'link',
               label: 'Workflow optimization',
               href: '/docs/cloud/about_gx#workflow-optimization',
             },
@@ -135,7 +145,7 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'Manually create an empty Expectation Suite ',
+              label: 'Create an empty Expectation Suite ',
               href: '/docs/cloud/expectation_suites/manage_expectation_suites#manually-create-an-empty-expectation-suite',
             },
             {
@@ -422,7 +432,10 @@ module.exports = {
     {
       type: 'category',
       label: 'Concepts',
-      link: { type: 'doc', id: 'conceptual_guides/learn_lp' },
+      link: { 
+        type: 'doc', 
+        id: 'conceptual_guides/learn_lp' 
+      },
       items: [
         'conceptual_guides/expectation_classes',
         'conceptual_guides/metricproviders',
@@ -480,8 +493,6 @@ module.exports = {
             },
             'terms/expectation_suite',
             'terms/metric',
-            'conceptual_guides/metricproviders',
-            'terms/metric',
             {
               type: 'category',
               label: 'Stores',
@@ -505,6 +516,7 @@ module.exports = {
     },
     { type: 'doc', id: 'changelog' },
     { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
+    'get_support',
     'contributing/contributing',
   ]
 }
