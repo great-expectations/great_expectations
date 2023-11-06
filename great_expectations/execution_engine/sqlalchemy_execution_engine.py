@@ -10,7 +10,6 @@ import random
 import re
 import string
 import traceback
-import warnings
 from contextlib import contextmanager
 from pathlib import Path
 from typing import (
@@ -1357,16 +1356,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         source_schema_name: str = batch_spec.get("schema_name", None)
         source_table_name: str = batch_spec.get("table_name", None)
-
-        if batch_spec.get("bigquery_temp_table"):
-            # deprecated-v0.15.3
-            warnings.warn(
-                "BigQuery tables that are created as the result of a query are no longer created as "
-                "permanent tables. Thus, a named permanent table through the `bigquery_temp_table`"
-                "parameter is not required. The `bigquery_temp_table` parameter is deprecated as of"
-                "v0.15.3 and will be removed in v0.18.",
-                DeprecationWarning,
-            )
 
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table

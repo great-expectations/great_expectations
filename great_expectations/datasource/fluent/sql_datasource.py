@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import copy
+import logging
+import warnings
 from datetime import date, datetime
 from pprint import pformat as pf
 from typing import (
@@ -8,6 +10,7 @@ from typing import (
     Any,
     ClassVar,
     Dict,
+    Final,
     List,
     Literal,
     Optional,
@@ -40,6 +43,7 @@ from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
     Datasource,
+    GxDatasourceWarning,
     Sorter,
     SortersDefinition,
     TestConnectionError,
@@ -60,6 +64,8 @@ if TYPE_CHECKING:
         BatchMetadata,
         BatchSlice,
     )
+
+LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
 
 class SQLDatasourceError(Exception):
@@ -961,6 +967,36 @@ class TableAsset(_SQLAsset):
         return False
 
 
+def _warn_for_more_specific_datasource_type(connection_string: str) -> None:
+    """
+    Warns if a more specific datasource type may be more appropriate based on the connection string connector prefix.
+    """
+    from great_expectations.datasource.fluent.sources import _SourceFactories
+
+    connector: str = connection_string.split("://")[0].split("+")[0]
+
+    type_lookup_plus: dict[str, str] = {
+        n: _SourceFactories.type_lookup[n].__name__
+        for n in _SourceFactories.type_lookup.type_names()
+    }
+    # type names are not always exact match to connector strings
+    type_lookup_plus.update(
+        {
+            "postgresql": type_lookup_plus["postgres"],
+            "databricks": type_lookup_plus["databricks_sql"],
+        }
+    )
+
+    more_specific_datasource: str | None = type_lookup_plus.get(connector)
+    if more_specific_datasource:
+        warnings.warn(
+            f"You are using a generic SQLDatasource but a more specific {more_specific_datasource} "
+            "may be more appropriate"
+            " https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data",
+            category=GxDatasourceWarning,
+        )
+
+
 # This improves our error messages by providing a more specific type for pydantic to validate against
 # It also ensure the generated jsonschema has a oneOf instead of anyOf field for assets
 # https://docs.pydantic.dev/1.10/usage/types/#discriminated-unions-aka-tagged-unions
@@ -1037,7 +1073,10 @@ class SQLDatasource(Datasource):
         _check_config_substitutions_needed(
             self, model_dict, raise_warning_if_provider_not_present=True
         )
+        # the connection_string has had config substitutions applied
         connection_string = model_dict.pop("connection_string")
+        if self.__class__.__name__ == "SQLDatasource":
+            _warn_for_more_specific_datasource_type(connection_string)
         kwargs = model_dict.pop("kwargs", {})
         return sa.create_engine(connection_string, **kwargs)
 

@@ -28,16 +28,11 @@ PACT_DIR: Final[str] = str(
 JsonData: TypeAlias = Union[None, int, str, bool, List[Any], Dict[str, Any]]
 
 PactBody: TypeAlias = Union[
-    Dict[str, Union[JsonData, pact.matchers.Matcher]], pact.matchers.Matcher
+    Dict[str, Union[JsonData, pact.matchers.Matcher]], pact.matchers.Matcher, None
 ]
 
 
-@pytest.fixture
-def existing_organization_id() -> str:
-    try:
-        return os.environ["GX_CLOUD_ORGANIZATION_ID"]
-    except KeyError as e:
-        raise OSError("GX_CLOUD_ORGANIZATION_ID is not set in this environment.") from e
+EXISTING_ORGANIZATION_ID: Final[str] = os.environ.get("GX_CLOUD_ORGANIZATION_ID", "")
 
 
 class RequestMethods(str, enum.Enum):
@@ -48,7 +43,7 @@ class RequestMethods(str, enum.Enum):
     PUT = "PUT"
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def gx_cloud_session() -> Session:
     try:
         access_token = os.environ["GX_CLOUD_ACCESS_TOKEN"]
@@ -61,7 +56,7 @@ def get_git_commit_hash() -> str:
     return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def pact_test(request) -> pact.Pact:
     pact_broker_base_url = "https://greatexpectations.pactflow.io"
     consumer_name = "great_expectations"
@@ -114,12 +109,20 @@ class ContractInteraction(pydantic.BaseModel):
 
     Args:
         method: A string (e.g. "GET" or "POST") or attribute of the RequestMethods class representing a request method.
+        request_path: A pathlib.Path to the endpoint relative to the base url.
+                        e.g.
+                            ```
+                            path = pathlib.Path(
+                                "/", "organizations", organization_id, "data-context-configuration"
+                            )
+                            ```
         upon_receiving: A string description of the type of request being made.
         given: A string description of the state of the Cloud backend data requested.
         response_status: The status code associated with the response. An integer between 100 and 599.
         response_body: A dictionary or Pact Matcher object representing the response body.
         request_body (Optional): A dictionary or Pact Matcher object representing the request body.
         request_headers (Optional): A dictionary representing the request headers.
+        request_parmas (Optional): A dictionary representing the request parameters.
 
     Returns:
         ContractInteraction
@@ -129,12 +132,14 @@ class ContractInteraction(pydantic.BaseModel):
         arbitrary_types_allowed = True
 
     method: Union[RequestMethods, pydantic.StrictStr]
+    request_path: pathlib.Path
     upon_receiving: pydantic.StrictStr
     given: pydantic.StrictStr
     response_status: Annotated[int, pydantic.Field(strict=True, ge=100, lt=600)]
     response_body: PactBody
     request_body: Union[PactBody, None] = None
     request_headers: Union[dict, None] = None
+    request_params: Union[dict, None] = None
 
 
 @pytest.fixture
@@ -143,20 +148,12 @@ def run_pact_test(
     pact_test: pact.Pact,
 ) -> Callable:
     def _run_pact_test(
-        path: pathlib.Path,
         contract_interaction: ContractInteraction,
     ) -> None:
         """Runs a contract test and produces a Pact contract json file in directory:
             - tests/integration/cloud/rest_contracts/pacts
 
         Args:
-            path: A pathlib.Path to the endpoint relative to the base url.
-                e.g.
-                    ```
-                    path = pathlib.Path(
-                        "/", "organizations", organization_id, "data-context-configuration"
-                    )
-                    ```
             contract_interaction: A ContractInteraction object which represents a Python API (Consumer) request
                                   and expected minimal response, given a state in the Cloud backend (Provider).
 
@@ -166,10 +163,12 @@ def run_pact_test(
 
         request: dict[str, str | PactBody] = {
             "method": contract_interaction.method,
-            "path": str(path),
+            "path": str(contract_interaction.request_path),
         }
         if contract_interaction.request_body is not None:
             request["body"] = contract_interaction.request_body
+        if contract_interaction.request_params is not None:
+            request["query"] = contract_interaction.request_params
 
         request["headers"] = dict(gx_cloud_session.headers)
         if contract_interaction.request_headers is not None:
@@ -178,8 +177,9 @@ def run_pact_test(
 
         response: dict[str, int | PactBody] = {
             "status": contract_interaction.response_status,
-            "body": contract_interaction.response_body,
         }
+        if contract_interaction.response_body is not None:
+            response["body"] = contract_interaction.response_body
 
         (
             pact_test.given(provider_state=contract_interaction.given)
@@ -188,11 +188,14 @@ def run_pact_test(
             .will_respond_with(**response)
         )
 
-        request_url = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}{path}"
+        request_url = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}{contract_interaction.request_path}"
 
         with pact_test:
             gx_cloud_session.request(
-                method=contract_interaction.method, url=request_url
+                method=contract_interaction.method,
+                url=request_url,
+                json=contract_interaction.request_body,
+                params=contract_interaction.request_params,
             )
 
     return _run_pact_test
