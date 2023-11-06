@@ -29,7 +29,7 @@ import great_expectations as gx
 
 context = gx.get_context()
 
-pg_datasource = context.sources.add_sql(
+pg_datasource = context.sources.add_postgres(
     name="pg_datasource", connection_string=PG_CONNECTION_STRING
 )
 table_asset = pg_datasource.add_table_asset(

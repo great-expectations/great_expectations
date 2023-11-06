@@ -142,7 +142,11 @@ def test_instantiation_via_url_with_kwargs(sa):
 
 
 @pytest.mark.sqlite
-def test_instantiation_via_fluent_data_sources_with_kwargs(sa, empty_data_context):
+def test_instantiation_via_fluent_data_sources_with_kwargs(
+    sa,
+    empty_data_context,
+    filter_gx_datasource_warnings: None,
+):
     db_file = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
