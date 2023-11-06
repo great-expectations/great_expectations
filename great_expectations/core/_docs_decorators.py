@@ -34,7 +34,7 @@ def public_api(func: F) -> F:
 def deprecated_method_or_class(
     version: str,
     message: str = "",
-):
+) -> Callable[[F], F]:
     """Add a deprecation warning to the docstring of the decorated method or class.
 
     Used as a decorator:
@@ -105,7 +105,7 @@ def deprecated_argument(
     argument_name: str,
     version: str,
     message: str = "",
-):
+) -> Callable[[F], F]:
     """Add an arg-specific deprecation warning to the decorated method or class.
 
     Used as a decorator:
@@ -148,7 +148,7 @@ def new_argument(
     argument_name: str,
     version: str,
     message: str = "",
-):
+) -> Callable[[F], F]:
     """Add an arg-specific version added note to the decorated method or class.
 
     Used as a decorator:
