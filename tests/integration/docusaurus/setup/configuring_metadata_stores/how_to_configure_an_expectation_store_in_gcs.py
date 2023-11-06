@@ -126,7 +126,7 @@ local_expectation_suite_file_path = pathlib.Path(
     context.root_directory, "expectations", f"{expectation_suite_name}.json"
 )
 copy_expectation_command = copy_expectation_command.replace(
-    "expectations/my_expectation_suite.json", local_expectation_suite_file_path
+    "expectations/my_expectation_suite.json", str(local_expectation_suite_file_path)
 )
 copy_expectation_command = copy_expectation_command.replace(
     "<YOUR GCS BUCKET NAME>",
