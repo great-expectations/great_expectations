@@ -6,6 +6,7 @@ pytest -v --docs-tests -k "how_to_connect_to_sqlite_data" tests/integration/test
 """
 
 import pathlib
+
 import great_expectations as gx
 
 sqlite_database_path = str(
