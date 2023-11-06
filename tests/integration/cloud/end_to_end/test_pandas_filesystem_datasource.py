@@ -8,7 +8,6 @@ import pandas as pd
 import pytest
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.datasource.data_connector.util import normalize_directory_path
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
@@ -56,15 +55,14 @@ def datasource(
         name=datasource_name, base_directory=original_base_dir
     )
 
-    datasource.base_directory = normalize_directory_path(
-        updated_base_dir, context.root_directory
-    )
+    datasource.base_directory = updated_base_dir
+
     datasource = context.sources.add_or_update_pandas_filesystem(datasource=datasource)
     assert (
         datasource.base_directory == updated_base_dir
     ), "The datasource was not updated in the previous method call."
 
-    datasource.base_directory = str(original_base_dir)
+    datasource.base_directory = original_base_dir
     datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment]
     assert (
         datasource.base_directory == original_base_dir
@@ -184,7 +182,7 @@ def test_interactive_validator(
     )
     validator.head()
     validator.expect_column_values_to_not_be_null(
-        column="id",
+        column="name",
         mostly=1,
     )
     validator.save_expectation_suite()
