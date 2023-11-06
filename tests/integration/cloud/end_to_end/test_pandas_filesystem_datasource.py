@@ -30,7 +30,7 @@ def base_dir(tmpdir) -> pathlib.Path:
     df = pd.DataFrame({"name": ["bob", "alice"]})
     csv_path = dir_path / "data.csv"
     df.to_csv(csv_path)
-    return dir_path
+    return pathlib.Path(dir_path)
 
 
 @pytest.fixture
@@ -40,7 +40,7 @@ def updated_base_dir(tmpdir) -> Iterator[pathlib.Path]:
     df = pd.DataFrame({"name": ["jim", "carol"]})
     csv_path = dir_path / "data.csv"
     df.to_csv(csv_path)
-    return dir_path
+    return pathlib.Path(dir_path)
 
 
 @pytest.fixture
