@@ -8,7 +8,7 @@ Use the information provided here to help you resolve issues with GX OSS.
 
 ### My Expectation Suite is not generating Expectations
 
-This issue is typically caused when an Expectation fails and `discard_failed_expectations` is set to `True`. To resolve this issue, set `discard_failed_expectations` to `False` when using `validator.save_expectation_suite` For example, `validator.save_expectation_suite(discard_failed_expectations= False)`.
+This issue is typically caused when an Expectation fails and `discard_failed_expectations` is set to `True`. To resolve this issue, set `discard_failed_expectations` to `False` when using `validator.save_expectation_suite`. For example, `validator.save_expectation_suite(discard_failed_expectations= False)`.
 
 ### Why did a specific Expectation fail?
 
@@ -22,7 +22,7 @@ Use Batches and Spark. See [Request data from a Data Asset](./guides/connecting_
 
 ### I'm experiencing issues with my Expectations and Data Sources after upgrading GX OSS
 
-Confirm you're using Fluent Data Sources and you have installed the latest version of GX OSS. If you're using data connectors, or importing `RuntimeBatchRequest` or `BatchRequest` methods, it's likely you're using an outdated version of GX OSS. To confirm you're using the latest version of GX OSS, see [Install GX](/docs/tutorials/quickstart#install-gx).
+Confirm you're using Fluent Data Sources and you have installed the latest version of GX OSS. If you're using data connectors, or importing `RuntimeBatchRequest` or `BatchRequest` methods, it's likely you're using an outdated version of GX OSS. To confirm you're using the latest version of GX OSS, see [Install GX](/docs/tutorials/quickstart/quickstart#install-gx).
 
 
 ### How do I adjust the timezone and regional settings in my Data Docs?
