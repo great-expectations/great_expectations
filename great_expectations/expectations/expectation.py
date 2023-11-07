@@ -28,11 +28,13 @@ from typing import (
     Set,
     Tuple,
     Type,
+    TypeVar,
     Union,
 )
 
 import pandas as pd
 from dateutil.parser import parse
+from typing_extensions import ParamSpec
 
 from great_expectations import __version__ as ge_version
 from great_expectations.compatibility.typing_extensions import override
@@ -143,9 +145,12 @@ _TEST_DEFS_DIR: Final = pathlib.Path(
     __file__, "..", "..", "..", "tests", "test_definitions"
 ).resolve()
 
+P = ParamSpec("P")
+T = TypeVar("T", List[RenderedStringTemplateContent], RenderedAtomicContent)
+
 
 @public_api
-def render_evaluation_parameter_string(render_func) -> Callable:
+def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]:
     """Decorator for Expectation classes that renders evaluation parameters as strings.
 
     allows Expectations that use Evaluation Parameters to render the values
@@ -158,17 +163,13 @@ def render_evaluation_parameter_string(render_func) -> Callable:
         GreatExpectationsError: If runtime_configuration with evaluation_parameters is not provided.
     """
 
-    def inner_func(
-        *args: Tuple[MetaExpectation], **kwargs: dict
-    ) -> Union[List[RenderedStringTemplateContent], RenderedAtomicContent]:
-        rendered_string_template: Union[
-            List[RenderedStringTemplateContent], RenderedAtomicContent
-        ] = render_func(*args, **kwargs)
-        current_expectation_params = list()
+    def inner_func(*args: P.args, **kwargs: P.kwargs) -> T:
+        rendered_string_template = render_func(*args, **kwargs)
+        current_expectation_params: list = []
         app_template_str = (
             "\n - $eval_param = $eval_param_value (at time of validation)."
         )
-        configuration: Optional[dict] = kwargs.get("configuration")
+        configuration: dict | None = kwargs.get("configuration")  # type: ignore[assignment] # could be object?
         if configuration:
             kwargs_dict: dict = configuration.get("kwargs", {})
             for key, value in kwargs_dict.items():
@@ -180,7 +181,7 @@ def render_evaluation_parameter_string(render_func) -> Callable:
         if current_expectation_params and not isinstance(
             rendered_string_template, RenderedAtomicContent
         ):
-            runtime_configuration: Optional[dict] = kwargs.get("runtime_configuration")
+            runtime_configuration: Optional[dict] = kwargs.get("runtime_configuration")  # type: ignore[assignment] # could be object?
             if runtime_configuration:
                 eval_params = runtime_configuration.get("evaluation_parameters", {})
                 styling = runtime_configuration.get("styling")
@@ -1053,6 +1054,16 @@ class Expectation(metaclass=MetaExpectation):
         )
         runtime_configuration["result_format"] = validation_dependencies.result_format
 
+        validation_dependencies_metric_configurations: List[
+            MetricConfiguration
+        ] = validation_dependencies.get_metric_configurations()
+
+        _validate_dependencies_against_available_metrics(
+            validation_dependencies=validation_dependencies_metric_configurations,
+            metrics=metrics,
+            configuration=configuration,
+        )
+
         metric_name: str
         metric_configuration: MetricConfiguration
         provided_metrics: Dict[str, MetricValue] = {
@@ -1790,7 +1801,6 @@ class Expectation(metaclass=MetaExpectation):
     ) -> RendererConfiguration:
         mostly_pct_value: str = num_to_str(
             renderer_configuration.params.mostly.value * 100,
-            precision=15,
             no_scientific=True,
         )
         renderer_configuration.add_param(
@@ -1974,10 +1984,10 @@ class Expectation(metaclass=MetaExpectation):
 
         result: str = ""
 
-        if type(rendered_result) == str:  # noqa: E721
+        if isinstance(rendered_result, str):
             result = rendered_result
 
-        elif type(rendered_result) == list:
+        elif isinstance(rendered_result, list):
             sub_result_list = []
             for sub_result in rendered_result:
                 res = self._get_rendered_result_as_string(sub_result)
@@ -2210,7 +2220,7 @@ class Expectation(metaclass=MetaExpectation):
                 )
             if forbidden_keys:
                 problems.append(f"Extra key(s) found: {sorted(forbidden_keys)}")
-            if type(augmented_library_metadata["requirements"]) != list:
+            if not isinstance(augmented_library_metadata["requirements"], list):
                 problems.append("library_metadata['requirements'] is not a list ")
             if not problems:
                 augmented_library_metadata["library_metadata_passed_checks"] = True
@@ -3602,7 +3612,8 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
         "unexpected_percent": unexpected_percent_nonmissing,
     }
 
-    if unexpected_list is not None:
+    exclude_unexpected_values = result_format.get("exclude_unexpected_values", False)
+    if unexpected_list is not None and not exclude_unexpected_values:
         return_obj["result"]["partial_unexpected_list"] = unexpected_list[
             : result_format["partial_unexpected_count"]
         ]
@@ -3630,7 +3641,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     if result_format["result_format"] == "BASIC":
         return return_obj
 
-    if unexpected_list is not None:
+    if unexpected_list is not None and not exclude_unexpected_values:
         if len(unexpected_list) and isinstance(unexpected_list[0], dict):
             # in the case of multicolumn map expectations `unexpected_list` contains dicts,
             # which will throw an exception when we hash it to count unique members.
@@ -3648,15 +3659,19 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     partial_unexpected_counts: Optional[List[Dict[str, Any]]] = None
     if partial_unexpected_count is not None and 0 < partial_unexpected_count:
         try:
-            partial_unexpected_counts = [
-                {"value": key, "count": value}
-                for key, value in sorted(
-                    Counter(immutable_unexpected_list).most_common(
-                        result_format["partial_unexpected_count"]
-                    ),
-                    key=lambda x: (-x[1], x[0]),
+            if not exclude_unexpected_values:
+                partial_unexpected_counts = [
+                    {"value": key, "count": value}
+                    for key, value in sorted(
+                        Counter(immutable_unexpected_list).most_common(
+                            result_format["partial_unexpected_count"]
+                        ),
+                        key=lambda x: (-x[1], x[0]),
+                    )
+                ]
+                return_obj["result"].update(
+                    {"partial_unexpected_counts": partial_unexpected_counts}
                 )
-            ]
         except TypeError:
             partial_unexpected_counts = [
                 {"error": "partial_exception_counts requires a hashable type"}
@@ -3670,14 +3685,11 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
                         ],
                     }
                 )
-            return_obj["result"].update(
-                {"partial_unexpected_counts": partial_unexpected_counts}
-            )
 
     if result_format["result_format"] == "SUMMARY":
         return return_obj
 
-    if unexpected_list is not None:
+    if unexpected_list is not None and not exclude_unexpected_values:
         return_obj["result"].update({"unexpected_list": unexpected_list})
     if unexpected_index_list is not None:
         return_obj["result"].update({"unexpected_index_list": unexpected_index_list})
@@ -3705,6 +3717,28 @@ def _validate_mostly_config(configuration: ExpectationConfiguration) -> None:
             mostly, (int, float)
         ), "'mostly' parameter must be an integer or float"
         assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
+
+
+def _validate_dependencies_against_available_metrics(
+    validation_dependencies: List[MetricConfiguration],
+    metrics: dict,
+    configuration: ExpectationConfiguration,
+) -> None:
+    """Check that validation_dependencies for current Expectations are available as Metrics.
+
+    Args:
+        validation_dependencies_as_metric_configurations: dependencies calculated for current Expectation.
+        metrics: dict of metrics available to current Expectation.
+        configuration: current ExpectationConfiguration
+
+    Raises:
+        InvalidExpectationConfigurationError: If a validation dependency is not available as a Metric.
+    """
+    for metric_config in validation_dependencies:
+        if metric_config.id not in metrics:
+            raise InvalidExpectationConfigurationError(
+                f"Metric {metric_config.id} is not available for validation of {configuration}. Please check your configuration."
+            )
 
 
 def _mostly_success(

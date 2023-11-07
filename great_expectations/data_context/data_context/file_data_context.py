@@ -152,7 +152,7 @@ class FileDataContext(SerializableDataContext):
         return variables
 
     @override
-    def _save_project_config(self, _fds_datasource=None) -> None:
+    def _save_project_config(self) -> None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
 
@@ -204,9 +204,7 @@ class FileDataContext(SerializableDataContext):
             )
         except YAMLError as err:
             raise gx_exceptions.InvalidConfigurationYamlError(
-                "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(
-                    err
-                )
+                f"Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{err}"
             )
         except OSError:
             raise gx_exceptions.ConfigNotFoundError()

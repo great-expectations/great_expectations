@@ -79,7 +79,7 @@ class CloudResponseSchema(pydantic.BaseModel):
     def from_datasource_json(cls, ds_payload: str | bytes) -> CloudResponseSchema:
         payload_dict = json.loads(ds_payload)
         data = {
-            "id": payload_dict.get("id"),
+            "id": payload_dict["data"].get("id"),
             "type": "datasource",
             "attributes": payload_dict["data"]["attributes"],
         }
@@ -127,7 +127,7 @@ FakeDBTypedDict = TypedDict(
 def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTypedDict:
     fds_config = fds_config or GxConfig(fluent_datasources=[])
     datasource_names: set[str] = set()
-    datasource_config: dict[str, dict] = {}
+    datasource_config: dict[str, dict | str] = {}
     datasources_by_id: dict[str, dict] = {}
 
     for ds in fds_config._json_dict()["fluent_datasources"]:
@@ -137,8 +137,16 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
         id: str = str(uuid.uuid4())
         ds["id"] = id
 
-        datasource_config[name] = ds
-        datasources_by_id[id] = ds
+        ds_response_json = {
+            "data": {
+                "attributes": {"datasource_config": ds},
+                "id": id,
+                "type": "datasource",
+            }
+        }
+
+        datasource_config[name] = name
+        datasources_by_id[id] = ds_response_json
 
     return {
         "DATASOURCE_NAMES": datasource_names,
@@ -282,6 +290,45 @@ def delete_datasources_cb(
     return result
 
 
+def delete_data_assets_cb(
+    request: PreparedRequest,
+) -> CallbackResult:
+    url = request.url
+    LOGGER.debug(f"{request.method} {url}")
+
+    parsed_url = urllib.parse.urlparse(url)
+    data_asset_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
+
+    datasources: dict[str, dict] = _CLOUD_API_FAKE_DB["datasources"]
+    deleted_asset_idx = None
+    deleted_asset = None
+
+    # find and remove asset from datasource config
+    for datasource in datasources.values():
+        for idx, asset in enumerate(
+            datasource["data"]["attributes"]["datasource_config"].get("assets", {})
+        ):
+            if asset.get("id") == data_asset_id:
+                deleted_asset_idx = idx
+                break
+        if deleted_asset_idx is not None:
+            deleted_asset = datasource["data"]["attributes"]["datasource_config"][
+                "assets"
+            ].pop(deleted_asset_idx)
+            break
+
+    if deleted_asset:
+        asset_name = deleted_asset["name"]
+        LOGGER.debug(f"Deleted asset '{asset_name}'")
+        result = CallbackResult(204, headers={}, body="")
+    else:
+        errors = ErrorPayloadSchema(
+            errors=[{"code": "mock 404", "detail": None, "source": None}]
+        )
+        result = CallbackResult(404, headers=DEFAULT_HEADERS, body=errors.json())
+    return result
+
+
 def post_datasources_cb(
     request: PreparedRequest,
 ) -> CallbackResult:
@@ -400,10 +447,12 @@ def get_datasources_cb(
     datasources_list: list[dict] = list(all_datasources.values())
     if queried_names:
         datasources_list = [
-            d
+            d["data"]
             for d in datasources_list
             if d["data"]["attributes"]["datasource_config"]["name"] in queried_names
         ]
+    else:
+        datasources_list = [d["data"] for d in datasources_list]
 
     resp_body = {"data": datasources_list}
     result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(resp_body))
@@ -423,7 +472,7 @@ def get_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     exp_suite_list: list[dict] = list(exp_suites.values())
     if queried_names:
         exp_suite_list = [
-            d
+            d["data"]
             for d in exp_suite_list
             if d["data"]["attributes"]["suite"]["expectation_suite_name"]
             in queried_names
@@ -665,6 +714,11 @@ def gx_cloud_api_fake_ctx(
             responses.PUT,
             re.compile(f"{org_url_base}/datasources/{UUID_REGEX}"),
             put_datasource_cb,
+        )
+        resp_mocker.add_callback(
+            responses.DELETE,
+            re.compile(f"{org_url_base}/data-assets/{UUID_REGEX}"),
+            delete_data_assets_cb,
         )
         resp_mocker.add_callback(
             responses.GET,

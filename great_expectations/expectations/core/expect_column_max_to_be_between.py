@@ -1,11 +1,9 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Dict, List, Optional
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
@@ -46,6 +44,11 @@ from great_expectations.expectations.expectation import ColumnAggregateExpectati
 from great_expectations.render.renderer.renderer import renderer
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -66,13 +69,6 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
             If True, the lower bound of the column maximum acceptable range must be strictly larger than min_value, default=False
         strict_max (boolean): \
             If True, the upper bound of the column maximum acceptable range must be strictly smaller than max_value, default=False
-
-    Keyword Args:
-        parse_strings_as_datetimes (Boolean or None): \
-            If True, parse min_value, max_values, and all non-null column values to datetimes before making \
-            comparisons.
-        output_strftime_format (str or None): \
-            A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
 
     Other Parameters:
         result_format (str or None): \
@@ -207,6 +203,7 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
     }
     args_keys = ("column", "min_value", "max_value", "strict_min", "strict_max")
 
+    @override
     @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -227,6 +224,7 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
+    @override
     def _prescriptive_template(
         cls,
         renderer_configuration: RendererConfiguration,
@@ -279,11 +277,12 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
         return renderer_configuration
 
     @classmethod
+    @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
-    def _prescriptive_renderer(
+    def _prescriptive_renderer(  # type: ignore[override] # TODO: Fix this type ignore
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
+        configuration: ExpectationConfiguration,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
@@ -337,14 +336,12 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                content_block_type="string_template",
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]
 
@@ -369,6 +366,7 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
             f"{result.result['observed_value']:.2f}",
         ]
 
+    @override
     def _validate(
         self,
         configuration: ExpectationConfiguration,

@@ -106,13 +106,32 @@ This results in the following Expectation Suite:
 Do not use single quotes or `\n` inside the specified `row_condition` as shown in the following examples:
 
 ```python 
-row_condition="PClass=='1st'"  # never use simple quotes inside !!!
+row_condition="PClass=='1st'"  # never use single quotes inside !!!
 ```
 
 ```python 
 row_condition="""
 PClass=="1st"
 """  # never use \n inside !!!
+```
+
+For Spark and SQL, you will also want to specify your columns using the `col()` function. 
+
+Some examples of valid `row_condition` values include: 
+
+```python
+row_condition='col("foo") == "Two  Two"'  # foo is 'Two Two'
+
+row_condition='col("foo").notNull()'  # foo is not null
+
+row_condition='col("foo") > 5'  # foo is greater than 5
+
+row_condition='col("foo") != "a-b"'  # foo is not "a-b" (SQL only)
+
+row_condition='col("foo") <= 3.14'  # foo is less than 3.14
+
+row_condition='col("foo") <= date("2023-03-13")'  # foo is earlier than 2023-03-13
+
 ```
 
 ## Data Docs and Conditional Expectations

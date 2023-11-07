@@ -180,7 +180,7 @@ def hooks(
         # used in CI - runs faster and only checks files that have changed
         cmds.extend(["--from-ref", "origin/HEAD", "--to-ref", "HEAD"])
 
-    ctx.run(" ".join(cmds))
+    ctx.run(" ".join(cmds), echo=True, pty=True)
 
     if sync:
         print("  Re-installing hooks ...")
@@ -243,6 +243,7 @@ def type_check(  # noqa: PLR0913, PLR0912
     install_types: bool = False,
     pretty: bool = False,
     warn_unused_ignores: bool = False,
+    disallow_untyped_decorators: bool = True,
     daemon: bool = False,
     clear_cache: bool = False,
     report: bool = False,
@@ -263,6 +264,7 @@ def type_check(  # noqa: PLR0913, PLR0912
             install_types=True,
             pretty=pretty,
             warn_unused_ignores=True,
+            disallow_untyped_decorators=True,
             daemon=daemon,
             clear_cache=clear_cache,
             report=report,
@@ -311,6 +313,8 @@ def type_check(  # noqa: PLR0913, PLR0912
         cmds.extend(["--pretty"])
     if warn_unused_ignores:
         cmds.extend(["--warn-unused-ignores"])
+    if disallow_untyped_decorators:
+        cmds.extend(["--disallow-untyped-decorators"])
     if python_version:
         cmds.extend(["--python-version", python_version])
     # use pseudo-terminal for colorized output
@@ -368,6 +372,7 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
     aliases=["test"],
     help={
         "unit": "Runs tests marked with the 'unit' marker. Default behavior.",
+        "cloud": "Runs tests marked with the 'cloud' marker. Default behavior.",
         "ignore-markers": "Don't exclude any test by not passing any markers to pytest.",
         "slowest": "Report on the slowest n number of tests",
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
@@ -801,7 +806,16 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "aws_deps": TestDependencies(("reqs/requirements-dev-lite.txt",)),
     "clickhouse": TestDependencies(("reqs/requirements-dev-clickhouse.txt",)),
     "cloud": TestDependencies(
-        ("reqs/requirements-dev-cloud.txt",), extra_pytest_args=("--cloud",)
+        (
+            "reqs/requirements-dev-cloud.txt",
+            "reqs/requirements-dev-snowflake.txt",
+            "reqs/requirements-dev-spark.txt",
+        ),
+        services=(
+            "mercury",
+            "spark",
+        ),
+        extra_pytest_args=("--cloud",),
     ),
     "databricks": TestDependencies(
         requirement_files=("reqs/requirements-dev-databricks.txt",),
@@ -829,6 +843,7 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "docs-creds-needed": TestDependencies(
         # these installs are handled by the CI
         requirement_files=(
+            "reqs/requirements-dev-test.txt",
             "reqs/requirements-dev-azure.txt",
             "reqs/requirements-dev-bigquery.txt",
             "reqs/requirements-dev-redshift.txt",
@@ -888,7 +903,13 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
 def _add_all_backends_marker(marker_string: str) -> bool:
     # We should generalize this, possibly leveraging MARKER_DEPENDENCY_MAP, but for now
     # right I've hardcoded all the containerized backend services we support in testing.
-    return marker_string in ["postgresql", "mssql", "mysql", "spark", "trino"]
+    return marker_string in [
+        "postgresql",
+        "mssql",
+        "mysql",
+        "spark",
+        "trino",
+    ]
 
 
 def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
@@ -1026,6 +1047,7 @@ def ci_tests(  # noqa: PLR0913
     ctx: Context,
     marker: str,
     up_services: bool = False,
+    restart_services: bool = False,
     verbose: bool = False,
     reports: bool = False,
     slowest: int = 5,
@@ -1042,6 +1064,8 @@ def ci_tests(  # noqa: PLR0913
 
     `up_services` is False by default to avoid starting services which may already be up
     when running tests locally.
+
+    `restart_services` is False by default to avoid always restarting the services.
 
     Defined this as a new invoke task to avoid some of the baggage of our old test setup.
     """
@@ -1060,8 +1084,14 @@ def ci_tests(  # noqa: PLR0913
         pytest_options.append("-vv")
 
     for test_deps in _get_marker_dependencies(marker):
-        if up_services:
-            service(ctx, names=test_deps.services, markers=test_deps.services, pty=pty)
+        if restart_services or up_services:
+            service(
+                ctx,
+                names=test_deps.services,
+                markers=test_deps.services,
+                restart_services=restart_services,
+                pty=pty,
+            )
 
         for extra_pytest_arg in test_deps.extra_pytest_args:
             pytest_options.append(extra_pytest_arg)
@@ -1082,12 +1112,18 @@ def ci_tests(  # noqa: PLR0913
     iterable=["names", "markers"],
 )
 def service(
-    ctx: Context, names: Sequence[str], markers: Sequence[str], pty: bool = True
+    ctx: Context,
+    names: Sequence[str],
+    markers: Sequence[str],
+    restart_services: bool = False,
+    pty: bool = True,
 ):
     """
     Startup a service, by referencing its name directly or by looking up a pytest marker.
 
     If a marker is specified, the services listed in `MARKER_DEPENDENCY_MAP` will be used.
+
+    If restart_services was passed, the containers will be stopped and re-built.
 
     Note:
         The main reason this is a separate task is to make it easy to start services
@@ -1102,15 +1138,66 @@ def service(
     if service_names:
         print(f"  Starting services for {', '.join(service_names)} ...")
         for service_name in service_names:
-            cmds = [
-                "docker",
-                "compose",
-                "-f",
-                f"assets/docker/{service_name}/docker-compose.yml",
-                "up",
-                "-d",
-                "--quiet-pull",
-            ]
+            cmds = []
+
+            if (
+                service_name == "mercury"
+                and os.environ.get("CI") is False  # noqa: TID251
+            ):
+                cmds.extend(
+                    [
+                        "FORCE_NO_ALIAS=true",
+                        "assumego",
+                        "dev",
+                        "--exec",
+                        "'aws ecr get-login-password --region us-east-1'",
+                        "|",
+                        "docker",
+                        "login",
+                        "--username",
+                        "AWS",
+                        "--password-stdin",
+                        "258143015559.dkr.ecr.us-east-1.amazonaws.com",
+                        "&&",
+                    ]
+                )
+
+            if restart_services:
+                print(
+                    f"  Removing existing containers and building latest for {service_name} ..."
+                )
+                cmds.extend(
+                    [
+                        "docker",
+                        "compose",
+                        "-f",
+                        f"assets/docker/{service_name}/docker-compose.yml",
+                        "rm",
+                        "-fsv",
+                        "&&",
+                        "docker",
+                        "compose",
+                        "-f",
+                        f"assets/docker/{service_name}/docker-compose.yml",
+                        "build",
+                        "--pull",
+                        "&&",
+                    ]
+                )
+
+            cmds.extend(
+                [
+                    "docker",
+                    "compose",
+                    "-f",
+                    f"assets/docker/{service_name}/docker-compose.yml",
+                    "up",
+                    "-d",
+                    "--quiet-pull",
+                    "--wait",
+                    "--wait-timeout 120",
+                ]
+            )
             ctx.run(" ".join(cmds), echo=True, pty=pty)
         # TODO: remove this sleep. This is a temporary hack to give services enough
         #       time to come up to get ci merging again.

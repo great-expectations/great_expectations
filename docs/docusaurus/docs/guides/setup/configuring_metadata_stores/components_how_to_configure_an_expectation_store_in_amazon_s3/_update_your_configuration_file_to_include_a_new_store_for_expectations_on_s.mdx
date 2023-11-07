@@ -13,7 +13,7 @@ class_name: ExpectationsStore
 store_backend:
   class_name: TupleS3StoreBackend
   bucket: '<your_s3_bucket_name>'
-  prefix: '<your_s3_bucket_folder_name>'
+  prefix: '<your_s3_bucket_folder_name>'  # Bucket and prefix in combination must be unique across all stores
   boto3_options:
     endpoint_url: ${S3_ENDPOINT} # Uses the S3_ENDPOINT environment variable to determine which endpoint to use.
     region_name: '<your_aws_region_name>'
@@ -33,7 +33,7 @@ class_name: ExpectationsStore
 store_backend:
   class_name: TupleS3StoreBackend
   bucket: '<your_s3_bucket_name>'
-  prefix: '<your_s3_bucket_folder_name>'
+  prefix: '<your_s3_bucket_folder_name>'  
   boto3_options:
     aws_access_key_id: ${AWS_ACCESS_KEY_ID} # Uses the AWS_ACCESS_KEY_ID environment variable to get aws_access_key_id.
     aws_secret_access_key: ${AWS_ACCESS_KEY_ID}
@@ -47,7 +47,7 @@ class_name: ExpectationsStore
 store_backend:
   class_name: TupleS3StoreBackend
   bucket: '<your_s3_bucket_name>'
-  prefix: '<your_s3_bucket_folder_name>'
+  prefix: '<your_s3_bucket_folder_name>'  # Bucket and prefix in combination must be unique across all stores
   boto3_options:
     assume_role_arn: '<your_role_to_assume>'
     region_name: '<your_aws_region_name>'

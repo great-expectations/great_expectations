@@ -1,11 +1,12 @@
-import os
 import pathlib
 import tempfile
+
+import boto3
+
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-import boto3
 
 client = boto3.client("s3")
 temp_dir = tempfile.TemporaryDirectory()
@@ -20,7 +21,7 @@ context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = pathlib.Path(
-    full_path_to_project_directory, "great_expectations/great_expectations.yml"
+    full_path_to_project_directory, FileDataContext.GX_DIR, FileDataContext.GX_YML
 )
 great_expectations_yaml = yaml.load(great_expectations_yaml_file_path.read_text())
 
@@ -64,8 +65,8 @@ stores:
     class_name: ExpectationsStore
     store_backend:
       class_name: TupleS3StoreBackend
-      bucket: <YOUR S3 BUCKET NAME>
-      prefix: <YOUR S3 PREFIX NAME>
+      bucket: '<YOUR S3 EXPECTATION BUCKET NAME>'
+      prefix: '<YOUR S3 EXPECTATION PREFIX NAME>'  # Bucket and prefix in combination must be unique across all stores
 
 expectations_store_name: expectations_S3_store
 # </snippet>
@@ -95,7 +96,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 # adding validation results store
-great_expectations_yaml_file_path = os.path.join(
+great_expectations_yaml_file_path = pathlib.Path(
     context.root_directory, FileDataContext.GX_YML
 )
 with open(great_expectations_yaml_file_path) as f:
@@ -144,8 +145,8 @@ stores:
     class_name: ValidationsStore
     store_backend:
       class_name: TupleS3StoreBackend
-      bucket: <YOUR S3 BUCKET NAME>
-      prefix: <YOUR S3 PREFIX NAME>
+      bucket: '<YOUR S3 VALIDATION BUCKET NAME>'
+      prefix: '<YOUR S3 VALIDATION PREFIX NAME>'  # Bucket and prefix in combination must be unique across all stores
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py set_new_validations_store">
@@ -192,7 +193,7 @@ data_docs_sites:
     class_name: SiteBuilder
     store_backend:
       class_name: TupleS3StoreBackend
-      bucket: <YOUR S3 BUCKET NAME>
+      bucket: '<YOUR S3 BUCKET NAME>'
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
 # </snippet>
@@ -201,7 +202,7 @@ data_docs_sites:
 data_docs_site_yaml = data_docs_site_yaml.replace(
     "<YOUR S3 BUCKET NAME>", "demo-data-docs"
 )
-great_expectations_yaml_file_path = os.path.join(
+great_expectations_yaml_file_path = pathlib.Path(
     context.root_directory, FileDataContext.GX_YML
 )
 with open(great_expectations_yaml_file_path) as f:

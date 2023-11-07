@@ -41,6 +41,13 @@ from great_expectations.data_context.data_context.serializable_data_context impo
 from great_expectations.data_context.data_context_variables import (
     CloudDataContextVariables,
 )
+from great_expectations.data_context.store import DataAssetStore
+from great_expectations.data_context.store.datasource_store import (
+    DatasourceStore,
+)
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
+)
 from great_expectations.data_context.types.base import (
     DEFAULT_USAGE_STATISTICS_URL,
     CheckpointConfig,
@@ -48,6 +55,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
     GXCloudConfig,
+    assetConfigSchema,
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
@@ -61,7 +69,6 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-    from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.types.base import (
         AnonymizedUsageStatisticsConfig,
     )
@@ -125,6 +132,10 @@ class CloudDataContext(SerializableDataContext):
             project_root_dir=project_root_dir,
         )
         self._project_config = self._init_project_config(project_config)
+
+        # The DataAssetStore is relevant only for CloudDataContexts and is not an explicit part of the project config.
+        # As such, it must be instantiated separately.
+        self._data_asset_store = self._init_data_asset_store()
 
         super().__init__(
             context_root_dir=self._context_root_directory,
@@ -215,7 +226,7 @@ class CloudDataContext(SerializableDataContext):
         )
         if context_root_dir is None:
             context_root_dir = os.getcwd()  # noqa: PTH109
-            logger.info(
+            logger.debug(
                 f'context_root_dir was not provided - defaulting to current working directory "'
                 f'{context_root_dir}".'
             )
@@ -386,13 +397,6 @@ class CloudDataContext(SerializableDataContext):
 
     @override
     def _init_datasource_store(self) -> DatasourceStore:
-        from great_expectations.data_context.store.datasource_store import (
-            DatasourceStore,
-        )
-        from great_expectations.data_context.store.gx_cloud_store_backend import (
-            GXCloudStoreBackend,
-        )
-
         # Never explicitly referenced but adheres
         # to the convention set by other internal Stores
         store_name = DataContextConfigDefaults.DEFAULT_DATASOURCE_STORE_NAME.value
@@ -411,6 +415,35 @@ class CloudDataContext(SerializableDataContext):
             serializer=JsonConfigSerializer(schema=datasourceConfigSchema),
         )
         return datasource_store
+
+    def _init_data_asset_store(self) -> DataAssetStore:
+        # Never explicitly referenced but adheres
+        # to the convention set by other internal Stores
+        store_name = DataContextConfigDefaults.DEFAULT_DATA_ASSET_STORE_NAME.value
+        store_backend: dict = {"class_name": GXCloudStoreBackend.__name__}
+        runtime_environment: dict = {
+            "root_directory": self.root_directory,
+            "ge_cloud_credentials": self.ge_cloud_config.to_dict(),  # type: ignore[union-attr]
+            "ge_cloud_resource_type": GXCloudRESTResource.DATA_ASSET,
+            "ge_cloud_base_url": self.ge_cloud_config.base_url,  # type: ignore[union-attr]
+        }
+
+        data_asset_store = DataAssetStore(
+            store_name=store_name,
+            store_backend=store_backend,
+            runtime_environment=runtime_environment,
+            serializer=JsonConfigSerializer(schema=assetConfigSchema),
+        )
+        return data_asset_store
+
+    def _delete_asset(self, id: str) -> bool:
+        """Delete a DataAsset. Cloud will also update the corresponding DatasourceConfig."""
+        key = GXCloudIdentifier(
+            resource_type=GXCloudRESTResource.DATA_ASSET,
+            id=id,
+        )
+
+        return self._data_asset_store.remove_key(key)
 
     @override
     def list_expectation_suite_names(self) -> List[str]:
@@ -470,21 +503,27 @@ class CloudDataContext(SerializableDataContext):
             ),
             "usage_statistics_url": DEFAULT_USAGE_STATISTICS_URL,
         }
+        missing_config_vars_and_subs: list[tuple[str, str]] = []
         for config_variable, value in cloud_config_variable_defaults.items():
             if substitutions.get(config_variable) is None:
-                logger.info(
-                    f'Config variable "{config_variable}" was not found in environment or global config ('
-                    f'{self.GLOBAL_CONFIG_PATHS}). Using default value "{value}" instead. If you would '
-                    f"like to "
-                    f"use a different value, please specify it in an environment variable or in a "
-                    f"great_expectations.conf file located at one of the above paths, in a section named "
-                    f'"ge_cloud_config".'
-                )
                 substitutions[config_variable] = value
+                missing_config_vars_and_subs.append((config_variable, value))
+
+        if missing_config_vars_and_subs:
+            missing_config_var_repr = ", ".join(
+                [f"{var}={sub}" for var, sub in missing_config_vars_and_subs]
+            )
+            logger.info(
+                "Config variables were not found in environment or global config ("
+                f"{self.GLOBAL_CONFIG_PATHS}). Using default values instead. {missing_config_var_repr} ;"
+                " If you would like to "
+                "use a different value, please specify it in an environment variable or in a "
+                "great_expectations.conf file located at one of the above paths, in a section named "
+                '"ge_cloud_config".'
+            )
 
         return DataContextConfig(**self.config_provider.substitute_config(config))
 
-    @override
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
@@ -546,7 +585,7 @@ class CloudDataContext(SerializableDataContext):
 
         return expectation_suite
 
-    @overload
+    @overload  # type: ignore[override] # overloads don't match
     def delete_expectation_suite(
         self,
         expectation_suite_name: str = ...,
@@ -573,6 +612,7 @@ class CloudDataContext(SerializableDataContext):
     ) -> bool:
         ...
 
+    @public_api
     @override
     def delete_expectation_suite(
         self,
@@ -708,7 +748,7 @@ class CloudDataContext(SerializableDataContext):
     def add_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
-        config_version: int | float = 1.0,  # noqa: PYI041
+        config_version: float = 1.0,
         template_name: str | None = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: str = "Checkpoint",
@@ -854,19 +894,6 @@ class CloudDataContext(SerializableDataContext):
             resource_name=name,
         )
 
-    @override
-    def _determine_key_for_profiler_save(
-        self, name: str, id: Optional[str]
-    ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
-        """
-        Note that this explicitly overriding the `AbstractDataContext` helper method called
-        in `self.save_profiler()`.
-
-        The only difference here is the creation of a Cloud-specific `GXCloudIdentifier`
-        instead of the usual `ConfigurationIdentifier` for `Store` interaction.
-        """
-        return GXCloudIdentifier(resource_type=GXCloudRESTResource.PROFILER, id=id)
-
     @classmethod
     def _load_cloud_backed_project_config(
         cls,
@@ -908,28 +935,16 @@ class CloudDataContext(SerializableDataContext):
         return expectation_suite
 
     @override
-    def _save_project_config(
-        self, _fds_datasource: FluentDatasource | None = None
-    ) -> FluentDatasource | None:
+    def _save_project_config(self) -> None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
 
         Explicitly override base class implementation to retain legacy behavior.
         """
-        # 042723 kilo59
-        # Currently CloudDataContext and FileDataContext diverge in how FDS are persisted.
-        # FileDataContexts don't use the DatasourceStore at all to save or hydrate FDS configs.
-        # CloudDataContext does use DatasourceStore in order to make use of the Cloud http clients.
-        # The intended future state is for a new FluentDatasourceStore that can fully encapsulate
-        # the different requirements for FDS vs BDS.
-        # At which time `_save_project_config` will revert to being a no-op operation on the CloudDataContext.
-        if _fds_datasource:
-            return self._datasource_store.set(key=None, value=_fds_datasource)
-        else:
-            logger.debug(
-                "CloudDataContext._save_project_config() has no `fds_datasource` to update"
-            )
-            return None
+        logger.debug(
+            "CloudDataContext._save_project_config() was called. Base class impl was override to be no-op to retain "
+            "legacy behavior."
+        )
 
     @override
     def _view_validation_result(self, result: CheckpointResult) -> None:
@@ -944,22 +959,16 @@ class CloudDataContext(SerializableDataContext):
         self,
         name: str | None = None,
         initialize: bool = True,
-        save_changes: bool | None = None,
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
-        result = super()._add_datasource(
+        if datasource and not isinstance(datasource, FluentDatasource):
+            raise TypeError(
+                "Adding block-style or legacy datasources in a Cloud-backed environment is no longer supported; please use fluent-style datasources moving forward."
+            )
+        return super()._add_datasource(
             name=name,
             initialize=initialize,
-            save_changes=save_changes,
             datasource=datasource,
             **kwargs,
         )
-        if result and not isinstance(result, FluentDatasource):
-            # deprecated-v0.17.2
-            warnings.warn(
-                "Adding block-style or legacy datasources in a Cloud-backed environment is deprecated as of v0.17.2 and will be removed in a future version. "
-                "Please migrate to fluent-style datasources moving forward.",
-                DeprecationWarning,
-            )
-        return result

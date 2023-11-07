@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pathlib
-from typing import TYPE_CHECKING
 from unittest import mock
 
 import pytest
@@ -19,14 +18,11 @@ from great_expectations.data_context.store.inline_store_backend import (
 )
 from great_expectations.data_context.types.base import (
     DataContextConfig,
-    DatasourceConfig,
     GXCloudConfig,
     InMemoryStoreBackendDefaults,
 )
 from great_expectations.datasource import Datasource
-
-if TYPE_CHECKING:
-    from great_expectations.data_context import CloudDataContext
+from great_expectations.exceptions import DatasourceNotFoundError
 
 
 @pytest.fixture
@@ -151,110 +147,6 @@ def test_get_datasource_cache_miss(in_memory_runtime_context) -> None:
     assert not mock_get.called
 
 
-@pytest.mark.cloud
-def test_DataContext_add_datasource_updates_cache_and_store(
-    cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: CloudDataContext,
-    datasource_config_with_names: DatasourceConfig,
-) -> None:
-    """
-    What does this test and why?
-
-    For persistence-enabled contexts, we should update both the cache and the underlying
-    store upon adding a datasource.
-
-    Note: the actual datasource config is not important for this test, it just needs to be a valid config since
-        initialize=True must be set in add_datasource() to add the datasource to the cache.
-    """
-    context = cloud_data_context_in_cloud_mode_with_datasource_pandas_engine
-
-    name = "some_random_name"
-    datasource_config_with_names.name = name
-
-    assert name not in context.datasources
-
-    with mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.set",
-        autospec=True,
-        return_value=datasource_config_with_names,
-    ) as mock_set, pytest.deprecated_call():  # non-FDS datasources are discouraged in Cloud
-        context.add_datasource(**datasource_config_with_names.to_json_dict())
-
-    mock_set.assert_called_once()
-    assert name in context.datasources
-
-
-@pytest.mark.cloud
-def test_DataContext_update_datasource_updates_existing_value_in_cache_and_store(
-    cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: CloudDataContext,
-    pandas_enabled_datasource_config: dict,
-) -> None:
-    """
-    What does this test and why?
-
-    For persistence-enabled contexts, we should update both the cache and the underlying
-    store upon updating an existing datasource.
-    """
-    context = cloud_data_context_in_cloud_mode_with_datasource_pandas_engine
-
-    name = context.list_datasources()[0]["name"]
-    pandas_enabled_datasource_config["name"] = name
-    data_connectors = pandas_enabled_datasource_config["data_connectors"]
-    pandas_enabled_datasource_config.pop("class_name")
-    datasource = Datasource(**pandas_enabled_datasource_config)
-
-    assert name in context.datasources
-
-    # Ensure that our cache value is updated to reflect changes
-    with mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.has_key"
-    ), mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.update"
-    ) as mock_update:
-        context.update_datasource(datasource)
-
-    mock_update.assert_called_once()
-    assert name in context.datasources
-
-    with mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.get"
-    ) as mock_get:
-        retrieved_datasource = context.get_datasource(datasource_name=name)
-
-    assert not mock_get.called
-    assert retrieved_datasource.data_connectors.keys() == data_connectors.keys()
-
-
-@pytest.mark.cloud
-def test_DataContext_update_datasource_creates_new_value_in_cache_and_store(
-    cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: CloudDataContext,
-    pandas_enabled_datasource_config: dict,
-) -> None:
-    """
-    What does this test and why?
-
-    For persistence-enabled contexts, we should update both the cache and the underlying
-    store upon using update to create a new datasource.
-    """
-    context = cloud_data_context_in_cloud_mode_with_datasource_pandas_engine
-
-    name = pandas_enabled_datasource_config["name"]
-    pandas_enabled_datasource_config.pop("class_name")
-    datasource = Datasource(**pandas_enabled_datasource_config)
-
-    assert name not in context.datasources
-
-    # Ensure that a brand new cache value is added to reflect changes
-    with mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.has_key"
-    ), mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.update"
-    ) as mock_update:
-        context.update_datasource(datasource)
-
-    mock_update.assert_called_once()
-    assert name in context.datasources
-
-
 @pytest.mark.unit
 def test_BaseDataContext_add_datasource_updates_cache(
     in_memory_runtime_context: EphemeralDataContext,
@@ -278,15 +170,14 @@ def test_BaseDataContext_add_datasource_updates_cache(
 
 
 @pytest.mark.unit
-def test_BaseDataContext_update_datasource_updates_existing_value_in_cache(
+def test_BaseDataContext_update_datasource_updates_existing_data_source(
     in_memory_runtime_context: EphemeralDataContext,
     pandas_enabled_datasource_config: dict,
 ) -> None:
     """
     What does this test and why?
 
-    When save_changes is set to False, we should only update the cache upon
-    updating an existing datasource.
+    Updating a Data Source should update a Data Source
     """
     context = in_memory_runtime_context
 
@@ -300,28 +191,21 @@ def test_BaseDataContext_update_datasource_updates_existing_value_in_cache(
     cached_datasource = context.datasources[name]
     assert cached_datasource.data_connectors.keys() != data_connectors.keys()
 
-    with pytest.deprecated_call():
-        # Ensure that our cache value is updated to reflect changes
-        context.update_datasource(datasource, save_changes=False)
-
-    assert name in context.datasources
-    cached_datasource = context.datasources[name]
-    assert cached_datasource.data_connectors.keys() == data_connectors.keys()
+    context.update_datasource(datasource)
 
     retrieved_datasource = context.get_datasource(datasource_name=name)
     assert retrieved_datasource.data_connectors.keys() == data_connectors.keys()
 
 
 @pytest.mark.unit
-def test_BaseDataContext_update_datasource_creates_new_value_in_cache(
+def test_BaseDataContext_update_datasource_fails_when_datsource_does_not_exist(
     in_memory_runtime_context: EphemeralDataContext,
     pandas_enabled_datasource_config: dict,
 ) -> None:
     """
     What does this test and why?
 
-    When save_changes is set to False, we should only update the cache upon
-    using update to create a new datasource.
+    Updating a data source that does not exist should create a new data source.
     """
     context = in_memory_runtime_context
 
@@ -331,29 +215,8 @@ def test_BaseDataContext_update_datasource_creates_new_value_in_cache(
 
     assert name not in context.datasources
 
-    # Ensure that a brand new cache value is added to reflect changes
-    with pytest.deprecated_call():
-        context.update_datasource(datasource, save_changes=False)
-
-    assert name in context.datasources
-
-
-@pytest.mark.unit
-def test_delete_datasource(
-    in_memory_runtime_context: EphemeralDataContext,
-) -> None:
-    """
-    What does this test and why?
-
-    When save_changes is set to False, we should only delete the value from
-    the cache.
-    """
-    context = in_memory_runtime_context
-
-    name = context.list_datasources()[0]["name"]
-    context.delete_datasource(name)
-
-    assert name not in context.datasources
+    with pytest.raises(DatasourceNotFoundError):
+        context.update_datasource(datasource)
 
 
 @pytest.mark.unit

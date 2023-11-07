@@ -10,6 +10,8 @@ import click
 
 from great_expectations.cli.pretty_printing import cli_message
 
+EXAMPLES_NOT_AVAILABLE_ERROR = """Examples are available when installing GX by following the contributor guidelines (not via `pip install great-expectations`). Please see the reference environment readme for more instructions and links to the contributor guidelines: https://github.com/great-expectations/great_expectations/tree/develop/examples/reference_environments#reference-environments"""
+
 
 @click.group(short_help="Examples")
 def example() -> None:
@@ -73,7 +75,7 @@ def example_snowflake(
         )
     repo_root = pathlib.Path(__file__).parents[2]
     example_directory = repo_root / "examples" / "reference_environments" / "snowflake"
-    assert example_directory.is_dir(), "Example directory not found"
+    assert example_directory.is_dir(), EXAMPLES_NOT_AVAILABLE_ERROR
     container_name = "gx_snowflake_example_jupyter"
     command_options = CommandOptions(stop, url, bash, rebuild)
     executed_standard_function = _execute_standard_functions(
@@ -93,7 +95,7 @@ def example_snowflake(
         )
         print_green_line()
         setup_commands = ["docker", "compose", "up"]
-        subprocess.run(setup_commands, cwd=example_directory)
+        subprocess.run(setup_commands, cwd=example_directory)  # noqa: PLW1510
 
 
 @example.command(name="postgres")
@@ -132,7 +134,7 @@ def example_postgres(
     """Start a postgres database example."""
     repo_root = pathlib.Path(__file__).parents[2]
     example_directory = repo_root / "examples" / "reference_environments" / "postgres"
-    assert example_directory.is_dir(), "Example directory not found"
+    assert example_directory.is_dir(), EXAMPLES_NOT_AVAILABLE_ERROR
     container_name = "gx_postgres_example_jupyter"
     command_options = CommandOptions(stop, url, bash, rebuild)
     executed_standard_function = _execute_standard_functions(
@@ -157,7 +159,7 @@ def example_postgres(
         )
         print_green_line()
         setup_commands = ["docker", "compose", "up"]
-        subprocess.run(setup_commands, cwd=example_directory)
+        subprocess.run(setup_commands, cwd=example_directory)  # noqa: PLW1510
 
 
 @example.command(name="s3")
@@ -222,7 +224,7 @@ def example_s3(
         )
         print_green_line()
         setup_commands = ["docker", "compose", "up"]
-        subprocess.run(setup_commands, cwd=example_directory)
+        subprocess.run(setup_commands, cwd=example_directory)  # noqa: PLW1510
 
 
 @example.command(name="gcs")
@@ -266,7 +268,7 @@ def example_gcs(
         )
     repo_root = pathlib.Path(__file__).parents[2]
     example_directory = repo_root / "examples" / "reference_environments" / "gcs"
-    assert example_directory.is_dir(), "Example directory not found"
+    assert example_directory.is_dir(), EXAMPLES_NOT_AVAILABLE_ERROR
     container_name = "gx_gcs_example_jupyter"
     command_options = CommandOptions(stop, url, bash, rebuild)
     executed_standard_function = _execute_standard_functions(
@@ -281,7 +283,7 @@ def example_gcs(
         )
         print_green_line()
         setup_commands = ["docker", "compose", "up"]
-        subprocess.run(setup_commands, cwd=example_directory)
+        subprocess.run(setup_commands, cwd=example_directory)  # noqa: PLW1510
 
 
 @example.command(name="bigquery")
@@ -325,7 +327,7 @@ def example_bigquery(
         )
     repo_root = pathlib.Path(__file__).parents[2]
     example_directory = repo_root / "examples" / "reference_environments" / "bigquery"
-    assert example_directory.is_dir(), "Example directory not found"
+    assert example_directory.is_dir(), EXAMPLES_NOT_AVAILABLE_ERROR
     container_name = "gx_bigquery_example_jupyter"
     command_options = CommandOptions(stop, url, bash, rebuild)
     executed_standard_function = _execute_standard_functions(
@@ -343,7 +345,7 @@ def example_bigquery(
         )
         print_green_line()
         setup_commands = ["docker", "compose", "up"]
-        subprocess.run(setup_commands, cwd=example_directory)
+        subprocess.run(setup_commands, cwd=example_directory)  # noqa: PLW1510
 
 
 @example.command(name="abs")
@@ -387,7 +389,7 @@ def example_abs(
         )
     repo_root = pathlib.Path(__file__).parents[2]
     example_directory = repo_root / "examples" / "reference_environments" / "abs"
-    assert example_directory.is_dir(), "Example directory not found"
+    assert example_directory.is_dir(), EXAMPLES_NOT_AVAILABLE_ERROR
     container_name = "gx_abs_example_jupyter"
     command_options = CommandOptions(stop, url, bash, rebuild)
     executed_standard_function = _execute_standard_functions(
@@ -402,7 +404,7 @@ def example_abs(
         )
         print_green_line()
         setup_commands = ["docker", "compose", "up"]
-        subprocess.run(setup_commands, cwd=example_directory)
+        subprocess.run(setup_commands, cwd=example_directory)  # noqa: PLW1510
 
 
 @example.command(name="aws_postgres")
@@ -448,7 +450,7 @@ def example_aws_postgres(
     example_directory = (
         repo_root / "examples" / "reference_environments" / "aws_postgres"
     )
-    assert example_directory.is_dir(), "Example directory not found"
+    assert example_directory.is_dir(), EXAMPLES_NOT_AVAILABLE_ERROR
     container_name = "aws_postgres_example_jupyter"
     command_options = CommandOptions(stop, url, bash, rebuild)
     executed_standard_function = _execute_standard_functions(
@@ -463,7 +465,7 @@ def example_aws_postgres(
         )
         print_green_line()
         setup_commands = ["docker", "compose", "up"]
-        subprocess.run(setup_commands, cwd=example_directory)
+        subprocess.run(setup_commands, cwd=example_directory)  # noqa: PLW1510
 
 
 @example.command(name="airflow")
@@ -490,7 +492,7 @@ def example_airflow(
     example_directory = (
         repo_root / "examples" / "reference_environments" / "airflow_2_6_2"
     )
-    assert example_directory.is_dir(), "Example directory not found"
+    assert example_directory.is_dir(), EXAMPLES_NOT_AVAILABLE_ERROR
     command_options = CommandOptions(stop, False, False, rebuild)
     executed_standard_function = _execute_standard_functions(
         command_options, example_directory, container_name="not_applicable"
@@ -508,7 +510,7 @@ def example_airflow(
         cli_message("<green>Setting up airflow example using airflow v2.6.2...</green>")
         print_green_line()
         example_setup_file = example_directory / "setup_airflow.sh"
-        subprocess.run(example_setup_file, cwd=example_directory)
+        subprocess.run(example_setup_file, cwd=example_directory)  # noqa: PLW1510
 
 
 def _execute_standard_functions(
@@ -544,7 +546,7 @@ def _execute_standard_functions(
     if command_options.stop:
         cli_message("<green>Shutting down...</green>")
         stop_commands = ["docker", "compose", "down"]
-        subprocess.run(stop_commands, cwd=example_directory)
+        subprocess.run(stop_commands, cwd=example_directory)  # noqa: PLW1510
         cli_message("<green>Done shutting down...</green>")
         executed = True
     elif command_options.url:
@@ -553,12 +555,12 @@ def _execute_standard_functions(
         executed = True
     elif command_options.bash:
         bash_commands = ["docker", "exec", "-it", container_name, "bash"]
-        subprocess.run(bash_commands, cwd=example_directory)
+        subprocess.run(bash_commands, cwd=example_directory)  # noqa: PLW1510
         executed = True
     elif command_options.rebuild:
         cli_message("<green>Rebuilding containers...</green>")
         rebuild_commands = ["docker", "compose", "build"]
-        subprocess.run(rebuild_commands, cwd=example_directory)
+        subprocess.run(rebuild_commands, cwd=example_directory)  # noqa: PLW1510
         cli_message("<green>Done rebuilding containers.</green>")
         executed = True
 
@@ -575,7 +577,7 @@ def _get_jupyter_url(container_name: str, example_directory: pathlib.Path) -> st
         "list",
         "--json",
     ]
-    url_json = subprocess.run(
+    url_json = subprocess.run(  # noqa: PLW1510
         url_commands,
         cwd=example_directory,
         capture_output=True,

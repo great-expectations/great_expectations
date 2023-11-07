@@ -1,4 +1,5 @@
 import pathlib
+
 import great_expectations as gx
 
 folder_path = str(
@@ -18,7 +19,7 @@ file_path: str = folder_path + "/visits.csv"
 # <snippet name="tests/integration/docusaurus/expectations/advanced/failed_rows_pandas.py get context">
 import great_expectations as gx
 
-context = gx.get_context(context_root_dir="./great_expectations")
+context = gx.get_context(project_root_dir=".")
 # </snippet>
 
 # add datasource and asset

@@ -1,4 +1,5 @@
 import pathlib
+
 import great_expectations as gx
 
 folder_path = str(
@@ -17,7 +18,7 @@ connection_string: str = f"sqlite:///{folder_path}/visits.db"
 # <snippet name="tests/integration/docusaurus/expectations/advanced/failed_rows_sql.py get context">
 import great_expectations as gx
 
-context = gx.get_context(context_root_dir="./great_expectations")
+context = gx.get_context(project_root_dir=".")
 # </snippet>
 
 # add datasource and asset

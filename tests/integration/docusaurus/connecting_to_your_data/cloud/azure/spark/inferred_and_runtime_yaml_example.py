@@ -14,7 +14,7 @@ CREDENTIAL = os.getenv("AZURE_ACCESS_KEY", "")
 context = gx.get_context()
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py datasource config">
-datasource_yaml = rf"""
+datasource_yaml = r"""
 name: my_azure_datasource
 class_name: Datasource
 execution_engine:
