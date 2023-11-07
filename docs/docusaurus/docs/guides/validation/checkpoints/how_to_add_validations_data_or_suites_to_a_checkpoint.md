@@ -19,39 +19,6 @@ Add validation data or <TechnicalTag tag="expectation_suite" text="Expectation S
 
 </Prerequisites>
 
-## Open your existing Checkpoint
-
-Open your Checkpoint in a text editor. Your Checkpoint should appear similar to the following example:
-
-```yaml
-name: my_checkpoint
-config_version: 1
-class_name: Checkpoint
-run_name_template: "%Y-%m-foo-bar-template-$VAR"
-validations:
-  - batch_request:
-      datasource_name: my_datasource
-      data_asset_name: users
-    expectation_suite_name: users.warning
-    action_list:
-        - name: store_validation_result
-          action:
-            class_name: StoreValidationResultAction
-        - name: store_evaluation_params
-          action:
-            class_name: StoreEvaluationParametersAction
-        - name: update_data_docs
-          action:
-            class_name: UpdateDataDocsAction
-    evaluation_parameters:
-      param1: "$MY_PARAM"
-      param2: 1 + "$OLD_PARAM"
-    runtime_configuration:
-      result_format:
-        result_format: BASIC
-        partial_unexpected_count: 20
-```
-
 ## Add an Expectation Suite to the Checkpoint
 
 To add a second Expectation Suite (in this example we add ``users.error``) to your Checkpoint configuration, modify the file to add an additional `batch_request` key and corresponding information, including `evaluation_parameters`, `action_list`, `runtime_configuration`, and `expectation_suite_name`.  In fact, the simplest way to run a different Expectation Suite on the same <TechnicalTag tag="batch" text="Batch" /> of data is to make a copy of the original `batch_request` entry and then edit the `expectation_suite_name` value to correspond to a different Expectation Suite.  The resulting configuration will look like this:
@@ -111,7 +78,7 @@ validations:
 
 ## Add validation data to the Checkpoint
 
-In the prvious example, the entry you added with your Expectation Suite was paired with the same Batch of data as the original Expectation Suite.  However, you may also specify different <TechnicalTag tag="batch_request" text="Batch Requests" /> (and thus different Batches of data) when you add an Expectation Suite.  The flexibility of easily adding multiple Validations of Batches of data with different Expectation Suites and specific <TechnicalTag tag="action" text="Actions" /> can be demonstrated using the following example of a Checkpoint configuration file:
+In the previous example, the entry you added with your Expectation Suite was paired with the same Batch of data as the original Expectation Suite.  However, you may also specify different <TechnicalTag tag="batch_request" text="Batch Requests" /> (and thus different Batches of data) when you add an Expectation Suite.  The flexibility of easily adding multiple Validations of Batches of data with different Expectation Suites and specific <TechnicalTag tag="action" text="Actions" /> can be demonstrated using the following example of a Checkpoint configuration file:
 
 ```yaml
 name: my_fancy_checkpoint
