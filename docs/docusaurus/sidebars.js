@@ -13,6 +13,16 @@ module.exports = {
           items: [
             {
               type: 'link',
+              label: 'GX Cloud architecture',
+              href: '/docs/cloud/about_gx#gx-cloud-architecture',
+            },
+            {
+              type: 'link',
+              label: 'GX Cloud deployment patterns',
+              href: '/docs/cloud/about_gx#gx-cloud-deployment-patterns',
+            },
+            {
+              type: 'link',
               label: 'Workflow optimization',
               href: '/docs/cloud/about_gx#workflow-optimization',
             },

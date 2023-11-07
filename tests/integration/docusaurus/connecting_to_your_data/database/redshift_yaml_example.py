@@ -26,7 +26,7 @@ load_data_into_test_database(
 
 context = gx.get_context()
 
-datasource_yaml = f"""
+datasource_yaml = """
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py datasource config">
 name: my_redshift_datasource
 class_name: Datasource

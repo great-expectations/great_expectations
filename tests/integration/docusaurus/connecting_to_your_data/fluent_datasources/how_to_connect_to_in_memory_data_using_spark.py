@@ -5,7 +5,9 @@ pytest -vv --docs-tests -k "how_to_connect_to_in_memory_data_using_spark" tests/
 ```
 """
 import os
+
 import pandas as pd
+
 import great_expectations as gx
 from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 

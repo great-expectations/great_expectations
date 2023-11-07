@@ -1,4 +1,4 @@
-# isort:skip_file
+# ruff: noqa: I001, PTH118, PTH109, PTH120
 import os
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py imports">

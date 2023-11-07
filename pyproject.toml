@@ -34,6 +34,7 @@ files = [
     "great_expectations",
     "tests/datasource/fluent",
     "tests/integration/cloud",
+    "tests/integration/docusaurus",
     # "contrib" # ignore entire `contrib` package
 ]
 warn_unused_configs = true
@@ -154,6 +155,13 @@ exclude = [
     'validation_operators/validation_operators\.py',                                                       # 16
     # tests
     'tests/datasource/fluent/tasks\.py',
+    'tests/integration/docusaurus/tutorials',
+    'tests/integration/docusaurus/connecting_to_your_data',
+    'tests/integration/docusaurus/deployment_patterns',
+    'tests/integration/docusaurus/expectations',
+    'tests/integration/docusaurus/reference',
+    'tests/integration/docusaurus/setup',
+    'tests/integration/docusaurus/validation',
 ]
 
 [[tool.mypy.overrides]]
@@ -249,7 +257,11 @@ extend-exclude = [
     # TODO: remove the items below and fix linting issues
     "tests/data_asset",                                         # 10 warnings
     "tests/dataset",                                            # 10 warnings
+<<<<<<< HEAD
     "tests/integration/docusaurus",                             # 208 warnings, 144 auto-fixable
+=======
+    "tests/test_fixtures/notebook_assets/suite_edit/footer.py", # 7 warnings
+>>>>>>> f3be177715feceaf90310ccceb8b41c2ab287a3d
 ]
 
 [tool.ruff.per-file-ignores]
