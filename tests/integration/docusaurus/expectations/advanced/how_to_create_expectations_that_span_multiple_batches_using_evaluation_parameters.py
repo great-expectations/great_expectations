@@ -1,5 +1,4 @@
 import pathlib
-import great_expectations as gx
 
 # <snippet name="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py get_context">
 import great_expectations as gx

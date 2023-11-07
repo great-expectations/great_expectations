@@ -56,7 +56,7 @@ from great_expectations.util import deep_filter_properties_iterable
 if TYPE_CHECKING:
     from io import TextIOWrapper
 
-    from great_expectations.alias_types import JSONValues
+    from great_expectations.alias_types import JSONValues, PathStr
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.datasource.fluent.batch_request import (
@@ -2074,8 +2074,8 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
 
     def __init__(
         self,
-        root_directory: Optional[str] = None,
-        plugins_directory: Optional[str] = None,
+        root_directory: Optional[PathStr] = None,
+        plugins_directory: Optional[PathStr] = None,
     ) -> None:
         # Initialize base defaults
         super().__init__()
@@ -2084,8 +2084,9 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
             plugins_directory = (
                 DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value
             )
-        self.plugins_directory = plugins_directory
+        self.plugins_directory = str(plugins_directory)
         if root_directory is not None:
+            root_directory = str(root_directory)
             self.stores[self.expectations_store_name]["store_backend"][  # type: ignore[index]
                 "root_directory"
             ] = root_directory
