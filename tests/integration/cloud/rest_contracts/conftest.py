@@ -65,7 +65,7 @@ def cloud_access_token() -> str:
         raise OSError("GX_CLOUD_ACCESS_TOKEN is not set in this environment.") from e
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def gx_cloud_session() -> Session:
     try:
         access_token = os.environ["GX_CLOUD_ACCESS_TOKEN"]
