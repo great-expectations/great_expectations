@@ -52,7 +52,6 @@ Typical usage example:
 from __future__ import annotations
 
 import ast
-import glob
 import logging
 import operator
 import pathlib
@@ -833,14 +832,14 @@ def _repo_root() -> pathlib.Path:
 def _default_doc_example_absolute_paths() -> Set[pathlib.Path]:
     """Get all paths of doc examples (docs examples)."""
     base_directory = _repo_root() / "tests" / "integration" / "docusaurus"
-    paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
+    paths = base_directory.rglob("**/*.py")
     return {pathlib.Path(p) for p in paths}
 
 
 def _default_code_absolute_paths() -> Set[pathlib.Path]:
     """All Great Expectations modules related to the main library."""
     base_directory = _repo_root() / "great_expectations"
-    paths = glob.glob(f"{base_directory}/**/*.py", recursive=True)
+    paths = base_directory.rglob("**/*.py")
     return {pathlib.Path(p) for p in paths}
 
 
@@ -849,7 +848,7 @@ def _default_docs_absolute_paths() -> Set[pathlib.Path]:
     base_directory = _repo_root() / "docs"
     paths = []
     for extension in ("md", "mdx", "yml", "yaml"):
-        paths.extend(glob.glob(f"{base_directory}/**/*.{extension}", recursive=True))
+        paths.extend(base_directory.rglob(f"**/*.{extension}"))
     return {pathlib.Path(p) for p in paths}
 
 
