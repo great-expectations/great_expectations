@@ -212,6 +212,7 @@ def test_get_expectation_suites(
         cloud_data_context.list_expectation_suites()
 
 
+@pytest.mark.cloud
 @pytest.mark.parametrize(
     "contract_interaction",
     [
