@@ -7,7 +7,6 @@ pytest -v --docs-tests -k "how_to_connect_to_a_sql_table" tests/integration/test
 import pathlib
 import warnings
 
-import tests.test_utils as test_utils
 import great_expectations as gx
 from great_expectations.datasource.fluent import GxDatasourceWarning
 

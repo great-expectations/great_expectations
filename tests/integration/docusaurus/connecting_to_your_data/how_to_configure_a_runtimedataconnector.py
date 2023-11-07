@@ -2,7 +2,6 @@
 import pandas as pd
 
 # </snippet>
-
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py yaml imports">
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py python imports">
 import great_expectations as gx

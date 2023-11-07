@@ -1,26 +1,24 @@
-from typing import Dict, Optional
+# ruff: noqa: E711
+from typing import Optional
 
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
 from great_expectations.execution_engine import (
-    ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
-    ExpectationValidationResult,
 )
-from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,
 )
-from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py ColumnPairValuesDiffThree class_def">

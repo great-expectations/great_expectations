@@ -1,4 +1,5 @@
 import os
+import pathlib
 
 import great_expectations as gx
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -45,11 +46,11 @@ os.environ[
 
 # get context and set config variables in config_variables.yml
 context = gx.get_context()
-context_config_variables_relative_file_path = os.path.join(
+context_config_variables_relative_file_path = pathlib.Path(
     context.GX_UNCOMMITTED_DIR, "config_variables.yml"
 )
 
-context_config_variables_file_path = os.path.join(
+context_config_variables_file_path = pathlib.Path(
     context.root_directory, context_config_variables_relative_file_path
 )
 # write content to config_variables.yml
