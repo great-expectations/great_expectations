@@ -355,7 +355,7 @@ filterwarnings = [
     # Example Actual Warning: UserWarning: Your query appears to have hard-coded references to your data. By not parameterizing your query with `{active_batch}`, {col}, etc., you may not be validating against your intended data asset, or the expectation may fail.
     'ignore: Your query appears to have hard-coded references to your data. By not parameterizing your query with `{active_batch}`, {col}, etc., you may not be validating against your intended data asset, or the expectation may fail.:UserWarning',
     # Example Actual Warning: UserWarning: Your query appears to not be parameterized for a data asset. By not parameterizing your query with `{active_batch}`, you may not be validating against your intended data asset, or the expectation may fail.
-    'ignore: Your query appears to not be parameterized for a data asset. By not parameterizing your query with `{active_batch}`, you may not be validating against your intended data asset, or the expectation may fail.:UserWarning',
+    'ignore: Your query ap_create_default_suite_and_checkpointpears to not be parameterized for a data asset. By not parameterizing your query with `{active_batch}`, you may not be validating against your intended data asset, or the expectation may fail.:UserWarning',
     # Example Actual Warning: DeprecationWarning: save_expectation_suite is deprecated as of v0.15.48 and will be removed in v0.18. Please use update_expectation_suite or add_or_update_expectation_suite instead.
     # Found in test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint
     'ignore: save_expectation_suite is deprecated as of v0.15.48 and will be removed in v0.18. Please use update_expectation_suite or add_or_update_expectation_suite instead.:DeprecationWarning',
@@ -412,6 +412,9 @@ filterwarnings = [
     'ignore: distutils Version classes are deprecated. Use packaging.version instead.:DeprecationWarning',
 
     # pandas
+    # Example Actual Warning: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+    # Found when running pytest tests/test_definitions/test_expectations_v3_api.py
+    'ignore: In a future version of pandas, parsing datetimes with mixed time zones:FutureWarning',
     # Example Actual Warning: FutureWarning: The behavior of `series[i:j]` with an integer-dtype index is deprecated. In a future version, this will be treated as *label-based* indexing, consistent with e.g. `series[i]` lookups. To retain the old behavior, use `series.iloc[i:j]`. To get the future behavior, use `series.loc[i:j]`.
     # Found when running pytest tests/test_definitions/test_expectations_v3_api.py
     'ignore: The behavior of `series:FutureWarning',
