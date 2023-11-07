@@ -239,67 +239,6 @@ def test_post_expectation_suite_request(
 
 
 @pytest.mark.cloud
-@pytest.mark.xfail(reason="difficulty using mock pact service for mercury API")
-def test_post_expectation_suite(
-    pact_test: pact.Pact,
-    cloud_data_context: CloudDataContext,
-) -> None:
-    provider_state = "the Expectation Suite does not exist"
-    scenario = "a request to get an Expectation Suite"
-    method = "GET"
-    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
-    query = {
-        "name": "brand new suite",
-    }
-    status = 200
-    response_body = GET_EXPECTATION_SUITE_MIN_RESPONSE_BODY
-
-    (
-        pact_test.given(provider_state=provider_state)
-        .upon_receiving(scenario=scenario)
-        .with_request(
-            method=method,
-            path=path,
-            query=query,
-        )
-        .will_respond_with(
-            status=status,
-            body=response_body,
-        )
-    )
-
-    provider_state = "the Expectation Suite does not exist"
-    scenario = "a request to post an Expectation Suite"
-    method = "POST"
-    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
-    request_body = POST_EXPECTATION_SUITE_MIN_REQUEST_BODY
-    status = 201
-    response_body = POST_EXPECTATION_SUITE_MIN_RESPONSE_BODY
-
-    (
-        pact_test.given(provider_state=provider_state)
-        .upon_receiving(scenario=scenario)
-        .with_request(
-            method=method,
-            path=path,
-            body=request_body,
-        )
-        .will_respond_with(
-            status=status,
-            body=response_body,
-        )
-    )
-
-    suite_dict = POST_EXPECTATION_SUITE_MIN_REQUEST_BODY["data"]["attributes"]["suite"]
-
-    with pact_test:
-        cloud_data_context.add_expectation_suite(**suite_dict)
-    cloud_data_context.delete_expectation_suite(
-        expectation_suite_name=suite_dict["expectation_suite_name"]
-    )
-
-
-@pytest.mark.cloud
 def test_put_expectation_suite(
     pact_test: pact.Pact,
     cloud_data_context: CloudDataContext,
