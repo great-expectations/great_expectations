@@ -93,10 +93,10 @@ pip install great_expectations
 ```
 and then run
 
-```
+```python
 import great_expectations as gx
 
-data_context = gx.get_context()
+context = gx.get_context()
 ```
 
 (We recommend deploying within a virtual environment. If you’re not familiar with pip, virtual environments, notebooks, or git, you may want to check out the [Supporting Resources](https://docs.greatexpectations.io/docs/terms/supporting_resource/), which will teach you how to get up and running in minutes.)
