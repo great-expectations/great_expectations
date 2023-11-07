@@ -226,7 +226,24 @@ def test_get_expectation_suites(
             ),
             upon_receiving="a request to post an Expectation Suite",
             given="the Expectation Suite does not exist",
-            request_body=POST_EXPECTATION_SUITE_MIN_REQUEST_BODY,
+            request_body={
+                "data": {
+                    "type": "expectation_suite",
+                    "attributes": {
+                        "suite": {
+                            "meta": {"great_expectations_version": "0.13.23"},
+                            "expectations": [
+                                {
+                                    "kwargs": {"max_value": 3, "min_value": 1},
+                                    "meta": {},
+                                    "expectation_type": "expect_table_row_count_to_be_between",
+                                },
+                            ],
+                            "expectation_suite_name": "brand new suite",
+                        }
+                    },
+                },
+            },
             response_status=201,
             response_body=POST_EXPECTATION_SUITE_MIN_RESPONSE_BODY,
         ),
