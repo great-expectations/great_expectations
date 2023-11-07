@@ -145,14 +145,13 @@ class LinkChecker:
             )
 
     def _get_absolute_path(self, path: pathlib.Path) -> pathlib.Path:
-        return self._docs_root.joinpath(path).absolute()
+        return self._docs_root.joinpath(path).resolve()
 
     def _get_relative_path(
         self, file: pathlib.Path, path: pathlib.Path
     ) -> pathlib.Path:
         # link should be relative to the location of the current file
-        directory = file.parent
-        return directory / path
+        return file.parent / path
 
     def _get_docroot_path(self, path: pathlib.Path) -> pathlib.Path:
         return self._docs_path / path
