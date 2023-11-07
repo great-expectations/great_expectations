@@ -3,7 +3,6 @@ import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 
 # </snippet>
-
 from great_expectations.core.yaml_handler import YAMLHandler
 
 yaml = YAMLHandler()

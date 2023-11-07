@@ -14,6 +14,7 @@ the snippets that are specified for use in documentation are maintained.  These 
 
 # The following imports are used as part of verifying that all example snippets are consistent.
 # Users may disregard them.
+from __future__ import annotations
 
 import operator
 from functools import reduce
@@ -35,7 +36,7 @@ def get_by_path(root_dictionary: dict, keys: Tuple[str]) -> Tuple:
 
 
 def gather_key_paths(
-    target_dict: dict, current_path: List[str] = None
+    target_dict: dict, current_path: List[str] | None = None
 ) -> List[Tuple[str]]:
     key_paths: List[Tuple[str]] = []
     for key, value in target_dict.items():
@@ -50,13 +51,12 @@ def gather_key_paths(
             else:
                 # If this is an empty dictionary, then there will be no further nested keys to gather.
                 key_paths.append(tuple(next_path))
+        elif current_path:
+            next_path = current_path[:]
+            next_path.append(key)
+            key_paths.append(tuple(next_path))
         else:
-            if current_path:
-                next_path = current_path[:]
-                next_path.append(key)
-                key_paths.append(tuple(next_path))
-            else:
-                key_paths.append((key,))
+            key_paths.append((key,))
     return key_paths
 
 
