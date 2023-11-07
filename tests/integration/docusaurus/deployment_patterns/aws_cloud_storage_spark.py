@@ -1,11 +1,13 @@
 import os
 import pathlib
 import tempfile
+
+import boto3
+
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-import boto3
 
 client = boto3.client("s3")
 temp_dir = tempfile.TemporaryDirectory()
@@ -14,7 +16,6 @@ yaml: YAMLHandler = YAMLHandler()
 
 
 import boto3
-import pyspark as pyspark
 
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
@@ -102,7 +103,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 # adding validation results store
-great_expectations_yaml_file_path = os.path.join(
+great_expectations_yaml_file_path = pathlib.Path(
     context.root_directory, FileDataContext.GX_YML
 )
 with open(great_expectations_yaml_file_path) as f:
@@ -208,7 +209,7 @@ data_docs_sites:
 data_docs_site_yaml = data_docs_site_yaml.replace(
     "<YOUR S3 BUCKET NAME>", "demo-data-docs"
 )
-great_expectations_yaml_file_path = os.path.join(
+great_expectations_yaml_file_path = pathlib.Path(
     context.root_directory, FileDataContext.GX_YML
 )
 with open(great_expectations_yaml_file_path) as f:
