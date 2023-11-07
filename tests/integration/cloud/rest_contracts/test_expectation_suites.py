@@ -380,8 +380,8 @@ def test_delete_expectation_suite(
         )
 
 
-@pytest.mark.cloud  # type: ignore[misc]
-@pytest.xfail(reason="unexpected 401 instead of 404 in CI only", strict=False)  # type: ignore[call-arg, misc]
+@pytest.mark.cloud
+@pytest.mark.xfail(reason="unexpected 401 instead of 404 in CI only", strict=False)
 def test_delete_non_existent_expectation_suite(
     pact_test: pact.Pact,
     cloud_data_context: CloudDataContext,
