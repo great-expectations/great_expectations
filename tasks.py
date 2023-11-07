@@ -1142,7 +1142,7 @@ def service(
 
             if (
                 service_name == "mercury"
-                and os.environ.get("CI") is not True  # noqa: TID251
+                and os.environ.get("CI") != "true"  # noqa: TID251
             ):
                 cmds.extend(
                     [
