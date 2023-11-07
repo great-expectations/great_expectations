@@ -14,16 +14,13 @@ This issue is typically caused when an Expectation fails and `discard_failed_exp
 
 See [Identify failed rows in an Expectation](./guides/expectations/advanced/identify_failed_rows_expectations.md). 
 
- 
-
 ### How can I improve Validation performance with a large Data Asset?
 
 Use Batches and Spark. See [Request data from a Data Asset](./guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md) and [Connect to in-memory Data Assets - Spark](./guides/connecting_to_your_data/fluent/in_memory/connect_in_memory_data.md). 
 
 ### I'm experiencing issues with my Expectations and Data Sources after upgrading GX OSS
 
-Confirm you're using Fluent Data Sources and you have installed the latest version of GX OSS. If you're using data connectors, or importing `RuntimeBatchRequest` or `BatchRequest` methods, it's likely you're using an outdated version of GX OSS. To confirm you're using the latest version of GX OSS, see [Install GX](/docs/tutorials/quickstart).
-
+Confirm you're using Fluent Data Sources and you have installed the latest version of GX OSS. If you're using data connectors, or importing `RuntimeBatchRequest` or `BatchRequest` methods, it's likely you're using an outdated version of GX OSS.
 
 ### How do I adjust the timezone and regional settings in my Data Docs?
 
