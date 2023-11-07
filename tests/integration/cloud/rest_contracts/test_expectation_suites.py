@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pathlib
+import uuid
 from typing import TYPE_CHECKING, Callable, Final
 
 import pact
@@ -389,7 +390,7 @@ def test_delete_non_existent_expectation_suite(
     method = "DELETE"
     path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
     query = {
-        "name": "brand new suite",
+        "name": str(uuid.uuid4()),
     }
     status = 404
 
