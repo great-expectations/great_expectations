@@ -13,6 +13,7 @@ from typing_extensions import Annotated, TypeAlias  # noqa: TCH002
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.http import create_session
+from great_expectations.data_context import CloudDataContext
 
 if TYPE_CHECKING:
     from requests import Session
@@ -24,7 +25,10 @@ PROVIDER_NAME: Final[str] = "mercury"
 
 PACT_MOCK_HOST: Final[str] = "localhost"
 PACT_MOCK_PORT: Final[int] = 9292
-PACT_DIR: Final[pathlib.Path] = pathlib.Path(pathlib.Path(__file__).parent, "pacts")
+PACT_DIR: Final[pathlib.Path] = pathlib.Path(
+    pathlib.Path(__file__, ".."), "pacts"
+).resolve()
+PACT_MOCK_SERVICE_URL: Final[str] = f"http://{PACT_MOCK_HOST}:{PACT_MOCK_PORT}"
 
 
 JsonData: TypeAlias = Union[None, int, str, bool, List[Any], Dict[str, Any]]
@@ -45,7 +49,23 @@ class RequestMethods(str, enum.Enum):
     PUT = "PUT"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
+def cloud_base_url() -> str:
+    try:
+        return os.environ["GX_CLOUD_BASE_URL"]
+    except KeyError as e:
+        raise OSError("GX_CLOUD_BASE_URL is not set in this environment.") from e
+
+
+@pytest.fixture
+def cloud_access_token() -> str:
+    try:
+        return os.environ["GX_CLOUD_ACCESS_TOKEN"]
+    except KeyError as e:
+        raise OSError("GX_CLOUD_ACCESS_TOKEN is not set in this environment.") from e
+
+
+@pytest.fixture
 def gx_cloud_session() -> Session:
     try:
         access_token = os.environ["GX_CLOUD_ACCESS_TOKEN"]
@@ -54,11 +74,33 @@ def gx_cloud_session() -> Session:
     return create_session(access_token=access_token)
 
 
+@pytest.fixture
+def cloud_data_context(
+    cloud_base_url: str,
+    cloud_access_token: str,
+) -> CloudDataContext:
+    """This is a real Cloud Data Context that points to the pact mock service instead of the Mercury API."""
+    cloud_data_context = CloudDataContext(
+        cloud_base_url=cloud_base_url,
+        cloud_organization_id=EXISTING_ORGANIZATION_ID,
+        cloud_access_token=cloud_access_token,
+    )
+    # we can't override the base url to use the mock service due to
+    # reliance on env vars, so instead we override with a real project config
+    project_config = cloud_data_context.config
+    return CloudDataContext(
+        cloud_base_url=PACT_MOCK_SERVICE_URL,
+        cloud_organization_id=EXISTING_ORGANIZATION_ID,
+        cloud_access_token=cloud_access_token,
+        project_config=project_config,
+    )
+
+
 def get_git_commit_hash() -> str:
     return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def pact_test(request) -> pact.Pact:
     pact_broker_base_url = "https://greatexpectations.pactflow.io"
 
@@ -92,7 +134,7 @@ def pact_test(request) -> pact.Pact:
         broker_token=broker_token,
         host_name=PACT_MOCK_HOST,
         port=PACT_MOCK_PORT,
-        pact_dir=str(PACT_DIR.resolve()),
+        pact_dir=str(PACT_DIR),
         publish_to_broker=publish_to_broker,
     )
 
