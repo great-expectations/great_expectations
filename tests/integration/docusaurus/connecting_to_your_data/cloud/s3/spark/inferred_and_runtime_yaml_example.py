@@ -8,11 +8,11 @@ from great_expectations.core.yaml_handler import YAMLHandler
 yaml = YAMLHandler()
 # </snippet>
 
+from great_expectations.data_context import get_context
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
-from great_expectations.data_context import get_context
 
 # NOTE: InMemoryStoreBackendDefaults SHOULD NOT BE USED in normal settings. You
 # may experience data loss as it persists nothing. It is used here for testing.
@@ -24,7 +24,7 @@ data_context_config = DataContextConfig(
 )
 context = get_context(project_config=data_context_config)
 
-datasource_yaml = rf"""
+datasource_yaml = r"""
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py datasource config">
 name: my_s3_datasource
 class_name: Datasource
