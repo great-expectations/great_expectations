@@ -33,7 +33,7 @@ def base_dir(tmpdir) -> pathlib.Path:
 
 
 @pytest.fixture
-def updated_base_dir(tmpdir) -> Iterator[pathlib.Path]:
+def updated_base_dir(tmpdir) -> pathlib.Path:
     dir_path = tmpdir / "other_data"
     dir_path.mkdir()
     df = pd.DataFrame({"name": ["jim", "carol"]})
