@@ -321,14 +321,14 @@ class LinkChecker:
 @click.option(
     "--path",
     "-p",
-    type=click.Path(exists=True, file_okay=True),
+    type=click.Path(exists=True, file_okay=True, path_type=pathlib.Path),
     default=".",
     help="Path to markdown file(s) to check",
 )
 @click.option(
     "--docs-root",
     "-r",
-    type=click.Path(exists=True, file_okay=False),
+    type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path),
     default=None,
     help="Root to all docs for link checking",
 )
@@ -340,7 +340,10 @@ class LinkChecker:
 )
 @click.option("--skip-external", is_flag=True)
 def scan_docs_click(
-    path: str, docs_root: Optional[str], site_prefix: str, skip_external: bool
+    path: pathlib.Path,
+    docs_root: Optional[pathlib.Path],
+    site_prefix: str,
+    skip_external: bool,
 ) -> None:
     code, message = scan_docs(path, docs_root, site_prefix, skip_external)
     click.echo(message)
@@ -348,19 +351,19 @@ def scan_docs_click(
 
 
 def scan_docs(
-    path: str | pathlib.Path, docs_root: str | pathlib.Path | None, site_prefix: str, skip_external: bool
+    path: pathlib.Path,
+    docs_root: pathlib.Path | None,
+    site_prefix: str,
+    skip_external: bool,
 ) -> tuple[int, str]:
-    path = pathlib.Path(path)
-    if docs_root:
-        docs_root = pathlib.Path(docs_root)
-    else:
+    if not docs_root:
         docs_root = path
 
     if not docs_root.is_dir():
         return 1, f"Docs root path: {docs_root} is not a directory"
 
     # prepare our return value
-    result: List[LinkReport] = list()
+    result: List[LinkReport] = []
     checker = LinkChecker(path, docs_root, site_prefix, skip_external)
 
     if path.is_dir():
