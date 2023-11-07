@@ -1,9 +1,9 @@
 from typing import Optional
 
 import numpy as np
-
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import PandasExecutionEngine, SqlAlchemyExecutionEngine
 from great_expectations.expectations.expectation import MulticolumnMapExpectation
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
@@ -35,10 +35,12 @@ class MulticolumnValuesNotAllNull(MulticolumnMapMetricProvider):
     def _pandas(cls, column_list, **kwargs):
         return column_list.notna().any(axis=1)
 
-    # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
-    # @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
-    # def _sqlalchemy(cls, column_list, **kwargs):
-    #     raise NotImplementedError
+    @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(cls, column_list, **kwargs):
+        conditions = []
+        for column in column_list:
+            conditions.append(column.isnot(None))
+        return sa.or_(*conditions)
 
     # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
     # @multicolumn_condition_partial(engine=SparkDFExecutionEngine)
@@ -54,13 +56,13 @@ class ExpectMulticolumnValuesNotToBeAllNull(MulticolumnMapExpectation):
     # They will also be executed as unit tests for your Expectation.
     examples = [
         {
+            "only_for": ["pandas"],
             "data": {
                 "no_nulls": [5, 6, 5, 12, -3],
                 "some_nulls": [np.nan, -3, np.nan, np.nan, -9],
                 "one_non_null": [np.nan, 2, np.nan, np.nan, np.nan],
                 "all_nulls": [np.nan, np.nan, np.nan, np.nan, np.nan],
             },
-            "only_for": ["pandas"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -96,7 +98,64 @@ class ExpectMulticolumnValuesNotToBeAllNull(MulticolumnMapExpectation):
                     },
                 },
             ],
-        }
+        },
+        {
+            "only_for": ["sqlite"],
+            "data": {
+                "no_nulls": [5, 6, 5, 12, -3],
+                "some_nulls": [None, -3, None, None, -9],
+                "one_non_null": [None, 2, None, None, None],
+                "all_nulls": [None, None, None, None, None],
+                "one_null": [None, 1, 1, 1, 1],
+            },
+            "tests": [
+                {
+                    "title": "basic_positive_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column_list": ["no_nulls", "some_nulls"]},
+                    "out": {
+                        "success": True,
+                    },
+                },
+                {
+                    "title": "basic_positive_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column_list": ["some_nulls", "one_non_null"],
+                        "mostly": 0.4,
+                    },
+                    "out": {
+                        "success": True,
+                    },
+                },
+                {
+                    "title": "basic_negative_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column_list": ["some_nulls", "one_non_null", "all_nulls"],
+                        "mostly": 1,
+                    },
+                    "out": {
+                        "success": False,
+                    },
+                },
+                {
+                    "title": "basic_negative_test_2",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column_list": ["all_nulls", "one_null"],
+                        "mostly": 1,
+                    },
+                    "out": {
+                        "success": False,
+                    },
+                },
+            ],
+        },
     ]
 
     # This is the id string of the Metric used by this Expectation.
@@ -130,23 +189,10 @@ class ExpectMulticolumnValuesNotToBeAllNull(MulticolumnMapExpectation):
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
 
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
-
-    # This object contains metadata for display in the public Gallery
-
     library_metadata = {
         "tags": ["null_check"],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
-            "@liyusa",  # Don't forget to add your github handle here!
+            "@liyusa", "@itaise" # Don't forget to add your github handle here!
         ],
     }
 
