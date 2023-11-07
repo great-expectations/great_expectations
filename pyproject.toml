@@ -355,7 +355,7 @@ filterwarnings = [
     # Example Actual Warning: UserWarning: Your query appears to have hard-coded references to your data. By not parameterizing your query with `{active_batch}`, {col}, etc., you may not be validating against your intended data asset, or the expectation may fail.
     'ignore: Your query appears to have hard-coded references to your data. By not parameterizing your query with `{active_batch}`, {col}, etc., you may not be validating against your intended data asset, or the expectation may fail.:UserWarning',
     # Example Actual Warning: UserWarning: Your query appears to not be parameterized for a data asset. By not parameterizing your query with `{active_batch}`, you may not be validating against your intended data asset, or the expectation may fail.
-    'ignore: Your query ap_create_default_suite_and_checkpointpears to not be parameterized for a data asset. By not parameterizing your query with `{active_batch}`, you may not be validating against your intended data asset, or the expectation may fail.:UserWarning',
+    'ignore: Your query appears to not be parameterized for a data asset. By not parameterizing your query with `{active_batch}`, you may not be validating against your intended data asset, or the expectation may fail.:UserWarning',
     # Example Actual Warning: DeprecationWarning: save_expectation_suite is deprecated as of v0.15.48 and will be removed in v0.18. Please use update_expectation_suite or add_or_update_expectation_suite instead.
     # Found in test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint
     'ignore: save_expectation_suite is deprecated as of v0.15.48 and will be removed in v0.18. Please use update_expectation_suite or add_or_update_expectation_suite instead.:DeprecationWarning',
