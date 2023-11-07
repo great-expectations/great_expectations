@@ -27,11 +27,11 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
 2. Complete the following mandatory fields:
 
-    - **Datasource name**: Enter a meaningful name for the Data Asset.
+    - **Data Source name**: Enter a meaningful name for the Data Asset.
 
     - **Username**: Enter your Snowflake username.
 
-    - **Password variable**: Enter `GX_CLOUD_SNOWFLAKE_PASSWORD`.
+    - **Password variable**: Enter `GX_CLOUD_SNOWFLAKE_PASSWORD`. If you haven't set this variable, see [Set up GX Cloud](../set_up_gx_cloud.md).
 
     - **Account or locator**: Enter your Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
@@ -51,7 +51,9 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
 5. Optional. Clear **Test connection** if you don't want to test the Data Asset connection. Testing the connection to the Data Asset is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
 
-6. Select **Table Asset** or **Query Asset** and complete the following fields:
+6. Click **Continue**.
+
+7. Select **Table Asset** or **Query Asset** and complete the following fields:
 
     - **Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
 
@@ -59,11 +61,11 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
     - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
 
-7. Optional. Select **Add table/query** to add additional tables or queries and repeat step 6.
+8. Optional. Select **Add another Data Asset** to add additional tables or queries and repeat step 7.
 
-8. Click **Finish**.
+9. Click **Finish**.
 
-9. Create an Expectation. See [Create an Expectation](/docs/cloud/expectations/manage_expectations#create-an-expectation).
+10. Create an Expectation. See [Create an Expectation](/docs/cloud/expectations/manage_expectations#create-an-expectation).
 
 ## View Data Asset metrics
 
