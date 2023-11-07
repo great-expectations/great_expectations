@@ -157,7 +157,11 @@ class LinkChecker:
         return self._docs_path / path
 
     def _check_absolute_link(
-        self, link: str, file: pathlib.Path, path: pathlib.Path, version: Optional[str]
+        self,
+        link: str,
+        file: pathlib.Path,
+        path: pathlib.Path | str,
+        version: Optional[str],
     ) -> Optional[LinkReport]:
         logger.debug(f"Checking absolute link {link} in file {file}")
 
@@ -166,7 +170,7 @@ class LinkChecker:
             return None
 
         # absolute links should point to files that exist (with the .md extension added)
-        md_file = path.resolve().with_suffix(".md")
+        md_file = pathlib.Path(path).resolve().with_suffix(".md")
         logger.debug(f"Absolute link {link} resolved to path {md_file}")
 
         if not md_file.is_file():
