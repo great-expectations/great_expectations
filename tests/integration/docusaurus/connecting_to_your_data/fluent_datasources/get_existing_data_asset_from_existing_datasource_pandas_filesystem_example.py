@@ -1,6 +1,7 @@
 import pathlib
-import great_expectations as gx
 import tempfile
+
+import great_expectations as gx
 
 temp_dir = tempfile.TemporaryDirectory()
 full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
