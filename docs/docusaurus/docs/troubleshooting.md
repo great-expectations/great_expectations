@@ -20,8 +20,22 @@ Use Batches and Spark. See [Request data from a Data Asset](./guides/connecting_
 
 ### I'm experiencing issues with my Expectations and Data Sources after upgrading GX OSS
 
-Confirm you're using Fluent Data Sources and you have installed the latest version of GX OSS. If you're using data connectors, or importing `RuntimeBatchRequest` or `BatchRequest` methods, it's likely you're using an outdated version of GX OSS.
+Confirm you're using Fluent Data Sources and you have installed the latest version of GX OSS. If you're using data connectors, or importing `RuntimeBatchRequest` or `BatchRequest` methods, it's likely you're using an outdated version of GX OSS. 
+
+Run the following command to determine the version of GX OSS you currently have installed:
+
+
+```bash title="Terminal input"
+great_expectations --version
+```
+
+If the GX OSS version is earlier than the latest GX OSS version displayed on the [GX documentation home page](https://docs.greatexpectations.io/docs/), run the following code to upgrade GX OSS:
+
+```bash title="Terminal input"
+pip install great_expectations --upgrade
+```
 
 ### How do I adjust the timezone and regional settings in my Data Docs?
 
 Unfortunately, these settings can't be adjusted. GX uses your computer settings to determine the time value.
+
