@@ -13,7 +13,7 @@ WHITELISTED_TAG = "--Public API--"
 
 def _prepend_base_repository_dir_to_sys_path():
     """Add great_expectations base repo dir to the front of sys path. Used for docs processing."""
-    sys.path.insert(0, os.path.abspath("../../"))
+    sys.path.insert(0, os.path.abspath("../../"))  # noqa: PTH100
 
 
 _prepend_base_repository_dir_to_sys_path()
