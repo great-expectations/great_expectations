@@ -357,8 +357,7 @@ def scan_docs(
 ) -> tuple[int, str]:
     if not docs_root:
         docs_root = path
-
-    if not docs_root.is_dir():
+    elif not docs_root.is_dir():
         return 1, f"Docs root path: {docs_root} is not a directory"
 
     # prepare our return value
