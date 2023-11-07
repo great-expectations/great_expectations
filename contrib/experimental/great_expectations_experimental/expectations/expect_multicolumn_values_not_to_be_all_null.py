@@ -1,9 +1,13 @@
 from typing import Optional
 
 import numpy as np
+
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import PandasExecutionEngine, SqlAlchemyExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.expectations.expectation import MulticolumnMapExpectation
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
@@ -192,7 +196,8 @@ class ExpectMulticolumnValuesNotToBeAllNull(MulticolumnMapExpectation):
     library_metadata = {
         "tags": ["null_check"],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
-            "@liyusa", "@itaise" # Don't forget to add your github handle here!
+            "@liyusa",
+            "@itaise",  # Don't forget to add your github handle here!
         ],
     }
 
