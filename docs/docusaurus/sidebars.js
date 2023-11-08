@@ -281,7 +281,7 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Connect to source data',
+          label: 'Connect to a Data Source',
           link: { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_lp' },
           items: [
             'guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data',
@@ -398,7 +398,7 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Integrations',
+          label: 'Integrate',
           link: {
             type: 'generated-index',
             title: 'Integrations',
@@ -454,7 +454,7 @@ module.exports = {
       link: { 
         type: 'generated-index', 
         title: 'GX API', 
-        description: 'GX API reference content is generated from classes and methods docstrings.',
+        description: 'GX API reference content is generated from classes and methods docstrings.<br/>If the code or documentation needs improvement, see the [contributor docs](https://docs.greatexpectations.io/docs/contributing/contributing), or submit your feedback on [Slack](https://greatexpectations.io/slack).',
       },
       items: [
         {
