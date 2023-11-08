@@ -450,11 +450,11 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'GX API',
+      label: 'GX OSS API',
       link: { 
         type: 'generated-index', 
-        title: 'GX API', 
-        description: 'GX API reference content is generated from classes and methods docstrings.<br/>If the code or documentation needs improvement, see the [contributor docs](https://docs.greatexpectations.io/docs/contributing/contributing), or submit your feedback on [Slack](https://greatexpectations.io/slack).',
+        title: 'GX OSS API',
+        description: 'GX OSS API reference content is generated from classes and methods docstrings.',
       },
       items: [
         {
