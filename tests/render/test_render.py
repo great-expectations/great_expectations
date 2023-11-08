@@ -3,11 +3,9 @@ from collections import OrderedDict
 
 import pytest
 
-import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
     ExpectationSuitePageRenderer,
@@ -381,25 +379,6 @@ def test_smoke_render_profiling_results_page_renderer_with_exception(
     assert rendered_page[:15] == "<!DOCTYPE html>"
     assert rendered_page[-7:] == "</html>"
     assert "exception" in rendered_page
-
-
-def test_full_oobe_flow():
-    df = gx.read_csv(file_relative_path(__file__, "../../examples/data/Titanic.csv"))
-    df.data_asset_name = "my_datasource/my_generator/my_asset"
-    df.profile(BasicDatasetProfiler)
-    evrs = df.validate()  # results
-
-    rendered_content = ProfilingResultsPageRenderer().render(evrs)
-    rendered_page = DefaultJinjaPageView().render(rendered_content)
-
-    with open(
-        file_relative_path(__file__, "./output/test_full_oobe_flow.html", strict=False),
-        "wb",
-    ) as f:
-        f.write(rendered_page.encode("utf-8"))
-
-    assert rendered_page[:15] == "<!DOCTYPE html>"
-    assert rendered_page[-7:] == "</html>"
 
 
 def test_render_string_template():

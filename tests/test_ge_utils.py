@@ -74,22 +74,6 @@ def numeric_array():
 
 
 @pytest.mark.unit
-def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
-    with pytest.raises(
-        ValueError, match=r"The validate util method only supports dataset validations"
-    ):
-        with pytest.warns(
-            Warning,
-            match="No great_expectations version found in configuration object.",
-        ):
-            gx.validate(
-                file_data_asset,
-                empty_expectation_suite,
-                data_asset_class=gx.data_asset.FileDataAsset,
-            )
-
-
-@pytest.mark.unit
 def test_gen_directory_tree_str(tmpdir):
     project_dir = str(tmpdir.mkdir("project_dir"))
     os.mkdir(os.path.join(project_dir, "BBB"))  # noqa: PTH102, PTH118

@@ -1065,67 +1065,6 @@ def test_profiler_all_expectation_types_spark(
     not is_library_loadable(library_name="sqlalchemy"),
     reason="requires sqlalchemy to be installed",
 )
-@pytest.mark.slow  # 4.70s
-@pytest.mark.postgresql
-def test_profiler_all_expectation_types_sqlalchemy(
-    titanic_data_context_modular_api,
-    taxi_validator_sqlalchemy,
-    possible_expectations_set,
-    taxi_data_semantic_types,
-    taxi_data_ignored_columns,
-):
-    """
-    What does this test do and why?
-    Ensures that all available expectation types work as expected for sqlalchemy
-    """
-    if taxi_validator_sqlalchemy is None:
-        pytest.skip("a message")
-
-    context = titanic_data_context_modular_api
-
-    profiler = UserConfigurableProfiler(
-        taxi_validator_sqlalchemy,
-        semantic_types_dict=taxi_data_semantic_types,
-        ignored_columns=taxi_data_ignored_columns,
-        # TODO: Add primary_or_compound_key test
-        #  primary_or_compound_key=[
-        #     "vendor_id",
-        #     "pickup_datetime",
-        #     "dropoff_datetime",
-        #     "trip_distance",
-        #     "pickup_location_id",
-        #     "dropoff_location_id",
-        #  ],
-    )
-
-    assert profiler.column_info.get("rate_code_id")
-    suite = profiler.build_suite()
-    assert len(suite.expectations) == 40
-    (
-        columns_with_expectations,
-        expectations_from_suite,
-    ) = get_set_of_columns_and_expectations_from_suite(suite)
-
-    unexpected_expectations = {
-        "expect_column_values_to_be_unique",
-        "expect_column_values_to_be_null",
-        "expect_compound_columns_to_be_unique",
-        "expect_column_values_to_be_between",
-    }
-    assert expectations_from_suite == {
-        i for i in possible_expectations_set if i not in unexpected_expectations
-    }
-
-    ignored_included_columns_overlap = [
-        i for i in columns_with_expectations if i in taxi_data_ignored_columns
-    ]
-    assert len(ignored_included_columns_overlap) == 0
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[taxi_validator_sqlalchemy]
-    )
-
-    assert results["success"]
-
 
 # TODO: When this expectation is implemented for V3, remove this test and test for this expectation.
 @pytest.mark.skipif(
