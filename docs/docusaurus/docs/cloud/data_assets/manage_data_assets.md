@@ -97,6 +97,27 @@ The following table lists the available Data Asset metrics.
 | **Null %**                                | The percentage of missing values in a column.             |
 
 
+## Add a Data Asset to an Existing Data Source
+
+1. In GX Cloud, click **Data Assets** and then select **New Data Asset**.
+
+2. Click the **Existing Data Source** tab and then select a Data Source.
+
+3. Click **Add another Data Asset**.
+
+4. Select **Table Asset** or **Query Asset** and complete the following fields:
+
+    - **Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
+
+    - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
+
+    - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
+
+5. Optional. Select **Add another Data Asset** to add additional tables or queries and repeat step 4.
+
+6. Click **Finish**.
+
+
 ## Edit a Data Asset
 
 1. In Jupyter Notebook, run the following code to import the `great_expectations` module and the existing Data Context:
