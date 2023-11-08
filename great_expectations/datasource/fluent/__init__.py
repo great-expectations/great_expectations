@@ -7,6 +7,8 @@ from great_expectations.datasource.fluent.interfaces import (
     Datasource,
     Sorter,
     BatchMetadata,
+    GxDatasourceWarning,
+    TestConnectionError,
 )
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,

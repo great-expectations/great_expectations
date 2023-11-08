@@ -13,9 +13,7 @@ the snippets that are specified for use in documentation are maintained.  These 
     https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant
 """
 import great_expectations as gx
-from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.datasource.fluent.interfaces import DataAsset
 
 yaml = YAMLHandler()
 
