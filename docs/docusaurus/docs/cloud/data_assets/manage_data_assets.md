@@ -99,9 +99,11 @@ The following table lists the available Data Asset metrics.
 
 ## Add a Data Asset to an Existing Data Source
 
+Additional Data Assets can only be added to an existing Snowflake Data Source.
+
 1. In GX Cloud, click **Data Assets** and then select **New Data Asset**.
 
-2. Click the **Existing Data Source** tab and then select a Data Source.
+2. Click the **Existing Data Source** tab and then select a Snowflake Data Source.
 
 3. Click **Add another Data Asset**.
 
