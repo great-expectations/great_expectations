@@ -10,19 +10,6 @@ del get_versions  # isort:skip
 
 from great_expectations.data_context import DataContext, get_context
 
-from .util import (
-    from_pandas,
-    read_csv,
-    read_excel,
-    read_feather,
-    read_json,
-    read_parquet,
-    read_pickle,
-    read_sas,
-    read_table,
-    validate,
-)
-
 # By placing this registry function in our top-level __init__,  we ensure that all
 # GX workflows have populated expectation registries before they are used.
 #
