@@ -401,7 +401,7 @@ module.exports = {
           label: 'Integrate',
           link: {
             type: 'generated-index',
-            title: 'Integrations',
+            title: 'Integrate',
             description: 'Integrate GX OSS with commonly used data engineering tools.',
           },
           items: [

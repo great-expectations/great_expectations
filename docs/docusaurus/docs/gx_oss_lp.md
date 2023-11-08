@@ -27,7 +27,7 @@ import LinkCard from '/docs/components/LinkCard';
 <LinkCardGrid>
   <LinkCard topIcon label="Create Expectations" description="Create and manage Expectations and Expectation Suites." href="/docs/guides/expectations/expectations_lp" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Validate Data" description="Validate Data, save Validation Results, run Actions, and create Data Docs." href="/docs/guides/validation/validate_data_lp" icon="/img/small_gx_logo.png" />
-  <LinkCard topIcon label="Integrations" description="Integrate GX OSS with commonly used data engineering tools." href="/docs/category/integrations" icon="/img/small_gx_logo.png" />
+  <LinkCard topIcon label="Integrations" description="Integrate GX OSS with commonly used data engineering tools." href="/docs/category/integrate" icon="/img/small_gx_logo.png" />
 </LinkCardGrid>
 
 ### Learn and contribute
