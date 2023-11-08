@@ -102,7 +102,7 @@ module.exports = {
             {
               type: 'link',
               label: 'Add a Data Asset to an Existing Data Source',
-              href: '/docs/cloud/data_assets//manage_data_assets#add-a-data-asset-to-an-existing-data-source',
+              href: '/docs/cloud/data_assets/manage_data_assets#add-a-data-asset-to-an-existing-data-source',
             },
             {
               type: 'link',
