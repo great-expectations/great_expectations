@@ -1022,6 +1022,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         suppress_store_backend_id=False,
         manually_initialize_store_backend_id: str = "",
         store_name=None,
+        base_public_path=None,
     ) -> None:
         super().__init__(
             filepath_template=filepath_template,
@@ -1033,6 +1034,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             suppress_store_backend_id=suppress_store_backend_id,
             manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             store_name=store_name,
+            base_public_path=base_public_path,
         )
         self.connection_string = connection_string or os.environ.get(  # noqa: TID251
             "AZURE_STORAGE_CONNECTION_STRING"
@@ -1149,14 +1151,42 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             key_list.append(key)
         return key_list
 
+    def _get_path_url(self, path):
+        if self.prefix:
+            path_url = "/".join((self.container, self.prefix, path))
+        else:  # noqa: PLR5501
+            if self.base_public_path:
+                if self.base_public_path[-1] != "/":
+                    path_url = f"/{path}"
+                else:
+                    path_url = path
+            else:
+                path_url = "/".join((self.container, path))
+
+        return path_url
+
     def get_url_for_key(self, key, protocol=None):
         az_blob_key = self._convert_key_to_filepath(key)
-        az_blob_path = os.path.join(self.prefix, az_blob_key)  # noqa: PTH118
+        az_blob_path = os.path.join(  # noqa: PTH118
+            self.container, self.prefix, az_blob_key
+        )
 
-        return "https://{}.z16.web.core.windows.net/{}".format(
+        return "https://{}.blob.core.windows.net/{}".format(
             self._container_client.account_name,
             az_blob_path,
         )
+
+    def get_public_url_for_key(self, key, protocol=None):
+        if not self.base_public_path:
+            raise StoreBackendError(
+                """Error: No base_public_path was configured!
+                    - A public URL was requested base_public_path was not configured for the
+                """
+            )
+        path = self._convert_key_to_filepath(key)
+        path_url = self._get_path_url(path)
+        public_url = self.base_public_path + path_url
+        return public_url
 
     def _has_key(self, key):
         all_keys = self.list_keys()
