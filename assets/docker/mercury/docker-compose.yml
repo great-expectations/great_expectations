@@ -68,6 +68,8 @@ services:
       - /bin/bash
       - -c
       - |
+        apt-get -qq update
+        apt-get -qq install -y curl
         sed -i 's/localhost/db/g' /app/services/ge_cloud/mercury/alembic.ini
         cd /app/services/ge_cloud/mercury
         alembic upgrade head
@@ -75,7 +77,7 @@ services:
         python -m tests.utils.dev_db_seed_script
         gunicorn mercury.api:get_app\(\) --config ./gunicorn.conf.py --workers=1
     healthcheck:
-      test: timeout 10s bash -c ':> /dev/tcp/0.0.0.0/5000' || exit 1
+      test: curl --write-out '%{http_code}' --silent --output --fail http://localhost:5000/status || exit 1
       interval: 5s
       timeout: 2s
       retries: 20
