@@ -28,7 +28,7 @@ Windows support for the open source Python version of GX is currently unavailabl
 
 ## Data validation workflow
 
-The following diagram illustrates the end-to-end GX data validation workflow implemented by the quickstart code. Click a workflow step to view related code.
+The following diagram illustrates the end-to-end GX data validation workflow that you'll implement with this quickstart. Click a workflow step to view the related content.
 
 ```mermaid
 flowchart LR
@@ -124,7 +124,7 @@ click 7 "#validate-data"
 
 ## Related documentation
 
-If you're ready to continue your GX journey, the following topics can help you implement a tailored solution for your specific environment and business requirements:
+If you're ready to continue your GX journey, the following topics can help you implement a solution for your specific environment and business requirements:
 
 - [Install GX in a specific environment with support for a specific Data Source](/docs/guides/setup/installation/install_gx).
 - [Initialize, instantiate, and save a Data Context](/docs/guides/setup/configure_data_contexts_lp).
