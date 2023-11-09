@@ -69,12 +69,7 @@ def datasource(
         datasource.create_temp_table is False
     ), "The datasource was not updated in the previous method call."
     yield datasource
-    # PP-692: this doesn't work due to a bug
-    # calling delete_datasource() will fail with:
-    # Datasource is used by Checkpoint <LONG HASH>
-    # This is confirmed to be the default Checkpoint,
-    # but error message is not specific enough to know without additional inspection
-    # context.delete_datasource(datasource_name=datasource_name)
+    context.delete_datasource(datasource_name=datasource_name)
 
 
 @pytest.fixture
@@ -92,11 +87,7 @@ def data_asset(datasource: SnowflakeDatasource, table_factory) -> Iterator[Table
     )
     table_asset = datasource.get_asset(asset_name=asset_name)
     yield table_asset
-    # PP-692: this doesn't work due to a bug
-    # calling delete_asset() will fail with:
-    # Cannot perform action because Asset is used by Checkpoint:
-    # end-to-end_snowflake_asset <SHORT HASH> - Default Checkpoint
-    # datasource.delete_asset(asset_name=asset_name)
+    datasource.delete_asset(asset_name=asset_name)
 
 
 @pytest.fixture

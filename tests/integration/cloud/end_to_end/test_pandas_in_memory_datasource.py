@@ -40,6 +40,7 @@ def datasource(
     )
     assert datasource.name == datasource_name
     yield datasource
+    context.delete_datasource(datasource_name=datasource_name)
 
 
 @pytest.fixture
@@ -50,6 +51,7 @@ def data_asset(datasource: PandasDatasource) -> Iterator[DataFrameAsset]:
     )
     data_asset = datasource.get_asset(asset_name=asset_name)
     yield data_asset
+    datasource.delete_asset(asset_name=asset_name)
 
 
 @pytest.fixture
