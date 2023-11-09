@@ -26,7 +26,7 @@ title: Changelog
 * [MAINTENANCE] `PandasFilesystemDatasource` E2E tests ([#8884](https://github.com/great-expectations/great_expectations/pull/8884))
 * [MAINTENANCE] Remove Cloud integration tests with duplicated logic ([#8940](https://github.com/great-expectations/great_expectations/pull/8940))
 * [MAINTENANCE] Fix error in boolean logic for local assume command ([#8941](https://github.com/great-expectations/great_expectations/pull/8941))
-* [MAINTENANCE] pre-commit autoupdate ([#8934](https://github.com/great-expectations/great_expectations/pull/8934)) (thanks @pre-commit-ci[bot])
+* [MAINTENANCE] pre-commit autoupdate ([#8934](https://github.com/great-expectations/great_expectations/pull/8934))
 * [MAINTENANCE] Add local verify step for pact tests ([#8876](https://github.com/great-expectations/great_expectations/pull/8876))
 
 ### 0.18.1
