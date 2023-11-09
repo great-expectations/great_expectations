@@ -1,6 +1,6 @@
 {
     "title": "FabricPowerBIDatasource",
-    "description": "Microsoft Fabric Datasource.\n\nhttps://pypi.org/project/semantic-link/",
+    "description": "--Public API--\nMicrosoft Fabric Datasource.\n\nhttps://pypi.org/project/semantic-link/",
     "type": "object",
     "properties": {
         "type": {
@@ -98,7 +98,7 @@
         },
         "PowerBITable": {
             "title": "PowerBITable",
-            "description": "Microsoft PowerBI Table.",
+            "description": "--Public API--Microsoft PowerBI Table.",
             "type": "object",
             "properties": {
                 "name": {
@@ -162,7 +162,7 @@
         },
         "PowerBIMeasure": {
             "title": "PowerBIMeasure",
-            "description": "Microsoft PowerBI Measure.",
+            "description": "--Public API--Microsoft PowerBI Measure.",
             "type": "object",
             "properties": {
                 "name": {
@@ -252,7 +252,7 @@
         },
         "PowerBIDax": {
             "title": "PowerBIDax",
-            "description": "Microsoft PowerBI DAX.",
+            "description": "--Public API--Microsoft PowerBI DAX.",
             "type": "object",
             "properties": {
                 "name": {
