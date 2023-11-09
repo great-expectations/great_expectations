@@ -1,6 +1,6 @@
 {
     "title": "PowerBIMeasure",
-    "description": "Microsoft PowerBI Measure.",
+    "description": "--Public API--Microsoft PowerBI Measure.",
     "type": "object",
     "properties": {
         "name": {

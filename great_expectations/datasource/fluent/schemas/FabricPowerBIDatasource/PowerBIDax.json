@@ -1,6 +1,6 @@
 {
     "title": "PowerBIDax",
-    "description": "Microsoft PowerBI DAX.",
+    "description": "--Public API--Microsoft PowerBI DAX.",
     "type": "object",
     "properties": {
         "name": {
