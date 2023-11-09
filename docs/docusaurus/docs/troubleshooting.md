@@ -29,7 +29,7 @@ Run the following command to determine the version of GX OSS you currently have 
 great_expectations --version
 ```
 
-If the GX OSS version is earlier than the latest GX OSS version displayed on the [GX documentation home page](https://docs.greatexpectations.io/docs/), run the following code to upgrade GX OSS:
+If the GX OSS version is earlier than the latest GX OSS version displayed in the drop-down list next to the Great Expectations logo at the top of the page, run the following code to upgrade GX OSS:
 
 ```bash title="Terminal input"
 pip install great_expectations --upgrade
