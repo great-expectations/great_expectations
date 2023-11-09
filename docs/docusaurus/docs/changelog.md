@@ -14,7 +14,7 @@ title: Changelog
 * [DOCS] Update Connect to SQL Database Data Assets ([#8918](https://github.com/great-expectations/great_expectations/pull/8918))
 * [DOCS] DSB-353: Add GX Cloud Architecture and Deployment Patterns page ([#8904](https://github.com/great-expectations/great_expectations/pull/8904))
 * [DOCS] Update descs for custom expectations ([#8923](https://github.com/great-expectations/great_expectations/pull/8923))
-* [DOCS] Update cloud docs for data assets ([#8932](https://github.com/great-expectations/great_expectations/pull/8932)) (thanks @r34ctor)
+* [DOCS] Update cloud docs for data assets ([#8932](https://github.com/great-expectations/great_expectations/pull/8932))
 * [DOCS] Update syntax highlighting in main README ([#8811](https://github.com/great-expectations/great_expectations/pull/8811))
 * [DOCS] Minor Updates to GX Cloud Documentation ([#8939](https://github.com/great-expectations/great_expectations/pull/8939))
 * [DOCS] add `FabricPowerBIDatasource` api docs ([#8948](https://github.com/great-expectations/great_expectations/pull/8948))
