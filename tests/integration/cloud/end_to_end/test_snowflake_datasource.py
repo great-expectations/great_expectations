@@ -128,6 +128,9 @@ def expectation_suite(
     expectation_suite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
+    assert (
+        len(expectation_suite.expectations) == 1
+    ), "Expectation Suite was not updated in the previous method call."
     yield expectation_suite
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
     with pytest.raises(get_missing_expectation_suite_error_type):
@@ -166,6 +169,9 @@ def checkpoint(
         ],
     )
     checkpoint = context.get_checkpoint(name=checkpoint_name)
+    assert (
+        len(checkpoint.validations) == 1
+    ), "Checkpoint was not updated in the previous method call."
     yield checkpoint
     # PP-691: this is a bug
     # you should only have to pass name
@@ -174,7 +180,7 @@ def checkpoint(
         id=checkpoint.ge_cloud_id,
     )
     with pytest.raises(get_missing_checkpoint_error_type):
-        context.get_checkpoint(checkpoint_name=checkpoint_name)
+        context.get_checkpoint(name=checkpoint_name)
 
 
 @pytest.mark.cloud
