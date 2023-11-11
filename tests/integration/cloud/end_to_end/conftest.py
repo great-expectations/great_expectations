@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 LOGGER: Final = logging.getLogger("tests")
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="package")
 def context() -> CloudDataContext:
     context = gx.get_context(
         mode="cloud",
