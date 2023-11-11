@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import os
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Final, Generator, Literal, Protocol
+from typing import TYPE_CHECKING, Final, Iterator, Literal, Protocol
 
 import numpy as np
 import pytest
@@ -61,9 +61,8 @@ class TableFactory(Protocol):
 
 
 @pytest.fixture(scope="module")
-def table_factory() -> Generator[TableFactory, None, None]:
+def table_factory() -> Iterator[TableFactory]:
     """
-    Class scoped.
     Given a SQLAlchemy engine, table_name and schema,
     create the table if it does not exist and drop it after the test class.
     """

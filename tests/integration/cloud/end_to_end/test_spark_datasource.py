@@ -58,7 +58,6 @@ def datasource(
 @pytest.fixture(scope="module")
 def data_asset(
     datasource: SparkDatasource,
-    table_factory,
     get_missing_data_asset_error_type: type[Exception],
 ) -> Iterator[DataFrameAsset]:
     asset_name = f"i{uuid.uuid4().hex}"

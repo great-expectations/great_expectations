@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import BatchRequest, SnowflakeDatasource
     from great_expectations.datasource.fluent.sql_datasource import TableAsset
+    from tests.integration.cloud.end_to_end.conftest import TableFactory
 
 
 @pytest.fixture(scope="module")
@@ -78,7 +79,7 @@ def datasource(
 @pytest.fixture(scope="module")
 def data_asset(
     datasource: SnowflakeDatasource,
-    table_factory,
+    table_factory: TableFactory,
     get_missing_data_asset_error_type: type[Exception],
 ) -> Iterator[TableAsset]:
     schema_name = f"i{uuid.uuid4().hex}"
