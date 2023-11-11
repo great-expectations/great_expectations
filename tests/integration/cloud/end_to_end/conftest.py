@@ -56,6 +56,11 @@ def get_missing_expectation_suite_error_type() -> type[Exception]:
     return gx_exceptions.DataContextError
 
 
+@pytest.fixture(scope="module")
+def get_missing_checkpoint_error_type() -> type[Exception]:
+    return gx_exceptions.DataContextError
+
+
 class TableFactory(Protocol):
     def __call__(
         self,

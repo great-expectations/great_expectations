@@ -136,6 +136,7 @@ def checkpoint(
     data_asset: CSVAsset,
     batch_request: BatchRequest,
     expectation_suite: ExpectationSuite,
+    get_missing_checkpoint_error_type: type[Exception],
 ) -> Iterator[Checkpoint]:
     checkpoint_name = f"{data_asset.datasource.name} | {data_asset.name}"
     _ = context.add_checkpoint(
@@ -168,6 +169,8 @@ def checkpoint(
         # name=checkpoint_name,
         id=checkpoint.ge_cloud_id,
     )
+    with pytest.raises(get_missing_checkpoint_error_type):
+        context.get_checkpoint(checkpoint_name=checkpoint_name)
 
 
 @pytest.mark.cloud
