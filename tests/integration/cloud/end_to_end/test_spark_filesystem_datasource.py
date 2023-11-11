@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(scope="module")
-def base_dir(tmp_dir: py.path) -> Iterator[pathlib.Path]:
+def base_dir(tmp_dir: py.path) -> pathlib.Path:
     dir_path = tmp_dir / "data"
     dir_path.mkdir()
     df = pd.DataFrame(
@@ -34,11 +34,11 @@ def base_dir(tmp_dir: py.path) -> Iterator[pathlib.Path]:
     )
     csv_path = dir_path / "data.csv"
     df.to_csv(csv_path)
-    yield dir_path
+    return dir_path
 
 
 @pytest.fixture(scope="module")
-def updated_base_dir(tmp_dir: py.path) -> Iterator[pathlib.Path]:
+def updated_base_dir(tmp_dir: py.path) -> pathlib.Path:
     dir_path = tmp_dir / "other_data"
     dir_path.mkdir()
     df = pd.DataFrame(
@@ -46,7 +46,7 @@ def updated_base_dir(tmp_dir: py.path) -> Iterator[pathlib.Path]:
     )
     csv_path = dir_path / "data.csv"
     df.to_csv(csv_path)
-    yield dir_path
+    return dir_path
 
 
 @pytest.fixture(scope="module")
