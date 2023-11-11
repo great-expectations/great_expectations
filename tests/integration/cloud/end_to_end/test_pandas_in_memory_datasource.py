@@ -45,7 +45,9 @@ def datasource(
     datasource = context.sources.add_or_update_pandas(
         datasource=datasource,
     )
-    assert datasource.name == datasource_name
+    assert (
+        datasource.name == datasource_name
+    ), "The datasource was not updated in the previous method call."
     yield datasource
     context.delete_datasource(datasource_name=datasource_name)
     with pytest.raises(get_missing_datasource_error_type):
@@ -70,8 +72,12 @@ def data_asset(
 
 @pytest.fixture(scope="module")
 def batch_request(
-    data_asset: DataFrameAsset, pandas_test_df: pd.DataFrame
+    data_asset: DataFrameAsset,
+    pandas_test_df: pd.DataFrame,
+    in_memory_batch_request_missing_dataframe_error_type: type[Exception],
 ) -> BatchRequest:
+    with pytest.raises(in_memory_batch_request_missing_dataframe_error_type):
+        data_asset.build_batch_request()
     return data_asset.build_batch_request(dataframe=pandas_test_df)
 
 

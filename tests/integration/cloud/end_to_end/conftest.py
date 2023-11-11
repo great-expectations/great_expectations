@@ -61,6 +61,11 @@ def get_missing_checkpoint_error_type() -> type[Exception]:
     return gx_exceptions.DataContextError
 
 
+@pytest.fixture(scope="module")
+def in_memory_batch_request_missing_dataframe_error_type() -> type[Exception]:
+    return ValueError
+
+
 class TableFactory(Protocol):
     def __call__(
         self,

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Callable, Iterator
 
 import pandas as pd
 import pytest
@@ -10,6 +10,7 @@ from great_expectations.core import ExpectationConfiguration
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
+    from great_expectations.compatibility import pyspark
     from great_expectations.core import ExpectationSuite
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import BatchRequest, SparkDatasource
@@ -72,16 +73,21 @@ def data_asset(
 @pytest.fixture(scope="module")
 def batch_request(
     data_asset: DataFrameAsset,
-    spark_session,
-    spark_df_from_pandas_df,
+    spark_session: pyspark.SparkSession,
+    spark_df_from_pandas_df: Callable[
+        [pyspark.SparkSession, pd.DataFrame], pyspark.DataFrame
+    ],
+    in_memory_batch_request_missing_dataframe_error_type: type[Exception],
 ) -> BatchRequest:
+    with pytest.raises(in_memory_batch_request_missing_dataframe_error_type):
+        data_asset.build_batch_request()
     pandas_df = pd.DataFrame(
         {
             "id": [1, 2, 3, 4],
             "name": [1, 2, 3, 4],
         },
     )
-    spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
+    spark_df: pyspark.DataFrame = spark_df_from_pandas_df(spark_session, pandas_df)
     return data_asset.build_batch_request(dataframe=spark_df)
 
 
