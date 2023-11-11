@@ -7,13 +7,13 @@ import pandas as pd
 import pytest
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.datasource.fluent.pandas_datasource import DataFrameAsset
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.core import ExpectationSuite
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import BatchRequest, PandasDatasource
+    from great_expectations.datasource.fluent.pandas_datasource import DataFrameAsset
 
 
 @pytest.fixture(scope="module")
