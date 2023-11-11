@@ -42,6 +42,22 @@ def context() -> CloudDataContext:
 
 
 @pytest.fixture(scope="module")
+def expectation_suite(
+    context: CloudDataContext,
+    data_asset: DataAsset,
+    get_missing_expectation_suite_error_type: type[Exception],
+) -> Iterator[ExpectationSuite]:
+    expectation_suite_name = f"{data_asset.datasource.name} | {data_asset.name}"
+    expectation_suite = context.add_expectation_suite(
+        expectation_suite_name=expectation_suite_name,
+    )
+    yield expectation_suite
+    context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
+    with pytest.raises(get_missing_expectation_suite_error_type):
+        context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+
+
+@pytest.fixture(scope="module")
 def checkpoint(
     context: CloudDataContext,
     data_asset: DataAsset,

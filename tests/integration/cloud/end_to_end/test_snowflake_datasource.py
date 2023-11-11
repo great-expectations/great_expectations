@@ -108,13 +108,11 @@ def batch_request(data_asset: TableAsset) -> BatchRequest:
 @pytest.fixture(scope="module")
 def expectation_suite(
     context: CloudDataContext,
-    data_asset: TableAsset,
-    get_missing_expectation_suite_error_type: type[Exception],
-) -> Iterator[ExpectationSuite]:
-    expectation_suite_name = f"{data_asset.datasource.name} | {data_asset.name}"
-    expectation_suite = context.add_expectation_suite(
-        expectation_suite_name=expectation_suite_name,
-    )
+    expectation_suite: ExpectationSuite,
+) -> ExpectationSuite:
+    """Test adding Expectations and updating the Expectation Suite for the Data Asset
+    defined in this module. The package-level expectation_suite fixture handles add and delete.
+    """
     expectation_suite.add_expectation(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
@@ -126,15 +124,12 @@ def expectation_suite(
     )
     _ = context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
     expectation_suite = context.get_expectation_suite(
-        expectation_suite_name=expectation_suite_name
+        expectation_suite_name=expectation_suite.name
     )
     assert (
         len(expectation_suite.expectations) == 1
     ), "Expectation Suite was not updated in the previous method call."
-    yield expectation_suite
-    context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
-    with pytest.raises(get_missing_expectation_suite_error_type):
-        context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+    return expectation_suite
 
 
 @pytest.mark.cloud
