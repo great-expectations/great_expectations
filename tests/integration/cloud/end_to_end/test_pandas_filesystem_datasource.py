@@ -133,52 +133,6 @@ def expectation_suite(
         context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 
-@pytest.fixture(scope="module")
-def checkpoint(
-    context: CloudDataContext,
-    data_asset: CSVAsset,
-    batch_request: BatchRequest,
-    expectation_suite: ExpectationSuite,
-    get_missing_checkpoint_error_type: type[Exception],
-) -> Iterator[Checkpoint]:
-    checkpoint_name = f"{data_asset.datasource.name} | {data_asset.name}"
-    _ = context.add_checkpoint(
-        name=checkpoint_name,
-        validations=[
-            {
-                "expectation_suite_name": expectation_suite.expectation_suite_name,
-                "batch_request": batch_request,
-            },
-            {
-                "expectation_suite_name": expectation_suite.expectation_suite_name,
-                "batch_request": batch_request,
-            },
-        ],
-    )
-    _ = context.add_or_update_checkpoint(
-        name=checkpoint_name,
-        validations=[
-            {
-                "expectation_suite_name": expectation_suite.expectation_suite_name,
-                "batch_request": batch_request,
-            }
-        ],
-    )
-    checkpoint = context.get_checkpoint(name=checkpoint_name)
-    assert (
-        len(checkpoint.validations) == 1
-    ), "Checkpoint was not updated in the previous method call."
-    yield checkpoint
-    # PP-691: this is a bug
-    # you should only have to pass name
-    context.delete_checkpoint(
-        # name=checkpoint_name,
-        id=checkpoint.ge_cloud_id,
-    )
-    with pytest.raises(get_missing_checkpoint_error_type):
-        context.get_checkpoint(name=checkpoint_name)
-
-
 @pytest.mark.cloud
 def test_interactive_validator(
     context: CloudDataContext,
