@@ -66,11 +66,6 @@ def pandas_filesystem_datasource(
     assert (
         datasource.base_directory == original_base_dir
     ), "The datasource was not updated in the previous method call."
-
-    datasource = context.get_datasource(datasource_name=datasource.name)  # type: ignore[assignment]
-    assert (
-        datasource.base_directory == original_base_dir
-    ), "The datasource was not updated in the previous method call."
     return datasource
 
 

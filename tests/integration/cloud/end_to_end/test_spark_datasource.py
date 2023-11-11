@@ -48,8 +48,7 @@ def spark_datasource(
     ), "The datasource was not updated in the previous method call."
     datasource.persist = True
     datasource_dict = datasource.dict()
-    _ = context.add_or_update_datasource(**datasource_dict)
-    datasource = context.get_datasource(datasource_name=datasource.name)  # type: ignore[assignment]
+    datasource = context.add_or_update_datasource(**datasource_dict)
     assert (
         datasource.persist is True
     ), "The datasource was not updated in the previous method call."

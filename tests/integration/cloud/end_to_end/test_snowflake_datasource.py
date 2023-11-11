@@ -69,8 +69,7 @@ def snowflake_datasource(
     # call to datasource.dict() results in a ConfigStr that fails pydantic
     # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
-    _ = context.add_or_update_datasource(**datasource_dict)
-    datasource = context.get_datasource(datasource_name=datasource.name)  # type: ignore[assignment]
+    datasource = context.add_or_update_datasource(**datasource_dict)
     assert (
         datasource.create_temp_table is False
     ), "The datasource was not updated in the previous method call."
