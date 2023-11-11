@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.sql_datasource import TableAsset
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def connection_string() -> str:
     if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
         return "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci"
@@ -26,7 +26,7 @@ def connection_string() -> str:
         pytest.skip("no snowflake credentials")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def datasource(
     context: CloudDataContext,
     connection_string: str,
@@ -72,7 +72,7 @@ def datasource(
     context.delete_datasource(datasource_name=datasource_name)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def data_asset(datasource: SnowflakeDatasource, table_factory) -> Iterator[TableAsset]:
     schema_name = f"i{uuid.uuid4().hex}"
     table_name = f"i{uuid.uuid4().hex}"
@@ -90,12 +90,12 @@ def data_asset(datasource: SnowflakeDatasource, table_factory) -> Iterator[Table
     datasource.delete_asset(asset_name=asset_name)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def batch_request(data_asset: TableAsset) -> BatchRequest:
     return data_asset.build_batch_request()
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def expectation_suite(
     context: CloudDataContext,
     data_asset: TableAsset,
@@ -121,7 +121,7 @@ def expectation_suite(
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def checkpoint(
     context: CloudDataContext,
     data_asset: TableAsset,

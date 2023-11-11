@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.spark_datasource import DataFrameAsset
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def datasource(
     context: CloudDataContext,
 ) -> Iterator[SparkDatasource]:
@@ -52,7 +52,7 @@ def datasource(
     context.delete_datasource(datasource_name=datasource_name)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def data_asset(datasource: SparkDatasource, table_factory) -> Iterator[DataFrameAsset]:
     asset_name = f"i{uuid.uuid4().hex}"
     _ = datasource.add_dataframe_asset(name=asset_name)
@@ -61,7 +61,7 @@ def data_asset(datasource: SparkDatasource, table_factory) -> Iterator[DataFrame
     datasource.delete_asset(asset_name=asset_name)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def batch_request(
     data_asset: DataFrameAsset,
     spark_session,
@@ -77,7 +77,7 @@ def batch_request(
     return data_asset.build_batch_request(dataframe=spark_df)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def expectation_suite(
     context: CloudDataContext,
     data_asset: DataFrameAsset,
@@ -103,7 +103,7 @@ def expectation_suite(
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def checkpoint(
     context: CloudDataContext,
     data_asset: DataFrameAsset,

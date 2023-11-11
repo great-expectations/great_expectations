@@ -10,6 +10,8 @@ import pytest
 from great_expectations.core import ExpectationConfiguration
 
 if TYPE_CHECKING:
+    import py
+
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.core import ExpectationSuite
     from great_expectations.data_context import CloudDataContext
@@ -22,9 +24,9 @@ if TYPE_CHECKING:
     )
 
 
-@pytest.fixture
-def base_dir(tmpdir) -> pathlib.Path:
-    dir_path = tmpdir / "data"
+@pytest.fixture(scope="module")
+def base_dir(tmp_dir: py.path) -> pathlib.Path:
+    dir_path = tmp_dir / "data"
     dir_path.mkdir()
     df = pd.DataFrame({"name": ["bob", "alice"]})
     csv_path = dir_path / "data.csv"
@@ -32,9 +34,9 @@ def base_dir(tmpdir) -> pathlib.Path:
     return pathlib.Path(dir_path)
 
 
-@pytest.fixture
-def updated_base_dir(tmpdir) -> pathlib.Path:
-    dir_path = tmpdir / "other_data"
+@pytest.fixture(scope="module")
+def updated_base_dir(tmp_dir: py.path) -> pathlib.Path:
+    dir_path = tmp_dir / "other_data"
     dir_path.mkdir()
     df = pd.DataFrame({"name": ["jim", "carol"]})
     csv_path = dir_path / "data.csv"
@@ -42,7 +44,7 @@ def updated_base_dir(tmpdir) -> pathlib.Path:
     return pathlib.Path(dir_path)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def datasource(
     context: CloudDataContext,
     base_dir: pathlib.Path,
@@ -72,28 +74,26 @@ def datasource(
     assert (
         datasource.base_directory == original_base_dir
     ), "The datasource was not updated in the previous method call."
-
     yield datasource
     context.delete_datasource(datasource_name=datasource_name)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def data_asset(datasource: PandasFilesystemDatasource) -> Iterator[CSVAsset]:
     asset_name = f"i{uuid.uuid4().hex}"
 
     _ = datasource.add_csv_asset(name=asset_name)
     csv_asset = datasource.get_asset(asset_name=asset_name)
-
     yield csv_asset
     datasource.delete_asset(asset_name=asset_name)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def batch_request(data_asset: CSVAsset) -> BatchRequest:
     return data_asset.build_batch_request()
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def expectation_suite(
     context: CloudDataContext,
     data_asset: CSVAsset,
@@ -119,7 +119,7 @@ def expectation_suite(
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def checkpoint(
     context: CloudDataContext,
     data_asset: CSVAsset,

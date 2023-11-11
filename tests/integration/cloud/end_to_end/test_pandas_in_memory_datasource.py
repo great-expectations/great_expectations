@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import BatchRequest, PandasDatasource
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def pandas_test_df() -> pd.DataFrame:
     d = {
         "string": ["a", "b", "c"],
@@ -30,7 +30,7 @@ def pandas_test_df() -> pd.DataFrame:
     return df
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def datasource(
     context: CloudDataContext,
 ) -> Iterator[PandasDatasource]:
@@ -39,11 +39,19 @@ def datasource(
         name=datasource_name,
     )
     assert datasource.name == datasource_name
+    datasource_name = f"i{uuid.uuid4().hex}"
+    datasource.name = datasource_name
+    datasource = context.sources.add_or_update_pandas(
+        datasource=datasource,
+    )
+    assert datasource.name == datasource_name
     yield datasource
     context.delete_datasource(datasource_name=datasource_name)
+    with pytest.raises(ValueError):
+        context.get_datasource(datasource_name=datasource_name)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def data_asset(datasource: PandasDatasource) -> Iterator[DataFrameAsset]:
     asset_name = f"i{uuid.uuid4().hex}"
     _ = datasource.add_dataframe_asset(
@@ -52,16 +60,18 @@ def data_asset(datasource: PandasDatasource) -> Iterator[DataFrameAsset]:
     data_asset = datasource.get_asset(asset_name=asset_name)
     yield data_asset
     datasource.delete_asset(asset_name=asset_name)
+    with pytest.raises(LookupError):
+        datasource.get_asset(asset_name=asset_name)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def batch_request(
     data_asset: DataFrameAsset, pandas_test_df: pd.DataFrame
 ) -> BatchRequest:
     return data_asset.build_batch_request(dataframe=pandas_test_df)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def expectation_suite(
     context: CloudDataContext,
     data_asset: DataFrameAsset,
@@ -87,7 +97,7 @@ def expectation_suite(
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def checkpoint(
     context: CloudDataContext,
     data_asset: DataFrameAsset,
@@ -125,51 +135,6 @@ def checkpoint(
         # name=checkpoint_name,
         id=checkpoint.ge_cloud_id,
     )
-
-
-@pytest.mark.cloud
-def test_datasource_crud(
-    context: CloudDataContext,
-):
-    datasource_name = f"i{uuid.uuid4().hex}"
-    # add_or_update
-    datasource = context.sources.add_or_update_pandas(
-        name=datasource_name,
-    )
-    assert datasource.name == datasource_name
-
-    # delete
-    _ = context.delete_datasource(datasource_name=datasource_name)
-
-    # get after delete
-    with pytest.raises(ValueError):
-        context.get_datasource(datasource_name=datasource_name)
-
-
-@pytest.mark.cloud
-def test_dataasset_crud(
-    context: CloudDataContext,
-):
-    # start with fresh datasource
-    datasource_name = f"i{uuid.uuid4().hex}"
-    datasource = context.sources.add_or_update_pandas(
-        name=datasource_name,
-    )
-    asset_name = f"i{uuid.uuid4().hex}"
-    _ = datasource.add_dataframe_asset(
-        name=asset_name,
-    )
-
-    # PP-692: this doesn't work due to a bug
-    # calling delete_datasource() will fail with:
-    # Datasource is used by Checkpoint <LONG HASH>
-    # This is confirmed to be the default Checkpoint,
-    # but error message is not specific enough to know without additional inspection
-    # delete
-    # datasource.delete_asset(asset_name=asset_name)
-    # get after delete
-    # with pytest.raises(ValueError):
-    #    _ = datasource.get_asset(asset_name=asset_name)
 
 
 @pytest.mark.cloud

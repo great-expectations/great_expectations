@@ -15,13 +15,15 @@ from great_expectations.data_context import CloudDataContext
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
+    import py
+
     from great_expectations.compatibility import pyspark
     from great_expectations.compatibility.sqlalchemy import engine
 
 LOGGER: Final = logging.getLogger("tests")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def context() -> CloudDataContext:
     context = gx.get_context(
         mode="cloud",
@@ -31,6 +33,11 @@ def context() -> CloudDataContext:
     )
     assert isinstance(context, CloudDataContext)
     return context
+
+
+@pytest.fixture(scope="module")
+def tmp_dir(tmpdir_factory) -> py.path:
+    return tmpdir_factory.mktemp("project")
 
 
 class TableFactory(Protocol):
@@ -43,7 +50,7 @@ class TableFactory(Protocol):
         ...
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="module")
 def table_factory() -> Generator[TableFactory, None, None]:
     """
     Class scoped.
@@ -103,7 +110,7 @@ def table_factory() -> Generator[TableFactory, None, None]:
             transaction.commit()
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def spark_df_from_pandas_df():
     """
     Construct a spark dataframe from pandas dataframe.
@@ -131,7 +138,7 @@ def spark_df_from_pandas_df():
     return _construct_spark_df_from_pandas
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def spark_session() -> pyspark.SparkSession:
     from great_expectations.compatibility import pyspark
 
