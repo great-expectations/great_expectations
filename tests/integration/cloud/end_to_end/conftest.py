@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import uuid
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Final, Iterator, Literal, Protocol
 
@@ -13,6 +14,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import CloudDataContext
+from great_expectations.datasource.fluent import DataAsset, Datasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
@@ -21,10 +23,7 @@ if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.compatibility import pyspark, sqlalchemy
     from great_expectations.core import ExpectationSuite
-    from great_expectations.datasource.fluent import (
-        BatchRequest,
-        DataAsset,
-    )
+    from great_expectations.datasource.fluent import BatchRequest
 
 LOGGER: Final = logging.getLogger("tests")
 
@@ -42,10 +41,44 @@ def context() -> CloudDataContext:
 
 
 @pytest.fixture(scope="module")
+def datasource_name() -> str:
+    return f"ds_{uuid.uuid4().hex}"
+
+
+@pytest.fixture(scope="module")
+def datasource(
+    context: CloudDataContext,
+    datasource_name: str,
+) -> Iterator[Datasource]:
+    yield Datasource(type="datasource", name=datasource_name)
+    try:
+        context.get_datasource(datasource_name=datasource_name)
+    except ValueError:
+        pytest.skip("no datasource created")
+    context.delete_datasource(datasource_name=datasource_name)
+    with pytest.raises(ValueError):
+        context.get_datasource(datasource_name=datasource_name)
+
+
+@pytest.fixture(scope="module")
+def data_asset(
+    context: CloudDataContext,
+    datasource_name: str,
+) -> Iterator[DataAsset]:
+    asset_name = f"da_{uuid.uuid4().hex}"
+    yield DataAsset(name=asset_name, type="data_asset")
+    datasource = context.get_datasource(datasource_name=datasource_name)
+    # this assertion tells the type checker it's a fluent datasource
+    assert isinstance(datasource, Datasource)
+    datasource.delete_asset(asset_name=asset_name)
+    with pytest.raises(LookupError):
+        datasource.get_asset(asset_name=asset_name)
+
+
+@pytest.fixture(scope="module")
 def expectation_suite(
     context: CloudDataContext,
     data_asset: DataAsset,
-    get_missing_expectation_suite_error_type: type[Exception],
 ) -> Iterator[ExpectationSuite]:
     expectation_suite_name = f"{data_asset.datasource.name} | {data_asset.name}"
     expectation_suite = context.add_expectation_suite(
@@ -53,7 +86,7 @@ def expectation_suite(
     )
     yield expectation_suite
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
-    with pytest.raises(get_missing_expectation_suite_error_type):
+    with pytest.raises(gx_exceptions.DataContextError):
         context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 
@@ -63,7 +96,6 @@ def checkpoint(
     data_asset: DataAsset,
     batch_request: BatchRequest,
     expectation_suite: ExpectationSuite,
-    get_missing_checkpoint_error_type: type[Exception],
 ) -> Iterator[Checkpoint]:
     checkpoint_name = f"{data_asset.datasource.name} | {data_asset.name}"
     _ = context.add_checkpoint(
@@ -99,33 +131,13 @@ def checkpoint(
         # name=checkpoint_name,
         id=checkpoint.ge_cloud_id,
     )
-    with pytest.raises(get_missing_checkpoint_error_type):
+    with pytest.raises(gx_exceptions.DataContextError):
         context.get_checkpoint(name=checkpoint_name)
 
 
 @pytest.fixture(scope="module")
 def tmp_dir(tmpdir_factory) -> py.path:
     return tmpdir_factory.mktemp("project")
-
-
-@pytest.fixture(scope="module")
-def get_missing_datasource_error_type() -> type[Exception]:
-    return ValueError
-
-
-@pytest.fixture(scope="module")
-def get_missing_data_asset_error_type() -> type[Exception]:
-    return LookupError
-
-
-@pytest.fixture(scope="module")
-def get_missing_expectation_suite_error_type() -> type[Exception]:
-    return gx_exceptions.DataContextError
-
-
-@pytest.fixture(scope="module")
-def get_missing_checkpoint_error_type() -> type[Exception]:
-    return gx_exceptions.DataContextError
 
 
 @pytest.fixture(scope="module")

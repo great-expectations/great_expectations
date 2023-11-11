@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import pathlib
-import uuid
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING
 
 import pandas as pd
 import pytest
@@ -17,11 +16,11 @@ if TYPE_CHECKING:
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import (
         BatchRequest,
+        DataAsset,
+        Datasource,
         PandasFilesystemDatasource,
     )
-    from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-        CSVAsset,
-    )
+    from great_expectations.datasource.fluent.pandas_datasource import CSVAsset
 
 
 @pytest.fixture(scope="module")
@@ -45,21 +44,18 @@ def updated_base_dir(tmp_dir: py.path) -> pathlib.Path:
 
 
 @pytest.fixture(scope="module")
-def datasource(
+def pandas_filesystem_datasource(
     context: CloudDataContext,
+    datasource: Datasource,
     base_dir: pathlib.Path,
     updated_base_dir: pathlib.Path,
-    get_missing_datasource_error_type: type[Exception],
-) -> Iterator[PandasFilesystemDatasource]:
-    datasource_name = f"i{uuid.uuid4().hex}"
+) -> PandasFilesystemDatasource:
     original_base_dir = base_dir
 
     datasource = context.sources.add_pandas_filesystem(
-        name=datasource_name, base_directory=original_base_dir
+        name=datasource.name, base_directory=original_base_dir
     )
-
     datasource.base_directory = updated_base_dir
-
     datasource = context.sources.add_or_update_pandas_filesystem(datasource=datasource)
     assert (
         datasource.base_directory == updated_base_dir
@@ -71,29 +67,20 @@ def datasource(
         datasource.base_directory == original_base_dir
     ), "The datasource was not updated in the previous method call."
 
-    datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
+    datasource = context.get_datasource(datasource_name=datasource.name)  # type: ignore[assignment]
     assert (
         datasource.base_directory == original_base_dir
     ), "The datasource was not updated in the previous method call."
-    yield datasource
-    context.delete_datasource(datasource_name=datasource_name)
-    with pytest.raises(get_missing_datasource_error_type):
-        context.get_datasource(datasource_name=datasource_name)
+    return datasource
 
 
 @pytest.fixture(scope="module")
 def data_asset(
-    datasource: PandasFilesystemDatasource,
-    get_missing_data_asset_error_type: type[Exception],
-) -> Iterator[CSVAsset]:
-    asset_name = f"i{uuid.uuid4().hex}"
-
-    _ = datasource.add_csv_asset(name=asset_name)
-    csv_asset = datasource.get_asset(asset_name=asset_name)
-    yield csv_asset
-    datasource.delete_asset(asset_name=asset_name)
-    with pytest.raises(get_missing_data_asset_error_type):
-        datasource.get_asset(asset_name=asset_name)
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
+    data_asset: DataAsset,
+) -> CSVAsset:
+    _ = pandas_filesystem_datasource.add_csv_asset(name=data_asset.name)
+    return pandas_filesystem_datasource.get_asset(asset_name=data_asset.name)
 
 
 @pytest.fixture(scope="module")

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import uuid
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -12,7 +12,12 @@ if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.core import ExpectationSuite
     from great_expectations.data_context import CloudDataContext
-    from great_expectations.datasource.fluent import BatchRequest, SnowflakeDatasource
+    from great_expectations.datasource.fluent import (
+        BatchRequest,
+        DataAsset,
+        Datasource,
+        SnowflakeDatasource,
+    )
     from great_expectations.datasource.fluent.sql_datasource import TableAsset
     from tests.integration.cloud.end_to_end.conftest import TableFactory
 
@@ -28,14 +33,13 @@ def connection_string() -> str:
 
 
 @pytest.fixture(scope="module")
-def datasource(
+def snowflake_datasource(
     context: CloudDataContext,
+    datasource: Datasource,
     connection_string: str,
-    get_missing_datasource_error_type: type[Exception],
-) -> Iterator[SnowflakeDatasource]:
-    datasource_name = f"i{uuid.uuid4().hex}"
+) -> SnowflakeDatasource:
     datasource = context.sources.add_snowflake(
-        name=datasource_name,
+        name=datasource.name,
         connection_string=connection_string,
         create_temp_table=False,
     )
@@ -66,38 +70,30 @@ def datasource(
     # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
     _ = context.add_or_update_datasource(**datasource_dict)
-    datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
+    datasource = context.get_datasource(datasource_name=datasource.name)  # type: ignore[assignment]
     assert (
         datasource.create_temp_table is False
     ), "The datasource was not updated in the previous method call."
-    yield datasource
-    context.delete_datasource(datasource_name=datasource_name)
-    with pytest.raises(get_missing_datasource_error_type):
-        context.get_datasource(datasource_name=datasource_name)
+    return datasource
 
 
 @pytest.fixture(scope="module")
 def data_asset(
-    datasource: SnowflakeDatasource,
+    snowflake_datasource: SnowflakeDatasource,
+    data_asset: DataAsset,
     table_factory: TableFactory,
-    get_missing_data_asset_error_type: type[Exception],
-) -> Iterator[TableAsset]:
+) -> TableAsset:
     schema_name = f"i{uuid.uuid4().hex}"
     table_name = f"i{uuid.uuid4().hex}"
     table_factory(
-        gx_engine=datasource.get_execution_engine(),
+        gx_engine=snowflake_datasource.get_execution_engine(),
         table_names={table_name},
         schema_name=schema_name,
     )
-    asset_name = f"i{uuid.uuid4().hex}"
-    _ = datasource.add_table_asset(
-        name=asset_name, table_name=table_name, schema_name=schema_name
+    _ = snowflake_datasource.add_table_asset(
+        name=data_asset.name, table_name=table_name, schema_name=schema_name
     )
-    table_asset = datasource.get_asset(asset_name=asset_name)
-    yield table_asset
-    datasource.delete_asset(asset_name=asset_name)
-    with pytest.raises(get_missing_data_asset_error_type):
-        datasource.get_asset(asset_name=asset_name)
+    return snowflake_datasource.get_asset(asset_name=data_asset.name)
 
 
 @pytest.fixture(scope="module")

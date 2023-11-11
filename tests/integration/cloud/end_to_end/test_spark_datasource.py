@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import uuid
-from typing import TYPE_CHECKING, Callable, Iterator
+from typing import TYPE_CHECKING, Callable
 
 import pandas as pd
 import pytest
@@ -13,18 +12,22 @@ if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark
     from great_expectations.core import ExpectationSuite
     from great_expectations.data_context import CloudDataContext
-    from great_expectations.datasource.fluent import BatchRequest, SparkDatasource
+    from great_expectations.datasource.fluent import (
+        BatchRequest,
+        DataAsset,
+        Datasource,
+        SparkDatasource,
+    )
     from great_expectations.datasource.fluent.spark_datasource import DataFrameAsset
 
 
 @pytest.fixture(scope="module")
-def datasource(
+def spark_datasource(
     context: CloudDataContext,
-    get_missing_datasource_error_type: type[Exception],
-) -> Iterator[SparkDatasource]:
-    datasource_name = f"i{uuid.uuid4().hex}"
+    datasource: Datasource,
+) -> SparkDatasource:
     datasource = context.sources.add_spark(
-        name=datasource_name,
+        name=datasource.name,
         persist=True,
     )
     datasource.persist = False
@@ -46,28 +49,20 @@ def datasource(
     datasource.persist = True
     datasource_dict = datasource.dict()
     _ = context.add_or_update_datasource(**datasource_dict)
-    datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment]
+    datasource = context.get_datasource(datasource_name=datasource.name)  # type: ignore[assignment]
     assert (
         datasource.persist is True
     ), "The datasource was not updated in the previous method call."
-    yield datasource
-    context.delete_datasource(datasource_name=datasource_name)
-    with pytest.raises(get_missing_datasource_error_type):
-        context.get_datasource(datasource_name=datasource_name)
+    return datasource
 
 
 @pytest.fixture(scope="module")
 def data_asset(
-    datasource: SparkDatasource,
-    get_missing_data_asset_error_type: type[Exception],
-) -> Iterator[DataFrameAsset]:
-    asset_name = f"i{uuid.uuid4().hex}"
-    _ = datasource.add_dataframe_asset(name=asset_name)
-    dataframe_asset = datasource.get_asset(asset_name=asset_name)
-    yield dataframe_asset
-    datasource.delete_asset(asset_name=asset_name)
-    with pytest.raises(get_missing_data_asset_error_type):
-        datasource.get_asset(asset_name=asset_name)
+    spark_datasource: SparkDatasource,
+    data_asset: DataAsset,
+) -> DataFrameAsset:
+    _ = spark_datasource.add_dataframe_asset(name=data_asset.name)
+    return spark_datasource.get_asset(asset_name=data_asset.name)
 
 
 @pytest.fixture(scope="module")

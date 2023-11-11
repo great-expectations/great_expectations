@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING
 
 import pandas as pd
 import pytest
@@ -12,7 +12,12 @@ if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.core import ExpectationSuite
     from great_expectations.data_context import CloudDataContext
-    from great_expectations.datasource.fluent import BatchRequest, PandasDatasource
+    from great_expectations.datasource.fluent import (
+        BatchRequest,
+        DataAsset,
+        Datasource,
+        PandasDatasource,
+    )
     from great_expectations.datasource.fluent.pandas_datasource import DataFrameAsset
 
 
@@ -31,16 +36,23 @@ def pandas_test_df() -> pd.DataFrame:
 
 
 @pytest.fixture(scope="module")
-def datasource(
+def pandas_datasource(
     context: CloudDataContext,
-    get_missing_datasource_error_type: type[Exception],
-) -> Iterator[PandasDatasource]:
-    datasource_name = f"i{uuid.uuid4().hex}"
+    datasource: Datasource,
+) -> PandasDatasource:
+    datasource_name = datasource.name
     datasource = context.sources.add_pandas(
         name=datasource_name,
     )
     assert datasource.name == datasource_name
-    datasource_name = f"i{uuid.uuid4().hex}"
+    new_datasource_name = f"ds{uuid.uuid4().hex}"
+    datasource.name = new_datasource_name
+    datasource = context.sources.add_or_update_pandas(
+        datasource=datasource,
+    )
+    assert (
+        datasource.name == new_datasource_name
+    ), "The datasource was not updated in the previous method call."
     datasource.name = datasource_name
     datasource = context.sources.add_or_update_pandas(
         datasource=datasource,
@@ -48,26 +60,18 @@ def datasource(
     assert (
         datasource.name == datasource_name
     ), "The datasource was not updated in the previous method call."
-    yield datasource
-    context.delete_datasource(datasource_name=datasource_name)
-    with pytest.raises(get_missing_datasource_error_type):
-        context.get_datasource(datasource_name=datasource_name)
+    return datasource
 
 
 @pytest.fixture(scope="module")
 def data_asset(
-    datasource: PandasDatasource,
-    get_missing_data_asset_error_type: type[Exception],
-) -> Iterator[DataFrameAsset]:
-    asset_name = f"i{uuid.uuid4().hex}"
-    _ = datasource.add_dataframe_asset(
-        name=asset_name,
+    pandas_datasource: PandasDatasource,
+    data_asset: DataAsset,
+) -> DataFrameAsset:
+    _ = pandas_datasource.add_dataframe_asset(
+        name=data_asset.name,
     )
-    data_asset = datasource.get_asset(asset_name=asset_name)
-    yield data_asset
-    datasource.delete_asset(asset_name=asset_name)
-    with pytest.raises(get_missing_data_asset_error_type):
-        datasource.get_asset(asset_name=asset_name)
+    return pandas_datasource.get_asset(asset_name=data_asset.name)
 
 
 @pytest.fixture(scope="module")
