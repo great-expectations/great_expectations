@@ -40,6 +40,16 @@ def tmp_dir(tmpdir_factory) -> py.path:
     return tmpdir_factory.mktemp("project")
 
 
+@pytest.fixture(scope="module")
+def missing_datasource_error_type() -> type[Exception]:
+    return ValueError
+
+
+@pytest.fixture(scope="module")
+def missing_data_asset_error_type() -> type[Exception]:
+    return LookupError
+
+
 class TableFactory(Protocol):
     def __call__(
         self,

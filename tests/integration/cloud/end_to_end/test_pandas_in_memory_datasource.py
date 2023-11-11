@@ -33,6 +33,7 @@ def pandas_test_df() -> pd.DataFrame:
 @pytest.fixture(scope="module")
 def datasource(
     context: CloudDataContext,
+    missing_datasource_error_type: type[Exception],
 ) -> Iterator[PandasDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
     datasource = context.sources.add_pandas(
@@ -47,12 +48,15 @@ def datasource(
     assert datasource.name == datasource_name
     yield datasource
     context.delete_datasource(datasource_name=datasource_name)
-    with pytest.raises(ValueError):
+    with pytest.raises(missing_datasource_error_type):
         context.get_datasource(datasource_name=datasource_name)
 
 
 @pytest.fixture(scope="module")
-def data_asset(datasource: PandasDatasource) -> Iterator[DataFrameAsset]:
+def data_asset(
+    datasource: PandasDatasource,
+    missing_data_asset_error_type: type[Exception],
+) -> Iterator[DataFrameAsset]:
     asset_name = f"i{uuid.uuid4().hex}"
     _ = datasource.add_dataframe_asset(
         name=asset_name,
@@ -60,7 +64,7 @@ def data_asset(datasource: PandasDatasource) -> Iterator[DataFrameAsset]:
     data_asset = datasource.get_asset(asset_name=asset_name)
     yield data_asset
     datasource.delete_asset(asset_name=asset_name)
-    with pytest.raises(LookupError):
+    with pytest.raises(missing_data_asset_error_type):
         datasource.get_asset(asset_name=asset_name)
 
 

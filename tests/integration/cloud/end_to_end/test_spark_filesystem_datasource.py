@@ -54,6 +54,7 @@ def datasource(
     context: CloudDataContext,
     base_dir: pathlib.Path,
     updated_base_dir: pathlib.Path,
+    missing_datasource_error_type: type[Exception],
 ) -> Iterator[SparkFilesystemDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
     original_base_dir = base_dir
@@ -82,20 +83,25 @@ def datasource(
     assert (
         datasource.base_directory == original_base_dir
     ), "The datasource was not updated in the previous method call."
-
     yield datasource
     context.delete_datasource(datasource_name=datasource_name)
+    with pytest.raises(missing_datasource_error_type):
+        context.get_datasource(datasource_name=datasource_name)
 
 
 @pytest.fixture(scope="module")
-def data_asset(datasource: SparkFilesystemDatasource) -> Iterator[CSVAsset]:
+def data_asset(
+    datasource: SparkFilesystemDatasource,
+    missing_data_asset_error_type: type[Exception],
+) -> Iterator[CSVAsset]:
     asset_name = f"i{uuid.uuid4().hex}"
 
     _ = datasource.add_csv_asset(name=asset_name, header=True, infer_schema=True)
     csv_asset = datasource.get_asset(asset_name=asset_name)
-
     yield csv_asset
     datasource.delete_asset(asset_name=asset_name)
+    with pytest.raises(missing_data_asset_error_type):
+        datasource.get_asset(asset_name=asset_name)
 
 
 @pytest.fixture(scope="module")
