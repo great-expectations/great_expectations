@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 @pytest.fixture(scope="module")
 def datasource(
     context: CloudDataContext,
-    missing_datasource_error_type: type[Exception],
+    get_missing_datasource_error_type: type[Exception],
 ) -> Iterator[SparkDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
     datasource = context.sources.add_spark(
@@ -51,7 +51,7 @@ def datasource(
     ), "The datasource was not updated in the previous method call."
     yield datasource
     context.delete_datasource(datasource_name=datasource_name)
-    with pytest.raises(missing_datasource_error_type):
+    with pytest.raises(get_missing_datasource_error_type):
         context.get_datasource(datasource_name=datasource_name)
 
 
@@ -59,14 +59,14 @@ def datasource(
 def data_asset(
     datasource: SparkDatasource,
     table_factory,
-    missing_data_asset_error_type: type[Exception],
+    get_missing_data_asset_error_type: type[Exception],
 ) -> Iterator[DataFrameAsset]:
     asset_name = f"i{uuid.uuid4().hex}"
     _ = datasource.add_dataframe_asset(name=asset_name)
     dataframe_asset = datasource.get_asset(asset_name=asset_name)
     yield dataframe_asset
     datasource.delete_asset(asset_name=asset_name)
-    with pytest.raises(missing_data_asset_error_type):
+    with pytest.raises(get_missing_data_asset_error_type):
         datasource.get_asset(asset_name=asset_name)
 
 

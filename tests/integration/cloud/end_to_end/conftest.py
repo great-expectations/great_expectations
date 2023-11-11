@@ -41,12 +41,12 @@ def tmp_dir(tmpdir_factory) -> py.path:
 
 
 @pytest.fixture(scope="module")
-def missing_datasource_error_type() -> type[Exception]:
+def get_missing_datasource_error_type() -> type[Exception]:
     return ValueError
 
 
 @pytest.fixture(scope="module")
-def missing_data_asset_error_type() -> type[Exception]:
+def get_missing_data_asset_error_type() -> type[Exception]:
     return LookupError
 
 

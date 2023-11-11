@@ -30,7 +30,7 @@ def connection_string() -> str:
 def datasource(
     context: CloudDataContext,
     connection_string: str,
-    missing_datasource_error_type: type[Exception],
+    get_missing_datasource_error_type: type[Exception],
 ) -> Iterator[SnowflakeDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
     datasource = context.sources.add_snowflake(
@@ -71,7 +71,7 @@ def datasource(
     ), "The datasource was not updated in the previous method call."
     yield datasource
     context.delete_datasource(datasource_name=datasource_name)
-    with pytest.raises(missing_datasource_error_type):
+    with pytest.raises(get_missing_datasource_error_type):
         context.get_datasource(datasource_name=datasource_name)
 
 
@@ -79,7 +79,7 @@ def datasource(
 def data_asset(
     datasource: SnowflakeDatasource,
     table_factory,
-    missing_data_asset_error_type: type[Exception],
+    get_missing_data_asset_error_type: type[Exception],
 ) -> Iterator[TableAsset]:
     schema_name = f"i{uuid.uuid4().hex}"
     table_name = f"i{uuid.uuid4().hex}"
@@ -95,7 +95,7 @@ def data_asset(
     table_asset = datasource.get_asset(asset_name=asset_name)
     yield table_asset
     datasource.delete_asset(asset_name=asset_name)
-    with pytest.raises(missing_data_asset_error_type):
+    with pytest.raises(get_missing_data_asset_error_type):
         datasource.get_asset(asset_name=asset_name)
 
 
