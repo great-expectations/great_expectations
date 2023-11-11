@@ -109,6 +109,7 @@ def batch_request(data_asset: TableAsset) -> BatchRequest:
 def expectation_suite(
     context: CloudDataContext,
     data_asset: TableAsset,
+    get_missing_expectation_suite_error_type: type[Exception],
 ) -> Iterator[ExpectationSuite]:
     expectation_suite_name = f"{data_asset.datasource.name} | {data_asset.name}"
     expectation_suite = context.add_expectation_suite(
@@ -129,6 +130,8 @@ def expectation_suite(
     )
     yield expectation_suite
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
+    with pytest.raises(get_missing_expectation_suite_error_type):
+        context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 
 @pytest.fixture(scope="module")

@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 import great_expectations as gx
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import CloudDataContext
@@ -48,6 +49,11 @@ def get_missing_datasource_error_type() -> type[Exception]:
 @pytest.fixture(scope="module")
 def get_missing_data_asset_error_type() -> type[Exception]:
     return LookupError
+
+
+@pytest.fixture(scope="module")
+def get_missing_expectation_suite_error_type() -> type[Exception]:
+    return gx_exceptions.DataContextError
 
 
 class TableFactory(Protocol):
