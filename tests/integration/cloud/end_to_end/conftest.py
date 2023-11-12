@@ -84,12 +84,17 @@ def validator(
     batch_request: BatchRequest,
     expectation_suite: ExpectationSuite,
 ) -> Validator:
-    validator = context.get_validator(
+    validator: Validator = context.get_validator(
         batch_request=batch_request,
         expectation_suite_name=expectation_suite.expectation_suite_name,
     )
     validator.head()
-    return validator
+    yield validator
+    validator.save_expectation_suite()
+    validator.get_expectation_suite()
+    context.get_expectation_suite(
+        expectation_suite_name=validator.expectation_suite_name,
+    )
 
 
 @pytest.fixture(scope="module")

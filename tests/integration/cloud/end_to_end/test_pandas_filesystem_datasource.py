@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     import py
 
     from great_expectations.checkpoint import Checkpoint
+    from great_expectations.checkpoint.checkpoint import CheckpointResult
     from great_expectations.core import ExpectationSuite, ExpectationValidationResult
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import (
@@ -140,10 +141,9 @@ def test_interactive_validator(
         )
     )
     assert expectation_validation_result.success
-    validator.save_expectation_suite()
 
 
 @pytest.mark.cloud
 def test_checkpoint_run(checkpoint: Checkpoint):
-    checkpoint_result = checkpoint.run()
-    assert checkpoint_result.success is True
+    checkpoint_result: CheckpointResult = checkpoint.run()
+    assert checkpoint_result.success
