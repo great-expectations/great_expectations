@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterator
 
 import pandas as pd
 import pytest
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.datasource.fluent.pandas_datasource import DataFrameAsset
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
@@ -15,10 +16,8 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import (
         BatchRequest,
         DataAsset,
-        Datasource,
         PandasDatasource,
     )
-    from great_expectations.datasource.fluent.pandas_datasource import DataFrameAsset
 
 
 @pytest.fixture(scope="module")
@@ -36,11 +35,10 @@ def pandas_test_df() -> pd.DataFrame:
 
 
 @pytest.fixture(scope="module")
-def pandas_datasource(
+def datasource(
     context: CloudDataContext,
-    datasource: Datasource,
+    datasource_name: str,
 ) -> PandasDatasource:
-    datasource_name = datasource.name
     datasource = context.sources.add_pandas(
         name=datasource_name,
     )
@@ -63,26 +61,43 @@ def pandas_datasource(
     return datasource
 
 
-@pytest.fixture(scope="module")
-def data_asset(
-    pandas_datasource: PandasDatasource,
-    data_asset: DataAsset,
+def dataframe_asset(
+    datasource: PandasDatasource,
+    asset_name: str,
 ) -> DataFrameAsset:
-    _ = pandas_datasource.add_dataframe_asset(
-        name=data_asset.name,
+    return datasource.add_dataframe_asset(
+        name=asset_name,
     )
-    return pandas_datasource.get_asset(asset_name=data_asset.name)
+
+
+@pytest.fixture(scope="module", params=[dataframe_asset])
+def data_asset(
+    datasource: PandasDatasource,
+    request,
+) -> Iterator[DataAsset]:
+    asset_name = f"da_{uuid.uuid4().hex}"
+    yield request.param(
+        datasource=datasource,
+        asset_name=asset_name,
+    )
+    datasource.delete_asset(asset_name=asset_name)
+    with pytest.raises(LookupError):
+        datasource.get_asset(asset_name=asset_name)
 
 
 @pytest.fixture(scope="module")
 def batch_request(
-    data_asset: DataFrameAsset,
+    data_asset: DataAsset,
     pandas_test_df: pd.DataFrame,
     in_memory_batch_request_missing_dataframe_error_type: type[Exception],
 ) -> BatchRequest:
-    with pytest.raises(in_memory_batch_request_missing_dataframe_error_type):
-        data_asset.build_batch_request()
-    return data_asset.build_batch_request(dataframe=pandas_test_df)
+    if isinstance(data_asset, DataFrameAsset):
+        with pytest.raises(in_memory_batch_request_missing_dataframe_error_type):
+            data_asset.build_batch_request()
+        batch_request = data_asset.build_batch_request(dataframe=pandas_test_df)
+    else:
+        batch_request = data_asset.build_batch_request()
+    return batch_request
 
 
 @pytest.fixture(scope="module")

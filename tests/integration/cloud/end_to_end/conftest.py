@@ -14,7 +14,6 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import CloudDataContext
-from great_expectations.datasource.fluent import DataAsset, Datasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
@@ -41,46 +40,28 @@ def context() -> CloudDataContext:
 
 
 @pytest.fixture(scope="module")
-def datasource_name() -> str:
-    return f"ds_{uuid.uuid4().hex}"
-
-
-@pytest.fixture(scope="module")
-def datasource(
+def datasource_name(
     context: CloudDataContext,
-    datasource_name: str,
-) -> Iterator[Datasource]:
-    yield Datasource(type="datasource", name=datasource_name)
+) -> Iterator[str]:
+    datasource_name = f"ds_{uuid.uuid4().hex}"
+    yield datasource_name
+    # if the test was skipped, we may not have a datasource to clean up
+    # in that case, we create one simply to test get and delete
     try:
         context.get_datasource(datasource_name=datasource_name)
     except ValueError:
-        pytest.skip("no datasource created")
+        context.sources.add_pandas(name=datasource_name)
+        context.get_datasource(datasource_name=datasource_name)
     context.delete_datasource(datasource_name=datasource_name)
     with pytest.raises(ValueError):
         context.get_datasource(datasource_name=datasource_name)
 
 
 @pytest.fixture(scope="module")
-def data_asset(
-    context: CloudDataContext,
-    datasource_name: str,
-) -> Iterator[DataAsset]:
-    asset_name = f"da_{uuid.uuid4().hex}"
-    yield DataAsset(name=asset_name, type="data_asset")
-    datasource = context.get_datasource(datasource_name=datasource_name)
-    # this assertion tells the type checker it's a fluent datasource
-    assert isinstance(datasource, Datasource)
-    datasource.delete_asset(asset_name=asset_name)
-    with pytest.raises(LookupError):
-        datasource.get_asset(asset_name=asset_name)
-
-
-@pytest.fixture(scope="module")
 def expectation_suite(
     context: CloudDataContext,
-    data_asset: DataAsset,
 ) -> Iterator[ExpectationSuite]:
-    expectation_suite_name = f"{data_asset.datasource.name} | {data_asset.name}"
+    expectation_suite_name = f"es_{uuid.uuid4().hex}"
     expectation_suite = context.add_expectation_suite(
         expectation_suite_name=expectation_suite_name,
     )
@@ -93,11 +74,12 @@ def expectation_suite(
 @pytest.fixture(scope="module")
 def checkpoint(
     context: CloudDataContext,
-    data_asset: DataAsset,
     batch_request: BatchRequest,
     expectation_suite: ExpectationSuite,
 ) -> Iterator[Checkpoint]:
-    checkpoint_name = f"{data_asset.datasource.name} | {data_asset.name}"
+    checkpoint_name = (
+        f"{batch_request.data_asset_name} | {expectation_suite.expectation_suite_name}"
+    )
     _ = context.add_checkpoint(
         name=checkpoint_name,
         validations=[
@@ -140,7 +122,7 @@ def tmp_dir(tmpdir_factory) -> py.path:
     return tmpdir_factory.mktemp("project")
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="package")
 def in_memory_batch_request_missing_dataframe_error_type() -> type[Exception]:
     return ValueError
 

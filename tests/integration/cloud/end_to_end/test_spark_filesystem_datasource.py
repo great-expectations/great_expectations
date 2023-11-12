@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import pathlib
-from typing import TYPE_CHECKING
+import uuid
+from typing import TYPE_CHECKING, Iterator
 
 import pandas as pd
 import pytest
@@ -18,10 +19,9 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import (
         BatchRequest,
         DataAsset,
-        Datasource,
         SparkFilesystemDatasource,
     )
-    from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+    from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
     )
 
@@ -42,25 +42,20 @@ def base_dir(tmp_dir: py.path) -> pathlib.Path:
 def updated_base_dir(tmp_dir: py.path) -> pathlib.Path:
     dir_path = tmp_dir / "other_data"
     dir_path.mkdir()
-    df = pd.DataFrame(
-        {"name": [1, 2, 3, 4], "id": ["one", "two", "three", "four"]},
-    )
-    csv_path = dir_path / "data.csv"
-    df.to_csv(csv_path)
     return dir_path
 
 
 @pytest.fixture(scope="module")
-def spark_filesystem_datasource(
+def datasource(
     context: CloudDataContext,
-    datasource: Datasource,
+    datasource_name: str,
     base_dir: pathlib.Path,
     updated_base_dir: pathlib.Path,
 ) -> SparkFilesystemDatasource:
     original_base_dir = base_dir
 
     datasource = context.sources.add_spark_filesystem(
-        name=datasource.name, base_directory=original_base_dir
+        name=datasource_name, base_directory=original_base_dir
     )
 
     datasource.base_directory = normalize_directory_path(
@@ -81,15 +76,26 @@ def spark_filesystem_datasource(
     return datasource
 
 
-@pytest.fixture(scope="module")
-def data_asset(
-    spark_filesystem_datasource: SparkFilesystemDatasource,
-    data_asset: DataAsset,
+def csv_asset(
+    datasource: SparkFilesystemDatasource,
+    asset_name: str,
 ) -> CSVAsset:
-    _ = spark_filesystem_datasource.add_csv_asset(
-        name=data_asset.name, header=True, infer_schema=True
+    return datasource.add_csv_asset(name=asset_name, header=True, infer_schema=True)
+
+
+@pytest.fixture(scope="module", params=[csv_asset])
+def data_asset(
+    datasource: SparkFilesystemDatasource,
+    request,
+) -> Iterator[DataAsset]:
+    asset_name = f"da_{uuid.uuid4().hex}"
+    yield request.param(
+        datasource=datasource,
+        asset_name=asset_name,
     )
-    return spark_filesystem_datasource.get_asset(asset_name=data_asset.name)
+    datasource.delete_asset(asset_name=asset_name)
+    with pytest.raises(LookupError):
+        datasource.get_asset(asset_name=asset_name)
 
 
 @pytest.fixture(scope="module")

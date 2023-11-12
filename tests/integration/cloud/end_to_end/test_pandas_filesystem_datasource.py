@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import pathlib
-from typing import TYPE_CHECKING
+import uuid
+from typing import TYPE_CHECKING, Iterator
 
 import pandas as pd
 import pytest
@@ -17,10 +18,12 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import (
         BatchRequest,
         DataAsset,
-        Datasource,
         PandasFilesystemDatasource,
     )
-    from great_expectations.datasource.fluent.pandas_datasource import CSVAsset
+    from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+        CSVAsset,
+        ParquetAsset,
+    )
 
 
 @pytest.fixture(scope="module")
@@ -28,8 +31,8 @@ def base_dir(tmp_dir: py.path) -> pathlib.Path:
     dir_path = tmp_dir / "data"
     dir_path.mkdir()
     df = pd.DataFrame({"name": ["bob", "alice"]})
-    csv_path = dir_path / "data.csv"
-    df.to_csv(csv_path)
+    df.to_csv(dir_path / "data.csv")
+    df.to_parquet(dir_path / "data.parquet")
     return pathlib.Path(dir_path)
 
 
@@ -37,23 +40,20 @@ def base_dir(tmp_dir: py.path) -> pathlib.Path:
 def updated_base_dir(tmp_dir: py.path) -> pathlib.Path:
     dir_path = tmp_dir / "other_data"
     dir_path.mkdir()
-    df = pd.DataFrame({"name": ["jim", "carol"]})
-    csv_path = dir_path / "data.csv"
-    df.to_csv(csv_path)
     return pathlib.Path(dir_path)
 
 
 @pytest.fixture(scope="module")
-def pandas_filesystem_datasource(
+def datasource(
     context: CloudDataContext,
-    datasource: Datasource,
+    datasource_name: str,
     base_dir: pathlib.Path,
     updated_base_dir: pathlib.Path,
 ) -> PandasFilesystemDatasource:
     original_base_dir = base_dir
 
     datasource = context.sources.add_pandas_filesystem(
-        name=datasource.name, base_directory=original_base_dir
+        name=datasource_name, base_directory=original_base_dir
     )
     datasource.base_directory = updated_base_dir
     datasource = context.sources.add_or_update_pandas_filesystem(datasource=datasource)
@@ -69,17 +69,43 @@ def pandas_filesystem_datasource(
     return datasource
 
 
-@pytest.fixture(scope="module")
-def data_asset(
-    pandas_filesystem_datasource: PandasFilesystemDatasource,
-    data_asset: DataAsset,
+def csv_asset(
+    datasource: PandasFilesystemDatasource,
+    asset_name: str,
 ) -> CSVAsset:
-    _ = pandas_filesystem_datasource.add_csv_asset(name=data_asset.name)
-    return pandas_filesystem_datasource.get_asset(asset_name=data_asset.name)
+    return datasource.add_csv_asset(
+        name=asset_name,
+        batching_regex="data.csv",
+    )
+
+
+def parquet_asset(
+    datasource: PandasFilesystemDatasource,
+    asset_name: str,
+) -> ParquetAsset:
+    return datasource.add_parquet_asset(
+        name=asset_name,
+        batching_regex="data.parquet",
+    )
+
+
+@pytest.fixture(scope="module", params=[csv_asset, parquet_asset])
+def data_asset(
+    datasource: PandasFilesystemDatasource,
+    request,
+) -> Iterator[DataAsset]:
+    asset_name = f"da_{uuid.uuid4().hex}"
+    yield request.param(
+        datasource=datasource,
+        asset_name=asset_name,
+    )
+    datasource.delete_asset(asset_name=asset_name)
+    with pytest.raises(LookupError):
+        datasource.get_asset(asset_name=asset_name)
 
 
 @pytest.fixture(scope="module")
-def batch_request(data_asset: CSVAsset) -> BatchRequest:
+def batch_request(data_asset: DataAsset) -> BatchRequest:
     return data_asset.build_batch_request()
 
 

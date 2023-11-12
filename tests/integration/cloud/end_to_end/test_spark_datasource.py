@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+import uuid
+from typing import TYPE_CHECKING, Callable, Iterator
 
 import pandas as pd
 import pytest
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.datasource.fluent.spark_datasource import DataFrameAsset
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
@@ -15,19 +17,17 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import (
         BatchRequest,
         DataAsset,
-        Datasource,
         SparkDatasource,
     )
-    from great_expectations.datasource.fluent.spark_datasource import DataFrameAsset
 
 
 @pytest.fixture(scope="module")
-def spark_datasource(
+def datasource(
     context: CloudDataContext,
-    datasource: Datasource,
+    datasource_name: str,
 ) -> SparkDatasource:
     datasource = context.sources.add_spark(
-        name=datasource.name,
+        name=datasource_name,
         persist=True,
     )
     datasource.persist = False
@@ -48,41 +48,60 @@ def spark_datasource(
     ), "The datasource was not updated in the previous method call."
     datasource.persist = True
     datasource_dict = datasource.dict()
-    datasource = context.add_or_update_datasource(**datasource_dict)
+    datasource = context.add_or_update_datasource(**datasource_dict)  # type: ignore[assignment]
     assert (
         datasource.persist is True
     ), "The datasource was not updated in the previous method call."
     return datasource
 
 
-@pytest.fixture(scope="module")
-def data_asset(
-    spark_datasource: SparkDatasource,
-    data_asset: DataAsset,
+def dataframe_asset(
+    datasource: SparkDatasource,
+    asset_name: str,
 ) -> DataFrameAsset:
-    _ = spark_datasource.add_dataframe_asset(name=data_asset.name)
-    return spark_datasource.get_asset(asset_name=data_asset.name)
+    return datasource.add_dataframe_asset(
+        name=asset_name,
+    )
+
+
+@pytest.fixture(scope="module", params=[dataframe_asset])
+def data_asset(
+    datasource: SparkDatasource,
+    request,
+) -> Iterator[DataAsset]:
+    asset_name = f"da_{uuid.uuid4().hex}"
+    yield request.param(
+        datasource=datasource,
+        asset_name=asset_name,
+    )
+    datasource.delete_asset(asset_name=asset_name)
+    with pytest.raises(LookupError):
+        datasource.get_asset(asset_name=asset_name)
 
 
 @pytest.fixture(scope="module")
 def batch_request(
-    data_asset: DataFrameAsset,
+    data_asset: DataAsset,
     spark_session: pyspark.SparkSession,
     spark_df_from_pandas_df: Callable[
         [pyspark.SparkSession, pd.DataFrame], pyspark.DataFrame
     ],
     in_memory_batch_request_missing_dataframe_error_type: type[Exception],
 ) -> BatchRequest:
-    with pytest.raises(in_memory_batch_request_missing_dataframe_error_type):
-        data_asset.build_batch_request()
-    pandas_df = pd.DataFrame(
-        {
-            "id": [1, 2, 3, 4],
-            "name": [1, 2, 3, 4],
-        },
-    )
-    spark_df: pyspark.DataFrame = spark_df_from_pandas_df(spark_session, pandas_df)
-    return data_asset.build_batch_request(dataframe=spark_df)
+    if isinstance(data_asset, DataFrameAsset):
+        with pytest.raises(in_memory_batch_request_missing_dataframe_error_type):
+            data_asset.build_batch_request()
+        pandas_df = pd.DataFrame(
+            {
+                "id": [1, 2, 3, 4],
+                "name": [1, 2, 3, 4],
+            },
+        )
+        spark_df: pyspark.DataFrame = spark_df_from_pandas_df(spark_session, pandas_df)
+        batch_request = data_asset.build_batch_request(dataframe=spark_df)
+    else:
+        batch_request = data_asset.build_batch_request()
+    return batch_request
 
 
 @pytest.fixture(scope="module")

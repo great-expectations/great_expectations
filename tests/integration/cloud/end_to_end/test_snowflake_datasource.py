@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterator
 
 import pytest
 
@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import (
         BatchRequest,
         DataAsset,
-        Datasource,
         SnowflakeDatasource,
     )
     from great_expectations.datasource.fluent.sql_datasource import TableAsset
@@ -33,13 +32,13 @@ def connection_string() -> str:
 
 
 @pytest.fixture(scope="module")
-def snowflake_datasource(
+def datasource(
     context: CloudDataContext,
-    datasource: Datasource,
+    datasource_name: str,
     connection_string: str,
 ) -> SnowflakeDatasource:
     datasource = context.sources.add_snowflake(
-        name=datasource.name,
+        name=datasource_name,
         connection_string=connection_string,
         create_temp_table=False,
     )
@@ -69,34 +68,51 @@ def snowflake_datasource(
     # call to datasource.dict() results in a ConfigStr that fails pydantic
     # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
-    datasource = context.add_or_update_datasource(**datasource_dict)
+    datasource = context.add_or_update_datasource(**datasource_dict)  # type: ignore[assignment]
     assert (
         datasource.create_temp_table is False
     ), "The datasource was not updated in the previous method call."
     return datasource
 
 
-@pytest.fixture(scope="module")
-def data_asset(
-    snowflake_datasource: SnowflakeDatasource,
-    data_asset: DataAsset,
+def table_asset(
+    datasource: SnowflakeDatasource,
+    asset_name: str,
     table_factory: TableFactory,
 ) -> TableAsset:
     schema_name = f"i{uuid.uuid4().hex}"
     table_name = f"i{uuid.uuid4().hex}"
     table_factory(
-        gx_engine=snowflake_datasource.get_execution_engine(),
+        gx_engine=datasource.get_execution_engine(),
         table_names={table_name},
         schema_name=schema_name,
     )
-    _ = snowflake_datasource.add_table_asset(
-        name=data_asset.name, table_name=table_name, schema_name=schema_name
+    return datasource.add_table_asset(
+        name=asset_name,
+        schema_name=schema_name,
+        table_name=table_name,
     )
-    return snowflake_datasource.get_asset(asset_name=data_asset.name)
+
+
+@pytest.fixture(scope="module", params=[table_asset])
+def data_asset(
+    datasource: SnowflakeDatasource,
+    table_factory: TableFactory,
+    request,
+) -> Iterator[DataAsset]:
+    asset_name = f"da_{uuid.uuid4().hex}"
+    yield request.param(
+        datasource=datasource,
+        asset_name=asset_name,
+        table_factory=table_factory,
+    )
+    datasource.delete_asset(asset_name=asset_name)
+    with pytest.raises(LookupError):
+        datasource.get_asset(asset_name=asset_name)
 
 
 @pytest.fixture(scope="module")
-def batch_request(data_asset: TableAsset) -> BatchRequest:
+def batch_request(data_asset: DataAsset) -> BatchRequest:
     return data_asset.build_batch_request()
 
 
