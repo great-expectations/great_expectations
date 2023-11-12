@@ -52,7 +52,7 @@ def datasource(
         datasource.name == new_datasource_name
     ), "The datasource was not updated in the previous method call."
     datasource.name = datasource_name
-    datasource = context.sources.add_or_update_pandas(
+    datasource = context.add_or_update_datasource(
         datasource=datasource,
     )
     assert (
@@ -105,7 +105,7 @@ def expectation_suite(
     context: CloudDataContext,
     expectation_suite: ExpectationSuite,
 ) -> ExpectationSuite:
-    """Test adding Expectations and updating the Expectation Suite for the Data Asset
+    """Test adding Expectations and updating the Expectation Suite for the Data Assets
     defined in this module. The package-level expectation_suite fixture handles add, get, and delete.
     """
     expectation_suite.add_expectation(

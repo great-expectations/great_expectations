@@ -99,7 +99,7 @@ def data_asset(
 
 
 @pytest.fixture(scope="module")
-def batch_request(data_asset: CSVAsset) -> BatchRequest:
+def batch_request(data_asset: DataAsset) -> BatchRequest:
     return data_asset.build_batch_request()
 
 
@@ -108,7 +108,7 @@ def expectation_suite(
     context: CloudDataContext,
     expectation_suite: ExpectationSuite,
 ) -> ExpectationSuite:
-    """Test adding Expectations and updating the Expectation Suite for the Data Asset
+    """Test adding Expectations and updating the Expectation Suite for the Data Assets
     defined in this module. The package-level expectation_suite fixture handles add, get, and delete.
     """
     expectation_suite.add_expectation(

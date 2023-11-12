@@ -121,7 +121,7 @@ def expectation_suite(
     context: CloudDataContext,
     expectation_suite: ExpectationSuite,
 ) -> ExpectationSuite:
-    """Test adding Expectations and updating the Expectation Suite for the Data Asset
+    """Test adding Expectations and updating the Expectation Suite for the Data Assets
     defined in this module. The package-level expectation_suite fixture handles add, get, and delete.
     """
     expectation_suite.add_expectation(
