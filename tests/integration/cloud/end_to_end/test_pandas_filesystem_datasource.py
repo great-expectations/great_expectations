@@ -115,7 +115,7 @@ def expectation_suite(
     expectation_suite: ExpectationSuite,
 ) -> ExpectationSuite:
     """Test adding Expectations and updating the Expectation Suite for the Data Asset
-    defined in this module. The package-level expectation_suite fixture handles add and delete.
+    defined in this module. The package-level expectation_suite fixture handles add, get, and delete.
     """
     expectation_suite.add_expectation(
         expectation_configuration=ExpectationConfiguration(
@@ -126,9 +126,8 @@ def expectation_suite(
             },
         )
     )
-    _ = context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
-    expectation_suite = context.get_expectation_suite(
-        expectation_suite_name=expectation_suite.name
+    expectation_suite = context.add_or_update_expectation_suite(
+        expectation_suite=expectation_suite
     )
     assert (
         len(expectation_suite.expectations) == 1

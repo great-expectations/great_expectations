@@ -66,6 +66,7 @@ def expectation_suite(
         expectation_suite_name=expectation_suite_name,
     )
     yield expectation_suite
+    context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
     with pytest.raises(gx_exceptions.DataContextError):
         context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
