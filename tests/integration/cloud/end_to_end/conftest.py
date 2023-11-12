@@ -15,6 +15,7 @@ from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import CloudDataContext
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
     import py
@@ -65,11 +66,30 @@ def expectation_suite(
     expectation_suite = context.add_expectation_suite(
         expectation_suite_name=expectation_suite_name,
     )
+    assert len(expectation_suite.expectations) == 0
     yield expectation_suite
+    expectation_suite = context.add_or_update_expectation_suite(
+        expectation_suite=expectation_suite
+    )
+    assert len(expectation_suite.expectations) > 0
     context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
     with pytest.raises(gx_exceptions.DataContextError):
         context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+
+
+@pytest.fixture(scope="module")
+def validator(
+    context: CloudDataContext,
+    batch_request: BatchRequest,
+    expectation_suite: ExpectationSuite,
+) -> Validator:
+    validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name=expectation_suite.expectation_suite_name,
+    )
+    validator.head()
+    return validator
 
 
 @pytest.fixture(scope="module")

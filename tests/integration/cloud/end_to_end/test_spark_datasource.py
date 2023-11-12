@@ -12,13 +12,14 @@ from great_expectations.datasource.fluent.spark_datasource import DataFrameAsset
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.compatibility import pyspark
-    from great_expectations.core import ExpectationSuite
+    from great_expectations.core import ExpectationSuite, ExpectationValidationResult
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import (
         BatchRequest,
         DataAsset,
         SparkDatasource,
     )
+    from great_expectations.validator.validator import Validator
 
 
 @pytest.fixture(scope="module")
@@ -109,9 +110,7 @@ def expectation_suite(
     context: CloudDataContext,
     expectation_suite: ExpectationSuite,
 ) -> ExpectationSuite:
-    """Test adding Expectations and updating the Expectation Suite for the Data Assets
-    defined in this module. The package-level expectation_suite fixture handles add, get, and delete.
-    """
+    """Add Expectations for the Data Assets defined in this module."""
     expectation_suite.add_expectation(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
@@ -121,37 +120,22 @@ def expectation_suite(
             },
         )
     )
-    expectation_suite = context.add_or_update_expectation_suite(
-        expectation_suite=expectation_suite
-    )
-    assert (
-        len(expectation_suite.expectations) == 1
-    ), "Expectation Suite was not updated in the previous method call."
     return expectation_suite
 
 
 @pytest.mark.cloud
 def test_interactive_validator(
     context: CloudDataContext,
-    batch_request: BatchRequest,
-    expectation_suite: ExpectationSuite,
+    validator: Validator,
 ):
-    expectation_count = len(expectation_suite.expectations)
-    expectation_suite_name = expectation_suite.expectation_suite_name
-    validator = context.get_validator(
-        batch_request=batch_request,
-        expectation_suite_name=expectation_suite_name,
+    expectation_validation_result: ExpectationValidationResult = (
+        validator.expect_column_values_to_not_be_null(
+            column="id",
+            mostly=1,
+        )
     )
-    validator.head()
-    validator.expect_column_values_to_not_be_null(
-        column="id",
-        mostly=1,
-    )
+    assert expectation_validation_result.success
     validator.save_expectation_suite()
-    expectation_suite = context.get_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
-    assert len(expectation_suite.expectations) == expectation_count + 1
 
 
 @pytest.mark.cloud
