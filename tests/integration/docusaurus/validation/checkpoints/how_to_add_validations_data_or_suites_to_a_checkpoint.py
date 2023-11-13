@@ -40,7 +40,8 @@ validations = [
 ]
 
 checkpoint = context.add_or_update_checkpoint(
-    name="my_test_checkpoint", validations=validations
+    name="my_test_checkpoint",
+    validations=validations,
 )
 # </snippet>
 assert len(checkpoint.validations) == 2
