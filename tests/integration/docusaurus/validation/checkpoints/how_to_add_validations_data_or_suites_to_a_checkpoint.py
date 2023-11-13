@@ -2,10 +2,6 @@ import great_expectations as gx
 
 context = gx.get_context(mode="ephemeral")
 
-import great_expectations as gx
-
-context = gx.get_context(mode="ephemeral")
-
 one_validation = [
     {
         "batch_request": {
