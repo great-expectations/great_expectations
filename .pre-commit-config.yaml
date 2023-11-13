@@ -21,8 +21,8 @@ repos:
     rev: 23.10.1
     hooks:
       - id: black-jupyter
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.1.3"
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.1.4"
     hooks:
       - id: ruff
         files: ^(great_expectations|assets|contrib|scripts|tasks\.py|tests) # TODO: add docs/ etc.

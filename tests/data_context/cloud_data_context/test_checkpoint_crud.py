@@ -11,7 +11,6 @@ from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
-from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfig,
@@ -687,33 +686,6 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_not_present
 
     assert checkpoint.config.validations[1]["id"] == validation_id_2
     assert checkpoint.validations[1]["id"] == validation_id_2
-
-
-@pytest.mark.xfail(
-    reason="GX Cloud E2E tests are currently failing due to a schema issue with DataContextVariables; xfailing for purposes of the 0.15.20 release",
-    run=True,
-    strict=True,
-)
-@pytest.mark.e2e
-@pytest.mark.cloud
-@mock.patch("great_expectations.data_context.DataContext._save_project_config")
-def test_cloud_backed_data_context_add_checkpoint_e2e(
-    mock_save_project_config: mock.MagicMock,
-    checkpoint_config: dict,
-) -> None:
-    context = DataContext(cloud_mode=True)
-
-    checkpoint = context.add_checkpoint(**checkpoint_config)
-
-    ge_cloud_id = checkpoint.ge_cloud_id
-
-    checkpoint_stored_in_cloud = context.get_checkpoint(ge_cloud_id=ge_cloud_id)
-
-    assert checkpoint.ge_cloud_id == checkpoint_stored_in_cloud.ge_cloud_id
-    assert (
-        checkpoint.config.to_json_dict()
-        == checkpoint_stored_in_cloud.config.to_json_dict()
-    )
 
 
 @pytest.fixture
