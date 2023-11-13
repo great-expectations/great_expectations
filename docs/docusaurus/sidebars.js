@@ -101,6 +101,11 @@ module.exports = {
             },
             {
               type: 'link',
+              label: 'Add a Data Asset to an Existing Data Source',
+              href: '/docs/cloud/data_assets/manage_data_assets#add-a-data-asset-to-an-existing-data-source',
+            },
+            {
+              type: 'link',
               label: 'Edit a Data Asset',
               href: '/docs/cloud/data_assets/manage_data_assets#edit-a-data-asset',
             },
@@ -515,6 +520,7 @@ module.exports = {
       ]
     },
     { type: 'doc', id: 'changelog' },
+    { type: 'doc', id: 'troubleshooting' },
     { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
     'get_support',
     'contributing/contributing',

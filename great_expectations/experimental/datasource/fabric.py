@@ -25,6 +25,7 @@ from typing_extensions import Annotated, TypeAlias
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import FabricBatchSpec
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
@@ -177,6 +178,7 @@ class _PowerBIAsset(DataAsset):
             )
 
 
+@public_api
 class PowerBIDax(_PowerBIAsset):
     """Microsoft PowerBI DAX."""
 
@@ -187,6 +189,7 @@ class PowerBIDax(_PowerBIAsset):
     pandas_convert_dtypes: bool = True
 
 
+@public_api
 class PowerBIMeasure(_PowerBIAsset):
     """Microsoft PowerBI Measure."""
 
@@ -202,6 +205,7 @@ class PowerBIMeasure(_PowerBIAsset):
     use_xmla: bool = False
 
 
+@public_api
 class PowerBITable(_PowerBIAsset):
     """Microsoft PowerBI Table."""
 
@@ -224,6 +228,7 @@ AssetTypes = Annotated[
 ]
 
 
+@public_api
 class FabricPowerBIDatasource(Datasource):
     """
     Microsoft Fabric Datasource.
@@ -287,6 +292,7 @@ class FabricPowerBIDatasource(Datasource):
                 asset._datasource = self
                 asset.test_connection()
 
+    @public_api
     def add_powerbi_dax_asset(  # noqa: PLR0913
         self,
         name: str,
@@ -316,6 +322,7 @@ class FabricPowerBIDatasource(Datasource):
         )
         return self._add_asset(asset)
 
+    @public_api
     def add_powerbi_measure_asset(  # noqa: PLR0913
         self,
         name: str,
@@ -355,6 +362,7 @@ class FabricPowerBIDatasource(Datasource):
         )
         return self._add_asset(asset)
 
+    @public_api
     def add_powerbi_table_asset(  # noqa: PLR0913
         self,
         name: str,
