@@ -1288,10 +1288,6 @@ class Expectation(metaclass=MetaExpectation):
 
     @property
     def configuration(self) -> ExpectationConfiguration:
-        if self._configuration is None:
-            raise InvalidExpectationConfigurationError(
-                "cannot access configuration: expectation has not yet been configured"
-            )
         return self._configuration
 
     @public_api
