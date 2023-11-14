@@ -350,8 +350,8 @@ class Expectation(metaclass=MetaExpectation):
     examples: ClassVar[List[dict]] = []
 
     def __init__(self, configuration: ExpectationConfiguration) -> None:
-        self.validate_configuration(configuration=configuration)
         self._configuration = configuration
+        self.validate_configuration(configuration=configuration)
 
     @classmethod
     def is_abstract(cls) -> bool:

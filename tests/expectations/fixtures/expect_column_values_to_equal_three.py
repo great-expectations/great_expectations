@@ -37,6 +37,9 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     success_keys = ("mostly",)
     # default_kwarg_values = ColumnMapExpectation.default_kwarg_values
 
+    def validate_configuration(self, configuration) -> None:
+        pass
+
 
 class ExpectColumnValuesToEqualThree__SecondIteration(ExpectColumnValuesToEqualThree):
     """Expect values in this column to equal the number three."""
