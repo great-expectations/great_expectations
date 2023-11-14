@@ -10,6 +10,25 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.2
+* [DOCS] Update Connect to SQL Database Data Assets ([#8918](https://github.com/great-expectations/great_expectations/pull/8918))
+* [DOCS] DSB-353: Add GX Cloud Architecture and Deployment Patterns page ([#8904](https://github.com/great-expectations/great_expectations/pull/8904))
+* [DOCS] Update descs for custom expectations ([#8923](https://github.com/great-expectations/great_expectations/pull/8923))
+* [DOCS] Update cloud docs for data assets ([#8932](https://github.com/great-expectations/great_expectations/pull/8932))
+* [DOCS] Update syntax highlighting in main README ([#8811](https://github.com/great-expectations/great_expectations/pull/8811))
+* [DOCS] Minor Updates to GX Cloud Documentation ([#8939](https://github.com/great-expectations/great_expectations/pull/8939))
+* [DOCS] add `FabricPowerBIDatasource` api docs ([#8948](https://github.com/great-expectations/great_expectations/pull/8948))
+* [DOCS]  Document Add Data Asset to Existing Data Source Functionality ([#8949](https://github.com/great-expectations/great_expectations/pull/8949))
+* [DOCS] Create OSS Troubleshooting Topic ([#8898](https://github.com/great-expectations/great_expectations/pull/8898))
+* [DOCS] Minor Updates to Create a Data Asset ([#8952](https://github.com/great-expectations/great_expectations/pull/8952))
+* [MAINTENANCE] Helpful Message for Expectations that require Metrics that are not available ([#8906](https://github.com/great-expectations/great_expectations/pull/8906))
+* [MAINTENANCE] Lint Docs tests ([#8930](https://github.com/great-expectations/great_expectations/pull/8930))
+* [MAINTENANCE] `PandasFilesystemDatasource` E2E tests ([#8884](https://github.com/great-expectations/great_expectations/pull/8884))
+* [MAINTENANCE] Remove Cloud integration tests with duplicated logic ([#8940](https://github.com/great-expectations/great_expectations/pull/8940))
+* [MAINTENANCE] Fix error in boolean logic for local assume command ([#8941](https://github.com/great-expectations/great_expectations/pull/8941))
+* [MAINTENANCE] pre-commit autoupdate ([#8934](https://github.com/great-expectations/great_expectations/pull/8934))
+* [MAINTENANCE] Add local verify step for pact tests ([#8876](https://github.com/great-expectations/great_expectations/pull/8876))
+
 ### 0.18.1
 * [FEATURE] Expect column specified percentile value to be above a given value. ([#8907](https://github.com/great-expectations/great_expectations/pull/8907)) (thanks @kurt1984)
 * [FEATURE] Warn users if more specific SQL Datasource is available. ([#8914](https://github.com/great-expectations/great_expectations/pull/8914))
