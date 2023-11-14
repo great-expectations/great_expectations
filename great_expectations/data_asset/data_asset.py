@@ -850,7 +850,7 @@ class DataAsset:
 
                 results.append(result)
 
-            statistics = _calc_validation_statistics(results)
+            statistics = calc_validation_statistics(results)
 
             if only_return_failures:
                 abbrev_results = []
@@ -1171,28 +1171,3 @@ class ValidationStatistics(NamedTuple):
     unsuccessful_expectations: int
     success_percent: float | None
     success: bool
-
-
-def _calc_validation_statistics(validation_results) -> ValidationStatistics:
-    """
-    Calculate summary statistics for the validation results and
-    return ``ExpectationStatistics``.
-    """
-    # calc stats
-    successful_expectations = sum(exp.success for exp in validation_results)
-    evaluated_expectations = len(validation_results)
-    unsuccessful_expectations = evaluated_expectations - successful_expectations
-    success = successful_expectations == evaluated_expectations
-    try:
-        success_percent = successful_expectations / evaluated_expectations * 100
-    except ZeroDivisionError:
-        # success_percent = float("nan")
-        success_percent = None
-
-    return ValidationStatistics(
-        successful_expectations=successful_expectations,
-        evaluated_expectations=evaluated_expectations,
-        unsuccessful_expectations=unsuccessful_expectations,
-        success=success,
-        success_percent=success_percent,
-    )

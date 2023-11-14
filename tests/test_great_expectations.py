@@ -4,6 +4,7 @@ import re
 import unittest
 
 import pandas as pd
+from great_expectations.validator.validator import calc_validation_statistics
 import pytest
 
 import great_expectations as gx
@@ -18,7 +19,6 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.data_asset.data_asset import (
     ValidationStatistics,
-    _calc_validation_statistics,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import MetaPandasDataset, PandasDataset
@@ -263,7 +263,7 @@ def test_validate_catch_invalid_parameter(empty_data_context):
 @pytest.mark.unit
 def test_stats_no_expectations():
     expectation_results = []
-    actual = _calc_validation_statistics(expectation_results)
+    actual = calc_validation_statistics(expectation_results)
 
     # pay attention to these two
     assert None is actual.success_percent
@@ -277,7 +277,7 @@ def test_stats_no_expectations():
 @pytest.mark.unit
 def test_stats_no_successful_expectations():
     expectation_results = [ExpectationValidationResult(success=False)]
-    actual = _calc_validation_statistics(expectation_results)
+    actual = calc_validation_statistics(expectation_results)
     expected = ValidationStatistics(1, 0, 1, 0.0, False)
     assert expected == actual
 
@@ -286,7 +286,7 @@ def test_stats_no_successful_expectations():
         ExpectationValidationResult(success=False),
         ExpectationValidationResult(success=False),
     ]
-    actual = _calc_validation_statistics(expectation_results)
+    actual = calc_validation_statistics(expectation_results)
     expected = ValidationStatistics(3, 0, 3, 0.0, False)
     assert expected == actual
 
@@ -296,7 +296,7 @@ def test_stats_all_successful_expectations():
     expectation_results = [
         ExpectationValidationResult(success=True),
     ]
-    actual = _calc_validation_statistics(expectation_results)
+    actual = calc_validation_statistics(expectation_results)
     expected = ValidationStatistics(1, 1, 0, 100.0, True)
     assert expected == actual
 
@@ -305,7 +305,7 @@ def test_stats_all_successful_expectations():
         ExpectationValidationResult(success=True),
         ExpectationValidationResult(success=True),
     ]
-    actual = _calc_validation_statistics(expectation_results)
+    actual = calc_validation_statistics(expectation_results)
     expected = ValidationStatistics(3, 3, 0, 100.0, True)
     assert expected == actual
 
@@ -316,7 +316,7 @@ def test_stats_mixed_expectations():
         ExpectationValidationResult(success=False),
         ExpectationValidationResult(success=True),
     ]
-    actual = _calc_validation_statistics(expectation_results)
+    actual = calc_validation_statistics(expectation_results)
     expected = ValidationStatistics(2, 1, 1, 50.0, False)
     assert expected == actual
 
