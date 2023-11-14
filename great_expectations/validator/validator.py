@@ -2059,6 +2059,7 @@ class BridgeValidator:
                 **self.batch.batch_kwargs.get("dataset_options", {}),
             )
 
+
 def calc_validation_statistics(
     validation_results: list[ExpectationValidationResult],
 ) -> ValidationStatistics:
@@ -2068,9 +2069,7 @@ def calc_validation_statistics(
     """
     # calc stats
     evaluated_expectations = len(validation_results)
-    successful_expectations = len(
-        [exp for exp in validation_results if exp.success]
-    )
+    successful_expectations = len([exp for exp in validation_results if exp.success])
     unsuccessful_expectations = evaluated_expectations - successful_expectations
     success = successful_expectations == evaluated_expectations
     try:

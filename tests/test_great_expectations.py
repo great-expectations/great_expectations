@@ -4,7 +4,6 @@ import re
 import unittest
 
 import pandas as pd
-from great_expectations.validator.validator import calc_validation_statistics
 import pytest
 
 import great_expectations as gx
@@ -24,6 +23,7 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import MetaPandasDataset, PandasDataset
 from great_expectations.exceptions import InvalidCacheValueError
 from great_expectations.util import is_library_loadable
+from great_expectations.validator.validator import calc_validation_statistics
 
 try:
     from unittest import mock
