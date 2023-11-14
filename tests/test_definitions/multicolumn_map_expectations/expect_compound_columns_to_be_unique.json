@@ -12,6 +12,11 @@
         "a": "IntegerType",
         "b": "IntegerType",
         "c": "IntegerType"
+      },
+      "mysql": {
+        "a": "INTEGER",
+        "b": "INTEGER",
+        "c": "INTEGER"
       }
     },
     "tests": [

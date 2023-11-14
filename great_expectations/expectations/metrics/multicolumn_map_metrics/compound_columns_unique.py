@@ -80,6 +80,31 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             "_table"
         )  # Note that here, "table" is of the "sqlalchemy.sql.selectable.Subquery" type.
 
+        # Filipe - 20231114
+        # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
+        # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created with
+        # the column we will be performing the expectation on, and the query is performed against it.
+        dialect = kwargs.get("_dialect")
+        sql_engine = kwargs.get("_sqlalchemy_engine")
+        try:
+            dialect_name = dialect.dialect.name
+        except AttributeError:
+            try:
+                dialect_name = dialect.name
+            except AttributeError:
+                dialect_name = ""
+        if sql_engine and dialect and dialect_name == "mysql":
+            partition_by_columns = sa.func.rank().over(
+                partition_by=[table.c.get(column) for column in column_names]
+            ).label('_num_rows')
+            count_selector = column_list + [partition_by_columns]
+            original_table_clause = (
+                sa.select(*count_selector)
+                .select_from(table)
+                .alias("original_table_clause")
+            )
+            return original_table_clause
+
         # Step-1: Obtain the SQLAlchemy "FromClause" version of the original "table" for the purposes of gaining the
         # "FromClause.c" attribute, which is a namespace of all the columns contained within the "FROM" clause (these
         # elements are themselves subclasses of the SQLAlchemy "ColumnElement" class).
