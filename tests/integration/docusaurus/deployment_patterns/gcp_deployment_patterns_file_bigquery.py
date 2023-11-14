@@ -1,6 +1,7 @@
 import os
-import tempfile
 import pathlib
+import tempfile
+
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -109,7 +110,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
 # adding validation results store
 
 # parse great_expectations.yml for comparison
-great_expectations_yaml_file_path = os.path.join(
+great_expectations_yaml_file_path = pathlib.Path(
     context.root_directory, FileDataContext.GX_YML
 )
 with open(great_expectations_yaml_file_path) as f:
@@ -212,7 +213,7 @@ data_docs_site_yaml = data_docs_site_yaml.replace(
 data_docs_site_yaml = data_docs_site_yaml.replace(
     "<YOUR GCS BUCKET NAME>", "test_datadocs_store"
 )
-great_expectations_yaml_file_path = os.path.join(
+great_expectations_yaml_file_path = pathlib.Path(
     context.root_directory, FileDataContext.GX_YML
 )
 with open(great_expectations_yaml_file_path) as f:
