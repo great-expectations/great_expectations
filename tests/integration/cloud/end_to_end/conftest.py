@@ -3,25 +3,28 @@ from __future__ import annotations
 import logging
 import os
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Final, Generator, Literal, Protocol
+from typing import TYPE_CHECKING, Final, Iterator, Literal, Protocol
 
 import numpy as np
 import pytest
 
 import great_expectations as gx
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import CloudDataContext
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
+    import py
+
     from great_expectations.compatibility import pyspark
     from great_expectations.compatibility.sqlalchemy import engine
 
 LOGGER: Final = logging.getLogger("tests")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def context() -> CloudDataContext:
     context = gx.get_context(
         mode="cloud",
@@ -31,6 +34,36 @@ def context() -> CloudDataContext:
     )
     assert isinstance(context, CloudDataContext)
     return context
+
+
+@pytest.fixture(scope="module")
+def tmp_dir(tmpdir_factory) -> py.path:
+    return tmpdir_factory.mktemp("project")
+
+
+@pytest.fixture(scope="module")
+def get_missing_datasource_error_type() -> type[Exception]:
+    return ValueError
+
+
+@pytest.fixture(scope="module")
+def get_missing_data_asset_error_type() -> type[Exception]:
+    return LookupError
+
+
+@pytest.fixture(scope="module")
+def get_missing_expectation_suite_error_type() -> type[Exception]:
+    return gx_exceptions.DataContextError
+
+
+@pytest.fixture(scope="module")
+def get_missing_checkpoint_error_type() -> type[Exception]:
+    return gx_exceptions.DataContextError
+
+
+@pytest.fixture(scope="module")
+def in_memory_batch_request_missing_dataframe_error_type() -> type[Exception]:
+    return ValueError
 
 
 class TableFactory(Protocol):
@@ -43,10 +76,9 @@ class TableFactory(Protocol):
         ...
 
 
-@pytest.fixture(scope="class")
-def table_factory() -> Generator[TableFactory, None, None]:
+@pytest.fixture(scope="module")
+def table_factory() -> Iterator[TableFactory]:
     """
-    Class scoped.
     Given a SQLAlchemy engine, table_name and schema,
     create the table if it does not exist and drop it after the test class.
     """
@@ -103,7 +135,7 @@ def table_factory() -> Generator[TableFactory, None, None]:
             transaction.commit()
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def spark_df_from_pandas_df():
     """
     Construct a spark dataframe from pandas dataframe.
@@ -131,7 +163,7 @@ def spark_df_from_pandas_df():
     return _construct_spark_df_from_pandas
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def spark_session() -> pyspark.SparkSession:
     from great_expectations.compatibility import pyspark
 
