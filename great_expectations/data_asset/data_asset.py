@@ -35,6 +35,7 @@ from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
 )
 from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.validator.validator import calc_validation_statistics
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)

@@ -13,17 +13,10 @@ from great_expectations.core import (
     expectationSuiteSchema,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.expectation_validation_result import (
-    ExpectationValidationResult,
-)
-from great_expectations.data_asset.data_asset import (
-    ValidationStatistics,
-)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import MetaPandasDataset, PandasDataset
 from great_expectations.exceptions import InvalidCacheValueError
 from great_expectations.util import is_library_loadable
-from great_expectations.validator.validator import calc_validation_statistics
 
 try:
     from unittest import mock
@@ -258,67 +251,6 @@ def test_validate_catch_invalid_parameter(empty_data_context):
         "min_value cannot be greater than max_value"
         in result.results[0].exception_info["exception_message"]
     )
-
-
-@pytest.mark.unit
-def test_stats_no_expectations():
-    expectation_results = []
-    actual = calc_validation_statistics(expectation_results)
-
-    # pay attention to these two
-    assert None is actual.success_percent
-    assert True is actual.success
-    # the rest is boring
-    assert 0 == actual.successful_expectations
-    assert 0 == actual.evaluated_expectations
-    assert 0 == actual.unsuccessful_expectations
-
-
-@pytest.mark.unit
-def test_stats_no_successful_expectations():
-    expectation_results = [ExpectationValidationResult(success=False)]
-    actual = calc_validation_statistics(expectation_results)
-    expected = ValidationStatistics(1, 0, 1, 0.0, False)
-    assert expected == actual
-
-    expectation_results = [
-        ExpectationValidationResult(success=False),
-        ExpectationValidationResult(success=False),
-        ExpectationValidationResult(success=False),
-    ]
-    actual = calc_validation_statistics(expectation_results)
-    expected = ValidationStatistics(3, 0, 3, 0.0, False)
-    assert expected == actual
-
-
-@pytest.mark.unit
-def test_stats_all_successful_expectations():
-    expectation_results = [
-        ExpectationValidationResult(success=True),
-    ]
-    actual = calc_validation_statistics(expectation_results)
-    expected = ValidationStatistics(1, 1, 0, 100.0, True)
-    assert expected == actual
-
-    expectation_results = [
-        ExpectationValidationResult(success=True),
-        ExpectationValidationResult(success=True),
-        ExpectationValidationResult(success=True),
-    ]
-    actual = calc_validation_statistics(expectation_results)
-    expected = ValidationStatistics(3, 3, 0, 100.0, True)
-    assert expected == actual
-
-
-@pytest.mark.unit
-def test_stats_mixed_expectations():
-    expectation_results = [
-        ExpectationValidationResult(success=False),
-        ExpectationValidationResult(success=True),
-    ]
-    actual = calc_validation_statistics(expectation_results)
-    expected = ValidationStatistics(2, 1, 1, 50.0, False)
-    assert expected == actual
 
 
 class TestIO(unittest.TestCase):

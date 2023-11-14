@@ -34,7 +34,11 @@ from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
 from great_expectations.validator.validation_graph import ValidationGraph
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import (
+    ValidationStatistics,
+    Validator,
+    calc_validation_statistics,
+)
 
 
 @pytest.fixture()
@@ -1654,3 +1658,64 @@ def test_graph_validate_with_two_expectations_and_first_expectation_with_result_
             exception_info=None,
         ),
     ]
+
+
+@pytest.mark.unit
+def test_stats_no_expectations():
+    expectation_results = []
+    actual = calc_validation_statistics(expectation_results)
+
+    # pay attention to these two
+    assert None is actual.success_percent
+    assert True is actual.success
+    # the rest is boring
+    assert 0 == actual.successful_expectations
+    assert 0 == actual.evaluated_expectations
+    assert 0 == actual.unsuccessful_expectations
+
+
+@pytest.mark.unit
+def test_stats_no_successful_expectations():
+    expectation_results = [ExpectationValidationResult(success=False)]
+    actual = calc_validation_statistics(expectation_results)
+    expected = ValidationStatistics(1, 0, 1, 0.0, False)
+    assert expected == actual
+
+    expectation_results = [
+        ExpectationValidationResult(success=False),
+        ExpectationValidationResult(success=False),
+        ExpectationValidationResult(success=False),
+    ]
+    actual = calc_validation_statistics(expectation_results)
+    expected = ValidationStatistics(3, 0, 3, 0.0, False)
+    assert expected == actual
+
+
+@pytest.mark.unit
+def test_stats_all_successful_expectations():
+    expectation_results = [
+        ExpectationValidationResult(success=True),
+    ]
+    actual = calc_validation_statistics(expectation_results)
+    expected = ValidationStatistics(1, 1, 0, 100.0, True)
+    assert expected == actual
+
+    expectation_results = [
+        ExpectationValidationResult(success=True),
+        ExpectationValidationResult(success=True),
+        ExpectationValidationResult(success=True),
+    ]
+    actual = calc_validation_statistics(expectation_results)
+    expected = ValidationStatistics(3, 3, 0, 100.0, True)
+    assert expected == actual
+
+
+@pytest.mark.unit
+def test_stats_mixed_expectations():
+    expectation_results = [
+        ExpectationValidationResult(success=False),
+        ExpectationValidationResult(success=True),
+    ]
+    actual = calc_validation_statistics(expectation_results)
+    expected = ValidationStatistics(2, 1, 1, 50.0, False)
+    assert expected == actual
