@@ -349,12 +349,8 @@ class Expectation(metaclass=MetaExpectation):
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
 
-    def __init__(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        if configuration:
-            self.validate_configuration(configuration=configuration)
-
+    def __init__(self, configuration: ExpectationConfiguration) -> None:
+        self.validate_configuration(configuration=configuration)
         self._configuration = configuration
 
     @classmethod
