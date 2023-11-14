@@ -12,7 +12,7 @@ import warnings
 from collections import Counter, defaultdict
 from collections.abc import Hashable
 from functools import wraps
-from typing import Any, Dict, List, NamedTuple, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from marshmallow import ValidationError
 
@@ -35,7 +35,9 @@ from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
 )
 from great_expectations.exceptions import GreatExpectationsError
-from great_expectations.validator.validator import calc_validation_statistics
+from great_expectations.validator.validation_statistics import (
+    calc_validation_statistics,
+)
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -1164,11 +1166,3 @@ class DataAsset:
 
         new_function = self.expectation(argspec)(function)
         return new_function(self, *args, **kwargs)
-
-
-class ValidationStatistics(NamedTuple):
-    evaluated_expectations: int
-    successful_expectations: int
-    unsuccessful_expectations: int
-    success_percent: float | None
-    success: bool
