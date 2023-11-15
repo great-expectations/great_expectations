@@ -85,7 +85,6 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created with
         # the column we will be performing the expectation on, and the query is performed against it.
         dialect = kwargs.get("_dialect")
-        sql_engine = kwargs.get("_sqlalchemy_engine")
         try:
             dialect_name = dialect.dialect.name
         except AttributeError:
@@ -93,11 +92,14 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
                 dialect_name = dialect.name
             except AttributeError:
                 dialect_name = ""
-        if sql_engine and dialect and dialect_name == "mysql":
+        if dialect and dialect_name == "mysql":
+            table_columns_selector = [
+                sa.column(column_name) for column_name in table_columns
+            ]
             partition_by_columns = sa.func.rank().over(
                 partition_by=[table.c.get(column) for column in column_names]
             ).label('_num_rows')
-            count_selector = column_list + [partition_by_columns]
+            count_selector = table_columns_selector + [partition_by_columns]
             original_table_clause = (
                 sa.select(*count_selector)
                 .select_from(table)
