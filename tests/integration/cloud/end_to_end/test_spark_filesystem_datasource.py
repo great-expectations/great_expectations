@@ -11,6 +11,8 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.datasource.data_connector.util import normalize_directory_path
 
 if TYPE_CHECKING:
+    import py
+
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.core import ExpectationSuite
     from great_expectations.data_context import CloudDataContext
@@ -23,35 +25,36 @@ if TYPE_CHECKING:
     )
 
 
-@pytest.fixture
-def base_dir(tmpdir) -> Iterator[pathlib.Path]:
-    dir_path = tmpdir / "data"
+@pytest.fixture(scope="module")
+def base_dir(tmp_dir: py.path) -> pathlib.Path:
+    dir_path = tmp_dir / "data"
     dir_path.mkdir()
     df = pd.DataFrame(
         {"name": [1, 2, 3, 4], "id": ["one", "two", "three", "four"]},
     )
     csv_path = dir_path / "data.csv"
     df.to_csv(csv_path)
-    yield dir_path
+    return dir_path
 
 
-@pytest.fixture
-def updated_base_dir(tmpdir) -> Iterator[pathlib.Path]:
-    dir_path = tmpdir / "other_data"
+@pytest.fixture(scope="module")
+def updated_base_dir(tmp_dir: py.path) -> pathlib.Path:
+    dir_path = tmp_dir / "other_data"
     dir_path.mkdir()
     df = pd.DataFrame(
         {"name": [1, 2, 3, 4], "id": ["one", "two", "three", "four"]},
     )
     csv_path = dir_path / "data.csv"
     df.to_csv(csv_path)
-    yield dir_path
+    return dir_path
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def datasource(
     context: CloudDataContext,
     base_dir: pathlib.Path,
     updated_base_dir: pathlib.Path,
+    get_missing_datasource_error_type: type[Exception],
 ) -> Iterator[SparkFilesystemDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
     original_base_dir = base_dir
@@ -80,40 +83,37 @@ def datasource(
     assert (
         datasource.base_directory == original_base_dir
     ), "The datasource was not updated in the previous method call."
-
     yield datasource
-    # PP-692: this doesn't work due to a bug
-    # calling delete_datasource() will fail with:
-    # Datasource is used by Checkpoint <LONG HASH>
-    # This is confirmed to be the default Checkpoint,
-    # but error message is not specific enough to know without additional inspection
-    # context.delete_datasource(datasource_name=datasource_name)
+    context.delete_datasource(datasource_name=datasource_name)
+    with pytest.raises(get_missing_datasource_error_type):
+        context.get_datasource(datasource_name=datasource_name)
 
 
-@pytest.fixture
-def data_asset(datasource: SparkFilesystemDatasource) -> Iterator[CSVAsset]:
+@pytest.fixture(scope="module")
+def data_asset(
+    datasource: SparkFilesystemDatasource,
+    get_missing_data_asset_error_type: type[Exception],
+) -> Iterator[CSVAsset]:
     asset_name = f"i{uuid.uuid4().hex}"
 
     _ = datasource.add_csv_asset(name=asset_name, header=True, infer_schema=True)
     csv_asset = datasource.get_asset(asset_name=asset_name)
-
     yield csv_asset
-    # PP-692: this doesn't work due to a bug
-    # calling delete_asset() will fail with:
-    # Cannot perform action because Asset is used by Checkpoint:
-    # end-to-end_pandas_filesystem_asset <SHORT HASH> - Default Checkpoint
-    # datasource.delete_asset(asset_name=asset_name)
+    datasource.delete_asset(asset_name=asset_name)
+    with pytest.raises(get_missing_data_asset_error_type):
+        datasource.get_asset(asset_name=asset_name)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def batch_request(data_asset: CSVAsset) -> BatchRequest:
     return data_asset.build_batch_request()
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def expectation_suite(
     context: CloudDataContext,
     data_asset: CSVAsset,
+    get_missing_expectation_suite_error_type: type[Exception],
 ) -> Iterator[ExpectationSuite]:
     expectation_suite_name = f"{data_asset.datasource.name} | {data_asset.name}"
     expectation_suite = context.add_expectation_suite(
@@ -132,16 +132,22 @@ def expectation_suite(
     expectation_suite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
+    assert (
+        len(expectation_suite.expectations) == 1
+    ), "Expectation Suite was not updated in the previous method call."
     yield expectation_suite
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
+    with pytest.raises(get_missing_expectation_suite_error_type):
+        context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def checkpoint(
     context: CloudDataContext,
     data_asset: CSVAsset,
     batch_request: BatchRequest,
     expectation_suite: ExpectationSuite,
+    get_missing_checkpoint_error_type: type[Exception],
 ) -> Iterator[Checkpoint]:
     checkpoint_name = f"{data_asset.datasource.name} | {data_asset.name}"
     _ = context.add_checkpoint(
@@ -167,6 +173,9 @@ def checkpoint(
         ],
     )
     checkpoint = context.get_checkpoint(name=checkpoint_name)
+    assert (
+        len(checkpoint.validations) == 1
+    ), "Checkpoint was not updated in the previous method call."
     yield checkpoint
     # PP-691: this is a bug
     # you should only have to pass name
@@ -174,6 +183,8 @@ def checkpoint(
         # name=checkpoint_name,
         id=checkpoint.ge_cloud_id,
     )
+    with pytest.raises(get_missing_checkpoint_error_type):
+        context.get_checkpoint(name=checkpoint_name)
 
 
 @pytest.mark.cloud
