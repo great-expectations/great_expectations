@@ -104,6 +104,7 @@ class SnowflakeDatasource(SQLDatasource):
     # TODO: rename this to `connection`?
     connection_string: Union[ConnectionDetails, ConfigStr, SnowflakeDsn]  # type: ignore[assignment] # Deviation from parent class as individual args are supported for connection
 
+    # TODO: pull this from ConnectionDetails
     _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
         "role",
         "account",
@@ -119,7 +120,13 @@ class SnowflakeDatasource(SQLDatasource):
     def _convert_root_connection_detail_fields(cls, values: dict) -> dict:
         """
         Convert root level connection detail fields to a ConnectionDetails compatible object.
+        This preserves backwards compatibility with the previous implementation of SnowflakeDatasource.
+
+        It also allows for users to continue to provide connection details in the
+        `context.sources.add_snowflake()` factory functions without nesting it in a
+        `connection_string` dict.
         """
+        # TODO: pull this from ConnectionDetails
         connection_detail_fields = {
             "account",
             "user",
