@@ -17,6 +17,13 @@ from great_expectations.datasource.fluent.snowflake_datasource import (
     "config_kwargs",
     [
         {"connection_string": "snowflake://my_user:password@my_account"},
+        {
+            "connection_string": {
+                "user": "my_user",
+                "password": "password",
+                "account": "my_account",
+            }
+        },
         {"user": "my_user", "password": "password", "account": "my_account"},
     ],
 )
@@ -43,10 +50,15 @@ def test_valid_config(config_kwargs: dict):
             {"account": "my_account", "user": "my_user"},
             id="incomplete connect_args",
         ),
+        pytest.param(
+            {"connection_string": {"account": "my_account", "user": "my_user"}},
+            {},
+            id="incomplete connection_string dict connect_args",
+        ),
     ],
 )
 def test_conflicting_connection_string_and_args_raises_error(
-    connection_string: ConfigStr | SnowflakeDsn | None, connect_args: dict
+    connection_string: ConfigStr | SnowflakeDsn | None | dict, connect_args: dict
 ):
     with pytest.raises(ValueError):
         _ = SnowflakeDatasource(connection_string=connection_string, **connect_args)
