@@ -449,6 +449,7 @@ module.exports = {
           ]
         },
         { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
+        { type: 'doc', id: 'troubleshooting' },
         'contributing/contributing',
         'get_support',
       ]
@@ -531,7 +532,6 @@ module.exports = {
         'terms/validation_result'
       ]
     },
-    { type: 'doc', id: 'changelog' },
   ]
 }
 
