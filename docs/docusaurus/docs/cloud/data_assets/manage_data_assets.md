@@ -67,7 +67,7 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
 10. Click **Finish**.
 
-11. Create an Expectation. See [Create an Expectation](/docs/cloud/expectations/manage_expectations#create-an-expectation).
+11. Add an Expectation. See [Add an Expectation](/docs/cloud/expectations/manage_expectations#add-an-expectation).
 
 ## View Data Asset metrics
 
