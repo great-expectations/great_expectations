@@ -351,7 +351,7 @@ class Expectation(metaclass=MetaExpectation):
 
     def __init__(self, configuration: ExpectationConfiguration) -> None:
         self._configuration = configuration
-        self.validate_configuration()
+        self.validate_configuration(configuration)
 
     @classmethod
     def is_abstract(cls) -> bool:
