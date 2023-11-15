@@ -45,7 +45,7 @@
         },
         "connection_string": {
             "title": "Connection String",
-            "anyOf": [
+            "oneOf": [
                 {
                     "$ref": "#/definitions/ConnectionDetails"
                 },

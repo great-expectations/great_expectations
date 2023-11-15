@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Union
+import logging
+from typing import TYPE_CHECKING, ClassVar, Final, Literal, Optional, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import AnyUrl, errors
@@ -21,6 +22,8 @@ from great_expectations.datasource.fluent.sql_datasource import (
 if TYPE_CHECKING:
     from great_expectations.compatibility import sqlalchemy
     from great_expectations.compatibility.pydantic.networks import Parts
+
+LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
 
 class _UrlPasswordError(pydantic.UrlError):
@@ -115,8 +118,17 @@ class SnowflakeDatasource(SQLDatasource):
     class Config:
         @staticmethod
         def schema_extra(schema: dict, model: type[SnowflakeDatasource]) -> None:
-            """Customize jsonschema for SnowflakeDatasource."""
-            print(schema)
+            """
+            Customize jsonschema for SnowflakeDatasource.
+            https://docs.pydantic.dev/1.10/usage/schema/#schema-customization
+            Change connection_string to be a string or a dict, but not both.
+            """
+            connection_string_prop = schema["properties"]["connection_string"].pop(
+                "anyOf"
+            )
+            schema["properties"]["connection_string"].update(
+                {"oneOf": connection_string_prop}
+            )
 
     def _get_connect_args(self) -> dict[str, str | bool]:
         excluded_fields: set[str] = set(SQLDatasource.__fields__.keys())
