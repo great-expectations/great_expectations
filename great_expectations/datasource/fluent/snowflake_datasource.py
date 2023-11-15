@@ -116,18 +116,11 @@ class SnowflakeDatasource(SQLDatasource):
         `context.sources.add_snowflake()` factory functions without nesting it in a
         `connection_string` dict.
         """
-        # TODO: pull this from ConnectionDetails
-        connection_detail_fields = {
-            "account",
-            "user",
-            "password",
-            "database",
-            "schema_",
-            "schema",
-            "warehouse",
-            "role",
-            "numpy",
+        connection_detail_fields: set[str] = {
+            "schema",  # field name in ConnectionDetails is schema_ (with underscore)
+            *ConnectionDetails.__fields__.keys(),
         }
+
         connection_details = {}
         for field in connection_detail_fields:
             if field in values:
