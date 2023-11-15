@@ -94,9 +94,11 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             except AttributeError:
                 dialect_name = ""
         if sql_engine and dialect and dialect_name == "mysql":
-            partition_by_columns = sa.func.rank().over(
-                partition_by=[table.c.get(column) for column in column_names]
-            ).label('_num_rows')
+            partition_by_columns = (
+                sa.func.rank()
+                .over(partition_by=[table.c.get(column) for column in column_names])
+                .label("_num_rows")
+            )
             count_selector = column_list + [partition_by_columns]
             original_table_clause = (
                 sa.select(*count_selector)
