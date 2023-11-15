@@ -135,7 +135,7 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
 )
 def test_expectation_succeeds_with_valid_mostly(fake_expectation_cls, config):
     try:
-        fake_expectation = fake_expectation_cls(config)
+        fake_expectation = fake_expectation_cls(configuration=config)
     except Exception:
         assert (
             False

@@ -339,6 +339,8 @@ class Expectation(ExpectationBase):
 
     __metaclass__ = MetaExpectation
 
+    configuration: Optional[ExpectationConfiguration] = None
+
     version: ClassVar[str] = ge_version
     domain_keys: ClassVar[Tuple[str, ...]] = ()
     success_keys: ClassVar[Tuple[str, ...]] = ()
@@ -359,13 +361,11 @@ class Expectation(ExpectationBase):
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
 
-    def __init__(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        if configuration:
-            self.validate_configuration(configuration=configuration)
-
-        self._configuration = configuration
+    @pydantic.validator("configuration")
+    def validate_config(self, config):
+        if config:
+            self.validate_configuration(config)
+        return config
 
     @classmethod
     def is_abstract(cls) -> bool:
@@ -1244,14 +1244,15 @@ class Expectation(ExpectationBase):
             InvalidExpectationConfigurationError: The configuration does not contain the values required
                 by the Expectation.
         """
-        if not configuration:
-            configuration = self.configuration
-        try:
-            assert (
-                configuration.expectation_type == self.expectation_type
-            ), f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
+        pass
+        # if not configuration:
+        #     configuration = self.configuration
+        # try:
+        #     assert (
+        #         configuration.expectation_type == self.expectation_type
+        #     ), f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"
+        # except AssertionError as e:
+        #     raise InvalidExpectationConfigurationError(str(e))
 
     @public_api
     def validate(  # noqa: PLR0913
@@ -1300,13 +1301,13 @@ class Expectation(ExpectationBase):
         )
         return expectation_validation_result_list[0]
 
-    @property
-    def configuration(self) -> ExpectationConfiguration:
-        if self._configuration is None:
-            raise InvalidExpectationConfigurationError(
-                "cannot access configuration: expectation has not yet been configured"
-            )
-        return self._configuration
+    # @property
+    # def configuration(self) -> ExpectationConfiguration:
+    #     if self._configuration is None:
+    #         raise InvalidExpectationConfigurationError(
+    #             "cannot access configuration: expectation has not yet been configured"
+    #         )
+    #     return self._configuration
 
     @public_api
     def run_diagnostics(  # noqa: PLR0913
