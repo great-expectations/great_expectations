@@ -37,6 +37,7 @@ from dateutil.parser import parse
 from typing_extensions import ParamSpec
 
 from great_expectations import __version__ as ge_version
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (
     deprecated_method_or_class,
@@ -296,8 +297,15 @@ class MetaExpectation(ABCMeta):
         return newclass
 
 
+class ExpectationBase(pydantic.BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
+    pass
+
+
 @public_api
-class Expectation(metaclass=MetaExpectation):
+class Expectation(ExpectationBase):
     """Base class for all Expectations.
 
     Expectation classes *must* have the following attributes set:
@@ -329,7 +337,9 @@ class Expectation(metaclass=MetaExpectation):
         2. Data Docs rendering methods decorated with the @renderer decorator. See the
     """
 
-    version: ClassVar = ge_version
+    __metaclass__ = MetaExpectation
+
+    version: ClassVar[str] = ge_version
     domain_keys: ClassVar[Tuple[str, ...]] = ()
     success_keys: ClassVar[Tuple[str, ...]] = ()
     runtime_keys: ClassVar[Tuple[str, ...]] = (
@@ -338,7 +348,7 @@ class Expectation(metaclass=MetaExpectation):
         "result_format",
     )
     default_kwarg_values: ClassVar[
-        dict[str, bool | str | float | RuleBasedProfilerConfig | None]
+        Dict[str, Union[bool, str, float, RuleBasedProfilerConfig, None]]
     ] = {
         "include_config": True,
         "catch_exceptions": False,
@@ -2352,7 +2362,7 @@ class BatchExpectation(Expectation, ABC):
         "condition_parser",
     )
     metric_dependencies: ClassVar[Tuple[str, ...]] = ()
-    domain_type: ClassVar = MetricDomainTypes.TABLE
+    domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.TABLE
     args_keys: ClassVar[Tuple[str, ...]] = ()
 
     @override
@@ -2750,14 +2760,14 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     """
 
     map_metric: ClassVar[Optional[str]] = None
-    domain_keys: ClassVar[tuple[str, ...]] = (
+    domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
         "table",
         "column",
         "row_condition",
         "condition_parser",
     )
-    domain_type: ClassVar = MetricDomainTypes.COLUMN
+    domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.COLUMN
     success_keys: ClassVar[Tuple[str, ...]] = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
@@ -3031,7 +3041,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             kwargs from the Expectation Configuration.
     """
 
-    map_metric = None
+    map_metric: ClassVar[Optional[str]] = None
     domain_keys = (
         "batch_id",
         "table",
@@ -3303,7 +3313,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             kwargs from the Expectation Configuration.
     """
 
-    map_metric = None
+    map_metric: ClassVar[Optional[str]] = None
     domain_keys = (
         "batch_id",
         "table",
