@@ -140,11 +140,13 @@ class SnowflakeDatasource(SQLDatasource):
 
     @pydantic.root_validator
     def _check_xor_input_args(cls, values: dict) -> dict:
-        # Method 1 - connection string
+        # keeping this validator isn't strictly necessary, but it provides a better error message
         connection_string: str | ConnectionDetails = values.get("connection_string")
         if connection_string:
+            # Method 1 - connection string
             if isinstance(connection_string, str):
                 return values
+            # Method 2 - individual args (account, user, and password are bare minimum)
             elif isinstance(connection_string, ConnectionDetails) and bool(
                 connection_string.account
                 and connection_string.user
