@@ -83,7 +83,7 @@ def validator(
     context: CloudDataContext,
     batch_request: BatchRequest,
     expectation_suite: ExpectationSuite,
-) -> Validator:
+) -> Iterator[Validator]:
     validator: Validator = context.get_validator(
         batch_request=batch_request,
         expectation_suite_name=expectation_suite.expectation_suite_name,
