@@ -39,7 +39,7 @@ def bobby_growth_numeric_data_assistant_result_usage_stats_enabled(
     no_usage_stats,
     bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
 ) -> GrowthNumericDataAssistantResult:
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -59,7 +59,7 @@ def bobby_growth_numeric_data_assistant_result_usage_stats_enabled(
 def bobby_growth_numeric_data_assistant_result(
     bobby_columnar_table_multi_batch_probabilistic_data_context: DataContext,
 ) -> GrowthNumericDataAssistantResult:
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -79,7 +79,7 @@ def bobby_growth_numeric_data_assistant_result(
 def quentin_implicit_invocation_result_actual_time(
     quentin_columnar_table_multi_batch_data_context: DataContext,
 ) -> GrowthNumericDataAssistantResult:
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -100,7 +100,7 @@ def quentin_implicit_invocation_result_actual_time(
 def quentin_implicit_invocation_result_frozen_time(
     quentin_columnar_table_multi_batch_data_context: DataContext,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -225,7 +225,7 @@ def test_growth_numeric_data_assistant_result_batch_id_to_batch_identifier_displ
 def test_growth_numeric_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -271,7 +271,7 @@ def test_growth_numeric_data_assistant_get_metrics_and_expectations_using_implic
 def test_growth_numeric_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
     quentin_columnar_table_multi_batch_data_context,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",

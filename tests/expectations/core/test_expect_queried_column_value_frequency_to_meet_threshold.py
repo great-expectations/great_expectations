@@ -56,7 +56,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
     warns,
     titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
 
     validator: Validator = context.get_validator(batch_request=batch_request)
 
@@ -142,7 +142,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
     warns,
     titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
 
     validator: Validator = context.get_validator(batch_request=batch_request)
 
@@ -304,7 +304,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
 def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite_multi_value(
     titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
 
     validator: Validator = context.get_validator(batch_request=sqlite_batch_request)
 

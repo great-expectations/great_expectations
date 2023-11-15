@@ -72,7 +72,7 @@ TIMESTAMP: str = "09/26/2019 13:42:41"
 
 @pytest.fixture
 def alice_validator(alice_columnar_table_single_batch_context) -> Validator:
-    context: DataContext = alice_columnar_table_single_batch_context
+    context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -98,7 +98,7 @@ def alice_validator(alice_columnar_table_single_batch_context) -> Validator:
 def bobby_validator(
     bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
 ) -> Validator:
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -126,7 +126,7 @@ def bobster_validator(
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ) -> Validator:
     """Utilizes a consistent bootstrap seed in its RBP NumericMetricRangeMultiBatchParameterBuilder."""
-    context: DataContext = (
+    context = (
         bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
     )
 
@@ -157,7 +157,7 @@ def quentin_validator(
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ) -> Validator:
     """Utilizes a consistent bootstrap seed in its RBP NumericMetricRangeMultiBatchParameterBuilder."""
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -192,7 +192,7 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
     This test most likely duplicates tests elsewhere, but it is more of a test of the configurable fixture.
     """
 
-    context: DataContext = alice_columnar_table_single_batch_context
+    context = alice_columnar_table_single_batch_context
 
     datasource_name: str = "alice_columnar_table_single_batch_datasource"
     data_connector_name: str = "alice_columnar_table_single_batch_data_connector"
@@ -571,7 +571,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     This test most likely duplicates tests elsewhere, but it is more of a test of the configurable fixture.
     """
 
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     datasource_name: str = "taxi_pandas"
     data_connector_name: str = "monthly"
@@ -1063,7 +1063,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     bobby_columnar_table_multi_batch_deterministic_data_context,
     bobby_validator: Validator,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context = bobby_columnar_table_multi_batch_deterministic_data_context
     validator: Validator = bobby_validator
 
     with restore_profiler_config(
@@ -1304,9 +1304,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 
         assert "profiler_config" not in expectation_impl.default_kwarg_values
 
-        context: DataContext = (
-            bobby_columnar_table_multi_batch_deterministic_data_context
-        )
+        context = bobby_columnar_table_multi_batch_deterministic_data_context
         validator: Validator = bobby_validator
 
         batch_request: dict

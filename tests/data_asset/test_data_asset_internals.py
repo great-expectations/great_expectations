@@ -18,7 +18,7 @@ from great_expectations.exceptions import InvalidExpectationConfigurationError
 def test_get_and_save_expectation_suite(
     tmp_path_factory, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     directory_name = str(
         tmp_path_factory.mktemp("test_get_and_save_expectation_config")
     )

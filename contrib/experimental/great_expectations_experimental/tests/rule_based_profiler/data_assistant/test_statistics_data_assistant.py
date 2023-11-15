@@ -47,7 +47,7 @@ def bobby_statistics_data_assistant_result(
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
     bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
 ) -> StatisticsDataAssistantResult:
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",

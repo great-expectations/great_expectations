@@ -7,12 +7,12 @@ from unittest import mock
 
 import pytest
 
+from great_expectations import get_context
 from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
-from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -640,7 +640,7 @@ def test_cloud_enabled_data_context_variables_e2e(
     new_site_name = f"docs_site_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
     updated_data_docs_sites[new_site_name] = {}
 
-    context = DataContext(cloud_mode=True)
+    context = get_context(cloud_mode=True)
 
     assert context.variables.plugins_directory != updated_plugins_dir
     assert context.variables.data_docs_sites != updated_data_docs_sites
@@ -653,7 +653,7 @@ def test_cloud_enabled_data_context_variables_e2e(
 
     context.variables.save_config()
 
-    context = DataContext(cloud_mode=True)
+    context = get_context(cloud_mode=True)
 
     assert context.variables.plugins_directory == updated_plugins_dir
     assert context.variables.data_docs_sites == updated_data_docs_sites
