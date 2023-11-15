@@ -3236,21 +3236,40 @@ def test_df(tmp_path_factory):
 
 
 @pytest.fixture
-def data_context_with_simple_sql_datasource_for_testing_get_batch(
-    sa, empty_data_context
-):
-    context = empty_data_context
-
+def sqlite_connection_string():
     db_file_path: str = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
             "test_sets", "test_cases_for_sql_data_connector.db"
         ),
     )
+    return f"sqlite:///{db_file_path}"
+
+
+@pytest.fixture
+def fds_data_context(
+    sa, empty_data_context: AbstractDataContext, sqlite_connection_string: str
+):
+    context = empty_data_context
+    datasource = context.sources.add_sqlite(
+        name="sqlite_datasource", connection_string=sqlite_connection_string
+    )
+    datasource.add_query_asset(
+        name="trip_asset",
+        query="SELECT * FROM table_partitioned_by_date_column__A",
+    )
+    return context
+
+
+@pytest.fixture
+def data_context_with_simple_sql_datasource_for_testing_get_batch(
+    sa, empty_data_context, sqlite_connection_string
+):
+    context = empty_data_context
 
     datasource_config: str = f"""
 class_name: SimpleSqlalchemyDatasource
-connection_string: sqlite:///{db_file_path}
+connection_string: {sqlite_connection_string}
 introspection:
     whole_table: {{}}
 
