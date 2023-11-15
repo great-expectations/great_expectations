@@ -19,6 +19,8 @@ def _log_request_method_and_response(r: requests.Response, *args, **kwargs):
         LOGGER.debug(f"{r}\n{pf(r.json(), depth=3)}")
     except json.JSONDecodeError:
         LOGGER.debug(f"{r}\n{r.content.decode()}")
+    except Exception as other_err:
+        LOGGER.info(f"{r} - Error logging response {other_err!r}")
 
 
 class _TimeoutHTTPAdapter(HTTPAdapter):
