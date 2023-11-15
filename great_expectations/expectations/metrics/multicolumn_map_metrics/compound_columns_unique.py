@@ -82,8 +82,10 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
 
         # Filipe - 20231114
         # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
-        # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created with
-        # the column we will be performing the expectation on, and the query is performed against it.
+        # more than once in the same query. The solution to this is to perform our operation without the need
+        # for a sub query. We can do this by using the window function count, to get the number of duplicate
+        # rows by over partition by the compound unique columns. This will give a table which has the same
+        # number of rows as the original table, but with an additional column _num_rows column.
         dialect = kwargs.get("_dialect")
         try:
             dialect_name = dialect.dialect.name
