@@ -1,8 +1,11 @@
-from typing import NamedTuple
+from __future__ import annotations
 
-from great_expectations.core.expectation_validation_result import (
-    ExpectationValidationResult,
-)
+from typing import TYPE_CHECKING, NamedTuple
+
+if TYPE_CHECKING:
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationValidationResult,
+    )
 
 
 class ValidationStatistics(NamedTuple):
