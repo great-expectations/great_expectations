@@ -532,6 +532,7 @@ module.exports = {
         'terms/validation_result'
       ]
     },
+    { type: 'doc', id: 'changelog' },
   ]
 }
 
