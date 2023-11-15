@@ -6,7 +6,6 @@ pytest -v --docs-tests -k "how_to_connect_to_one_or_more_files_using_spark" test
 """
 import pathlib
 
-
 import great_expectations as gx
 
 context = gx.get_context()

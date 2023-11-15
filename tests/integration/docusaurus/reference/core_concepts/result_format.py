@@ -1,18 +1,14 @@
 from typing import Any, Dict, List
 
 import pandas as pd
+
 import great_expectations as gx
+from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuiteValidationResult,
-    IDDict,
 )
-from great_expectations.checkpoint import Checkpoint
-from great_expectations.core.batch import Batch, BatchDefinition
-from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.util import filter_properties_dict
-from great_expectations.validator.validator import Validator
 
 # Snippet: example data frame for result_format
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/pandas_df_for_result_format">
@@ -48,7 +44,7 @@ validation_result = my_validator.expect_column_values_to_be_in_set(
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_boolean_example_output">
-assert validation_result.success == False
+assert validation_result.success is False
 assert validation_result.result == {}
 # </snippet>
 
@@ -60,7 +56,7 @@ validation_result = my_validator.expect_column_values_to_be_in_set(
 )
 # </snippet>
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_set_output">
-assert validation_result.success == False
+assert validation_result.success is False
 assert validation_result.result == {
     "element_count": 8,
     "unexpected_count": 5,
@@ -80,7 +76,7 @@ validation_result = my_validator.expect_column_mean_to_be_between(
 )
 # </snippet>
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_agg_output">
-assert validation_result.success == True
+assert validation_result.success is True
 assert validation_result.result == {"observed_value": 2.75}
 # </snippet>
 
@@ -99,7 +95,7 @@ validation_result = my_validator.expect_column_values_to_be_in_set(
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_set_output">
-assert validation_result.success == False
+assert validation_result.success is False
 assert validation_result.result == {
     "element_count": 8,
     "unexpected_count": 5,
@@ -132,7 +128,7 @@ validation_result = my_validator.expect_column_mean_to_be_between(
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_agg_output">
-assert validation_result.success == True
+assert validation_result.success is True
 assert validation_result.result == {"observed_value": 2.75}
 # </snippet>
 
@@ -150,7 +146,7 @@ validation_result = my_validator.expect_column_values_to_be_in_set(
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_set_output">
-assert validation_result.success == False
+assert validation_result.success is False
 assert validation_result.result == {
     "element_count": 8,
     "unexpected_count": 5,
@@ -193,7 +189,7 @@ validation_result = my_validator.expect_column_mean_to_be_between(
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_agg_output">
-assert validation_result.success == True
+assert validation_result.success is True
 assert validation_result.result == {"observed_value": 2.75}
 # </snippet>
 

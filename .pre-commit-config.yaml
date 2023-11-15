@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
       - id: check-ast
       - id: check-json
@@ -18,11 +18,11 @@ repos:
       - id: detect-private-key
         exclude: tests/test_fixtures/database_key_test*
   - repo: https://github.com/psf/black
-    rev: 23.3.0
+    rev: 23.10.1
     hooks:
       - id: black-jupyter
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.0.290"
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.1.4"
     hooks:
       - id: ruff
         files: ^(great_expectations|assets|contrib|scripts|tasks\.py|tests) # TODO: add docs/ etc.
