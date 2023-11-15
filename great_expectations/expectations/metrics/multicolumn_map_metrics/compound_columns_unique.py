@@ -96,9 +96,11 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             table_columns_selector = [
                 sa.column(column_name) for column_name in table_columns
             ]
-            partition_by_columns = sa.func.rank().over(
-                partition_by=[table.c.get(column) for column in column_names]
-            ).label('_num_rows')
+            partition_by_columns = (
+                sa.func.rank()
+                .over(partition_by=[table.c.get(column) for column in column_names])
+                .label("_num_rows")
+            )
             count_selector = table_columns_selector + [partition_by_columns]
             original_table_clause = (
                 sa.select(*count_selector)
