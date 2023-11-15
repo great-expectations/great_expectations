@@ -14,9 +14,10 @@ if TYPE_CHECKING:
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import BatchRequest, SnowflakeDatasource
     from great_expectations.datasource.fluent.sql_datasource import TableAsset
+    from tests.integration.cloud.end_to_end.conftest import TableFactory
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def connection_string() -> str:
     if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
         return "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci"
@@ -26,10 +27,11 @@ def connection_string() -> str:
         pytest.skip("no snowflake credentials")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def datasource(
     context: CloudDataContext,
     connection_string: str,
+    get_missing_datasource_error_type: type[Exception],
 ) -> Iterator[SnowflakeDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
     datasource = context.sources.add_snowflake(
@@ -69,16 +71,17 @@ def datasource(
         datasource.create_temp_table is False
     ), "The datasource was not updated in the previous method call."
     yield datasource
-    # PP-692: this doesn't work due to a bug
-    # calling delete_datasource() will fail with:
-    # Datasource is used by Checkpoint <LONG HASH>
-    # This is confirmed to be the default Checkpoint,
-    # but error message is not specific enough to know without additional inspection
-    # context.delete_datasource(datasource_name=datasource_name)
+    context.delete_datasource(datasource_name=datasource_name)
+    with pytest.raises(get_missing_datasource_error_type):
+        context.get_datasource(datasource_name=datasource_name)
 
 
-@pytest.fixture
-def data_asset(datasource: SnowflakeDatasource, table_factory) -> Iterator[TableAsset]:
+@pytest.fixture(scope="module")
+def data_asset(
+    datasource: SnowflakeDatasource,
+    table_factory: TableFactory,
+    get_missing_data_asset_error_type: type[Exception],
+) -> Iterator[TableAsset]:
     schema_name = f"i{uuid.uuid4().hex}"
     table_name = f"i{uuid.uuid4().hex}"
     table_factory(
@@ -92,22 +95,21 @@ def data_asset(datasource: SnowflakeDatasource, table_factory) -> Iterator[Table
     )
     table_asset = datasource.get_asset(asset_name=asset_name)
     yield table_asset
-    # PP-692: this doesn't work due to a bug
-    # calling delete_asset() will fail with:
-    # Cannot perform action because Asset is used by Checkpoint:
-    # end-to-end_snowflake_asset <SHORT HASH> - Default Checkpoint
-    # datasource.delete_asset(asset_name=asset_name)
+    datasource.delete_asset(asset_name=asset_name)
+    with pytest.raises(get_missing_data_asset_error_type):
+        datasource.get_asset(asset_name=asset_name)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def batch_request(data_asset: TableAsset) -> BatchRequest:
     return data_asset.build_batch_request()
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def expectation_suite(
     context: CloudDataContext,
     data_asset: TableAsset,
+    get_missing_expectation_suite_error_type: type[Exception],
 ) -> Iterator[ExpectationSuite]:
     expectation_suite_name = f"{data_asset.datasource.name} | {data_asset.name}"
     expectation_suite = context.add_expectation_suite(
@@ -126,16 +128,22 @@ def expectation_suite(
     expectation_suite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
+    assert (
+        len(expectation_suite.expectations) == 1
+    ), "Expectation Suite was not updated in the previous method call."
     yield expectation_suite
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
+    with pytest.raises(get_missing_expectation_suite_error_type):
+        context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def checkpoint(
     context: CloudDataContext,
     data_asset: TableAsset,
     batch_request: BatchRequest,
     expectation_suite: ExpectationSuite,
+    get_missing_checkpoint_error_type: type[Exception],
 ) -> Iterator[Checkpoint]:
     checkpoint_name = f"{data_asset.datasource.name} | {data_asset.name}"
     _ = context.add_checkpoint(
@@ -161,6 +169,9 @@ def checkpoint(
         ],
     )
     checkpoint = context.get_checkpoint(name=checkpoint_name)
+    assert (
+        len(checkpoint.validations) == 1
+    ), "Checkpoint was not updated in the previous method call."
     yield checkpoint
     # PP-691: this is a bug
     # you should only have to pass name
@@ -168,6 +179,8 @@ def checkpoint(
         # name=checkpoint_name,
         id=checkpoint.ge_cloud_id,
     )
+    with pytest.raises(get_missing_checkpoint_error_type):
+        context.get_checkpoint(name=checkpoint_name)
 
 
 @pytest.mark.cloud
