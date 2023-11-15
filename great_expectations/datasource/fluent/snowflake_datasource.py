@@ -137,7 +137,7 @@ class SnowflakeDatasource(SQLDatasource):
         )
         if connection_string:
             # Method 1 - connection string
-            if isinstance(connection_string, str):
+            if isinstance(connection_string, (str, ConfigStr)):
                 return values
             # Method 2 - individual args (account, user, and password are bare minimum)
             elif isinstance(connection_string, ConnectionDetails) and bool(

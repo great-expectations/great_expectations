@@ -5,6 +5,7 @@ import sqlalchemy as sa
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.snowflake import snowflake
+from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.snowflake_datasource import (
     SnowflakeDatasource,
@@ -12,11 +13,18 @@ from great_expectations.datasource.fluent.snowflake_datasource import (
 )
 
 
+@pytest.fixture
+def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MY_CONN_STR", "snowflake://my_user:password@my_account")
+    monkeypatch.setenv("MY_PASSWORD", "my_password")
+
+
 @pytest.mark.snowflake  # TODO: make this a unit test
 @pytest.mark.parametrize(
     "config_kwargs",
     [
         {"connection_string": "snowflake://my_user:password@my_account"},
+        {"connection_string": "${MY_CONN_STR}"},
         {
             "connection_string": {
                 "user": "my_user",
@@ -24,13 +32,25 @@ from great_expectations.datasource.fluent.snowflake_datasource import (
                 "account": "my_account",
             }
         },
+        {
+            "connection_string": {
+                "user": "my_user",
+                "password": "${MY_PASSWORD}",
+                "account": "my_account",
+            }
+        },
         {"user": "my_user", "password": "password", "account": "my_account"},
     ],
 )
-def test_valid_config(config_kwargs: dict):
+def test_valid_config(
+    empty_file_context: AbstractDataContext, seed_env_vars: None, config_kwargs: dict
+):
     my_sf_ds_1 = SnowflakeDatasource(name="my_sf_ds_1", **config_kwargs)
     assert my_sf_ds_1
 
+    my_sf_ds_1._data_context = (
+        empty_file_context  # attach to enable config substitution
+    )
     sql_engine = my_sf_ds_1.get_engine()
     assert isinstance(sql_engine, sa.engine.Engine)
 
