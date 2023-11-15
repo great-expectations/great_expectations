@@ -61,6 +61,11 @@ def test_conflicting_connection_string_and_args_raises_error(
             [
                 {
                     "loc": ("connection_string",),
+                    "msg": "value is not a valid dict",
+                    "type": "type_error.dict",
+                },
+                {
+                    "loc": ("connection_string",),
                     "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
                     "type": "value_error",
                 },
@@ -82,6 +87,11 @@ def test_conflicting_connection_string_and_args_raises_error(
             [
                 {
                     "loc": ("connection_string",),
+                    "msg": "value is not a valid dict",
+                    "type": "type_error.dict",
+                },
+                {
+                    "loc": ("connection_string",),
                     "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
                     "type": "value_error",
                 },
@@ -101,6 +111,11 @@ def test_conflicting_connection_string_and_args_raises_error(
         pytest.param(
             "snowflake://user_login_name:password@",
             [
+                {
+                    "loc": ("connection_string",),
+                    "msg": "value is not a valid dict",
+                    "type": "type_error.dict",
+                },
                 {
                     "loc": ("connection_string",),
                     "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",

@@ -115,6 +115,46 @@ class SnowflakeDatasource(SQLDatasource):
         "warehouse",
     }
 
+    @pydantic.root_validator(pre=True)
+    def _convert_root_connection_detail_fields(cls, values: dict) -> dict:
+        """
+        Convert root level connection detail fields to a ConnectionDetails compatible object.
+        """
+        connection_detail_fields = {
+            "account",
+            "user",
+            "password",
+            "database",
+            "schema_",
+            "warehouse",
+            "role",
+            "numpy",
+        }
+        connection_details = {}
+        for field in connection_detail_fields:
+            if field in values:
+                connection_details[field] = values.pop(field)
+        if connection_details:
+            values["connection_string"] = connection_details
+        return values
+
+    @pydantic.root_validator
+    def _check_xor_input_args(cls, values: dict) -> dict:
+        # Method 1 - connection string
+        connection_string: str | ConnectionDetails = values.get("connection_string")
+        if connection_string:
+            if isinstance(connection_string, str):
+                return values
+            elif isinstance(connection_string, ConnectionDetails) and bool(
+                connection_string.account
+                and connection_string.user
+                and connection_string.password
+            ):
+                return values
+        raise ValueError(
+            "Must provide either a connection string or a combination of account, user, and password."
+        )
+
     class Config:
         @staticmethod
         def schema_extra(schema: dict, model: type[SnowflakeDatasource]) -> None:
