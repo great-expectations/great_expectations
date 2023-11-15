@@ -40,6 +40,11 @@ module.exports = {
           href: "https://greatexpectations.io/company"
         }
       }
+    },
+    docs: {
+      sidebar: {
+        autoCollapseCategories: true,
+      },
     }, 
     algolia: {
       // See: https://docusaurus.io/docs/search#connecting-algolia
