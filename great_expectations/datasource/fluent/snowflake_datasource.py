@@ -133,6 +133,7 @@ class SnowflakeDatasource(SQLDatasource):
             "password",
             "database",
             "schema_",
+            "schema",
             "warehouse",
             "role",
             "numpy",
