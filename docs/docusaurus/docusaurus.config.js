@@ -24,8 +24,6 @@ module.exports = {
       },
     ],
   ],
-
-
   themeConfig: {
     gxCard: {
       title: "What is GX Cloud?",
