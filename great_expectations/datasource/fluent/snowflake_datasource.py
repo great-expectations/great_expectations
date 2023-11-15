@@ -101,7 +101,7 @@ class SnowflakeDatasource(SQLDatasource):
     """
 
     type: Literal["snowflake"] = "snowflake"  # type: ignore[assignment]
-    # TODO: rename this to `connection`?
+    # TODO: rename this to `connection` for v1?
     connection_string: Union[ConnectionDetails, ConfigStr, SnowflakeDsn]  # type: ignore[assignment] # Deviation from parent class as individual args are supported for connection
 
     # TODO: add props for account, user, password, etc?
