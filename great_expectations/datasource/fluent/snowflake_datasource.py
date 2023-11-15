@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, ClassVar, Final, Literal, Optional, Union
+from typing import TYPE_CHECKING, Final, Literal, Optional, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import AnyUrl, errors
@@ -104,17 +104,7 @@ class SnowflakeDatasource(SQLDatasource):
     # TODO: rename this to `connection`?
     connection_string: Union[ConnectionDetails, ConfigStr, SnowflakeDsn]  # type: ignore[assignment] # Deviation from parent class as individual args are supported for connection
 
-    # TODO: pull this from ConnectionDetails
-    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
-        "role",
-        "account",
-        "schema_",
-        "database",
-        "user",
-        "password",
-        "numpy",
-        "warehouse",
-    }
+    # TODO: add props for account, user, password, etc?
 
     @pydantic.root_validator(pre=True)
     def _convert_root_connection_detail_fields(cls, values: dict) -> dict:
