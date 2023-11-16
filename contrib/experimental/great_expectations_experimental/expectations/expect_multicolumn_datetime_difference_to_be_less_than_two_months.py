@@ -64,6 +64,83 @@ class ExpectMulticolumnDatetimeDifferenceToBeLessThanTwoMonths(
 
     """
 
+    examples = [
+
+        {
+            "data":{
+                "start_datetime": [ 
+                    "2023-01-01",
+                    "2023-02-01",
+                    "2023-03-01",
+                    "2023-04-01",
+                    "2023-05-01",
+                ],
+                "end_datetime_within_threshold": [
+                    "2023-01-15",
+                    "2023-03-02",
+                    "2023-05-01",
+                    "2023-06-01",
+                    "2023-07-01",
+                ],
+                "end_datetime_above_threshold": [
+                    "2023-04-15",
+                    "2023-05-02",
+                    "2023-06-01",
+                    "2023-07-01",
+                    "2023-09-01",
+                ],
+                "end_datetime_with_Nan": [
+                    pd.NaT,
+                    "2023-03-02",
+                    "2023-05-01",
+                    "2023-06-01",
+                    pd.NaT,
+                ]
+            },
+        "tests": [
+            {
+                "title": "within threshold",
+                "exact_match_out": False,
+                "include_in_gallery": True,
+                "in":{
+                    "start_datetime": "start_datetime",
+                    "end_datetime": "end_datetime_within_threshold",
+                    "column_list": ["start_datetime", "end_datetime_within_threshold"],
+                },
+                "out":{
+                    "success": True,
+                },
+            },
+            {
+                "title": "above threshold",
+                "exact_match_out": False,
+                "include_in_gallery": True,
+                "in":{
+                    "start_datetime": "start_datetime",
+                    "end_datetime": "end_datetime_above_threshold",
+                    "column_list": ["start_datetime", "end_datetime_above_threshold"],
+                },
+                "out":{
+                    "success": False,
+                },
+            },
+            {
+                "title": "with Nan",
+                "exact_match_out": False,
+                "include_in_gallery": True,
+                "in":{
+                    "start_datetime": "start_datetime",
+                    "end_datetime": "end_datetime_with_Nan",
+                    "column_list": ["start_datetime", "end_datetime_with_Nan"],
+                },
+                "out":{
+                    "success": True,
+                },
+            }
+        ]
+    }
+    ]
+
     # This is the id string of the Metric used by this Expectation.
     map_metric = (
         "multicolumn_values.column_datetime_difference_to_be_less_than_two_months"
@@ -98,7 +175,7 @@ class ExpectMulticolumnDatetimeDifferenceToBeLessThanTwoMonths(
         start_datetime = configuration.kwargs["start_datetime"]
         end_datetime = configuration.kwargs["end_datetime"]
         column_list = configuration.kwargs["column_list"]
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
+        # Check other things in configuration.kwargs and raise Exceptions if needed
         try:
             # parameter cannot be less than zero,
             assert start_datetime is None or isinstance(start_datetime, str)
