@@ -298,6 +298,8 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Start services
+        env:
+          AUTH0_API_AUDIENCE: ${{secrets.AUTH0_API_AUDIENCE}}
         run: |
           docker compose -f assets/docker/mercury/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 150 && \
           docker compose -f assets/docker/spark/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 90
