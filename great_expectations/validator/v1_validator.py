@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from great_expectations.core import ExpectationSuite
     from great_expectations.core.batch_config import BatchConfig
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
     from great_expectations.expectations.expectation import (
         Expectation,
         ExpectationConfiguration,
@@ -37,7 +38,7 @@ class Validator:
         context: AbstractDataContext,
         batch_config: BatchConfig,
         result_format: ResultFormat = ResultFormat.SUMMARY,
-        batch_asset_options: dict | None = None,
+        batch_asset_options: Optional[BatchRequestOptions] = None,
     ) -> None:
         self._context = context
         self._batch_config = batch_config
@@ -76,7 +77,9 @@ class Validator:
         self, expectation_configs: list[ExpectationConfiguration]
     ) -> list[ExpectationValidationResult]:
         """Run a list of expectation configurations against the batch config"""
-        batch_request = self._batch_config.build_batch_request()
+        batch_request = self._batch_config.data_asset.build_batch_request(
+            options=self._batch_asset_options
+        )
         wrapped_validator = self._context.get_validator(batch_request=batch_request)
 
         results = wrapped_validator.graph_validate(

@@ -1,6 +1,14 @@
-from typing_extensions import TypeAlias
+from dataclasses import dataclass
 
-from great_expectations.datasource.fluent.sql_datasource import QueryAsset
+from great_expectations.datasource.fluent.interfaces import DataAsset
 
-# TODO: fix this type
-BatchConfig: TypeAlias = QueryAsset
+
+@dataclass(frozen=True)
+class BatchConfig:
+    """Configuration for a batch of data.
+
+    References the DataAsset to be used, and any additional parameters needed to fetch the data.
+    TODO: Add splitters and sorters?
+    """
+
+    data_asset: DataAsset

@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 
 from great_expectations.core.batch_config import BatchConfig
@@ -58,7 +59,17 @@ def expectation_suite(
 def batch_config(fds_data_context: AbstractDataContext) -> BatchConfig:
     datasource = fds_data_context.get_datasource("sqlite_datasource")
     assert isinstance(datasource, SqliteDatasource)
-    return datasource.get_asset("trip_asset")
+    return BatchConfig(
+        data_asset=datasource.get_asset("trip_asset"),
+    )
+
+@pytest.fixture
+def batch_config_with_event_type_splitter(fds_data_context: AbstractDataContext) -> BatchConfig:
+    datasource = fds_data_context.get_datasource("sqlite_datasource")
+    assert isinstance(datasource, SqliteDatasource)
+    return BatchConfig(
+        data_asset=datasource.get_asset("trip_asset_split_by_event_type"),
+    )
 
 
 @pytest.fixture
@@ -136,6 +147,33 @@ def test_validate_expectation_failure(
     result = validator.validate_expectation(failing_expectation)
 
     assert not result.success
+
+
+@pytest.mark.unit
+def test_validate_expectation_with_batch_asset_options(
+    fds_data_context: AbstractDataContext,
+    batch_config_with_event_type_splitter: BatchConfig,
+    only_start_expectation: Expectation,
+):
+    validator = Validator(
+        context=fds_data_context,
+        batch_config=batch_config_with_event_type_splitter,
+        batch_asset_options={"event_type": "start"},
+    )
+
+    result = validator.validate_expectation(
+        ExpectColumnValuesToBeInSet(
+            ExpectationConfiguration(
+                "expect_column_values_to_be_in_set",
+                kwargs={
+                    "column": "event_type",
+                    "value_set": ["start"],
+                },
+            )
+        )
+    )
+
+    assert result.success
 
 
 @pytest.mark.unit

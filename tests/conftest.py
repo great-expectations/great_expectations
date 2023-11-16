@@ -3254,12 +3254,17 @@ def fds_data_context(
     datasource = context.sources.add_sqlite(
         name="sqlite_datasource", connection_string=sqlite_connection_string
     )
+
     datasource.add_query_asset(
         name="trip_asset",
         query="SELECT * FROM table_partitioned_by_date_column__A",
     )
-    return context
+    datasource.add_query_asset(
+        name="trip_asset_split_by_event_type",
+        query="SELECT * FROM table_partitioned_by_date_column__A",
+    ).add_splitter_column_value("event_type")
 
+    return context
 
 @pytest.fixture
 def data_context_with_simple_sql_datasource_for_testing_get_batch(
