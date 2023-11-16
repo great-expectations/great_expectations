@@ -65,10 +65,9 @@ class ExpectMulticolumnDatetimeDifferenceToBeLessThanTwoMonths(
     """
 
     examples = [
-
         {
-            "data":{
-                "start_datetime": [ 
+            "data": {
+                "start_datetime": [
                     "2023-01-01",
                     "2023-02-01",
                     "2023-03-01",
@@ -95,50 +94,56 @@ class ExpectMulticolumnDatetimeDifferenceToBeLessThanTwoMonths(
                     "2023-05-01",
                     "2023-06-01",
                     pd.NaT,
-                ]
+                ],
             },
-        "tests": [
-            {
-                "title": "within threshold",
-                "exact_match_out": False,
-                "include_in_gallery": True,
-                "in":{
-                    "start_datetime": "start_datetime",
-                    "end_datetime": "end_datetime_within_threshold",
-                    "column_list": ["start_datetime", "end_datetime_within_threshold"],
+            "tests": [
+                {
+                    "title": "within threshold",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "start_datetime": "start_datetime",
+                        "end_datetime": "end_datetime_within_threshold",
+                        "column_list": [
+                            "start_datetime",
+                            "end_datetime_within_threshold",
+                        ],
+                    },
+                    "out": {
+                        "success": True,
+                    },
                 },
-                "out":{
-                    "success": True,
+                {
+                    "title": "above threshold",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "start_datetime": "start_datetime",
+                        "end_datetime": "end_datetime_above_threshold",
+                        "column_list": [
+                            "start_datetime",
+                            "end_datetime_above_threshold",
+                        ],
+                    },
+                    "out": {
+                        "success": False,
+                    },
                 },
-            },
-            {
-                "title": "above threshold",
-                "exact_match_out": False,
-                "include_in_gallery": True,
-                "in":{
-                    "start_datetime": "start_datetime",
-                    "end_datetime": "end_datetime_above_threshold",
-                    "column_list": ["start_datetime", "end_datetime_above_threshold"],
+                {
+                    "title": "with Nan",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "start_datetime": "start_datetime",
+                        "end_datetime": "end_datetime_with_Nan",
+                        "column_list": ["start_datetime", "end_datetime_with_Nan"],
+                    },
+                    "out": {
+                        "success": True,
+                    },
                 },
-                "out":{
-                    "success": False,
-                },
-            },
-            {
-                "title": "with Nan",
-                "exact_match_out": False,
-                "include_in_gallery": True,
-                "in":{
-                    "start_datetime": "start_datetime",
-                    "end_datetime": "end_datetime_with_Nan",
-                    "column_list": ["start_datetime", "end_datetime_with_Nan"],
-                },
-                "out":{
-                    "success": True,
-                },
-            }
-        ]
-    }
+            ],
+        }
     ]
 
     # This is the id string of the Metric used by this Expectation.
