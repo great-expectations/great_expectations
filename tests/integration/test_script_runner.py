@@ -92,6 +92,12 @@ docs_test_matrix: List[IntegrationTestFixture] = []
 
 local_tests = [
     IntegrationTestFixture(
+        name="how_to_add_validations_data_or_suites_to_a_checkpoint.py",
+        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        backend_dependencies=[],
+    ),
+    IntegrationTestFixture(
         name="how_to_validate_multiple_batches_within_single_checkpoint",
         user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
