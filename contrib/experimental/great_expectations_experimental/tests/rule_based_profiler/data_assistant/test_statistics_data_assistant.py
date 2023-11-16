@@ -5,8 +5,6 @@ from typing import Any, Dict, Optional, cast
 import numpy as np
 import pytest
 
-import great_expectations as gx
-
 # noinspection PyUnresolvedReferences
 from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant_result import (
     StatisticsDataAssistantResult,
@@ -229,7 +227,7 @@ def test_pandas_happy_path_statistics_data_assistant(empty_data_context) -> None
     3. Running StatisticsDataAssistant and making sure that StatisticsDataAssistantResult contains relevant fields
     4. Configuring BatchRequest to load 2020 January data
     """
-    data_context: gx.DataContext = empty_data_context
+    data_context = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
@@ -309,7 +307,7 @@ def test_sql_happy_path_statistics_data_assistant(
     else:
         load_data_into_postgres_database(sa)
 
-    data_context: gx.DataContext = empty_data_context
+    data_context = empty_data_context
 
     datasource_config = {
         "name": "taxi_multi_batch_sql_datasource",
@@ -376,7 +374,7 @@ def test_spark_happy_path_statistics_data_assistant(
     from great_expectations.compatibility import pyspark
 
     schema: pyspark.types.StructType = spark_df_taxi_data_schema
-    data_context: gx.DataContext = empty_data_context
+    data_context = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
