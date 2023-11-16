@@ -313,11 +313,6 @@ jobs:
           docker compose -f assets/docker/mercury/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 150 && \
           docker compose -f assets/docker/spark/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 90
 
-      - name: Cat api logs
-        if: always()
-        run: |
-          docker compose -f assets/docker/mercury/docker-compose.yml logs mercury-service-api
-
       - name: Run the tests
         run: invoke ci-tests 'cloud' --up-services --verbose
 
