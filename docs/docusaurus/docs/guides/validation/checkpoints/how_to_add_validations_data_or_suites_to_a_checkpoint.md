@@ -24,13 +24,13 @@ To add a second Expectation Suite (in the following example, `users.error`) to y
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.py add_expectation_suite"
 ```
 
-## Add validation data to the Checkpoint
+## Add Validation data to the Checkpoint
 
-In the previous example, the Validation you added was paired with the same Batch as the original Expectation Suite.  However, you can also specify different <TechnicalTag tag="batch_request" text="Batch Requests" /> when you add an Expectation Suite.  Adding multiple Validations with different Expectation Suites and specific <TechnicalTag tag="action" text="Actions" /> is demonstrated in the following example:
+In the previous example, you added a Validation and it was paired with the same Batch as the original Expectation Suite.  However, you can also specify different <TechnicalTag tag="batch_request" text="Batch Requests" /> when you add an Expectation Suite.  Adding multiple Validations with different Expectation Suites and specific <TechnicalTag tag="action" text="Actions" /> is shown in the following example:
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.py add_validation"
 ```
 
-In this Checkpoint configuration, the Expectation Suite `users.warning` runs against the `batch_request` with the results processed by the Actions specified in the `action_list`. Similarly, the Expectation Suite `users.error` runs against the `batch_request` with the results processed by the actions specified in the `action_list`. In addition, the Expectation Suite `users.delivery` runs against the `batch_request` with the results processed by actions in the Validation `action_list` and the `action_list`.
+In this Checkpoint configuration, the Expectation Suite `users.warning` runs against the `batch_request` and the results are processed by the Actions specified in the `action_list`. Similarly, the Expectation Suite `users.error` runs against the `batch_request` and the results processed by the actions specified in the `action_list`. In addition, the Expectation Suite `users.delivery` runs against the `batch_request` and the results are processed by the actions in the Validation `action_list` and its `action_list`.
 
 For additional Checkpoint configuration information, see [Manage Checkpoints](./checkpoint_lp.md).
