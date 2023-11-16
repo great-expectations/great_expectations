@@ -28,34 +28,34 @@ Windows support for the open source Python version of GX is currently unavailabl
 
 ## Data validation workflow
 
-The following diagram illustrates the end-to-end GX data validation workflow implemented by the quickstart code. Click a workflow step to view related documentation.
+The following diagram illustrates the end-to-end GX data validation workflow that you'll implement with this quickstart. Click a workflow step to view the related content.
 
 ```mermaid
 flowchart LR
 %%{init: {"themeVariables": {"fontSize" : "24px"}}}%%
 
-    Configure_A(Install\n<b>GX</b>):::gxWorkflowStep --> Configure_B("Create a\n<b>Data Context</b>"):::gxWorkflowStep
+    1(Install\n<b>GX</b>) --> 2("Create a\n<b>Data Context</b>")
 
-    Configure_B --> Connect_A
+    2 --> 3
 
-    Connect_A("Connect\nto data</b>"):::gxWorkflowStep
+    3("Connect\nto data</b>")
 
-    Connect_A --> Define_A
+    3 --> 4
 
-    Define_A("Create a\n<b>Validator</b>"):::gxWorkflowStep --> Define_B("Create\n<b>Expectations</b>"):::gxWorkflowStep
+    4("Create a\n<b>Validator</b>") --> 5("Create\n<b>Expectations</b>")
 
-    Define_B --> Validate_A
+    5 --> 6
 
-    Validate_A("Run a\n<b>Checkpoint</b>"):::gxWorkflowStep --> Validate_B("View\n<b>Validation Results</b>"):::gxWorkflowStep
+    6("Run a\n<b>Checkpoint</b>") --> 7("View\n<b>Validation Results</b>")
 
-%% Link each workflow step to underlying documentation.
-click Configure_A "https://docs.greatexpectations.io/docs/guides/setup/installation/install_gx"
-click Configure_B "https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context/"
-click Connect_A "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_lp"
-click Define_A "https://docs.greatexpectations.io/docs/terms/validator"
-click Define_B "https://docs.greatexpectations.io/docs/guides/expectations/expectations_lp"
-click Validate_A "https://docs.greatexpectations.io/docs/guides/validation/checkpoints/checkpoint_lp"
-click Validate_B "https://docs.greatexpectations.io/docs/terms/data_docs"
+%% Link each workflow step to section on page.
+click 1 "#install-gx"
+click 2 "#create-a-data-context"
+click 3 "#connect-to-data"
+click 4 "#connect-to-data"
+click 5 "#create-expectations"
+click 6 "#validate-data"
+click 7 "#validate-data"
 ```
 
 ## Prerequisites
@@ -124,7 +124,10 @@ click Validate_B "https://docs.greatexpectations.io/docs/terms/data_docs"
 
 ## Related documentation
 
-If you're ready to continue your Great Expectations journey, the following topics can help you implement a tailored solution for your specific environment and business requirements:
+If you're ready to continue your GX journey, the following topics can help you implement a solution for your specific environment and business requirements:
 
 - [Install GX in a specific environment with support for a specific Data Source](/docs/guides/setup/installation/install_gx).
 - [Initialize, instantiate, and save a Data Context](/docs/guides/setup/configure_data_contexts_lp).
+- [Connect to Data Sources](/docs/guides/connecting_to_your_data/connect_to_data_lp).
+- [Create and manage Expectations and Expectation Suites](/docs/guides/expectations/expectations_lp/).
+- [Create, manage, and run Checkpoints](/docs/guides/validation/checkpoints/checkpoint_lp/).

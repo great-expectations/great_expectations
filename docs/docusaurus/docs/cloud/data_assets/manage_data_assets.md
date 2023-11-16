@@ -25,7 +25,9 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
 1. In GX Cloud, click **Data Assets** > **New Asset**.
 
-2. Complete the following mandatory fields:
+2. Click the **New Data Source** tab and then select **Snowflake**.
+
+3. Complete the following mandatory fields:
 
     - **Data Source name**: Enter a meaningful name for the Data Asset.
 
@@ -35,7 +37,7 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
     - **Account or locator**: Enter your Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
-3. Optional. Complete the following fields:
+4. Optional. Complete the following fields:
 
     - **Database**: Enter the name of the Snowflake database where the data you want to validate is stored.
  
@@ -47,13 +49,13 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
     - **Authenticator**: Enter the Snowflake database authenticator that you want to use to verify your Snowflake connection. 
 
-4. Optional. Clear **Create temp table** if you don't want to create a temporary database table. Temporary database tables store data temporarily and can improve performance by making queries run faster.
+5. Optional. Clear **Create temp table** if you don't want to create a temporary database table. Temporary database tables store data temporarily and can improve performance by making queries run faster.
 
-5. Optional. Clear **Test connection** if you don't want to test the Data Asset connection. Testing the connection to the Data Asset is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
+6. Optional. Clear **Test connection** if you don't want to test the Data Asset connection. Testing the connection to the Data Asset is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
 
-6. Click **Continue**.
+7. Click **Continue**.
 
-7. Select **Table Asset** or **Query Asset** and complete the following fields:
+8. Select **Table Asset** or **Query Asset** and complete the following fields:
 
     - **Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
 
@@ -61,11 +63,11 @@ Create a Data Asset to define the data you want GX Cloud to access. Currently, t
 
     - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
 
-8. Optional. Select **Add another Data Asset** to add additional tables or queries and repeat step 7.
+9. Optional. Select **Add another Data Asset** to add additional tables or queries and repeat step 7.
 
-9. Click **Finish**.
+10. Click **Finish**.
 
-10. Create an Expectation. See [Create an Expectation](/docs/cloud/expectations/manage_expectations#create-an-expectation).
+11. Add an Expectation. See [Add an Expectation](/docs/cloud/expectations/manage_expectations#add-an-expectation).
 
 ## View Data Asset metrics
 
