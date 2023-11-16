@@ -64,7 +64,7 @@ def batch_fixture() -> Batch:
     return batch
 
 
-@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch("great_expectations.data_context.data_context.EphemeralDataContext")
 @pytest.mark.unit
 def test_regex_pattern_string_parameter_builder_instantiation_with_defaults(
     mock_data_context: mock.MagicMock,
@@ -97,7 +97,7 @@ def test_regex_pattern_string_parameter_builder_instantiation_with_defaults(
     assert regex_pattern_string_parameter.CANDIDATE_REGEX == candidate_regexes
 
 
-@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch("great_expectations.data_context.data_context.EphemeralDataContext")
 @pytest.mark.unit
 def test_regex_pattern_string_parameter_builder_instantiation_override_defaults(
     mock_data_context: mock.MagicMock,
@@ -368,7 +368,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
     )
 
 
-@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch("great_expectations.data_context.data_context.EphemeralDataContext")
 @pytest.mark.big
 def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Batch):
     batch: Batch = batch_fixture
@@ -416,7 +416,7 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
     )
 
 
-@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch("great_expectations.data_context.data_context.EphemeralDataContext")
 @pytest.mark.big
 def test_regex_single_candidate(
     mock_data_context: mock.MagicMock,
@@ -490,7 +490,7 @@ def test_regex_single_candidate(
     assert meta == expected_meta
 
 
-@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch("great_expectations.data_context.data_context.EphemeralDataContext")
 @pytest.mark.big
 def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: Batch):
     batch: Batch = batch_fixture
