@@ -1496,6 +1496,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._save_project_config()
 
+    @public_api
     @overload
     def add_checkpoint(  # noqa: PLR0913
         self,
@@ -1531,6 +1532,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         ...
 
+    @public_api
     @overload
     def add_checkpoint(  # noqa: PLR0913
         self,
@@ -5446,9 +5448,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
         if not os.path.isfile(config_variables_filepath):  # noqa: PTH113
             logger.info(
-                "Creating new substitution_variables file at {config_variables_filepath}".format(
-                    config_variables_filepath=config_variables_filepath
-                )
+                f"Creating new substitution_variables file at {config_variables_filepath}"
             )
             with open(config_variables_filepath, "w") as template:
                 template.write(CONFIG_VARIABLES_TEMPLATE)
