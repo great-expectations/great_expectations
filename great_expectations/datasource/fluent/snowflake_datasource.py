@@ -122,9 +122,9 @@ class SnowflakeDatasource(SQLDatasource):
         }
 
         connection_details = {}
-        for field in connection_detail_fields:
-            if field in values:
-                connection_details[field] = values.pop(field)
+        for field_name in tuple(values.keys()):
+            if field_name in connection_detail_fields:
+                connection_details[field_name] = values.pop(field_name)
         if connection_details:
             values["connection_string"] = connection_details
         return values
