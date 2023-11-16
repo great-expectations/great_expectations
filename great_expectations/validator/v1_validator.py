@@ -32,9 +32,9 @@ class Validator:
     Responsible for running expectations on a batch configuration.
     """
 
-    context: AbstractDataContext
-    batch_config: BatchConfig
-    batch_asset_options: dict | None
+    _context: AbstractDataContext
+    _batch_config: BatchConfig
+    _batch_asset_options: dict | None
     result_format: ResultFormat
 
     def __init__(
@@ -44,9 +44,9 @@ class Validator:
         result_format: ResultFormat = ResultFormat.SUMMARY,
         batch_asset_options: dict | None = None,
     ) -> None:
-        self.context = context
-        self.batch_config = batch_config
-        self.batch_asset_options = batch_asset_options
+        self._context = context
+        self._batch_config = batch_config
+        self._batch_asset_options = batch_asset_options
         self.result_format = result_format
 
     def validate_expectation(
@@ -81,8 +81,8 @@ class Validator:
         self, expectation_configs: list[ExpectationConfiguration]
     ) -> list[ExpectationValidationResult]:
         """Run a list of expectation configurations against the batch config"""
-        batch_request = self.batch_config.build_batch_request()
-        wrapped_validator = self.context.get_validator(batch_request=batch_request)
+        batch_request = self._batch_config.build_batch_request()
+        wrapped_validator = self._context.get_validator(batch_request=batch_request)
 
         results = wrapped_validator.graph_validate(
             configurations=expectation_configs,
