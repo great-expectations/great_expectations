@@ -80,7 +80,7 @@ services:
       test: curl --write-out '%{http_code}' --silent --output --fail http://localhost:5000/status || exit 1
       interval: 5s
       timeout: 2s
-      retries: 20
+      retries: 50
     depends_on:
       db-provisioner:
         condition: service_completed_successfully
