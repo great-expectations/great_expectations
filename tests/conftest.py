@@ -3266,6 +3266,7 @@ def fds_data_context(
 
     return context
 
+
 @pytest.fixture
 def data_context_with_simple_sql_datasource_for_testing_get_batch(
     sa, empty_data_context, sqlite_connection_string

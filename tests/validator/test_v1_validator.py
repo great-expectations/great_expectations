@@ -1,4 +1,3 @@
-import pandas as pd
 import pytest
 
 from great_expectations.core.batch_config import BatchConfig
@@ -63,8 +62,11 @@ def batch_config(fds_data_context: AbstractDataContext) -> BatchConfig:
         data_asset=datasource.get_asset("trip_asset"),
     )
 
+
 @pytest.fixture
-def batch_config_with_event_type_splitter(fds_data_context: AbstractDataContext) -> BatchConfig:
+def batch_config_with_event_type_splitter(
+    fds_data_context: AbstractDataContext,
+) -> BatchConfig:
     datasource = fds_data_context.get_datasource("sqlite_datasource")
     assert isinstance(datasource, SqliteDatasource)
     return BatchConfig(
@@ -153,12 +155,12 @@ def test_validate_expectation_failure(
 def test_validate_expectation_with_batch_asset_options(
     fds_data_context: AbstractDataContext,
     batch_config_with_event_type_splitter: BatchConfig,
-    only_start_expectation: Expectation,
 ):
+    desired_event_type = "start"
     validator = Validator(
         context=fds_data_context,
         batch_config=batch_config_with_event_type_splitter,
-        batch_asset_options={"event_type": "start"},
+        batch_asset_options={"event_type": desired_event_type},
     )
 
     result = validator.validate_expectation(
@@ -167,7 +169,7 @@ def test_validate_expectation_with_batch_asset_options(
                 "expect_column_values_to_be_in_set",
                 kwargs={
                     "column": "event_type",
-                    "value_set": ["start"],
+                    "value_set": [desired_event_type],
                 },
             )
         )
