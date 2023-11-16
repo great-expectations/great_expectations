@@ -10,7 +10,7 @@ import sys
 import time
 import traceback
 import warnings
-from abc import ABC, ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from collections import Counter, defaultdict
 from copy import deepcopy
 from inspect import isabstract
@@ -38,6 +38,7 @@ from typing_extensions import ParamSpec
 
 from great_expectations import __version__ as ge_version
 from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import ModelMetaclass
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (
     deprecated_method_or_class,
@@ -265,8 +266,7 @@ def param_method(param_name: str) -> Callable:
     return _param_method
 
 
-# noinspection PyMethodParameters
-class MetaExpectation(ABCMeta):
+class MetaExpectation(ModelMetaclass):
     """MetaExpectation registers Expectations as they are defined, adding them to the Expectation registry.
 
     Any class inheriting from Expectation will be registered based on the value of the "expectation_type" class
@@ -297,15 +297,15 @@ class MetaExpectation(ABCMeta):
         return newclass
 
 
-class ExpectationBase(pydantic.BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
+# class ExpectationBase(pydantic.BaseModel):
+#     class Config:
+#         arbitrary_types_allowed = True
 
-    pass
+#     pass
 
 
 @public_api
-class Expectation(ExpectationBase):
+class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     """Base class for all Expectations.
 
     Expectation classes *must* have the following attributes set:
@@ -337,7 +337,8 @@ class Expectation(ExpectationBase):
         2. Data Docs rendering methods decorated with the @renderer decorator. See the
     """
 
-    __metaclass__ = MetaExpectation
+    class Config:
+        arbitrary_types_allowed = True
 
     configuration: Optional[ExpectationConfiguration] = None
 
@@ -361,11 +362,11 @@ class Expectation(ExpectationBase):
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
 
-    @pydantic.validator("configuration")
-    def validate_config(self, config):
-        if config:
-            self.validate_configuration(config)
-        return config
+    # @pydantic.validator("configuration")
+    # def validate_config(self, config):
+    #     if config:
+    #         self.validate_configuration(config)
+    #     return config
 
     @classmethod
     def is_abstract(cls) -> bool:
