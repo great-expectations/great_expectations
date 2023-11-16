@@ -28,7 +28,7 @@ suite: ExpectationSuite = context.get_expectation_suite(
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py datasource_yaml">
-datasource_yaml = f"""
+datasource_yaml = """
 name: my_pandas_datasource
 class_name: Datasource
 module_name: great_expectations.datasource

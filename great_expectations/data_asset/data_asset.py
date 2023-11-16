@@ -12,7 +12,7 @@ import warnings
 from collections import Counter, defaultdict
 from collections.abc import Hashable
 from functools import wraps
-from typing import Any, Dict, List, NamedTuple, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from marshmallow import ValidationError
 
@@ -35,6 +35,9 @@ from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
 )
 from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.validator.validation_statistics import (
+    calc_validation_statistics,
+)
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -850,7 +853,7 @@ class DataAsset:
 
                 results.append(result)
 
-            statistics = _calc_validation_statistics(results)
+            statistics = calc_validation_statistics(results)
 
             if only_return_failures:
                 abbrev_results = []
@@ -1163,36 +1166,3 @@ class DataAsset:
 
         new_function = self.expectation(argspec)(function)
         return new_function(self, *args, **kwargs)
-
-
-class ValidationStatistics(NamedTuple):
-    evaluated_expectations: int
-    successful_expectations: int
-    unsuccessful_expectations: int
-    success_percent: float | None
-    success: bool
-
-
-def _calc_validation_statistics(validation_results) -> ValidationStatistics:
-    """
-    Calculate summary statistics for the validation results and
-    return ``ExpectationStatistics``.
-    """
-    # calc stats
-    successful_expectations = sum(exp.success for exp in validation_results)
-    evaluated_expectations = len(validation_results)
-    unsuccessful_expectations = evaluated_expectations - successful_expectations
-    success = successful_expectations == evaluated_expectations
-    try:
-        success_percent = successful_expectations / evaluated_expectations * 100
-    except ZeroDivisionError:
-        # success_percent = float("nan")
-        success_percent = None
-
-    return ValidationStatistics(
-        successful_expectations=successful_expectations,
-        evaluated_expectations=evaluated_expectations,
-        unsuccessful_expectations=unsuccessful_expectations,
-        success=success,
-        success_percent=success_percent,
-    )

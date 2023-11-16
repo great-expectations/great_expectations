@@ -13,6 +13,16 @@ module.exports = {
           items: [
             {
               type: 'link',
+              label: 'GX Cloud architecture',
+              href: '/docs/cloud/about_gx#gx-cloud-architecture',
+            },
+            {
+              type: 'link',
+              label: 'GX Cloud deployment patterns',
+              href: '/docs/cloud/about_gx#gx-cloud-deployment-patterns',
+            },
+            {
+              type: 'link',
               label: 'Workflow optimization',
               href: '/docs/cloud/about_gx#workflow-optimization',
             },
@@ -88,6 +98,11 @@ module.exports = {
               type: 'link',
               label: 'View Data Asset metrics',
               href: '/docs/cloud/data_assets/manage_data_assets#view-data-asset-metrics',
+            },
+            {
+              type: 'link',
+              label: 'Add a Data Asset to an Existing Data Source',
+              href: '/docs/cloud/data_assets/manage_data_assets#add-a-data-asset-to-an-existing-data-source',
             },
             {
               type: 'link',
@@ -483,8 +498,6 @@ module.exports = {
             },
             'terms/expectation_suite',
             'terms/metric',
-            'conceptual_guides/metricproviders',
-            'terms/metric',
             {
               type: 'category',
               label: 'Stores',
@@ -507,7 +520,9 @@ module.exports = {
       ]
     },
     { type: 'doc', id: 'changelog' },
+    { type: 'doc', id: 'troubleshooting' },
     { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
+    'get_support',
     'contributing/contributing',
   ]
 }
