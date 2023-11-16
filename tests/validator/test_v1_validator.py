@@ -17,13 +17,6 @@ from great_expectations.validator.v1_validator import ResultFormat, Validator
 
 
 @pytest.fixture
-def context(
-    fds_data_context,
-) -> AbstractDataContext:
-    return fds_data_context
-
-
-@pytest.fixture
 def failing_expectation() -> Expectation:
     return ExpectColumnValuesToBeInSet(
         ExpectationConfiguration(
@@ -61,15 +54,17 @@ def expectation_suite(
 
 
 @pytest.fixture
-def batch_config(context: AbstractDataContext) -> BatchConfig:
-    datasource = context.get_datasource("sqlite_datasource")
+def batch_config(fds_data_context: AbstractDataContext) -> BatchConfig:
+    datasource = fds_data_context.get_datasource("sqlite_datasource")
     return datasource.get_asset("trip_asset")
 
 
 @pytest.fixture
-def validator(context: AbstractDataContext, batch_config: BatchConfig) -> Validator:
+def validator(
+    fds_data_context: AbstractDataContext, batch_config: BatchConfig
+) -> Validator:
     return Validator(
-        context=context,
+        context=fds_data_context,
         batch_config=batch_config,
         batch_asset_options=None,
         result_format=ResultFormat.SUMMARY,

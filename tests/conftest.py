@@ -3236,7 +3236,7 @@ def test_df(tmp_path_factory):
 
 
 @pytest.fixture
-def sqlite_connection_string():
+def sqlite_connection_string() -> str:
     db_file_path: str = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
@@ -3249,7 +3249,7 @@ def sqlite_connection_string():
 @pytest.fixture
 def fds_data_context(
     sa, empty_data_context: AbstractDataContext, sqlite_connection_string: str
-):
+) -> AbstractDataContext:
     context = empty_data_context
     datasource = context.sources.add_sqlite(
         name="sqlite_datasource", connection_string=sqlite_connection_string
@@ -3264,7 +3264,7 @@ def fds_data_context(
 @pytest.fixture
 def data_context_with_simple_sql_datasource_for_testing_get_batch(
     sa, empty_data_context, sqlite_connection_string
-):
+) -> AbstractDataContext:
     context = empty_data_context
 
     datasource_config: str = f"""
