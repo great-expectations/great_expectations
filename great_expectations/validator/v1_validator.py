@@ -32,11 +32,6 @@ class Validator:
     Responsible for running expectations on a batch configuration.
     """
 
-    _context: AbstractDataContext
-    _batch_config: BatchConfig
-    _batch_asset_options: dict | None
-    result_format: ResultFormat
-
     def __init__(
         self,
         context: AbstractDataContext,
