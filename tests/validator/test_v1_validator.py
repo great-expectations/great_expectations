@@ -71,7 +71,7 @@ def validator(
     )
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_result_format_boolean_only(
     validator: Validator, failing_expectation: Expectation
 ):
@@ -82,7 +82,7 @@ def test_result_format_boolean_only(
     assert result.result == {}
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_result_format_basic(validator: Validator, failing_expectation: Expectation):
     validator.result_format = ResultFormat.BASIC
     result = validator.validate_expectation(failing_expectation)
@@ -94,7 +94,7 @@ def test_result_format_basic(validator: Validator, failing_expectation: Expectat
     assert "unexpected_list" not in result.result
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_result_format_summary(validator: Validator, failing_expectation: Expectation):
     validator.result_format = ResultFormat.SUMMARY
     result = validator.validate_expectation(failing_expectation)
@@ -106,7 +106,7 @@ def test_result_format_summary(validator: Validator, failing_expectation: Expect
     assert "unexpected_list" not in result.result
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_result_format_complete(validator: Validator, failing_expectation: Expectation):
     validator.result_format = ResultFormat.COMPLETE
     result = validator.validate_expectation(failing_expectation)
@@ -118,7 +118,7 @@ def test_result_format_complete(validator: Validator, failing_expectation: Expec
     assert "unexpected_list" in result.result
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_validate_expectation_success(
     validator: Validator, passing_expectation: Expectation
 ):
@@ -127,7 +127,7 @@ def test_validate_expectation_success(
     assert result.success
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_validate_expectation_failure(
     validator: Validator, failing_expectation: Expectation
 ):
@@ -136,7 +136,7 @@ def test_validate_expectation_failure(
     assert not result.success
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_validate_expectation_suite(
     validator: Validator, expectation_suite: ExpectationSuite
 ):
