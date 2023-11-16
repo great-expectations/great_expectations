@@ -14,7 +14,6 @@ from great_expectations.core.batch import (
 from great_expectations.core.domain import Domain
 from great_expectations.core.id_dict import BatchSpec, IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.data_context import DataContext
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
@@ -70,7 +69,7 @@ def batch_fixture() -> Batch:
 def test_regex_pattern_string_parameter_builder_instantiation_with_defaults(
     mock_data_context: mock.MagicMock,
 ):
-    data_context: DataContext = mock_data_context
+    data_context = mock_data_context
 
     candidate_regexes: Set[str] = {
         r"\d+",  # whole number with 1 or more digits
@@ -103,7 +102,7 @@ def test_regex_pattern_string_parameter_builder_instantiation_with_defaults(
 def test_regex_pattern_string_parameter_builder_instantiation_override_defaults(
     mock_data_context: mock.MagicMock,
 ):
-    data_context: DataContext = mock_data_context
+    data_context = mock_data_context
 
     candidate_regexes: Set[str] = {
         r"\d{1}",
@@ -126,7 +125,7 @@ def test_regex_pattern_string_parameter_builder_instantiation_override_defaults(
 def test_regex_pattern_string_parameter_builder_alice(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -197,9 +196,7 @@ def test_regex_pattern_string_parameter_builder_alice(
 def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -279,9 +276,7 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
 def test_regex_pattern_string_parameter_builder_bobby_no_match(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -382,7 +377,7 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
         execution_engine=PandasExecutionEngine(), batches=[batch]
     )
 
-    data_context: DataContext = mock_data_context
+    data_context = mock_data_context
 
     # column : c does not exist
     metric_domain_kwargs: dict = {"column": "c"}
@@ -429,7 +424,7 @@ def test_regex_single_candidate(
 ):
     batch: Batch = batch_fixture
 
-    data_context: DataContext = mock_data_context
+    data_context = mock_data_context
 
     metric_domain_kwargs: dict = {"column": "b"}
     candidate_regexes: List[str] = [r"^\d{1}$"]
@@ -500,7 +495,7 @@ def test_regex_single_candidate(
 def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: Batch):
     batch: Batch = batch_fixture
 
-    data_context: DataContext = mock_data_context
+    data_context = mock_data_context
 
     metric_domain_kwargs: dict = {"column": "b"}
     candidate_regexes: List[str] = [r"^\d{1}$", r"^\d{3}$"]

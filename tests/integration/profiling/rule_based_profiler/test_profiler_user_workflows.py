@@ -23,7 +23,6 @@ from freezegun import freeze_time
 from packaging import version
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
@@ -96,7 +95,7 @@ def alice_validator(alice_columnar_table_single_batch_context) -> Validator:
 
 @pytest.fixture
 def bobby_validator(
-    bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_deterministic_data_context,
 ) -> Validator:
     context = bobby_columnar_table_multi_batch_deterministic_data_context
 
@@ -244,7 +243,7 @@ def test_alice_profiler_user_workflow_single_batch(
     alice_columnar_table_single_batch,
 ):
     # Load data context
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     # Load profiler configs & loop (run tests for each one)
     yaml_config: str = alice_columnar_table_single_batch["profiler_config"]
@@ -643,9 +642,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     bobby_columnar_table_multi_batch,
 ):
     # Load data context
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # Load profiler configs & loop (run tests for each one)
     yaml_config: str = bobby_columnar_table_multi_batch["profiler_config"]
@@ -1560,7 +1557,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ):
     # Load data context
-    data_context: DataContext = (
+    data_context = (
         bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
     )
 
@@ -1772,7 +1769,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ):
     # Load data context
-    data_context: DataContext = quentin_columnar_table_multi_batch_data_context
+    data_context = quentin_columnar_table_multi_batch_data_context
 
     # Load profiler configs & loop (run tests for each one)
     yaml_config: str = quentin_columnar_table_multi_batch["profiler_config"]

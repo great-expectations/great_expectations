@@ -16,7 +16,6 @@ from contrib.experimental.great_expectations_experimental.tests.test_utils impor
     CONNECTION_STRING,
     load_data_into_postgres_database,
 )
-from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain import Domain
@@ -37,7 +36,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 @pytest.fixture
 def bobby_growth_numeric_data_assistant_result_usage_stats_enabled(
     no_usage_stats,
-    bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_deterministic_data_context,
 ) -> GrowthNumericDataAssistantResult:
     context = bobby_columnar_table_multi_batch_deterministic_data_context
 
@@ -57,7 +56,7 @@ def bobby_growth_numeric_data_assistant_result_usage_stats_enabled(
 
 @pytest.fixture(scope="module")
 def bobby_growth_numeric_data_assistant_result(
-    bobby_columnar_table_multi_batch_probabilistic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ) -> GrowthNumericDataAssistantResult:
     context = bobby_columnar_table_multi_batch_probabilistic_data_context
 
@@ -77,7 +76,7 @@ def bobby_growth_numeric_data_assistant_result(
 
 @pytest.fixture(scope="module")
 def quentin_implicit_invocation_result_actual_time(
-    quentin_columnar_table_multi_batch_data_context: DataContext,
+    quentin_columnar_table_multi_batch_data_context,
 ) -> GrowthNumericDataAssistantResult:
     context = quentin_columnar_table_multi_batch_data_context
 
@@ -98,7 +97,7 @@ def quentin_implicit_invocation_result_actual_time(
 @pytest.fixture(scope="module")
 @freeze_time("09/26/2019 13:42:41")
 def quentin_implicit_invocation_result_frozen_time(
-    quentin_columnar_table_multi_batch_data_context: DataContext,
+    quentin_columnar_table_multi_batch_data_context,
 ):
     context = quentin_columnar_table_multi_batch_data_context
 
