@@ -8,7 +8,6 @@ import pandas as pd
 import pytest
 
 import great_expectations as gx
-from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_asset import DataAsset
