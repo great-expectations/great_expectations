@@ -1,6 +1,6 @@
 {
     "title": "PowerBITable",
-    "description": "Microsoft PowerBI Table.",
+    "description": "--Public API--Microsoft PowerBI Table.",
     "type": "object",
     "properties": {
         "name": {

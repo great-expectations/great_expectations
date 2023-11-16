@@ -104,9 +104,9 @@ Confirm the `library_metadata` object for your Custom Expectation includes the f
     - [FEATURE] for significant PRs that add a new feature likely to require being added to our feature maturity matrix.
 
     - [MAINTENANCE] for PRs that focus on updating repository settings or related changes.
-		
+
     - [CONTRIB] for the contribution of Custom Expectations and supporting work into the `contrib/` directory.
-      
+
     - [HACKATHON] for submissions to an active Great Expectations Hackathon.
 
     In the section for design review, include a description of any prior discussion or coordination on the features in the PR, such as mentioning the number of the issue where discussion has taken place. For example: Closes #123”, linking to a relevant discuss or slack article, citing a team meeting, or even noting that no discussion is relevant because the issue is small.
@@ -131,6 +131,6 @@ Additionally, Great Expectations adds the following tags to indicate issue statu
 
 - The`help wanted` tag identifies useful issues that require help from community contributors to accelerate development.
 
-- The `enhacement` and `expectation-request` tags identify new Great Expectations features that require additional investigation and discussion. 
+- The `enhacement` and `expectation-request` tags identify new Great Expectations features that require additional investigation and discussion.
 
 - The `good first issue` tag identifies issues that provide an introduction to the Great Expectations contribution process.

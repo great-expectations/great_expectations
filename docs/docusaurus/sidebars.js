@@ -8,6 +8,48 @@ module.exports = {
       items: [
         {
           type: 'category',
+          label: 'About GX Cloud',
+          link: { type: 'doc', id: 'cloud/about_gx' },
+          items: [
+            {
+              type: 'link',
+              label: 'GX Cloud architecture',
+              href: '/docs/cloud/about_gx#gx-cloud-architecture',
+            },
+            {
+              type: 'link',
+              label: 'GX Cloud deployment patterns',
+              href: '/docs/cloud/about_gx#gx-cloud-deployment-patterns',
+            },
+            {
+              type: 'link',
+              label: 'Workflow optimization',
+              href: '/docs/cloud/about_gx#workflow-optimization',
+            },
+            {
+              type: 'link',
+              label: 'GX Cloud workflow',
+              href: '/docs/cloud/about_gx#gx-cloud-workflow',
+            },
+            {
+              type: 'link',
+              label: 'Roles and responsibilities',
+              href: '/docs/cloud/about_gx#roles-and-responsibilities',
+            },
+            {
+              type: 'link',
+              label: 'Supported browsers',
+              href: '/docs/cloud/about_gx#supported-browsers',
+            },
+            {
+              type: 'link',
+              label: 'Get support',
+              href: '/docs/cloud/about_gx#get-support',
+            },
+          ]
+        },
+        {
+          type: 'category',
           label: 'Set up GX Cloud',
           link: { type: 'doc', id: 'cloud/set_up_gx_cloud' },
           items: [
@@ -39,6 +81,7 @@ module.exports = {
           link: { type: 'doc', id: 'cloud/quickstarts/quickstart_lp' },
           items: [
             'cloud/quickstarts/snowflake_quickstart',
+            'cloud/quickstarts/airflow_quickstart',
           ]
         },
         {
@@ -55,6 +98,11 @@ module.exports = {
               type: 'link',
               label: 'View Data Asset metrics',
               href: '/docs/cloud/data_assets/manage_data_assets#view-data-asset-metrics',
+            },
+            {
+              type: 'link',
+              label: 'Add a Data Asset to an Existing Data Source',
+              href: '/docs/cloud/data_assets/manage_data_assets#add-a-data-asset-to-an-existing-data-source',
             },
             {
               type: 'link',
@@ -102,7 +150,7 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'Manually create an empty Expectation Suite ',
+              label: 'Create an empty Expectation Suite ',
               href: '/docs/cloud/expectation_suites/manage_expectation_suites#manually-create-an-empty-expectation-suite',
             },
             {
@@ -233,7 +281,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Connect to source data',
+      label: 'Connect to a Data Source',
       link: { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_lp' },
       items: [
         'guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data',
@@ -389,7 +437,10 @@ module.exports = {
     {
       type: 'category',
       label: 'Concepts',
-      link: { type: 'doc', id: 'conceptual_guides/learn_lp' },
+      link: { 
+        type: 'doc', 
+        id: 'conceptual_guides/learn_lp' 
+      },
       items: [
         'conceptual_guides/expectation_classes',
         'conceptual_guides/metricproviders',
@@ -447,8 +498,6 @@ module.exports = {
             },
             'terms/expectation_suite',
             'terms/metric',
-            'conceptual_guides/metricproviders',
-            'terms/metric',
             {
               type: 'category',
               label: 'Stores',
@@ -471,7 +520,9 @@ module.exports = {
       ]
     },
     { type: 'doc', id: 'changelog' },
+    { type: 'doc', id: 'troubleshooting' },
     { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
+    'get_support',
     'contributing/contributing',
   ]
 }

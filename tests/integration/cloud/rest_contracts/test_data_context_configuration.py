@@ -1,23 +1,28 @@
 from __future__ import annotations
 
-import pathlib
-from typing import Callable, Final
+from typing import TYPE_CHECKING, Final
 
+import pact
 import pytest
-from pact import Format, Like
 
+import great_expectations as gx
 from tests.integration.cloud.rest_contracts.conftest import (
-    ContractInteraction,
+    EXISTING_ORGANIZATION_ID,
+    PACT_MOCK_SERVICE_URL,
 )
 
-DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[dict] = {
-    "anonymous_usage_statistics": Like(
+if TYPE_CHECKING:
+    import requests
+
+
+GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[dict] = {
+    "anonymous_usage_statistics": pact.Like(
         {
-            "data_context_id": Format().uuid,
+            "data_context_id": pact.Format().uuid,
             "enabled": False,
         }
     ),
-    "datasources": Like({}),
+    "datasources": pact.Like({}),
     "include_rendered_content": {
         "globally": True,
         "expectation_validation_result": True,
@@ -27,25 +32,36 @@ DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[dict] = {
 
 
 @pytest.mark.cloud
-@pytest.mark.parametrize(
-    "contract_interaction",
-    [
-        ContractInteraction(
-            method="GET",
-            upon_receiving="a request for a Data Context",
-            given="the Data Context exists",
-            response_status=200,
-            response_body=DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY,
-        ),
-    ],
-)
 def test_data_context_configuration(
-    contract_interaction: ContractInteraction,
-    run_pact_test: Callable[[pathlib.Path, ContractInteraction], None],
-    existing_organization_id: str,
+    gx_cloud_session: requests.Session,
+    cloud_access_token: str,
+    pact_test: pact.Pact,
 ) -> None:
-    # the path to the endpoint relative to the base url
-    path = pathlib.Path(
-        "/", "organizations", existing_organization_id, "data-context-configuration"
+    provider_state = "the Data Context exists"
+    scenario = "a request for a Data Context"
+    method = "GET"
+    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/data-context-configuration"
+    status = 200
+    response_body = GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY
+
+    (
+        pact_test.given(provider_state=provider_state)
+        .upon_receiving(scenario=scenario)
+        .with_request(
+            headers=dict(gx_cloud_session.headers),
+            method=method,
+            path=path,
+        )
+        .will_respond_with(
+            status=status,
+            body=response_body,
+        )
     )
-    run_pact_test(path, contract_interaction)
+
+    with pact_test:
+        _ = gx.get_context(
+            mode="cloud",
+            cloud_base_url=PACT_MOCK_SERVICE_URL,
+            cloud_organization_id=EXISTING_ORGANIZATION_ID,
+            cloud_access_token=cloud_access_token,
+        )

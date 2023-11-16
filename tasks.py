@@ -180,7 +180,7 @@ def hooks(
         # used in CI - runs faster and only checks files that have changed
         cmds.extend(["--from-ref", "origin/HEAD", "--to-ref", "HEAD"])
 
-    ctx.run(" ".join(cmds))
+    ctx.run(" ".join(cmds), echo=True, pty=True)
 
     if sync:
         print("  Re-installing hooks ...")
@@ -810,8 +810,12 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
             "reqs/requirements-dev-cloud.txt",
             "reqs/requirements-dev-cloud-tests.txt",
             "reqs/requirements-dev-snowflake.txt",
+            "reqs/requirements-dev-spark.txt",
         ),
-        services=("mercury",),
+        services=(
+            "mercury",
+            "spark",
+        ),
         extra_pytest_args=("--cloud",),
     ),
     "databricks": TestDependencies(
@@ -1136,6 +1140,29 @@ def service(
         print(f"  Starting services for {', '.join(service_names)} ...")
         for service_name in service_names:
             cmds = []
+
+            if (
+                service_name == "mercury"
+                and os.environ.get("CI") != "true"  # noqa: TID251
+            ):
+                cmds.extend(
+                    [
+                        "FORCE_NO_ALIAS=true",
+                        "assumego",
+                        "dev",
+                        "--exec",
+                        "'aws ecr get-login-password --region us-east-1'",
+                        "|",
+                        "docker",
+                        "login",
+                        "--username",
+                        "AWS",
+                        "--password-stdin",
+                        "258143015559.dkr.ecr.us-east-1.amazonaws.com",
+                        "&&",
+                    ]
+                )
+
             if restart_services:
                 print(
                     f"  Removing existing containers and building latest for {service_name} ..."
@@ -1169,12 +1196,12 @@ def service(
                     "-d",
                     "--quiet-pull",
                     "--wait",
-                    "--wait-timeout 90",
+                    "--wait-timeout 120",
                 ]
             )
             ctx.run(" ".join(cmds), echo=True, pty=pty)
-        # TODO: remove this sleep. This is a temporary hack to give services enough
-        #       time to come up to get ci merging again.
+        # TODO: Add healthchecks to services that require this sleep and then remove it.
+        #       This is a temporary hack to give services enough time to come up before moving on.
         ctx.run("sleep 15")
     else:
         print("  No matching services to start")

@@ -11,7 +11,6 @@ from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
-from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfig,
@@ -293,62 +292,6 @@ def test_cloud_backed_data_context_add_checkpoint(
 
     assert checkpoint.config.validations[1]["id"] == validation_id_2
     assert checkpoint.validations[1]["id"] == validation_id_2
-
-
-@pytest.mark.cloud
-def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
-    empty_cloud_data_context: CloudDataContext,
-    checkpoint_config: dict,
-    checkpoint_id: str,
-    mocked_post_response: Callable[[], MockResponse],
-    mocked_put_response: Callable[[], MockResponse],
-    mocked_get_response: Callable[[], MockResponse],
-    ge_cloud_base_url: str,
-    ge_cloud_organization_id: str,
-) -> None:
-    context = empty_cloud_data_context
-
-    with mock.patch(
-        "requests.Session.put", autospec=True, side_effect=mocked_put_response
-    ) as mock_put, mock.patch(
-        "requests.Session.get", autospec=True, side_effect=mocked_get_response
-    ) as mock_get:
-        checkpoint = context.add_checkpoint(
-            ge_cloud_id=checkpoint_id, **checkpoint_config
-        )
-
-        # Round trip through schema to mimic updates made during store serialization process
-        expected_checkpoint_config = checkpointConfigSchema.dump(
-            CheckpointConfig(**checkpoint_config)
-        )
-
-        # Always called by store after POST and PATCH calls
-        assert mock_get.call_count == 3
-        mock_get.assert_called_with(
-            mock.ANY,  # requests.Session object
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints",
-            params={"name": "oss_test_checkpoint"},
-        )
-
-        expected_checkpoint_config["ge_cloud_id"] = checkpoint_id
-
-        # Called during creation of `checkpoint` (which is `checkpoint_1` but updated)
-        mock_put.assert_called_once_with(
-            mock.ANY,  # requests.Session object
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
-            json={
-                "data": {
-                    "type": "checkpoint",
-                    "attributes": {
-                        "checkpoint_config": expected_checkpoint_config,
-                        "organization_id": ge_cloud_organization_id,
-                    },
-                    "id": checkpoint_id,
-                },
-            },
-        )
-
-    assert checkpoint.ge_cloud_id == checkpoint_id
 
 
 @pytest.mark.cloud
@@ -743,33 +686,6 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_not_present
 
     assert checkpoint.config.validations[1]["id"] == validation_id_2
     assert checkpoint.validations[1]["id"] == validation_id_2
-
-
-@pytest.mark.xfail(
-    reason="GX Cloud E2E tests are currently failing due to a schema issue with DataContextVariables; xfailing for purposes of the 0.15.20 release",
-    run=True,
-    strict=True,
-)
-@pytest.mark.e2e
-@pytest.mark.cloud
-@mock.patch("great_expectations.data_context.DataContext._save_project_config")
-def test_cloud_backed_data_context_add_checkpoint_e2e(
-    mock_save_project_config: mock.MagicMock,
-    checkpoint_config: dict,
-) -> None:
-    context = DataContext(cloud_mode=True)
-
-    checkpoint = context.add_checkpoint(**checkpoint_config)
-
-    ge_cloud_id = checkpoint.ge_cloud_id
-
-    checkpoint_stored_in_cloud = context.get_checkpoint(ge_cloud_id=ge_cloud_id)
-
-    assert checkpoint.ge_cloud_id == checkpoint_stored_in_cloud.ge_cloud_id
-    assert (
-        checkpoint.config.to_json_dict()
-        == checkpoint_stored_in_cloud.config.to_json_dict()
-    )
 
 
 @pytest.fixture

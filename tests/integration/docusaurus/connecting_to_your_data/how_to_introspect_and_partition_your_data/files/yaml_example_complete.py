@@ -1,3 +1,4 @@
+# ruff: noqa: PTH118
 import os
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py imports">
@@ -13,7 +14,7 @@ context = gx.get_context()
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py datasource_yaml">
-datasource_yaml = f"""
+datasource_yaml = """
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -46,7 +47,7 @@ data_connectors:
               - filename
           taxi_data_year_month:
             base_directory: samples_2020
-            pattern: ([\\w]+)_tripdata_sample_(\\d{{4}})-(\\d{{2}})\\.csv
+            pattern: ([\\w]+)_tripdata_sample_(\\d{4})-(\\d{2})\\.csv
             group_names:
               - name
               - year

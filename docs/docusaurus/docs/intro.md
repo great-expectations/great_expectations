@@ -46,9 +46,9 @@ Great Expectations renders Expectations in a clean, human-readable format called
 
 ![Screenshot of Data Docs](./guides/images/datadocs.png)
 
-#### Support for various Datasources and Store backends
+#### Support for various Data Sources and Store backends
 
-Great Expectations currently supports native execution of Expectations against various Datasources, such as Pandas dataframes, Spark dataframes, and SQL databases via SQLAlchemy. This means you’re not tied to having your data in a database in order to validate it: You can also run Great Expectations against CSV files or any piece of data you can load into a dataframe.
+Great Expectations currently supports native execution of Expectations against various Data Sources, such as Pandas dataframes, Spark dataframes, and SQL databases via SQLAlchemy. This means you’re not tied to having your data in a database in order to validate it: You can also run Great Expectations against CSV files or any piece of data you can load into a dataframe.
 
 Great Expectations is highly configurable. It allows you to store all relevant metadata, such as the Expectations and Validation Results in file systems, database backends, as well as cloud storage such as S3 and Google Cloud Storage, by configuring metadata Stores.
 

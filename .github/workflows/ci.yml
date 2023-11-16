@@ -92,7 +92,6 @@ jobs:
             - 'tests/test_sets/**'
 
   docs-snippets:
-    name: docs-snippets
     needs: [unit-tests, docs-changes, doc-checks, ci-is-on-main-repo]
     # run on non-draft PRs with docs changes
     if: |
@@ -299,7 +298,9 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Start services
-        run: docker compose -f assets/docker/mercury/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 90
+        run: |
+          docker compose -f assets/docker/mercury/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 150 && \
+          docker compose -f assets/docker/spark/docker-compose.yml up -d --quiet-pull --wait --wait-timeout 90
 
       - name: Run the tests
         env:

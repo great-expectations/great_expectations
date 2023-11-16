@@ -1,8 +1,8 @@
 ---
-sidebar_label: "Connect to SQL database source data"
-title: "Connect to SQL database source data"
+sidebar_label: "Connect to SQL database Data Assets"
+title: "Connect to SQL database Data Assets"
 id: connect_sql_source_data
-description: Connect to source data stored on SQL databases.
+description: Connect to Data Assets stored on SQL databases.
 toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
@@ -17,254 +17,24 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-Use the information provided here to connect to source data stored in SQL databases. Great Expectations (GX) uses SQLAlchemy to connect to SQL source data, and most of the SQL dialects supported by SQLAlchemy are also supported by GX. For more information about the SQL dialects supported by SQLAlchemy, see [Dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
+Use the information provided here to connect to Data Assets stored in SQL databases. Great Expectations (GX) uses SQLAlchemy to connect to SQL Data Assets, and most of the SQL dialects supported by SQLAlchemy are also supported by GX. For more information about the SQL dialects supported by SQLAlchemy, see [Dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
 <Tabs
   groupId="connect-sql-source-data"
   defaultValue='sql'
   values={[
-  {label: 'SQL', value:'sql'},
+  {label: 'Snowflake', value:'snowflake'},
   {label: 'PostgreSQL', value:'postgresql'},
   {label: 'SQLite', value:'sqlite'},
-  {label: 'Snowflake', value:'snowflake'},
   {label: 'Databricks SQL', value:'databricks'},
   {label: 'BigQuery SQL', value:'bigquery'},
+  {label: 'Generic SQL', value:'sql'},
   ]}>
-<TabItem value="sql">
-
-## SQL
-
-Connect GX to a SQL database to access source data.
-
-### Prerequisites
-
-<Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
-
-- [An installation of GX set up to work with SQL](/docs/guides/setup/installation/install_gx)
-- Source data stored in a SQL database
-
-</Prerequisites> 
-
-### Import GX and instantiate a Data Context
-
-<ImportGxAndInstantiateADataContext />
-
-### Determine your connection string
-
-GX supports numerous SQL source data systems.  However, most SQL dialects have their own specifications for defining a connection string. See the dialect documentation to determine the connection string for your SQL database.
-
-:::info Some examples of different connection strings:
-
-The following are some of the connection strings that are available for different SQL dialects:
-
-- AWS Athena: `awsathena+rest://@athena.<REGION>.amazonaws.com/<DATABASE>?s3_staging_dir=<S3_PATH>`
-- BigQuery: `bigquery://<GCP_PROJECT>/<BIGQUERY_DATASET>?credentials_path=/path/to/your/credentials.json`
-- MSSQL: `mssql+pyodbc://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?driver=<DRIVER>&charset=utf&autocommit=true`
-- MySQL: `mysql+pymysql://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>`
-- PostgreSQL: `postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>`
-- Redshift: `postgresql+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?sslmode=<SSLMODE>`
-- Snowflake: `snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>&application=great_expectations_oss`
-- SQLite: `sqlite:///<PATH_TO_DB_FILE>`
-- Trino: `trino://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<CATALOG>/<SCHEMA>`
-
-:::
-
-Run one of the connection strings in your preferred SQL dialect to store the connection string in the `connection_string` variable with plain text credentials. The following code is an example of the PostgreSQL connection string format:
-
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py sql_connection_string"
-```
-
-:::tip Is there a more secure way to include my credentials?
-
-You can use environment variables or a key in `config_variables.yml` to store connection string passwords.  After you define your password, you reference it in your connection string similar to this example:
-
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py connection_string"
-```
-
-In the previous example `MY_PASSWORD` is the name of the environment variable, or the key to the value in `config_variables.yml` that corresponds to your password.
-
-If you include a password as plain text in your connection string when you define your Data Source, GX automatically removes it, adds it to `config_variables.yml`, and substitutes it in the Data Source saved configuration with a variable.
-
-:::
-
-### Create a SQL Data Source
-
-Run the following Python code to create a SQL Data Source:
-
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py add_sql"
-```
-
-</TabItem>
-<TabItem value="postgresql">
-
-## PostgreSQL
-
-Connect GX to a PostgreSQL database to access source data.
-
-### Prerequisites
-
-<Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
-
-- [An installation of GX set up to work with PostgreSQL](/docs/guides/setup/installation/install_gx)
-- Source data stored in a PostgreSQL database
-
-</Prerequisites> 
-
-### Import GX and instantiate a Data Context
-
-<ImportGxAndInstantiateADataContext />
-
-### Determine your connection string
-
-The following code examples use a PostgreSQL connection string. A PostgreSQL connection string connects GX to the PostgreSQL database.
-
-The following code is an example of a PostgreSQL connection string format:
-
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgreql_data.py connection_string"
-```
-
-:::tip Is there a more secure way to store my credentials than plain text in a connection string?
-
-<PostgreSqlConfigureCredentialsInConfigVariablesYml />
-
-:::
-
-### Create a PostgreSQL Data Source
-
-1. Run the following Python code to set the `name` and `connection_string` variables:
-
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py connection_string2"
-    ```
-
-2. Run the following Python code to create a PostgreSQL Data Source:
-
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py add_postgres"
-    ```
-
-### Connect to a specific set of data with a Data Asset
-
-To connect the Data Source to a specific set of data in the database, you define a Data Asset in the Data Source. A Data Source can contain multiple Data Assets. Each Data Asset acts as the interface between GX and the specific set of data it is configured for.
-
-With SQL databases, you can use Table or Query Data Assets. The Table Data Asset connects GX to the data contained in a single table in the source database. The Query Data Asset connects GX to the data returned by a SQL query.
-
-:::tip Maximum allowable Data Assets for a Data Source
-
-Although there isn't a maximum number of Data Assets you can define for a Data Source, you must create a single Data Asset to allow GX to retrieve data from your Data Source.
-
-:::
-
-### Connect a Data Asset to the data in a table (Optional)
-
-1. Run the following Python code to identify the table to connect to with a Table Data Asset:
-
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py asset_name"
-    ```
-
-2.  Run the following Python code to create the Data Asset:
-
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py add_table_asset"
-    ```
-
-### Connect a Data Asset to the data returned by a query (Optional)
-
-1. Run the following Python code to define a Query Data Asset:
-
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py asset_query"
-    ```
-
-2. Run the following Python code to create the Data Asset:
-
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py add_query_asset"
-    ```
-
-### Connect to additional tables or queries (Optional)
-
-Repeat the previous steps to add additional Data Assets.
-
-</TabItem>
-<TabItem value="sqlite">
-
-## SQLite
-
-Connect GX to a SQLite database to access source data.
-
-### Prerequisites
-
-<Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
-
-- [An installation of GX set up to work with SQLite](/docs/guides/setup/installation/install_gx)
-- Source data stored in a SQLite database
-
-</Prerequisites> 
-
-### Import GX and instantiate a Data Context
-
-<ImportGxAndInstantiateADataContext />
-
-### Determine your connection string
-
-The following code examples use a SQLite connection string. A SQLite connection string connects GX to the SQLite database.
-
-The following code is an example of a SQLite connection string format:
-
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py connection_string"
-```
-
-### Create a SQLite Data Source
-
-1. Run the following Python code to set the `name` and `connection_string` variables:
-
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py datasource_name"
-    ```
-
-2. Run the following Python code to create a SQLite Data Source:
-
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py datasource"
-    ```
-
-    :::caution Using `add_sql(...)` instead of `add_sqlite(...)`
-
-    The SQL Data Source created with `add_sql` can connect to data in a SQLite database. However, `add_sqlite(...)` is the preferred method.
-
-    SQLite stores datetime values as strings.  Because of this, a general SQL Data Source sees datetime columns as string columns. A SQLite Data Source has additional handling in place for these fields, and also has additional error reporting for SQLite specific issues.
-
-    If you are working with SQLite source data, use `add_sqlite(...)` to create your Data Source.
-    :::
-
-### Connect to the data in a table (Optional)
-
-1. Run the following Python code to set the `asset_name` and `asset_table_name` variables:
-
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py asset_name"
-    ```
-
-2. Run the following Python code to create the Data Asset:
-
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py table_asset"
-    ```
-
-### Connect to the data in a query (Optional)
-
-1. Run the following Python code to define a Query Data Asset:
-
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py asset_query"
-    ```
-2. Run the following Python code to create the Data Asset:
-
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py query_table_asset"
-    ```
-
-### Add additional tables or queries (Optional)
-
-Repeat the previous steps to add additional Data Assets.
-
-
-</TabItem>
 <TabItem value="snowflake">
 
 ## Snowflake
 
-Connect GX to a Snowflake database to access source data.
+Connect GX to a Snowflake database to access Data Assets.
 
 ### Prerequisites
 
@@ -374,11 +144,176 @@ Repeat the previous steps to add additional Data Assets.
 
 
 </TabItem>
+<TabItem value="postgresql">
+
+## PostgreSQL
+
+Connect GX to a PostgreSQL database to access Data Assets.
+
+### Prerequisites
+
+<Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
+
+- [An installation of GX set up to work with PostgreSQL](/docs/guides/setup/installation/install_gx)
+- Source data stored in a PostgreSQL database
+
+</Prerequisites> 
+
+### Import GX and instantiate a Data Context
+
+<ImportGxAndInstantiateADataContext />
+
+### Determine your connection string
+
+The following code examples use a PostgreSQL connection string. A PostgreSQL connection string connects GX to the PostgreSQL database.
+
+The following code is an example of a PostgreSQL connection string format:
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgreql_data.py connection_string"
+```
+
+:::tip Is there a more secure way to store my credentials than plain text in a connection string?
+
+<PostgreSqlConfigureCredentialsInConfigVariablesYml />
+
+:::
+
+### Create a PostgreSQL Data Source
+
+1. Run the following Python code to set the `name` and `connection_string` variables:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py connection_string2"
+    ```
+
+2. Run the following Python code to create a PostgreSQL Data Source:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py add_postgres"
+    ```
+
+### Connect to a specific set of data with a Data Asset
+
+To connect the Data Source to a specific set of data in the database, you define a Data Asset in the Data Source. A Data Source can contain multiple Data Assets. Each Data Asset acts as the interface between GX and the specific set of data it is configured for.
+
+With SQL databases, you can use Table or Query Data Assets. The Table Data Asset connects GX to the data contained in a single table in the source database. The Query Data Asset connects GX to the data returned by a SQL query.
+
+:::tip Maximum allowable Data Assets for a Data Source
+
+Although there isn't a maximum number of Data Assets you can define for a Data Source, you must create a single Data Asset to allow GX to retrieve data from your Data Source.
+
+:::
+
+### Connect a Data Asset to the data in a table (Optional)
+
+1. Run the following Python code to identify the table to connect to with a Table Data Asset:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py asset_name"
+    ```
+
+2.  Run the following Python code to create the Data Asset:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py add_table_asset"
+    ```
+
+### Connect a Data Asset to the data returned by a query (Optional)
+
+1. Run the following Python code to define a Query Data Asset:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py asset_query"
+    ```
+
+2. Run the following Python code to create the Data Asset:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py add_query_asset"
+    ```
+
+### Connect to additional tables or queries (Optional)
+
+Repeat the previous steps to add additional Data Assets.
+
+</TabItem>
+<TabItem value="sqlite">
+
+## SQLite
+
+Connect GX to a SQLite database to access Data Assets.
+
+### Prerequisites
+
+<Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
+
+- [An installation of GX set up to work with SQLite](/docs/guides/setup/installation/install_gx)
+- Source data stored in a SQLite database
+
+</Prerequisites> 
+
+### Import GX and instantiate a Data Context
+
+<ImportGxAndInstantiateADataContext />
+
+### Determine your connection string
+
+The following code examples use a SQLite connection string. A SQLite connection string connects GX to the SQLite database.
+
+The following code is an example of a SQLite connection string format:
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py connection_string"
+```
+
+### Create a SQLite Data Source
+
+1. Run the following Python code to set the `name` and `connection_string` variables:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py datasource_name"
+    ```
+
+2. Run the following Python code to create a SQLite Data Source:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py datasource"
+    ```
+
+    :::caution Using `add_sql(...)` instead of `add_sqlite(...)`
+
+    The SQL Data Source created with `add_sql` can connect to data in a SQLite database. However, `add_sqlite(...)` is the preferred method.
+
+    SQLite stores datetime values as strings.  Because of this, a general SQL Data Source sees datetime columns as string columns. A SQLite Data Source has additional handling in place for these fields, and also has additional error reporting for SQLite specific issues.
+
+    If you are working with SQLite Data Source, use `add_sqlite(...)` to create your Data Source.
+    :::
+
+### Connect to the data in a table (Optional)
+
+1. Run the following Python code to set the `asset_name` and `asset_table_name` variables:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py asset_name"
+    ```
+
+2. Run the following Python code to create the Data Asset:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py table_asset"
+    ```
+
+### Connect to the data in a query (Optional)
+
+1. Run the following Python code to define a Query Data Asset:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py asset_query"
+    ```
+2. Run the following Python code to create the Data Asset:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py query_table_asset"
+    ```
+
+### Add additional tables or queries (Optional)
+
+Repeat the previous steps to add additional Data Assets.
+
+
+</TabItem>
 <TabItem value="databricks">
 
 ## Databricks SQL
 
-Connect GX to Databricks to access source data.
+Connect GX to Databricks to access Data Assets.
 
 ### Prerequisites
 
@@ -573,9 +508,9 @@ gcloud app browse
 
 The URL to your app appears and opens in a new browser window. You can view the index page of your Data Docs site.
 
-### Connect to source data
+### Connect to a Data Source
 
-Connect to source data stored on a GCS or .
+Connect to a GCS or BigQuery Data Source.
 
 <Tabs
   groupId="connect-to-data-gcs-bigquery"
@@ -626,7 +561,7 @@ To configure the BigQuery Data Source, see [How to connect to a BigQuery databas
   ]}>
 <TabItem value="gcs">
 
-Use the `add_csv_asset` function to add a CSV `Asset` to your `Datasource`.
+Use the `add_csv_asset` function to add a CSV `Asset` to your `Data Source`.
 
 Configure the `prefix` and `batching_regex`. The `prefix` is the path to the GCS bucket where the files are located. `batching_regex` is a regular expression that indicates which files should be treated as Batches in the Asset, and how to identify them. For example:
 
@@ -650,7 +585,7 @@ Run the following code to use the `add_csv_asset` function to add an `Asset` nam
 </TabItem>
 <TabItem value="bigquery">
 
-You can add a BigQuery `Asset` into your `Datasource` as a table asset or query asset.
+You can add a BigQuery `Asset` into your `Data Source` as a table asset or query asset.
 
 In the following example, a table `Asset` named `my_table_asset` is built by naming the table in your BigQuery Database. 
 
@@ -899,6 +834,71 @@ To trigger the DAG manually:
 3. Click **Trigger Dag** to run your DAG configuration.
 
     When the DAG run is successful, the `Success` status appears on the DAGs page of the Airflow Web UI. You can also check that new Data Docs have been generated by accessing the URL to your `gcloud` app.
+
+</TabItem>
+<TabItem value="sql">
+
+## SQL
+
+Connect GX to a SQL database to access Data Assets.
+
+### Prerequisites
+
+<Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
+
+- [An installation of GX set up to work with SQL](/docs/guides/setup/installation/install_gx)
+- Source data stored in a SQL database
+
+</Prerequisites> 
+
+### Import GX and instantiate a Data Context
+
+<ImportGxAndInstantiateADataContext />
+
+### Determine your connection string
+
+GX supports numerous SQL Data Sources.  However, most SQL dialects have their own specifications for defining a connection string. See the dialect documentation to determine the connection string for your SQL database.
+
+:::info Some examples of different connection strings:
+
+The following are some of the connection strings that are available for different SQL dialects:
+
+- AWS Athena: `awsathena+rest://@athena.<REGION>.amazonaws.com/<DATABASE>?s3_staging_dir=<S3_PATH>`
+- BigQuery: `bigquery://<GCP_PROJECT>/<BIGQUERY_DATASET>?credentials_path=/path/to/your/credentials.json`
+- MSSQL: `mssql+pyodbc://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?driver=<DRIVER>&charset=utf&autocommit=true`
+- MySQL: `mysql+pymysql://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>`
+- PostgreSQL: `postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>`
+- Redshift: `postgresql+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?sslmode=<SSLMODE>`
+- Snowflake: `snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>&application=great_expectations_oss`
+- SQLite: `sqlite:///<PATH_TO_DB_FILE>`
+- Trino: `trino://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<CATALOG>/<SCHEMA>`
+
+:::
+
+Run one of the connection strings in your preferred SQL dialect to store the connection string in the `connection_string` variable with plain text credentials. The following code is an example of the PostgreSQL connection string format:
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py sql_connection_string"
+```
+
+:::tip Is there a more secure way to include my credentials?
+
+You can use environment variables or a key in `config_variables.yml` to store connection string passwords.  After you define your password, you reference it in your connection string similar to this example:
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py connection_string"
+```
+
+In the previous example `MY_PASSWORD` is the name of the environment variable, or the key to the value in `config_variables.yml` that corresponds to your password.
+
+If you include a password as plain text in your connection string when you define your Data Source, GX automatically removes it, adds it to `config_variables.yml`, and substitutes it in the Data Source saved configuration with a variable.
+
+:::
+
+### Create a SQL Data Source
+
+Run the following Python code to create a SQL Data Source:
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py add_sql"
+```
 
 </TabItem>
 </Tabs>

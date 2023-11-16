@@ -17,7 +17,6 @@ from typing import (
     Callable,
     Dict,
     List,
-    NamedTuple,
     Optional,
     Sequence,
     Set,
@@ -81,6 +80,9 @@ from great_expectations.validator.validation_graph import (
     ExpectationValidationGraph,
     MetricEdge,
     ValidationGraph,
+)
+from great_expectations.validator.validation_statistics import (
+    calc_validation_statistics,
 )
 
 logger = logging.getLogger(__name__)
@@ -153,14 +155,6 @@ class ValidationDependencies:
         Returns "MetricConfiguration" dependency objects specified.
         """
         return list(self.metric_configurations.values())
-
-
-class ValidationStatistics(NamedTuple):
-    evaluated_expectations: int
-    successful_expectations: int
-    unsuccessful_expectations: int
-    success_percent: float | None
-    success: bool
 
 
 @public_api
@@ -357,30 +351,6 @@ class Validator:
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
-    ) -> _MetricsDict:
-        """
-        Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
-
-        Args:
-            metric_configurations: List of desired MetricConfiguration objects to be resolved.
-            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
-            min_graph_edges_pbar_enable: Minumum number of graph edges to warrant showing progress bars.
-
-        Returns:
-            Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
-        """
-        return self._metrics_calculator.compute_metrics(
-            metric_configurations=metric_configurations,
-            runtime_configuration=runtime_configuration,
-            min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
-        )
-
-    def compute_metrics_with_aborted_metrics(
-        self,
-        metric_configurations: List[MetricConfiguration],
-        runtime_configuration: Optional[dict] = None,
-        min_graph_edges_pbar_enable: int = 0,
-        # Set to low number (e.g., 3) to suppress progress bar for small graphs.
     ) -> tuple[_MetricsDict, _AbortedMetricsInfoDict]:
         """
         Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
@@ -391,11 +361,11 @@ class Validator:
             min_graph_edges_pbar_enable: Minumum number of graph edges to warrant showing progress bars.
 
         Returns:
-            Tuple with two elements. The first is a dictionary with requested metrics resolved, with unique metric
-            ID as key and computed metric as value. The second is a dictionary with information about any metrics
-            that were aborted during computation, using the unique metric ID as key.
+            Tuple of two elements, the first is a dictionary with requested metrics resolved,
+            with unique metric ID as key and computed metric as value. The second is a dictionary of the
+            aborted metrics information, with metric ID as key if any metrics were aborted.
         """
-        return self._metrics_calculator.compute_metrics_with_aborted_metrics(
+        return self._metrics_calculator.compute_metrics(
             metric_configurations=metric_configurations,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
@@ -1715,7 +1685,7 @@ class Validator:
             if self._include_rendered_content:
                 for validation_result in results:
                     validation_result.render()
-            statistics = self._calc_validation_statistics(results)
+            statistics = calc_validation_statistics(results)
 
             if only_return_failures:
                 abbrev_results = []
@@ -1966,34 +1936,6 @@ class Validator:
                 runtime_configuration.update({"result_format": result_format})
 
         return runtime_configuration
-
-    @staticmethod
-    def _calc_validation_statistics(
-        validation_results: List[ExpectationValidationResult],
-    ) -> ValidationStatistics:
-        """
-        Calculate summary statistics for the validation results and
-        return ``ExpectationStatistics``.
-        """
-        # calc stats
-        evaluated_expectations = len(validation_results)
-        successful_expectations = len(
-            [exp for exp in validation_results if exp.success]
-        )
-        unsuccessful_expectations = evaluated_expectations - successful_expectations
-        success = successful_expectations == evaluated_expectations
-        try:
-            success_percent = successful_expectations / evaluated_expectations * 100
-        except ZeroDivisionError:
-            success_percent = None
-
-        return ValidationStatistics(
-            successful_expectations=successful_expectations,
-            evaluated_expectations=evaluated_expectations,
-            unsuccessful_expectations=unsuccessful_expectations,
-            success=success,
-            success_percent=success_percent,
-        )
 
     def convert_to_checkpoint_validations_list(
         self,
