@@ -256,6 +256,9 @@ class ExpectationSuite(SerializableDictDot):
         memo[id(self)] = result
 
         attributes_to_copy = set(ExpectationSuiteSchema().fields.keys())
+        # map expectations to expectation_configurations
+        attributes_to_copy.remove("expectations")
+        attributes_to_copy.add("expectation_configurations")
         for key in attributes_to_copy:
             setattr(result, key, deepcopy(getattr(self, key)))
 
