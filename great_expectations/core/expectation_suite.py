@@ -1071,7 +1071,6 @@ class LegacyExpectationSuite(SerializableDictDot):
 
 
 class ExpectationSuite(LegacyExpectationSuite):
-
     def __init__(
         self,
         *args,
@@ -1079,7 +1078,7 @@ class ExpectationSuite(LegacyExpectationSuite):
         name: str = None,
         expectations: Sequence[Expectation] = None,
         id: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ):
         if name:
             kwargs["expectation_suite_name"] = name
@@ -1104,11 +1103,6 @@ class ExpectationSuite(LegacyExpectationSuite):
     def get_all(self) -> list[Expectation]:
         """Get a list of all Expectations in this ExpectationSuite."""
         ...
-
-
-
-
-
 
 
 class ExpectationSuiteSchema(Schema):
