@@ -10,7 +10,7 @@ import sys
 import time
 import traceback
 import warnings
-from abc import ABC, ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from collections import Counter, defaultdict
 from copy import deepcopy
 from inspect import isabstract
@@ -37,6 +37,8 @@ from dateutil.parser import parse
 from typing_extensions import ParamSpec
 
 from great_expectations import __version__ as ge_version
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pydantic import ModelMetaclass
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (
     deprecated_method_or_class,
@@ -265,7 +267,7 @@ def param_method(param_name: str) -> Callable:
 
 
 # noinspection PyMethodParameters
-class MetaExpectation(ABCMeta):
+class MetaExpectation(ModelMetaclass):
     """MetaExpectation registers Expectations as they are defined, adding them to the Expectation registry.
 
     Any class inheriting from Expectation will be registered based on the value of the "expectation_type" class
@@ -297,7 +299,7 @@ class MetaExpectation(ABCMeta):
 
 
 @public_api
-class Expectation(metaclass=MetaExpectation):
+class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     """Base class for all Expectations.
 
     Expectation classes *must* have the following attributes set:
@@ -329,7 +331,11 @@ class Expectation(metaclass=MetaExpectation):
         2. Data Docs rendering methods decorated with the @renderer decorator. See the
     """
 
-    version: ClassVar = ge_version
+    class Config:
+        arbitrary_types_allowed = True
+        extra = "allow"
+
+    version: ClassVar[str] = ge_version
     domain_keys: ClassVar[Tuple[str, ...]] = ()
     success_keys: ClassVar[Tuple[str, ...]] = ()
     runtime_keys: ClassVar[Tuple[str, ...]] = (
@@ -338,7 +344,7 @@ class Expectation(metaclass=MetaExpectation):
         "result_format",
     )
     default_kwarg_values: ClassVar[
-        dict[str, bool | str | float | RuleBasedProfilerConfig | None]
+        dict[str, Union[bool, str, float, RuleBasedProfilerConfig, None]]
     ] = {
         "include_config": True,
         "catch_exceptions": False,
@@ -350,9 +356,7 @@ class Expectation(metaclass=MetaExpectation):
     examples: ClassVar[List[dict]] = []
 
     def __init__(self, **kwargs) -> None:
-        # Promote ExpectationConfiguration fields to Expectation
-        for k, v in kwargs.items():
-            setattr(self, k, v)
+        super().__init__(**kwargs)
 
         # Everything below is purely to maintain current validation logic
         expectation_type = camel_to_snake(self.__class__.__name__)
@@ -1249,6 +1253,7 @@ class Expectation(metaclass=MetaExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    # Renamed from validate due to collision with Pydantic method of the same name
     @public_api
     def validate_(  # noqa: PLR0913
         self,
@@ -2354,7 +2359,7 @@ class BatchExpectation(Expectation, ABC):
         "condition_parser",
     )
     metric_dependencies: ClassVar[Tuple[str, ...]] = ()
-    domain_type: ClassVar = MetricDomainTypes.TABLE
+    domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.TABLE
     args_keys: ClassVar[Tuple[str, ...]] = ()
 
     @override
@@ -2752,14 +2757,14 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     """
 
     map_metric: ClassVar[Optional[str]] = None
-    domain_keys: ClassVar[tuple[str, ...]] = (
+    domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
         "table",
         "column",
         "row_condition",
         "condition_parser",
     )
-    domain_type: ClassVar = MetricDomainTypes.COLUMN
+    domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.COLUMN
     success_keys: ClassVar[Tuple[str, ...]] = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
@@ -3033,7 +3038,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             kwargs from the Expectation Configuration.
     """
 
-    map_metric = None
+    map_metric: ClassVar[Optional[str]] = None
     domain_keys = (
         "batch_id",
         "table",
@@ -3305,7 +3310,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             kwargs from the Expectation Configuration.
     """
 
-    map_metric = None
+    map_metric: ClassVar[Optional[str]] = None
     domain_keys = (
         "batch_id",
         "table",
