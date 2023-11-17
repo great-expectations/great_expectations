@@ -1258,7 +1258,7 @@ def _context_to_validator_and_expectation_sql(
         },
     )
     expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+        **expectation_configuration.kwargs
     )
 
     batch_request = BatchRequest(
@@ -1312,7 +1312,7 @@ def test_validator_result_format_config_from_expectation(
         context=data_context_with_connection_to_metrics_db,
     )
     with pytest.warns(UserWarning) as config_warning:
-        _: ExpectationValidationResult = expectation.validate(
+        _: ExpectationValidationResult = expectation.validate_(
             validator=validator, runtime_configuration=runtime_configuration
         )
 

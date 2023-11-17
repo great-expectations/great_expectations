@@ -1477,7 +1477,7 @@ class ExpectationConfiguration(SerializableDictDot):
         """
         expectation_impl: Type[Expectation] = self._get_expectation_impl()
         # noinspection PyCallingNonCallable
-        return expectation_impl(self).validate(
+        return expectation_impl(**self.kwargs).validate_(
             validator=validator,
             runtime_configuration=runtime_configuration,
         )
@@ -1491,7 +1491,7 @@ class ExpectationConfiguration(SerializableDictDot):
     ):
         expectation_impl: Type[Expectation] = self._get_expectation_impl()
         # noinspection PyCallingNonCallable
-        return expectation_impl(self).metrics_validate(
+        return expectation_impl(**self.kwargs).metrics_validate(
             metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,
