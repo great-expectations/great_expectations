@@ -42,11 +42,13 @@ else:
 
 __all__ = [
     "AnyUrl",
+    "BaseSettings",
     "error_wrappers",
     "errors",
     "fields",
     "GenericModel",
     "generics",
+    "HttpUrl",
     "json",
     "ModelMetaclass",
     "networks",
