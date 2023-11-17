@@ -1075,15 +1075,20 @@ class ExpectationSuite(LegacyExpectationSuite):
         self,
         *args,
         # once refactor is complete, these should be required fields
-        name: str = None,
-        expectations: Sequence[Expectation] = None,
+        name: Optional[str] = None,
+        expectations: Optional[
+            Sequence[Union[dict, ExpectationConfiguration, Expectation]]
+        ] = None,
         id: Optional[str] = None,
         **kwargs,
     ):
         if name:
             kwargs["expectation_suite_name"] = name
         if expectations and all(isinstance(exp, Expectation) for exp in expectations):
+            # new api
             kwargs["expectations"] = [exp.configuration for exp in expectations]
+        else:
+            kwargs["expectations"] = expectations
         if id:
             kwargs["ge_cloud_id"] = id
         super().__init__(*args, **kwargs)
