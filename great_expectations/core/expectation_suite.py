@@ -1086,6 +1086,9 @@ class ExpectationSuite(LegacyExpectationSuite):
         id: Optional[str] = None,
         **kwargs,
     ):
+        # avoid circular import
+        from great_expectations.expectations.expectation import Expectation
+
         if name:
             kwargs["expectation_suite_name"] = name
         if expectations and all(isinstance(exp, Expectation) for exp in expectations):
