@@ -355,6 +355,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
 
+    # @pydantic.validator("configuration")
+    # def validate_config():
+    #     pass
+
     @classmethod
     def is_abstract(cls) -> bool:
         return isabstract(cls)
@@ -1232,15 +1236,14 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             InvalidExpectationConfigurationError: The configuration does not contain the values required
                 by the Expectation.
         """
-        pass
-        # if not configuration:
-        #     configuration = self.configuration
-        # try:
-        #     assert (
-        #         configuration.expectation_type == self.expectation_type
-        #     ), f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
+        if not configuration:
+            configuration = self.configuration
+        try:
+            assert (
+                configuration.expectation_type == self.expectation_type
+            ), f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
 
     @public_api
     def validate(  # noqa: PLR0913

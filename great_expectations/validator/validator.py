@@ -543,7 +543,7 @@ class Validator:
                 )
 
             try:
-                expectation = expectation_impl(configuration)
+                expectation = expectation_impl(configuration=configuration)
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
 
                 if not self.interactive_evaluation and not self._active_validation:
@@ -1124,7 +1124,7 @@ class Validator:
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
             validation_dependencies: ValidationDependencies = expectation_impl(
-                evaluated_config
+                configuration=evaluated_config
             ).get_validation_dependencies(
                 configuration=evaluated_config,
                 execution_engine=self._execution_engine,
