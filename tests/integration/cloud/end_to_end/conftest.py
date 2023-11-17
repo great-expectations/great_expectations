@@ -15,7 +15,6 @@ from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import CloudDataContext
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
     import py
@@ -24,6 +23,7 @@ if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark, sqlalchemy
     from great_expectations.core import ExpectationSuite
     from great_expectations.datasource.fluent import BatchRequest
+    from great_expectations.validator.validator import Validator
 
 LOGGER: Final = logging.getLogger("tests")
 
