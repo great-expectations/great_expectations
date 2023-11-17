@@ -82,7 +82,6 @@ class Validator:
         )
         return self._context.get_validator(batch_request=batch_request)
 
-
     def _validate_expectation_configs(
         self, expectation_configs: list[ExpectationConfiguration]
     ) -> list[ExpectationValidationResult]:
