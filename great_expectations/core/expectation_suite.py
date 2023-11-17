@@ -780,7 +780,7 @@ class ExpectationSuite(SerializableDictDot):
     ) -> Expectation:
         try:
             class_ = get_expectation_impl(expectation_configuration.expectation_type)
-            expectation = class_()
+            expectation = class_(configuration=expectation_configuration)
             expectation.validate_configuration(expectation_configuration)
             return expectation
         except (
