@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from enum import Enum
+from functools import cached_property
 from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
+from great_expectations.validator.validator import Validator as OldValidator
 from great_expectations.validator.validator import calc_validation_statistics
 
 if TYPE_CHECKING:
@@ -45,6 +47,13 @@ class Validator:
         self._batch_asset_options = batch_asset_options
         self.result_format = result_format
 
+    @cached_property
+    def _wrapped_validator(self) -> OldValidator:
+        batch_request = self._batch_config.data_asset.build_batch_request(
+            options=self._batch_asset_options
+        )
+        return self._context.get_validator(batch_request=batch_request)
+
     def validate_expectation(
         self, expectation: Expectation
     ) -> ExpectationValidationResult:
@@ -57,7 +66,7 @@ class Validator:
     def validate_expectation_suite(
         self, expectation_suite: ExpectationSuite
     ) -> ExpectationSuiteValidationResult:
-        """Run an  expectation suite against the batch config"""
+        """Run an expectation suite against the batch config"""
         results = self._validate_expectation_configs(expectation_suite.expectations)
         statistics = calc_validation_statistics(results)
 
@@ -77,12 +86,7 @@ class Validator:
         self, expectation_configs: list[ExpectationConfiguration]
     ) -> list[ExpectationValidationResult]:
         """Run a list of expectation configurations against the batch config"""
-        batch_request = self._batch_config.data_asset.build_batch_request(
-            options=self._batch_asset_options
-        )
-        wrapped_validator = self._context.get_validator(batch_request=batch_request)
-
-        results = wrapped_validator.graph_validate(
+        results = self._wrapped_validator.graph_validate(
             configurations=expectation_configs,
             runtime_configuration={"result_format": self.result_format.value},
         )
