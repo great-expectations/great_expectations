@@ -504,7 +504,7 @@ class TestEqDunder:
                     reason="Currently data_context is not considered in ExpectationSuite equality",
                 ),
             ),
-            pytest.param("expectations", []),
+            pytest.param("expectation_configurations", []),
             pytest.param(
                 "evaluation_parameters", {"different": "evaluation_parameters"}
             ),
