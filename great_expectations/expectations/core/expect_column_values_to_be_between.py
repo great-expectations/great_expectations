@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, ClassVar, List, Optional
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import (
@@ -160,7 +160,9 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         column_min_range_estimator_parameter_builder_config,
         column_max_range_estimator_parameter_builder_config,
     ]
-    default_profiler_config = RuleBasedProfilerConfig(
+    default_profiler_config: ClassVar[
+        RuleBasedProfilerConfig
+    ] = RuleBasedProfilerConfig(
         name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},
