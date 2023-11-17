@@ -140,7 +140,7 @@ def _expecation_configuration_to_validation_result_pandas(
         expectation_configuration (ExpectationConfiguration): configuration that is being tested
 
     """
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
+    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     batch_definition = BatchDefinition(
         datasource_name="pandas_datasource",
         data_connector_name="runtime_data_connector",
@@ -176,7 +176,7 @@ def _expecation_configuration_to_validation_result_sql(
         expectation_configuration (ExpectationConfiguration): configuration that is being tested
 
     """
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
+    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
     connection_string = f"sqlite:///{sqlite_path}"
     engine = SqlAlchemyExecutionEngine(
@@ -774,7 +774,7 @@ def test_include_unexpected_rows_without_explicit_result_format_raises_error(
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
+    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     batch_definition = BatchDefinition(
         datasource_name="pandas_datasource",
         data_connector_name="runtime_data_connector",
