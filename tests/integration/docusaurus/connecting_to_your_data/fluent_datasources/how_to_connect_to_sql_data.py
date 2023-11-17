@@ -5,6 +5,7 @@ pytest -v --docs-tests -k "how_to_connect_to_sql_data" tests/integration/test_sc
 ```
 """
 import pathlib
+
 import great_expectations as gx
 
 context = gx.get_context()

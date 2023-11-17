@@ -4,6 +4,90 @@
 Changelog
 #########
 
+0.18.3
+-----------------
+* [FEATURE] Update SnowflakeDatasource connection details ([#8922](https://github.com/great-expectations/great_expectations/pull/8922))
+* [DOCS] Minor Updates to Create a Data Asset ([#8952](https://github.com/great-expectations/great_expectations/pull/8952))
+* [DOCS] List the Available GX Cloud Expectations in Manage Expectations ([#8959](https://github.com/great-expectations/great_expectations/pull/8959))
+* [DOCS] DSB-484 Improve Quickstart diagram links ([#8951](https://github.com/great-expectations/great_expectations/pull/8951))
+* [DOCS] Update Add Validation Data or Expectation Suites to a Checkpoint ([#8931](https://github.com/great-expectations/great_expectations/pull/8931))
+* [MAINTENANCE] Add delete Data Source and Data Asset methods to end-to-end tests ([#8956](https://github.com/great-expectations/great_expectations/pull/8956))
+* [MAINTENANCE] Add Nevin and cleanup teams.yml ([#8955](https://github.com/great-expectations/great_expectations/pull/8955))
+* [MAINTENANCE] dry up validation status calc ([#8962](https://github.com/great-expectations/great_expectations/pull/8962))
+* [MAINTENANCE] Update type hints so our decorators play well with classes ([#8935](https://github.com/great-expectations/great_expectations/pull/8935))
+* [CONTRIB] add sqlalchemy execution engine compatability to expect_column_values… ([#8942](https://github.com/great-expectations/great_expectations/pull/8942)) (thanks @mcornew)
+* [CONTRIB] add sqlalchemy support for expect_multicolumn_values_not_to_be_all_null ([#8938](https://github.com/great-expectations/great_expectations/pull/8938)) (thanks @itaise)
+
+0.18.2
+-----------------
+* [DOCS] Update Connect to SQL Database Data Assets ([#8918](https://github.com/great-expectations/great_expectations/pull/8918))
+* [DOCS] DSB-353: Add GX Cloud Architecture and Deployment Patterns page ([#8904](https://github.com/great-expectations/great_expectations/pull/8904))
+* [DOCS] Update descs for custom expectations ([#8923](https://github.com/great-expectations/great_expectations/pull/8923))
+* [DOCS] Update cloud docs for data assets ([#8932](https://github.com/great-expectations/great_expectations/pull/8932))
+* [DOCS] Update syntax highlighting in main README ([#8811](https://github.com/great-expectations/great_expectations/pull/8811))
+* [DOCS] Minor Updates to GX Cloud Documentation ([#8939](https://github.com/great-expectations/great_expectations/pull/8939))
+* [DOCS] add `FabricPowerBIDatasource` api docs ([#8948](https://github.com/great-expectations/great_expectations/pull/8948))
+* [DOCS]  Document Add Data Asset to Existing Data Source Functionality ([#8949](https://github.com/great-expectations/great_expectations/pull/8949))
+* [DOCS] Create OSS Troubleshooting Topic ([#8898](https://github.com/great-expectations/great_expectations/pull/8898))
+* [DOCS] Minor Updates to Create a Data Asset ([#8952](https://github.com/great-expectations/great_expectations/pull/8952))
+* [MAINTENANCE] Helpful Message for Expectations that require Metrics that are not available ([#8906](https://github.com/great-expectations/great_expectations/pull/8906))
+* [MAINTENANCE] Lint Docs tests ([#8930](https://github.com/great-expectations/great_expectations/pull/8930))
+* [MAINTENANCE] `PandasFilesystemDatasource` E2E tests ([#8884](https://github.com/great-expectations/great_expectations/pull/8884))
+* [MAINTENANCE] Remove Cloud integration tests with duplicated logic ([#8940](https://github.com/great-expectations/great_expectations/pull/8940))
+* [MAINTENANCE] Fix error in boolean logic for local assume command ([#8941](https://github.com/great-expectations/great_expectations/pull/8941))
+* [MAINTENANCE] pre-commit autoupdate ([#8934](https://github.com/great-expectations/great_expectations/pull/8934))
+* [MAINTENANCE] Add local verify step for pact tests ([#8876](https://github.com/great-expectations/great_expectations/pull/8876))
+
+0.18.1
+-----------------
+* [FEATURE] Expect column specified percentile value to be above a given value. ([#8907](https://github.com/great-expectations/great_expectations/pull/8907)) (thanks @kurt1984)
+* [FEATURE] Warn users if more specific SQL Datasource is available. ([#8914](https://github.com/great-expectations/great_expectations/pull/8914))
+* [DOCS] Update Cloud Quickstart save expectation suite example ([#8893](https://github.com/great-expectations/great_expectations/pull/8893))
+* [DOCS] Update Section Title ([#8905](https://github.com/great-expectations/great_expectations/pull/8905))
+* [DOCS] add 'user' access token clarification to GX Cloud quickstart ([#8912](https://github.com/great-expectations/great_expectations/pull/8912))
+* [DOCS] Remove TOC  Content Duplication ([#8917](https://github.com/great-expectations/great_expectations/pull/8917))
+* [DOCS]  Create a New Get Support Topic ([#8849](https://github.com/great-expectations/great_expectations/pull/8849))
+* [MAINTENANCE] Get checkpoint endpoint contract test ([#8881](https://github.com/great-expectations/great_expectations/pull/8881))
+* [MAINTENANCE] Add Expectation Suite Pact tests ([#8885](https://github.com/great-expectations/great_expectations/pull/8885))
+* [MAINTENANCE] Do not skip spark tests in cloud stage ([#8901](https://github.com/great-expectations/great_expectations/pull/8901))
+* [MAINTENANCE] List checkpoints endpoint contract test ([#8886](https://github.com/great-expectations/great_expectations/pull/8886))
+* [MAINTENANCE] Adjust timeouts for cloud-tests services ([#8910](https://github.com/great-expectations/great_expectations/pull/8910))
+* [MAINTENANCE] Typing render/view ([#8903](https://github.com/great-expectations/great_expectations/pull/8903))
+* [MAINTENANCE] Better error msg for refrence environments ([#8913](https://github.com/great-expectations/great_expectations/pull/8913))
+* [MAINTENANCE] remove deprecated usage of pydantic Extra ([#8896](https://github.com/great-expectations/great_expectations/pull/8896))
+* [MAINTENANCE] E2E Test - Spark Filesystem with Cloud ([#8889](https://github.com/great-expectations/great_expectations/pull/8889))
+* [MAINTENANCE] Update ruff + black + mypy ([#8902](https://github.com/great-expectations/great_expectations/pull/8902))
+* [MAINTENANCE] Deal with `GxDatasourceWarning` warnings in docs-snippet tests ([#8924](https://github.com/great-expectations/great_expectations/pull/8924))
+* [MAINTENANCE] Add JennyTee as core contributor ([#8921](https://github.com/great-expectations/great_expectations/pull/8921))
+* [CONTRIB] [FEATURE]-add-threshold-parameter ([#8891](https://github.com/great-expectations/great_expectations/pull/8891)) (thanks @tb102122)
+
+0.18.0
+-----------------
+* [BUGFIX] Only update self.assets if cloud deletion successful ([#8894](https://github.com/great-expectations/great_expectations/pull/8894))
+* [DOCS] DSB-321: Add workflow diagram to OSS Quickstart ([#8804](https://github.com/great-expectations/great_expectations/pull/8804))
+* [DOCS] Add @public_api to Method ([#8870](https://github.com/great-expectations/great_expectations/pull/8870))
+* [DOCS] Update Instances of Source Data to Data Source ([#8857](https://github.com/great-expectations/great_expectations/pull/8857))
+* [DOCS] Airflow tutorial ([#8858](https://github.com/great-expectations/great_expectations/pull/8858)) (thanks @r34ctor)
+* [DOCS] Create About GX Cloud Content ([#8834](https://github.com/great-expectations/great_expectations/pull/8834))
+* [MAINTENANCE] Use contract test response bodies as unit test mocks ([#8855](https://github.com/great-expectations/great_expectations/pull/8855))
+* [MAINTENANCE] Flakey usage-stats test fixes ([#8861](https://github.com/great-expectations/great_expectations/pull/8861))
+* [MAINTENANCE] Run `docs-snippets` tests on every PR ([#8866](https://github.com/great-expectations/great_expectations/pull/8866))
+* [MAINTENANCE] Increase docker compose up services timeout ([#8864](https://github.com/great-expectations/great_expectations/pull/8864))
+* [MAINTENANCE] Remove `docs-snippets` `name` ([#8867](https://github.com/great-expectations/great_expectations/pull/8867))
+* [MAINTENANCE] Column Descriptive Metrics: Remove compute_metrics_with_aborted_metrics ([#8865](https://github.com/great-expectations/great_expectations/pull/8865))
+* [MAINTENANCE] Bump @babel/traverse from 7.23.0 to 7.23.2 in /docs/docusaurus ([#8838](https://github.com/great-expectations/great_expectations/pull/8838))
+* [MAINTENANCE] Improve Cloud update Snowflake Data Source tests ([#8868](https://github.com/great-expectations/great_expectations/pull/8868))
+* [MAINTENANCE] Remove the deprecated save_changes parameters on ADC data source crud methods ([#8859](https://github.com/great-expectations/great_expectations/pull/8859))
+* [MAINTENANCE] Bump urllib3 from 1.26.17 to 1.26.18 in /docs_rtd ([#8840](https://github.com/great-expectations/great_expectations/pull/8840))
+* [MAINTENANCE] Cloud integration tests documentation ([#8871](https://github.com/great-expectations/great_expectations/pull/8871))
+* [MAINTENANCE] Remove deprecated code in advance of v18 release ([#8863](https://github.com/great-expectations/great_expectations/pull/8863))
+* [MAINTENANCE] Add contract interactions for GET and POST datasource ([#8877](https://github.com/great-expectations/great_expectations/pull/8877))
+* [MAINTENANCE] Add pre-commit autofix to PRs ([#8873](https://github.com/great-expectations/great_expectations/pull/8873))
+* [MAINTENANCE] Only run `docs-snippets` on doc changes ([#8880](https://github.com/great-expectations/great_expectations/pull/8880))
+* [MAINTENANCE] Quieter logging ([#8892](https://github.com/great-expectations/great_expectations/pull/8892))
+* [MAINTENANCE] E2E Test - Pandas In Memory with Cloud ([#8887](https://github.com/great-expectations/great_expectations/pull/8887))
+* [MAINTENANCE] Add `SparkDatasource` End-to-End test ([#8879](https://github.com/great-expectations/great_expectations/pull/8879))
+
 0.17.23
 -----------------
 * [FEATURE] Unexpected index list with/without values - New parameter in result_format ([#8785](https://github.com/great-expectations/great_expectations/pull/8785)) (thanks @MMoussabbih)

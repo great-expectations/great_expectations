@@ -1,8 +1,6 @@
-from great_expectations.datasource.fluent import Datasource
-from great_expectations.datasource.fluent import DataAsset
-
 # <snippet name="tests/integration/docusaurus/reference/glossary/checkpoints.py setup">
 import great_expectations as gx
+from great_expectations.datasource.fluent import DataAsset, Datasource
 
 context = gx.get_context()
 # </snippet>

@@ -34,6 +34,7 @@ files = [
     "great_expectations",
     "tests/datasource/fluent",
     "tests/integration/cloud",
+    "tests/integration/docusaurus",
     # "contrib" # ignore entire `contrib` package
 ]
 warn_unused_configs = true
@@ -73,18 +74,24 @@ exclude = [
     'cli/upgrade_helpers/upgrade_helper_v13\.py',                        # 17 - This is legacy code and will not be typed.
     'dataset/sparkdf_dataset\.py',                                       #  3 - This is legacy code and will not be typed.
     'dataset/sqlalchemy_dataset\.py',                                    # 16 - This is legacy code and will not be typed.
+    'core/usage_statistics/anonymizers/batch_anonymizer\.py',            # 10 - This code will be removed in 1.0
+    'core/usage_statistics/anonymizers/batch_request_anonymizer\.py',    # 16 - This code will be removed in 1.0
+    'core/usage_statistics/anonymizers/checkpoint_anonymizer\.py',       # 16 - This code will be removed in 1.0
+    'core/usage_statistics/anonymizers/data_docs_anonymizer\.py',        # 5 - This code will be removed in 1.0
+    'core/usage_statistics/anonymizers/datasource_anonymizer\.py',       # 9 - This code will be removed in 1.0
+    'core/usage_statistics/anonymizers/expectation_anonymizer\.py',      # 6 - This code will be removed in 1.0
+    'core/usage_statistics/anonymizers/validation_operator_anonymizer\.py',  # 5 - This code will be removed in 1.0
+    'render/renderer/v3/suite_edit_notebook_renderer\.py',               # 11 - This is legacy code and will not be typed.
+    'render/renderer/v3/suite_profile_notebook_renderer\.py',            # 4 - This is legacy code and will not be typed.
+    'render/renderer/suite_edit_notebook_renderer\.py',                  # 7 - This is legacy code and will not be typed.
+    'render/renderer/suite_scaffold_notebook_renderer\.py',              # 7 - This is legacy code and will not be typed.
+    'render/renderer/datasource_new_notebook_renderer\.py',              # 4 - This is legacy code and will not be typed.
+    'render/renderer/checkpoint_new_notebook_renderer\.py',              # 9 - This is legacy code and will not be typed.
     # END ALWAYS EXCLUDE SECTION ######################################################
     #
     # #################################################################################
     # TODO: complete typing for the following modules and remove from exclude list
     # number is the current number of typing errors for the excluded pattern
-    'core/usage_statistics/anonymizers/batch_anonymizer\.py',                                              # 10
-    'core/usage_statistics/anonymizers/batch_request_anonymizer\.py',                                      # 16
-    'core/usage_statistics/anonymizers/checkpoint_anonymizer\.py',                                         # 16
-    'core/usage_statistics/anonymizers/data_docs_anonymizer\.py',                                          # 5
-    'core/usage_statistics/anonymizers/datasource_anonymizer\.py',                                         # 9
-    'core/usage_statistics/anonymizers/expectation_anonymizer\.py',                                        # 6
-    'core/usage_statistics/anonymizers/validation_operator_anonymizer\.py',                                # 5
     'expectations/core/expect_column_values_to_be_of_type\.py',                                            # 12
     'expectations/core/expect_column_values_to_not_match_regex_list\.py',                                  # 2
     'expectations/core/expect_column_values_to_not_match_regex\.py',                                       # 2
@@ -133,20 +140,12 @@ exclude = [
     'expectations/regex_based_column_map_expectation\.py',                                                 # 3
     'expectations/row_conditions\.py',                                                                     # 4
     'expectations/set_based_column_map_expectation\.py',                                                   # 3
-    'render/renderer/checkpoint_new_notebook_renderer\.py',                                                # 9
     'render/renderer/content_block/content_block\.py',                                                     # 5
     'render/renderer/content_block/exception_list_content_block\.py',                                      # 4
-    'render/renderer/datasource_new_notebook_renderer\.py',                                                #  4
-    'render/renderer/notebook_renderer\.py',                                                               # 2
     'render/renderer/page_renderer\.py',                                                                   # 10
     'render/renderer/profiling_results_overview_section_renderer\.py',                                     # 2
     'render/renderer/site_builder\.py',                                                                    # 3
     'render/renderer/slack_renderer\.py',                                                                  # 9
-    'render/renderer/suite_edit_notebook_renderer\.py',                                                    # 7
-    'render/renderer/suite_scaffold_notebook_renderer\.py',                                                # 7
-    'render/renderer/v3/suite_edit_notebook_renderer\.py',                                                 # 11
-    'render/renderer/v3/suite_profile_notebook_renderer\.py',                                              # 4
-    'render/view/view\.py',                                                                                # 11
     'rule_based_profiler/domain_builder/map_metric_column_domain_builder\.py',                             # 8
     'rule_based_profiler/estimators/bootstrap_numeric_range_estimator\.py',                                # 8
     'rule_based_profiler/estimators/kde_numeric_range_estimator\.py',                                      # 7
@@ -165,6 +164,13 @@ exclude = [
     'validation_operators/validation_operators\.py',                                                       # 16
     # tests
     'tests/datasource/fluent/tasks\.py',
+    'tests/integration/docusaurus/tutorials',
+    'tests/integration/docusaurus/connecting_to_your_data',
+    'tests/integration/docusaurus/deployment_patterns',
+    'tests/integration/docusaurus/expectations',
+    'tests/integration/docusaurus/reference',
+    'tests/integration/docusaurus/setup',
+    'tests/integration/docusaurus/validation',
 ]
 
 [[tool.mypy.overrides]]
@@ -260,7 +266,6 @@ extend-exclude = [
     # TODO: remove the items below and fix linting issues
     "tests/data_asset",                                         # 10 warnings
     "tests/dataset",                                            # 10 warnings
-    "tests/integration/docusaurus",                             # 208 warnings, 144 auto-fixable
     "tests/test_fixtures/notebook_assets/suite_edit/footer.py", # 7 warnings
 ]
 

@@ -12,13 +12,14 @@ devrel:
   - '@kwcanuck'        # Rob Gray
   - '@kyleaton'        # Kyle Eaton
   - '@rachhouse'       # Rachel House
-  - '@rdodev'          # Ruben Orduz
   - '@talagluck'       # Tal Gluck
+  - '@r34ctor'         # Nevin Tan
 
 core:
   - '@DrewHoo'         # Drew Hoover
   - '@Erin-GX'         # Erin Kapp
   - '@HaebichanGX'     # Haebichan Jung
+  - '@JennyTee'        # Jenny Terlinden
   - '@Kilo59'          # Gabriel Gore
   - '@NathanFarmer'    # Nathan Farmer
   - '@Shinnnyshinshin' # Will Shin
@@ -48,3 +49,4 @@ core:
 bot:
   - '@dependabot'
   - '@dependabot[bot]'
+  - '@pre-commit-ci[bot]'

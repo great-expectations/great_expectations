@@ -1,6 +1,5 @@
 import great_expectations as gx
-from great_expectations.datasource.fluent import Datasource
-from great_expectations.datasource.fluent import DataAsset
+from great_expectations.datasource.fluent import DataAsset, Datasource
 
 context = gx.get_context()
 

@@ -809,8 +809,12 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
         (
             "reqs/requirements-dev-cloud.txt",
             "reqs/requirements-dev-snowflake.txt",
+            "reqs/requirements-dev-spark.txt",
         ),
-        services=("mercury",),
+        services=(
+            "mercury",
+            "spark",
+        ),
         extra_pytest_args=("--cloud",),
     ),
     "databricks": TestDependencies(
@@ -1138,7 +1142,7 @@ def service(
 
             if (
                 service_name == "mercury"
-                and os.environ.get("CI") is False  # noqa: TID251
+                and os.environ.get("CI") != "true"  # noqa: TID251
             ):
                 cmds.extend(
                     [
@@ -1195,8 +1199,8 @@ def service(
                 ]
             )
             ctx.run(" ".join(cmds), echo=True, pty=pty)
-        # TODO: remove this sleep. This is a temporary hack to give services enough
-        #       time to come up to get ci merging again.
+        # TODO: Add healthchecks to services that require this sleep and then remove it.
+        #       This is a temporary hack to give services enough time to come up before moving on.
         ctx.run("sleep 15")
     else:
         print("  No matching services to start")
