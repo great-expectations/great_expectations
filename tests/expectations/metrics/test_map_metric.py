@@ -160,7 +160,7 @@ def _expecation_configuration_to_validation_result_pandas(
             batch,
         ],
     )
-    result = expectation.validate(validator)
+    result = expectation.validate_(validator)
     return result
 
 
@@ -236,7 +236,7 @@ def _expecation_configuration_to_validation_result_sql(
             batch,
         ],
     )
-    result = expectation.validate(validator)
+    result = expectation.validate_(validator)
     return result
 
 
@@ -795,7 +795,7 @@ def test_include_unexpected_rows_without_explicit_result_format_raises_error(
         ],
     )
     with pytest.raises(ValueError):
-        expectation.validate(validator)
+        expectation.validate_(validator)
 
 
 # Spark
@@ -834,7 +834,7 @@ def test_spark_single_column_complete_result_format(
             batch,
         ],
     )
-    result = expectation.validate(validator)
+    result = expectation.validate_(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -894,7 +894,7 @@ def test_spark_single_column_complete_result_format_with_id_pk(
 
     # result_format configuration at ExpectationConfiguration-level will emit warning
     with pytest.warns(UserWarning):
-        result = expectation.validate(validator)
+        result = expectation.validate_(validator)
 
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
@@ -962,7 +962,7 @@ def test_spark_single_column_summary_result_format(
             batch,
         ],
     )
-    result = expectation.validate(validator)
+    result = expectation.validate_(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -1015,7 +1015,7 @@ def test_spark_single_column_basic_result_format(
             batch,
         ],
     )
-    result = expectation.validate(validator)
+    result = expectation.validate_(validator)
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,

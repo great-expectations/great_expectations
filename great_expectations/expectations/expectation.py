@@ -1246,7 +1246,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @public_api
-    def validate(  # noqa: PLR0913
+    def validate_(  # noqa: PLR0913
         self,
         validator: Validator,
         configuration: Optional[ExpectationConfiguration] = None,

@@ -754,7 +754,9 @@ class ExpectationSuite(SerializableDictDot):
     ):
         try:
             class_ = get_expectation_impl(expectation_configuration.expectation_type)
-            _ = class_(expectation_configuration)  # Implicitly validates in constructor
+            _ = class_(
+                expectation_configuration=expectation_configuration
+            )  # Implicitly validates in constructor
         except (
             gx_exceptions.ExpectationNotFoundError,
             gx_exceptions.InvalidExpectationConfigurationError,
