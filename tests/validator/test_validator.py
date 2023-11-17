@@ -1312,7 +1312,7 @@ def test_validator_result_format_config_from_expectation(
         context=data_context_with_connection_to_metrics_db,
     )
     with pytest.warns(UserWarning) as config_warning:
-        _: ExpectationValidationResult = expectation.validate_(
+        _: ExpectationValidationResult = expectation.validate(
             validator=validator, runtime_configuration=runtime_configuration
         )
 
