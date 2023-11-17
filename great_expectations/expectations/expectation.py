@@ -297,13 +297,6 @@ class MetaExpectation(ModelMetaclass):
         return newclass
 
 
-# class ExpectationBase(pydantic.BaseModel):
-#     class Config:
-#         arbitrary_types_allowed = True
-
-#     pass
-
-
 @public_api
 class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     """Base class for all Expectations.
@@ -340,7 +333,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     class Config:
         arbitrary_types_allowed = True
 
-    configuration: Optional[ExpectationConfiguration] = None
+    configuration: ExpectationConfiguration
 
     version: ClassVar[str] = ge_version
     domain_keys: ClassVar[Tuple[str, ...]] = ()
