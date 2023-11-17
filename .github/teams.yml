@@ -12,8 +12,8 @@ devrel:
   - '@kwcanuck'        # Rob Gray
   - '@kyleaton'        # Kyle Eaton
   - '@rachhouse'       # Rachel House
-  - '@rdodev'          # Ruben Orduz
   - '@talagluck'       # Tal Gluck
+  - '@r34ctor'         # Nevin Tan
 
 core:
   - '@DrewHoo'         # Drew Hoover
@@ -49,3 +49,4 @@ core:
 bot:
   - '@dependabot'
   - '@dependabot[bot]'
+  - '@pre-commit-ci[bot]'
