@@ -551,7 +551,7 @@ class Validator:
                         expectation_config=copy.deepcopy(expectation.configuration)
                     )
                 else:
-                    validation_result = expectation.validate(
+                    validation_result = expectation.validate_(
                         validator=self,
                         evaluation_parameters=self._expectation_suite.evaluation_parameters,
                         data_context=self._data_context,
