@@ -82,7 +82,7 @@ expectation_suite_name = "my_awsathena_expectation_suite"
 try:
     suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
     print(
-        f'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} expectations.'
+        f'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectation_configs)} expectations.'
     )
 except DataContextError:
     suite = context.add_expectation_suite(expectation_suite_name=expectation_suite_name)

@@ -624,7 +624,7 @@ def test_update_expectation_suite_success(
 
     assert context.expectations_store.save_count == 1
 
-    suite.expectations = [
+    suite.expectation_configs = [
         ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_in_set",
             kwargs={"column": "x", "value_set": [1, 2, 4]},
@@ -632,7 +632,7 @@ def test_update_expectation_suite_success(
     ]
     updated_suite = context.update_expectation_suite(suite)
 
-    assert updated_suite.expectations == suite.expectations
+    assert updated_suite.expectation_configs == suite.expectation_configs
     assert context.expectations_store.save_count == 2
 
 
@@ -705,7 +705,7 @@ def test_add_or_update_expectation_suite_adds_successfully(
     suite = context.add_or_update_expectation_suite(**kwargs)
 
     assert suite.expectation_suite_name == expectation_suite_name
-    assert suite.expectations == expectations
+    assert suite.expectation_configs == expectations
     assert suite.meta == meta
     assert context.expectations_store.save_count == 1
 
@@ -752,7 +752,7 @@ def test_add_or_update_expectation_suite_updates_successfully(
         expectation_suite_name=suite_name, expectations=new_expectations
     )
 
-    assert suite.expectations == new_expectations
+    assert suite.expectation_configs == new_expectations
     assert context.expectations_store.save_count == 2
 
 

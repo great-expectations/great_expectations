@@ -108,7 +108,7 @@ class LegacyExpectationSuite(SerializableDictDot):
 
         if expectations is None:
             expectations = []
-        self.expectations = [
+        self.expectation_configs = [
             ExpectationConfiguration(**expectation)
             if isinstance(expectation, dict)
             else expectation
@@ -208,9 +208,11 @@ class LegacyExpectationSuite(SerializableDictDot):
                 # Delegate comparison to the other instance
                 return NotImplemented
 
-        return len(self.expectations) == len(other.expectations) and all(
+        return len(self.expectation_configs) == len(other.expectation_configs) and all(
             mine.isEquivalentTo(theirs)
-            for (mine, theirs) in zip(self.expectations, other.expectations)
+            for (mine, theirs) in zip(
+                self.expectation_configs, other.expectation_configs
+            )
         )
 
     def __eq__(self, other):
@@ -221,7 +223,7 @@ class LegacyExpectationSuite(SerializableDictDot):
         return all(
             (
                 self.expectation_suite_name == other.expectation_suite_name,
-                self.expectations == other.expectations,
+                self.expectation_configs == other.expectation_configs,
                 self.evaluation_parameters == other.evaluation_parameters,
                 self.data_asset_type == other.data_asset_type,
                 self.meta == other.meta,
@@ -275,7 +277,7 @@ class LegacyExpectationSuite(SerializableDictDot):
 
     def get_evaluation_parameter_dependencies(self) -> dict:
         dependencies: dict = {}
-        for expectation in self.expectations:
+        for expectation in self.expectation_configs:
             t = expectation.get_evaluation_parameter_dependencies()
             nested_update(dependencies, t)
 
@@ -333,7 +335,7 @@ class LegacyExpectationSuite(SerializableDictDot):
            Notes:
                May want to add type-checking in the future.
         """
-        self.expectations.append(expectation_config)
+        self.expectation_configs.append(expectation_config)
 
     @public_api
     @new_argument(
@@ -383,7 +385,7 @@ class LegacyExpectationSuite(SerializableDictDot):
             if remove_multiple_matches:
                 removed_expectations = []
                 for index in sorted(found_expectation_indexes, reverse=True):
-                    removed_expectations.append(self.expectations.pop(index))
+                    removed_expectations.append(self.expectation_configs.pop(index))
                 return removed_expectations
             else:
                 raise ValueError(
@@ -392,7 +394,7 @@ class LegacyExpectationSuite(SerializableDictDot):
                 )
 
         else:
-            return [self.expectations.pop(found_expectation_indexes[0])]
+            return [self.expectation_configs.pop(found_expectation_indexes[0])]
 
     def remove_all_expectations_of_type(
         self, expectation_types: Union[List[str], str]
@@ -402,12 +404,12 @@ class LegacyExpectationSuite(SerializableDictDot):
 
         removed_expectations = [
             expectation
-            for expectation in self.expectations
+            for expectation in self.expectation_configs
             if expectation.expectation_type in expectation_types
         ]
-        self.expectations = [
+        self.expectation_configs = [
             expectation
-            for expectation in self.expectations
+            for expectation in self.expectation_configs
             if expectation.expectation_type not in expectation_types
         ]
 
@@ -452,7 +454,7 @@ class LegacyExpectationSuite(SerializableDictDot):
             )
 
         match_indexes = []
-        for idx, expectation in enumerate(self.expectations):
+        for idx, expectation in enumerate(self.expectation_configs):
             if ge_cloud_id is not None:
                 if expectation.ge_cloud_id == ge_cloud_id:
                     match_indexes.append(idx)
@@ -498,7 +500,7 @@ class LegacyExpectationSuite(SerializableDictDot):
         )
 
         if len(found_expectation_indexes) > 0:
-            return [self.expectations[idx] for idx in found_expectation_indexes]
+            return [self.expectation_configs[idx] for idx in found_expectation_indexes]
 
         return []
 
@@ -546,7 +548,7 @@ class LegacyExpectationSuite(SerializableDictDot):
         elif len(found_expectation_indexes) == 0:
             raise ValueError("No matching Expectation was found.")
 
-        self.expectations[found_expectation_indexes[0]] = new_expectation_configuration  # type: ignore[assignment]
+        self.expectation_configs[found_expectation_indexes[0]] = new_expectation_configuration  # type: ignore[assignment]
 
     def patch_expectation(  # noqa: PLR0913
         self,
@@ -585,8 +587,8 @@ class LegacyExpectationSuite(SerializableDictDot):
                 "criteria"
             )
 
-        self.expectations[found_expectation_indexes[0]].patch(op, path, value)
-        return self.expectations[found_expectation_indexes[0]]
+        self.expectation_configs[found_expectation_indexes[0]].patch(op, path, value)
+        return self.expectation_configs[found_expectation_indexes[0]]
 
     def _add_expectation(
         self,
@@ -636,7 +638,7 @@ class LegacyExpectationSuite(SerializableDictDot):
             # patch_expectation.apply(self.expectations[found_expectation_index].kwargs, in_place=True)
             if overwrite_existing:
                 # if existing Expectation has a ge_cloud_id, add it back to the new Expectation Configuration
-                existing_expectation_ge_cloud_id = self.expectations[
+                existing_expectation_ge_cloud_id = self.expectation_configs[
                     found_expectation_indexes[0]
                 ].ge_cloud_id
                 if existing_expectation_ge_cloud_id is not None:
@@ -644,7 +646,7 @@ class LegacyExpectationSuite(SerializableDictDot):
                         existing_expectation_ge_cloud_id
                     )
 
-                self.expectations[
+                self.expectation_configs[
                     found_expectation_indexes[0]
                 ] = expectation_configuration
             else:
@@ -886,7 +888,7 @@ class LegacyExpectationSuite(SerializableDictDot):
         expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
                 lambda element: element.get_domain_type() == MetricDomainTypes.TABLE,
-                self.expectations,
+                self.expectation_configs,
             )
         )
 
@@ -903,7 +905,7 @@ class LegacyExpectationSuite(SerializableDictDot):
         expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
                 lambda element: element.get_domain_type() == MetricDomainTypes.COLUMN,
-                self.expectations,
+                self.expectation_configs,
             )
         )
 
@@ -926,7 +928,7 @@ class LegacyExpectationSuite(SerializableDictDot):
             filter(
                 lambda element: element.get_domain_type()
                 == MetricDomainTypes.COLUMN_PAIR,
-                self.expectations,
+                self.expectation_configs,
             )
         )
 
@@ -954,7 +956,7 @@ class LegacyExpectationSuite(SerializableDictDot):
             filter(
                 lambda element: element.get_domain_type()
                 == MetricDomainTypes.MULTICOLUMN,
-                self.expectations,
+                self.expectation_configs,
             )
         )
 
@@ -978,7 +980,7 @@ class LegacyExpectationSuite(SerializableDictDot):
 
         column: str
         expectation: ExpectationConfiguration
-        for expectation in self.expectations:
+        for expectation in self.expectation_configs:
             if "column" in expectation.kwargs:
                 column = expectation.kwargs["column"]
             else:
@@ -1041,7 +1043,7 @@ class LegacyExpectationSuite(SerializableDictDot):
         Renders content using the atomic prescriptive renderer for each expectation configuration associated with
            this ExpectationSuite to ExpectationConfiguration.rendered_content.
         """
-        for expectation_configuration in self.expectations:
+        for expectation_configuration in self.expectation_configs:
             inline_renderer_config: InlineRendererConfig = {
                 "class_name": "InlineRenderer",
                 "render_object": expectation_configuration,

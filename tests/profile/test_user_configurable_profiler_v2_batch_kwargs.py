@@ -273,10 +273,10 @@ def test_build_suite_no_config(titanic_dataset, possible_expectations_set):
     """
     profiler = UserConfigurableProfiler(titanic_dataset)
     suite = profiler.build_suite()
-    expectations_from_suite = {i.expectation_type for i in suite.expectations}
+    expectations_from_suite = {i.expectation_type for i in suite.expectation_configs}
 
     assert expectations_from_suite.issubset(possible_expectations_set)
-    assert len(suite.expectations) == 48
+    assert len(suite.expectation_configs) == 48
 
 
 @pytest.mark.unit
@@ -305,7 +305,7 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
     assert columns_with_expectations == columns_expected_in_suite
     assert expectations_from_suite.issubset(possible_expectations_set)
     assert "expect_column_mean_to_be_between" not in expectations_from_suite
-    assert len(suite.expectations) == 29
+    assert len(suite.expectation_configs) == 29
 
 
 @mock.patch(
@@ -345,11 +345,11 @@ def test_build_suite_with_semantic_types_dict(
     assert "column_one" not in columns_with_expectations
     assert "expect_column_values_to_not_be_null" not in expectations_from_suite
     assert expectations_from_suite.issubset(possible_expectations_set)
-    assert len(suite.expectations) == 33
+    assert len(suite.expectation_configs) == 33
 
     value_set_expectations = [
         i
-        for i in suite.expectations
+        for i in suite.expectation_configs
         if i.expectation_type == "expect_column_values_to_be_in_set"
     ]
     value_set_columns = {i.kwargs.get("column") for i in value_set_expectations}
@@ -381,13 +381,13 @@ def test_build_suite_when_suite_already_exists(mock_emit, cardinality_dataset):
 
     suite = profiler.build_suite()
     _, expectations = get_set_of_columns_and_expectations_from_suite(suite)
-    assert len(suite.expectations) == 1
+    assert len(suite.expectation_configs) == 1
     assert "expect_table_columns_to_match_ordered_list" in expectations
 
     profiler.excluded_expectations = ["expect_table_columns_to_match_ordered_list"]
     suite = profiler.build_suite()
     _, expectations = get_set_of_columns_and_expectations_from_suite(suite)
-    assert len(suite.expectations) == 1
+    assert len(suite.expectation_configs) == 1
     assert "expect_table_row_count_to_be_between" in expectations
 
     # Note 20211209 - Currently the only method called by the Profiler that is instrumented for usage_statistics
@@ -491,7 +491,7 @@ def test_nullity_expectations_mostly_tolerance(
     )
     suite = profiler.build_suite()
 
-    for i in suite.expectations:
+    for i in suite.expectation_configs:
         assert i["kwargs"]["mostly"] == 0.66
 
 
@@ -573,7 +573,7 @@ def test_profiler_all_expectation_types(
 
     assert profiler.column_info.get("rate_code_id")
     suite = profiler.build_suite()
-    assert len(suite.expectations) == 46
+    assert len(suite.expectation_configs) == 46
     (
         columns_with_expectations,
         expectations_from_suite,

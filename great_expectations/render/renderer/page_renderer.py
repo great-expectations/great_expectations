@@ -801,9 +801,9 @@ class ExpectationSuitePageRenderer(Renderer):
     def _render_expectation_suite_notes(cls, expectations):  # noqa: PLR0912
         content = []
 
-        total_expectations = len(expectations.expectations)
+        total_expectations = len(expectations.expectation_configs)
         columns = []
-        for exp in expectations.expectations:
+        for exp in expectations.expectation_configs:
             if "column" in exp.kwargs:
                 columns.append(exp.kwargs["column"])
         total_columns = len(set(columns))

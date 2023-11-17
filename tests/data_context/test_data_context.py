@@ -174,7 +174,7 @@ def test_get_existing_expectation_suite(data_context_parameterized_expectation_s
     assert (
         expectation_suite.expectation_suite_name == parameterized_expectation_suite_name
     )
-    assert len(expectation_suite.expectations) == 2
+    assert len(expectation_suite.expectation_configs) == 2
 
 
 @pytest.mark.filesystem
@@ -188,7 +188,7 @@ def test_get_new_expectation_suite(data_context_parameterized_expectation_suite)
         expectation_suite.expectation_suite_name
         == "this_data_asset_does_not_exist.default"
     )
-    assert len(expectation_suite.expectations) == 0
+    assert len(expectation_suite.expectation_configs) == 0
 
 
 @pytest.mark.filesystem
@@ -198,7 +198,7 @@ def test_save_expectation_suite(data_context_parameterized_expectation_suite):
             "this_data_asset_config_does_not_exist.default"
         )
     )
-    expectation_suite.expectations.append(
+    expectation_suite.expectation_configs.append(
         ExpectationConfiguration(
             expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
         )
@@ -211,7 +211,10 @@ def test_save_expectation_suite(data_context_parameterized_expectation_suite):
             "this_data_asset_config_does_not_exist.default"
         )
     )
-    assert expectation_suite.expectations == expectation_suite_saved.expectations
+    assert (
+        expectation_suite.expectation_configs
+        == expectation_suite_saved.expectation_configs
+    )
 
 
 @pytest.mark.filesystem
@@ -223,12 +226,12 @@ def test_save_expectation_suite_include_rendered_content(
             "this_data_asset_config_does_not_exist.default"
         )
     )
-    expectation_suite.expectations.append(
+    expectation_suite.expectation_configs.append(
         ExpectationConfiguration(
             expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
         )
     )
-    for expectation in expectation_suite.expectations:
+    for expectation in expectation_suite.expectation_configs:
         assert expectation.rendered_content is None
     data_context_parameterized_expectation_suite.save_expectation_suite(
         expectation_suite,
@@ -239,7 +242,7 @@ def test_save_expectation_suite_include_rendered_content(
             "this_data_asset_config_does_not_exist.default"
         )
     )
-    for expectation in expectation_suite_saved.expectations:
+    for expectation in expectation_suite_saved.expectation_configs:
         for rendered_content_block in expectation.rendered_content:
             assert isinstance(
                 rendered_content_block,
@@ -256,12 +259,12 @@ def test_get_expectation_suite_include_rendered_content(
             "this_data_asset_config_does_not_exist.default"
         )
     )
-    expectation_suite.expectations.append(
+    expectation_suite.expectation_configs.append(
         ExpectationConfiguration(
             expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
         )
     )
-    for expectation in expectation_suite.expectations:
+    for expectation in expectation_suite.expectation_configs:
         assert expectation.rendered_content is None
     data_context_parameterized_expectation_suite.save_expectation_suite(
         expectation_suite,
@@ -271,7 +274,7 @@ def test_get_expectation_suite_include_rendered_content(
             "this_data_asset_config_does_not_exist.default"
         )
     )
-    for expectation in expectation_suite.expectations:
+    for expectation in expectation_suite.expectation_configs:
         assert expectation.rendered_content is None
 
     expectation_suite_retrieved: ExpectationSuite = (
@@ -281,7 +284,7 @@ def test_get_expectation_suite_include_rendered_content(
         )
     )
 
-    for expectation in expectation_suite_retrieved.expectations:
+    for expectation in expectation_suite_retrieved.expectation_configs:
         for rendered_content_block in expectation.rendered_content:
             assert isinstance(
                 rendered_content_block,
@@ -2874,7 +2877,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
     )
     assert not any(
         expectation_configuration.rendered_content
-        for expectation_configuration in expectation_suite.expectations
+        for expectation_configuration in expectation_suite.expectation_configs
     )
 
     # Once we include_rendered_content, we get rendered_content on each ExpectationConfiguration in the ExpectationSuite.
@@ -2882,7 +2885,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
     expectation_suite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
-    for expectation_configuration in expectation_suite.expectations:
+    for expectation_configuration in expectation_suite.expectation_configs:
         assert all(
             isinstance(rendered_content_block, RenderedAtomicContent)
             for rendered_content_block in expectation_configuration.rendered_content
@@ -2950,7 +2953,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
     ]
 
     actual_rendered_content: List[RenderedAtomicContent] = []
-    for expectation_configuration in expectation_suite.expectations:
+    for expectation_configuration in expectation_suite.expectation_configs:
         actual_rendered_content.extend(expectation_configuration.rendered_content)
 
     assert actual_rendered_content == expected_rendered_content
@@ -3000,10 +3003,10 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
         ),
     ]
 
-    expectation_suite.expectations[0].rendered_content = legacy_rendered_content
+    expectation_suite.expectation_configs[0].rendered_content = legacy_rendered_content
 
     actual_rendered_content: List[RenderedAtomicContent] = []
-    for expectation_configuration in expectation_suite.expectations:
+    for expectation_configuration in expectation_suite.expectation_configs:
         actual_rendered_content.extend(expectation_configuration.rendered_content)
 
     assert actual_rendered_content == legacy_rendered_content

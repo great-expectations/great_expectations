@@ -20,7 +20,9 @@ def test_alice_fixture_generation(
     )
     assert (
         len(
-            alice_columnar_table_single_batch["expected_expectation_suite"].expectations
+            alice_columnar_table_single_batch[
+                "expected_expectation_suite"
+            ].expectation_configs
         )
         == 22
     )
@@ -43,7 +45,7 @@ def test_bobby_fixture_generation(
         len(
             bobby_columnar_table_multi_batch["test_configuration_quantiles_estimator"][
                 "expected_expectation_suite"
-            ].expectations
+            ].expectation_configs
         )
         == 39
     )

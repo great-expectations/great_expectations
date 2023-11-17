@@ -108,7 +108,7 @@ def test_cli_init_on_new_project(
 
     first_suite = context.list_expectation_suites()[0]
     suite = context.get_expectation_suite(first_suite.expectation_suite_name)
-    assert len(suite.expectations) == 14
+    assert len(suite.expectation_configs) == 14
 
     assert os.path.isdir(ge_dir)  # noqa: PTH112
     config_path = os.path.join(  # noqa: PTH118
@@ -281,7 +281,7 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
 
     first_suite = context.list_expectation_suites()[0]
     suite = context.get_expectation_suite(first_suite.expectation_suite_name)
-    assert len(suite.expectations) == 14
+    assert len(suite.expectation_configs) == 14
 
     assert os.path.isdir(ge_dir)  # noqa: PTH112
     config_path = os.path.join(  # noqa: PTH118

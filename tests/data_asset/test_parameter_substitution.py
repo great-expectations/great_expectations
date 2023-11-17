@@ -139,7 +139,7 @@ def test_parameter_substitution(single_expectation_custom_data_asset):
     # Ensure our value has been substituted during evaluation, and set properly in the suite
     assert result.result["details"]["expectation_argument"] == "upstream_dag_value"
     assert suite.evaluation_parameters == {"upstream_dag_key": "upstream_dag_value"}
-    assert suite.expectations[0].kwargs == {
+    assert suite.expectation_configs[0].kwargs == {
         "expectation_argument": {"$PARAMETER": "upstream_dag_key"}
     }
 
@@ -163,7 +163,7 @@ def test_parameter_substitution_with_validator(validator_with_titanic_1911_asset
     # Ensure our value has been substituted during evaluation, and set properly in the suite
     assert result.result["details"]["expectation_argument"] == "upstream_dag_value"
     assert suite.evaluation_parameters == {"upstream_dag_key": "upstream_dag_value"}
-    assert suite.expectations[0].kwargs == {
+    assert suite.expectation_configs[0].kwargs == {
         "expectation_argument": {"$PARAMETER": "upstream_dag_key"}
     }
 
@@ -182,7 +182,7 @@ def test_exploratory_parameter_substitution(single_expectation_custom_data_asset
     # Ensure our value has been substituted during evaluation, and NOT stored in the suite
     assert result.result["details"]["expectation_argument"] == "temporary_value"
     assert suite.evaluation_parameters == {}
-    assert suite.expectations[0].kwargs == {
+    assert suite.expectation_configs[0].kwargs == {
         "expectation_argument": {"$PARAMETER": "upstream_dag_key"}
     }
 
@@ -218,7 +218,7 @@ def test_exploratory_parameter_substitution_with_validator(
     # Ensure our value has been substituted during evaluation, and NOT stored in the suite
     assert result.result["details"]["expectation_argument"] == "temporary_value"
     assert suite.evaluation_parameters == {}
-    assert suite.expectations[0].kwargs == {
+    assert suite.expectation_configs[0].kwargs == {
         "expectation_argument": {"$PARAMETER": "upstream_dag_key"}
     }
 

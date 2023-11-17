@@ -96,12 +96,12 @@ updated_config = ExpectationConfiguration(
 my_suite.add_expectation(updated_config)
 # </snippet>
 
-assert len(my_suite.expectations) == 2
-assert my_suite.expectations[0] == ExpectationConfiguration(
+assert len(my_suite.expectation_configs) == 2
+assert my_suite.expectation_configs[0] == ExpectationConfiguration(
     expectation_type="expect_column_values_to_not_be_null",
     kwargs={"column": "pickup_datetime"},
 )
-assert my_suite.expectations[1] == updated_config
+assert my_suite.expectation_configs[1] == updated_config
 
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite find_configuration">
@@ -131,8 +131,8 @@ assert found_expectation != [updated_config]
 my_suite.show_expectations_by_expectation_type()
 # </snippet>
 
-assert len(my_suite.expectations) == 1
-assert my_suite.expectations[0] == ExpectationConfiguration(
+assert len(my_suite.expectation_configs) == 1
+assert my_suite.expectation_configs[0] == ExpectationConfiguration(
     expectation_type="expect_column_values_to_not_be_null",
     kwargs={"column": "pickup_datetime"},
 )

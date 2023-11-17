@@ -230,7 +230,7 @@ def test_profile_get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
 
-    assert suite is not None and len(suite.expectations) > 0
+    assert suite is not None and len(suite.expectation_configs) > 0
 
     assert mock_emit.call_count == 44
 

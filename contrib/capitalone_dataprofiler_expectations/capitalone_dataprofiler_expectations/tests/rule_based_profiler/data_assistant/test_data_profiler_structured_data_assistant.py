@@ -156,7 +156,7 @@ def test_profile_data_profiler_structured_data_assistant_result_get_expectation_
         expectation_suite_name=expectation_suite_name
     )
 
-    assert suite is not None and len(suite.expectations) > 0
+    assert suite is not None and len(suite.expectation_configs) > 0
 
     assert mock_emit.call_count == 1
 

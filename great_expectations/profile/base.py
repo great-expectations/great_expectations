@@ -206,9 +206,10 @@ class DatasetProfiler(DataAssetProfiler):
             expectation_suite.meta[class_name]["batch_kwargs"] = batch_kwargs
 
         new_expectations = [
-            cls.add_expectation_meta(exp) for exp in expectation_suite.expectations
+            cls.add_expectation_meta(exp)
+            for exp in expectation_suite.expectation_configs
         ]
-        expectation_suite.expectations = new_expectations
+        expectation_suite.expectation_configs = new_expectations
 
         if "notes" not in expectation_suite.meta:
             expectation_suite.meta["notes"] = {

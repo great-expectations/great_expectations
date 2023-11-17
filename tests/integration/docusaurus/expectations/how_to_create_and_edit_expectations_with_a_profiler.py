@@ -91,7 +91,7 @@ suite = profiler.build_suite()
 # </snippet>
 
 assert suite.expectation_suite_name == expectation_suite_name
-assert len(suite.expectations) > 0
+assert len(suite.expectation_configs) > 0
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler e2e">
 

@@ -257,7 +257,7 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
     original_suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
-    assert len(original_suite.expectations) == 0
+    assert len(original_suite.expectation_configs) == 0
     assert context.list_expectation_suite_names() == [expectation_suite_name]
     assert context.list_datasources() == [
         {
@@ -389,7 +389,7 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
 
     expectation_configurations: List[ExpectationConfiguration] = []
     expectation_configuration: ExpectationConfiguration
-    for expectation_configuration in suite.expectations:
+    for expectation_configuration in suite.expectation_configs:
         kwargs: dict = expectation_configuration.kwargs
         key: str
         value: Any

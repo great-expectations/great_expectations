@@ -155,7 +155,7 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 # ASSERTIONS vvvvv vvvvv
 assert context.list_expectation_suite_names() == [expectation_suite_name]
 suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
-assert len(suite.expectations) == 2
+assert len(suite.expectation_configs) == 2
 # ASSERTIONS ^^^^^ ^^^^^
 
 # 6. Validate your data (Dataframe)

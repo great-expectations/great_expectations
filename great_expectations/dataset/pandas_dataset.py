@@ -736,7 +736,9 @@ Notes:
                 )
             )
             if len(existing_expectations) == 1:
-                self._expectation_suite.expectations.pop(existing_expectations[0])
+                self._expectation_suite.expectation_configs.pop(
+                    existing_expectations[0]
+                )
 
             # Now, rename the expectation we just added
             new_expectations = self._expectation_suite.find_expectation_indexes(
@@ -746,14 +748,18 @@ Notes:
                 )
             )
             assert len(new_expectations) == 1
-            old_config = self._expectation_suite.expectations[new_expectations[0]]
+            old_config = self._expectation_suite.expectation_configs[
+                new_expectations[0]
+            ]
             new_config = ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_of_type",
                 kwargs=old_config.kwargs,
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectations[new_expectations[0]] = new_config
+            self._expectation_suite.expectation_configs[
+                new_expectations[0]
+            ] = new_config
         else:
             res = self._expect_column_values_to_be_of_type__map(column, type_, **kwargs)
             # Note: this logic is similar to the logic in _append_expectation for deciding when to overwrite an
@@ -772,7 +778,9 @@ Notes:
                 )
             )
             if len(existing_expectations) == 1:
-                self._expectation_suite.expectations.pop(existing_expectations[0])
+                self._expectation_suite.expectation_configs.pop(
+                    existing_expectations[0]
+                )
 
             # Now, rename the expectation we just added
             new_expectations = self._expectation_suite.find_expectation_indexes(
@@ -782,14 +790,18 @@ Notes:
                 )
             )
             assert len(new_expectations) == 1
-            old_config = self._expectation_suite.expectations[new_expectations[0]]
+            old_config = self._expectation_suite.expectation_configs[
+                new_expectations[0]
+            ]
             new_config = ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_of_type",
                 kwargs=old_config.kwargs,
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectations[new_expectations[0]] = new_config
+            self._expectation_suite.expectation_configs[
+                new_expectations[0]
+            ] = new_config
 
         return res
 
@@ -959,7 +971,9 @@ Notes:
                 )
             )
             if len(existing_expectations) == 1:
-                self._expectation_suite.expectations.pop(existing_expectations[0])
+                self._expectation_suite.expectation_configs.pop(
+                    existing_expectations[0]
+                )
 
             new_expectations = self._expectation_suite.find_expectation_indexes(
                 ExpectationConfiguration(
@@ -968,14 +982,18 @@ Notes:
                 )
             )
             assert len(new_expectations) == 1
-            old_config = self._expectation_suite.expectations[new_expectations[0]]
+            old_config = self._expectation_suite.expectation_configs[
+                new_expectations[0]
+            ]
             new_config = ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_in_type_list",
                 kwargs=old_config.kwargs,
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectations[new_expectations[0]] = new_config
+            self._expectation_suite.expectation_configs[
+                new_expectations[0]
+            ] = new_config
         else:
             res = self._expect_column_values_to_be_in_type_list__map(
                 column, type_list, **kwargs
@@ -996,7 +1014,9 @@ Notes:
                 )
             )
             if len(existing_expectations) == 1:
-                self._expectation_suite.expectations.pop(existing_expectations[0])
+                self._expectation_suite.expectation_configs.pop(
+                    existing_expectations[0]
+                )
 
             # Now, rename the expectation we just added
             new_expectations = self._expectation_suite.find_expectation_indexes(
@@ -1006,14 +1026,18 @@ Notes:
                 )
             )
             assert len(new_expectations) == 1
-            old_config = self._expectation_suite.expectations[new_expectations[0]]
+            old_config = self._expectation_suite.expectation_configs[
+                new_expectations[0]
+            ]
             new_config = ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_in_type_list",
                 kwargs=old_config.kwargs,
                 meta=old_config.meta,
                 success_on_last_run=old_config.success_on_last_run,
             )
-            self._expectation_suite.expectations[new_expectations[0]] = new_config
+            self._expectation_suite.expectation_configs[
+                new_expectations[0]
+            ] = new_config
 
         return res
 

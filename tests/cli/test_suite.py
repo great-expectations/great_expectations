@@ -221,7 +221,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
-    assert suite.expectations == []
+    assert suite.expectation_configs == []
 
     assert mock_subprocess.call_count == 1
     call_args: List[str] = mock_subprocess.call_args[0][0]
@@ -336,7 +336,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
-    assert suite.expectations == []
+    assert suite.expectation_configs == []
 
     assert mock_subprocess.call_count == 1
     call_args: List[str] = mock_subprocess.call_args[0][0]
@@ -449,7 +449,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_open
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
-    assert suite.expectations == []
+    assert suite.expectation_configs == []
 
     assert mock_subprocess.call_count == 1
     call_args: List[str] = mock_subprocess.call_args[0][0]
@@ -566,7 +566,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_j
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
-    assert suite.expectations == []
+    assert suite.expectation_configs == []
 
     assert mock_subprocess.call_count == 0
 
@@ -887,7 +887,7 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
-    assert suite.expectations == []
+    assert suite.expectation_configs == []
 
     assert mock_subprocess.call_count == 0
 
@@ -3190,7 +3190,7 @@ def test_suite_new_profile_runs_notebook_no_jupyter(  # noqa: PLR0915
 
     expectation_configurations: List[ExpectationConfiguration] = []
     expectation_configuration: ExpectationConfiguration
-    for expectation_configuration in suite.expectations:
+    for expectation_configuration in suite.expectation_configs:
         kwargs: dict = expectation_configuration.kwargs
         key: str
         value: Any
@@ -3416,7 +3416,7 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(  # noqa: PLR0915
 
     expectation_configurations: List[ExpectationConfiguration] = []
     expectation_configuration: ExpectationConfiguration
-    for expectation_configuration in suite.expectations:
+    for expectation_configuration in suite.expectation_configs:
         kwargs: dict = expectation_configuration.kwargs
         key: str
         value: Any

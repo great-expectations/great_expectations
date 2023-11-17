@@ -500,7 +500,7 @@ def warning_suite(empty_data_context) -> ExpectationSuite:
 def test_render_with_no_column_cells_without_batch_request(
     critical_suite_with_citations, empty_data_context
 ):
-    critical_suite_with_citations.expectations = []
+    critical_suite_with_citations.expectation_configs = []
     obs: dict = SuiteEditNotebookRenderer.from_data_context(
         data_context=empty_data_context
     ).render(suite=critical_suite_with_citations)
@@ -967,7 +967,7 @@ def test_notebook_execution_with_pandas_backend(
     original_suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
-    assert len(original_suite.expectations) == 3
+    assert len(original_suite.expectation_configs) == 3
     assert context.list_expectation_suite_names() == [expectation_suite_name]
     assert context.list_datasources() == [
         {

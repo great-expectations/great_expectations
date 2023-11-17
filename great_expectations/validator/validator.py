@@ -1398,7 +1398,7 @@ class Validator:
         """
 
         expectation_suite = copy.deepcopy(self.expectation_suite)
-        expectations = expectation_suite.expectations
+        expectations = expectation_suite.expectation_configs
 
         discards: defaultdict[str, int] = defaultdict(int)
 
@@ -1461,7 +1461,7 @@ class Validator:
         ):  # Only add this if we added one of the settings above.
             settings_message += " settings filtered."
 
-        expectation_suite.expectations = expectations
+        expectation_suite.expectation_configs = expectations
         if not suppress_logging:
             logger.info(message + settings_message)
         return expectation_suite
@@ -1652,7 +1652,7 @@ class Validator:
             # Group expectations by column
             columns: dict[Any, list[ExpectationConfiguration]] = {}
 
-            for expectation in expectation_suite.expectations:
+            for expectation in expectation_suite.expectation_configs:
                 expectation.process_evaluation_parameters(
                     evaluation_parameters=runtime_evaluation_parameters,
                     interactive_evaluation=self.interactive_evaluation,

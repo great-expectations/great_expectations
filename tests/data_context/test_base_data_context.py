@@ -232,7 +232,7 @@ def prepare_validator_for_cloud_e2e() -> (
             expectation_suite=suite,
         )
 
-        assert len(suite.expectations) == 4
+        assert len(suite.expectation_configs) == 4
 
         # Grab the first datasource/data connector/data asset bundle we can to use in Validation instantiation
         datasource_name = "Test Pandas Datasource"
@@ -260,7 +260,7 @@ def prepare_validator_for_cloud_e2e() -> (
         )
 
         # Ensure that the Expectations set above propogate down successfully
-        assert len(validator.expectation_suite.expectations) == 4
+        assert len(validator.expectation_suite.expectation_configs) == 4
 
         return validator, expectation_suite_ge_cloud_id
 

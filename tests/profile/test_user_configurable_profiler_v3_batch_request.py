@@ -482,10 +482,10 @@ def test_build_suite_no_config(
     """
     profiler = UserConfigurableProfiler(titanic_validator)
     suite = profiler.build_suite()
-    expectations_from_suite = {i.expectation_type for i in suite.expectations}
+    expectations_from_suite = {i.expectation_type for i in suite.expectation_configs}
 
     assert expectations_from_suite.issubset(possible_expectations_set)
-    assert len(suite.expectations) == 48
+    assert len(suite.expectation_configs) == 48
 
     # Note 20211209 - Profiler will also call ExpectationSuite's add_expectation(), but it will not
     # send a usage_stats event when called from a Profiler.
@@ -599,7 +599,7 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
     assert columns_with_expectations == columns_expected_in_suite
     assert expectations_from_suite.issubset(possible_expectations_set)
     assert "expect_column_mean_to_be_between" not in expectations_from_suite
-    assert len(suite.expectations) == 29
+    assert len(suite.expectation_configs) == 29
 
     assert mock_emit.call_count == 1
     assert "expectation_suite.add_expectation" not in [
@@ -672,11 +672,11 @@ def test_build_suite_with_semantic_types_dict(
     assert "column_one" not in columns_with_expectations
     assert "expect_column_values_to_not_be_null" not in expectations_from_suite
     assert expectations_from_suite.issubset(possible_expectations_set)
-    assert len(suite.expectations) == 32
+    assert len(suite.expectation_configs) == 32
 
     value_set_expectations = [
         i
-        for i in suite.expectations
+        for i in suite.expectation_configs
         if i.expectation_type == "expect_column_values_to_be_in_set"
     ]
     value_set_columns = {i.kwargs.get("column") for i in value_set_expectations}
@@ -736,13 +736,13 @@ def test_build_suite_when_suite_already_exists(
 
     suite = profiler.build_suite()
     _, expectations = get_set_of_columns_and_expectations_from_suite(suite)
-    assert len(suite.expectations) == 1
+    assert len(suite.expectation_configs) == 1
     assert "expect_table_columns_to_match_ordered_list" in expectations
 
     profiler.excluded_expectations = ["expect_table_columns_to_match_ordered_list"]
     suite = profiler.build_suite()
     _, expectations = get_set_of_columns_and_expectations_from_suite(suite)
-    assert len(suite.expectations) == 1
+    assert len(suite.expectation_configs) == 1
     assert "expect_table_row_count_to_be_between" in expectations
 
     assert mock_emit.call_count == 2
@@ -879,7 +879,7 @@ def test_nullity_expectations_mostly_tolerance(
     )
     suite = profiler.build_suite()
 
-    for i in suite.expectations:
+    for i in suite.expectation_configs:
         assert i["kwargs"]["mostly"] == 0.66
 
 
@@ -971,7 +971,7 @@ def test_profiler_all_expectation_types_pandas(
 
     suite = profiler.build_suite()
 
-    assert len(suite.expectations) == 41
+    assert len(suite.expectation_configs) == 41
     (
         columns_with_expectations,
         expectations_from_suite,
@@ -1033,7 +1033,7 @@ def test_profiler_all_expectation_types_spark(
     assert profiler.column_info.get("rate_code_id")
     suite = profiler.build_suite()
 
-    assert len(suite.expectations) == 40
+    assert len(suite.expectation_configs) == 40
     (
         columns_with_expectations,
         expectations_from_suite,
@@ -1100,7 +1100,7 @@ def test_profiler_all_expectation_types_sqlalchemy(
 
     assert profiler.column_info.get("rate_code_id")
     suite = profiler.build_suite()
-    assert len(suite.expectations) == 40
+    assert len(suite.expectation_configs) == 40
     (
         columns_with_expectations,
         expectations_from_suite,
@@ -1187,7 +1187,7 @@ def test_expect_compound_columns_to_be_unique(
         filter(lambda record: record.levelname == "WARNING", caplog.records)
     )
     assert len(log_warning_records) == 0
-    assert len(suite.expectations) == 3
+    assert len(suite.expectation_configs) == 3
 
     (
         columns_with_expectations,
@@ -1210,7 +1210,7 @@ def test_expect_compound_columns_to_be_unique(
 
     suite = profiler_with_single_column_key.build_suite()
 
-    assert len(suite.expectations) == 3
+    assert len(suite.expectation_configs) == 3
 
     (
         columns_with_expectations,

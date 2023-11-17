@@ -74,9 +74,11 @@ def get_set_of_columns_and_expectations_from_suite(
         A tuple containing a set of columns and a set of expectations found in a suite
     """
     columns: Set[str] = {
-        i.kwargs.get("column") for i in suite.expectations if i.kwargs.get("column")
+        i.kwargs.get("column")
+        for i in suite.expectation_configs
+        if i.kwargs.get("column")
     }
-    expectations: Set[str] = {i.expectation_type for i in suite.expectations}
+    expectations: Set[str] = {i.expectation_type for i in suite.expectation_configs}
 
     return columns, expectations
 

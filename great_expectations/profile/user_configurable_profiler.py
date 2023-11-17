@@ -232,7 +232,7 @@ class UserConfigurableProfiler:
             An Expectation Suite.
         """
         expectation_suite: ExpectationSuite
-        if len(self.profile_dataset.get_expectation_suite().expectations) > 0:  # type: ignore[union-attr]
+        if len(self.profile_dataset.get_expectation_suite().expectation_configs) > 0:  # type: ignore[union-attr]
             # Only `Validator`` has `get_expectation_suite()`
             # noinspection PyProtectedMember
             suite_name: str = (
@@ -738,7 +738,7 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
         Returns:
             The ExpectationSuite
         """
-        expectations = suite.expectations
+        expectations = suite.expectation_configs
         expectations_by_column = {}
         for expectation in expectations:
             domain = expectation["kwargs"].get("column") or "table_level_expectations"

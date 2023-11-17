@@ -125,7 +125,7 @@ def expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
     assert (
-        len(expectation_suite.expectations) == 1
+        len(expectation_suite.expectation_configs) == 1
     ), "Expectation Suite was not updated in the previous method call."
     yield expectation_suite
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
@@ -185,7 +185,7 @@ def test_interactive_validator(
     batch_request: BatchRequest,
     expectation_suite: ExpectationSuite,
 ):
-    expectation_count = len(expectation_suite.expectations)
+    expectation_count = len(expectation_suite.expectation_configs)
     expectation_suite_name = expectation_suite.expectation_suite_name
     validator = context.get_validator(
         batch_request=batch_request,
@@ -201,7 +201,7 @@ def test_interactive_validator(
         expectation_suite_name=expectation_suite_name
     )
 
-    assert len(expectation_suite.expectations) == expectation_count
+    assert len(expectation_suite.expectation_configs) == expectation_count
 
 
 @pytest.mark.cloud
