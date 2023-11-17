@@ -358,13 +358,16 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
-        # Everything below is purely to maintain current validation logic
+        # Everything below is purely to maintain current validation logic but should be migrated to Pydantic validators
         expectation_type = camel_to_snake(self.__class__.__name__)
         configuration = ExpectationConfiguration(
             expectation_type=expectation_type,
             kwargs=kwargs,
         )
         self.validate_configuration(configuration)
+
+        # Currently only used in Validator.validate_expectation
+        # Once the V1 Validator is live, we can remove this and its related property
         self._configuration = configuration
 
     @classmethod

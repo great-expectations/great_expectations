@@ -245,13 +245,6 @@ def get_context(  # noqa: PLR0913
         "cloud": CloudDataContext,
         None: AbstractDataContext,
     }
-
-    if mode == "ephemeral":
-        return _get_ephemeral_context(
-            project_config=project_config,
-            runtime_environment=runtime_environment,
-        )
-
     context = _get_context(**kwargs)
 
     expected_type = expected_ctx_types[mode]
