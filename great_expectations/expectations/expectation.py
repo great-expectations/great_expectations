@@ -350,11 +350,15 @@ class Expectation(metaclass=MetaExpectation):
     examples: ClassVar[List[dict]] = []
 
     def __init__(self, **kwargs) -> None:
+        # Promote ExpectationConfiguration fields to Expectation
         self.meta = kwargs.pop("meta", None)
         self.success_on_last_run = kwargs.pop("success_on_last_run", None)
         self.expectation_context = kwargs.pop("expectation_context", None)
         self.rendered_content = kwargs.pop("rendered_content", None)
+        for k, v in kwargs:
+            setattr(self, k, v)
 
+        # Everything below is purely to maintain current validation logic
         expectation_type = camel_to_snake(self.__class__.__name__)
         configuration = ExpectationConfiguration(
             expectation_type=expectation_type,
