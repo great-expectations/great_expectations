@@ -19,7 +19,7 @@ from typing import (
     Union,
 )
 
-from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
+from marshmallow import Schema, ValidationError, fields, post_dump, post_load, pre_dump
 
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
@@ -215,14 +215,18 @@ class ExpectationSuite(SerializableDictDot):
                 # Delegate comparison to the other instance
                 return NotImplemented
 
-        return len(self.expectation_configurations) == len(
+        exp_count_is_equal = len(self.expectation_configurations) == len(
             other.expectation_configurations
-        ) and all(
+        )
+
+        exp_configs_are_equal = all(
             mine.isEquivalentTo(theirs)
             for (mine, theirs) in zip(
                 self.expectation_configurations, other.expectation_configurations
             )
         )
+
+        return exp_count_is_equal and exp_configs_are_equal
 
     def __eq__(self, other):
         """ExpectationSuite equality ignores instance identity, relying only on properties."""
@@ -1140,6 +1144,13 @@ class ExpectationSuiteSchema(Schema):
             data[key] = convert_to_json_serializable(data[key])
 
         data = self.clean_empty(data)
+        return data
+
+    @post_dump(pass_original=True)
+    def insert_expectations(self, data, original_data, **kwargs) -> dict:
+        data["expectations"] = convert_to_json_serializable(
+            original_data.expectation_configurations
+        )
         return data
 
     @post_load
