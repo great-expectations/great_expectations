@@ -1258,7 +1258,7 @@ def _context_to_validator_and_expectation_sql(
         },
     )
     expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+        **expectation_configuration.kwargs
     )
 
     batch_request = BatchRequest(
