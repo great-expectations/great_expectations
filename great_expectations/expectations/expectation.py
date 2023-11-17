@@ -362,12 +362,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
 
-    # @pydantic.validator("configuration")
-    # def validate_config(self, config):
-    #     if config:
-    #         self.validate_configuration(config)
-    #     return config
-
     @classmethod
     def is_abstract(cls) -> bool:
         return isabstract(cls)
@@ -1301,14 +1295,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             runtime_configuration=runtime_configuration,
         )
         return expectation_validation_result_list[0]
-
-    # @property
-    # def configuration(self) -> ExpectationConfiguration:
-    #     if self._configuration is None:
-    #         raise InvalidExpectationConfigurationError(
-    #             "cannot access configuration: expectation has not yet been configured"
-    #         )
-    #     return self._configuration
 
     @public_api
     def run_diagnostics(  # noqa: PLR0913

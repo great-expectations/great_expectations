@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 
 from great_expectations.core.expectation_diagnostics.supporting_types import Maturity
@@ -15,7 +17,9 @@ pytestmark = pytest.mark.unit
     "This is broken because Expectation._get_execution_engine_diagnostics is broken"
 )
 def test_print_diagnostic_checklist__first_iteration():
-    output_message = ExpectColumnValuesToEqualThree().print_diagnostic_checklist()
+    output_message = ExpectColumnValuesToEqualThree(
+        configuration=mock.MagicMock()
+    ).print_diagnostic_checklist()
 
     assert (
         output_message
@@ -30,9 +34,9 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
 
 
 def test_print_diagnostic_checklist__second_iteration():
-    output_message = (
-        ExpectColumnValuesToEqualThree__SecondIteration().print_diagnostic_checklist()
-    )
+    output_message = ExpectColumnValuesToEqualThree__SecondIteration(
+        configuration=mock.MagicMock()
+    ).print_diagnostic_checklist()
     print(output_message)
 
     assert (
@@ -57,9 +61,9 @@ Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration ({Mat
 
 
 def test_print_diagnostic_checklist__third_iteration():
-    output_message = (
-        ExpectColumnValuesToEqualThree__ThirdIteration().print_diagnostic_checklist()
-    )
+    output_message = ExpectColumnValuesToEqualThree__ThirdIteration(
+        configuration=mock.MagicMock()
+    ).print_diagnostic_checklist()
     print(output_message)
 
     assert (
