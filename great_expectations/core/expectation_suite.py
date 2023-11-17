@@ -1071,6 +1071,8 @@ class LegacyExpectationSuite(SerializableDictDot):
 
 
 class ExpectationSuite(LegacyExpectationSuite):
+    """Manage a collection of Expectations."""
+
     def __init__(
         self,
         *args,
