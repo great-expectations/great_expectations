@@ -1121,6 +1121,7 @@ class ExpectationSuiteSchema(Schema):
     expectation_suite_name = fields.Str()
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     expectation_configs = fields.List(fields.Nested(ExpectationConfigurationSchema))
+    expectations = fields.List(fields.Nested(ExpectationConfigurationSchema))
     evaluation_parameters = fields.Dict(allow_none=True)
     data_asset_type = fields.Str(allow_none=True)
     meta = fields.Dict()
