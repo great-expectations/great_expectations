@@ -277,7 +277,9 @@ class ExpectationSuite(SerializableDictDot):
         myself = expectationSuiteSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
-        myself["expectations"] = convert_to_json_serializable(myself["expectations"])
+        myself["expectations"] = convert_to_json_serializable(
+            myself["expectation_configurations"]
+        )
         try:
             myself["evaluation_parameters"] = convert_to_json_serializable(
                 myself["evaluation_parameters"]
