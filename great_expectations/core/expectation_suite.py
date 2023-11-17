@@ -47,6 +47,7 @@ from great_expectations.core.util import (
     parse_string_to_datetime,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.expectations.expectation import Expectation
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
@@ -71,7 +72,7 @@ logger = logging.getLogger(__name__)
     version="0.13.33",
     message="Used in GX Cloud deployments.",
 )
-class ExpectationSuite(SerializableDictDot):
+class LegacyExpectationSuite(SerializableDictDot):
     """Suite of expectations plus create, read, update, and delete functionality.
 
     - create: add_expectation(), append_expectation()
@@ -1067,6 +1068,47 @@ class ExpectationSuite(SerializableDictDot):
                 new_rendered_content=rendered_content,
                 failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
             )
+
+
+class ExpectationSuite(LegacyExpectationSuite):
+
+    def __init__(
+        self,
+        *args,
+        # once refactor is complete, these should be required fields
+        name: str = None,
+        expectations: Sequence[Expectation] = None,
+        id: Optional[str] = None,
+        **kwargs
+    ):
+        if name:
+            kwargs["expectation_suite_name"] = name
+        if expectations and all(isinstance(exp, Expectation) for exp in expectations):
+            kwargs["expectations"] = [exp.configuration for exp in expectations]
+        if id:
+            kwargs["ge_cloud_id"] = id
+        super().__init__(*args, **kwargs)
+
+    def add(self, expectation: Expectation) -> Expectation:
+        """Add an Expectation to this ExpectationSuite"""
+        ...
+
+    def update(self, expectation: Expectation) -> Expectation:
+        """Update an existing Expectation in this ExpectationSuite"""
+        ...
+
+    def delete(self, expectation: Expectation) -> Expectation:
+        """Delete an Expectation from this ExpectationSuite"""
+        ...
+
+    def get_all(self) -> list[Expectation]:
+        """Get a list of all Expectations in this ExpectationSuite."""
+        ...
+
+
+
+
+
 
 
 class ExpectationSuiteSchema(Schema):
