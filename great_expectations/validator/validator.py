@@ -1652,7 +1652,7 @@ class Validator:
             # Group expectations by column
             columns: dict[Any, list[ExpectationConfiguration]] = {}
 
-            for expectation in expectation_suite.expectations:
+            for expectation in expectation_suite.expectation_configurations:
                 expectation.process_evaluation_parameters(
                     evaluation_parameters=runtime_evaluation_parameters,
                     interactive_evaluation=self.interactive_evaluation,
