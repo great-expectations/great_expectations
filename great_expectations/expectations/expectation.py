@@ -349,13 +349,9 @@ class Expectation(metaclass=MetaExpectation):
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
 
-    def __init__(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        if configuration:
-            self.validate_configuration(configuration=configuration)
-
+    def __init__(self, configuration: ExpectationConfiguration) -> None:
         self._configuration = configuration
+        self.validate_configuration(configuration)
 
     @classmethod
     def is_abstract(cls) -> bool:
@@ -1292,10 +1288,6 @@ class Expectation(metaclass=MetaExpectation):
 
     @property
     def configuration(self) -> ExpectationConfiguration:
-        if self._configuration is None:
-            raise InvalidExpectationConfigurationError(
-                "cannot access configuration: expectation has not yet been configured"
-            )
         return self._configuration
 
     @public_api
