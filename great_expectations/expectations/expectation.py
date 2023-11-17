@@ -355,7 +355,7 @@ class Expectation(metaclass=MetaExpectation):
         self.success_on_last_run = kwargs.pop("success_on_last_run", None)
         self.expectation_context = kwargs.pop("expectation_context", None)
         self.rendered_content = kwargs.pop("rendered_content", None)
-        for k, v in kwargs:
+        for k, v in kwargs.items():
             setattr(self, k, v)
 
         # Everything below is purely to maintain current validation logic
