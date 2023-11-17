@@ -40,19 +40,12 @@ class Validator:
         context: AbstractDataContext,
         batch_config: BatchConfig,
         result_format: ResultFormat = ResultFormat.SUMMARY,
-        batch_asset_options: Optional[BatchRequestOptions] = None,
+        batch_request_options: Optional[BatchRequestOptions] = None,
     ) -> None:
         self._context = context
         self._batch_config = batch_config
-        self._batch_asset_options = batch_asset_options
+        self._batch_request_options = batch_request_options
         self.result_format = result_format
-
-    @cached_property
-    def _wrapped_validator(self) -> OldValidator:
-        batch_request = self._batch_config.data_asset.build_batch_request(
-            options=self._batch_asset_options
-        )
-        return self._context.get_validator(batch_request=batch_request)
 
     def validate_expectation(
         self, expectation: Expectation
@@ -81,6 +74,14 @@ class Validator:
                 "success_percent": statistics.success_percent,
             },
         )
+
+    @cached_property
+    def _wrapped_validator(self) -> OldValidator:
+        batch_request = self._batch_config.build_batch_request(
+            batch_request_options=self._batch_request_options
+        )
+        return self._context.get_validator(batch_request=batch_request)
+
 
     def _validate_expectation_configs(
         self, expectation_configs: list[ExpectationConfiguration]

@@ -81,7 +81,7 @@ def validator(
     return Validator(
         context=fds_data_context,
         batch_config=batch_config,
-        batch_asset_options=None,
+        batch_request_options=None,
         result_format=ResultFormat.SUMMARY,
     )
 
@@ -160,7 +160,7 @@ def test_validate_expectation_with_batch_asset_options(
     validator = Validator(
         context=fds_data_context,
         batch_config=batch_config_with_event_type_splitter,
-        batch_asset_options={"event_type": desired_event_type},
+        batch_request_options={"event_type": desired_event_type},
     )
 
     result = validator.validate_expectation(
