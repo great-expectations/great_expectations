@@ -47,7 +47,6 @@ from great_expectations.core.util import (
     parse_string_to_datetime,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.expectations.expectation import Expectation
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
@@ -60,6 +59,7 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation import Expectation
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
 
 logger = logging.getLogger(__name__)
