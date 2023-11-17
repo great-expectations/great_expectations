@@ -12,6 +12,11 @@
         "a": "IntegerType",
         "b": "IntegerType",
         "c": "IntegerType"
+      },
+      "mysql": {
+        "a": "INTEGER",
+        "b": "INTEGER",
+        "c": "INTEGER"
       }
     },
     "tests": [
@@ -97,6 +102,14 @@
         "z": "IntegerType",
         "a": "IntegerType",
         "b": "IntegerType"
+      },
+      "mysql": {
+        "w": "INTEGER",
+        "x": "INTEGER",
+        "y": "INTEGER",
+        "z": "INTEGER",
+        "a": "INTEGER",
+        "b": "INTEGER"
       }
     },
     "tests" : [{
