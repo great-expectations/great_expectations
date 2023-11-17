@@ -49,13 +49,13 @@ def datasource_name(
     # if the test was skipped, we may not have a datasource to clean up
     # in that case, we create one simply to test get and delete
     try:
-        context.get_datasource(datasource_name=datasource_name)
+        _ = context.get_datasource(datasource_name=datasource_name)
     except ValueError:
-        context.sources.add_pandas(name=datasource_name)
+        _ = context.sources.add_pandas(name=datasource_name)
         context.get_datasource(datasource_name=datasource_name)
     context.delete_datasource(datasource_name=datasource_name)
     with pytest.raises(ValueError):
-        context.get_datasource(datasource_name=datasource_name)
+        _ = context.get_datasource(datasource_name=datasource_name)
 
 
 @pytest.fixture(scope="module")
@@ -72,10 +72,10 @@ def expectation_suite(
         expectation_suite=expectation_suite
     )
     assert len(expectation_suite.expectations) > 0
-    context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+    _ = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
     with pytest.raises(gx_exceptions.DataContextError):
-        context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+        _ = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 
 @pytest.fixture(scope="module")
@@ -91,9 +91,9 @@ def validator(
     validator.head()
     yield validator
     validator.save_expectation_suite()
-    validator.get_expectation_suite()
-    context.get_expectation_suite(
-        expectation_suite_name=validator.expectation_suite_name,
+    expectation_suite = validator.get_expectation_suite()
+    _ = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite.expectation_suite_name,
     )
 
 
