@@ -225,7 +225,7 @@ def suite_with_table_and_column_expectations(
         meta={"notes": "This is an expectation suite."},
         data_context=context,
     )
-    assert suite.expectations == [
+    assert suite.expectation_configurations == [
         exp1,
         exp2,
         exp3,
@@ -259,7 +259,7 @@ def suite_with_column_pair_and_table_expectations(
         meta={"notes": "This is an expectation suite."},
         data_context=context,
     )
-    assert suite.expectations == [
+    assert suite.expectation_configurations == [
         column_pair_expectation,
         table_exp1,
         table_exp2,
@@ -442,11 +442,11 @@ def test_remove_expectation_without_necessary_args(single_expectation_suite):
 
 @pytest.mark.filesystem
 def test_patch_expectation_replace(exp5, exp6, domain_success_runtime_suite):
-    assert domain_success_runtime_suite.expectations[4] is exp5
+    assert domain_success_runtime_suite.expectation_configurations[4] is exp5
 
-    assert not domain_success_runtime_suite.expectations[4].isEquivalentTo(
-        exp6, match_type="success"
-    )
+    assert not domain_success_runtime_suite.expectation_configurations[
+        4
+    ].isEquivalentTo(exp6, match_type="success")
     domain_success_runtime_suite.patch_expectation(
         exp5,
         op="replace",
@@ -454,18 +454,18 @@ def test_patch_expectation_replace(exp5, exp6, domain_success_runtime_suite):
         value=[1, 2],
         match_type="runtime",
     )
-    assert domain_success_runtime_suite.expectations[4].isEquivalentTo(
+    assert domain_success_runtime_suite.expectation_configurations[4].isEquivalentTo(
         exp6, match_type="success"
     )
 
 
 @pytest.mark.filesystem
 def test_patch_expectation_add(exp5, exp7, domain_success_runtime_suite):
-    assert domain_success_runtime_suite.expectations[4] is exp5
+    assert domain_success_runtime_suite.expectation_configurations[4] is exp5
 
-    assert not domain_success_runtime_suite.expectations[4].isEquivalentTo(
-        exp7, match_type="success"
-    )
+    assert not domain_success_runtime_suite.expectation_configurations[
+        4
+    ].isEquivalentTo(exp7, match_type="success")
     domain_success_runtime_suite.patch_expectation(
         exp5,
         op="add",
@@ -473,18 +473,18 @@ def test_patch_expectation_add(exp5, exp7, domain_success_runtime_suite):
         value=4,
         match_type="runtime",
     )
-    assert domain_success_runtime_suite.expectations[4].isEquivalentTo(
+    assert domain_success_runtime_suite.expectation_configurations[4].isEquivalentTo(
         exp7, match_type="success"
     )
 
 
 @pytest.mark.filesystem
 def test_patch_expectation_remove(exp5, exp8, domain_success_runtime_suite):
-    assert domain_success_runtime_suite.expectations[4] is exp5
+    assert domain_success_runtime_suite.expectation_configurations[4] is exp5
 
-    assert not domain_success_runtime_suite.expectations[4].isEquivalentTo(
-        exp8, match_type="runtime"
-    )
+    assert not domain_success_runtime_suite.expectation_configurations[
+        4
+    ].isEquivalentTo(exp8, match_type="runtime")
     domain_success_runtime_suite.patch_expectation(
         exp5,
         op="remove",
@@ -492,7 +492,7 @@ def test_patch_expectation_remove(exp5, exp8, domain_success_runtime_suite):
         value=None,
         match_type="runtime",
     )
-    assert domain_success_runtime_suite.expectations[4].isEquivalentTo(
+    assert domain_success_runtime_suite.expectation_configurations[4].isEquivalentTo(
         exp8, match_type="runtime"
     )
 
@@ -625,11 +625,9 @@ def test_add_expectation_with_ge_cloud_id(
     """
     This test ensures that expectation does not lose ge_cloud_id attribute when updated
     """
-    expectation_ge_cloud_id = (
-        single_expectation_suite_with_expectation_ge_cloud_id.expectations[
-            0
-        ].ge_cloud_id
-    )
+    expectation_ge_cloud_id = single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[
+        0
+    ].ge_cloud_id
     # updated expectation does not have ge_cloud_id
     updated_expectation = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -644,15 +642,23 @@ def test_add_expectation_with_ge_cloud_id(
         updated_expectation, overwrite_existing=True
     )
     assert (
-        single_expectation_suite_with_expectation_ge_cloud_id.expectations[
+        single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[
             0
         ].ge_cloud_id
         == expectation_ge_cloud_id
     )
     # make sure expectation config was actually updated
-    assert single_expectation_suite_with_expectation_ge_cloud_id.expectations[0].kwargs[
+    assert single_expectation_suite_with_expectation_ge_cloud_id.expectation_configurations[
+        0
+    ].kwargs[
         "value_set"
-    ] == [11, 22, 33, 44, 55]
+    ] == [
+        11,
+        22,
+        33,
+        44,
+        55,
+    ]
 
     # ensure usage statistics are being emitted correctly
     assert mock_emit.call_count == 1
@@ -688,7 +694,7 @@ def test_remove_all_expectations_of_type(
 @pytest.mark.cloud
 def test_replace_expectation_replaces_expectation(ge_cloud_suite, ge_cloud_id, exp1):
     # The state of the first expectation before update
-    expectation_before_update = ge_cloud_suite.expectations[0]
+    expectation_before_update = ge_cloud_suite.expectation_configurations[0]
     assert expectation_before_update["kwargs"]["column"] == "a"
     assert expectation_before_update["kwargs"]["value_set"] == [1, 2, 3]
     assert expectation_before_update["meta"]["notes"] == "This is an expectation."
@@ -705,7 +711,7 @@ def test_replace_expectation_replaces_expectation(ge_cloud_suite, ge_cloud_id, e
     )
 
     # The state of the first expectation after update
-    expectation_after_update = ge_cloud_suite.expectations[0]
+    expectation_after_update = ge_cloud_suite.expectation_configurations[0]
     assert expectation_after_update["kwargs"]["column"] == "b"
     assert expectation_after_update["kwargs"]["value_set"] == [4, 5, 6]
     assert (

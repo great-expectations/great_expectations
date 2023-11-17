@@ -113,7 +113,7 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
     # Group expectations by column
     exp_groups = {}
     # print(json.dumps(titanic_expectations, indent=2))
-    for exp in titanic_expectations.expectations:
+    for exp in titanic_expectations.expectation_configurations:
         try:
             column = exp.kwargs["column"]
             if column not in exp_groups:
