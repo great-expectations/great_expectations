@@ -32,6 +32,7 @@ def init(
     data_context_id: Optional[UUID] = None,
     organization_id: Optional[UUID] = None,
     oss_id: Optional[UUID] = None,
+    cloud_mode: bool = False,
 ):
     """Initializes the analytics platform client."""
     conf = {}
@@ -43,7 +44,7 @@ def init(
         conf["organization_id"] = organization_id
     if oss_id:
         conf["oss_id"] = oss_id
-    update_config(config=Config(**conf))
+    update_config(config=Config(cloud_mode=cloud_mode, **conf))
 
     posthog.disabled = not ENV_CONFIG.posthog_enabled
     if ENV_CONFIG.posthog_enabled:
