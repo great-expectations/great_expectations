@@ -47,6 +47,7 @@ class GXDependencies:
             "numpy",
             "packaging",
             "pandas",
+            "posthog",
             "pydantic",
             "pyparsing",
             "python-dateutil",
