@@ -62,12 +62,13 @@ class Event:
         return cls._allowed_actions
 
     def properties(self) -> dict:
-        return {
+        props = {
             "data_context_id": self.data_context_id,
             "organization_id": self.organization_id,
             "oss_id": self.oss_id,
             "service": "python-client",
-        } | self._properties()
+        }
+        return {**props, **self._properties()}
 
     def _properties(self) -> dict:
         """Returns event specific properties.

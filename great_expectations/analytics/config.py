@@ -27,7 +27,7 @@ class _EnvConfig(BaseSettings):
         return self.gx_posthog_debug
 
     @property
-    def posthog_host(self) -> bool:
+    def posthog_host(self) -> str:
         return self.gx_posthog_host
 
     @property
