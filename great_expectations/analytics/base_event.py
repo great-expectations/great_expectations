@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import ClassVar, Optional
+from typing import ClassVar, List, Optional
 from uuid import UUID
 
 from great_expectations.analytics.config import get_config
@@ -45,7 +45,7 @@ class Event:
     def user_id(self) -> UUID:
         return get_config().user_id
 
-    _allowed_actions: ClassVar[Optional[list[Action]]] = None
+    _allowed_actions: ClassVar[Optional[List[Action]]] = None
 
     def __post_init__(self):
         allowed_actions = self.get_allowed_actions()
