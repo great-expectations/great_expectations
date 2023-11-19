@@ -100,9 +100,7 @@ def _get_sqlalchemy_column_metadata(
         schema_name = batch_data.source_schema_name or batch_data.selectable.schema
 
     # if custom query was passed in
-    elif sqlalchemy.Subquery and isinstance(
-        batch_data.selectable, sqlalchemy.Subquery
-    ):
+    elif sqlalchemy.Subquery and isinstance(batch_data.selectable, sqlalchemy.Subquery):
         table_selectable = batch_data.selectable
         schema_name = None
 
