@@ -93,21 +93,28 @@ class ColumnTypes(TableMetricProvider):
 def _get_sqlalchemy_column_metadata(
     execution_engine: SqlAlchemyExecutionEngine, batch_data: SqlAlchemyBatchData
 ):
-    table_selectable: str | sqlalchemy.TextClause
+    table_selectable: str | sqlalchemy.TextClause | sqlalchemy.Subquery
 
     if sqlalchemy.Table and isinstance(batch_data.selectable, sqlalchemy.Table):
         table_selectable = batch_data.source_table_name or batch_data.selectable.name
         schema_name = batch_data.source_schema_name or batch_data.selectable.schema
 
     # if custom query was passed in
+    elif sqlalchemy.Subquery and isinstance(
+        batch_data.selectable, sqlalchemy.Subquery
+    ):
+        table_selectable = batch_data.selectable
+        schema_name = None
+
+    # if custom query was passed in (RuntimeBatchRequest)
     elif sqlalchemy.TextClause and isinstance(
         batch_data.selectable, sqlalchemy.TextClause
     ):
         table_selectable = batch_data.selectable
         schema_name = None
     else:
-        table_selectable = batch_data.source_table_name or batch_data.selectable.name
-        schema_name = batch_data.source_schema_name or batch_data.selectable.schema
+        table_selectable = batch_data.selectable
+        schema_name = None
 
     return get_sqlalchemy_column_metadata(
         execution_engine=execution_engine,

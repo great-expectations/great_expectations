@@ -655,9 +655,12 @@ def column_reflection_fallback(  # noqa: PLR0915
                 for schema_name, table_name, column_name, column_data_type in col_info_tuples_list
             ]
         else:
-            # if a custom query was passed
+            # if a custom query was passed (RuntimeBatchRequest)
             if sqlalchemy.TextClause and isinstance(selectable, sqlalchemy.TextClause):
                 query: sqlalchemy.TextClause = selectable
+            # if a custom query was passed
+            elif sqlalchemy.Subquery and isinstance(selectable, sqlalchemy.Subquery):
+                query = sa.select(sa.text("*")).select_from(selectable).limit(1)
             elif sqlalchemy.Table and isinstance(selectable, sqlalchemy.Table):
                 query = sa.select(sa.text("*")).select_from(selectable).limit(1)
             else:  # noqa: PLR5501
