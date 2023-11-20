@@ -40,6 +40,7 @@ def data_context(
     datasource.assets.append(mock_asset)
     return fds_data_context
 
+
 @pytest.mark.unit
 def test_data_asset(
     data_context: AbstractDataContext,
@@ -53,6 +54,7 @@ def test_data_asset(
         data_asset_name=mock_asset_name,
     )
     assert batch_config.data_asset == mock_asset
+
 
 @pytest.mark.parametrize(
     "batch_request_options",
