@@ -356,6 +356,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     examples: ClassVar[List[dict]] = []
 
     def __init__(self, **kwargs) -> None:
+        # Safety precaution to prevent old-style instantiation
         if "configuration" in kwargs:
             raise ValueError(
                 "Cannot directly pass configuration into Expectation constructor; please pass in individual success keys and domain kwargs."
