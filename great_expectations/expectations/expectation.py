@@ -356,6 +356,11 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     examples: ClassVar[List[dict]] = []
 
     def __init__(self, **kwargs) -> None:
+        if "configuration" in kwargs:
+            raise ValueError(
+                "Cannot directly pass configuration into Expectation constructor; please pass in individual success keys and domain kwargs."
+            )
+
         super().__init__(**kwargs)
 
         # Everything below is purely to maintain current validation logic but should be migrated to Pydantic validators
