@@ -39,7 +39,6 @@ from typing_extensions import ParamSpec
 from great_expectations import __version__ as ge_version
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (
-    deprecated_method_or_class,
     public_api,
 )
 from great_expectations.core.expectation_configuration import (
@@ -354,12 +353,16 @@ class Expectation(metaclass=MetaExpectation):
         self.validate_configuration(configuration)
 
     @classmethod
+    def _get_expectation_type(cls) -> str:
+        return camel_to_snake(cls.__name__)
+
+    @classmethod
     def is_abstract(cls) -> bool:
         return isabstract(cls)
 
     @classmethod
     def _register_renderer_functions(cls) -> None:
-        expectation_type: str = camel_to_snake(cls.__name__)
+        expectation_type: str = cls._get_expectation_type()
 
         for candidate_renderer_fn_name in dir(cls):
             attr_obj: Callable = getattr(cls, candidate_renderer_fn_name)
@@ -1291,8 +1294,9 @@ class Expectation(metaclass=MetaExpectation):
         return self._configuration
 
     @public_api
+    @classmethod
     def run_diagnostics(  # noqa: PLR0913
-        self,
+        cls,
         raise_exceptions_for_backends: bool = False,
         ignore_suppress: bool = False,
         ignore_only_for: bool = False,
@@ -1346,9 +1350,9 @@ class Expectation(metaclass=MetaExpectation):
             _error = lambda x: x  # noqa: E731
 
         library_metadata: AugmentedLibraryMetadata = (
-            self._get_augmented_library_metadata()
+            cls._get_augmented_library_metadata()
         )
-        examples: List[ExpectationTestDataCases] = self._get_examples(
+        examples: List[ExpectationTestDataCases] = cls._get_examples(
             return_only_gallery_examples=False
         )
         gallery_examples: List[ExpectationTestDataCases] = []
@@ -1362,25 +1366,25 @@ class Expectation(metaclass=MetaExpectation):
                 gallery_examples.append(example)
 
         description_diagnostics: ExpectationDescriptionDiagnostics = (
-            self._get_description_diagnostics()
+            cls._get_description_diagnostics()
         )
 
         _expectation_config: Optional[
             ExpectationConfiguration
-        ] = self._get_expectation_configuration_from_examples(examples)
+        ] = cls._get_expectation_configuration_from_examples(examples)
         if not _expectation_config:
             _error(
-                f"Was NOT able to get Expectation configuration for {self.expectation_type}. "
+                f"Was NOT able to get Expectation configuration for {cls._get_expectation_type()}. "
                 "Is there at least one sample test where 'success' is True?"
             )
         metric_diagnostics_list: List[
             ExpectationMetricDiagnostics
-        ] = self._get_metric_diagnostics_list(
+        ] = cls._get_metric_diagnostics_list(
             expectation_config=_expectation_config,
         )
 
         introspected_execution_engines: ExpectationExecutionEngineDiagnostics = (
-            self._get_execution_engine_diagnostics(
+            cls._get_execution_engine_diagnostics(
                 metric_diagnostics_list=metric_diagnostics_list,
                 registered_metrics=_registered_metrics,
             )
@@ -1391,11 +1395,11 @@ class Expectation(metaclass=MetaExpectation):
             if i is True
         ]
         _debug(
-            f"Implemented engines for {self.expectation_type}: {', '.join(engines_implemented)}"
+            f"Implemented engines for {cls._get_expectation_type()}: {', '.join(engines_implemented)}"
         )
 
         _debug("Getting test results")
-        test_results: List[ExpectationTestDiagnostics] = self._get_test_results(
+        test_results: List[ExpectationTestDiagnostics] = cls._get_test_results(
             expectation_type=description_diagnostics.snake_name,
             test_data_cases=examples,
             execution_engine_diagnostics=introspected_execution_engines,
@@ -1411,16 +1415,14 @@ class Expectation(metaclass=MetaExpectation):
             ExpectationBackendTestResultCounts
         ] = ExpectationDiagnostics._get_backends_from_test_results(test_results)
 
-        renderers: List[
-            ExpectationRendererDiagnostics
-        ] = self._get_renderer_diagnostics(
+        renderers: List[ExpectationRendererDiagnostics] = cls._get_renderer_diagnostics(
             expectation_type=description_diagnostics.snake_name,
             test_diagnostics=test_results,
             registered_renderers=_registered_renderers,  # type: ignore[arg-type]
         )
 
         maturity_checklist: ExpectationDiagnosticMaturityMessages = (
-            self._get_maturity_checklist(
+            cls._get_maturity_checklist(
                 library_metadata=library_metadata,
                 description=description_diagnostics,
                 examples=examples,
@@ -1434,7 +1436,7 @@ class Expectation(metaclass=MetaExpectation):
             execution_engines=introspected_execution_engines,
         )
 
-        _debug(f"coverage_score: {coverage_score} for {self.expectation_type}")
+        _debug(f"coverage_score: {coverage_score} for {cls.expectation_type}")
 
         # Set final maturity level based on status of all checks
         library_metadata.maturity = Expectation._get_final_maturity_level(
@@ -1473,8 +1475,9 @@ class Expectation(metaclass=MetaExpectation):
             coverage_score=coverage_score,
         )
 
+    @staticmethod
     def _warn_if_result_format_config_in_runtime_configuration(
-        self, runtime_configuration: Union[dict, None] = None
+        runtime_configuration: Union[dict, None] = None
     ) -> None:
         """
         Issues warning if result_format is in runtime_configuration for Validator
@@ -1485,8 +1488,9 @@ class Expectation(metaclass=MetaExpectation):
                 UserWarning,
             )
 
+    @staticmethod
     def _warn_if_result_format_config_in_expectation_configuration(
-        self, configuration: ExpectationConfiguration
+        configuration: ExpectationConfiguration,
     ) -> None:
         """
         Issues warning if result_format is in ExpectationConfiguration
@@ -1499,8 +1503,9 @@ class Expectation(metaclass=MetaExpectation):
             )
 
     @public_api
+    @classmethod
     def print_diagnostic_checklist(
-        self,
+        cls,
         diagnostics: Optional[ExpectationDiagnostics] = None,
         show_failed_tests: bool = False,
         backends: Optional[List[str]] = None,
@@ -1532,7 +1537,7 @@ class Expectation(metaclass=MetaExpectation):
                 debug_logger.addHandler(chandler)
                 debug_logger.setLevel(logging.DEBUG)
 
-            diagnostics = self.run_diagnostics(
+            diagnostics = cls.run_diagnostics(
                 debug_logger=debug_logger, only_consider_these_backends=backends
             )
         if show_failed_tests:
@@ -1546,18 +1551,21 @@ class Expectation(metaclass=MetaExpectation):
 
         return checklist
 
-    def _get_examples_from_json(self):
+    @classmethod
+    def _get_examples_from_json(cls):
         """Only meant to be called by self._get_examples"""
         results = []
-        found = next(_TEST_DEFS_DIR.rglob(f"**/{self.expectation_type}.json"), None)
+        expectation_type = cls._get_expectation_type()
+        found = next(_TEST_DEFS_DIR.rglob(f"**/{expectation_type}.json"), None)
         if found:
             with open(found) as fp:
                 data = json.load(fp)
             results = data["datasets"]
         return results
 
+    @classmethod
     def _get_examples(
-        self, return_only_gallery_examples: bool = True
+        cls, return_only_gallery_examples: bool = True
     ) -> List[ExpectationTestDataCases]:
         """
         Get a list of examples from the object's `examples` member variable.
@@ -1568,7 +1576,7 @@ class Expectation(metaclass=MetaExpectation):
         :return: list of examples or [], if no examples exist
         """
         # Currently, only community contrib expectations have an examples attribute
-        all_examples: List[dict] = self.examples or self._get_examples_from_json()
+        all_examples: List[dict] = cls.examples or cls._get_examples_from_json()
 
         included_examples = []
         for i, example in enumerate(all_examples, 1):
@@ -1619,7 +1627,7 @@ class Expectation(metaclass=MetaExpectation):
                 if "dataset_name" not in copied_example:
                     dataset_name = generate_dataset_name_from_expectation_name(
                         dataset=copied_example,
-                        expectation_type=self.expectation_type,
+                        expectation_type=cls._get_expectation_type(),
                         index=i,
                     )
                     copied_example["dataset_name"] = dataset_name
@@ -1628,24 +1636,26 @@ class Expectation(metaclass=MetaExpectation):
 
         return included_examples
 
-    def _get_docstring_and_short_description(self) -> Tuple[str, str]:
-        """Conveninence method to get the Exepctation's docstring and first line"""
+    @classmethod
+    def _get_docstring_and_short_description(cls) -> Tuple[str, str]:
+        """Conveninence method to get the Expectation's docstring and first line"""
 
-        if self.__doc__ is not None:
-            docstring = self.__doc__
-            short_description = next(line for line in self.__doc__.split("\n") if line)
+        if cls.__doc__ is not None:
+            docstring = cls.__doc__
+            short_description = next(line for line in cls.__doc__.split("\n") if line)
         else:
             docstring = ""
             short_description = ""
 
         return docstring, short_description
 
-    def _get_description_diagnostics(self) -> ExpectationDescriptionDiagnostics:
+    @classmethod
+    def _get_description_diagnostics(cls) -> ExpectationDescriptionDiagnostics:
         """Introspect the Expectation and create its ExpectationDescriptionDiagnostics object"""
 
-        camel_name = self.__class__.__name__
-        snake_name = camel_to_snake(self.__class__.__name__)
-        docstring, short_description = self._get_docstring_and_short_description()
+        camel_name = cls.__class__.__name__
+        snake_name = camel_to_snake(cls.__class__.__name__)
+        docstring, short_description = cls._get_docstring_and_short_description()
 
         return ExpectationDescriptionDiagnostics(
             **{
@@ -1656,8 +1666,9 @@ class Expectation(metaclass=MetaExpectation):
             }
         )
 
+    @classmethod
     def _get_expectation_configuration_from_examples(
-        self,
+        cls,
         examples: List[ExpectationTestDataCases],
     ) -> Optional[ExpectationConfiguration]:
         """Return an ExpectationConfiguration instance using test input expected to succeed"""
@@ -1668,7 +1679,7 @@ class Expectation(metaclass=MetaExpectation):
                     for test in tests:
                         if test.output.get("success"):
                             return ExpectationConfiguration(
-                                expectation_type=self.expectation_type,
+                                expectation_type=cls._get_expectation_type(),
                                 kwargs=test.input,
                             )
 
@@ -1679,26 +1690,10 @@ class Expectation(metaclass=MetaExpectation):
                     for test in tests:
                         if test.input:
                             return ExpectationConfiguration(
-                                expectation_type=self.expectation_type,
+                                expectation_type=cls._get_expectation_type(),
                                 kwargs=test.input,
                             )
         return None
-
-    @staticmethod
-    @deprecated_method_or_class(
-        version="0.17.11", message="Please use is_expectation_auto_initializing instead"
-    )
-    def is_expectation_self_initializing(name: str) -> bool:
-        """
-        Given the name of an Expectation, returns a boolean that represents whether an Expectation can be auto-intialized.
-
-        Args:
-            name (str): name of Expectation
-
-        Returns:
-            boolean that represents whether an Expectation can be auto-initialized. Information also outputted to logger.
-        """
-        return Expectation.is_expectation_auto_initializing(name=name)
 
     @staticmethod
     def is_expectation_auto_initializing(name: str) -> bool:
@@ -2177,7 +2172,8 @@ class Expectation(metaclass=MetaExpectation):
 
         return metric_diagnostics_list
 
-    def _get_augmented_library_metadata(self):
+    @classmethod
+    def _get_augmented_library_metadata(cls):
         """Introspect the Expectation's library_metadata object (if it exists), and augment it with additional information."""
 
         augmented_library_metadata = {
@@ -2200,9 +2196,9 @@ class Expectation(metaclass=MetaExpectation):
         }
         problems = []
 
-        if hasattr(self, "library_metadata"):
-            augmented_library_metadata.update(self.library_metadata)
-            keys = set(self.library_metadata.keys())
+        if hasattr(cls, "library_metadata"):
+            augmented_library_metadata.update(cls.library_metadata)
+            keys = set(cls.library_metadata.keys())
             missing_required_keys = required_keys - keys
             forbidden_keys = keys - allowed_keys
 
