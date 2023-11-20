@@ -2254,7 +2254,6 @@ def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
     """
 
     data_asset.set_default_expectation_argument("result_format", "COMPLETE")
-    data_asset.set_default_expectation_argument("include_config", False)
 
     if "title" not in test:
         raise ValueError("Invalid test configuration detected: 'title' is required.")
@@ -2336,7 +2335,6 @@ def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
     # noinspection PyProtectedMember
     validator._initialize_expectations(expectation_suite=expectation_suite)
     # validator.set_default_expectation_argument("result_format", "COMPLETE")
-    # validator.set_default_expectation_argument("include_config", False)
 
     if "title" not in test:
         raise ValueError("Invalid test configuration detected: 'title' is required.")
@@ -2377,14 +2375,12 @@ def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
                         "result_format": "COMPLETE",
                         "unexpected_index_column_names": ["pk_index"],
                     },
-                    "include_config": False,
                 }
             else:
                 runtime_kwargs = {
                     "result_format": {
                         "result_format": "COMPLETE",
                     },
-                    "include_config": False,
                 }
             runtime_kwargs.update(kwargs)
             result = getattr(validator, expectation_type)(**runtime_kwargs)

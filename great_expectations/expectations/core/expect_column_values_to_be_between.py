@@ -217,8 +217,6 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "parse_strings_as_datetimes": False,
         "allow_cross_type_comparisons": None,
         "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
         "meta": None,
         "auto": False,
         "profiler_config": default_profiler_config,

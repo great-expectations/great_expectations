@@ -89,8 +89,6 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
         "min_value": None,
         "max_value": None,
         "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
         "meta": None,
     }
     args_keys = (

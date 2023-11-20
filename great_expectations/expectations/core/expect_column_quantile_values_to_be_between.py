@@ -234,8 +234,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         "quantile_ranges": None,
         "result_format": "BASIC",
         "allow_relative_error": False,
-        "include_config": True,
-        "catch_exceptions": False,
         "meta": None,
         "auto": False,
         "profiler_config": default_profiler_config,

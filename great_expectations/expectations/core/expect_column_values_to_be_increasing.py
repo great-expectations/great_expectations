@@ -91,8 +91,6 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
         "strictly": None,
         "mostly": 1,
         "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
         "parse_strings_as_datetimes": False,
     }
     args_keys = ("column",)

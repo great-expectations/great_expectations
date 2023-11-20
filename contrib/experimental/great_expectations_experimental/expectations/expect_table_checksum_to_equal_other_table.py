@@ -434,8 +434,6 @@ class ExpectTableChecksumToEqualOtherTable(BatchExpectation):
         "other_table_name": None,
         "ignore_columns": "",
         "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
         "meta": None,
     }
 

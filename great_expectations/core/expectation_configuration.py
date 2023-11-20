@@ -158,8 +158,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "column_index": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_table_columns_to_match_ordered_list": {
@@ -167,8 +165,6 @@ class ExpectationConfiguration(SerializableDictDot):
             "success_kwargs": ("column_list",),
             "default_kwarg_values": {
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_table_columns_to_match_set": {
@@ -176,8 +172,6 @@ class ExpectationConfiguration(SerializableDictDot):
             "success_kwargs": ("column_set", "exact_match"),
             "default_kwarg_values": {
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
                 "exact_match": True,
             },
         },
@@ -188,8 +182,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "min_value": None,
                 "max_value": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_table_column_count_to_equal": {
@@ -197,8 +189,6 @@ class ExpectationConfiguration(SerializableDictDot):
             "success_kwargs": ("value",),
             "default_kwarg_values": {
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_table_row_count_to_be_between": {
@@ -208,8 +198,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "min_value": None,
                 "max_value": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_table_row_count_to_equal": {
@@ -217,8 +205,6 @@ class ExpectationConfiguration(SerializableDictDot):
             "success_kwargs": ("value",),
             "default_kwarg_values": {
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_values_to_be_unique": {
@@ -229,8 +215,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_values_to_not_be_null": {
@@ -241,8 +225,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_compound_columns_to_be_unique": {
@@ -253,8 +235,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "ignore_row_if": "all_values_are_missing",
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_values_to_be_null": {
@@ -265,8 +245,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_values_to_be_of_type": {
@@ -277,8 +255,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_values_to_be_in_type_list": {
@@ -289,8 +265,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_values_to_be_in_set": {
@@ -302,8 +276,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "mostly": None,
                 "parse_strings_as_datetimes": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_values_to_not_be_in_set": {
@@ -315,8 +287,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "mostly": None,
                 "parse_strings_as_datetimes": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_values_to_be_between": {
@@ -341,8 +311,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "output_strftime_format": None,
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_values_to_be_increasing": {
@@ -355,8 +323,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "parse_strings_as_datetimes": None,
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_values_to_be_decreasing": {
@@ -369,8 +335,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "parse_strings_as_datetimes": None,
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_value_lengths_to_be_between": {
@@ -383,8 +347,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "max_value": None,
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_value_lengths_to_equal": {
@@ -395,8 +357,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_values_to_match_regex": {
@@ -407,8 +367,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_values_to_not_match_regex": {
@@ -419,8 +377,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_values_to_match_regex_list": {
@@ -432,8 +388,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "match_on": "any",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_values_to_not_match_regex_list": {
@@ -444,8 +398,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_values_to_match_strftime_format": {
@@ -456,8 +408,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_values_to_be_dateutil_parseable": {
@@ -468,8 +418,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_values_to_be_json_parseable": {
@@ -480,8 +428,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_values_to_match_json_schema": {
@@ -492,8 +438,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than": {
@@ -505,8 +449,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "p_value": 0.05,
                 "params": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_distinct_values_to_be_in_set": {
@@ -517,8 +459,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "parse_strings_as_datetimes": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_distinct_values_to_equal_set": {
@@ -529,8 +469,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "parse_strings_as_datetimes": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_distinct_values_to_contain_set": {
@@ -541,8 +479,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "parse_strings_as_datetimes": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_mean_to_be_between": {
@@ -556,8 +492,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "strict_min": False,
                 "strict_max": False,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_median_to_be_between": {
@@ -571,8 +505,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "strict_min": False,
                 "strict_max": False,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_quantile_values_to_be_between": {
@@ -583,8 +515,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "allow_relative_error": False,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_stdev_to_be_between": {
@@ -598,8 +528,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "strict_min": False,
                 "strict_max": False,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_unique_value_count_to_be_between": {
@@ -611,8 +539,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "min_value": None,
                 "max_value": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_proportion_of_unique_values_to_be_between": {
@@ -626,8 +552,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "strict_min": False,
                 "strict_max": False,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_most_common_value_to_be_in_set": {
@@ -638,8 +562,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "ties_okay": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_sum_to_be_between": {
@@ -653,8 +575,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "strict_min": False,
                 "strict_max": False,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_min_to_be_between": {
@@ -677,8 +597,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "parse_strings_as_datetimes": None,
                 "output_strftime_format": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_max_to_be_between": {
@@ -701,8 +619,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "parse_strings_as_datetimes": None,
                 "output_strftime_format": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_chisquare_test_p_value_to_be_greater_than": {
@@ -715,8 +631,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "p": 0.05,
                 "tail_weight_holdout": 0,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than": {
@@ -735,8 +649,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "bootstrap_samples": None,
                 "bootstrap_sample_size": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_kl_divergence_to_be_less_than": {
@@ -757,8 +669,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "internal_weight_holdout": 0,
                 "bucketize_data": True,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_pair_values_to_be_equal": {
@@ -774,8 +684,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "ignore_row_if": "both_values_are_missing",
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_pair_values_A_to_be_greater_than_B": {
@@ -797,8 +705,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "parse_strings_as_datetimes": None,
                 "ignore_row_if": "both_values_are_missing",
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_pair_values_to_be_in_set": {
@@ -815,8 +721,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "ignore_row_if": "both_values_are_missing",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_multicolumn_values_to_be_unique": {
@@ -827,8 +731,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "ignore_row_if": "all_values_are_missing",
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_multicolumn_sum_to_equal": {
@@ -839,8 +741,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "ignore_row_if": "all_values_are_missing",
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "_expect_column_values_to_be_of_type__aggregate": {
@@ -851,8 +751,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "_expect_column_values_to_be_of_type__map": {
@@ -863,8 +761,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "_expect_column_values_to_be_in_type_list__aggregate": {
@@ -875,8 +771,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "_expect_column_values_to_be_in_type_list__map": {
@@ -887,8 +781,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "mostly": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_column_value_z_scores_to_be_less_than": {
@@ -899,8 +791,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "mostly": 1,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
             },
         },
         "expect_file_line_regex_match_count_to_be_between": {
@@ -918,8 +808,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "mostly": 1,
                 "nonnull_lines_regex": r"^\s*$",
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
                 "meta": None,
                 "_lines": None,
             },
@@ -933,8 +821,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "mostly": 1,
                 "nonnull_lines_regex": r"^\s*$",
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
                 "meta": None,
                 "_lines": None,
             },
@@ -945,8 +831,6 @@ class ExpectationConfiguration(SerializableDictDot):
             "default_kwarg_values": {
                 "hash_alg": "md5",
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
                 "meta": None,
             },
         },
@@ -957,8 +841,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "minsize": 0,
                 "maxsize": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
                 "meta": None,
             },
         },
@@ -968,8 +850,6 @@ class ExpectationConfiguration(SerializableDictDot):
             "default_kwarg_values": {
                 "filepath": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
                 "meta": None,
             },
         },
@@ -979,8 +859,6 @@ class ExpectationConfiguration(SerializableDictDot):
             "default_kwarg_values": {
                 "skip": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
                 "meta": None,
             },
         },
@@ -990,18 +868,12 @@ class ExpectationConfiguration(SerializableDictDot):
             "default_kwarg_values": {
                 "schema": None,
                 "result_format": "BASIC",
-                "include_config": True,
-                "catch_exceptions": False,
                 "meta": None,
             },
         },
     }
 
-    runtime_kwargs: ClassVar[tuple[str, ...]] = (
-        "result_format",
-        "include_config",
-        "catch_exceptions",
-    )
+    runtime_kwargs: ClassVar[tuple[str, ...]] = ("result_format",)
 
     def __init__(  # noqa: PLR0913
         self,

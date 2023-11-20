@@ -75,8 +75,6 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
         "double_sided": True,
         "mostly": 1,
         "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
     }
     args_keys = ("column", "threshold")
 

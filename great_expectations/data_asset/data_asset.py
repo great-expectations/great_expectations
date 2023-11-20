@@ -145,9 +145,9 @@ class DataAsset:
                     modification. For more detail, see :ref:`meta`.
         """
 
-        def outer_wrapper(func):  # noqa: C901, PLR0915
+        def outer_wrapper(func):
             @wraps(func)
-            def wrapper(self, *args, **kwargs):  # noqa: C901, PLR0912, PLR0915
+            def wrapper(self, *args, **kwargs):  # noqa: PLR0912
                 # Get the name of the method
                 method_name = func.__name__
 
@@ -156,18 +156,6 @@ class DataAsset:
                 all_args.update(kwargs)
 
                 # Unpack display parameters; remove them from all_args if appropriate
-                if "include_config" in kwargs:
-                    include_config = kwargs["include_config"]
-                    del all_args["include_config"]
-                else:
-                    include_config = self.default_expectation_args["include_config"]
-
-                if "catch_exceptions" in kwargs:
-                    catch_exceptions = kwargs["catch_exceptions"]
-                    del all_args["catch_exceptions"]
-                else:
-                    catch_exceptions = self.default_expectation_args["catch_exceptions"]
-
                 if "result_format" in kwargs:
                     result_format = kwargs["result_format"]
                 else:
@@ -231,30 +219,14 @@ class DataAsset:
                     expectation_type=method_name, kwargs=expectation_args, meta=meta
                 )
 
-                raised_exception = False
-                exception_traceback = None
-                exception_message = None
-
                 # Finally, execute the expectation method itself
                 if (
                     self._config.get("interactive_evaluation", True)
                     or self._active_validation
                 ):
-                    try:
-                        return_obj = func(self, **evaluation_args)
-                        if isinstance(return_obj, dict):
-                            return_obj = ExpectationValidationResult(**return_obj)
-
-                    except Exception as err:
-                        if catch_exceptions:
-                            raised_exception = True
-                            exception_traceback = traceback.format_exc()
-                            exception_message = f"{type(err).__name__}: {err!s}"
-
-                            return_obj = ExpectationValidationResult(success=False)
-
-                        else:
-                            raise err
+                    return_obj = func(self, **evaluation_args)
+                    if isinstance(return_obj, dict):
+                        return_obj = ExpectationValidationResult(**return_obj)
 
                 else:
                     return_obj = ExpectationValidationResult(
@@ -272,20 +244,12 @@ class DataAsset:
                         send_usage_event=False,
                     )
 
-                if include_config:
-                    return_obj.expectation_config = copy.deepcopy(stored_config)
+                return_obj.expectation_config = copy.deepcopy(stored_config)
 
                 # If there was no interactive evaluation, success will not have been computed.
                 if return_obj.success is not None:
                     # Add a "success" object to the config
                     stored_config.success_on_last_run = return_obj.success
-
-                if catch_exceptions:
-                    return_obj.exception_info = {
-                        "raised_exception": raised_exception,
-                        "exception_message": exception_message,
-                        "exception_traceback": exception_traceback,
-                    }
 
                 if len(substituted_parameters) > 0:
                     if meta is None:
@@ -365,8 +329,6 @@ class DataAsset:
 
         self._expectation_suite.data_asset_type = self._data_asset_type
         self.default_expectation_args = {
-            "include_config": True,
-            "catch_exceptions": False,
             "result_format": "BASIC",
         }
 
@@ -412,8 +374,6 @@ class DataAsset:
             Ex::
 
                 {
-                    "include_config" : True,
-                    "catch_exceptions" : False,
                     "result_format" : 'BASIC'
                 }
 
@@ -439,12 +399,10 @@ class DataAsset:
 
         self.default_expectation_args[argument] = value
 
-    def get_expectation_suite(  # noqa: C901, PLR0912, PLR0913
+    def get_expectation_suite(
         self,
         discard_failed_expectations=True,
         discard_result_format_kwargs=True,
-        discard_include_config_kwargs=True,
-        discard_catch_exceptions_kwargs=True,
         suppress_warnings=False,
         suppress_logging=False,
     ):
@@ -455,10 +413,6 @@ class DataAsset:
                 Only include expectations with success_on_last_run=True in the exported config.  Defaults to `True`.
             discard_result_format_kwargs (boolean): \
                 In returned expectation objects, suppress the `result_format` parameter. Defaults to `True`.
-            discard_include_config_kwargs (boolean): \
-                In returned expectation objects, suppress the `include_config` parameter. Defaults to `True`.
-            discard_catch_exceptions_kwargs (boolean): \
-                In returned expectation objects, suppress the `catch_exceptions` parameter.  Defaults to `True`.
             suppress_warnings (boolean): \
                 If true, do not include warnings in logging information about the operation.
             suppress_logging (boolean): \
@@ -510,26 +464,10 @@ class DataAsset:
                     del expectation.kwargs["result_format"]
                     discards["result_format"] += 1
 
-            if discard_include_config_kwargs:
-                if "include_config" in expectation.kwargs:
-                    del expectation.kwargs["include_config"]
-                    discards["include_config"] += 1
-
-            if discard_catch_exceptions_kwargs:
-                if "catch_exceptions" in expectation.kwargs:
-                    del expectation.kwargs["catch_exceptions"]
-                    discards["catch_exceptions"] += 1
-
         settings_message = ""
 
         if discards["result_format"] > 0 and not suppress_warnings:
             settings_message += " result_format"
-
-        if discards["include_config"] > 0 and not suppress_warnings:
-            settings_message += " include_config"
-
-        if discards["catch_exceptions"] > 0 and not suppress_warnings:
-            settings_message += " catch_exceptions"
 
         if (
             len(settings_message) > 1

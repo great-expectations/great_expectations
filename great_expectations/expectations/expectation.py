@@ -332,16 +332,10 @@ class Expectation(metaclass=MetaExpectation):
     version: ClassVar = ge_version
     domain_keys: ClassVar[Tuple[str, ...]] = ()
     success_keys: ClassVar[Tuple[str, ...]] = ()
-    runtime_keys: ClassVar[Tuple[str, ...]] = (
-        "include_config",
-        "catch_exceptions",
-        "result_format",
-    )
+    runtime_keys: ClassVar[Tuple[str, ...]] = ("result_format",)
     default_kwarg_values: ClassVar[
         dict[str, bool | str | float | RuleBasedProfilerConfig | None]
     ] = {
-        "include_config": True,
-        "catch_exceptions": False,
         "result_format": "BASIC",
     }
     args_keys: ClassVar[Tuple[str, ...]] = ()
@@ -2569,8 +2563,6 @@ class QueryExpectation(BatchExpectation, ABC):
 
     default_kwarg_values: ClassVar[Dict] = {
         "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
         "meta": None,
         "row_condition": None,
         "condition_parser": None,
@@ -2756,8 +2748,6 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1,
         "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": True,
     }
 
     @classmethod
@@ -3039,8 +3029,6 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1,
         "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": True,
     }
 
     @classmethod
@@ -3312,8 +3300,6 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         "mostly": 1,
         "ignore_row_if": "all_values_are_missing",
         "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": True,
     }
 
     @classmethod

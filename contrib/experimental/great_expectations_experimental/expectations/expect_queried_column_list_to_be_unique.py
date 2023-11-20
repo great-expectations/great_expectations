@@ -37,8 +37,6 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         "condition_parser",
     )
     default_kwarg_values = {
-        "include_config": True,
-        "catch_exceptions": False,
         "meta": None,
         "query": query,
     }

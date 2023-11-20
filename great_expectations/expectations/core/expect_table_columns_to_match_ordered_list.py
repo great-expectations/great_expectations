@@ -76,8 +76,6 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         "result_format": "BASIC",
         "column": None,
         "column_index": None,
-        "include_config": True,
-        "catch_exceptions": False,
         "meta": None,
     }
     args_keys = ("column_list",)

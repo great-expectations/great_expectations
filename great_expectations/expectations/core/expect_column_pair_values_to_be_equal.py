@@ -84,8 +84,6 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         "ignore_row_if": "both_values_are_missing",
         "mostly": 1.0,
         "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
     }
     args_keys = (
         "column_A",

@@ -183,8 +183,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         "internal_weight_holdout": 0,
         "bucketize_data": True,
         "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
     }
     args_keys = (
         "column",

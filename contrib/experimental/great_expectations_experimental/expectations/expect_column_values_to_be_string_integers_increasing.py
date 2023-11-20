@@ -194,8 +194,6 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnAggregateExpectation)
         "condition_parser": None,
         "strictly": False,
         "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
     }
 
     def _validate_success_key(

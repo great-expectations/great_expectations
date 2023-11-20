@@ -320,8 +320,6 @@ class ExpectColumnSkewToBeBetween(ColumnAggregateExpectation):
         "strict_max": None,
         "abs": False,
         "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
     }
 
     # def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None):

@@ -180,8 +180,6 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
         "strict_min": None,
         "strict_max": None,
         "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
         "auto": False,
         "profiler_config": default_profiler_config,
     }

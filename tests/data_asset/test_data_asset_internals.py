@@ -202,16 +202,12 @@ def test_set_default_expectation_argument():
     )
 
     assert {
-        "include_config": True,
-        "catch_exceptions": False,
         "result_format": "BASIC",
     } == df.get_default_expectation_arguments()
 
     df.set_default_expectation_argument("result_format", "SUMMARY")
 
     assert {
-        "include_config": True,
-        "catch_exceptions": False,
         "result_format": "SUMMARY",
     } == df.get_default_expectation_arguments()
 

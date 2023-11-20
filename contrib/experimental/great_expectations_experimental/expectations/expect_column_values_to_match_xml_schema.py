@@ -138,8 +138,6 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1,
         "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": True,
     }
 
     def validate_configuration(

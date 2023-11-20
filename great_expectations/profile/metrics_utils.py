@@ -13,6 +13,6 @@ def kwargs_to_tuple(d):
         return tuple(
             (k, kwargs_to_tuple(v))
             for k, v in sorted(d.items())
-            if k not in ["result_format", "include_config", "catch_exceptions", "meta"]
+            if k not in ["result_format", "meta"]
         )
     return d

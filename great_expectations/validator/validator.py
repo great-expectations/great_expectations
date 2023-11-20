@@ -174,8 +174,6 @@ class Validator:
     """
 
     DEFAULT_RUNTIME_CONFIGURATION = {
-        "include_config": True,
-        "catch_exceptions": False,
         "result_format": "BASIC",
     }
     RUNTIME_KEYS = DEFAULT_RUNTIME_CONFIGURATION.keys()
@@ -1325,8 +1323,6 @@ class Validator:
             Ex::
 
                 {
-                    "include_config" : True,
-                    "catch_exceptions" : False,
                     "result_format" : 'BASIC'
                 }
 
@@ -1374,12 +1370,10 @@ class Validator:
         self._default_expectation_args[argument] = value
 
     @public_api
-    def get_expectation_suite(  # noqa: C901, PLR0912, PLR0913
+    def get_expectation_suite(
         self,
         discard_failed_expectations: bool = True,
         discard_result_format_kwargs: bool = True,
-        discard_include_config_kwargs: bool = True,
-        discard_catch_exceptions_kwargs: bool = True,
         suppress_warnings: bool = False,
         suppress_logging: bool = False,
     ) -> ExpectationSuite:
@@ -1388,8 +1382,6 @@ class Validator:
         Args:
             discard_failed_expectations: Omit Expectations which failed on their last run.
             discard_result_format_kwargs: Omit `result_format` from each Expectation.
-            discard_include_config_kwargs: Omit `include_config` from each Expectation.
-            discard_catch_exceptions_kwargs: Omit `catch_exceptions` from each Expectation.
             suppress_warnings: Do not log warnings.
             suppress_logging: Do not log anything.
 
@@ -1435,26 +1427,10 @@ class Validator:
                     del expectation.kwargs["result_format"]
                     discards["result_format"] += 1
 
-            if discard_include_config_kwargs:
-                if "include_config" in expectation.kwargs:
-                    del expectation.kwargs["include_config"]
-                    discards["include_config"] += 1
-
-            if discard_catch_exceptions_kwargs:
-                if "catch_exceptions" in expectation.kwargs:
-                    del expectation.kwargs["catch_exceptions"]
-                    discards["catch_exceptions"] += 1
-
         settings_message = ""
 
         if discards["result_format"] > 0 and not suppress_warnings:
             settings_message += " result_format"
-
-        if discards["include_config"] > 0 and not suppress_warnings:
-            settings_message += " include_config"
-
-        if discards["catch_exceptions"] > 0 and not suppress_warnings:
-            settings_message += " catch_exceptions"
 
         if (
             len(settings_message) > 1
@@ -1520,7 +1496,6 @@ class Validator:
                 "Unable to save config: filepath or data_context must be available."
             )
 
-    # TODO: <Alex>Should "include_config" also be an argument of this method?</Alex>
     @public_api
     @deprecated_argument(
         argument_name="run_id",

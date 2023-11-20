@@ -86,8 +86,6 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
         "value_set": None,
         "parse_strings_as_datetimes": False,
         "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
     }
     args_keys = (
         "column",
