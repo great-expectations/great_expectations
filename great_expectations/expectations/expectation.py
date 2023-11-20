@@ -78,6 +78,7 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
+from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
     ExpectationNotFoundError,
@@ -335,29 +336,27 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         arbitrary_types_allowed = True
         extra = pydantic.Extra.allow
 
+    id: Union[str, None] = None
     meta: Union[dict, None] = None
+    result_format: ResultFormat = ResultFormat.BASIC
 
     version: ClassVar[str] = ge_version
     domain_keys: ClassVar[Tuple[str, ...]] = ()
     success_keys: ClassVar[Tuple[str, ...]] = ()
-    runtime_keys: ClassVar[Tuple[str, ...]] = (
-        "include_config",
-        "catch_exceptions",
-        "result_format",
-    )
+    runtime_keys: ClassVar[Tuple[str, ...]] = ("result_format",)
     default_kwarg_values: ClassVar[
         dict[str, Union[bool, str, float, RuleBasedProfilerConfig, None]]
     ] = {
-        "include_config": True,
-        "catch_exceptions": False,
-        "result_format": "BASIC",
+        "result_format": ResultFormat.BASIC,
     }
     args_keys: ClassVar[Tuple[str, ...]] = ()
 
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
 
-    def __init__(self, meta: dict | None = None, **kwargs) -> None:
+    def __init__(
+        self, id: str | None = None, meta: dict | None = None, **kwargs
+    ) -> None:
         # Safety precaution to prevent old-style instantiation
         if "configuration" in kwargs:
             raise ValueError(
@@ -371,6 +370,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             expectation_type=camel_to_snake(self.__class__.__name__),
             kwargs=kwargs,
             meta=meta,
+            ge_cloud_id=id,
         )
         self.validate_configuration(configuration)
 
@@ -1104,7 +1104,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         result_format = parse_result_format(
             runtime_configuration.get("result_format", {})
         )
-        if result_format.get("result_format") == "BOOLEAN_ONLY":
+        if result_format.get("result_format") == ResultFormat.BOOLEAN_ONLY:
             if isinstance(expectation_validation_result, ExpectationValidationResult):
                 expectation_validation_result.result = {}
             else:
@@ -2594,9 +2594,7 @@ class QueryExpectation(BatchExpectation, ABC):
     """
 
     default_kwarg_values: ClassVar[Dict] = {
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
+        "result_format": ResultFormat.BASIC,
         "meta": None,
         "row_condition": None,
         "condition_parser": None,
@@ -2781,9 +2779,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": True,
+        "result_format": ResultFormat.BASIC,
     }
 
     @classmethod
@@ -2879,7 +2875,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             bool
         ] = validation_dependencies.result_format.get("include_unexpected_rows")
 
-        if result_format_str == "BOOLEAN_ONLY":
+        if result_format_str == ResultFormat.BOOLEAN_ONLY:
             return validation_dependencies
 
         metric_kwargs = get_metric_kwargs(
@@ -2911,7 +2907,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
                 ),
             )
 
-        if result_format_str in ["BASIC"]:
+        if result_format_str == ResultFormat.BASIC:
             return validation_dependencies
 
         metric_kwargs = get_metric_kwargs(
@@ -3064,9 +3060,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": True,
+        "result_format": ResultFormat.BASIC,
     }
 
     @classmethod
@@ -3163,7 +3157,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             bool
         ] = validation_dependencies.result_format.get("include_unexpected_rows")
 
-        if result_format_str == "BOOLEAN_ONLY":
+        if result_format_str == ResultFormat.BOOLEAN_ONLY:
             return validation_dependencies
 
         metric_kwargs = get_metric_kwargs(
@@ -3195,7 +3189,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
                 ),
             )
 
-        if result_format_str in ["BASIC"]:
+        if result_format_str == ResultFormat.BASIC:
             return validation_dependencies
 
         metric_kwargs = get_metric_kwargs(
@@ -3337,9 +3331,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1,
         "ignore_row_if": "all_values_are_missing",
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": True,
+        "result_format": ResultFormat.BASIC,
     }
 
     @classmethod
@@ -3435,7 +3427,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             bool
         ] = validation_dependencies.result_format.get("include_unexpected_rows")
 
-        if result_format_str == "BOOLEAN_ONLY":
+        if result_format_str == ResultFormat.BOOLEAN_ONLY:
             return validation_dependencies
 
         metric_kwargs = get_metric_kwargs(
@@ -3452,7 +3444,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             ),
         )
 
-        if result_format_str in ["BASIC"]:
+        if result_format_str == ResultFormat.BASIC:
             return validation_dependencies
 
         if include_unexpected_rows:
@@ -3599,7 +3591,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     # Incrementally add to result and return when all values for the specified level are present
     return_obj: Dict[str, Any] = {"success": success}
 
-    if result_format["result_format"] == "BOOLEAN_ONLY":
+    if result_format["result_format"] == ResultFormat.BOOLEAN_ONLY:
         return return_obj
 
     skip_missing = False
@@ -3656,7 +3648,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
             }
         )
 
-    if result_format["result_format"] == "BASIC":
+    if result_format["result_format"] == ResultFormat.BASIC:
         return return_obj
 
     if unexpected_list is not None and not exclude_unexpected_values:
@@ -3704,7 +3696,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     }
                 )
 
-    if result_format["result_format"] == "SUMMARY":
+    if result_format["result_format"] == ResultFormat.SUMMARY:
         return return_obj
 
     if unexpected_list is not None and not exclude_unexpected_values:
@@ -3713,7 +3705,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
         return_obj["result"].update({"unexpected_index_list": unexpected_index_list})
     if unexpected_index_query is not None:
         return_obj["result"].update({"unexpected_index_query": unexpected_index_query})
-    if result_format["result_format"] == "COMPLETE":
+    if result_format["result_format"] == ResultFormat.COMPLETE:
         return return_obj
 
     raise ValueError(f"Unknown result_format {result_format['result_format']}.")
