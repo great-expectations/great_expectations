@@ -355,7 +355,11 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     examples: ClassVar[List[dict]] = []
 
     def __init__(
-        self, id: str | None = None, meta: dict | None = None, **kwargs
+        self,
+        id: str | None = None,
+        meta: dict | None = None,
+        result_format: ResultFormat = ResultFormat.BASIC,
+        **kwargs,
     ) -> None:
         # Safety precaution to prevent old-style instantiation
         if "configuration" in kwargs:
@@ -363,7 +367,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
                 "Cannot directly pass configuration into Expectation constructor; please pass in individual success keys and domain kwargs."
             )
 
-        super().__init__(**kwargs)
+        super().__init__(id=id, meta=meta, result_format=result_format, **kwargs)
 
         # Everything below is purely to maintain current validation logic but should be migrated to Pydantic validators
         configuration = ExpectationConfiguration(
@@ -377,6 +381,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         # Currently only used in Validator.validate_expectation
         # Once the V1 Validator is live, we can remove this and its related property
         self._configuration = configuration
+
+    @pydantic.validator("result_format", pre=True)
+    def validate_result_format(cls, result_format: str):
+        return ResultFormat(result_format)
 
     @classmethod
     def is_abstract(cls) -> bool:
@@ -2363,6 +2371,11 @@ class BatchExpectation(Expectation, ABC):
             expectation.
     """
 
+    batch_id: Union[str, None] = None
+    table: Union[str, None] = None
+    row_condition: Union[str, None] = None
+    condition_parser: Union[str, None] = None
+
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
         "table",
@@ -2534,32 +2547,6 @@ representation."""
 
 
 @public_api
-class TableExpectation(BatchExpectation, ABC):
-    """Base class for TableExpectations.
-
-    WARNING: TableExpectation will be deprecated in a future release. Please use BatchExpectation instead.
-
-    TableExpectations answer a semantic question about the table itself.
-
-    For example, `expect_table_column_count_to_equal` and `expect_table_row_count_to_equal` answer
-    how many columns and rows are in your table.
-
-    TableExpectations must implement a `_validate(...)` method containing logic
-    for determining whether the Expectation is successfully validated.
-
-    TableExpectations may optionally provide implementations of `validate_configuration`,
-    which should raise an error if the configuration will not be usable for the Expectation.
-
-    Raises:
-        InvalidExpectationConfigurationError: The configuration does not contain the values required by the Expectation.
-
-    Args:
-        domain_keys (tuple): A tuple of the keys used to determine the domain of the
-            expectation.
-    """
-
-
-@public_api
 class QueryExpectation(BatchExpectation, ABC):
     """Base class for QueryExpectations.
 
@@ -2708,35 +2695,6 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
             ), "'column' parameter is required for column expectations"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-
-
-@public_api
-class ColumnExpectation(ColumnAggregateExpectation, ABC):
-    """Base class for column aggregate Expectations.
-
-    These types of Expectation produce an aggregate metric for a column, such as the mean, standard deviation,
-    number of unique values, column type, etc.
-
-    WARNING: This class will be deprecated in favor of ColumnAggregateExpectation, and removed in a future release.
-    If you're using this class, please update your code to use ColumnAggregateExpectation instead.
-    There is no change in functionality between the two classes; just a name change for clarity.
-
-    --Documentation--
-        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations/
-
-    Args:
-     domain_keys (tuple): A tuple of the keys used to determine the domain of the
-         expectation.
-     success_keys (tuple): A tuple of the keys used to determine the success of
-         the expectation.
-     default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
-         kwargs from the Expectation Configuration.
-
-         - A  "column" key is required for column expectations.
-
-    Raises:
-        InvalidExpectationConfigurationError: If no `column` is specified
-    """
 
 
 @public_api
