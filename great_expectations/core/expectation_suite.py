@@ -141,6 +141,29 @@ class ExpectationSuite(SerializableDictDot):
             for expectation_configuration in self.expectation_configurations
         ]
 
+    def add(self, expectation: Expectation) -> Expectation:
+        """Add an Expectation to the collection.
+
+        Raises:
+            ValueError: Suite already has an Expectation with the same configuration.
+        """
+        self.expectation_configurations.append(expectation.configuration)
+
+    def delete(self, expectation: Expectation) -> Expectation:
+        """Delete an Expectation from the collection.
+
+        Raises:
+            ValueError: Expectation not found in suite.
+        """
+        updated_expectation_configs = [
+            exp_config for exp_config in self.expectation_configurations
+            if exp_config != expectation.configuration
+        ]
+        if len(updated_expectation_configs) != len(self.expectation_configurations) - 1:
+            raise ValueError("No matching expectation was found.")
+        self.expectation_configurations = updated_expectation_configs
+        return expectation
+
     def add_citation(  # noqa: PLR0913
         self,
         comment: str,
