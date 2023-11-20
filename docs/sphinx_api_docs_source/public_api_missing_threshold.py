@@ -9,6 +9,7 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/checkpoint/checkpoint.py Name: SimpleCheckpoint",
     "File: great_expectations/compatibility/not_imported.py Name: is_version_greater_or_equal",
     "File: great_expectations/core/batch.py Name: head",
+    "File: great_expectations/core/batch_config.py Name: BatchConfig",
     "File: great_expectations/core/batch_spec.py Name: to_json_dict",
     "File: great_expectations/core/expectation_suite.py Name: show_expectations_by_expectation_type",
     "File: great_expectations/core/util.py Name: convert_to_json_serializable",
@@ -99,5 +100,6 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/rule_based_profiler/rule_based_profiler.py Name: to_json_dict",
     "File: great_expectations/util.py Name: get_context",
     "File: great_expectations/util.py Name: read_parquet",
+    "File: great_expectations/validator/v1_validator.py Name: Validator",
     "File: great_expectations/validator/validation_graph.py Name: resolve",
 ]
