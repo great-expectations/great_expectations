@@ -369,6 +369,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
         super().__init__(id=id, meta=meta, result_format=result_format, **kwargs)
 
+        # Add back result format for configuration validation
+        kwargs["result_format"] = result_format
+
         # Everything below is purely to maintain current validation logic but should be migrated to Pydantic validators
         configuration = ExpectationConfiguration(
             expectation_type=camel_to_snake(self.__class__.__name__),
