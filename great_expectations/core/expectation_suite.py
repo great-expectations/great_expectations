@@ -147,6 +147,13 @@ class ExpectationSuite(SerializableDictDot):
         Raises:
             ValueError: Suite already has an Expectation with the same configuration.
         """
+        if any(
+            expectation.configuration == existing_config
+            for existing_config in self.expectation_configurations
+        ):
+            raise ValueError(
+                "An Expectation with this configuration already exists in this ExpectationSuite."
+            )
         self.expectation_configurations.append(expectation.configuration)
 
     def delete(self, expectation: Expectation) -> Expectation:
@@ -156,7 +163,8 @@ class ExpectationSuite(SerializableDictDot):
             ValueError: Expectation not found in suite.
         """
         updated_expectation_configs = [
-            exp_config for exp_config in self.expectation_configurations
+            exp_config
+            for exp_config in self.expectation_configurations
             if exp_config != expectation.configuration
         ]
         if len(updated_expectation_configs) != len(self.expectation_configurations) - 1:
