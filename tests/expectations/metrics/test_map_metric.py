@@ -814,7 +814,7 @@ def test_spark_single_column_complete_result_format(
             },
         },
     )
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
+    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     batch_definition = BatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
@@ -871,7 +871,7 @@ def test_spark_single_column_complete_result_format_with_id_pk(
             },
         },
     )
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
+    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     batch_definition = BatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
@@ -942,7 +942,7 @@ def test_spark_single_column_summary_result_format(
             },
         },
     )
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
+    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     batch_definition = BatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",
@@ -995,7 +995,7 @@ def test_spark_single_column_basic_result_format(
             },
         },
     )
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
+    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
     batch_definition = BatchDefinition(
         datasource_name="spark_datasource",
         data_connector_name="runtime_data_connector",

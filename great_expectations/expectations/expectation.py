@@ -335,6 +335,8 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         arbitrary_types_allowed = True
         extra = pydantic.Extra.allow
 
+    meta: dict | None = None
+
     version: ClassVar[str] = ge_version
     domain_keys: ClassVar[Tuple[str, ...]] = ()
     success_keys: ClassVar[Tuple[str, ...]] = ()
@@ -355,7 +357,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, meta: dict | None = None, **kwargs) -> None:
         # Safety precaution to prevent old-style instantiation
         if "configuration" in kwargs:
             raise ValueError(
@@ -365,10 +367,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         super().__init__(**kwargs)
 
         # Everything below is purely to maintain current validation logic but should be migrated to Pydantic validators
-        expectation_type = camel_to_snake(self.__class__.__name__)
         configuration = ExpectationConfiguration(
-            expectation_type=expectation_type,
+            expectation_type=camel_to_snake(self.__class__.__name__),
             kwargs=kwargs,
+            meta=meta,
         )
         self.validate_configuration(configuration)
 
