@@ -335,7 +335,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         arbitrary_types_allowed = True
         extra = pydantic.Extra.allow
 
-    meta: dict | None = None
+    meta: Union[dict, None] = None
 
     version: ClassVar[str] = ge_version
     domain_keys: ClassVar[Tuple[str, ...]] = ()
