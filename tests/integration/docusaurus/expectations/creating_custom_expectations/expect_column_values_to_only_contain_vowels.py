@@ -1,3 +1,4 @@
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.expectations.regex_based_column_map_expectation import (
     RegexBasedColumnMapExpectation,
 )
@@ -109,12 +110,22 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
 
 if __name__ == "__main__":
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py diagnostics">
-    ExpectColumnValuesToOnlyContainVowels().print_diagnostic_checklist()
+    ExpectColumnValuesToOnlyContainVowels(
+        configuration=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_only_contain_vowels",
+            kwargs={"column": "only_vowels"},
+        )
+    ).print_diagnostic_checklist()
 #     </snippet>
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
-diagnostics = ExpectColumnValuesToOnlyContainVowels().run_diagnostics()
+diagnostics = ExpectColumnValuesToOnlyContainVowels(
+    configuration=ExpectationConfiguration(
+        expectation_type="expect_column_values_to_only_contain_vowels",
+        kwargs={"column": "only_vowels"},
+    )
+).run_diagnostics()
 
 for check in diagnostics["tests"]:
     assert check["test_passed"] is True
