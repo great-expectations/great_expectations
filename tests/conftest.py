@@ -3247,12 +3247,21 @@ def sqlite_connection_string() -> str:
 
 
 @pytest.fixture
+def fds_data_context_datasource_name() -> str:
+    return "sqlite_datasource"
+
+
+@pytest.fixture
 def fds_data_context(
-    sa, empty_data_context: AbstractDataContext, sqlite_connection_string: str
+    sa,
+    fds_data_context_datasource_name: str,
+    empty_data_context: AbstractDataContext,
+    sqlite_connection_string: str,
 ) -> AbstractDataContext:
     context = empty_data_context
     datasource = context.sources.add_sqlite(
-        name="sqlite_datasource", connection_string=sqlite_connection_string
+        name=fds_data_context_datasource_name,
+        connection_string=sqlite_connection_string,
     )
 
     datasource.add_query_asset(
