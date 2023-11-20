@@ -132,7 +132,7 @@ class KWargDetailsDict(TypedDict):
     message="Used to support column descriptions in GX Cloud.",
 )
 class ExpectationConfiguration(SerializableDictDot):
-    """Denies the parameters and name of a specific expectation.
+    """Defines the parameters and name of a specific Expectation.
 
     Args:
         expectation_type: The name of the expectation class to use in snake case, e.g. `expect_column_values_to_not_be_null`.
