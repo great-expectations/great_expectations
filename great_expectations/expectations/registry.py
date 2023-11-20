@@ -341,7 +341,9 @@ def get_metric_kwargs(
         }
         if configuration:
             expectation_impl = get_expectation_impl(configuration.expectation_type)
-            configuration_kwargs = expectation_impl().get_runtime_kwargs(
+            configuration_kwargs = expectation_impl(
+                **configuration.kwargs
+            ).get_runtime_kwargs(
                 configuration=configuration, runtime_configuration=runtime_configuration
             )
             if len(metric_kwargs["metric_domain_keys"]) > 0:

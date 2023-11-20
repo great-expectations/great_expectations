@@ -132,7 +132,7 @@ class KWargDetailsDict(TypedDict):
     message="Used to support column descriptions in GX Cloud.",
 )
 class ExpectationConfiguration(SerializableDictDot):
-    """Denies the parameters and name of a specific expectation.
+    """Defines the parameters and name of a specific Expectation.
 
     Args:
         expectation_type: The name of the expectation class to use in snake case, e.g. `expect_column_values_to_not_be_null`.
@@ -1477,7 +1477,7 @@ class ExpectationConfiguration(SerializableDictDot):
         """
         expectation_impl: Type[Expectation] = self._get_expectation_impl()
         # noinspection PyCallingNonCallable
-        return expectation_impl(self).validate(
+        return expectation_impl(meta=self.meta, **self.kwargs).validate_(
             validator=validator,
             runtime_configuration=runtime_configuration,
         )
@@ -1491,7 +1491,7 @@ class ExpectationConfiguration(SerializableDictDot):
     ):
         expectation_impl: Type[Expectation] = self._get_expectation_impl()
         # noinspection PyCallingNonCallable
-        return expectation_impl(self).metrics_validate(
+        return expectation_impl(meta=self.meta, **self.kwargs).metrics_validate(
             metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,
