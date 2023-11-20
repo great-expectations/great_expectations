@@ -78,7 +78,7 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.core.result_format import ResultFormat
+from great_expectations.core.result_format import ResultFormat, ResultFormatDict
 from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
     ExpectationNotFoundError,
@@ -338,7 +338,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     id: Union[str, None] = None
     meta: Union[dict, None] = None
-    result_format: Union[ResultFormat, dict] = ResultFormat.BASIC
+    result_format: Union[ResultFormat, ResultFormatDict] = ResultFormat.BASIC
 
     version: ClassVar[str] = ge_version
     domain_keys: ClassVar[Tuple[str, ...]] = ()
@@ -358,7 +358,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         self,
         id: str | None = None,
         meta: dict | None = None,
-        result_format: ResultFormat | dict = ResultFormat.BASIC,
+        result_format: ResultFormat | ResultFormatDict = ResultFormat.BASIC,
         **kwargs,
     ) -> None:
         # Safety precaution to prevent old-style instantiation
@@ -381,16 +381,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         # Currently only used in Validator.validate_expectation
         # Once the V1 Validator is live, we can remove this and its related property
         self._configuration = configuration
-
-    @pydantic.validator("result_format", pre=True)
-    def validate_result_format(cls, result_format: str | ResultFormat | dict):
-        if isinstance(result_format, dict):
-            result_format["result_format"] = ResultFormat(
-                result_format["result_format"]
-            )
-            return result_format
-        else:
-            return ResultFormat(result_format)
 
     @classmethod
     def is_abstract(cls) -> bool:
