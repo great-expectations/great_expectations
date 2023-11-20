@@ -338,7 +338,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     id: Union[str, None] = None
     meta: Union[dict, None] = None
-    result_format: ResultFormat = ResultFormat.BASIC
+    result_format: Union[ResultFormat, dict] = ResultFormat.BASIC
 
     version: ClassVar[str] = ge_version
     domain_keys: ClassVar[Tuple[str, ...]] = ()
@@ -358,7 +358,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         self,
         id: str | None = None,
         meta: dict | None = None,
-        result_format: ResultFormat = ResultFormat.BASIC,
+        result_format: ResultFormat | dict = ResultFormat.BASIC,
         **kwargs,
     ) -> None:
         # Safety precaution to prevent old-style instantiation
@@ -383,8 +383,14 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         self._configuration = configuration
 
     @pydantic.validator("result_format", pre=True)
-    def validate_result_format(cls, result_format: str):
-        return ResultFormat(result_format)
+    def validate_result_format(cls, result_format: str | ResultFormat | dict):
+        if isinstance(result_format, dict):
+            result_format["result_format"] = ResultFormat(
+                result_format["result_format"]
+            )
+            return result_format
+        else:
+            return ResultFormat(result_format)
 
     @classmethod
     def is_abstract(cls) -> bool:
