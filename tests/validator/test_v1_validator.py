@@ -1,12 +1,10 @@
 import pytest
 
 from great_expectations.core.batch_config import BatchConfig
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
-from great_expectations.datasource.fluent.sqlite_datasource import SqliteDatasource
 from great_expectations.expectations.core.expect_column_values_to_be_between import (
     ExpectColumnValuesToBeBetween,
 )
@@ -20,27 +18,17 @@ from great_expectations.validator.v1_validator import ResultFormat, Validator
 @pytest.fixture
 def failing_expectation() -> Expectation:
     return ExpectColumnValuesToBeInSet(
-        ExpectationConfiguration(
-            "expect_column_values_to_be_in_set",
-            kwargs={
-                "column": "event_type",
-                "value_set": ["start", "stop"],
-            },
-        )
+        column="event_type",
+        value_set=["start", "stop"],
     )
 
 
 @pytest.fixture
 def passing_expectation() -> Expectation:
     return ExpectColumnValuesToBeBetween(
-        ExpectationConfiguration(
-            "expect_column_values_to_be_between",
-            kwargs={
-                "column": "id",
-                "min_value": -1,
-                "max_value": 1000000,
-            },
-        )
+        column="id",
+        min_value=-1,
+        max_value=1000000,
     )
 
 
@@ -55,22 +43,26 @@ def expectation_suite(
 
 
 @pytest.fixture
-def batch_config(fds_data_context: AbstractDataContext) -> BatchConfig:
-    datasource = fds_data_context.get_datasource("sqlite_datasource")
-    assert isinstance(datasource, SqliteDatasource)
+def batch_config(
+    fds_data_context: AbstractDataContext,
+    fds_data_context_datasource_name: str,
+) -> BatchConfig:
     return BatchConfig(
-        data_asset=datasource.get_asset("trip_asset"),
+        context=fds_data_context,
+        datasource_name=fds_data_context_datasource_name,
+        data_asset_name="trip_asset",
     )
 
 
 @pytest.fixture
 def batch_config_with_event_type_splitter(
     fds_data_context: AbstractDataContext,
+    fds_data_context_datasource_name: str,
 ) -> BatchConfig:
-    datasource = fds_data_context.get_datasource("sqlite_datasource")
-    assert isinstance(datasource, SqliteDatasource)
     return BatchConfig(
-        data_asset=datasource.get_asset("trip_asset_split_by_event_type"),
+        context=fds_data_context,
+        datasource_name=fds_data_context_datasource_name,
+        data_asset_name="trip_asset_split_by_event_type",
     )
 
 
@@ -165,13 +157,8 @@ def test_validate_expectation_with_batch_asset_options(
 
     result = validator.validate_expectation(
         ExpectColumnValuesToBeInSet(
-            ExpectationConfiguration(
-                "expect_column_values_to_be_in_set",
-                kwargs={
-                    "column": "event_type",
-                    "value_set": [desired_event_type],
-                },
-            )
+            column="event_type",
+            value_set=[desired_event_type],
         )
     )
 

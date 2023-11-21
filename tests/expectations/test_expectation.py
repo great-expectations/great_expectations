@@ -87,7 +87,7 @@ def fake_expectation_config(
 )
 def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config):
     try:
-        fake_expectation = fake_expectation_cls(config)
+        fake_expectation = fake_expectation_cls(**config.kwargs)
     except Exception:
         assert (
             False
@@ -134,12 +134,7 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
     ),
 )
 def test_expectation_succeeds_with_valid_mostly(fake_expectation_cls, config):
-    try:
-        fake_expectation = fake_expectation_cls(config)
-    except Exception:
-        assert (
-            False
-        ), "Validate configuration threw an error when testing default mostly value"
+    fake_expectation = fake_expectation_cls(**config.kwargs)
     assert (
         fake_expectation.get_success_kwargs().get("mostly") == config.kwargs["mostly"]
     ), "Default mostly success ratio is not 1"
@@ -174,7 +169,7 @@ def test_multicolumn_expectation_validation_errors_with_bad_mostly(
     fake_expectation_cls, config
 ):
     with pytest.raises(InvalidExpectationConfigurationError):
-        fake_expectation_cls(config)
+        fake_expectation_cls(**config)
 
 
 @pytest.mark.unit

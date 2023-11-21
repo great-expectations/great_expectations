@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Union
 
 import numpy as np
 
@@ -182,7 +182,9 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         quantile_value_ranges_estimator_parameter_builder_config,
     ]
-    default_profiler_config = RuleBasedProfilerConfig(
+    default_profiler_config: ClassVar[
+        RuleBasedProfilerConfig
+    ] = RuleBasedProfilerConfig(
         name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},
