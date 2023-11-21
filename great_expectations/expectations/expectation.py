@@ -2357,6 +2357,7 @@ class BatchExpectation(Expectation, ABC):
     table: Union[str, None] = None
     row_condition: Union[str, None] = None
     condition_parser: Union[str, None] = None
+    mostly: Union[float, int] = pydantic.Field(1, ge=0, le=1)
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -2693,7 +2694,6 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     """
 
     column: str
-    mostly: float = pydantic.Field(1.0, ge=0.0, le=1.0)
 
     map_metric: ClassVar[Optional[str]] = None
     domain_keys: ClassVar[Tuple[str, ...]] = (
@@ -2962,7 +2962,6 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
 
     column_A: str
     column_B: str
-    mostly: float = pydantic.Field(1.0, ge=0.0, le=1.0)
 
     map_metric: ClassVar[Optional[str]] = None
     domain_keys = (
@@ -3217,7 +3216,6 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
     """
 
     column_list: List[str]
-    mostly: float = pydantic.Field(1.0, ge=0.0, le=1.0)
 
     map_metric: ClassVar[Optional[str]] = None
     domain_keys = (
