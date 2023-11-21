@@ -54,6 +54,14 @@ If you have specific business requirements, or you want to examine specific data
 
 8. Optional. Run a Validation on the Expectation Suite. See [Run a Validation](/docs/cloud/validations/manage_validations#run-a-validation).
 
+## Edit an Expectation Suite name
+
+1. In GX Cloud, click **Expectation Suites**.
+
+2. Click **Edit** for the Expectation Suite you want to edit.
+
+3. Edit the Expectation Suite name and then click **Save**.
+
 ## Delete an Expectation Suite
 
 1. In GX Cloud, delete all Checkpoints associated with the Expectation Suite. See [Delete a Checkpoint](/docs/cloud/checkpoints/manage_checkpoints#delete-a-checkpoint). 

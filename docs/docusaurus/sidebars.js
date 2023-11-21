@@ -155,6 +155,11 @@ module.exports = {
             },
             {
               type: 'link',
+              label: 'Edit an Expectation Suite name',
+              href: '/docs/cloud/expectation_suites/manage_expectation_suites#edit-an-expectation-suite-name',
+            },
+            {
+              type: 'link',
               label: 'Delete an Expectation Suite',
               href: '/docs/cloud/expectation_suites/manage_expectation_suites#delete-an-expectation-suite',
             },

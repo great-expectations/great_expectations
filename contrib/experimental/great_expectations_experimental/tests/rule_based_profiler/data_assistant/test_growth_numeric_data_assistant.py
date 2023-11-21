@@ -6,8 +6,6 @@ from unittest import mock
 import pytest
 from freezegun import freeze_time
 
-import great_expectations as gx
-
 # noinspection PyUnresolvedReferences
 from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant_result import (
     GrowthNumericDataAssistantResult,
@@ -16,7 +14,6 @@ from contrib.experimental.great_expectations_experimental.tests.test_utils impor
     CONNECTION_STRING,
     load_data_into_postgres_database,
 )
-from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain import Domain
@@ -37,9 +34,9 @@ from great_expectations.rule_based_profiler.parameter_container import (
 @pytest.fixture
 def bobby_growth_numeric_data_assistant_result_usage_stats_enabled(
     no_usage_stats,
-    bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_deterministic_data_context,
 ) -> GrowthNumericDataAssistantResult:
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -57,9 +54,9 @@ def bobby_growth_numeric_data_assistant_result_usage_stats_enabled(
 
 @pytest.fixture(scope="module")
 def bobby_growth_numeric_data_assistant_result(
-    bobby_columnar_table_multi_batch_probabilistic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_probabilistic_data_context,
 ) -> GrowthNumericDataAssistantResult:
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context = bobby_columnar_table_multi_batch_probabilistic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -77,9 +74,9 @@ def bobby_growth_numeric_data_assistant_result(
 
 @pytest.fixture(scope="module")
 def quentin_implicit_invocation_result_actual_time(
-    quentin_columnar_table_multi_batch_data_context: DataContext,
+    quentin_columnar_table_multi_batch_data_context,
 ) -> GrowthNumericDataAssistantResult:
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -98,9 +95,9 @@ def quentin_implicit_invocation_result_actual_time(
 @pytest.fixture(scope="module")
 @freeze_time("09/26/2019 13:42:41")
 def quentin_implicit_invocation_result_frozen_time(
-    quentin_columnar_table_multi_batch_data_context: DataContext,
+    quentin_columnar_table_multi_batch_data_context,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -225,7 +222,7 @@ def test_growth_numeric_data_assistant_result_batch_id_to_batch_identifier_displ
 def test_growth_numeric_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -271,7 +268,7 @@ def test_growth_numeric_data_assistant_get_metrics_and_expectations_using_implic
 def test_growth_numeric_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
     quentin_columnar_table_multi_batch_data_context,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -303,7 +300,7 @@ def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> 
     3. Running GrowthNumericDataAssistantResult and saving resulting ExpectationSuite as 'taxi_data_2019_suite'
     4. Configuring BatchRequest to load 2020 January data
     """
-    data_context: gx.DataContext = empty_data_context
+    data_context = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
@@ -414,7 +411,7 @@ def test_spark_happy_path_growth_numeric_data_assistant(
     from great_expectations.compatibility import pyspark
 
     schema: pyspark.types.StructType = spark_df_taxi_data_schema
-    data_context: gx.DataContext = empty_data_context
+    data_context = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
@@ -519,7 +516,7 @@ def test_sql_happy_path_growth_numeric_data_assistant(
     else:
         load_data_into_postgres_database(sa)
 
-    data_context: gx.DataContext = empty_data_context
+    data_context = empty_data_context
 
     datasource_config = {
         "name": "taxi_multi_batch_sql_datasource",

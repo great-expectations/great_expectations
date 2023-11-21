@@ -2,7 +2,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.datasource.types import DatasourceTypes
 from great_expectations.render.renderer.datasource_new_notebook_renderer import (
     DatasourceNewNotebookRenderer,
@@ -194,7 +193,7 @@ def test_render_datasource_new_notebook_with_pandas_Datasource(
     The DatasourceNewNotebookRenderer should generate a notebook with text based on the datasource we are trying to implement. Here we are testing pandas Datasource.
     """
 
-    context: DataContext = empty_data_context
+    context = empty_data_context
 
     datasource_name = "my_pandas_datasource_name"
     datasource_yaml = '"""test_yaml:\n  indented_key: value"""'
@@ -248,7 +247,7 @@ def test_render_datasource_new_notebook_with_spark_Datasource(
     The DatasourceNewNotebookRenderer should generate a notebook with text based on the datasource we are trying to implement. Here we are testing spark Datasource.
     """
 
-    context: DataContext = empty_data_context
+    context = empty_data_context
 
     datasource_name = "my_spark_datasource_name"
     datasource_yaml = '"""test_yaml:\n  indented_key: value"""'
@@ -302,7 +301,7 @@ def test_render_datasource_new_notebook_with_sql_Datasource(
     The DatasourceNewNotebookRenderer should generate a notebook with text based on the datasource we are trying to implement. Here we are testing sql Datasource.
     """
 
-    context: DataContext = empty_data_context
+    context = empty_data_context
 
     datasource_name = "my_sql_datasource_name"
     datasource_yaml = '"""test_yaml:\n  indented_key: value"""'
