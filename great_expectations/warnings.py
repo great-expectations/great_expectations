@@ -9,6 +9,7 @@ import warnings
 def warn_deprecated_parse_strings_as_datetimes() -> None:
     """Warn when using parse_strings_as_datetimes in expectations."""
     # deprecated-v0.13.41
+    # NOTE: Should write ticket to fully delete this support
     warnings.warn(
         """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
 v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
