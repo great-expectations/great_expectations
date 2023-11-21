@@ -171,7 +171,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
-    from great_expectations.datasource import LegacyDatasource
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequest as FluentBatchRequest,
     )
@@ -853,7 +852,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         initialize: bool = ...,
         datasource: None = ...,
         **kwargs,
-    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
+    ) -> BaseDatasource | FluentDatasource | None:
         """
         A `name` is provided.
         `datasource` should not be provided.
@@ -865,9 +864,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: None = ...,
         initialize: bool = ...,
-        datasource: BaseDatasource | FluentDatasource | LegacyDatasource = ...,
+        datasource: BaseDatasource | FluentDatasource = ...,
         **kwargs,
-    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
+    ) -> BaseDatasource | FluentDatasource | None:
         """
         A `datasource` is provided.
         `name` should not be provided.
@@ -888,9 +887,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         initialize: bool = True,
-        datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
+        datasource: BaseDatasource | FluentDatasource | None = None,
         **kwargs,
-    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
+    ) -> BaseDatasource | FluentDatasource | None:
         """Add a new Datasource to the data context, with configuration provided as kwargs.
 
         --Documentation--
@@ -916,7 +915,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @staticmethod
     def _validate_add_datasource_args(
         name: str | None,
-        datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None,
+        datasource: BaseDatasource | FluentDatasource | None,
         **kwargs,
     ) -> None:
         if not ((datasource is None) ^ (name is None)):
@@ -935,9 +934,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         initialize: bool = True,
-        datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
+        datasource: BaseDatasource | FluentDatasource | None = None,
         **kwargs,
-    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
+    ) -> BaseDatasource | FluentDatasource | None:
         self._validate_add_datasource_args(name=name, datasource=datasource, **kwargs)
         if isinstance(datasource, FluentDatasource):
             self._add_fluent_datasource(
@@ -956,9 +955,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         initialize: bool = True,
-        datasource: BaseDatasource | LegacyDatasource | None = None,
+        datasource: BaseDatasource | None = None,
         **kwargs,
-    ) -> BaseDatasource | LegacyDatasource | None:
+    ) -> BaseDatasource | None:
         logger.debug(f"Starting AbstractDataContext.add_datasource for {name}")
 
         if datasource:
@@ -993,8 +992,8 @@ class AbstractDataContext(ConfigPeer, ABC):
     @public_api
     def update_datasource(
         self,
-        datasource: BaseDatasource | FluentDatasource | LegacyDatasource,
-    ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
+        datasource: BaseDatasource | FluentDatasource,
+    ) -> BaseDatasource | FluentDatasource:
         """Updates a Datasource that already exists in the store.
 
         Args:
@@ -1011,8 +1010,8 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _update_block_config_datasource(
         self,
-        datasource: LegacyDatasource | BaseDatasource,
-    ) -> BaseDatasource | LegacyDatasource:
+        datasource: BaseDatasource,
+    ) -> BaseDatasource:
         name = datasource.name
         config = datasource.config
         # `instantiate_class_from_config` requires `class_name`
@@ -1043,7 +1042,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: str = ...,
         datasource: None = ...,
         **kwargs,
-    ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
+    ) -> BaseDatasource | FluentDatasource:
         """
         A `name` is provided.
         `datasource` should not be provided.
@@ -1054,9 +1053,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_or_update_datasource(
         self,
         name: None = ...,
-        datasource: BaseDatasource | FluentDatasource | LegacyDatasource = ...,
+        datasource: BaseDatasource | FluentDatasource = ...,
         **kwargs,
-    ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
+    ) -> BaseDatasource | FluentDatasource:
         """
         A `datasource` is provided.
         `name` should not be provided.
@@ -1068,9 +1067,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_or_update_datasource(
         self,
         name: str | None = None,
-        datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
+        datasource: BaseDatasource | FluentDatasource | None = None,
         **kwargs,
-    ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
+    ) -> BaseDatasource | FluentDatasource:
         """Add a new Datasource or update an existing one on the context depending on whether
         it already exists or not. The configuration is provided as kwargs.
 
@@ -1083,7 +1082,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             The Datasource added or updated by the input `kwargs`.
         """
         self._validate_add_datasource_args(name=name, datasource=datasource)
-        return_datasource: BaseDatasource | FluentDatasource | LegacyDatasource
+        return_datasource: BaseDatasource | FluentDatasource
         if "type" in kwargs:
             assert name, 'Fluent Datasource kwargs must include the keyword "name"'
             kwargs["name"] = name
@@ -1174,7 +1173,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
 
         datasource_name: Optional[Any] = batch_kwargs.get("datasource")
-        datasource: LegacyDatasource | BaseDatasource | FluentDatasource
+        datasource: BaseDatasource | FluentDatasource
         if isinstance(datasource_name, str):
             datasource = self.get_datasource(datasource_name)
         else:
@@ -1263,7 +1262,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @public_api
     def get_datasource(
         self, datasource_name: str = "default"
-    ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
+    ) -> BaseDatasource | FluentDatasource:
         """Retrieve a given Datasource by name from the context's underlying DatasourceStore.
 
         Args:
@@ -1281,9 +1280,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         try:
-            datasource: BaseDatasource | LegacyDatasource | FluentDatasource = (
-                self.datasources[datasource_name]
-            )
+            datasource: BaseDatasource | FluentDatasource = self.datasources[
+                datasource_name
+            ]
         except KeyError as e:
             raise ValueError(str(e)) from e
 
@@ -2427,9 +2426,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
         datasource_name: str = batch_list[-1].batch_definition.datasource_name
-        datasource: LegacyDatasource | BaseDatasource | FluentDatasource = (
-            self.datasources[datasource_name]
-        )
+        datasource: BaseDatasource | FluentDatasource = self.datasources[
+            datasource_name
+        ]
         execution_engine: ExecutionEngine
         if isinstance(datasource, FluentDatasource):
             batch = batch_list[-1]

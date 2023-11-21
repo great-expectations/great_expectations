@@ -38,7 +38,6 @@ if TYPE_CHECKING:
     )
     from great_expectations.core.usage_statistics.events import UsageStatsEvents
     from great_expectations.data_context import AbstractDataContext
-    from great_expectations.datasource import LegacyDatasource
     from great_expectations.datasource.new_datasource import BaseDatasource
     from great_expectations.rule_based_profiler.rule_based_profiler import (
         RuleBasedProfiler,
@@ -396,7 +395,7 @@ def edit_expectation_suite_usage_statistics(
 def add_datasource_usage_statistics(
     data_context: AbstractDataContext,
     name: str | None = None,
-    datasource: LegacyDatasource | BaseDatasource | None = None,
+    datasource: BaseDatasource | None = None,
     **kwargs,
 ) -> dict:
     if not data_context.usage_statistics_handler:
