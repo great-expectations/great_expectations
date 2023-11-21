@@ -134,3 +134,11 @@ The following browsers are supported by GX Cloud:
 ### Browser session duration
 
 A session is the period of time that you’re signed in to your GX Cloud account from a browser. If you close the browser, your session ends, and you're signed out. You'll need to sign in again to access GX Cloud.
+
+## Get support
+
+Use the following resources when you have questions or encounter issues with GX Cloud:
+
+- [GX Cloud support on Discourse](https://discourse.greatexpectations.io/c/cloud-support/17)
+
+- [Discuss your issue with GX community members on Slack](https://greatexpectationstalk.slack.com/archives/C051D941XAL)
