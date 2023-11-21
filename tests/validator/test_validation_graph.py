@@ -105,9 +105,9 @@ def expect_column_value_z_scores_to_be_less_than_expectation_validation_graph():
 
     graph = ValidationGraph(execution_engine=execution_engine)
     validation_dependencies: ValidationDependencies = (
-        ExpectColumnValueZScoresToBeLessThan().get_validation_dependencies(
-            expectation_configuration, execution_engine
-        )
+        ExpectColumnValueZScoresToBeLessThan(
+            **expectation_configuration.kwargs
+        ).get_validation_dependencies(expectation_configuration, execution_engine)
     )
 
     metric_configuration: MetricConfiguration

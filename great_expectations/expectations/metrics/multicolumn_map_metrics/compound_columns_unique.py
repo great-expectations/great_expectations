@@ -80,6 +80,37 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             "_table"
         )  # Note that here, "table" is of the "sqlalchemy.sql.selectable.Subquery" type.
 
+        # Filipe - 20231114
+        # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
+        # more than once in the same query. The solution to this is to perform our operation without the need
+        # for a sub query. We can do this by using the window function count, to get the number of duplicate
+        # rows by over partition by the compound unique columns. This will give a table which has the same
+        # number of rows as the original table, but with an additional column _num_rows column.
+        dialect = kwargs.get("_dialect")
+        try:
+            dialect_name = dialect.dialect.name
+        except AttributeError:
+            try:
+                dialect_name = dialect.name
+            except AttributeError:
+                dialect_name = ""
+        if dialect and dialect_name == "mysql":
+            table_columns_selector = [
+                sa.column(column_name) for column_name in table_columns
+            ]
+            partition_by_columns = (
+                sa.func.count()
+                .over(partition_by=[sa.column(column) for column in column_names])
+                .label("_num_rows")
+            )
+            count_selector = table_columns_selector + [partition_by_columns]
+            original_table_clause = (
+                sa.select(*count_selector)
+                .select_from(table)
+                .alias("original_table_clause")
+            )
+            return original_table_clause
+
         # Step-1: Obtain the SQLAlchemy "FromClause" version of the original "table" for the purposes of gaining the
         # "FromClause.c" attribute, which is a namespace of all the columns contained within the "FROM" clause (these
         # elements are themselves subclasses of the SQLAlchemy "ColumnElement" class).
