@@ -155,6 +155,7 @@ class ExpectationSuite(SerializableDictDot):
                 "An Expectation with this configuration already exists in this ExpectationSuite."
             )
         self.expectation_configurations.append(expectation.configuration)
+        return expectation
 
     def delete(self, expectation: Expectation) -> Expectation:
         """Delete an Expectation from the collection.

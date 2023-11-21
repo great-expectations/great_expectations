@@ -18,6 +18,9 @@ from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.core import (
+    ExpectColumnValuesToBeInSet,
+)
 from great_expectations.util import filter_properties_dict
 
 
@@ -184,6 +187,63 @@ class TestInit:
         assert "is of type NotSerializable which cannot be serialized to json" in str(
             e.value
         )
+
+
+class TestCRUDMethods:
+    """Tests related to the 1.0 CRUD API."""
+
+    @pytest.mark.unit
+    def test_add_success(self, expect_column_values_to_be_in_set_col_a_with_meta):
+        suite = ExpectationSuite(expectation_suite_name="test-suite")
+        expectation = ExpectColumnValuesToBeInSet(
+            configuration=expect_column_values_to_be_in_set_col_a_with_meta
+        )
+        created_expectation = suite.add(expectation=expectation)
+        assert created_expectation == expectation
+        assert (
+            suite.expectations[0].configuration
+            == expect_column_values_to_be_in_set_col_a_with_meta
+        )
+
+    @pytest.mark.unit
+    def test_add_fails_when_expectation_already_exists(
+        self, expect_column_values_to_be_in_set_col_a_with_meta
+    ):
+        suite = ExpectationSuite(
+            expectation_suite_name="test-suite",
+            expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
+        )
+        expectation = ExpectColumnValuesToBeInSet(
+            configuration=expect_column_values_to_be_in_set_col_a_with_meta
+        )
+        with pytest.raises(ValueError, match="configuration already exists"):
+            suite.add(expectation=expectation)
+
+    @pytest.mark.unit
+    def test_delete_success(self, expect_column_values_to_be_in_set_col_a_with_meta):
+        suite = ExpectationSuite(
+            expectation_suite_name="test-suite",
+            expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
+        )
+        expectation = ExpectColumnValuesToBeInSet(
+            configuration=expect_column_values_to_be_in_set_col_a_with_meta
+        )
+        deleted_expectation = suite.delete(expectation=expectation)
+        assert deleted_expectation == expectation
+        assert suite.expectations == []
+
+    @pytest.mark.unit
+    def test_delete_fails_when_expectation_is_not_found(
+        self, expect_column_values_to_be_in_set_col_a_with_meta
+    ):
+        suite = ExpectationSuite(
+            expectation_suite_name="test-suite",
+        )
+        expectation = ExpectColumnValuesToBeInSet(
+            configuration=expect_column_values_to_be_in_set_col_a_with_meta
+        )
+        with pytest.raises(ValueError, match="No matching expectation was found."):
+            suite.delete(expectation=expectation)
 
 
 class TestAddCitation:
