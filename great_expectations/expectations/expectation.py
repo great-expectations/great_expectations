@@ -1252,24 +1252,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validates the configuration for the Expectation.
-
-        For all expectations, the configuration's `expectation_type` needs to match the type of the expectation being
-        configured. This method is meant to be overridden by specific expectations to provide additional validation
-        checks as required. Overriding methods should call `super().validate_configuration(configuration)`.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required
-                by the Expectation.
-        """
-        if not configuration:
-            configuration = self.configuration
-        try:
-            assert (
-                configuration.expectation_type == self.expectation_type
-            ), f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
+        pass  # no-op
 
     # Renamed from validate due to collision with Pydantic method of the same name
     @public_api
@@ -2677,23 +2660,10 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
         InvalidExpectationConfigurationError: If no `column` is specified
     """
 
+    column: str
+
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
-
-    @override
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        super().validate_configuration(configuration=configuration)
-        if not configuration:
-            configuration = self.configuration
-        # Ensuring basic configuration parameters are properly set
-        try:
-            assert (
-                "column" in configuration.kwargs
-            ), "'column' parameter is required for column expectations"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
 
 @public_api
@@ -2722,6 +2692,9 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             kwargs from the Expectation Configuration.
     """
 
+    column: str
+    mostly: Union[int, float] = pydantic.Field(1, ge=0, le=1)
+
     map_metric: ClassVar[Optional[str]] = None
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -2743,21 +2716,6 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     @override
     def is_abstract(cls) -> bool:
         return not cls.map_metric or super().is_abstract()
-
-    @override
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        super().validate_configuration(configuration=configuration)
-        if not configuration:
-            configuration = self.configuration
-        try:
-            assert (
-                "column" in configuration.kwargs
-            ), "'column' parameter is required for column map expectations"
-            _validate_mostly_config(configuration)
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @override
     def get_validation_dependencies(
@@ -3002,6 +2960,10 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             kwargs from the Expectation Configuration.
     """
 
+    column_A: str
+    column_B: str
+    mostly: Union[int, float] = pydantic.Field(1, ge=0, le=1)
+
     map_metric: ClassVar[Optional[str]] = None
     domain_keys = (
         "batch_id",
@@ -3024,24 +2986,6 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
     @override
     def is_abstract(cls) -> bool:
         return cls.map_metric is None or super().is_abstract()
-
-    @override
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        super().validate_configuration(configuration=configuration)
-        if not configuration:
-            configuration = self.configuration
-        try:
-            assert (
-                "column_A" in configuration.kwargs
-            ), "'column_A' parameter is required for column pair map expectations"
-            assert (
-                "column_B" in configuration.kwargs
-            ), "'column_B' parameter is required for column pair map expectations"
-            _validate_mostly_config(configuration)
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @override
     def get_validation_dependencies(
@@ -3272,6 +3216,9 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             kwargs from the Expectation Configuration.
     """
 
+    column_list: List[str]
+    mostly: Union[int, float] = pydantic.Field(1, ge=0, le=1)
+
     map_metric: ClassVar[Optional[str]] = None
     domain_keys = (
         "batch_id",
@@ -3295,21 +3242,6 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
     @override
     def is_abstract(cls) -> bool:
         return cls.map_metric is None or super().is_abstract()
-
-    @override
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        super().validate_configuration(configuration=configuration)
-        if not configuration:
-            configuration = self.configuration
-        try:
-            assert (
-                "column_list" in configuration.kwargs
-            ), "'column_list' parameter is required for multicolumn map expectations"
-            _validate_mostly_config(configuration)
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @override
     def get_validation_dependencies(
