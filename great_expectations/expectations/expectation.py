@@ -3600,24 +3600,6 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     raise ValueError(f"Unknown result_format {result_format['result_format']}.")
 
 
-def _validate_mostly_config(configuration: ExpectationConfiguration) -> None:
-    """
-    Validates "mostly" in ExpectationConfiguration is a number if it exists.
-
-    Args:
-        configuration: The ExpectationConfiguration to be validated
-
-    Raises:
-        AssertionError: An error is mostly exists in the configuration but is not between 0 and 1.
-    """
-    if "mostly" in configuration.kwargs:
-        mostly = configuration.kwargs["mostly"]
-        assert isinstance(
-            mostly, (int, float)
-        ), "'mostly' parameter must be an integer or float"
-        assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
-
-
 def _validate_dependencies_against_available_metrics(
     validation_dependencies: List[MetricConfiguration],
     metrics: dict,
