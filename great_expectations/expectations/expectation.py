@@ -2693,7 +2693,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     """
 
     column: str
-    mostly: Union[int, float] = pydantic.Field(1, ge=0, le=1)
+    mostly: float = pydantic.Field(1.0, ge=00, le=1.0)
 
     map_metric: ClassVar[Optional[str]] = None
     domain_keys: ClassVar[Tuple[str, ...]] = (
@@ -3217,7 +3217,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
     """
 
     column_list: List[str]
-    mostly: Union[int, float] = pydantic.Field(1, ge=0, le=1)
+    mostly: float = pydantic.Field(1.0, ge=00, le=1.0)
 
     map_metric: ClassVar[Optional[str]] = None
     domain_keys = (
