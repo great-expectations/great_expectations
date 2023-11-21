@@ -1149,9 +1149,11 @@ class ExpectationSuiteSchema(Schema):
 
     @post_dump(pass_original=True)
     def insert_expectations(self, data, original_data, **kwargs) -> dict:
-        data["expectations"] = convert_to_json_serializable(
-            original_data.expectation_configurations
-        )
+        if isinstance(original_data, dict):
+            expectations = original_data.get("expectations", [])
+        else:
+            expectations = original_data.expectation_configurations
+        data["expectations"] = convert_to_json_serializable(expectations)
         return data
 
     @post_load
