@@ -10,8 +10,6 @@ from great_expectations.compatibility import sqlalchemy
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import (
     Datasource,
-    PandasDatasource,
-    SparkDFDatasource,
 )
 from great_expectations.execution_engine.sparkdf_execution_engine import (
     SparkDFExecutionEngine,
@@ -118,18 +116,6 @@ def glue_titanic_catalog():
             },
         )
         yield client
-
-
-@pytest.fixture(scope="module")
-def basic_pandas_datasource():
-    return PandasDatasource("basic_pandas_datasource")
-
-
-@pytest.fixture(scope="module")
-def basic_sparkdf_datasource(test_backends):
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("Spark has not been enabled, so this test must be skipped.")
-    return SparkDFDatasource("basic_sparkdf_datasource")
 
 
 @pytest.fixture

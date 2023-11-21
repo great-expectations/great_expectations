@@ -42,7 +42,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import (
     Datasource,
-    LegacyDatasource,
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
@@ -372,11 +371,6 @@ def test_data_context_get_latest_validation_result(titanic_data_context):
         "mydatasource.mygenerator.Titanic.BasicDatasetProfiler"
     )
     assert latest_validation_result in validation_results
-
-
-@pytest.mark.unit
-def test_data_context_get_datasource(titanic_data_context):
-    isinstance(titanic_data_context.get_datasource("mydatasource"), LegacyDatasource)
 
 
 @pytest.mark.filesystem

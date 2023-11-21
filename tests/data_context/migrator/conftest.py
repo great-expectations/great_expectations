@@ -1,4 +1,4 @@
-from typing import Dict, Final, List, Optional, Tuple, Union
+from typing import Dict, Final, List, Optional, Tuple
 
 import pytest
 
@@ -13,7 +13,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
 )
-from great_expectations.datasource import BaseDatasource, LegacyDatasource
+from great_expectations.datasource import BaseDatasource
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 
 
@@ -131,7 +131,7 @@ class StubBaseDataContext:
         return StubDatasourceStore()
 
     @property
-    def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
+    def datasources(self) -> Dict[str, BaseDatasource]:
         # Datasource is a dummy since we just want the DatasourceConfig from the store, not an
         # actual initialized datasource.
         return {

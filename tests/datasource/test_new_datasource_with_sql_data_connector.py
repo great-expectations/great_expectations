@@ -21,7 +21,6 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.datasource import (
     BaseDatasource,
-    LegacyDatasource,
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.exceptions.exceptions import ExecutionEngineError
@@ -100,7 +99,7 @@ def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
     try:
         # noinspection PyUnusedLocal
         my_sql_datasource: Optional[  # noqa: F841
-            Union[SimpleSqlalchemyDatasource, LegacyDatasource]
+            SimpleSqlalchemyDatasource
         ] = context.add_datasource(
             "test_sqlite_db_datasource", **yaml.load(datasource_config)
         )
@@ -230,7 +229,7 @@ def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config
                         n: 10
     """
     context.add_datasource(**yaml.load(config))
-    datasource: Union[LegacyDatasource, BaseDatasource, None] = context.get_datasource(
+    datasource: Union[BaseDatasource, None] = context.get_datasource(
         datasource_name="my_datasource"
     )
     report: dict = datasource.self_check()
@@ -393,7 +392,7 @@ def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_s
                 n: 10
         """
     context.add_datasource(**yaml.load(config))
-    datasource: Union[LegacyDatasource, BaseDatasource, None] = context.get_datasource(
+    datasource: Union[BaseDatasource, None] = context.get_datasource(
         datasource_name="my_datasource"
     )
     report: dict = datasource.self_check()
