@@ -5,8 +5,6 @@ from typing import Any, Dict, Optional, cast
 import numpy as np
 import pytest
 
-import great_expectations as gx
-
 # noinspection PyUnresolvedReferences
 from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant_result import (
     StatisticsDataAssistantResult,
@@ -15,7 +13,6 @@ from contrib.experimental.great_expectations_experimental.tests.test_utils impor
     CONNECTION_STRING,
     load_data_into_postgres_database,
 )
-from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -45,9 +42,9 @@ def bobby_statistics_data_assistant_result(
     monkeypatch,
     no_usage_stats,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
-    bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_deterministic_data_context,
 ) -> StatisticsDataAssistantResult:
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -230,7 +227,7 @@ def test_pandas_happy_path_statistics_data_assistant(empty_data_context) -> None
     3. Running StatisticsDataAssistant and making sure that StatisticsDataAssistantResult contains relevant fields
     4. Configuring BatchRequest to load 2020 January data
     """
-    data_context: gx.DataContext = empty_data_context
+    data_context = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
@@ -310,7 +307,7 @@ def test_sql_happy_path_statistics_data_assistant(
     else:
         load_data_into_postgres_database(sa)
 
-    data_context: gx.DataContext = empty_data_context
+    data_context = empty_data_context
 
     datasource_config = {
         "name": "taxi_multi_batch_sql_datasource",
@@ -377,7 +374,7 @@ def test_spark_happy_path_statistics_data_assistant(
     from great_expectations.compatibility import pyspark
 
     schema: pyspark.types.StructType = spark_df_taxi_data_schema
-    data_context: gx.DataContext = empty_data_context
+    data_context = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118

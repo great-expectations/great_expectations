@@ -3,8 +3,8 @@ import json
 import os
 from typing import TYPE_CHECKING, List, Optional, Tuple
 
+import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint  # noqa: TCH001
 from great_expectations.cli.upgrade_helpers.base_upgrade_helper import BaseUpgradeHelper
 from great_expectations.data_context.store.checkpoint_store import CheckpointStore
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 class UpgradeHelperV13(BaseUpgradeHelper):
     def __init__(
         self,
-        data_context: Optional[DataContext] = None,
+        data_context=None,
         context_root_dir: Optional[str] = None,
         update_version: bool = False,
     ) -> None:
@@ -28,7 +28,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
             data_context or context_root_dir
         ), "Please provide a data_context object or a context_root_dir."
 
-        self.data_context = data_context or DataContext(
+        self.data_context = data_context or gx.get_context(
             context_root_dir=context_root_dir
         )
 

@@ -4,7 +4,6 @@ from unittest import mock
 
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.resource_identifiers import (
@@ -20,7 +19,7 @@ from tests.core.usage_statistics.util import (
 
 @pytest.mark.filesystem
 def test_expectations_store(empty_data_context):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     my_store = ExpectationsStore()
 
     with pytest.raises(TypeError):
@@ -57,7 +56,7 @@ def test_expectations_store(empty_data_context):
 
 @pytest.mark.filesystem
 def test_ExpectationsStore_with_DatabaseStoreBackend(sa, empty_data_context):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     # Use sqlite so we don't require postgres for this test.
     connection_kwargs = {"drivername": "sqlite"}
 

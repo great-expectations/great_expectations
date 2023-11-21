@@ -16,7 +16,6 @@ from great_expectations.core.serializer import (
 )
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -267,7 +266,7 @@ def test_datasource_store_set_cloud_mode(
 
 @pytest.mark.filesystem
 def test_datasource_store_with_inline_store_backend(
-    block_config_datasource_config: DatasourceConfig, empty_data_context: DataContext
+    block_config_datasource_config: DatasourceConfig, empty_data_context
 ) -> None:
     inline_store_backend_config: dict = {
         "class_name": "InlineStoreBackend",
@@ -436,7 +435,7 @@ def test_datasource_store_update_raises_error_if_datasource_doesnt_exist(
 def test_datasource_store_with_inline_store_backend_config_with_names_does_not_store_datasource_name(
     datasource_config_with_names: DatasourceConfig,
     block_config_datasource_config: DatasourceConfig,
-    empty_data_context: DataContext,
+    empty_data_context,
 ) -> None:
     inline_store_backend_config: dict = {
         "class_name": "InlineStoreBackend",
@@ -482,7 +481,7 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
 def test_datasource_store_with_inline_store_backend_config_with_names_does_not_store_dataconnector_name(
     datasource_config_with_names: DatasourceConfig,
     block_config_datasource_config: DatasourceConfig,
-    empty_data_context: DataContext,
+    empty_data_context,
 ) -> None:
     inline_store_backend_config: dict = {
         "class_name": "InlineStoreBackend",

@@ -1,14 +1,13 @@
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.data_context.types.base import DatasourceConfig
 
 
 @pytest.mark.filesystem
 def test_datasource_delete_removes_from_cache_and_config_data_context(
-    empty_data_context: DataContext, block_config_datasource_config: DatasourceConfig
+    empty_data_context, block_config_datasource_config: DatasourceConfig
 ):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     datasource_name: str = "my_datasource"
 
     assert len(context.datasources) == 0
