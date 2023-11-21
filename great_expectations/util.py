@@ -15,7 +15,6 @@ import re
 import sys
 import time
 import uuid
-import warnings
 from collections import OrderedDict
 from functools import wraps
 from gc import get_referrers
@@ -114,16 +113,6 @@ class bidict(dict):
         if self[key] in self.inverse and not self.inverse[self[key]]:
             del self.inverse[self[key]]
         super().__delitem__(key)
-
-
-def get_context(*args, **kwargs) -> AbstractDataContext:
-    # deprecated-v0.17.12
-    warnings.warn(
-        "Importing `get_context` from `great_expectations.util` is deprecated as of v0.17.12 and will be removed in v0.20. Please import from the top-level `great_expectations` module.",
-        DeprecationWarning,
-    )
-
-    return context_factory(*args, **kwargs)
 
 
 def camel_to_snake(name: str) -> str:
