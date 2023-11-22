@@ -114,13 +114,13 @@ The following table lists the available Data Asset metrics.
 
 5. Select one of the following options:
 
-    - To add an Expectation to a new Expectation Suite, click the **Create new Expectation Suite** tab and then enter a name for the Expectation.
+    - To add an Expectation to a new Expectation Suite, click the **Create new Expectation Suite** tab and then enter a name for the new Expectation Suite.
 
     - To add an Expectation to an existing Expectation Suite, click the **Add to existing Expectation Suite** tab and then select an existing Expectation Suite.
 
 6. Select an Expectation type. See [Available Expectation types](/docs/cloud/expectations/manage_expectations#available-expectation-types).
 
-7. Select a column and then complete the optional fields.
+7. Select a column in the **Create Expectation** pane and then complete the optional fields.
 
 8. Click **Save** to add the Expectation, or click **Save & Add More** to add additional Expectations.
 
