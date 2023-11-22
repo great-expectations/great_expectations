@@ -61,7 +61,7 @@ class DataContext:
         cls,
         context_root_dir: Optional[DirectoryPath] = None,
         _config_file: str = "config.yaml",  # for ease of use during POC
-    ) -> DataContext:
+    ):
         if not cls._context:
             cls._context = DataContext(context_root_dir=context_root_dir)
 
@@ -116,9 +116,7 @@ class DataContext:
         ...
 
 
-def get_context(
-    context_root_dir: Optional[DirectoryPath] = None, **kwargs
-) -> DataContext:
+def get_context(context_root_dir: Optional[DirectoryPath] = None, **kwargs):
     """Experimental get_context placeholder function."""
     logger.info(f"Getting context {context_root_dir or ''}")
     context = DataContext.get_context(context_root_dir=context_root_dir, **kwargs)
