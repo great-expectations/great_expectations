@@ -98,7 +98,7 @@ The following table lists the available Data Asset metrics.
 | **Median**                                 | For numeric columns, the value in the middle of a data set.<br/> 50% of the data within the Data Asset has a value smaller or equal to the median, and 50% of the data within the Data Asset has a value that is higher or equal to the median.  |
 | **Null %**                                | The percentage of missing values in a column.             |
 
-## Add an Expectation to Data Asset Metrics
+## Add an Expectation to a Data Asset column
 
 1. In GX Cloud, click **Data Assets** and then select a Data Asset in the **Data Assets** list.
 
