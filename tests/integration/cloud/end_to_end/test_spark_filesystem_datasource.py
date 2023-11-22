@@ -93,6 +93,7 @@ def data_asset(
     datasource: SparkFilesystemDatasource,
     request,
 ) -> Iterator[DataAsset]:
+    """Test the entire Data Asset CRUD lifecycle here and in Data Asset-specific fixtures."""
     asset_name = f"da_{uuid.uuid4().hex}"
     yield request.param(
         datasource=datasource,

@@ -105,6 +105,7 @@ def data_asset(
     table_factory: TableFactory,
     request,
 ) -> Iterator[DataAsset]:
+    """Test the entire Data Asset CRUD lifecycle here and in Data Asset-specific fixtures."""
     asset_name = f"da_{uuid.uuid4().hex}"
     yield request.param(
         datasource=datasource,
