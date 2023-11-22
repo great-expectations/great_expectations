@@ -142,6 +142,10 @@ def test_interactive_validator(
     context: CloudDataContext,
     validator: Validator,
 ):
+    """Test interactive evaluation of the Data Assets in this module using an existing Validator.
+    Note: There is no need to test getting a Validator or using Validator.head(). That is already
+    tested in the validator fixture.
+    """
     expectation_validation_result: ExpectationValidationResult = (
         validator.expect_column_values_to_be_in_set(
             column="name",
@@ -153,5 +157,6 @@ def test_interactive_validator(
 
 @pytest.mark.cloud
 def test_checkpoint_run(checkpoint: Checkpoint):
+    """Test running a Checkpoint that was created using the entities defined in this module."""
     checkpoint_result: CheckpointResult = checkpoint.run()
     assert checkpoint_result.success
