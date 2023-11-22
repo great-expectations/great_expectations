@@ -48,7 +48,7 @@ The following table lists the available GX Cloud Expectation types.
 
     If you prefer to work in a code editor, or you want to configure an Expectation from the [Expectations Gallery](https://greatexpectations.io/expectations/) that isn't listed, click the **JSON Editor** tab and define your Expectation parameters in the code pane.
 
-6. Enter the column name in the **Create Expectation** pane and then complete the optional fields.
+6. Complete the fields in the **Create Expectation** pane.
 
 7. Click **Save**.
 

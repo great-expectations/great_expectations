@@ -120,7 +120,7 @@ The following table lists the available Data Asset metrics.
 
 6. Select an Expectation type. See [Available Expectation types](/docs/cloud/expectations/manage_expectations#available-expectation-types).
 
-7. Select a column in the **Create Expectation** pane and then complete the optional fields.
+7. Complete the fields in the **Create Expectation** pane.
 
 8. Click **Save** to add the Expectation, or click **Save & Add More** to add additional Expectations.
 
