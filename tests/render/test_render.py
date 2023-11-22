@@ -4,7 +4,6 @@ from collections import OrderedDict
 import pytest
 
 import great_expectations as gx
-from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
@@ -51,7 +50,7 @@ def titanic_profiler_evrs_with_exception():
 
 @pytest.fixture(scope="module")
 def titanic_dataset_profiler_expectations(empty_data_context_module_scoped):
-    context: DataContext = empty_data_context_module_scoped
+    context = empty_data_context_module_scoped
     with open(
         file_relative_path(
             __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
@@ -67,7 +66,7 @@ def titanic_dataset_profiler_expectations(empty_data_context_module_scoped):
 def titanic_dataset_profiler_expectations_with_distribution(
     empty_data_context_module_scoped,
 ):
-    context: DataContext = empty_data_context_module_scoped
+    context = empty_data_context_module_scoped
     with open(
         file_relative_path(
             __file__,
@@ -82,7 +81,7 @@ def titanic_dataset_profiler_expectations_with_distribution(
 
 @pytest.fixture
 def titanic_profiled_expectations_1(empty_data_context_stats_enabled):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     with open(
         file_relative_path(
             __file__, "./fixtures/BasicDatasetProfiler_expectations.json"

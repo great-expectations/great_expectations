@@ -1248,7 +1248,7 @@ def test_user_configurable_profiler_progress_bar_config_enabled(
     assert mock_tqdm.call_count == 1
 
 
-@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch("great_expectations.data_context.data_context.EphemeralDataContext")
 @pytest.mark.slow  # 1.34s
 @pytest.mark.filesystem
 def test_user_configurable_profiler_progress_bar_config_disabled(

@@ -17,7 +17,7 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 
 yaml = YAMLHandler()
-data_context: gx.DataContext = gx.get_context()
+data_context = gx.get_context()
 
 datasource_config = {
     "name": "taxi_multi_batch_datasource",

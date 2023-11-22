@@ -7,7 +7,6 @@ import pandas as pd
 import pytest
 
 import great_expectations as gx
-from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationConfiguration,
     expectationSuiteSchema,
@@ -183,7 +182,7 @@ def test_base_class_expectation():
     return_value=False,
 )
 def test_validate_with_invalid_result_catch_exceptions_false(empty_data_context):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     with open(
         file_relative_path(__file__, "./test_sets/titanic_expectations.json")
     ) as f:
@@ -207,7 +206,7 @@ def test_validate_with_invalid_result_catch_exceptions_false(empty_data_context)
 
 @pytest.mark.filesystem
 def test_validate_catch_non_existent_expectation(empty_data_context):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     df = gx.dataset.PandasDataset({"x": [1, 2, 3, 4, 5]})
 
     validation_config_non_existent_expectation = ExpectationSuite(
@@ -231,7 +230,7 @@ def test_validate_catch_non_existent_expectation(empty_data_context):
 
 @pytest.mark.filesystem
 def test_validate_catch_invalid_parameter(empty_data_context):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     df = gx.dataset.PandasDataset({"x": [1, 2, 3, 4, 5]})
 
     validation_config_invalid_parameter = ExpectationSuite(

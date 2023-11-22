@@ -5,7 +5,6 @@ import pytest
 
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
@@ -15,7 +14,7 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
 def test_onboarding_data_assistant_runner_top_level_kwargs_allowed(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context = bobby_columnar_table_multi_batch_probabilistic_data_context
     batch_request = {
         "datasource_name": "taxi_pandas",
         "data_connector_name": "monthly",
@@ -50,7 +49,7 @@ def test_onboarding_data_assistant_runner_top_level_kwargs_allowed(
 def test_onboarding_data_assistant_runner_top_level_kwargs_override(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context = bobby_columnar_table_multi_batch_probabilistic_data_context
     batch_request = {
         "datasource_name": "taxi_pandas",
         "data_connector_name": "monthly",
@@ -74,7 +73,7 @@ def test_onboarding_data_assistant_runner_top_level_kwargs_override(
 def test_onboarding_data_assistant_runner_top_level_kwargs_explicit_none(
     data_context_with_datasource_pandas_engine,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context = data_context_with_datasource_pandas_engine
 
     df = pd.DataFrame(
         {
@@ -111,7 +110,7 @@ def test_onboarding_data_assistant_runner_top_level_kwargs_explicit_none(
 def test_onboarding_data_assistant_runner_using_validator(
     data_context_with_datasource_pandas_engine,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context = data_context_with_datasource_pandas_engine
 
     df = pd.DataFrame(
         {

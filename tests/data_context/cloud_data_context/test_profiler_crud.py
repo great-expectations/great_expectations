@@ -5,7 +5,6 @@ import pytest
 
 from great_expectations.data_context import get_context
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
@@ -88,35 +87,6 @@ def mocked_post_response(
         )
 
     return _mocked_post_response
-
-
-@pytest.mark.e2e
-@pytest.mark.cloud
-@mock.patch("great_expectations.data_context.DataContext._save_project_config")
-@pytest.mark.xfail(
-    strict=False,
-    reason="GX Cloud E2E tests are failing due to env vars not being consistently recognized by Docker; x-failing for purposes of 0.15.22 release",
-)
-def test_cloud_backed_data_context_add_profiler_e2e(
-    mock_save_project_config: mock.MagicMock,
-    profiler_rules: dict,
-) -> None:
-    context = DataContext(cloud_mode=True)
-
-    name = "oss_test_profiler"
-    config_version = 1.0
-    rules = profiler_rules
-
-    profiler = context.add_profiler(
-        name=name, config_version=config_version, rules=rules
-    )
-
-    ge_cloud_id = profiler.ge_cloud_id
-
-    profiler_stored_in_cloud = context.get_profiler(ge_cloud_id=ge_cloud_id)
-
-    assert profiler.ge_cloud_id == profiler_stored_in_cloud.ge_cloud_id
-    assert profiler.to_json_dict() == profiler_stored_in_cloud.to_json_dict()
 
 
 @pytest.fixture
