@@ -93,6 +93,7 @@ def batch_request(
     pandas_test_df: pd.DataFrame,
     in_memory_batch_request_missing_dataframe_error_type: type[Exception],
 ) -> BatchRequest:
+    """Build a BatchRequest depending on the types of Data Assets tested in the module."""
     if isinstance(data_asset, DataFrameAsset):
         with pytest.raises(in_memory_batch_request_missing_dataframe_error_type):
             data_asset.build_batch_request()

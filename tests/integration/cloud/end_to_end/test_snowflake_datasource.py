@@ -115,6 +115,7 @@ def data_asset(
 
 @pytest.fixture(scope="module")
 def batch_request(data_asset: DataAsset) -> BatchRequest:
+    """Build a BatchRequest depending on the types of Data Assets tested in the module."""
     return data_asset.build_batch_request()
 
 
