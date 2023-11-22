@@ -148,6 +148,11 @@ def tmp_dir(tmpdir_factory) -> py.path:
     return tmpdir_factory.mktemp("project")
 
 
+@pytest.fixture(scope="module")
+def get_missing_data_asset_error_type() -> type[Exception]:
+    return LookupError
+
+
 @pytest.fixture(scope="package")
 def in_memory_batch_request_missing_dataframe_error_type() -> type[Exception]:
     return ValueError

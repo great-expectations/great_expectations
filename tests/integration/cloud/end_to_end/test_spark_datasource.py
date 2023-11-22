@@ -72,6 +72,7 @@ def dataframe_asset(
 @pytest.fixture(scope="module", params=[dataframe_asset])
 def data_asset(
     datasource: SparkDatasource,
+    get_missing_data_asset_error_type: Exception,
     request,
 ) -> Iterator[DataAsset]:
     """Test the entire Data Asset CRUD lifecycle here and in Data Asset-specific fixtures."""
@@ -81,7 +82,7 @@ def data_asset(
         asset_name=asset_name,
     )
     datasource.delete_asset(asset_name=asset_name)
-    with pytest.raises(LookupError):
+    with pytest.raises(get_missing_data_asset_error_type):
         datasource.get_asset(asset_name=asset_name)
 
 
