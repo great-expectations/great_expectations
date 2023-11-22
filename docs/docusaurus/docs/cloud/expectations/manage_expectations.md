@@ -14,6 +14,26 @@ To learn more about Expectations, see [Expectation](../../terms/expectation.md).
 
 - You have a [Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset).
 
+## Available Expectation types
+
+The following table lists the available GX Cloud Expectation types.
+
+| Expectation type                         | Description                                               | 
+|------------------------------------------|------------------------------------------------------------------------|
+| `expect_column_max_to_be_between`        | Expect the column maximum to be between a minimum and a maximum value. For more information, see [expect_column_max_to_be_between](https://greatexpectations.io/expectations/expect_column_max_to_be_between).  | 
+| `expect_column_mean_to_be_between`       | Expect the column mean to be between a minimum and a maximum value (inclusive). For more information, see [expect_column_mean_to_be_between](https://greatexpectations.io/expectations/expect_column_mean_to_be_between). | 
+| `expect_column_median_to_be_between`     | Expect the column median to be between a minimum and a maximum value. For more information, see [expect_column_median_to_be_between](https://greatexpectations.io/expectations/expect_column_median_to_be_between). | 
+| `expect_column_min_to_be_between`        | Expect the column minimum to be between a minimum value and a maximum value. For more information, see  [expect_column_min_to_be_between](https://greatexpectations.io/expectations/expect_column_min_to_be_between).| 
+| `expect_column_values_to_be_in_set`      | Expect each column value to be in a given set. For more information, see [expect_column_values_to_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_be_in_set).| 
+| `expect_column_values_to_be_in_type_list`| Expect a column to contain values from a specified type list. For more information, see [expect_column_values_to_be_in_type_list](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list).|
+| `expect_column_values_to_be_null`        | Expect the column values to be null. For more information, see [expect_column_values_to_be_null](https://greatexpectations.io/expectations/expect_column_values_to_be_null).|
+| `expect_column_values_to_be_of_type`     | Expect a column to contain values of a specified data type. For more information, see [expect_column_values_to_be_of_type](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type).|
+| `expect_column_values_to_be_unique`      | Expect each column value to be unique. For more information, see [expect_column_values_to_be_unique](https://greatexpectations.io/expectations/expect_column_values_to_be_unique).|
+| `expect_column_values_to_not_be_null`    | Expect the column values to not be null. For more information, see [expect_column_values_to_not_be_null](https://greatexpectations.io/expectations/expect_column_values_to_not_be_null).|
+| `expect_table_columns_to_match_ordered_list` | Expect the columns to exactly match a specified list. For more information, see [expect_table_columns_to_match_ordered_list](https://greatexpectations.io/expectations/expect_table_columns_to_match_ordered_list).|
+| `expect_table_row_count_to_be_between`   | Expect the number of rows to be between two values. For more information, see [expect_table_row_count_to_be_between](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between).|
+| `expect_table_row_count_to_equal`        | Expect the number of rows to equal a value. For more information, see [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal). |                                          
+
 ## Add an Expectation
 
 1. In GX Cloud, click **Data Assets**.
@@ -24,33 +44,7 @@ To learn more about Expectations, see [Expectation](../../terms/expectation.md).
 
 4. Click **New Expectation**.
 
-5. Select one of the following Expectation types:
-
-    - [expect_column_max_to_be_between](https://greatexpectations.io/expectations/expect_column_max_to_be_between) - Expect the column maximum to be between a minimum and a maximum value.
-
-    - [expect_column_mean_to_be_between](https://greatexpectations.io/expectations/expect_column_mean_to_be_between) - Expect the column mean to be between a minimum and a maximum value (inclusive).
-
-    - [expect_column_median_to_be_between](https://greatexpectations.io/expectations/expect_column_median_to_be_between) - Expect the column median to be between a minimum and a maximum value.
-
-    - [expect_column_min_to_be_between](https://greatexpectations.io/expectations/expect_column_min_to_be_between) - Expect the column minimum to be between a minimum value and a maximum value.
-
-    - [expect_column_values_to_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_be_in_set) - Expect each column value to be in a given set.
-
-    - [expect_column_values_to_be_in_type_list](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list) - Expect a column to contain values from a specified type list.
-
-    - [expect_column_values_to_be_null](https://greatexpectations.io/expectations/expect_column_values_to_be_null) - Expect the column values to be null.
-
-    - [expect_column_values_to_be_of_type](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type) - Expect a column to contain values of a specified data type.
-
-    - [expect_column_values_to_be_unique](https://greatexpectations.io/expectations/expect_column_values_to_be_unique) - Expect each column value to be unique.
-
-    - [expect_column_values_to_not_be_null](https://greatexpectations.io/expectations/expect_column_values_to_not_be_null) - Expect the column values to not be null.
-
-    - [expect_table_columns_to_match_ordered_list](https://greatexpectations.io/expectations/expect_table_columns_to_match_ordered_list) - Expect the columns to exactly match a specified list.
-
-    - [expect_table_row_count_to_be_between](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between) - Expect the number of rows to be between two values.
-
-    - [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal) - Expect the number of rows to equal a value.
+5. Select an Expectation type. See [Available Expectation types](#available-expectation-types).
 
     If you prefer to work in a code editor, or you want to configure an Expectation from the [Expectations Gallery](https://greatexpectations.io/expectations/) that isn't listed, click the **JSON Editor** tab and define your Expectation parameters in the code pane.
 
