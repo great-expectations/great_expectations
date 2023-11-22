@@ -73,6 +73,11 @@ module.exports = {
               label: 'Set the environment variables and start the GX Cloud agent',
               href: '/docs/cloud/set_up_gx_cloud#set-the-environment-variables-and-start-the-gx-cloud-agent',
             },
+            {
+              type: 'link',
+              label: 'Securely manage credentials for GX API-created Data Sources',
+              href: '/docs/cloud/set_up_gx_cloud#securely-manage-credentials-for-gx-api-created-data-sources',
+            },
           ]
         },
         {
