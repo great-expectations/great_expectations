@@ -28,6 +28,9 @@ def datasource(
     context: CloudDataContext,
     datasource_name: str,
 ) -> SparkDatasource:
+    """Test Adding and Updating the Datasource associated with this module.
+    Note: There is no need to test Get or Delete Datasource.
+    Those assertions can be found in the datasource_name fixture."""
     datasource = context.sources.add_spark(
         name=datasource_name,
         persist=True,

@@ -52,6 +52,9 @@ def datasource(
     base_dir: pathlib.Path,
     updated_base_dir: pathlib.Path,
 ) -> PandasFilesystemDatasource:
+    """Test Adding and Updating the Datasource associated with this module.
+    Note: There is no need to test Get or Delete Datasource.
+    Those assertions can be found in the datasource_name fixture."""
     original_base_dir = base_dir
 
     datasource = context.sources.add_pandas_filesystem(

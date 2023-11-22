@@ -39,6 +39,9 @@ def datasource(
     datasource_name: str,
     connection_string: str,
 ) -> SnowflakeDatasource:
+    """Test Adding and Updating the Datasource associated with this module.
+    Note: There is no need to test Get or Delete Datasource.
+    Those assertions can be found in the datasource_name fixture."""
     datasource = context.sources.add_snowflake(
         name=datasource_name,
         connection_string=connection_string,
