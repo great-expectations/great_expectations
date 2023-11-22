@@ -103,7 +103,7 @@ def table_asset(
 def data_asset(
     datasource: SnowflakeDatasource,
     table_factory: TableFactory,
-    get_missing_data_asset_error_type: Exception,
+    get_missing_data_asset_error_type: type[Exception],
     request,
 ) -> Iterator[DataAsset]:
     """Test the entire Data Asset CRUD lifecycle here and in Data Asset-specific fixtures."""
