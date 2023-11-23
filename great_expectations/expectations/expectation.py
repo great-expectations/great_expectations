@@ -2360,7 +2360,6 @@ class BatchExpectation(Expectation, ABC):
     """
 
     batch_id: Union[str, None] = None
-    table: Union[str, None] = None
     row_condition: Union[str, None] = None
     condition_parser: Union[str, None] = None
     mostly: Union[float, int] = 1.0
