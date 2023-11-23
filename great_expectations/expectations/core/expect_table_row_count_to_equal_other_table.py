@@ -5,6 +5,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     BatchExpectation,
@@ -189,6 +190,13 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
             "table.row_count.other", table_row_count_metric_config_other
         )
         return validation_dependencies
+
+    @public_api
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
+        """Validates the configuration of an Expectation. This expectation has no configuration."""
+        super().validate_configuration(configuration)
 
     def _validate(
         self,
