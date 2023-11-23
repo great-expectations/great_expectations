@@ -1,3 +1,6 @@
+from typing import Optional
+
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -163,6 +166,12 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
         "max_consec_numbers": 99,
         "max_consec_letters": 99,
     }
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
+        super().validate_configuration(configuration)
+        configuration = configuration or self.configuration
 
     @classmethod
     @renderer(renderer_type="renderer.question")

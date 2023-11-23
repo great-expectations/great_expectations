@@ -1,6 +1,9 @@
+from typing import Optional
+
 import numpy as np
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SqlAlchemyExecutionEngine,
@@ -172,6 +175,23 @@ class ExpectMulticolumnValuesNotToBeAllNull(MulticolumnMapExpectation):
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {"ignore_row_if": "never"}
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        necessary configuration arguments have been provided for the validation of the expectation.
+
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+        """
+
+        super().validate_configuration(configuration)
+        configuration = configuration or self.configuration
 
     library_metadata = {
         "tags": ["null_check"],  # Tags for this Expectation in the Gallery

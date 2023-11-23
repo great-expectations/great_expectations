@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 
 from dateutil.relativedelta import relativedelta
 
@@ -143,6 +143,12 @@ class ExpectColumnToHaveNoMonthsMissing(ColumnAggregateExpectation):
         ],
         "tags": ["date-column"],
     }
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
+        # Setting up a configuration
+        super().validate_configuration(configuration)
 
     def _validate(
         self,

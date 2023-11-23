@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -112,6 +112,12 @@ class ExpectColumnToHaveNoDaysMissing(ColumnAggregateExpectation):
         ],
         "tags": ["date-column"],
     }
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
+        # Setting up a configuration
+        super().validate_configuration(configuration)
 
     def _validate(
         self,
