@@ -61,7 +61,7 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
     RuleBasedProfiler,
 )
-from great_expectations.util import camel_to_snake
+from great_expectations.util import camel_to_snake, measure_execution_time
 from great_expectations.validator.validator import Validator
 
 # noinspection PyMethodParameters
@@ -580,7 +580,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             profiler=self._profiler,
             variables=variables,
             rules=rules,
-            batch_list=list(batches.values()),  # type: ignore[arg-type]
+            batch_list=list(batches.values()),
             batch_request=None,
             variables_directives_list=variables_directives_list,
             domain_type_directives_list=domain_type_directives_list,
@@ -722,6 +722,11 @@ class DataAssistant(metaclass=MetaDataAssistant):
         }
 
 
+@measure_execution_time(
+    execution_time_holder_object_reference_name="data_assistant_result",
+    execution_time_property_name="profiler_execution_time",
+    pretty_print=False,
+)
 def run_profiler_on_data(  # noqa: PLR0913
     data_assistant: DataAssistant,
     data_assistant_result: DataAssistantResult,
