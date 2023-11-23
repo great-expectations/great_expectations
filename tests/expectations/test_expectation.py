@@ -3,7 +3,6 @@ from typing import Any, Dict, List
 
 import pytest
 
-from great_expectations.compatibility import pydantic
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations import expectation
@@ -169,7 +168,7 @@ def test_expectation_succeeds_with_valid_mostly(fake_expectation_cls, config):
 def test_multicolumn_expectation_validation_errors_with_bad_mostly(
     fake_expectation_cls, config
 ):
-    with pytest.raises(pydantic.ValidationError):
+    with pytest.raises(InvalidExpectationConfigurationError):
         fake_expectation_cls(**config)
 
 
