@@ -1,16 +1,24 @@
 from __future__ import annotations
 
 import copy
+import cProfile
 import datetime
 import decimal
 import importlib
 import inspect
+import io
 import logging
 import os
+import pstats
 import re
 import sys
+import time
 import uuid
+from collections import OrderedDict
+from functools import wraps
 from inspect import (
+    BoundArguments,
+    signature,
     stack,
 )
 from numbers import Number
@@ -128,6 +136,101 @@ def underscore(word: str) -> str:
 
 def hyphen(txt: str):
     return txt.replace("_", "-")
+
+
+def profile(func: Callable) -> Callable:
+    @wraps(func)
+    def profile_function_call(*args, **kwargs) -> Any:
+        pr: cProfile.Profile = cProfile.Profile()
+        pr.enable()
+        retval: Any = func(*args, **kwargs)
+        pr.disable()
+        s: io.StringIO = io.StringIO()
+        sortby: str = pstats.SortKey.CUMULATIVE  # "cumulative"
+        ps: pstats.Stats = pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        print(s.getvalue())
+        return retval
+
+    return profile_function_call
+
+
+def measure_execution_time(
+    execution_time_holder_object_reference_name: str = "execution_time_holder",
+    execution_time_property_name: str = "execution_time",
+    method: str = "process_time",
+    pretty_print: bool = True,
+    include_arguments: bool = True,
+) -> Callable:
+    """
+    Parameterizes template "execution_time_decorator" function with options, supplied as arguments.
+
+    Args:
+        execution_time_holder_object_reference_name: Handle, provided in "kwargs", holds execution time property setter.
+        execution_time_property_name: Property attribute name, provided in "kwargs", sets execution time value.
+        method: Name of method in "time" module (default: "process_time") to be used for recording timestamps.
+        pretty_print: If True (default), prints execution time summary to standard output; if False, "silent" mode.
+        include_arguments: If True (default), prints arguments of function, whose execution time is measured.
+
+    Note: Method "time.perf_counter()" keeps going during sleep, while method "time.process_time()" does not.
+    Using "time.process_time()" is the better suited method for measuring code computational efficiency.
+
+    Returns:
+        Callable -- configured "execution_time_decorator" function.
+    """
+
+    def execution_time_decorator(func: Callable) -> Callable:
+        @wraps(func)
+        def compute_delta_t(*args, **kwargs) -> Any:
+            """
+            Computes return value of decorated function, calls back "execution_time_holder_object_reference_name", and
+            saves execution time (in seconds) into specified "execution_time_property_name" of passed object reference.
+            Settable "{execution_time_holder_object_reference_name}.{execution_time_property_name}" property must exist.
+
+            Args:
+                args: Positional arguments of original function being decorated.
+                kwargs: Keyword arguments of original function being decorated.
+
+            Returns:
+                Any (output value of original function being decorated).
+            """
+            time_begin: float = (getattr(time, method))()
+            try:
+                return func(*args, **kwargs)
+            finally:
+                time_end: float = (getattr(time, method))()
+                delta_t: float = time_end - time_begin
+                if kwargs is None:
+                    kwargs = {}
+
+                execution_time_holder: type = kwargs.get(  # type: ignore[assignment]
+                    execution_time_holder_object_reference_name
+                )
+                if execution_time_holder is not None and hasattr(
+                    execution_time_holder, execution_time_property_name
+                ):
+                    setattr(
+                        execution_time_holder, execution_time_property_name, delta_t
+                    )
+
+                if pretty_print:
+                    if include_arguments:
+                        bound_args: BoundArguments = signature(func).bind(
+                            *args, **kwargs
+                        )
+                        call_args: OrderedDict = bound_args.arguments
+                        print(
+                            f"""Total execution time of function {func.__name__}({dict(call_args)!s}): {delta_t} \
+seconds."""
+                        )
+                    else:
+                        print(
+                            f"Total execution time of function {func.__name__}(): {delta_t} seconds."
+                        )
+
+        return compute_delta_t
+
+    return execution_time_decorator
 
 
 def verify_dynamic_loading_support(
@@ -303,7 +406,7 @@ def gen_directory_tree_str(startpath: PathStr):
     return output_str
 
 
-# NOTE: Can be deleted once the CLI is removed
+# NOTE: Can delete once CLI is removed
 def lint_code(code: str) -> str:
     """Lint strings of code passed in.  Optional dependency "black" must be installed."""
 
@@ -326,7 +429,7 @@ def lint_code(code: str) -> str:
         return code
 
 
-# NOTE: Can be deleted once the CLI is removed
+# NOTE: Can delete once CLI is removed
 def convert_json_string_to_be_python_compliant(code: str) -> str:
     """Cleans JSON-formatted string to adhere to Python syntax
 
@@ -345,7 +448,7 @@ def convert_json_string_to_be_python_compliant(code: str) -> str:
     return code
 
 
-# NOTE: Can be deleted once the CLI is removed
+# NOTE: Can delete once CLI is removed
 def _convert_nulls_to_None(code: str) -> str:
     pattern = r'"([a-zA-Z0-9_]+)": null'
     result = re.findall(pattern, code)
@@ -357,7 +460,7 @@ def _convert_nulls_to_None(code: str) -> str:
     return code
 
 
-# NOTE: Can be deleted once the CLI is removed
+# NOTE: Can delete once CLI is removed
 def _convert_json_bools_to_python_bools(code: str) -> str:
     pattern = r'"([a-zA-Z0-9_]+)": (true|false)'
     result = re.findall(pattern, code)
