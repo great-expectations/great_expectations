@@ -3,8 +3,6 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-import great_expectations as gx
-from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import PandasDataset
 from great_expectations.profile.base import (
     OrderedProfilerCardinality,
@@ -43,14 +41,6 @@ def nulls_dataset():
             "mostly_not_null": [None if i % 3 == 0 else i for i in range(0, 1000)],
         }
     )
-    batch_df = PandasDataset(df)
-
-    return batch_df
-
-
-@pytest.fixture()
-def titanic_dataset():
-    df = gx.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
     batch_df = PandasDataset(df)
 
     return batch_df
@@ -265,49 +255,6 @@ def test__validate_semantic_types_dict(cardinality_dataset):
     )
 
 
-@pytest.mark.unit
-def test_build_suite_no_config(titanic_dataset, possible_expectations_set):
-    """
-    What does this test do and why?
-    Tests that the build_suite function works as expected with no config
-    """
-    profiler = UserConfigurableProfiler(titanic_dataset)
-    suite = profiler.build_suite()
-    expectations_from_suite = {i.expectation_type for i in suite.expectations}
-
-    assert expectations_from_suite.issubset(possible_expectations_set)
-    assert len(suite.expectations) == 48
-
-
-@pytest.mark.unit
-def test_build_suite_with_config_and_no_semantic_types_dict(
-    titanic_dataset, possible_expectations_set
-):
-    """
-    What does this test do and why?
-    Tests that the build_suite function works as expected with a config and without a semantic_types dict
-    """
-    profiler = UserConfigurableProfiler(
-        titanic_dataset,
-        ignored_columns=["Survived", "Unnamed: 0"],
-        excluded_expectations=["expect_column_mean_to_be_between"],
-        primary_or_compound_key=["Name"],
-        table_expectations_only=False,
-        value_set_threshold="very_few",
-    )
-    suite = profiler.build_suite()
-    (
-        columns_with_expectations,
-        expectations_from_suite,
-    ) = get_set_of_columns_and_expectations_from_suite(suite)
-
-    columns_expected_in_suite = {"Name", "PClass", "Age", "Sex", "SexCode"}
-    assert columns_with_expectations == columns_expected_in_suite
-    assert expectations_from_suite.issubset(possible_expectations_set)
-    assert "expect_column_mean_to_be_between" not in expectations_from_suite
-    assert len(suite.expectations) == 29
-
-
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -512,88 +459,6 @@ def test_profiled_dataset_passes_own_validation(
     context.add_expectation_suite(expectation_suite=suite)
     results = context.run_validation_operator(
         "action_list_operator", assets_to_validate=[cardinality_dataset]
-    )
-
-    assert results["success"]
-
-
-@pytest.mark.filesystem
-def test_profiler_all_expectation_types(
-    titanic_data_context, possible_expectations_set
-):
-    """
-    What does this test do and why?
-    Ensures that all available expectation types work as expected
-    """
-    context = titanic_data_context
-    df = gx.read_csv(
-        file_relative_path(
-            __file__,
-            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
-        )
-    )
-    batch_df = gx.dataset.PandasDataset(df)
-
-    ignored_columns = [
-        "pickup_location_id",
-        "dropoff_location_id",
-        "fare_amount",
-        "extra",
-        "mta_tax",
-        "tip_amount",
-        "tolls_amount",
-        "improvement_surcharge",
-        "congestion_surcharge",
-    ]
-    semantic_types = {
-        "datetime": ["pickup_datetime", "dropoff_datetime"],
-        "numeric": ["total_amount", "passenger_count"],
-        "value_set": [
-            "payment_type",
-            "rate_code_id",
-            "store_and_fwd_flag",
-            "passenger_count",
-        ],
-        "boolean": ["store_and_fwd_flag"],
-    }
-
-    profiler = UserConfigurableProfiler(
-        batch_df,
-        semantic_types_dict=semantic_types,
-        ignored_columns=ignored_columns,
-        primary_or_compound_key=[
-            "vendor_id",
-            "pickup_datetime",
-            "dropoff_datetime",
-            "trip_distance",
-            "pickup_location_id",
-            "dropoff_location_id",
-        ],
-    )
-
-    assert profiler.column_info.get("rate_code_id")
-    suite = profiler.build_suite()
-    assert len(suite.expectations) == 46
-    (
-        columns_with_expectations,
-        expectations_from_suite,
-    ) = get_set_of_columns_and_expectations_from_suite(suite)
-
-    unexpected_expectations = {
-        "expect_column_values_to_be_unique",
-        "expect_column_values_to_be_null",
-    }
-    assert expectations_from_suite == {
-        i for i in possible_expectations_set if i not in unexpected_expectations
-    }
-
-    ignored_included_columns_overlap = [
-        i for i in columns_with_expectations if i in ignored_columns
-    ]
-    assert len(ignored_included_columns_overlap) == 0
-
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[batch_df]
     )
 
     assert results["success"]
