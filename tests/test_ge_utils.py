@@ -1,5 +1,6 @@
 import copy
 import datetime
+import json
 import logging
 import os
 from typing import TYPE_CHECKING, Any
@@ -22,6 +23,16 @@ from great_expectations.util import (
 
 if TYPE_CHECKING:
     import numpy as np
+
+
+@pytest.fixture
+def file_data_asset(tmp_path):
+    tmp_path = str(tmp_path)
+    path = os.path.join(tmp_path, "file_data_asset.txt")  # noqa: PTH118
+    with open(path, "w+") as file:
+        file.write(json.dumps([0, 1, 2, 3, 4]))
+
+    return gx.data_asset.FileDataAsset(file_path=path)
 
 
 @pytest.fixture
