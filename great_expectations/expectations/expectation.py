@@ -2370,7 +2370,8 @@ class BatchExpectation(Expectation, ABC):
     args_keys: ClassVar[Tuple[str, ...]] = ()
 
     @pydantic.validator("mostly")
-    def validate_mostly(mostly: float) -> float:
+    @classmethod
+    def validate_mostly(cls, mostly: float) -> float:
         if not (0 <= mostly <= 1):
             raise ValueError("mostly must be a value between 0 and 1")
         return mostly
