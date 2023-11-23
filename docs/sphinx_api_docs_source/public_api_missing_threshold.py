@@ -98,8 +98,6 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/rule_based_profiler/rule_based_profiler.py Name: RuleBasedProfiler",
     "File: great_expectations/rule_based_profiler/rule_based_profiler.py Name: run",
     "File: great_expectations/rule_based_profiler/rule_based_profiler.py Name: to_json_dict",
-    "File: great_expectations/util.py Name: get_context",
-    "File: great_expectations/util.py Name: read_parquet",
     "File: great_expectations/validator/v1_validator.py Name: Validator",
     "File: great_expectations/validator/validation_graph.py Name: resolve",
 ]
