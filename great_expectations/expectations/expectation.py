@@ -2357,7 +2357,7 @@ class BatchExpectation(Expectation, ABC):
     table: Union[str, None] = None
     row_condition: Union[str, None] = None
     condition_parser: Union[str, None] = None
-    mostly: Union[float, int] = pydantic.Field(1.0, ge=0.0, le=1.0)
+    mostly: Union[float, int] = 1.0
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -2368,6 +2368,12 @@ class BatchExpectation(Expectation, ABC):
     metric_dependencies: ClassVar[Tuple[str, ...]] = ()
     domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.TABLE
     args_keys: ClassVar[Tuple[str, ...]] = ()
+
+    @pydantic.validator("mostly")
+    def validate_mostly(mostly: float) -> float:
+        if not (0 <= mostly <= 1):
+            raise ValueError("mostly must be a value between 0 and 1")
+        return mostly
 
     @override
     def get_validation_dependencies(
