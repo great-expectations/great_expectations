@@ -81,6 +81,15 @@ To learn more about Checkpoints, see [Checkpoint](../../terms/checkpoint.md).
 
 4. Click **Run Checkpoint** for the Checkpoint you want to run.
 
+## Edit a Checkpoint name
+
+1. In GX Cloud, click **Checkpoints**.
+
+2. Click **Edit Checkpoint** in the **Checkpoints** list for the Checkpoint you want to edit.
+
+3. Enter a new name for the Checkpoint and then click **Save**.
+
+4. Optional. Update the Checkpoint name in all code that included the previous Checkpoint name.
 
 ## Edit a Checkpoint configuration
 
