@@ -39,7 +39,6 @@ from great_expectations.rule_based_profiler.rule.rule_state import RuleState
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import (
     deep_filter_properties_iterable,
-    measure_execution_time,
 )
 
 
@@ -84,11 +83,6 @@ class Rule(SerializableDictDot):
         self._parameter_builders = parameter_builders
         self._expectation_configuration_builders = expectation_configuration_builders
 
-    @measure_execution_time(
-        execution_time_holder_object_reference_name="rule_state",
-        execution_time_property_name="rule_execution_time",
-        pretty_print=False,
-    )
     def run(  # noqa: PLR0913
         self,
         variables: Optional[ParameterContainer] = None,
@@ -323,11 +317,6 @@ class Rule(SerializableDictDot):
         }
 
     # noinspection PyUnusedLocal
-    @measure_execution_time(
-        execution_time_holder_object_reference_name="rule_state",
-        execution_time_property_name="rule_domain_builder_execution_time",
-        pretty_print=False,
-    )
     def _get_rule_domains(  # noqa: PLR0913
         self,
         variables: Optional[ParameterContainer] = None,
