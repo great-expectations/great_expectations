@@ -5,7 +5,7 @@ For detailed information on QueryExpectations, please see:
 """
 
 
-from typing import Optional, Union
+from typing import Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
@@ -39,11 +39,6 @@ class ExpectQueryToHaveNoDuplicateValueCombinations(QueryExpectation):
         "columns": None,
         "query": query,
     }
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        super().validate_configuration(configuration)
 
     def _validate(
         self,
