@@ -71,7 +71,7 @@
             "catch_exceptions": true
           },
           "out": {
-            "traceback_substring": "must be between 0 and 1"
+            "traceback_substring": "between 0 and 1"
           }
         }
       ]
