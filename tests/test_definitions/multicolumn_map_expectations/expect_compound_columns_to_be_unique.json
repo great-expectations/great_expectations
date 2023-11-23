@@ -80,7 +80,7 @@
           "catch_exceptions": true
         },
         "out": {
-          "traceback_substring": "less than or equal to 1.0"
+          "traceback_substring": "between 0 and 1"
         }
       }
     ]
