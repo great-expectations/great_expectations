@@ -1,6 +1,5 @@
 import copy
 import datetime
-import json
 import logging
 import os
 from typing import TYPE_CHECKING, Any
@@ -23,26 +22,6 @@ from great_expectations.util import (
 
 if TYPE_CHECKING:
     import numpy as np
-
-
-@pytest.fixture
-def empty_expectation_suite():
-    expectation_suite = {
-        "expectation_suite_name": "default",
-        "meta": {},
-        "expectations": [],
-    }
-    return expectation_suite
-
-
-@pytest.fixture
-def file_data_asset(tmp_path):
-    tmp_path = str(tmp_path)
-    path = os.path.join(tmp_path, "file_data_asset.txt")  # noqa: PTH118
-    with open(path, "w+") as file:
-        file.write(json.dumps([0, 1, 2, 3, 4]))
-
-    return gx.data_asset.FileDataAsset(file_path=path)
 
 
 @pytest.fixture
@@ -70,22 +49,6 @@ def datetime_string_array():
 def numeric_array():
     idx: int
     return [idx for idx in range(4)]
-
-
-@pytest.mark.unit
-def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
-    with pytest.raises(
-        ValueError, match=r"The validate util method only supports dataset validations"
-    ):
-        with pytest.warns(
-            Warning,
-            match="No great_expectations version found in configuration object.",
-        ):
-            gx.validate(
-                file_data_asset,
-                empty_expectation_suite,
-                data_asset_class=gx.data_asset.FileDataAsset,
-            )
 
 
 @pytest.mark.unit
