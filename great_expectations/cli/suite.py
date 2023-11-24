@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import click
 
-from great_expectations import DataContext
 from great_expectations import exceptions as gx_exceptions
 from great_expectations.cli import toolkit
 
@@ -141,7 +140,7 @@ def suite_new(  # noqa: PLR0913
     Create a new Expectation Suite.
     Edit in jupyter notebooks, or skip with the --no-jupyter flag.
     """
-    context: DataContext = ctx.obj.data_context
+    context = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     # only fluent datasources
@@ -192,7 +191,7 @@ def _determine_profile(profiler_name: Optional[str]) -> bool:
 
 
 def _process_suite_new_flags_and_prompt(  # noqa: PLR0913
-    context: DataContext,
+    context,
     usage_event_end: str,
     interactive_flag: bool,
     manual_flag: bool,
@@ -239,7 +238,7 @@ def _process_suite_new_flags_and_prompt(  # noqa: PLR0913
 
 
 def _suite_new_workflow(  # noqa: PLR0913
-    context: DataContext,
+    context,
     expectation_suite_name: Optional[str],
     interactive_mode: CLISuiteInteractiveFlagCombinations,
     profile: bool,
@@ -428,7 +427,7 @@ def _suite_new_process_profile_and_batch_request_flags(
 
 def _exit_early_if_error(
     error_message: Optional[str],
-    context: DataContext,
+    context,
     usage_event_end: str,
     interactive_mode: CLISuiteInteractiveFlagCombinations,
 ) -> None:
@@ -561,7 +560,7 @@ def suite_edit(  # noqa: PLR0913
 
     Read more about specifying batches of data in the documentation: https://docs.greatexpectations.io/
     """
-    context: DataContext = ctx.obj.data_context
+    context = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     # only fluent datasources
@@ -607,7 +606,7 @@ def suite_edit(  # noqa: PLR0913
 
 
 def _process_suite_edit_flags_and_prompt(  # noqa: PLR0913, PLR0912
-    context: DataContext,
+    context,
     usage_event_end: str,
     interactive_flag: bool,
     manual_flag: bool,
@@ -730,7 +729,7 @@ How would you like to edit your Expectation Suite?
 
 
 def _suite_edit_workflow(  # noqa: C901, PLR0912, PLR0913
-    context: DataContext,
+    context,
     expectation_suite_name: str,
     profile: bool,
     profiler_name: Optional[str],
@@ -894,7 +893,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 @click.pass_context
 def suite_demo(ctx: click.Context) -> None:
     """This command is not supported in the v3 (Batch Request) API."""
-    context: DataContext = ctx.obj.data_context
+    context = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     send_usage_message(
         data_context=context,
@@ -914,7 +913,7 @@ def suite_delete(ctx: click.Context, suite: str) -> None:
     """
     Delete an Expectation Suite from the Expectation Store.
     """
-    context: DataContext = ctx.obj.data_context
+    context = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     try:
         suite_names: List[str] = context.list_expectation_suite_names()
@@ -963,7 +962,7 @@ def suite_delete(ctx: click.Context, suite: str) -> None:
 @click.pass_context
 def suite_list(ctx: click.Context) -> None:
     """List existing Expectation Suites."""
-    context: DataContext = ctx.obj.data_context
+    context = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     try:
         suite_names: List[str] = context.list_expectation_suite_names()
@@ -1002,7 +1001,7 @@ def suite_list(ctx: click.Context) -> None:
     )
 
 
-def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
+def _get_notebook_path(context, notebook_name: str) -> str:
     return os.path.abspath(  # noqa: PTH100
         os.path.join(  # noqa: PTH118
             context.root_directory, context.GX_EDIT_NOTEBOOK_DIR, notebook_name

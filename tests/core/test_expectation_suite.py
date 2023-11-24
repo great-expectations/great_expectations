@@ -7,7 +7,6 @@ from unittest.mock import MagicMock
 import pytest
 
 import great_expectations.exceptions.exceptions as gx_exceptions
-from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
@@ -613,7 +612,7 @@ def table_exp3() -> ExpectationConfiguration:
 
 @pytest.fixture
 def empty_suite(empty_data_context) -> ExpectationSuite:
-    context: DataContext = empty_data_context
+    context = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[],
@@ -634,7 +633,7 @@ def suite_with_table_and_column_expectations(
     table_exp3,
     empty_data_context,
 ) -> ExpectationSuite:
-    context: DataContext = empty_data_context
+    context = empty_data_context
     suite = ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[
@@ -667,7 +666,7 @@ def suite_with_table_and_column_expectations(
 def baseline_suite(
     expect_column_values_to_be_in_set_col_a_with_meta, exp2, empty_data_context
 ) -> ExpectationSuite:
-    context: DataContext = empty_data_context
+    context = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[expect_column_values_to_be_in_set_col_a_with_meta, exp2],

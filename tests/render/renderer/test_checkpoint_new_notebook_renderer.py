@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 import pytest
 
 import great_expectations as gx
-from great_expectations import DataContext
 from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -338,7 +337,7 @@ def test_render_checkpoint_new_notebook_with_available_data_asset(
     The CheckpointNewNotebookRenderer should generate a notebook with an example SimpleCheckpoint yaml config based on the first available data asset.
     """
 
-    context: DataContext = deterministic_asset_data_connector_context
+    context = deterministic_asset_data_connector_context
 
     assert context.list_checkpoints() == []
     context.add_expectation_suite(expectation_suite=titanic_expectation_suite)
@@ -386,7 +385,7 @@ def test_render_checkpoint_new_notebook_with_unavailable_data_asset(
     assetless_dataconnector_context,
     checkpoint_new_notebook_assets,
 ):
-    context: DataContext = assetless_dataconnector_context
+    context = assetless_dataconnector_context
 
     assert context.list_checkpoints() == []
 

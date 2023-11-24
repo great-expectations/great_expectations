@@ -1,6 +1,5 @@
 from typing import List, Optional, Union
 
-from great_expectations import DataContext
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
@@ -20,7 +19,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context,
         semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
