@@ -89,7 +89,7 @@ To learn more about Checkpoints, see [Checkpoint](../../terms/checkpoint.md).
 
 3. Enter a new name for the Checkpoint and then click **Save**.
 
-4. Optional. Update the Checkpoint name in all code that included the previous Checkpoint name.
+4. Update the Checkpoint name in all code that included the previous Checkpoint name.
 
 ## Edit a Checkpoint configuration
 
