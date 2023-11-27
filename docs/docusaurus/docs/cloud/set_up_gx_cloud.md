@@ -74,15 +74,17 @@ Currently, the GX Cloud user interface is configured for Snowflake and this proc
 
     To edit an environment variable, stop the GX Cloud agent, edit the environment variable, save the change, and then restart the GX Cloud agent.
 
-## Securely manage credentials for GX API-created Data Sources
+## Securely manage GX API Data Source connection strings 
 
-If you create Data Sources in GX Cloud using the GX API (rather than the GX Cloud web UI), ensure that your sensitive Data Source credentials are properly obfuscated in your connection string. Data Source connection strings are persisted in [GX Cloud backend storage](/docs/cloud/about_gx#gx-cloud-architecture). If you create a connection string containing plaintext credentials, those credentials will be stored in plaintext.
+If you're using the GX API to connect to Data Sources and not GX Cloud, you must obfuscate your sensitive Data Source credentials in your connection string. Data Source connection strings are persisted in [GX Cloud backend storage](/docs/cloud/about_gx#gx-cloud-architecture). Connection strings containing plaintext credentials are stored as plaintext.
 
-1. Store your credential value in an environment variable. The environment variable name should be prefixed with `GX_CLOUD_`.
+The following are additional recommendations for keeping your sensitive data safe: 
 
-2. When creating your Data Source connection string, specify the environment variable name in place of where you would normally include the credential. The environment variable name must be encased in curly braces with a preceding dollar sign, for example: `${GX_CLOUD_SNOWFLAKE_PASSWORD}`. Do not include the credential value directly your connection string via interpolation.
+- Store your credential values as environment variables. Prefix environment variable names with `GX_CLOUD_`.
 
-    A full connection string might look like this:
+- When creating your Data Source connection string, use an environment variable instead of the credential. Environment variable names must be enclosed by curly braces and be preceded by a dollar sign. For example: `${GX_CLOUD_SNOWFLAKE_PASSWORD}.` Do not use interpolation to add credential values to connection strings.
+
+    A full connection string appears similar to this example:
     ```python title="Example Data Source connection string"
     snowflake://<user-name>:${GX_CLOUD_SNOWFLAKE_PASSWORD}@<account-name>/<database-name>/<schema-name>?warehouse=<warehouse-name>&role=<role-name>
     ```

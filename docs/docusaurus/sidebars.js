@@ -75,8 +75,8 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'Securely manage credentials for GX API-created Data Sources',
-              href: '/docs/cloud/set_up_gx_cloud#securely-manage-credentials-for-gx-api-created-data-sources',
+              label: 'Securely manage GX API Data Source connection strings',
+              href: '/docs/cloud/set_up_gx_cloud#securely-manage-gx-api-data-source-connection-strings',
             },
           ]
         },
