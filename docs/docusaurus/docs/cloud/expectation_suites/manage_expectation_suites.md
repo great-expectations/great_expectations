@@ -62,7 +62,7 @@ If you have specific business requirements, or you want to examine specific data
 
 3. Edit the Expectation Suite name and then click **Save**.
 
-4. Optional. Update the Expectation Suite name in all code that included the previous Expectation Suite name.
+4. Update the Expectation Suite name in all code that included the previous Expectation Suite name.
 
 ## Delete an Expectation Suite
 

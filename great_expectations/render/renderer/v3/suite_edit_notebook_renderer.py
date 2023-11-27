@@ -378,7 +378,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self.add_header(suite_name=suite_name, batch_request=batch_request)
         self.add_authoring_intro(batch_request=batch_request)
         self.add_expectation_cells_from_suite(
-            expectations=suite.expectations, batch_request=batch_request
+            expectations=suite.expectation_configurations, batch_request=batch_request
         )
         self.add_footer(batch_request=batch_request)
 

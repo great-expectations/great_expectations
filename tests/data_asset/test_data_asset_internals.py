@@ -176,7 +176,7 @@ def test_expectation_meta():
     k = 0
     assert True is result.success
     suite = df.get_expectation_suite()
-    for expectation_config in suite.expectations:
+    for expectation_config in suite.expectation_configurations:
         if expectation_config.expectation_type == "expect_column_median_to_be_between":
             k += 1
             assert {"notes": "This expectation is for lolz."} == expectation_config.meta
@@ -736,19 +736,19 @@ def test_discard_failing_expectations():
     sub1 = df[:3]
 
     sub1.discard_failing_expectations()
-    assert sub1.get_expectation_suite().expectations == exp1
+    assert sub1.get_expectation_suite().expectation_configurations == exp1
 
     sub1 = df[1:2]
     sub1.discard_failing_expectations()
-    assert sub1.get_expectation_suite().expectations == exp1
+    assert sub1.get_expectation_suite().expectation_configurations == exp1
 
     sub1 = df[:-1]
     sub1.discard_failing_expectations()
-    assert sub1.get_expectation_suite().expectations == exp1
+    assert sub1.get_expectation_suite().expectation_configurations == exp1
 
     sub1 = df[-1:]
     sub1.discard_failing_expectations()
-    assert sub1.get_expectation_suite().expectations == exp1
+    assert sub1.get_expectation_suite().expectation_configurations == exp1
 
     sub1 = df[["A", "D"]]
     exp1 = [
@@ -769,7 +769,7 @@ def test_discard_failing_expectations():
     ]
     with pytest.warns(UserWarning, match=r"Removed \d expectations that were 'False'"):
         sub1.discard_failing_expectations()
-    assert sub1.get_expectation_suite().expectations == exp1
+    assert sub1.get_expectation_suite().expectation_configurations == exp1
 
     sub1 = df[["A"]]
     exp1 = [
@@ -783,7 +783,7 @@ def test_discard_failing_expectations():
     ]
     with pytest.warns(UserWarning, match=r"Removed \d expectations that were 'False'"):
         sub1.discard_failing_expectations()
-    assert sub1.get_expectation_suite().expectations == exp1
+    assert sub1.get_expectation_suite().expectation_configurations == exp1
 
     sub1 = df.iloc[:3, 1:4]
     exp1 = [
@@ -811,7 +811,7 @@ def test_discard_failing_expectations():
     ]
     with pytest.warns(UserWarning, match=r"Removed \d expectations that were 'False'"):
         sub1.discard_failing_expectations()
-    assert sub1.get_expectation_suite().expectations == exp1
+    assert sub1.get_expectation_suite().expectation_configurations == exp1
 
     sub1 = df.loc[0:, "A":"B"]
     exp1 = [
@@ -832,7 +832,7 @@ def test_discard_failing_expectations():
     ]
     with pytest.warns(UserWarning, match=r"Removed \d expectations that were 'False'"):
         sub1.discard_failing_expectations()
-    assert sub1.get_expectation_suite().expectations == exp1
+    assert sub1.get_expectation_suite().expectation_configurations == exp1
 
 
 @pytest.mark.unit
