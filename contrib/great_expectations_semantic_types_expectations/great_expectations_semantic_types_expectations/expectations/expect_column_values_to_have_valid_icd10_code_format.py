@@ -10,21 +10,6 @@ class ExpectColumnValuesToHaveValidICD10CodeFormat(RegexBasedColumnMapExpectatio
     the given code actually exists in any version of the ICD10.
     """
 
-    def validate_configuration(self, configuration) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-
     regex_camel_name = "ICD10Codes"
     regex = "[A-Za-z][0-9][A-Za-z0-9](?:\\.[A-Za-z0-9]{0,4})?\\Z"
     semantic_type_name_plural = None

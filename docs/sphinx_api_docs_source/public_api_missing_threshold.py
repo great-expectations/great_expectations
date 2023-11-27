@@ -58,7 +58,6 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/expectations/core/expect_column_min_to_be_between.py Name: validate_configuration",
     "File: great_expectations/expectations/core/expect_column_most_common_value_to_be_in_set.py Name: validate_configuration",
     "File: great_expectations/expectations/core/expect_column_pair_values_a_to_be_greater_than_b.py Name: validate_configuration",
-    "File: great_expectations/expectations/core/expect_column_values_to_match_json_schema.py Name: validate_configuration",
     "File: great_expectations/expectations/core/expect_column_values_to_match_like_pattern.py Name: validate_configuration",
     "File: great_expectations/expectations/core/expect_column_values_to_match_like_pattern_list.py Name: validate_configuration",
     "File: great_expectations/expectations/core/expect_column_values_to_match_regex.py Name: validate_configuration",

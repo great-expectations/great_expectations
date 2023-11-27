@@ -380,11 +380,6 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
         "catch_exceptions": True,
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        super().validate_configuration(configuration)
-
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
