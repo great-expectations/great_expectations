@@ -21,8 +21,8 @@ batch = context.sources.pandas_default.read_csv(
 # BatchConfig (Splitters): (none configured)
 # BatchOptions: (none needed)
 
-batch = context.sources.postgresql.add_query_asset(name="top1000"
-    "SELECT * FROM taxi LIMIT 1000"
+batch = context.sources.postgresql.add_query_asset(
+    name="top1000" "SELECT * FROM taxi LIMIT 1000"
 ).get_batch()
 
 # What happened in the background?
@@ -40,7 +40,10 @@ suite = context.add_expectation_suite("quickstart")
 # Demo beats:
 # 1. We can still use our postional arguments
 # 2. Notice that the "note" option is now a top-level concern!
-expectation = gx.ExpectColumnValuesToNotBeNull("pu_datetime", note="These are filtered out upstream, because the entire record is garbage if there is no pu_datetime")
+expectation = gx.ExpectColumnValuesToNotBeNull(
+    "pu_datetime",
+    note="These are filtered out upstream, because the entire record is garbage if there is no pu_datetime",
+)
 batch.validate(expectation)
 suite.add_expectation(expectation)
 suite.add_expectation(
@@ -54,7 +57,7 @@ suite.add_expectation(
 batch_expectations = context.batch_expectations.add(
     name="quickstart",
     expectation_suite=suite,
-    batch_config=batch.batch_config,    # TODO: need to resolve in concert with absent batch_config
+    batch_config=batch.batch_config,  # TODO: need to resolve in concert with absent batch_config
 )
 # </snippet>
 
