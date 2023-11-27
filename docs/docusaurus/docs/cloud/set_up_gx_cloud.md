@@ -94,7 +94,7 @@ You must obfuscate your sensitive Data Source credentials in your connection str
 
 3. Use the environment variable to supply the credential value when you run the GX Agent. For example:
     ```bash title="Terminal input"
-    docker run --rm -e GX_CLOUD_SNOWFLAKE_PASSWORD="<snowflake_password>" GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" -e greatexpectations/agent
+    docker run --rm -e GX_CLOUD_SNOWFLAKE_PASSWORD="<snowflake_password>" -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" greatexpectations/agent
     ```
 
 ## Next steps
