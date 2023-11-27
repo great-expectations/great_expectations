@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
@@ -135,11 +135,6 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
             ],
         },
     ]
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        super().validate_configuration(configuration)
 
 
 if __name__ == "__main__":
