@@ -25,13 +25,12 @@ validator.save_expectation_suite()
 ###############
 # Demo point:
 # This code seems like it should be easy to understand, but its behavior is actually
-# confusing. The problem is that the expectations are being added *conditionally* 
+# confusing. The problem is that the expectations are being added *conditionally*
 # based on the data. If the expectation did not pass, it will not be saved.
 #
 # Further, the user did not know they created a suite. The resulting suite is just
 # named "default"
 ###############
-
 
 
 # Validate data

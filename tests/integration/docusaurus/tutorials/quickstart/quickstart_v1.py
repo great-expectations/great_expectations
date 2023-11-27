@@ -23,7 +23,9 @@ expectation = ExpectColumnValuesToNotBeNull("pickup_datetime")
 validator.validate(expectation)
 suite.add_expectation(expectation)
 suite.add_expectation(
-    ExpectColumnValuesToBeBetween("passenger_count", min_value=1, max_value=6)  # Note: we are removing "auto" at this point
+    ExpectColumnValuesToBeBetween(
+        "passenger_count", min_value=1, max_value=6
+    )  # Note: we are removing "auto" at this point
 )
 # </snippet>
 
@@ -32,7 +34,7 @@ suite.add_expectation(
 batch_expectations = context.add_batch_expectations(
     name="quickstart",
     expectation_suite=suite,
-    batch_config=validator.batch_config,    # not discussed yet
+    batch_config=validator.batch_config,  # not discussed yet
 )
 # </snippet>
 
