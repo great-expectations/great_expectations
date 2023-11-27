@@ -6,7 +6,7 @@ from typing import Optional, Tuple, Type
 
 from dateutil.parser import parse
 
-from great_expectations import DataContext
+import great_expectations as gx
 from great_expectations.cli.upgrade_helpers.base_upgrade_helper import BaseUpgradeHelper
 from great_expectations.data_context.store import (
     DatabaseStoreBackend,
@@ -29,7 +29,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 class UpgradeHelperV11(BaseUpgradeHelper):
     def __init__(
         self,
-        data_context: Optional[DataContext] = None,
+        data_context=None,
         context_root_dir: Optional[str] = None,
         **kwargs: dict,
     ) -> None:
@@ -37,7 +37,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             data_context or context_root_dir
         ), "Please provide a data_context object or a context_root_dir."
 
-        self.data_context = data_context or DataContext(
+        self.data_context = data_context or gx.get_context(
             context_root_dir=context_root_dir
         )
 

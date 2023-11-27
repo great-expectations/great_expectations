@@ -1036,7 +1036,7 @@ def check_if_datasource_name_exists(
     """
     Check if a Datasource name already exists in the on-disk version of the given DataContext and if so raise an error
     Args:
-        context: DataContext to check for existing Datasource
+        context to check for existing Datasource
         datasource_name: name of the proposed Datasource
     Returns:
         boolean True if datasource name exists in on-disk config, else False

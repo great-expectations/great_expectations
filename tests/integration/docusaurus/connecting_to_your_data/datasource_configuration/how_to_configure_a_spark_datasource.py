@@ -39,7 +39,7 @@ from tests.integration.docusaurus.connecting_to_your_data.datasource_configurati
 )
 
 yaml = YAMLHandler()
-data_context: gx.DataContext = gx.get_context()
+data_context = gx.get_context()
 
 
 def validate_universal_config_elements():

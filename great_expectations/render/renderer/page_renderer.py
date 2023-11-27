@@ -803,7 +803,7 @@ class ExpectationSuitePageRenderer(Renderer):
 
         total_expectations = len(expectations.expectations)
         columns = []
-        for exp in expectations.expectations:
+        for exp in expectations.expectation_configurations:
             if "column" in exp.kwargs:
                 columns.append(exp.kwargs["column"])
         total_columns = len(set(columns))

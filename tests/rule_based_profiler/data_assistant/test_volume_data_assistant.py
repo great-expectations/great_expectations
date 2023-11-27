@@ -1773,7 +1773,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_insta
 
     assert (
         data_assistant_result.expectation_configurations
-        == expected_expectation_suite.expectations
+        == expected_expectation_suite.expectation_configurations
     )
 
     assert sorted(
@@ -1844,7 +1844,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
     assert (
         data_assistant_result.expectation_configurations
-        == expected_expectation_suite.expectations
+        == expected_expectation_suite.expectation_configurations
     )
 
     data_assistant_result_profiler_config_as_json_dict: dict = (
@@ -1962,9 +1962,9 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
     expectation_configuration: ExpectationConfiguration
 
-    expected_expectation_suite.expectations = [
+    expected_expectation_suite.expectation_configurations = [
         expectation_configuration
-        for expectation_configuration in expected_expectation_suite.expectations
+        for expectation_configuration in expected_expectation_suite.expectation_configurations
         if not (
             expectation_configuration.kwargs
             and expectation_configuration.kwargs.get("column") in exclude_column_names
@@ -1979,7 +1979,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
     assert (
         data_assistant_result.expectation_configurations
-        == expected_expectation_suite.expectations
+        == expected_expectation_suite.expectation_configurations
     )
 
     data_assistant_result_profiler_config_as_json_dict: dict = (

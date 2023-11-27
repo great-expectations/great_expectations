@@ -1,13 +1,11 @@
 import glob
 import json
 import os
-from typing import cast
 
 import pandas as pd
 import pytest
 
 import great_expectations.compatibility.bigquery as BigQueryDialect
-from great_expectations import DataContext
 from great_expectations.compatibility import snowflake, sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     SQLALCHEMY_NOT_IMPORTED,
@@ -139,9 +137,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     data=dataset,
                                     table_name=dataset_name,
                                     schemas=schemas,
-                                    context=cast(
-                                        DataContext, build_in_memory_runtime_context()
-                                    ),
+                                    context=build_in_memory_runtime_context(),
                                     pk_column=pk_column,
                                 )
 

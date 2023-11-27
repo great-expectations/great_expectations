@@ -7,11 +7,12 @@ from click.testing import CliRunner
 from freezegun import freeze_time
 
 from great_expectations.cli import cli
+from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.util import gen_directory_tree_str, get_context
+from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
