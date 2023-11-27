@@ -482,7 +482,9 @@ def test_build_suite_no_config(
     """
     profiler = UserConfigurableProfiler(titanic_validator)
     suite = profiler.build_suite()
-    expectations_from_suite = {i.expectation_type for i in suite.expectations}
+    expectations_from_suite = {
+        i.expectation_type for i in suite.expectation_configurations
+    }
 
     assert expectations_from_suite.issubset(possible_expectations_set)
     assert len(suite.expectations) == 48
@@ -676,7 +678,7 @@ def test_build_suite_with_semantic_types_dict(
 
     value_set_expectations = [
         i
-        for i in suite.expectations
+        for i in suite.expectation_configurations
         if i.expectation_type == "expect_column_values_to_be_in_set"
     ]
     value_set_columns = {i.kwargs.get("column") for i in value_set_expectations}
@@ -879,7 +881,7 @@ def test_nullity_expectations_mostly_tolerance(
     )
     suite = profiler.build_suite()
 
-    for i in suite.expectations:
+    for i in suite.expectation_configurations:
         assert i["kwargs"]["mostly"] == 0.66
 
 
@@ -1248,7 +1250,7 @@ def test_user_configurable_profiler_progress_bar_config_enabled(
     assert mock_tqdm.call_count == 1
 
 
-@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch("great_expectations.data_context.data_context.EphemeralDataContext")
 @pytest.mark.slow  # 1.34s
 @pytest.mark.filesystem
 def test_user_configurable_profiler_progress_bar_config_disabled(

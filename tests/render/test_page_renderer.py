@@ -4,7 +4,6 @@ import re
 import mistune
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
@@ -23,7 +22,7 @@ pytestmark = pytest.mark.filesystem
 def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
     empty_data_context,
 ):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
             expectation_suite_name="test", meta={"notes": "*hi*"}, data_context=context

@@ -292,7 +292,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
             suite_name, batch_kwargs, suite_notes=suite.meta.get("notes", None)
         )
         self.add_authoring_intro()
-        self.add_expectation_cells_from_suite(suite.expectations)
+        self.add_expectation_cells_from_suite(suite.expectation_configurations)
         self.add_footer()
 
         return self._notebook

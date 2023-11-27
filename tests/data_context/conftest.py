@@ -15,7 +15,6 @@ import pytest
 import requests
 
 import great_expectations as gx
-from great_expectations import DataContext
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -757,10 +756,10 @@ def mocked_datasource_post_response(
 
 @pytest.fixture
 def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
-    empty_data_context_in_cloud_mode: DataContext,
+    empty_data_context_in_cloud_mode,
     mocked_datasource_get_response,
 ):
-    context: DataContext = empty_data_context_in_cloud_mode
+    context = empty_data_context_in_cloud_mode
     with patch(
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.list_keys"
     ), patch(
