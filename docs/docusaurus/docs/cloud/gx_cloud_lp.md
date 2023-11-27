@@ -4,6 +4,7 @@ title: 'GX Cloud'
 description: Get started with GX Cloud and learn more about GX Cloud features and functionality.
 pagination_next: null
 pagination_prev: null
+slug: /cloud/
 ---
 
 import LinkCardGrid from '/docs/components/LinkCardGrid';

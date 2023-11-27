@@ -1,11 +1,6 @@
 module.exports = {
-  docs: [
-    'gx_welcome',
-    {
-      type: 'category',
-      label: 'GX Cloud',
-      link: { type: 'doc', id: 'cloud/gx_cloud_lp' },
-      items: [
+  gx_cloud: [
+      { type: 'doc', id: 'cloud/gx_cloud_lp' },
         {
           type: 'category',
           label: 'About GX Cloud',
@@ -241,13 +236,9 @@ module.exports = {
             },
           ]
         },
-      ]
-    },
-    {
-      type: 'category',
-      label: 'GX OSS',
-      link: { type: 'doc', id: 'gx_oss_lp' },
-      items: [
+      ],
+  gx_core: [
+      { type: 'doc', id: 'gx_oss_lp' },
         {
           type: 'category',
           label: 'Get started with GX OSS',
@@ -452,13 +443,14 @@ module.exports = {
         { type: 'doc', id: 'troubleshooting' },
         'contributing/contributing',
         'get_support',
-      ]
-    },
-    {
+      { type: 'doc', id: 'changelog' },
+      ],
+  gx_apis: [
+      {
       type: 'category',
       label: 'GX OSS API',
-      link: { 
-        type: 'generated-index', 
+      link: {
+        type: 'generated-index',
         title: 'GX OSS API',
         description: 'GX OSS API reference content is generated from classes and methods docstrings.',
       },
@@ -469,16 +461,12 @@ module.exports = {
         }
       ]
     },
-    {
-      type: 'category',
-      label: 'Learn',
-      link: { type: 'doc', id: 'conceptual_guides/learn_lp' },
-      items: [
-        'conceptual_guides/expectation_classes',
-        'conceptual_guides/metricproviders',
-      ]
-    },
-    {
+  ],
+  learn: [
+      { type: 'doc', id: 'conceptual_guides/learn_lp' },
+      'conceptual_guides/expectation_classes',
+      'conceptual_guides/metricproviders',
+      {
       type: 'category',
       label: 'Glossary',
       link: { type: 'doc', id: 'glossary' },
@@ -532,7 +520,6 @@ module.exports = {
         'terms/validation_result'
       ]
     },
-    { type: 'doc', id: 'changelog' },
   ]
 }
 

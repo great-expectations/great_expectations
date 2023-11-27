@@ -95,80 +95,24 @@ module.exports = {
           dropdownActiveClassDisabled: true,
         },
         {
-          label: 'Product',
-          position: 'right',
-          items: [
-            {
-              label: 'GX CLOUD',
-              to: 'https://greatexpectations.io/gx-cloud',
-            },
-            {
-              label: 'GX OSS',
-              to: 'https://greatexpectations.io/gx-oss',
-            },
-          ],
+          label: 'HOME',
+          to: '/docs/home/',
         },
         {
-          label: 'Community',
-          position: 'right',
-          items: [
-            {
-              label: 'COMMUNITY HOME',
-              to: 'https://greatexpectations.io/community',
-            },
-            {
-              label: 'COMMUNITY FORUM',
-              to: 'https://discourse.greatexpectations.io/',
-            },
-            {
-              label: 'GITHUB',
-              to: 'https://github.com/great-expectations/great_expectations',
-            },
-            {
-              label: 'JOIN THE EMAIL LIST',
-              to: 'https://greatexpectations.io/newsletter',
-            },
-          ],
+          label: 'GX CLOUD',
+          to: '/docs/cloud/',
         },
         {
-          label: 'RESOURCES',
-          position: 'right',
-          items: [
-            {
-              label: 'INTEGRATIONS',
-              to: 'https://greatexpectations.io/integrations',
-            },
-            {
-              label: 'DOCUMENTATION',
-              to: 'https://docs.greatexpectations.io/docs/',
-            },
-            {
-              label: 'EXPECTATION GALLERY',
-              to: 'https://greatexpectations.io/expectations',
-            },
-            {
-              label: 'GREAT EXPECTATIONS BLOG',
-              to: 'https://greatexpectations.io/blog',
-            },
-            {
-              label: 'GREAT EXPECTATIONS CASE STUDIES',
-              to: 'https://greatexpectations.io/case-studies',
-            },
-          ],
+          label: 'GX OSS',
+          to: '/docs/gx_oss_lp/',
         },
         {
-          label: 'Company',
-          position: 'right',
-          items: [
-            {
-              label: 'ABOUT US',
-              to: 'https://greatexpectations.io/company',
-            },
-            {
-              label: 'CAREERS',
-              to: 'https://jobs.greatexpectations.io/',
-            },
-          ],
+          label: 'API',
+          to: '/docs/category/gx-oss-api',
+        },
+        {
+          label: 'LEARN',
+          to: '/docs/conceptual_guides/learn_lp',
         },
         {
           to: 'https://greatexpectations.io/gx-cloud',
