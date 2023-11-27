@@ -100,7 +100,7 @@ module.exports = {
         },
         {
           label: 'GX CLOUD',
-          to: '/docs/cloud/',
+          to: '/docs/cloud/gx_cloud_lp',
         },
         {
           label: 'GX OSS',
