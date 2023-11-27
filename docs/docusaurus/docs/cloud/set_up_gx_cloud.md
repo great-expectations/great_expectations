@@ -74,24 +74,29 @@ Currently, the GX Cloud user interface is configured for Snowflake and this proc
 
     To edit an environment variable, stop the GX Cloud agent, edit the environment variable, save the change, and then restart the GX Cloud agent.
 
-## Securely manage GX API Data Source connection strings 
+## Secure your GX API Data Source connection strings
 
-If you're using the GX API to connect to Data Sources and not GX Cloud, you must obfuscate your sensitive Data Source credentials in your connection string. Data Source connection strings are persisted in [GX Cloud backend storage](/docs/cloud/about_gx#gx-cloud-architecture). Connection strings containing plaintext credentials are stored as plaintext.
+You must obfuscate your sensitive Data Source credentials in your connection string when you use the GX API, not GX Cloud, to create Data Sources. Data Source connection strings are persisted in [GX Cloud backend storage](/docs/cloud/about_gx#gx-cloud-architecture). Connection strings containing plaintext credentials are stored as plaintext.
 
-The following are recommended steps for keeping your sensitive data safe:
+1. Store your credential value as an environment variable. Store the value by entering `export ENV_VAR_NAME=env_var_value` in the terminal or adding the command to your `~/.bashrc` or `~/.zshrc` file. For example:
 
-1. Store your credential values as environment variables. Prefix environment variable names with `GX_CLOUD_`.
+    ```bash title="Terminal input"
+    export GX_CLOUD_SNOWFLAKE_PASSWORD=<password-string>
+    ```
 
-2. When creating your Data Source connection string, use an environment variable name instead of the credential value. Environment variable names must be enclosed by curly braces and be preceded by a dollar sign. For example: `${GX_CLOUD_SNOWFLAKE_PASSWORD}`. Do not use interpolation to add credential values to connection strings.
+    Prefix environment variable names with `GX_CLOUD_`.
 
-    A full connection string appears similar to this example:
+2. Create a Data Source connection string using the environment variable name instead of the credential value. For example:
+
     ```python title="Example Data Source connection string"
     snowflake://<user-name>:${GX_CLOUD_SNOWFLAKE_PASSWORD}@<account-name>/<database-name>/<schema-name>?warehouse=<warehouse-name>&role=<role-name>
     ```
 
-3. Use environment variables to supply credential values when you run the GX Agent. For example:
+    Environment variable names must be enclosed by curly braces and be preceded by a dollar sign. For example: `${GX_CLOUD_SNOWFLAKE_PASSWORD}`. Do not use interpolation to add credential values to connection strings.
+
+3. Use the environment variable to supply the credential value when you run the GX Agent. For example:
     ```bash title="Terminal input"
-    docker run --rm -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" -e GX_CLOUD_SNOWFLAKE_PASSWORD="<snowflake_password>" greatexpectations/agent
+    docker run --rm -e GX_CLOUD_SNOWFLAKE_PASSWORD="<snowflake_password>" GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" -e greatexpectations/agent
     ```
 
 ## Next steps
