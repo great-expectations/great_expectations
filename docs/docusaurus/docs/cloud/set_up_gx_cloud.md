@@ -78,18 +78,18 @@ Currently, the GX Cloud user interface is configured for Snowflake and this proc
 
 If you're using the GX API to connect to Data Sources and not GX Cloud, you must obfuscate your sensitive Data Source credentials in your connection string. Data Source connection strings are persisted in [GX Cloud backend storage](/docs/cloud/about_gx#gx-cloud-architecture). Connection strings containing plaintext credentials are stored as plaintext.
 
-The following are additional recommendations for keeping your sensitive data safe: 
+The following are recommended steps for keeping your sensitive data safe:
 
-- Store your credential values as environment variables. Prefix environment variable names with `GX_CLOUD_`.
+1. Store your credential values as environment variables. Prefix environment variable names with `GX_CLOUD_`.
 
-- When creating your Data Source connection string, use an environment variable instead of the credential. Environment variable names must be enclosed by curly braces and be preceded by a dollar sign. For example: `${GX_CLOUD_SNOWFLAKE_PASSWORD}.` Do not use interpolation to add credential values to connection strings.
+2. When creating your Data Source connection string, use an environment variable name instead of the credential value. Environment variable names must be enclosed by curly braces and be preceded by a dollar sign. For example: `${GX_CLOUD_SNOWFLAKE_PASSWORD}`. Do not use interpolation to add credential values to connection strings.
 
     A full connection string appears similar to this example:
     ```python title="Example Data Source connection string"
     snowflake://<user-name>:${GX_CLOUD_SNOWFLAKE_PASSWORD}@<account-name>/<database-name>/<schema-name>?warehouse=<warehouse-name>&role=<role-name>
     ```
 
-3. Make your credential value available an an environment variable when running the GX Agent.
+3. Use environment variables to supply credential values when you run the GX Agent. For example:
     ```bash title="Terminal input"
     docker run --rm -e GX_CLOUD_ACCESS_TOKEN="<user_access_token>" -e GX_CLOUD_ORGANIZATION_ID="<organization_id>" -e GX_CLOUD_SNOWFLAKE_PASSWORD="<snowflake_password>" greatexpectations/agent
     ```
