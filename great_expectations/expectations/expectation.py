@@ -34,11 +34,11 @@ from typing import (
 
 import pandas as pd
 from dateutil.parser import parse
-from typing_extensions import Annotated, ParamSpec
+from typing_extensions import ParamSpec
 
 from great_expectations import __version__ as ge_version
 from great_expectations.compatibility import pydantic
-from great_expectations.compatibility.pydantic import Field, ModelMetaclass
+from great_expectations.compatibility.pydantic import ModelMetaclass
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (
     deprecated_method_or_class,
@@ -2362,7 +2362,7 @@ class BatchExpectation(Expectation, ABC):
     batch_id: Union[str, None] = None
     row_condition: Union[str, None] = None
     condition_parser: Union[str, None] = None
-    mostly: Annotated[float, Field(strict=True, ge=0, le=1)] = 1
+    mostly: pydantic.confloat(ge=0, le=1) = 1
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -2373,13 +2373,6 @@ class BatchExpectation(Expectation, ABC):
     metric_dependencies: ClassVar[Tuple[str, ...]] = ()
     domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.TABLE
     args_keys: ClassVar[Tuple[str, ...]] = ()
-
-    # @pydantic.validator("mostly")
-    # @classmethod
-    # def validate_mostly(cls, mostly: float) -> float:
-    #     if not (0 <= mostly <= 1):
-    #         raise ValueError("mostly must be a value between 0 and 1")
-    #     return mostly
 
     @override
     def get_validation_dependencies(
