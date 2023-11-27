@@ -123,16 +123,6 @@ module.exports = {
         },
       ],
     },
-    sidebarNav: {
-      bottomNav: {
-        items: [
-          {
-            label: 'GX Cloud status',
-            href: 'https://status.greatexpectations.io/?referral=docs-sidebar',
-          }
-        ]
-      }
-    },
     footer: {
       style: 'light',
       logo: {
