@@ -338,32 +338,22 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
 if __name__ == "__main__":
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py diagnostics">
     ExpectColumnMaxToBeBetweenCustom(
-        configuration=ExpectationConfiguration(
-            expectation_type="expect_column_max_to_be_between_custom",
-            kwargs={
-                "column": "x",
-                "min_value": 0,
-                "max_value": 10,
-                "strict_min": True,
-                "strict_max": False,
-            },
-        )
+        column="x",
+        min_value=0,
+        max_value=10,
+        strict_min=True,
+        strict_max=False,
     ).print_diagnostic_checklist()
 #     </snippet>
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
 diagnostics = ExpectColumnMaxToBeBetweenCustom(
-    configuration=ExpectationConfiguration(
-        expectation_type="expect_column_max_to_be_between_custom",
-        kwargs={
-            "column": "x",
-            "min_value": 0,
-            "max_value": 10,
-            "strict_min": True,
-            "strict_max": False,
-        },
-    )
+    column="x",
+    min_value=0,
+    max_value=10,
+    strict_min=True,
+    strict_max=False,
 ).run_diagnostics()
 
 for check in diagnostics["tests"]:

@@ -1,7 +1,6 @@
 import pytest
 from moto import mock_glue
 
-from great_expectations import DataContext
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -226,7 +225,7 @@ def test_invalid_instantiation(glue_titanic_catalog):
 def test_instantiation_from_a_config(
     empty_data_context_stats_enabled, glue_titanic_catalog
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     report_object = context.test_yaml_config(
         """
     module_name: great_expectations.datasource.data_connector

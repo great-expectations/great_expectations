@@ -5,7 +5,6 @@ from unittest import mock
 import pytest
 from click.testing import CliRunner, Result
 
-from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
 from great_expectations.cli import cli
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -462,7 +461,7 @@ def test_assume_yes_using_full_flag_using_checkpoint_delete(
     What does this test and why?
     All versions of the --assume-yes flag (--assume-yes/--yes/-y) should behave the same.
     """
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     runner: CliRunner = CliRunner(mix_stderr=False)
     checkpoint_name: str = "my_v1_checkpoint"
@@ -534,7 +533,7 @@ def test_assume_yes_using_yes_flag_using_checkpoint_delete(
     What does this test and why?
     All versions of the --assume-yes flag (--assume-yes/--yes/-y) should behave the same.
     """
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     runner: CliRunner = CliRunner(mix_stderr=False)
     checkpoint_name: str = "my_v1_checkpoint"
@@ -606,7 +605,7 @@ def test_assume_yes_using_y_flag_using_checkpoint_delete(
     What does this test and why?
     All versions of the --assume-yes flag (--assume-yes/--yes/-y) should behave the same.
     """
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     runner: CliRunner = CliRunner(mix_stderr=False)
     checkpoint_name: str = "my_v1_checkpoint"
@@ -678,7 +677,7 @@ def test_using_assume_yes_flag_on_command_with_no_assume_yes_implementation(
     What does this test and why?
     The --assume-yes flag should not cause issues when run with commands that do not implement any logic based on it.
     """
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
     monkeypatch.chdir(os.path.dirname(context.root_directory))  # noqa: PTH120
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
