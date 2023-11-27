@@ -61,7 +61,7 @@ def test_expectation_suite_filedata_asset():
             expectation_type="expect_file_line_regex_match_count_to_equal",
             kwargs={"expected_count": 3, "regex": ",\\S", "skip": 1},
         )
-    ] == complete_config.expectations
+    ] == complete_config.expectation_configurations
 
     # Include result format kwargs
     complete_config2 = f_dat.get_expectation_suite(
@@ -86,7 +86,7 @@ def test_expectation_suite_filedata_asset():
                 "skip": 1,
             },
         ),
-    ] == complete_config2.expectations
+    ] == complete_config2.expectation_configurations
 
     # Discard Failing Expectations
     complete_config3 = f_dat.get_expectation_suite(
@@ -103,7 +103,7 @@ def test_expectation_suite_filedata_asset():
                 "skip": 1,
             },
         )
-    ] == complete_config3.expectations
+    ] == complete_config3.expectation_configurations
 
 
 @pytest.mark.filesystem

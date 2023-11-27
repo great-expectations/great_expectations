@@ -62,6 +62,8 @@ If you have specific business requirements, or you want to examine specific data
 
 3. Edit the Expectation Suite name and then click **Save**.
 
+4. Update the Expectation Suite name in all code that included the previous Expectation Suite name.
+
 ## Delete an Expectation Suite
 
 1. In GX Cloud, delete all Checkpoints associated with the Expectation Suite. See [Delete a Checkpoint](/docs/cloud/checkpoints/manage_checkpoints#delete-a-checkpoint). 

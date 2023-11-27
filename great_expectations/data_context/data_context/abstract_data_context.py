@@ -3646,7 +3646,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             new_column_count = len(
                 {
                     exp.kwargs["column"]
-                    for exp in expectation_suite.expectations
+                    for exp in expectation_suite.expectation_configurations
                     if "column" in exp.kwargs
                 }
             )
