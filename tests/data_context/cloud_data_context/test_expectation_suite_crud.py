@@ -676,7 +676,9 @@ def test_get_expectation_suite_include_rendered_content_prescriptive(
         )
     )
     assert (
-        expectation_suite_exclude_rendered_content.expectations[0].rendered_content
+        expectation_suite_exclude_rendered_content.expectation_configurations[
+            0
+        ].rendered_content
         is None
     )
 
@@ -712,6 +714,8 @@ def test_get_expectation_suite_include_rendered_content_prescriptive(
         )
     )
     assert (
-        expectation_suite_include_rendered_content.expectations[0].rendered_content
+        expectation_suite_include_rendered_content.expectation_configurations[
+            0
+        ].rendered_content
         == expected_expectation_configuration_prescriptive_rendered_content
     )

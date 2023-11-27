@@ -578,7 +578,7 @@ def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
 
 
 def test_render_with_no_column_cells(critical_suite_with_citations, empty_data_context):
-    critical_suite_with_citations.expectations = []
+    critical_suite_with_citations.expectation_configurations = []
     obs = SuiteEditNotebookRenderer.from_data_context(empty_data_context).render(
         critical_suite_with_citations
     )

@@ -459,7 +459,7 @@ def test_build_suite_with_semantic_types_dict(
 
     value_set_expectations = [
         i
-        for i in suite.expectations
+        for i in suite.expectation_configurations
         if i.expectation_type == "expect_column_values_to_be_in_set"
     ]
     value_set_columns = {i.kwargs.get("column") for i in value_set_expectations}
@@ -662,7 +662,7 @@ def test_nullity_expectations_mostly_tolerance(
     )
     suite = profiler.build_suite()
 
-    for i in suite.expectations:
+    for i in suite.expectation_configurations:
         assert i["kwargs"]["mostly"] == 0.66
 
 

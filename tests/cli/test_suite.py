@@ -3190,7 +3190,7 @@ def test_suite_new_profile_runs_notebook_no_jupyter(  # noqa: PLR0915
 
     expectation_configurations: List[ExpectationConfiguration] = []
     expectation_configuration: ExpectationConfiguration
-    for expectation_configuration in suite.expectations:
+    for expectation_configuration in suite.expectation_configurations:
         kwargs: dict = expectation_configuration.kwargs
         key: str
         value: Any
@@ -3416,7 +3416,7 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(  # noqa: PLR0915
 
     expectation_configurations: List[ExpectationConfiguration] = []
     expectation_configuration: ExpectationConfiguration
-    for expectation_configuration in suite.expectations:
+    for expectation_configuration in suite.expectation_configurations:
         kwargs: dict = expectation_configuration.kwargs
         key: str
         value: Any
