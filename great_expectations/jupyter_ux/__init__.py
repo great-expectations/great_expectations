@@ -351,7 +351,7 @@ def display_column_expectations_as_section(
     # TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
     column_expectation_list = [
         e
-        for e in expectation_suite.expectations
+        for e in expectation_suite.expectation_configurations
         if "column" in e.kwargs and e.kwargs["column"] == column
     ]
 
