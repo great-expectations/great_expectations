@@ -2362,7 +2362,7 @@ class BatchExpectation(Expectation, ABC):
     batch_id: Union[str, None] = None
     row_condition: Union[str, None] = None
     condition_parser: Union[str, None] = None
-    mostly: confloat(ge=0, le=1) = Field(default=1)
+    mostly: confloat(ge=0, le=1) = Field(default=1, ge=0, le=1)
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
