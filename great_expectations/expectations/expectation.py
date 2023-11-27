@@ -2362,7 +2362,7 @@ class BatchExpectation(Expectation, ABC):
     batch_id: Union[str, None] = None
     row_condition: Union[str, None] = None
     condition_parser: Union[str, None] = None
-    mostly: pydantic.Annotated[float, pydantic.Field(strict=True, gt=0, lt=1)] = 1
+    mostly: pydantic.Annotated[float, pydantic.Field(strict=True, ge=0, le=1)] = 1
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
