@@ -189,7 +189,7 @@ def test_render_expectation_suite_column_section_renderer(
 ):
     # Group expectations by column
     exp_groups = {}
-    for exp in titanic_profiled_expectations_1.expectations:
+    for exp in titanic_profiled_expectations_1.expectation_configurations:
         try:
             column = exp.kwargs["column"]
             if column not in exp_groups:

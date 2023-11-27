@@ -284,7 +284,9 @@ def test_alice_profiler_user_workflow_single_batch(
 
     assert (
         result.expectation_configurations
-        == alice_columnar_table_single_batch["expected_expectation_suite"].expectations
+        == alice_columnar_table_single_batch[
+            "expected_expectation_suite"
+        ].expectation_configurations
     )
 
     assert mock_emit.call_count == 43
@@ -685,7 +687,10 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                 "estimation_histogram", None
             )
 
-    assert result.expectation_configurations == fixture_expectation_suite.expectations
+    assert (
+        result.expectation_configurations
+        == fixture_expectation_suite.expectation_configurations
+    )
 
     profiled_fully_qualified_parameter_names_by_domain: Dict[
         Domain, List[str]

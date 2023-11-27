@@ -107,10 +107,10 @@ suite.add_expectation(expectation_configuration=expectation_configuration_4)
 
 # Does the ExpectationSuite contain what we expect
 assert len(suite.expectations) == 4
-assert suite.expectations[0] == expectation_configuration_1
-assert suite.expectations[1] == expectation_configuration_2
-assert suite.expectations[2] == expectation_configuration_3
-assert suite.expectations[3] == expectation_configuration_4
+assert suite.expectation_configurations[0] == expectation_configuration_1
+assert suite.expectation_configurations[1] == expectation_configuration_2
+assert suite.expectation_configurations[2] == expectation_configuration_3
+assert suite.expectation_configurations[3] == expectation_configuration_4
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py save_expectation_suite">
 context.save_expectation_suite(expectation_suite=suite)
