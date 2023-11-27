@@ -50,12 +50,12 @@ def test_cloud_backed_data_context_add_or_update_expectation_suite_include_rende
         expectation_suite: ExpectationSuite = context.add_or_update_expectation_suite(
             "test_suite"
         )
-    expectation_suite.expectations.append(
+    expectation_suite.expectation_configurations.append(
         ExpectationConfiguration(
             expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
         )
     )
-    assert expectation_suite.expectations[0].rendered_content is None
+    assert expectation_suite.expectation_configurations[0].rendered_content is None
 
     with mock.patch(
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.list_keys"

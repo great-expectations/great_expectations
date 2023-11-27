@@ -500,7 +500,7 @@ def warning_suite(empty_data_context) -> ExpectationSuite:
 def test_render_with_no_column_cells_without_batch_request(
     critical_suite_with_citations, empty_data_context
 ):
-    critical_suite_with_citations.expectations = []
+    critical_suite_with_citations.expectation_configurations = []
     obs: dict = SuiteEditNotebookRenderer.from_data_context(
         data_context=empty_data_context
     ).render(suite=critical_suite_with_citations)
