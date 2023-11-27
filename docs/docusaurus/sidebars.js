@@ -204,6 +204,11 @@ module.exports = {
             },
             {
               type: 'link',
+              label: 'Edit a Checkpoint name',
+              href: '/docs/cloud/checkpoints/manage_checkpoints#edit-a-checkpoint-name',
+            },
+            {
+              type: 'link',
               label: 'Edit a Checkpoint configuration',
               href: '/docs/cloud/checkpoints/manage_checkpoints#edit-a-checkpoint-configuration',
             },
