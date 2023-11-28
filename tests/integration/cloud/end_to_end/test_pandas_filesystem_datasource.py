@@ -10,8 +10,6 @@ import pytest
 from great_expectations.core import ExpectationConfiguration
 
 if TYPE_CHECKING:
-    import py
-
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.checkpoint import CheckpointResult
     from great_expectations.core import ExpectationSuite, ExpectationValidationResult
@@ -29,8 +27,8 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(scope="module")
-def base_dir(tmp_dir: py.path) -> pathlib.Path:
-    dir_path = tmp_dir / "data"
+def base_dir(tmp_path: pathlib.Path) -> pathlib.Path:
+    dir_path = tmp_path / "data"
     dir_path.mkdir()
     df = pd.DataFrame({"name": ["bob", "alice"]})
     df.to_csv(dir_path / "data.csv")
@@ -39,8 +37,8 @@ def base_dir(tmp_dir: py.path) -> pathlib.Path:
 
 
 @pytest.fixture(scope="module")
-def updated_base_dir(tmp_dir: py.path) -> pathlib.Path:
-    dir_path = tmp_dir / "other_data"
+def updated_base_dir(tmp_path: pathlib.Path) -> pathlib.Path:
+    dir_path = tmp_path / "other_data"
     dir_path.mkdir()
     return pathlib.Path(dir_path)
 
