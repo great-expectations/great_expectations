@@ -131,12 +131,9 @@ def checkpoint(
     assert (
         len(checkpoint.validations) == 1
     ), "Checkpoint was not updated in the previous method call."
-    yield checkpoint
-    # PP-691: this is a bug
-    # you should only have to pass name
+
     context.delete_checkpoint(
-        # name=checkpoint_name,
-        id=checkpoint.ge_cloud_id,
+        name=checkpoint_name,
     )
     with pytest.raises(gx_exceptions.DataContextError):
         context.get_checkpoint(name=checkpoint_name)
