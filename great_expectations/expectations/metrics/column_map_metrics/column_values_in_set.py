@@ -21,7 +21,7 @@ except ImportError:
 
 class ColumnValuesInSet(ColumnMapMetricProvider):
     condition_metric_name = "column_values.in_set"
-    condition_value_keys = "value_set"
+    condition_value_keys = ("value_set",)
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(
