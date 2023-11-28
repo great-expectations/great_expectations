@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import datetime
 from typing import TYPE_CHECKING, Dict, List, Optional
 
+from great_expectations.compatibility.pydantic import validator
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.expectations.core.validators import (
+    validate_max_value,
+    validate_min_value,
+)
 from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
@@ -98,6 +103,12 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
     See Also:
         [expect_column_min_to_be_between](https://greatexpectations.io/expectations/expect_column_min_to_be_between)
     """
+
+    min_val: float | int | dict | datetime.datetime | None = None
+    max_val: float | int | dict | datetime.datetime | None = None
+
+    _min_val = validator("min_val", allow_reuse=True)(validate_min_value)
+    _max_val = validator("max_val", allow_reuse=True)(validate_max_value)
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -202,26 +213,6 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
         "profiler_config": default_profiler_config,
     }
     args_keys = ("column", "min_value", "max_value", "strict_min", "strict_max")
-
-    @override
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration for the Expectation.
-
-        For this expectation, `configuraton.kwargs` may contain `min_value` and `max_value` whose value is either
-        a number or date.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-
-        Raises:
-            InvalidExpectationConfigurationError: if the config is not validated successfully
-        """
-        super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     @override

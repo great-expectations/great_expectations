@@ -1,9 +1,15 @@
-from typing import Dict, Optional
+import datetime
+from typing import Dict
 
 from scipy import stats
 
+from great_expectations.compatibility.pydantic import validator
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.expectations.core.validators import (
+    validate_max_value,
+    validate_min_value,
+)
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
@@ -137,6 +143,12 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnAggregateExpectation):
         [Wasserstein Metric on Wikipedia](https://en.wikipedia.org/wiki/Wasserstein_metric)
     """
 
+    min_val: float | int | dict | datetime.datetime | None = None
+    max_val: float | int | dict | datetime.datetime | None = None
+
+    _min_val = validator("min_val", allow_reuse=True)(validate_min_value)
+    _max_val = validator("max_val", allow_reuse=True)(validate_max_value)
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.custom.wasserstein",)
     success_keys = (
@@ -212,22 +224,6 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnAggregateExpectation):
             ],
         },
     ]
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-        super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
 
     # @classmethod
     # @renderer(renderer_type="renderer.prescriptive")

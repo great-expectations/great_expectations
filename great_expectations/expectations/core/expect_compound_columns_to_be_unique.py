@@ -1,8 +1,14 @@
+import datetime
 from typing import TYPE_CHECKING, Optional
 
+from great_expectations.compatibility.pydantic import validator
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
+)
+from great_expectations.expectations.core.validators import (
+    validate_max_value,
+    validate_min_value,
 )
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
@@ -55,6 +61,12 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
 
+    min_val: float | int | dict | datetime.datetime | None = None
+    max_val: float | int | dict | datetime.datetime | None = None
+
+    _min_val = validator("min_val", allow_reuse=True)(validate_min_value)
+    _max_val = validator("max_val", allow_reuse=True)(validate_max_value)
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
@@ -80,26 +92,6 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         "catch_exceptions": False,
     }
     args_keys = ("column_list",)
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates the configuration of an Expectation.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-                                  superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                                  from the configuration attribute of the Expectation instance.
-
-        Raises:
-            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
-                                  Expectation."
-        """
-        super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     def _prescriptive_template(

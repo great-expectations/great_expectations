@@ -1,9 +1,15 @@
-from typing import Dict, Optional
+import datetime
+from typing import Dict
 
 from scipy import stats
 
+from great_expectations.compatibility.pydantic import validator
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.expectations.core.validators import (
+    validate_max_value,
+    validate_min_value,
+)
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
@@ -118,6 +124,12 @@ class ColumnNormallyDistributed(ColumnAggregateMetricProvider):
 class ExpectColumnValuesToBeNormallyDistributed(ColumnAggregateExpectation):
     """Expect column values to be normally distributed. NaN values are omitted."""
 
+    min_val: float | int | dict | datetime.datetime | None = None
+    max_val: float | int | dict | datetime.datetime | None = None
+
+    _min_val = validator("min_val", allow_reuse=True)(validate_min_value)
+    _max_val = validator("max_val", allow_reuse=True)(validate_max_value)
+
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
         {
@@ -197,22 +209,6 @@ class ExpectColumnValuesToBeNormallyDistributed(ColumnAggregateExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-        super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
 
     # @classmethod
     # @renderer(renderer_type="renderer.prescriptive")

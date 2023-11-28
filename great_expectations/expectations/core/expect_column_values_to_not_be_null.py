@@ -1,11 +1,17 @@
 from __future__ import annotations
 
+import datetime
 from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
 
+from great_expectations.compatibility.pydantic import validator
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
+)
+from great_expectations.expectations.core.validators import (
+    validate_max_value,
+    validate_min_value,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -78,6 +84,12 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         [expect_column_values_to_be_null](https://greatexpectations.io/expectations/expect_column_values_to_be_null)
     """
 
+    min_val: float | int | dict | datetime.datetime | None = None
+    max_val: float | int | dict | datetime.datetime | None = None
+
+    _min_val = validator("min_val", allow_reuse=True)(validate_min_value)
+    _max_val = validator("max_val", allow_reuse=True)(validate_max_value)
+
     library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
@@ -91,27 +103,6 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
 
     map_metric: ClassVar[str] = "column_values.nonnull"
     args_keys: ClassVar[Tuple[str, ...]] = ("column",)
-
-    @override
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates the configuration of an Expectation.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                                  from the configuration attribute of the Expectation instance.
-
-        Raises:
-            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
-                                                                           Expectation."
-        """
-        super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     @override
