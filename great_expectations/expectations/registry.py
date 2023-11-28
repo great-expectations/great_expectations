@@ -188,7 +188,7 @@ def register_core_metrics() -> None:
     after_count = len(_registered_metrics)
 
     if before_count == after_count:
-        logger.debug("Already registered core mtrics; no updates to registry")
+        logger.debug("Already registered core metrics; no updates to registry")
     else:
         logger.debug(f"Registered {after_count-before_count} core metrics")
 
