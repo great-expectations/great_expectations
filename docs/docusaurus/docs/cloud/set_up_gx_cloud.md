@@ -76,7 +76,7 @@ Currently, the GX Cloud user interface is configured for Snowflake and this proc
 
 ## Secure your GX API Data Source connection strings
 
-You must obfuscate your sensitive Data Source credentials in your connection string when you use the GX API and not GX Cloud, to connect to Data Sources. Data Source connection strings are persisted in [GX Cloud backend storage](/docs/cloud/about_gx#gx-cloud-architecture). Connection strings containing plaintext credentials are stored as plaintext.
+When you use the GX API and not GX Cloud to connect to Data Sources, you must obfuscate your sensitive Data Source credentials in your connection string. Data Source connection strings are persisted in [GX Cloud backend storage](/docs/cloud/about_gx#gx-cloud-architecture). Connection strings containing plaintext credentials are stored as plaintext.
 
 1. Store your credential value as an environment variable by entering `export ENV_VAR_NAME=env_var_value` in the terminal or adding the command to your `~/.bashrc` or `~/.zshrc` file. For example:
 
