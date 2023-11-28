@@ -75,7 +75,7 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'Securely manage GX API Data Source connection strings',
+              label: 'Secure your GX API Data Source connection strings',
               href: '/docs/cloud/set_up_gx_cloud#secure-your-gx-api-data-source-connection-strings',
             },
           ]
