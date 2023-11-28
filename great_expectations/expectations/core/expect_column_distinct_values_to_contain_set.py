@@ -72,15 +72,11 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.value_counts",)
-    success_keys = (
-        "value_set",
-        "parse_strings_as_datetimes",
-    )
+    success_keys = ("value_set",)
 
     # Default values
     default_kwarg_values = {
         "value_set": None,
-        "parse_strings_as_datetimes": False,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
@@ -127,7 +123,6 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
         add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("value_set", RendererValueType.ARRAY),
-            ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
         )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
@@ -149,9 +144,6 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
                 renderer_configuration=renderer_configuration,
             )
             template_str = f"distinct values must contain this set: {value_set_str}."
-
-            if params.parse_strings_as_datetimes:
-                template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -179,7 +171,6 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
             [
                 "column",
                 "value_set",
-                "parse_strings_as_datetimes",
                 "row_condition",
                 "condition_parser",
             ],
@@ -196,9 +187,6 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
             )
 
         template_str = f"distinct values must contain this set: {values_string}."
-
-        if params.get("parse_strings_as_datetimes"):
-            template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"

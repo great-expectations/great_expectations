@@ -17,13 +17,9 @@ from great_expectations.expectations.metrics.metric_provider import metric_parti
 
 class ColumnValuesDecreasing(ColumnMapMetricProvider):
     condition_metric_name = "column_values.decreasing"
-    condition_value_keys = (
-        "strictly",
-        "parse_strings_as_datetimes",
-    )
+    condition_value_keys = ("strictly",)
     default_kwarg_values = {
         "strictly": False,
-        "parse_strings_as_datetimes": False,
     }
 
     @column_condition_partial(engine=PandasExecutionEngine)
@@ -86,7 +82,6 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
             compute_domain_kwargs, MetricDomainTypes.COLUMN
         )
 
-        # NOTE: 20201105 - parse_strings_as_datetimes is not supported here;
         # instead detect types naturally
         column = F.col(column_name)
         if isinstance(

@@ -26,7 +26,6 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         "max_value",
         "strict_min",
         "strict_max",
-        "parse_strings_as_datetimes",
         "allow_cross_type_comparisons",
     )
 
@@ -38,7 +37,6 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         max_value=None,
         strict_min=None,
         strict_max=None,
-        parse_strings_as_datetimes: bool = False,
         allow_cross_type_comparisons=None,
         **kwargs,
     ):
@@ -172,7 +170,6 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         max_value=None,
         strict_min=None,
         strict_max=None,
-        parse_strings_as_datetimes: bool = False,
         **kwargs,
     ):
         if min_value is not None and max_value is not None and min_value > max_value:
@@ -225,7 +222,6 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         max_value=None,
         strict_min=None,
         strict_max=None,
-        parse_strings_as_datetimes: bool = False,
         **kwargs,
     ):
         if min_value is not None and max_value is not None and min_value > max_value:

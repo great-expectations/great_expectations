@@ -23,7 +23,6 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
     )
     condition_value_keys = (
         "or_equal",
-        "parse_strings_as_datetimes",
         "allow_cross_type_comparisons",
     )
 
@@ -52,12 +51,6 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
             kwargs.get("allow_cross_type_comparisons") or False
         )
         if allow_cross_type_comparisons:
-            raise NotImplementedError
-
-        parse_strings_as_datetimes: bool = (
-            kwargs.get("parse_strings_as_datetimes") or False
-        )
-        if parse_strings_as_datetimes:
             raise NotImplementedError
 
         or_equal: bool = kwargs.get("or_equal") or False

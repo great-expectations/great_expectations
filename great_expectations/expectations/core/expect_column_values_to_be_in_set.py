@@ -87,8 +87,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         mostly (None or a float between 0 and 1): \
             Successful if at least mostly fraction of values match the expectation. \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
-        parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed as \
-            datetimes before making comparisons.
 
     Other Parameters:
         result_format (str or None): \
@@ -132,7 +130,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     success_keys = (
         "value_set",
         "mostly",
-        "parse_strings_as_datetimes",
         "auto",
         "profiler_config",
     )
@@ -183,7 +180,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
     default_kwarg_values = {
         "value_set": [],
-        "parse_strings_as_datetimes": False,
         "auto": False,
         "profiler_config": default_profiler_config,
     }
@@ -197,7 +193,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             ("column", RendererValueType.STRING),
             ("value_set", RendererValueType.ARRAY),
             ("mostly", RendererValueType.NUMBER),
-            ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
         )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
@@ -228,9 +223,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             else:
                 template_str += "."
 
-            if params.parse_strings_as_datetimes:
-                template_str += " Values should be parsed as datetimes."
-
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
@@ -258,7 +250,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                 "column",
                 "value_set",
                 "mostly",
-                "parse_strings_as_datetimes",
                 "row_condition",
                 "condition_parser",
             ],
@@ -284,9 +275,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-
-        if params.get("parse_strings_as_datetimes"):
-            template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"

@@ -14,7 +14,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 
 class ColumnMin(ColumnAggregateMetricProvider):
     metric_name = "column.min"
-    value_keys = ("parse_strings_as_datetimes",)
+    value_keys = ()
 
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):

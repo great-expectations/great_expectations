@@ -1,7 +1,4 @@
-import datetime
 from typing import Any, Dict
-
-import pandas as pd
 
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
@@ -20,13 +17,9 @@ from great_expectations.expectations.metrics.metric_provider import metric_parti
 
 class ColumnValuesIncreasing(ColumnMapMetricProvider):
     condition_metric_name = "column_values.increasing"
-    condition_value_keys = (
-        "strictly",
-        "parse_strings_as_datetimes",
-    )
+    condition_value_keys = ("strictly",)
     default_kwarg_values = {
         "strictly": False,
-        "parse_strings_as_datetimes": False,
     }
 
     @column_condition_partial(engine=PandasExecutionEngine)
@@ -35,28 +28,16 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
         column,
         **kwargs,
     ):
-        parse_strings_as_datetimes: bool = (
-            kwargs.get("parse_strings_as_datetimes") or False
-        )
         temp_column = column
 
         series_diff = temp_column.diff()
         # The first element is null, so it gets a bye and is always treated as True
-        if parse_strings_as_datetimes:
-            series_diff[series_diff.isnull()] = datetime.timedelta(seconds=1)
-            series_diff = pd.to_timedelta(series_diff, unit="S")
-        else:
-            series_diff[series_diff.isnull()] = 1
+        series_diff[series_diff.isnull()] = 1
 
         strictly: bool = kwargs.get("strictly") or False
         if strictly:
-            if parse_strings_as_datetimes:
-                return series_diff.dt.total_seconds() > 0.0  # noqa: PLR2004
             return series_diff > 0
-        else:
-            if parse_strings_as_datetimes:
-                return series_diff.dt.total_seconds() >= 0.0  # noqa: PLR2004
-            return series_diff >= 0
+        return series_diff >= 0
 
     @metric_partial(
         engine=SparkDFExecutionEngine,
@@ -102,7 +83,6 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
             compute_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
 
-        # NOTE: 20201105 - parse_strings_as_datetimes is not supported here;
         # instead detect types naturally
         column = F.col(column_name)
         if isinstance(
