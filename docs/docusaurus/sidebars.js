@@ -73,6 +73,11 @@ module.exports = {
               label: 'Set the environment variables and start the GX Cloud agent',
               href: '/docs/cloud/set_up_gx_cloud#set-the-environment-variables-and-start-the-gx-cloud-agent',
             },
+            {
+              type: 'link',
+              label: 'Secure your GX API Data Source connection strings',
+              href: '/docs/cloud/set_up_gx_cloud#secure-your-gx-api-data-source-connection-strings',
+            },
           ]
         },
         {
@@ -128,8 +133,8 @@ module.exports = {
           items: [
             {
               type: 'link',
-              label: 'Available Expectation types',
-              href: '/docs/cloud/expectations/manage_expectations#available-expectation-types',
+              label: 'Available Expectations',
+              href: '/docs/cloud/expectations/manage_expectations#available-expectations',
             },
             {
               type: 'link',
