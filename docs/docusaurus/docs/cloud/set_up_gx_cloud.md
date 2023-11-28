@@ -21,11 +21,7 @@ To get the most out of GX Cloud, you'll need to request a GX Cloud Beta account,
 
 ## Prepare your environment
 
-1. Download and install Python. See [Active Python Releases](https://www.python.org/downloads/).
-
-2. Download and install pip. See the [pip documentation](https://pip.pypa.io/en/stable/cli/pip/).
-
-3. Download and install Docker. See [Get Docker](https://docs.docker.com/get-docker/).
+1. Download and install Docker. See [Get Docker](https://docs.docker.com/get-docker/).
 
 ## Get your user access token and organization ID
 
