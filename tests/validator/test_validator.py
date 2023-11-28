@@ -1056,39 +1056,6 @@ def test_validator_include_rendered_content_diagnostic(
         in validation_result.rendered_content
     )
 
-    expected_expectation_configuration_diagnostic_rendered_content = RenderedAtomicContent(
-        name="atomic.prescriptive.summary",
-        value=RenderedAtomicValue(
-            schema={"type": "com.superconductive.rendered.string"},
-            params={
-                "column": {"schema": {"type": "string"}, "value": "passenger_count"},
-                "min_value": {
-                    "schema": {"type": "number"},
-                    "value": 1,
-                    "evaluation_parameter": {
-                        "schema": {"type": "object"},
-                        "value": {"$PARAMETER": "upstream_column_min"},
-                    },
-                },
-                "max_value": {
-                    "schema": {"type": "number"},
-                    "value": 8,
-                    "evaluation_parameter": {
-                        "schema": {"type": "object"},
-                        "value": {"$PARAMETER": "upstream_column_max"},
-                    },
-                },
-            },
-            template="$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.",
-        ),
-        value_type="StringValueType",
-    )
-
-    assert (
-        expected_expectation_configuration_diagnostic_rendered_content
-        in validation_result.expectation_config.rendered_content
-    )
-
     # test conditional expectations render
     validation_result: ExpectationValidationResult = (
         validator_include_rendered_content.expect_column_min_to_be_between(
@@ -1258,7 +1225,7 @@ def _context_to_validator_and_expectation_sql(
         },
     )
     expectation: ExpectColumnValuesToBeInSet = ExpectColumnValuesToBeInSet(
-        expectation_configuration
+        **expectation_configuration.kwargs
     )
 
     batch_request = BatchRequest(
@@ -1312,7 +1279,7 @@ def test_validator_result_format_config_from_expectation(
         context=data_context_with_connection_to_metrics_db,
     )
     with pytest.warns(UserWarning) as config_warning:
-        _: ExpectationValidationResult = expectation.validate(
+        _: ExpectationValidationResult = expectation.validate_(
             validator=validator, runtime_configuration=runtime_configuration
         )
 

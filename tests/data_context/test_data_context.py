@@ -21,7 +21,7 @@ from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import DataContext, get_context
+from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
@@ -198,7 +198,7 @@ def test_save_expectation_suite(data_context_parameterized_expectation_suite):
             "this_data_asset_config_does_not_exist.default"
         )
     )
-    expectation_suite.expectations.append(
+    expectation_suite.expectation_configurations.append(
         ExpectationConfiguration(
             expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
         )
@@ -211,7 +211,10 @@ def test_save_expectation_suite(data_context_parameterized_expectation_suite):
             "this_data_asset_config_does_not_exist.default"
         )
     )
-    assert expectation_suite.expectations == expectation_suite_saved.expectations
+    assert (
+        expectation_suite.expectation_configurations
+        == expectation_suite_saved.expectation_configurations
+    )
 
 
 @pytest.mark.filesystem
@@ -223,12 +226,12 @@ def test_save_expectation_suite_include_rendered_content(
             "this_data_asset_config_does_not_exist.default"
         )
     )
-    expectation_suite.expectations.append(
+    expectation_suite.expectation_configurations.append(
         ExpectationConfiguration(
             expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
         )
     )
-    for expectation in expectation_suite.expectations:
+    for expectation in expectation_suite.expectation_configurations:
         assert expectation.rendered_content is None
     data_context_parameterized_expectation_suite.save_expectation_suite(
         expectation_suite,
@@ -239,7 +242,7 @@ def test_save_expectation_suite_include_rendered_content(
             "this_data_asset_config_does_not_exist.default"
         )
     )
-    for expectation in expectation_suite_saved.expectations:
+    for expectation in expectation_suite_saved.expectation_configurations:
         for rendered_content_block in expectation.rendered_content:
             assert isinstance(
                 rendered_content_block,
@@ -256,12 +259,12 @@ def test_get_expectation_suite_include_rendered_content(
             "this_data_asset_config_does_not_exist.default"
         )
     )
-    expectation_suite.expectations.append(
+    expectation_suite.expectation_configurations.append(
         ExpectationConfiguration(
             expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
         )
     )
-    for expectation in expectation_suite.expectations:
+    for expectation in expectation_suite.expectation_configurations:
         assert expectation.rendered_content is None
     data_context_parameterized_expectation_suite.save_expectation_suite(
         expectation_suite,
@@ -271,7 +274,7 @@ def test_get_expectation_suite_include_rendered_content(
             "this_data_asset_config_does_not_exist.default"
         )
     )
-    for expectation in expectation_suite.expectations:
+    for expectation in expectation_suite.expectation_configurations:
         assert expectation.rendered_content is None
 
     expectation_suite_retrieved: ExpectationSuite = (
@@ -281,7 +284,7 @@ def test_get_expectation_suite_include_rendered_content(
         )
     )
 
-    for expectation in expectation_suite_retrieved.expectations:
+    for expectation in expectation_suite_retrieved.expectation_configurations:
         for rendered_content_block in expectation.rendered_content:
             assert isinstance(
                 rendered_content_block,
@@ -291,7 +294,7 @@ def test_get_expectation_suite_include_rendered_content(
 
 @pytest.mark.filesystem
 def test_compile_evaluation_parameter_dependencies(
-    data_context_parameterized_expectation_suite: DataContext,
+    data_context_parameterized_expectation_suite,
 ):
     assert (
         data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
@@ -321,9 +324,9 @@ def test_compile_evaluation_parameter_dependencies(
 @mock.patch("great_expectations.data_context.store.DatasourceStore.update_by_name")
 def test_update_datasource_persists_changes_with_store(
     mock_update_by_name: mock.MagicMock,
-    data_context_parameterized_expectation_suite: DataContext,
+    data_context_parameterized_expectation_suite,
 ) -> None:
-    context: DataContext = data_context_parameterized_expectation_suite
+    context = data_context_parameterized_expectation_suite
 
     datasource_to_update: Datasource = tuple(context.datasources.values())[0]
 
@@ -853,8 +856,7 @@ def empty_context(tmp_path_factory) -> FileDataContext:
     assert os.path.isfile(  # noqa: PTH113
         os.path.join(ge_dir, FileDataContext.GX_YML)  # noqa: PTH118
     )
-    with pytest.deprecated_call():
-        context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
     assert isinstance(context, FileDataContext)
     return context
 
@@ -1521,7 +1523,7 @@ def test_run_checkpoint_new_style(
 def test_get_validator_with_instantiated_expectation_suite(
     empty_data_context_stats_enabled, tmp_path_factory
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -1719,7 +1721,7 @@ def test_get_validator_with_batch_list(in_memory_runtime_context):
 def test_add_expectation_to_expectation_suite(
     mock_emit, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     expectation_suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name="my_new_expectation_suite"
@@ -1754,7 +1756,7 @@ def test_add_checkpoint_from_yaml(mock_emit, empty_data_context_stats_enabled):
     Note: This tests multiple items and could stand to be broken up.
     """
 
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     checkpoint_name: str = "my_new_checkpoint"
 
     assert checkpoint_name not in context.list_checkpoints()
@@ -1960,7 +1962,7 @@ def test_add_checkpoint_from_yaml_fails_for_unrecognized_class_name(
     Checkpoint yaml should have a valid class_name
     """
 
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     checkpoint_name: str = "my_new_checkpoint"
 
     assert checkpoint_name not in context.list_checkpoints()
@@ -2013,7 +2015,7 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
     What does this test and why?
     Adding a datasource using context.add_datasource() via a config from a parsed yaml string without substitution variables should work as expected.
     """
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     assert "my_new_datasource" not in context.datasources.keys()
     assert "my_new_datasource" not in context.list_datasources()
@@ -2119,8 +2121,7 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
     # Check that the datasource was written to disk as expected
     root_directory = context.root_directory
     del context
-    with pytest.deprecated_call():
-        context = DataContext(root_directory)
+    context = get_context(context_root_dir=root_directory)
 
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
@@ -2158,7 +2159,7 @@ def test_add_datasource_from_yaml_sql_datasource(  # noqa: PLR0915
     if "postgresql" not in test_backends:
         pytest.skip("test_add_datasource_from_yaml_sql_datasource requires postgresql")
 
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     assert "my_new_datasource" not in context.datasources.keys()
     assert "my_new_datasource" not in context.list_datasources()
@@ -2280,8 +2281,7 @@ def test_add_datasource_from_yaml_sql_datasource(  # noqa: PLR0915
     # Check that the datasource was written to disk as expected
     root_directory = context.root_directory
     del context
-    with pytest.deprecated_call():
-        context = DataContext(root_directory)
+    context = get_context(context_root_dir=root_directory)
 
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
@@ -2354,7 +2354,7 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
             "test_add_datasource_from_yaml_sql_datasource_with_credentials requires postgresql"
         )
 
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     assert "my_new_datasource" not in context.datasources.keys()
     assert "my_new_datasource" not in context.list_datasources()
@@ -2556,7 +2556,7 @@ def test_add_datasource_from_yaml_with_substitution_variables(
     Adding a datasource using context.add_datasource() via a config from a parsed yaml string containing substitution variables should work as expected.
     """
 
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     assert "my_new_datasource" not in context.datasources.keys()
     assert "my_new_datasource" not in context.list_datasources()
@@ -2664,8 +2664,7 @@ def test_add_datasource_from_yaml_with_substitution_variables(
     # Check that the datasource was written to disk as expected
     root_directory = context.root_directory
     del context
-    with pytest.deprecated_call():
-        context = DataContext(root_directory)
+    context = get_context(context_root_dir=root_directory)
 
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
@@ -2724,7 +2723,7 @@ def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_
 
 @pytest.mark.filesystem
 def test_modifications_to_env_vars_is_recognized_within_same_program_execution(
-    empty_data_context: DataContext, monkeypatch
+    empty_data_context, monkeypatch
 ) -> None:
     """
     What does this test do and why?
@@ -2734,7 +2733,7 @@ def test_modifications_to_env_vars_is_recognized_within_same_program_execution(
 
     This is particularly relevant when performing substitutions within a user's project config.
     """
-    context: DataContext = empty_data_context
+    context = empty_data_context
     env_var_name: str = "MY_PLUGINS_DIRECTORY"
     env_var_value: str = "my_patched_value"
 
@@ -2748,7 +2747,7 @@ def test_modifications_to_env_vars_is_recognized_within_same_program_execution(
 
 @pytest.mark.filesystem
 def test_modifications_to_config_vars_is_recognized_within_same_program_execution(
-    empty_data_context: DataContext,
+    empty_data_context,
 ) -> None:
     """
     What does this test do and why?
@@ -2758,7 +2757,7 @@ def test_modifications_to_config_vars_is_recognized_within_same_program_executio
 
     This is particularly relevant when performing substitutions within a user's project config.
     """
-    context: DataContext = empty_data_context
+    context = empty_data_context
     config_var_name: str = "my_plugins_dir"
     config_var_value: str = "my_patched_value"
 
@@ -2774,7 +2773,7 @@ def test_modifications_to_config_vars_is_recognized_within_same_program_executio
 
 @pytest.mark.big
 def test_check_for_usage_stats_sync_finds_diff(
-    empty_data_context_stats_enabled: DataContext,
+    empty_data_context_stats_enabled,
     data_context_config_with_datasources: DataContextConfig,
 ) -> None:
     """
@@ -2793,7 +2792,7 @@ def test_check_for_usage_stats_sync_finds_diff(
 
 @pytest.mark.big
 def test_check_for_usage_stats_sync_does_not_find_diff(
-    empty_data_context_stats_enabled: DataContext,
+    empty_data_context_stats_enabled,
 ) -> None:
     """
     What does this test do and why?
@@ -2811,7 +2810,7 @@ def test_check_for_usage_stats_sync_does_not_find_diff(
 
 @pytest.mark.big
 def test_check_for_usage_stats_sync_short_circuits_due_to_disabled_usage_stats(
-    empty_data_context: DataContext,
+    empty_data_context,
     data_context_config_with_datasources: DataContextConfig,
 ) -> None:
     context = empty_data_context
@@ -2851,9 +2850,9 @@ class ExpectSkyToBeColor(BatchExpectation):
 
 @pytest.mark.filesystem
 def test_unrendered_and_failed_prescriptive_renderer_behavior(
-    empty_data_context: DataContext,
+    empty_data_context,
 ):
-    context: DataContext = empty_data_context
+    context = empty_data_context
 
     expectation_suite_name: str = "test_suite"
 
@@ -2874,7 +2873,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
     )
     assert not any(
         expectation_configuration.rendered_content
-        for expectation_configuration in expectation_suite.expectations
+        for expectation_configuration in expectation_suite.expectation_configurations
     )
 
     # Once we include_rendered_content, we get rendered_content on each ExpectationConfiguration in the ExpectationSuite.
@@ -2882,7 +2881,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
     expectation_suite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
-    for expectation_configuration in expectation_suite.expectations:
+    for expectation_configuration in expectation_suite.expectation_configurations:
         assert all(
             isinstance(rendered_content_block, RenderedAtomicContent)
             for rendered_content_block in expectation_configuration.rendered_content
@@ -2950,7 +2949,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
     ]
 
     actual_rendered_content: List[RenderedAtomicContent] = []
-    for expectation_configuration in expectation_suite.expectations:
+    for expectation_configuration in expectation_suite.expectation_configurations:
         actual_rendered_content.extend(expectation_configuration.rendered_content)
 
     assert actual_rendered_content == expected_rendered_content
@@ -3000,10 +2999,12 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
         ),
     ]
 
-    expectation_suite.expectations[0].rendered_content = legacy_rendered_content
+    expectation_suite.expectation_configurations[
+        0
+    ].rendered_content = legacy_rendered_content
 
     actual_rendered_content: List[RenderedAtomicContent] = []
-    for expectation_configuration in expectation_suite.expectations:
+    for expectation_configuration in expectation_suite.expectation_configurations:
         actual_rendered_content.extend(expectation_configuration.rendered_content)
 
     assert actual_rendered_content == legacy_rendered_content

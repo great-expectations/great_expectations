@@ -1506,6 +1506,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._save_project_config()
 
+    @public_api
     @overload
     def add_checkpoint(  # noqa: PLR0913
         self,
@@ -1541,6 +1542,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         ...
 
+    @public_api
     @overload
     def add_checkpoint(  # noqa: PLR0913
         self,
@@ -3654,7 +3656,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             new_column_count = len(
                 {
                     exp.kwargs["column"]
-                    for exp in expectation_suite.expectations
+                    for exp in expectation_suite.expectation_configurations
                     if "column" in exp.kwargs
                 }
             )

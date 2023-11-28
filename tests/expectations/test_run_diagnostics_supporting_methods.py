@@ -99,6 +99,9 @@ def test__get_description_diagnostics():
         It has more to it.
         """
 
+        def validate_configuration(self, configuration=None) -> None:
+            pass
+
     description_diagnostics = (
         ExpectColumnValuesToBeAwesome()._get_description_diagnostics()
     )

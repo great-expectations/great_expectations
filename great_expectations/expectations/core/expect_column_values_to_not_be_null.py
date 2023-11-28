@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_configuration import parse_result_format
@@ -90,7 +90,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     }
 
     map_metric: ClassVar[str] = "column_values.nonnull"
-    args_keys: ClassVar[tuple[str, ...]] = ("column",)
+    args_keys: ClassVar[Tuple[str, ...]] = ("column",)
 
     @override
     def validate_configuration(

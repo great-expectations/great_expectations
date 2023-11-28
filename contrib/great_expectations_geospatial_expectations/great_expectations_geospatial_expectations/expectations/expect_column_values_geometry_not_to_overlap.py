@@ -1,5 +1,3 @@
-from typing import Optional
-
 import geopandas
 import numpy as np
 from shapely.geometry import Point, Polygon
@@ -95,34 +93,6 @@ class ExpectColumnValuesGeometryNotToOverlap(ColumnAggregateExpectation):
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
 
     # This object contains metadata for display in the public Gallery
     def _validate(
