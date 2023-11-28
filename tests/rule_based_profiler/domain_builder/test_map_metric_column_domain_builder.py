@@ -2,7 +2,6 @@ from typing import List
 
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -16,7 +15,7 @@ pytestmark = pytest.mark.big
 
 @pytest.mark.slow  # 1.20s
 def test_column_values_unique_single_batch(alice_columnar_table_single_batch_context):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="alice_columnar_table_single_batch_datasource",
@@ -73,9 +72,7 @@ def test_column_values_unique_single_batch(alice_columnar_table_single_batch_con
 def test_column_values_nonnull_multi_batch_one_column_not_emitted(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -143,9 +140,7 @@ def test_column_values_nonnull_multi_batch_one_column_not_emitted(
 def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpected_values(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -215,9 +210,7 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpec
 def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_min_max_unexpected_values_proportion(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -286,9 +279,7 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_min_max_une
 def test_column_values_nonnull_multi_batch_one_column_not_emitted_tight_max_unexpected_ratio(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -356,9 +347,7 @@ def test_column_values_nonnull_multi_batch_one_column_not_emitted_tight_max_unex
 def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpected_ratio(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",

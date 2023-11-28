@@ -7,7 +7,6 @@ from click.testing import CliRunner
 
 import great_expectations as gx
 from great_expectations.cli import cli
-from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -21,9 +20,7 @@ pytestmark = pytest.mark.cli
 
 
 @pytest.fixture
-def titanic_data_context_clean_usage_stats_enabled(
-    tmp_path_factory, monkeypatch
-) -> DataContext:
+def titanic_data_context_clean_usage_stats_enabled(tmp_path_factory, monkeypatch):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
@@ -55,7 +52,7 @@ def titanic_data_context_clean_usage_stats_enabled(
 @pytest.fixture
 def titanic_data_context_v2_datasources_and_validation_operators_usage_stats_enabled(
     tmp_path_factory, monkeypatch
-) -> DataContext:
+):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 

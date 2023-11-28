@@ -88,13 +88,12 @@ def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
 
     runner: CliRunner = CliRunner(mix_stderr=False)
 
-    with pytest.deprecated_call():
-        result: Result = runner.invoke(
-            cli,
-            ["-c", v10_project_directory, "project", "upgrade"],
-            input="\n",
-            catch_exceptions=False,
-        )
+    result: Result = runner.invoke(
+        cli,
+        ["-c", v10_project_directory, "project", "upgrade"],
+        input="\n",
+        catch_exceptions=False,
+    )
     stdout: str = result.stdout
 
     assert "Checking project..." in stdout
@@ -203,13 +202,12 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
 
     runner: CliRunner = CliRunner(mix_stderr=False)
 
-    with pytest.deprecated_call():
-        result: Result = runner.invoke(
-            cli,
-            ["-c", v10_project_directory, "project", "upgrade"],
-            input="\n",
-            catch_exceptions=False,
-        )
+    result: Result = runner.invoke(
+        cli,
+        ["-c", v10_project_directory, "project", "upgrade"],
+        input="\n",
+        catch_exceptions=False,
+    )
     stdout: str = escape_ansi(result.stdout).strip()
 
     with open(
@@ -424,13 +422,12 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
 
     runner: CliRunner = CliRunner(mix_stderr=False)
 
-    with pytest.deprecated_call():
-        result: Result = runner.invoke(
-            cli,
-            ["-c", v10_project_directory, "project", "upgrade"],
-            input="\n",
-            catch_exceptions=False,
-        )
+    result: Result = runner.invoke(
+        cli,
+        ["-c", v10_project_directory, "project", "upgrade"],
+        input="\n",
+        catch_exceptions=False,
+    )
     stdout: str = escape_ansi(result.stdout).strip()
 
     with open(
@@ -524,18 +521,17 @@ def test_v2_to_v3_project_upgrade_without_manual_steps(
 ):
     runner: CliRunner = CliRunner(mix_stderr=False)
 
-    with pytest.deprecated_call():
-        result: Result = runner.invoke(
-            cli,
-            [
-                "-c",
-                v20_project_directory_with_v30_configuration_and_no_checkpoints,
-                "project",
-                "upgrade",
-            ],
-            input="\n",
-            catch_exceptions=False,
-        )
+    result: Result = runner.invoke(
+        cli,
+        [
+            "-c",
+            v20_project_directory_with_v30_configuration_and_no_checkpoints,
+            "project",
+            "upgrade",
+        ],
+        input="\n",
+        catch_exceptions=False,
+    )
     stdout: str = escape_ansi(result.stdout).strip()
 
     with open(

@@ -8,7 +8,6 @@ from __future__ import annotations
 import os
 from typing import List, Optional
 
-from great_expectations import DataContext
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context import AbstractDataContext, get_context
@@ -236,7 +235,7 @@ def _create_context(
     data_connector_name: str,
     asset_names: List[str],
     html_dir: Optional[str] = None,
-) -> DataContext:
+):
     data_docs_sites = (
         {
             "local_site": {

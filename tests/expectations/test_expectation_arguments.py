@@ -6,7 +6,6 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import DataContext
 from great_expectations.compatibility import pyspark
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -789,6 +788,7 @@ def test_result_format_configured_with_set_default_override(
         "expectation_config": {
             "kwargs": {
                 "include_config": True,
+                "result_format": "BASIC",  # Default from Expectation base class
                 "column": "Name",
                 "Notes": "Some notes",
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
@@ -818,7 +818,7 @@ def test_result_format_configured_with_set_default_override(
 def test_in_memory_runtime_context_configured_with_usage_stats_handler(
     mock_emit, in_memory_runtime_context, test_pandas_df
 ):
-    context: DataContext = in_memory_runtime_context
+    context = in_memory_runtime_context
 
     # manually set usage statistics handler
     handler = UsageStatisticsHandler(

@@ -812,7 +812,9 @@ class ExpectationSuite(SerializableDictDot):
     ) -> Expectation:
         try:
             class_ = get_expectation_impl(expectation_configuration.expectation_type)
-            expectation = class_(configuration=expectation_configuration)
+            expectation = class_(
+                meta=expectation_configuration.meta, **expectation_configuration.kwargs
+            )  # Implicitly validates in constructor
             return expectation
         except (
             gx_exceptions.ExpectationNotFoundError,
@@ -1179,9 +1181,11 @@ class ExpectationSuiteSchema(Schema):
 
     @post_dump(pass_original=True)
     def insert_expectations(self, data, original_data, **kwargs) -> dict:
-        data["expectations"] = convert_to_json_serializable(
-            original_data.expectation_configurations
-        )
+        if isinstance(original_data, dict):
+            expectations = original_data.get("expectations", [])
+        else:
+            expectations = original_data.expectation_configurations
+        data["expectations"] = convert_to_json_serializable(expectations)
         return data
 
     @post_load

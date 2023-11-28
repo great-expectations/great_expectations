@@ -4,7 +4,6 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.rule_based_profiler.data_assistant import (
     ColumnValueMissingDataAssistant,
 )
@@ -82,7 +81,7 @@ def test_single_batch_multiple_columns(ephemeral_context_with_defaults):
 def test_column_value_missing_data_assistant_uses_multi_batch_mode_for_multi_batch(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
