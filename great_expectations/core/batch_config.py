@@ -1,14 +1,11 @@
 from typing import Optional
 
 from great_expectations.compatibility import pydantic
-from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,
-)
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
 )
-from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
+from great_expectations.datasource.fluent.interfaces import DataAsset
 
 
 class BatchConfig(pydantic.BaseModel):
@@ -18,20 +15,7 @@ class BatchConfig(pydantic.BaseModel):
     TODO: Add splitters and sorters?
     """
 
-    class Config:
-        arbitrary_types_allowed = True
-
-    context: AbstractDataContext
-    datasource_name: str
-    data_asset_name: str
-
-    @property
-    def data_asset(self) -> DataAsset:
-        """Get the DataAsset referenced by this BatchConfig."""
-        datasource = self.context.get_datasource(self.datasource_name)
-        assert isinstance(datasource, Datasource)
-
-        return datasource.get_asset(self.data_asset_name)
+    data_asset: DataAsset
 
     def build_batch_request(
         self, batch_request_options: Optional[BatchRequestOptions] = None

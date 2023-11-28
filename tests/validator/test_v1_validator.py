@@ -5,6 +5,7 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
+from great_expectations.datasource.fluent.sqlite_datasource import SqliteDatasource
 from great_expectations.expectations.core.expect_column_values_to_be_between import (
     ExpectColumnValuesToBeBetween,
 )
@@ -43,26 +44,22 @@ def expectation_suite(
 
 
 @pytest.fixture
-def batch_config(
-    fds_data_context: AbstractDataContext,
-    fds_data_context_datasource_name: str,
-) -> BatchConfig:
+def batch_config(fds_data_context: AbstractDataContext) -> BatchConfig:
+    datasource = fds_data_context.get_datasource("sqlite_datasource")
+    assert isinstance(datasource, SqliteDatasource)
     return BatchConfig(
-        context=fds_data_context,
-        datasource_name=fds_data_context_datasource_name,
-        data_asset_name="trip_asset",
+        data_asset=datasource.get_asset("trip_asset"),
     )
 
 
 @pytest.fixture
 def batch_config_with_event_type_splitter(
     fds_data_context: AbstractDataContext,
-    fds_data_context_datasource_name: str,
 ) -> BatchConfig:
+    datasource = fds_data_context.get_datasource("sqlite_datasource")
+    assert isinstance(datasource, SqliteDatasource)
     return BatchConfig(
-        context=fds_data_context,
-        datasource_name=fds_data_context_datasource_name,
-        data_asset_name="trip_asset_split_by_event_type",
+        data_asset=datasource.get_asset("trip_asset_split_by_event_type"),
     )
 
 
