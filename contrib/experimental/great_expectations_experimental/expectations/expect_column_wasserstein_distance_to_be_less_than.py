@@ -1,5 +1,5 @@
 import datetime
-from typing import Dict
+from typing import Dict, Union
 
 from scipy import stats
 
@@ -143,8 +143,8 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnAggregateExpectation):
         [Wasserstein Metric on Wikipedia](https://en.wikipedia.org/wiki/Wasserstein_metric)
     """
 
-    min_val: float | int | dict | datetime.datetime | None = None
-    max_val: float | int | dict | datetime.datetime | None = None
+    min_val: Union[float, dict, datetime.datetime, None] = None
+    max_val: Union[float, dict, datetime.datetime, None] = None
 
     _min_val = validator("min_val", allow_reuse=True)(validate_min_value)
     _max_val = validator("max_val", allow_reuse=True)(validate_max_value)

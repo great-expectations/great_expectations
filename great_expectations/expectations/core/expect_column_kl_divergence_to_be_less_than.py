@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import logging
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import altair as alt
 import numpy as np
@@ -7,11 +9,6 @@ import pandas as pd
 from scipy import stats
 
 from great_expectations.compatibility.pydantic import validator
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.util import (
     is_valid_categorical_partition_object,
     is_valid_partition_object,
@@ -53,14 +50,19 @@ from great_expectations.validator.metrics_calculator import (
     MetricsCalculator,
     _MetricsDict,
 )
-from great_expectations.validator.validator import (
-    ValidationDependencies,
-)
 
 if TYPE_CHECKING:
     import datetime
 
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer_configuration import AddParamArgs
+    from great_expectations.validator.validator import (
+        ValidationDependencies,
+    )
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -161,8 +163,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         parsers to crash when encountered. The python None token will be serialized to null in json.
     """
 
-    min_val: float | int | dict | datetime.datetime | None = None
-    max_val: float | int | dict | datetime.datetime | None = None
+    min_val: Union[float, dict, datetime.datetime, None] = None
+    max_val: Union[float, dict, datetime.datetime, None] = None
 
     _min_val = validator("min_val", allow_reuse=True)(validate_min_value)
     _max_val = validator("max_val", allow_reuse=True)(validate_max_value)

@@ -1,5 +1,5 @@
 import datetime
-from typing import TYPE_CHECKING, ClassVar, List, Optional
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Union
 
 from great_expectations.compatibility.pydantic import root_validator, validator
 from great_expectations.core import (
@@ -91,8 +91,8 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         [expect_column_value_lengths_to_be_between](https://greatexpectations.io/expectations/expect_column_value_lengths_to_be_between)
     """
 
-    min_val: float | int | dict | datetime.datetime | None = None
-    max_val: float | int | dict | datetime.datetime | None = None
+    min_val: Union[float, dict, datetime.datetime, None] = None
+    max_val: Union[float, dict, datetime.datetime, None] = None
 
     _min_val = validator("min_val", allow_reuse=True)(validate_min_value)
     _max_val = validator("max_val", allow_reuse=True)(validate_max_value)

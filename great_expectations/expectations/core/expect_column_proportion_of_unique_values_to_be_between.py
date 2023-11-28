@@ -1,11 +1,16 @@
-from typing import TYPE_CHECKING, Dict, List, Optional
+import datetime
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
+from great_expectations.compatibility.pydantic import validator
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.core.validators import (
+    validate_max_value,
+    validate_min_value,
+)
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_evaluation_parameter_string,
@@ -91,6 +96,12 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
     See Also:
         [expect_column_unique_value_count_to_be_between](https://greatexpectations.io/expectations/expect_column_unique_value_count_to_be_between)
     """
+
+    min_val: Union[float, dict, datetime.datetime, None] = None
+    max_val: Union[float, dict, datetime.datetime, None] = None
+
+    _min_val = validator("min_val", allow_reuse=True)(validate_min_value)
+    _max_val = validator("max_val", allow_reuse=True)(validate_max_value)
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -202,23 +213,6 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
     )
 
     """ A Column Aggregate MetricProvider Decorator for the Unique Proportion"""
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        The configuration will be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                from the configuration attribute of the Expectation instance.
-
-        """
-        super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     def _prescriptive_template(
