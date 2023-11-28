@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import pathlib
 import uuid
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Final, Iterator, Literal, Protocol
@@ -17,8 +18,6 @@ from great_expectations.data_context import CloudDataContext
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
-    import py
-
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.compatibility import pyspark, sqlalchemy
     from great_expectations.core import ExpectationSuite
@@ -144,8 +143,8 @@ def checkpoint(
 
 
 @pytest.fixture(scope="module")
-def tmp_dir(tmpdir_factory) -> py.path:
-    return tmpdir_factory.mktemp("project")
+def tmp_path(tmp_path_factory) -> pathlib.Path:
+    return tmp_path_factory.mktemp("project")
 
 
 @pytest.fixture(scope="package")
