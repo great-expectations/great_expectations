@@ -19,7 +19,7 @@ from tests.expectations.fixtures.expect_column_values_to_equal_three import (
 
 @pytest.mark.unit
 def test_expectation_self_check():
-    my_expectation = ExpectColumnValuesToEqualThree()
+    my_expectation = ExpectColumnValuesToEqualThree(column="values")
     expectation_diagnostic = my_expectation.run_diagnostics()
     print(json.dumps(expectation_diagnostic.to_dict(), indent=2))
 
@@ -213,7 +213,7 @@ def test_expectation_self_check():
 
 @pytest.mark.unit
 def test_include_in_gallery_flag():
-    my_expectation = ExpectColumnValuesToEqualThree__SecondIteration()
+    my_expectation = ExpectColumnValuesToEqualThree__SecondIteration(column="values")
     report_object = my_expectation.run_diagnostics()
     # print(json.dumps(report_object["examples"], indent=2))
 
@@ -520,9 +520,9 @@ def test_expectation_is_abstract():
 
 @pytest.mark.unit
 def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
-    expectation_diagnostics = (
-        ExpectColumnValuesToEqualThree__BrokenIteration().run_diagnostics()
-    )
+    expectation_diagnostics = ExpectColumnValuesToEqualThree__BrokenIteration(
+        column="values"
+    ).run_diagnostics()
     # print(json.dumps(expectation_diagnostics.to_dict(), indent=2))
 
     tests = expectation_diagnostics["tests"]

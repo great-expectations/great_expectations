@@ -1122,7 +1122,9 @@ class Validator:
                 raise InvalidExpectationConfigurationError(str(e))
 
             evaluated_config = copy.deepcopy(configuration)
-            evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
+
+            if self.active_batch_id:
+                evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
             validation_dependencies: ValidationDependencies = expectation_impl(
