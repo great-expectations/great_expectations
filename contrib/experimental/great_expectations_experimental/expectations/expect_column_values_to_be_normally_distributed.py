@@ -124,11 +124,11 @@ class ColumnNormallyDistributed(ColumnAggregateMetricProvider):
 class ExpectColumnValuesToBeNormallyDistributed(ColumnAggregateExpectation):
     """Expect column values to be normally distributed. NaN values are omitted."""
 
-    min_val: Union[float, dict, datetime.datetime, None] = None
-    max_val: Union[float, dict, datetime.datetime, None] = None
+    min_value: Union[float, dict, datetime.datetime, None] = None
+    max_value: Union[float, dict, datetime.datetime, None] = None
 
-    _min_val = validator("min_val", allow_reuse=True)(validate_min_value)
-    _max_val = validator("max_val", allow_reuse=True)(validate_max_value)
+    _min_val = validator("min_value", allow_reuse=True)(validate_min_value)
+    _max_val = validator("max_value", allow_reuse=True)(validate_max_value)
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [

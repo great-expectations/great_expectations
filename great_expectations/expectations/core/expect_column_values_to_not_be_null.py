@@ -84,11 +84,11 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         [expect_column_values_to_be_null](https://greatexpectations.io/expectations/expect_column_values_to_be_null)
     """
 
-    min_val: Union[float, dict, datetime.datetime, None] = None
-    max_val: Union[float, dict, datetime.datetime, None] = None
+    min_value: Union[float, dict, datetime.datetime, None] = None
+    max_value: Union[float, dict, datetime.datetime, None] = None
 
-    _min_val = validator("min_val", allow_reuse=True)(validate_min_value)
-    _max_val = validator("max_val", allow_reuse=True)(validate_max_value)
+    _min_val = validator("min_value", allow_reuse=True)(validate_min_value)
+    _max_val = validator("max_value", allow_reuse=True)(validate_max_value)
 
     library_metadata: ClassVar[dict] = {
         "maturity": "production",

@@ -74,11 +74,11 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
         [expect_table_column_count_to_equal](https://greatexpectations.io/expectations/expect_table_column_count_to_equal)
     """
 
-    min_val: Union[float, dict, datetime.datetime, None] = None
-    max_val: Union[float, dict, datetime.datetime, None] = None
+    min_value: Union[float, dict, datetime.datetime, None] = None
+    max_value: Union[float, dict, datetime.datetime, None] = None
 
-    _min_val = validator("min_val", allow_reuse=True)(validate_min_value)
-    _max_val = validator("max_val", allow_reuse=True)(validate_max_value)
+    _min_val = validator("min_value", allow_reuse=True)(validate_min_value)
+    _max_val = validator("max_value", allow_reuse=True)(validate_max_value)
 
     library_metadata = {
         "maturity": "production",
