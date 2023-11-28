@@ -14,9 +14,9 @@ To learn more about Expectations, see [Expectation](../../terms/expectation.md).
 
 - You have a [Data Asset](/docs/cloud/data_assets/manage_data_assets#create-a-data-asset).
 
-## Available Expectation types
+## Available Expectations
 
-The following table lists the available GX Cloud Expectation types.
+The following table lists the available GX Cloud Expectations.
 
 | Expectation                              | Description                                                                    | 
 |------------------------------------------|--------------------------------------------------------------------------------|

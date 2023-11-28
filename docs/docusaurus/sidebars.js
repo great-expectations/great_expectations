@@ -133,8 +133,8 @@ module.exports = {
           items: [
             {
               type: 'link',
-              label: 'Available Expectation types',
-              href: '/docs/cloud/expectations/manage_expectations#available-expectation-types',
+              label: 'Available Expectations',
+              href: '/docs/cloud/expectations/manage_expectations#available-expectations',
             },
             {
               type: 'link',
