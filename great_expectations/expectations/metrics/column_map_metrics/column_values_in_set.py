@@ -12,7 +12,6 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 try:
     import sqlalchemy as sa  # noqa: TID251
@@ -31,13 +30,6 @@ class ColumnValuesInSet(ColumnMapMetricProvider):
         value_set,
         **kwargs,
     ):
-        # no need to parse as datetime; just compare the strings as is
-        parse_strings_as_datetimes: bool = (
-            kwargs.get("parse_strings_as_datetimes") or False
-        )
-        if parse_strings_as_datetimes:
-            warn_deprecated_parse_strings_as_datetimes()
-
         if value_set is None:
             # Vacuously true
             return np.ones(len(column), dtype=np.bool_)
@@ -50,13 +42,6 @@ class ColumnValuesInSet(ColumnMapMetricProvider):
 
     @staticmethod
     def _sqlalchemy_impl(column, value_set, **kwargs):
-        # no need to parse as datetime; just compare the strings as is
-        parse_strings_as_datetimes: bool = (
-            kwargs.get("parse_strings_as_datetimes") or False
-        )
-        if parse_strings_as_datetimes:
-            warn_deprecated_parse_strings_as_datetimes()
-
         if value_set is None:
             # vacuously true
             return True
@@ -94,13 +79,6 @@ class ColumnValuesInSet(ColumnMapMetricProvider):
         value_set,
         **kwargs,
     ):
-        # no need to parse as datetime; just compare the strings as is
-        parse_strings_as_datetimes: bool = (
-            kwargs.get("parse_strings_as_datetimes") or False
-        )
-        if parse_strings_as_datetimes:
-            warn_deprecated_parse_strings_as_datetimes()
-
         if value_set is None:
             # vacuously true
             return F.lit(True)

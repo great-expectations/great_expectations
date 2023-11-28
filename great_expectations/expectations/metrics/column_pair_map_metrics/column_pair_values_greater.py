@@ -1,6 +1,3 @@
-from dateutil.parser import parse
-
-from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -11,7 +8,6 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,
 )
-from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 
 class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
@@ -40,24 +36,8 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
         if allow_cross_type_comparisons:
             raise NotImplementedError
 
-        parse_strings_as_datetimes: bool = (
-            kwargs.get("parse_strings_as_datetimes") or False
-        )
-        if parse_strings_as_datetimes:
-            warn_deprecated_parse_strings_as_datetimes()
-
-            try:
-                temp_column_A = column_A.map(parse)
-            except TypeError:
-                temp_column_A = column_A
-
-            try:
-                temp_column_B = column_B.map(parse)
-            except TypeError:
-                temp_column_B = column_B
-        else:
-            temp_column_A = column_A
-            temp_column_B = column_B
+        temp_column_A = column_A
+        temp_column_B = column_B
 
         or_equal: bool = kwargs.get("or_equal") or False
         if or_equal:
@@ -98,17 +78,8 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
         if allow_cross_type_comparisons:
             raise NotImplementedError
 
-        parse_strings_as_datetimes: bool = (
-            kwargs.get("parse_strings_as_datetimes") or False
-        )
-        if parse_strings_as_datetimes:
-            warn_deprecated_parse_strings_as_datetimes()
-
-            temp_column_A = F.to_date(column_A)
-            temp_column_B = F.to_date(column_B)
-        else:
-            temp_column_A = column_A
-            temp_column_B = column_B
+        temp_column_A = column_A
+        temp_column_B = column_B
 
         or_equal: bool = kwargs.get("or_equal") or False
         if or_equal:

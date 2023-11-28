@@ -17,7 +17,6 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 
 class ColumnValuesBetween(ColumnMapMetricProvider):
@@ -32,7 +31,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
     )
 
     @column_condition_partial(engine=PandasExecutionEngine)  # type: ignore[misc] # untyped-decorator
-    def _pandas(  # noqa: C901, PLR0912, PLR0913
+    def _pandas(  # noqa: C901, PLR0913
         cls,
         column,
         min_value=None,
@@ -49,28 +48,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         if allow_cross_type_comparisons:
             raise NotImplementedError
 
-        if parse_strings_as_datetimes:
-            warn_deprecated_parse_strings_as_datetimes()
-
-            if min_value is not None:
-                try:
-                    min_value = parse(min_value)
-                except TypeError:
-                    pass
-
-            if max_value is not None:
-                try:
-                    max_value = parse(max_value)
-                except TypeError:
-                    pass
-
-            try:
-                temp_column = column.map(parse)
-            except TypeError:
-                temp_column = column
-
-        else:
-            temp_column = column
+        temp_column = column
 
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
@@ -187,7 +165,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
             return (min_value <= column) & (column <= max_value)
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)  # type: ignore[misc] # untyped-decorator
-    def _sqlalchemy(  # noqa: PLR0911, PLR0912, PLR0913
+    def _sqlalchemy(  # noqa: PLR0911, PLR0913
         cls,
         column,
         min_value=None,
@@ -197,21 +175,6 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         parse_strings_as_datetimes: bool = False,
         **kwargs,
     ):
-        if parse_strings_as_datetimes:
-            warn_deprecated_parse_strings_as_datetimes()
-
-            if min_value is not None:
-                try:
-                    min_value = parse(min_value)
-                except TypeError:
-                    pass
-
-            if max_value is not None:
-                try:
-                    max_value = parse(max_value)
-                except TypeError:
-                    pass
-
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
 
@@ -255,7 +218,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
             )
 
     @column_condition_partial(engine=SparkDFExecutionEngine)  # type: ignore[misc] # untyped-decorator
-    def _spark(  # noqa: PLR0911, PLR0912, PLR0913
+    def _spark(  # noqa: PLR0911, PLR0913
         cls,
         column,
         min_value=None,
@@ -265,21 +228,6 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         parse_strings_as_datetimes: bool = False,
         **kwargs,
     ):
-        if parse_strings_as_datetimes:
-            warn_deprecated_parse_strings_as_datetimes()
-
-            if min_value is not None:
-                try:
-                    min_value = parse(min_value)
-                except TypeError:
-                    pass
-
-            if max_value is not None:
-                try:
-                    max_value = parse(max_value)
-                except TypeError:
-                    pass
-
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
 

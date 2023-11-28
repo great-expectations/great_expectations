@@ -1,7 +1,5 @@
 from typing import TYPE_CHECKING, Dict, List, Optional
 
-import pandas as pd
-
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -12,7 +10,6 @@ from great_expectations.expectations.expectation import (
     InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
-from great_expectations.expectations.metrics.util import parse_value_set
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -23,7 +20,6 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
@@ -239,18 +235,10 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
-            "parse_strings_as_datetimes"
-        )
         observed_value_counts = metrics.get("column.value_counts")
         value_set = self.get_success_kwargs(configuration).get("value_set")
 
-        if parse_strings_as_datetimes:
-            warn_deprecated_parse_strings_as_datetimes()
-            parsed_value_set = parse_value_set(value_set)
-            observed_value_counts.index = pd.to_datetime(observed_value_counts.index)
-        else:
-            parsed_value_set = value_set
+        parsed_value_set = value_set
 
         observed_value_set = set(observed_value_counts.index)
         expected_value_set = set(parsed_value_set)

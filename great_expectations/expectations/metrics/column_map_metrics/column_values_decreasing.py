@@ -1,8 +1,4 @@
-import datetime
 from typing import Any, Dict
-
-import pandas as pd
-from dateutil.parser import parse
 
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
@@ -17,7 +13,6 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     column_condition_partial,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_partial
-from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 
 class ColumnValuesDecreasing(ColumnMapMetricProvider):
@@ -37,36 +32,15 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         column,
         **kwargs,
     ):
-        parse_strings_as_datetimes: bool = (
-            kwargs.get("parse_strings_as_datetimes") or False
-        )
-        if parse_strings_as_datetimes:
-            warn_deprecated_parse_strings_as_datetimes()
-
-            try:
-                temp_column = column.map(parse)
-            except TypeError:
-                temp_column = column
-        else:
-            temp_column = column
+        temp_column = column
 
         series_diff = temp_column.diff()
-        # The first element is null, so it gets a bye and is always treated as True
-        if parse_strings_as_datetimes:
-            series_diff[series_diff.isnull()] = datetime.timedelta(seconds=-1)
-            series_diff = pd.to_timedelta(series_diff, unit="S")
-        else:
-            series_diff[series_diff.isnull()] = -1
+        series_diff[series_diff.isnull()] = -1
 
         strictly: bool = kwargs.get("strictly") or False
         if strictly:
-            if parse_strings_as_datetimes:
-                return series_diff.dt.total_seconds() < 0.0  # noqa: PLR2004
             return series_diff < 0
-        else:
-            if parse_strings_as_datetimes:
-                return series_diff.dt.total_seconds() <= 0.0  # noqa: PLR2004
-            return series_diff <= 0
+        return series_diff <= 0
 
     @metric_partial(
         engine=SparkDFExecutionEngine,
@@ -81,12 +55,6 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ):
-        parse_strings_as_datetimes: bool = (
-            metric_value_kwargs.get("parse_strings_as_datetimes") or False
-        )
-        if parse_strings_as_datetimes:
-            warn_deprecated_parse_strings_as_datetimes()
-
         # check if column is any type that could have na (numeric types)
         column_name = metric_domain_kwargs["column"]
         table_columns = metrics["table.column_types"]
