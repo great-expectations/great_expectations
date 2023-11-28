@@ -42,7 +42,6 @@ from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import (
     AbstractDataContext,
-    BaseDataContext,
     CloudDataContext,
     get_context,
 )
@@ -3247,12 +3246,21 @@ def sqlite_connection_string() -> str:
 
 
 @pytest.fixture
+def fds_data_context_datasource_name() -> str:
+    return "sqlite_datasource"
+
+
+@pytest.fixture
 def fds_data_context(
-    sa, empty_data_context: AbstractDataContext, sqlite_connection_string: str
+    sa,
+    fds_data_context_datasource_name: str,
+    empty_data_context: AbstractDataContext,
+    sqlite_connection_string: str,
 ) -> AbstractDataContext:
     context = empty_data_context
     datasource = context.sources.add_sqlite(
-        name="sqlite_datasource", connection_string=sqlite_connection_string
+        name=fds_data_context_datasource_name,
+        connection_string=sqlite_connection_string,
     )
 
     datasource.add_query_asset(
@@ -3627,18 +3635,18 @@ def empty_base_data_context_in_cloud_mode(
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
-) -> BaseDataContext:
+) -> CloudDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir(exist_ok=True)
     project_path = str(project_path)
 
-    with pytest.deprecated_call():
-        context = gx.data_context.BaseDataContext(
-            project_config=empty_ge_cloud_data_context_config,
-            context_root_dir=project_path,
-            cloud_mode=True,
-            cloud_config=ge_cloud_config,
-        )
+    context = CloudDataContext(
+        project_config=empty_ge_cloud_data_context_config,
+        context_root_dir=project_path,
+        cloud_base_url=ge_cloud_config.base_url,
+        cloud_access_token=ge_cloud_config.access_token,
+        cloud_organization_id=ge_cloud_config.organization_id,
+    )
 
     return context
 
@@ -3744,7 +3752,7 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
-) -> BaseDataContext:
+) -> CloudDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path = str(project_path)
@@ -3753,13 +3761,13 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
     custom_ge_cloud_config = copy.deepcopy(ge_cloud_config)
     custom_ge_cloud_config.base_url = custom_base_url
 
-    with pytest.deprecated_call():
-        context = gx.data_context.BaseDataContext(
-            project_config=empty_ge_cloud_data_context_config,
-            context_root_dir=project_path,
-            cloud_mode=True,
-            cloud_config=custom_ge_cloud_config,
-        )
+    context = CloudDataContext(
+        project_config=empty_ge_cloud_data_context_config,
+        context_root_dir=project_path,
+        cloud_base_url=custom_ge_cloud_config.base_url,
+        cloud_access_token=custom_ge_cloud_config.access_token,
+        cloud_organization_id=custom_ge_cloud_config.organization_id,
+    )
     assert context.list_datasources() == []
     assert context.ge_cloud_config.base_url != ge_cloud_config.base_url
     assert context.ge_cloud_config.base_url == custom_base_url

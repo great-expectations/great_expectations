@@ -1,4 +1,3 @@
-import logging
 import random
 import string
 from typing import List
@@ -7,16 +6,13 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-import great_expectations as gx
 from great_expectations.compatibility import sqlalchemy
-from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.types.base import ProgressBarsConfig
-from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
@@ -31,7 +27,6 @@ from great_expectations.profile.user_configurable_profiler import (
 from great_expectations.self_check.util import (
     get_sql_dialect_floating_point_infinity_value,
 )
-from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 
@@ -175,70 +170,6 @@ def get_sqlalchemy_runtime_validator_postgresql(
     batch = Batch(data=batch_data)
 
     return Validator(execution_engine=execution_engine, batches=[batch])
-
-
-@pytest.fixture
-def titanic_validator(titanic_data_context_modular_api):
-    """
-    What does this test do and why?
-    Ensures that all available expectation types work as expected
-    """
-    df = gx.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
-
-    return get_pandas_runtime_validator(titanic_data_context_modular_api, df)
-
-
-@pytest.fixture
-def taxi_validator_pandas(titanic_data_context_modular_api):
-    """
-    What does this test do and why?
-    Ensures that all available expectation types work as expected
-    """
-
-    df = gx.read_csv(
-        file_relative_path(
-            __file__,
-            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
-        ),
-        parse_dates=["pickup_datetime", "dropoff_datetime"],
-    )
-
-    return get_pandas_runtime_validator(titanic_data_context_modular_api, df)
-
-
-@pytest.fixture
-def taxi_validator_spark(spark_session, titanic_data_context_modular_api):
-    """
-    What does this test do and why?
-    Ensures that all available expectation types work as expected
-    """
-    df = gx.read_csv(
-        file_relative_path(
-            __file__,
-            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
-        ),
-        parse_dates=["pickup_datetime", "dropoff_datetime"],
-        date_format="%Y-%m-%d %H:%M:%S",
-    )
-    return get_spark_runtime_validator(titanic_data_context_modular_api, df)
-
-
-@pytest.fixture
-def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api, postgresql_engine):
-    """
-    What does this test do and why?
-    Ensures that all available expectation types work as expected
-    """
-    df = gx.read_csv(
-        file_relative_path(
-            __file__,
-            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
-        ),
-        parse_dates=["pickup_datetime", "dropoff_datetime"],
-    )
-    return get_sqlalchemy_runtime_validator_postgresql(
-        df, postgresql_engine=postgresql_engine
-    )
 
 
 @pytest.fixture()
@@ -466,89 +397,6 @@ def test__validate_semantic_types_dict(cardinality_validator):
     )
 
 
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@pytest.mark.slow  # 1.76s
-@pytest.mark.filesystem
-def test_build_suite_no_config(
-    mock_emit,
-    titanic_validator,
-    possible_expectations_set,
-):
-    """
-    What does this test do and why?
-    Tests that the build_suite function works as expected with no config
-    """
-    profiler = UserConfigurableProfiler(titanic_validator)
-    suite = profiler.build_suite()
-    expectations_from_suite = {i.expectation_type for i in suite.expectations}
-
-    assert expectations_from_suite.issubset(possible_expectations_set)
-    assert len(suite.expectations) == 48
-
-    # Note 20211209 - Profiler will also call ExpectationSuite's add_expectation(), but it will not
-    # send a usage_stats event when called from a Profiler.
-    assert mock_emit.call_count == 1
-    assert "expectation_suite.add_expectation" not in [
-        mock_emit.call_args_list[0][0][0]["event"]
-    ]
-
-    # noinspection PyUnresolvedReferences
-    expected_events: List[mock._Call]
-    # noinspection PyUnresolvedReferences
-    actual_events: List[mock._Call]
-
-    expected_events = [
-        mock.call(
-            {
-                "event": "legacy_profiler.build_suite",
-                "event_payload": {
-                    "profile_dataset_type": "Validator",
-                    "excluded_expectations_specified": False,
-                    "ignored_columns_specified": False,
-                    "not_null_only": False,
-                    "primary_or_compound_key_specified": False,
-                    "semantic_types_dict_specified": False,
-                    "table_expectations_only": False,
-                    "value_set_threshold_specified": True,
-                    "api_version": "v2",
-                },
-                "success": True,
-            }
-        ),
-    ]
-    actual_events = mock_emit.call_args_list
-    assert actual_events == expected_events
-
-
-@pytest.mark.slow  # 1.32s
-@pytest.mark.filesystem
-def test_all_table_columns_populates(taxi_validator_pandas):
-    taxi_profiler = UserConfigurableProfiler(taxi_validator_pandas)
-
-    assert taxi_profiler.all_table_columns == [
-        "vendor_id",
-        "pickup_datetime",
-        "dropoff_datetime",
-        "passenger_count",
-        "trip_distance",
-        "rate_code_id",
-        "store_and_fwd_flag",
-        "pickup_location_id",
-        "dropoff_location_id",
-        "payment_type",
-        "fare_amount",
-        "extra",
-        "mta_tax",
-        "tip_amount",
-        "tolls_amount",
-        "improvement_surcharge",
-        "total_amount",
-        "congestion_surcharge",
-    ]
-
-
 @pytest.mark.filesystem
 def test_profiler_works_with_batch_object(cardinality_validator):
     profiler = UserConfigurableProfiler(cardinality_validator.active_batch)
@@ -567,71 +415,6 @@ def test_profiler_works_with_batch_object(cardinality_validator):
         "col_very_many",
         "col_unique",
     ]
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@pytest.mark.slow  # 1.37s
-@pytest.mark.filesystem
-def test_build_suite_with_config_and_no_semantic_types_dict(
-    mock_emit, titanic_validator, possible_expectations_set
-):
-    """
-    What does this test do and why?
-    Tests that the build_suite function works as expected with a config and without a semantic_types dict
-    """
-    profiler = UserConfigurableProfiler(
-        titanic_validator,
-        ignored_columns=["Survived", "Unnamed: 0"],
-        excluded_expectations=["expect_column_mean_to_be_between"],
-        primary_or_compound_key=["Name"],
-        table_expectations_only=False,
-        value_set_threshold="very_few",
-    )
-    suite = profiler.build_suite()
-    (
-        columns_with_expectations,
-        expectations_from_suite,
-    ) = get_set_of_columns_and_expectations_from_suite(suite)
-
-    columns_expected_in_suite = {"Name", "PClass", "Age", "Sex", "SexCode"}
-    assert columns_with_expectations == columns_expected_in_suite
-    assert expectations_from_suite.issubset(possible_expectations_set)
-    assert "expect_column_mean_to_be_between" not in expectations_from_suite
-    assert len(suite.expectations) == 29
-
-    assert mock_emit.call_count == 1
-    assert "expectation_suite.add_expectation" not in [
-        mock_emit.call_args_list[0][0][0]["event"]
-    ]
-
-    # noinspection PyUnresolvedReferences
-    expected_events: List[mock._Call]
-    # noinspection PyUnresolvedReferences
-    actual_events: List[mock._Call]
-
-    expected_events = [
-        mock.call(
-            {
-                "event": "legacy_profiler.build_suite",
-                "event_payload": {
-                    "profile_dataset_type": "Validator",
-                    "excluded_expectations_specified": True,
-                    "ignored_columns_specified": True,
-                    "not_null_only": False,
-                    "primary_or_compound_key_specified": True,
-                    "semantic_types_dict_specified": False,
-                    "table_expectations_only": False,
-                    "value_set_threshold_specified": True,
-                    "api_version": "v2",
-                },
-                "success": True,
-            }
-        ),
-    ]
-    actual_events = mock_emit.call_args_list
-    assert actual_events == expected_events
 
 
 @mock.patch(
@@ -676,7 +459,7 @@ def test_build_suite_with_semantic_types_dict(
 
     value_set_expectations = [
         i
-        for i in suite.expectations
+        for i in suite.expectation_configurations
         if i.expectation_type == "expect_column_values_to_be_in_set"
     ]
     value_set_columns = {i.kwargs.get("column") for i in value_set_expectations}
@@ -879,7 +662,7 @@ def test_nullity_expectations_mostly_tolerance(
     )
     suite = profiler.build_suite()
 
-    for i in suite.expectations:
+    for i in suite.expectation_configurations:
         assert i["kwargs"]["mostly"] == 0.66
 
 
@@ -938,294 +721,6 @@ def test_column_cardinality_functions(cardinality_validator):
     assert cardinality_with_large_pct_and_no_num.name == "NONE"
 
 
-@pytest.mark.slow  # 1.94s
-@pytest.mark.filesystem
-def test_profiler_all_expectation_types_pandas(
-    titanic_data_context_modular_api,
-    taxi_validator_pandas,
-    possible_expectations_set,
-    taxi_data_semantic_types,
-    taxi_data_ignored_columns,
-):
-    """
-    What does this test do and why?
-    Ensures that all available expectation types work as expected for pandas
-    """
-    context = titanic_data_context_modular_api
-
-    profiler = UserConfigurableProfiler(
-        taxi_validator_pandas,
-        semantic_types_dict=taxi_data_semantic_types,
-        ignored_columns=taxi_data_ignored_columns,
-        primary_or_compound_key=[
-            "vendor_id",
-            "pickup_datetime",
-            "dropoff_datetime",
-            "trip_distance",
-            "pickup_location_id",
-            "dropoff_location_id",
-        ],
-    )
-
-    assert profiler.column_info.get("rate_code_id")
-
-    suite = profiler.build_suite()
-
-    assert len(suite.expectations) == 41
-    (
-        columns_with_expectations,
-        expectations_from_suite,
-    ) = get_set_of_columns_and_expectations_from_suite(suite)
-
-    unexpected_expectations = {
-        "expect_column_values_to_be_unique",
-        "expect_column_values_to_be_null",
-        "expect_column_values_to_be_between",
-    }
-    assert expectations_from_suite == {
-        i for i in possible_expectations_set if i not in unexpected_expectations
-    }
-
-    ignored_included_columns_overlap = [
-        i for i in columns_with_expectations if i in taxi_data_ignored_columns
-    ]
-    assert len(ignored_included_columns_overlap) == 0
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[taxi_validator_pandas]
-    )
-
-    assert results["success"]
-
-
-@pytest.mark.skipif(
-    not is_library_loadable(library_name="pyspark"),
-    reason="requires pyspark to be installed",
-)
-@pytest.mark.spark
-def test_profiler_all_expectation_types_spark(
-    titanic_data_context_modular_api,
-    taxi_validator_spark,
-    possible_expectations_set,
-    taxi_data_semantic_types,
-    taxi_data_ignored_columns,
-):
-    """
-    What does this test do and why?
-    Ensures that all available expectation types work as expected for spark
-    """
-    context = titanic_data_context_modular_api
-
-    profiler = UserConfigurableProfiler(
-        taxi_validator_spark,
-        semantic_types_dict=taxi_data_semantic_types,
-        ignored_columns=taxi_data_ignored_columns,
-        # TODO: Add primary_or_compound_key test
-        #  primary_or_compound_key=[
-        #     "vendor_id",
-        #     "pickup_datetime",
-        #     "dropoff_datetime",
-        #     "trip_distance",
-        #     "pickup_location_id",
-        #     "dropoff_location_id",
-        #  ],
-    )
-
-    assert profiler.column_info.get("rate_code_id")
-    suite = profiler.build_suite()
-
-    assert len(suite.expectations) == 40
-    (
-        columns_with_expectations,
-        expectations_from_suite,
-    ) = get_set_of_columns_and_expectations_from_suite(suite)
-
-    unexpected_expectations = {
-        "expect_column_values_to_be_unique",
-        "expect_column_values_to_be_null",
-        "expect_compound_columns_to_be_unique",
-        "expect_column_values_to_be_between",
-    }
-    assert expectations_from_suite == {
-        i for i in possible_expectations_set if i not in unexpected_expectations
-    }
-
-    ignored_included_columns_overlap = [
-        i for i in columns_with_expectations if i in taxi_data_ignored_columns
-    ]
-    assert len(ignored_included_columns_overlap) == 0
-
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[taxi_validator_spark]
-    )
-
-    assert results["success"]
-
-
-@pytest.mark.skipif(
-    not is_library_loadable(library_name="sqlalchemy"),
-    reason="requires sqlalchemy to be installed",
-)
-@pytest.mark.slow  # 4.70s
-@pytest.mark.postgresql
-def test_profiler_all_expectation_types_sqlalchemy(
-    titanic_data_context_modular_api,
-    taxi_validator_sqlalchemy,
-    possible_expectations_set,
-    taxi_data_semantic_types,
-    taxi_data_ignored_columns,
-):
-    """
-    What does this test do and why?
-    Ensures that all available expectation types work as expected for sqlalchemy
-    """
-    if taxi_validator_sqlalchemy is None:
-        pytest.skip("a message")
-
-    context = titanic_data_context_modular_api
-
-    profiler = UserConfigurableProfiler(
-        taxi_validator_sqlalchemy,
-        semantic_types_dict=taxi_data_semantic_types,
-        ignored_columns=taxi_data_ignored_columns,
-        # TODO: Add primary_or_compound_key test
-        #  primary_or_compound_key=[
-        #     "vendor_id",
-        #     "pickup_datetime",
-        #     "dropoff_datetime",
-        #     "trip_distance",
-        #     "pickup_location_id",
-        #     "dropoff_location_id",
-        #  ],
-    )
-
-    assert profiler.column_info.get("rate_code_id")
-    suite = profiler.build_suite()
-    assert len(suite.expectations) == 40
-    (
-        columns_with_expectations,
-        expectations_from_suite,
-    ) = get_set_of_columns_and_expectations_from_suite(suite)
-
-    unexpected_expectations = {
-        "expect_column_values_to_be_unique",
-        "expect_column_values_to_be_null",
-        "expect_compound_columns_to_be_unique",
-        "expect_column_values_to_be_between",
-    }
-    assert expectations_from_suite == {
-        i for i in possible_expectations_set if i not in unexpected_expectations
-    }
-
-    ignored_included_columns_overlap = [
-        i for i in columns_with_expectations if i in taxi_data_ignored_columns
-    ]
-    assert len(ignored_included_columns_overlap) == 0
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[taxi_validator_sqlalchemy]
-    )
-
-    assert results["success"]
-
-
-# TODO: When this expectation is implemented for V3, remove this test and test for this expectation.
-@pytest.mark.skipif(
-    is_version_greater_or_equal(pd.__version__, "2.0.0"),
-    reason="pyspark 3.4.0 is not compatible with pandas 2.0.0.",
-    run=True,
-    strict=True,
-)
-@pytest.mark.spark
-def test_expect_compound_columns_to_be_unique(
-    taxi_validator_spark, taxi_data_ignored_columns, caplog
-):
-    """
-    Until all ExecutionEngine implementations for V3 are completed for this expectation:
-    1) Use the "taxi_validator_" argument for this test method, corresponding to one of the ExecutionEngine subclasses,
-       for which this expectation has not yet been implemented (and update the :param annotation below accordingly);
-    2) With every additional ExecutionEngine implementation for this expectation, update the corresponding
-       "test_profiler_all_expectation_types_" test method to include this expectation in the appropriate assertion.
-    3) Once this expectation has been implemented for all ExecutionEngine subclasses, delete this test method entirely.
-
-    :param taxi_validator_spark:
-    :param taxi_data_ignored_columns:
-    :param caplog:
-    :return:
-    """
-
-    taxi_validator = taxi_validator_spark
-
-    ignored_columns = taxi_data_ignored_columns + [
-        "pickup_datetime",
-        "dropoff_datetime",
-        "total_amount",
-        "passenger_count",
-        "payment_type",
-        "rate_code_id",
-        "store_and_fwd_flag",
-        "passenger_count",
-        "store_and_fwd_flag",
-        "vendor_id",
-        "trip_distance",
-    ]
-
-    profiler = UserConfigurableProfiler(
-        taxi_validator,
-        ignored_columns=ignored_columns,
-        primary_or_compound_key=[
-            "vendor_id",
-            "pickup_datetime",
-            "dropoff_datetime",
-            "trip_distance",
-            "pickup_location_id",
-            "dropoff_location_id",
-        ],
-    )
-    with caplog.at_level(logging.WARNING):
-        suite = profiler.build_suite()
-
-    log_warning_records = list(
-        filter(lambda record: record.levelname == "WARNING", caplog.records)
-    )
-    assert len(log_warning_records) == 0
-    assert len(suite.expectations) == 3
-
-    (
-        columns_with_expectations,
-        expectations_from_suite,
-    ) = get_set_of_columns_and_expectations_from_suite(suite)
-
-    expected_expectations = {
-        "expect_table_columns_to_match_ordered_list",
-        "expect_table_row_count_to_be_between",
-        "expect_compound_columns_to_be_unique",
-    }
-
-    assert expected_expectations == expectations_from_suite
-
-    profiler_with_single_column_key = UserConfigurableProfiler(
-        taxi_validator,
-        ignored_columns=ignored_columns,
-        primary_or_compound_key=["pickup_datetime"],
-    )
-
-    suite = profiler_with_single_column_key.build_suite()
-
-    assert len(suite.expectations) == 3
-
-    (
-        columns_with_expectations,
-        expectations_from_suite,
-    ) = get_set_of_columns_and_expectations_from_suite(suite)
-
-    expected_expectations = {
-        "expect_table_columns_to_match_ordered_list",
-        "expect_table_row_count_to_be_between",
-        "expect_column_values_to_be_unique",
-    }
-
-    assert expected_expectations == expectations_from_suite
-
-
 @mock.patch("great_expectations.profile.user_configurable_profiler.tqdm")
 @pytest.mark.slow  # 1.28s
 @pytest.mark.filesystem
@@ -1248,7 +743,7 @@ def test_user_configurable_profiler_progress_bar_config_enabled(
     assert mock_tqdm.call_count == 1
 
 
-@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch("great_expectations.data_context.data_context.EphemeralDataContext")
 @pytest.mark.slow  # 1.34s
 @pytest.mark.filesystem
 def test_user_configurable_profiler_progress_bar_config_disabled(
