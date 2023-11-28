@@ -251,10 +251,6 @@ snapshots[
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "parse_strings_as_datetimes": {
-                "schema": {"type": "boolean"},
-                "value": True,
-            },
             "v__0": {"schema": {"type": "string"}, "value": "a"},
             "v__1": {"schema": {"type": "string"}, "value": "b"},
             "v__2": {"schema": {"type": "string"}, "value": "c"},
@@ -273,10 +269,6 @@ snapshots[
     "value": {
         "params": {
             "column": {"schema": {"type": "string"}, "value": "my_column"},
-            "parse_strings_as_datetimes": {
-                "schema": {"type": "boolean"},
-                "value": True,
-            },
             "v__0": {"schema": {"type": "string"}, "value": "a"},
             "v__1": {"schema": {"type": "string"}, "value": "b"},
             "v__2": {"schema": {"type": "string"}, "value": "c"},
@@ -342,10 +334,6 @@ snapshots["test_atomic_prescriptive_summary_expect_column_max_to_be_between 1"] 
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "max_value": {"schema": {"type": "number"}, "value": 5},
             "min_value": {"schema": {"type": "number"}, "value": 1},
-            "parse_strings_as_datetimes": {
-                "schema": {"type": "boolean"},
-                "value": True,
-            },
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value. Values should be parsed as datetimes.",
@@ -388,10 +376,6 @@ snapshots["test_atomic_prescriptive_summary_expect_column_min_to_be_between 1"] 
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "max_value": {"schema": {"type": "number"}, "value": 5},
             "min_value": {"schema": {"type": "number"}, "value": 1},
-            "parse_strings_as_datetimes": {
-                "schema": {"type": "boolean"},
-                "value": True,
-            },
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value. Values should be parsed as datetimes.",
@@ -445,10 +429,6 @@ snapshots[
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
             "or_equal": {"schema": {"type": "boolean"}, "value": True},
-            "parse_strings_as_datetimes": {
-                "schema": {"type": "boolean"},
-                "value": True,
-            },
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "template": "Values in $column_A must be greater than or equal to those in $column_B, at least $mostly_pct % of the time. Values should be parsed as datetimes.",
@@ -675,10 +655,6 @@ snapshots[
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
-            "parse_strings_as_datetimes": {
-                "schema": {"type": "boolean"},
-                "value": True,
-            },
             "strictly": {"schema": {"type": "boolean"}, "value": True},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
@@ -694,10 +670,6 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_in_set 1"
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
-            "parse_strings_as_datetimes": {
-                "schema": {"type": "boolean"},
-                "value": True,
-            },
             "v__0": {"schema": {"type": "number"}, "value": 1},
             "v__1": {"schema": {"type": "number"}, "value": 2},
             "v__2": {"schema": {"type": "number"}, "value": 3},
@@ -742,10 +714,6 @@ snapshots[
             "column": {"schema": {"type": "string"}, "value": "my_column"},
             "mostly": {"schema": {"type": "number"}, "value": 0.8},
             "mostly_pct": {"schema": {"type": "string"}, "value": "80"},
-            "parse_strings_as_datetimes": {
-                "schema": {"type": "boolean"},
-                "value": True,
-            },
             "strictly": {"schema": {"type": "boolean"}, "value": True},
         },
         "schema": {"type": "com.superconductive.rendered.string"},
