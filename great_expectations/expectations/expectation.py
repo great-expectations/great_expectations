@@ -38,7 +38,7 @@ from typing_extensions import ParamSpec
 
 from great_expectations import __version__ as ge_version
 from great_expectations.compatibility import pydantic
-from great_expectations.compatibility.pydantic import Field, ModelMetaclass, confloat
+from great_expectations.compatibility.pydantic import Field, ModelMetaclass
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (
     deprecated_method_or_class,
@@ -2362,7 +2362,7 @@ class BatchExpectation(Expectation, ABC):
     batch_id: Union[str, None] = None
     row_condition: Union[str, None] = None
     condition_parser: Union[str, None] = None
-    mostly: confloat(ge=0, le=1) = Field(default=1, ge=0, le=1)
+    mostly: float = Field(default=1.0, ge=0.0, le=1.0)
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
