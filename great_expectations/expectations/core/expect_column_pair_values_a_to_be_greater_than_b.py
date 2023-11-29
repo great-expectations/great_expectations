@@ -76,13 +76,11 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         "column_A",
         "column_B",
         "ignore_row_if",
-        "parse_strings_as_datetimes",
         "or_equal",
         "mostly",
     )
     default_kwarg_values = {
         "mostly": 1.0,
-        "parse_strings_as_datetimes": False,
         "ignore_row_if": "both_values_are_missing",
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
@@ -128,7 +126,6 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         add_param_args: AddParamArgs = (
             ("column_A", RendererValueType.STRING),
             ("column_B", RendererValueType.STRING),
-            ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
             ("ignore_row_if", RendererValueType.STRING),
             ("mostly", RendererValueType.NUMBER),
             ("or_equal", RendererValueType.BOOLEAN),
@@ -156,9 +153,6 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
             else:
                 template_str = "Values in $column_A must be greater than or equal to those in $column_B, at least $mostly_pct % of the time."
 
-        if params.parse_strings_as_datetimes:
-            template_str += " Values should be parsed as datetimes."
-
         renderer_configuration.template_str = template_str
 
         return renderer_configuration
@@ -181,7 +175,6 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
             [
                 "column_A",
                 "column_B",
-                "parse_strings_as_datetimes",
                 "ignore_row_if",
                 "mostly",
                 "or_equal",
@@ -208,9 +201,6 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
                 template_str = "Values in $column_A must be greater than those in $column_B, at least $mostly_pct % of the time."
             else:
                 template_str = "Values in $column_A must be greater than or equal to those in $column_B, at least $mostly_pct % of the time."
-
-        if params.get("parse_strings_as_datetimes"):
-            template_str += " Values should be parsed as datetimes."
 
         if params["row_condition"] is not None:
             (

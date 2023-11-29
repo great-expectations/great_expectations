@@ -1091,9 +1091,6 @@ def test_column_partition_metric_pd():
     column_min_metric: MetricConfiguration = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={
-            "parse_strings_as_datetimes": False,
-        },
     )
     column_min_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
@@ -1101,9 +1098,6 @@ def test_column_partition_metric_pd():
     column_max_metric: MetricConfiguration = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={
-            "parse_strings_as_datetimes": False,
-        },
     )
     column_max_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
@@ -1151,9 +1145,6 @@ def test_column_partition_metric_pd():
     column_min_metric: MetricConfiguration = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs={
-            "parse_strings_as_datetimes": True,
-        },
     )
     column_min_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
@@ -1161,9 +1152,6 @@ def test_column_partition_metric_pd():
     column_max_metric: MetricConfiguration = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs={
-            "parse_strings_as_datetimes": True,
-        },
     )
     column_max_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
@@ -1297,9 +1285,6 @@ def test_column_partition_metric_sa(sa):  # noqa: PLR0915
     column_min_metric: MetricConfiguration = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={
-            "parse_strings_as_datetimes": False,
-        },
     )
     column_min_metric.metric_dependencies = {
         "metric_partial_fn": partial_column_min_metric,
@@ -1308,9 +1293,6 @@ def test_column_partition_metric_sa(sa):  # noqa: PLR0915
     column_max_metric: MetricConfiguration = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={
-            "parse_strings_as_datetimes": False,
-        },
     )
     column_max_metric.metric_dependencies = {
         "metric_partial_fn": partial_column_max_metric,
@@ -1384,9 +1366,6 @@ def test_column_partition_metric_sa(sa):  # noqa: PLR0915
     column_min_metric: MetricConfiguration = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs={
-            "parse_strings_as_datetimes": True,
-        },
     )
     column_min_metric.metric_dependencies = {
         "metric_partial_fn": partial_column_min_metric,
@@ -1395,9 +1374,6 @@ def test_column_partition_metric_sa(sa):  # noqa: PLR0915
     column_max_metric: MetricConfiguration = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs={
-            "parse_strings_as_datetimes": True,
-        },
     )
     column_max_metric.metric_dependencies = {
         "metric_partial_fn": partial_column_max_metric,
@@ -1539,9 +1515,6 @@ def test_column_partition_metric_spark(spark_session):  # noqa: PLR0915
     column_min_metric: MetricConfiguration = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={
-            "parse_strings_as_datetimes": False,
-        },
     )
     column_min_metric.metric_dependencies = {
         "metric_partial_fn": partial_column_min_metric,
@@ -1550,9 +1523,6 @@ def test_column_partition_metric_spark(spark_session):  # noqa: PLR0915
     column_max_metric: MetricConfiguration = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={
-            "parse_strings_as_datetimes": False,
-        },
     )
     column_max_metric.metric_dependencies = {
         "metric_partial_fn": partial_column_max_metric,
@@ -1626,9 +1596,6 @@ def test_column_partition_metric_spark(spark_session):  # noqa: PLR0915
     column_min_metric: MetricConfiguration = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs={
-            "parse_strings_as_datetimes": True,
-        },
     )
     column_min_metric.metric_dependencies = {
         "metric_partial_fn": partial_column_min_metric,
@@ -1637,9 +1604,6 @@ def test_column_partition_metric_spark(spark_session):  # noqa: PLR0915
     column_max_metric: MetricConfiguration = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs={
-            "parse_strings_as_datetimes": True,
-        },
     )
     column_max_metric.metric_dependencies = {
         "metric_partial_fn": partial_column_max_metric,
@@ -2146,13 +2110,13 @@ def test_map_column_values_increasing_pd():
         pd.DataFrame(
             {
                 "a": [
-                    "2021-01-01",
-                    "2021-01-31",
-                    "2021-02-28",
-                    "2021-03-20",
-                    "2021-02-21",
-                    "2021-05-01",
-                    "2021-06-18",
+                    1,
+                    2,
+                    4,
+                    5,
+                    3,
+                    6,
+                    7,
                 ]
             }
         )
@@ -2171,22 +2135,16 @@ def test_map_column_values_increasing_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "strictly": True,
-            "parse_strings_as_datetimes": True,
         },
     )
     condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
-    with pytest.warns(DeprecationWarning) as record:
-        results = engine.resolve_metrics(
-            metrics_to_resolve=(condition_metric,),
-            metrics=metrics,
-        )
-        metrics.update(results)
-    assert len(record) == 1
-    assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
-        record.list[0].message
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,),
+        metrics=metrics,
     )
+    metrics.update(results)
 
     unexpected_count_metric = MetricConfiguration(
         metric_name=f"column_values.increasing.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
@@ -2230,7 +2188,6 @@ def test_map_column_values_increasing_pd():
     metrics.update(results)
 
     assert metrics[unexpected_rows_metric.id]["a"].index == pd.Index([4], dtype="int64")
-    assert metrics[unexpected_rows_metric.id]["a"].values == ["2021-02-21"]
 
 
 @pytest.mark.spark
@@ -2271,23 +2228,17 @@ def test_map_column_values_increasing_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "strictly": True,
-            "parse_strings_as_datetimes": True,
         },
     )
     condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
         "table.column_types": table_column_types,
     }
-    with pytest.warns(DeprecationWarning) as record:
-        results = engine.resolve_metrics(
-            metrics_to_resolve=(condition_metric,),
-            metrics=metrics,
-        )
-        metrics.update(results)
-    assert len(record) == 1
-    assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
-        record.list[0].message
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,),
+        metrics=metrics,
     )
+    metrics.update(results)
 
     unexpected_count_metric = MetricConfiguration(
         metric_name=f"column_values.increasing.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
@@ -2335,13 +2286,13 @@ def test_map_column_values_decreasing_pd():
         pd.DataFrame(
             {
                 "a": [
-                    "2021-06-18",
-                    "2021-05-01",
-                    "2021-02-21",
-                    "2021-03-20",
-                    "2021-02-28",
-                    "2021-01-31",
-                    "2021-01-01",
+                    7,
+                    6,
+                    3,
+                    5,
+                    4,
+                    2,
+                    1,
                 ]
             }
         )
@@ -2360,22 +2311,16 @@ def test_map_column_values_decreasing_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "strictly": True,
-            "parse_strings_as_datetimes": True,
         },
     )
     condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
-    with pytest.warns(DeprecationWarning) as record:
-        results = engine.resolve_metrics(
-            metrics_to_resolve=(condition_metric,),
-            metrics=metrics,
-        )
-        metrics.update(results)
-    assert len(record) == 1
-    assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
-        record.list[0].message
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,),
+        metrics=metrics,
     )
+    metrics.update(results)
 
     unexpected_count_metric = MetricConfiguration(
         metric_name=f"column_values.decreasing.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
@@ -2419,7 +2364,6 @@ def test_map_column_values_decreasing_pd():
     metrics.update(results)
 
     assert metrics[unexpected_rows_metric.id]["a"].index == pd.Index([3], dtype="int64")
-    assert metrics[unexpected_rows_metric.id]["a"].values == ["2021-03-20"]
 
 
 @pytest.mark.spark
@@ -2460,23 +2404,17 @@ def test_map_column_values_decreasing_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "strictly": True,
-            "parse_strings_as_datetimes": True,
         },
     )
     condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
         "table.column_types": table_column_types,
     }
-    with pytest.warns(DeprecationWarning) as record:
-        results = engine.resolve_metrics(
-            metrics_to_resolve=(condition_metric,),
-            metrics=metrics,
-        )
-        metrics.update(results)
-    assert len(record) == 1
-    assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
-        record.list[0].message
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,),
+        metrics=metrics,
     )
+    metrics.update(results)
 
     unexpected_count_metric = MetricConfiguration(
         metric_name=f"column_values.decreasing.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
@@ -4913,9 +4851,6 @@ def test_batch_aggregate_metrics_pd():
     desired_metric_1 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={
-            "parse_strings_as_datetimes": True,
-        },
     )
     desired_metric_1.metric_dependencies = {
         "table.columns": table_columns_metric,
@@ -4923,9 +4858,6 @@ def test_batch_aggregate_metrics_pd():
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={
-            "parse_strings_as_datetimes": True,
-        },
     )
     desired_metric_2.metric_dependencies = {
         "table.columns": table_columns_metric,
@@ -4933,9 +4865,6 @@ def test_batch_aggregate_metrics_pd():
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs={
-            "parse_strings_as_datetimes": True,
-        },
     )
     desired_metric_3.metric_dependencies = {
         "table.columns": table_columns_metric,
@@ -4943,37 +4872,28 @@ def test_batch_aggregate_metrics_pd():
     desired_metric_4 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs={
-            "parse_strings_as_datetimes": True,
-        },
     )
     desired_metric_4.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
     start = datetime.datetime.now()
-    with pytest.warns(DeprecationWarning) as records:
-        results = engine.resolve_metrics(
-            metrics_to_resolve=(
-                desired_metric_1,
-                desired_metric_2,
-                desired_metric_3,
-                desired_metric_4,
-            ),
-            metrics=metrics,
-        )
-        metrics.update(results)
-    assert len(records) == 4
-    for record in records:
-        assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
-            record.message
-        )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(
+            desired_metric_1,
+            desired_metric_2,
+            desired_metric_3,
+            desired_metric_4,
+        ),
+        metrics=metrics,
+    )
+    metrics.update(results)
     end = datetime.datetime.now()
     print(end - start)
-    assert results[desired_metric_1.id] == pd.Timestamp(year=2021, month=6, day=18)
-    assert results[desired_metric_2.id] == pd.Timestamp(year=2021, month=1, day=1)
-    assert results[desired_metric_3.id] == pd.Timestamp(year=2021, month=6, day=18)
-    assert results[desired_metric_4.id] == pd.Timestamp(year=2021, month=1, day=1)
+    assert results[desired_metric_1.id] == "2021-06-18"
+    assert results[desired_metric_2.id] == "2021-01-01"
+    assert results[desired_metric_3.id] == "2021-06-18"
+    assert results[desired_metric_4.id] == "2021-01-01"
 
 
 @pytest.mark.sqlite
