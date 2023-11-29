@@ -788,6 +788,7 @@ def test_result_format_configured_with_set_default_override(
         "expectation_config": {
             "kwargs": {
                 "include_config": True,
+                "result_format": "BASIC",  # Default from Expectation base class
                 "column": "Name",
                 "Notes": "Some notes",
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",

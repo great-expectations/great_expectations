@@ -2,6 +2,7 @@ import pandas as pd
 import pytest
 
 from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -759,10 +760,7 @@ def test_pandas_specify_not_include_unexpected_rows(
 
 
 @pytest.mark.unit
-def test_include_unexpected_rows_without_explicit_result_format_raises_error(
-    in_memory_runtime_context,
-    pandas_animals_dataframe_for_unexpected_rows_and_index,
-):
+def test_include_unexpected_rows_without_explicit_result_format_raises_error():
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
@@ -774,28 +772,8 @@ def test_include_unexpected_rows_without_explicit_result_format_raises_error(
         },
     )
 
-    expectation = ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
-    batch_definition = BatchDefinition(
-        datasource_name="pandas_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
-        batch_spec_passthrough=None,
-    )
-    batch = Batch(
-        data=pandas_animals_dataframe_for_unexpected_rows_and_index,
-        batch_definition=batch_definition,
-    )
-    engine = PandasExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        data_context=in_memory_runtime_context,
-        batches=[
-            batch,
-        ],
-    )
-    with pytest.raises(ValueError):
-        expectation.validate_(validator)
+    with pytest.raises(ValidationError):
+        ExpectColumnValuesToBeInSet(**expectation_configuration.kwargs)
 
 
 # Spark
