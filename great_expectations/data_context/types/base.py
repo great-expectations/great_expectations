@@ -1397,128 +1397,6 @@ class AnonymizedUsageStatisticsConfigSchema(Schema):
         return data
 
 
-class NotebookTemplateConfig(DictDot):
-    def __init__(self, file_name, template_kwargs=None) -> None:
-        self.file_name = file_name
-        if template_kwargs:
-            self.template_kwargs = template_kwargs
-        else:
-            self.template_kwargs = {}
-
-
-class NotebookTemplateConfigSchema(Schema):
-    file_name = fields.String()
-    template_kwargs = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), allow_none=True
-    )
-
-    # noinspection PyUnusedLocal
-    @post_load
-    def make_notebook_template_config(self, data, **kwargs):
-        return NotebookTemplateConfig(**data)
-
-
-class NotebookConfig(DictDot):
-    def __init__(  # noqa: PLR0913
-        self,
-        class_name,
-        module_name,
-        custom_templates_module=None,
-        header_markdown=None,
-        footer_markdown=None,
-        table_expectations_header_markdown=None,
-        column_expectations_header_markdown=None,
-        table_expectations_not_found_markdown=None,
-        column_expectations_not_found_markdown=None,
-        authoring_intro_markdown=None,
-        column_expectations_markdown=None,
-        header_code=None,
-        footer_code=None,
-        table_expectation_code=None,
-        column_expectation_code=None,
-    ) -> None:
-        self.class_name = class_name
-        self.module_name = module_name
-        self.custom_templates_module = custom_templates_module
-
-        self.header_markdown = header_markdown
-        self.footer_markdown = footer_markdown
-        self.table_expectations_header_markdown = table_expectations_header_markdown
-        self.column_expectations_header_markdown = column_expectations_header_markdown
-        self.table_expectations_not_found_markdown = (
-            table_expectations_not_found_markdown
-        )
-        self.column_expectations_not_found_markdown = (
-            column_expectations_not_found_markdown
-        )
-        self.authoring_intro_markdown = authoring_intro_markdown
-        self.column_expectations_markdown = column_expectations_markdown
-
-        self.header_code = header_code
-        self.footer_code = footer_code
-        self.table_expectation_code = table_expectation_code
-        self.column_expectation_code = column_expectation_code
-
-
-class NotebookConfigSchema(Schema):
-    class_name = fields.String(missing="SuiteEditNotebookRenderer")
-    module_name = fields.String(
-        missing="great_expectations.render.renderer.v3.suite_edit_notebook_renderer"
-    )
-    custom_templates_module = fields.String(allow_none=True)
-
-    header_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    footer_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    table_expectations_header_markdown = fields.Nested(
-        NotebookTemplateConfigSchema, allow_none=True
-    )
-    column_expectations_header_markdown = fields.Nested(
-        NotebookTemplateConfigSchema, allow_none=True
-    )
-    table_expectations_not_found_markdown = fields.Nested(
-        NotebookTemplateConfigSchema, allow_none=True
-    )
-    column_expectations_not_found_markdown = fields.Nested(
-        NotebookTemplateConfigSchema, allow_none=True
-    )
-    authoring_intro_markdown = fields.Nested(
-        NotebookTemplateConfigSchema, allow_none=True
-    )
-    column_expectations_markdown = fields.Nested(
-        NotebookTemplateConfigSchema, allow_none=True
-    )
-
-    header_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    footer_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    table_expectation_code = fields.Nested(
-        NotebookTemplateConfigSchema, allow_none=True
-    )
-    column_expectation_code = fields.Nested(
-        NotebookTemplateConfigSchema, allow_none=True
-    )
-
-    # noinspection PyUnusedLocal
-    @post_load
-    def make_notebook_config(self, data, **kwargs):
-        return NotebookConfig(**data)
-
-
-class NotebooksConfig(DictDot):
-    def __init__(self, suite_edit) -> None:
-        self.suite_edit = suite_edit
-
-
-class NotebooksConfigSchema(Schema):
-    # for now only suite_edit, could have other customization options for
-    # notebooks in the future
-    suite_edit = fields.Nested(NotebookConfigSchema)
-
-    # noinspection PyUnusedLocal
-    @post_load
-    def make_notebooks_config(self, data, **kwargs):
-        return NotebooksConfig(**data)
-
-
 class ProgressBarsConfig(DictDot):
     def __init__(
         self,
@@ -1665,7 +1543,6 @@ class DataContextConfigSchema(Schema):
         keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
     )
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
-    notebooks = fields.Nested(NotebooksConfigSchema, allow_none=True)
     data_docs_sites = fields.Dict(
         keys=fields.Str(), values=fields.Dict(), allow_none=True
     )
@@ -2430,7 +2307,7 @@ class DataContextConfig(BaseYamlConfig):
     # TODO: <Alex>ALEX (does not work yet)</Alex>
     # _config_schema_class = DataContextConfigSchema
 
-    def __init__(  # noqa: C901, PLR0912, PLR0913, PLR0915
+    def __init__(  # noqa: C901, PLR0912, PLR0913
         self,
         config_version: Optional[float] = None,
         datasources: Optional[
@@ -2449,7 +2326,6 @@ class DataContextConfig(BaseYamlConfig):
         validation_operators=None,
         stores: Optional[Dict] = None,
         data_docs_sites: Optional[Dict] = None,
-        notebooks: Optional[NotebookConfig] = None,
         config_variables_file_path: Optional[str] = None,
         anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig] = None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
@@ -2498,7 +2374,6 @@ class DataContextConfig(BaseYamlConfig):
         if validation_operators is not None:
             self.validation_operators = validation_operators
         self.stores = stores or {}
-        self.notebooks = notebooks
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
         if anonymous_usage_statistics is None:
@@ -3223,7 +3098,6 @@ assetConfigSchema = AssetConfigSchema()
 sorterConfigSchema = SorterConfigSchema()
 # noinspection SpellCheckingInspection
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
-notebookConfigSchema = NotebookConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
 concurrencyConfigSchema = ConcurrencyConfigSchema()
 progressBarsConfigSchema = ProgressBarsConfigSchema()
