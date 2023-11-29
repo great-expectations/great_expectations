@@ -2307,7 +2307,7 @@ class DataContextConfig(BaseYamlConfig):
     # TODO: <Alex>ALEX (does not work yet)</Alex>
     # _config_schema_class = DataContextConfigSchema
 
-    def __init__(  # noqa: C901, PLR0912, PLR0913
+    def __init__(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         config_version: Optional[float] = None,
         datasources: Optional[
@@ -2325,6 +2325,7 @@ class DataContextConfig(BaseYamlConfig):
         plugins_directory: Optional[str] = None,
         validation_operators=None,
         stores: Optional[Dict] = None,
+        notebooks: Optional[Any] = None,
         data_docs_sites: Optional[Dict] = None,
         config_variables_file_path: Optional[str] = None,
         anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig] = None,
@@ -2334,6 +2335,9 @@ class DataContextConfig(BaseYamlConfig):
         progress_bars: Optional[ProgressBarsConfig] = None,
         include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
     ) -> None:
+        if notebooks:
+            warnings.warn("The `notebooks` parameter no longer supported.", UserWarning)
+
         # Set defaults
         if config_version is None:
             config_version = DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value
