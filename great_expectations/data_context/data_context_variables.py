@@ -27,6 +27,7 @@ if TYPE_CHECKING:
         ConcurrencyConfig,
         DataContextConfig,
         IncludeRenderedContentConfig,
+        NotebookConfig,
         ProgressBarsConfig,
     )
     from great_expectations.datasource.fluent.interfaces import (
@@ -249,6 +250,17 @@ class DataContextVariables(ABC):
         self._set(
             DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
             anonymous_usage_statistics,
+        )
+
+    @property
+    def notebooks(self) -> Optional[NotebookConfig]:
+        return self._get(DataContextVariableSchema.NOTEBOOKS)
+
+    @notebooks.setter
+    def notebooks(self, notebooks: NotebookConfig) -> None:
+        self._set(
+            DataContextVariableSchema.NOTEBOOKS,
+            notebooks,
         )
 
     @property

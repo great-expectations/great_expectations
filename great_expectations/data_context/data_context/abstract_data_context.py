@@ -86,6 +86,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfigDefaults,
     DatasourceConfig,
     IncludeRenderedContentConfig,
+    NotebookConfig,
     ProgressBarsConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
@@ -4339,6 +4340,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @property
     def include_rendered_content(self) -> IncludeRenderedContentConfig:
         return self.variables.include_rendered_content
+
+    @property
+    def notebooks(self) -> NotebookConfig:
+        return self.variables.notebooks  # type: ignore[return-value]
 
     @property
     def datasources(self) -> DatasourceDict:
