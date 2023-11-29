@@ -58,6 +58,7 @@ from great_expectations.util import deep_filter_properties_iterable
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.data_context.store import Store
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
@@ -101,10 +102,12 @@ class ExpectationSuite(SerializableDictDot):
         execution_engine_type: Optional[Type[ExecutionEngine]] = None,
         meta: Optional[dict] = None,
         ge_cloud_id: Optional[str] = None,
+        _store: Optional[Store] = None,
     ) -> None:
         self.expectation_suite_name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
         self._data_context = data_context
+        self._store = _store
 
         if expectations is None:
             expectations = []
