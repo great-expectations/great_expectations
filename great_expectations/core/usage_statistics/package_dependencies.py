@@ -31,7 +31,6 @@ class GXDependencies:
     GX_REQUIRED_DEPENDENCIES: List[str] = sorted(
         [
             "altair",
-            "Click",
             "colorama",
             "cryptography",
             "Ipython",
@@ -42,8 +41,6 @@ class GXDependencies:
             "makefun",
             "marshmallow",
             "mistune",
-            "nbformat",
-            "notebook",
             "numpy",
             "packaging",
             "pandas",
@@ -143,6 +140,7 @@ class GXDependencies:
         "mistune",
         "moto",
         "ipykernel",
+        "nbformat",
         "nbconvert",
         "py",
         "pact-python",
