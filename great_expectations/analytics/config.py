@@ -7,6 +7,9 @@ from great_expectations.compatibility.pydantic import (
 )
 
 
+DUMMY_UUID = UUID("00000000-0000-0000-0000-000000000000")
+
+
 class _EnvConfig(BaseSettings):
     gx_analytics_enabled: bool = False  # disabled by default, for now
 
@@ -39,10 +42,10 @@ class _EnvConfig(BaseSettings):
 
 
 class Config(GenericModel):
-    organization_id: UUID = UUID("00000000-0000-0000-0000-000000000000")
-    user_id: UUID = UUID("00000000-0000-0000-0000-000000000000")
-    data_context_id: UUID = UUID("00000000-0000-0000-0000-000000000000")
-    oss_id: UUID = UUID("00000000-0000-0000-0000-000000000000")
+    organization_id: UUID = DUMMY_UUID
+    user_id: UUID = DUMMY_UUID
+    data_context_id: UUID = DUMMY_UUID
+    oss_id: UUID = DUMMY_UUID
     cloud_mode: bool = False
 
 
