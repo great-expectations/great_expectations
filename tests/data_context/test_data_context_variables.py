@@ -71,7 +71,6 @@ def data_context_config_dict() -> dict:
             data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
             usage_statistics_url=USAGE_STATISTICS_QA_URL,
         ),
-        "notebooks": None,
         "concurrency": None,
         "progress_bars": None,
         "include_rendered_content": {
