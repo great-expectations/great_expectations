@@ -29,8 +29,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     GXCloudConfig,
     IncludeRenderedContentConfig,
-    NotebookConfig,
-    NotebookTemplateConfig,
     ProgressBarsConfig,
 )
 from great_expectations.data_context.types.resource_identifiers import (
@@ -73,7 +71,6 @@ def data_context_config_dict() -> dict:
             data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
             usage_statistics_url=USAGE_STATISTICS_QA_URL,
         ),
-        "notebooks": None,
         "concurrency": None,
         "progress_bars": None,
         "include_rendered_content": {
@@ -203,17 +200,6 @@ def anonymous_usage_statistics() -> AnonymizedUsageStatisticsConfig:
 
 
 @pytest.fixture
-def notebooks() -> NotebookConfig:
-    return NotebookConfig(
-        class_name="SuiteEditNotebookRenderer",
-        module_name="great_expectations.render.renderer.v3.suite_edit_notebook_renderer",
-        header_markdown=NotebookTemplateConfig(
-            file_name="my_notebook_template.md",
-        ),
-    )
-
-
-@pytest.fixture
 def concurrency() -> ConcurrencyConfig:
     return ConcurrencyConfig(enabled=True)
 
@@ -279,10 +265,6 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
         pytest.param(
             DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
             id="anonymous_usage_statistics getter",
-        ),
-        pytest.param(
-            DataContextVariableSchema.NOTEBOOKS,
-            id="notebooks getter",
         ),
         pytest.param(
             DataContextVariableSchema.CONCURRENCY,
@@ -399,11 +381,6 @@ def test_data_context_variables_get_with_substitutions(
             id="anonymous_usage_statistics setter",
         ),
         pytest.param(
-            notebooks,
-            DataContextVariableSchema.NOTEBOOKS,
-            id="notebooks setter",
-        ),
-        pytest.param(
             concurrency,
             DataContextVariableSchema.CONCURRENCY,
             id="concurrency setter",
@@ -486,7 +463,6 @@ def test_data_context_variables_save_config(
             "config_variables_file_path",
             "config_version",
             "data_docs_sites",
-            "notebooks",
             "plugins_directory",
             "stores",
             "include_rendered_content",
