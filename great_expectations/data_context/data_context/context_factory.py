@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
+    Callable,
     Literal,
     Mapping,
     Type,
@@ -189,14 +190,12 @@ def get_context(  # noqa: PLR0913
         "ephemeral": dict(
             project_config=project_config,
             runtime_environment=runtime_environment,
-            cloud_mode=False,
         ),
         "file": dict(
             project_config=project_config,
             context_root_dir=context_root_dir,
             project_root_dir=project_root_dir or Path.cwd(),
             runtime_environment=runtime_environment,
-            cloud_mode=False,
         ),
         "cloud": dict(
             project_config=project_config,
@@ -206,7 +205,6 @@ def get_context(  # noqa: PLR0913
             cloud_base_url=cloud_base_url,
             cloud_access_token=cloud_access_token,
             cloud_organization_id=cloud_organization_id,
-            cloud_mode=True,
         ),
         None: dict(
             project_config=project_config,
@@ -245,7 +243,16 @@ def get_context(  # noqa: PLR0913
         "cloud": CloudDataContext,
         None: AbstractDataContext,
     }
-    context = _get_context(**kwargs)
+
+    context_fn_map: dict[ContextModes | None, Callable] = {
+        "ephemeral": _get_ephemeral_context,
+        "file": _get_file_context,
+        "cloud": _get_cloud_context,
+        None: _get_context,
+    }
+
+    context_fn = context_fn_map[mode]
+    context = context_fn(**kwargs)
 
     expected_type = expected_ctx_types[mode]
     if not isinstance(context, expected_type):

@@ -83,21 +83,6 @@
         "success": true
       }
     },{
-      "title" : "test_parse_strings_as_datetimes_and_mostly",
-      "exact_match_out" : false,
-      "only_for": ["pandas"],
-      "in": {
-        "column_A": "a",
-        "column_B": "b",
-        "parse_strings_as_datetimes": true,
-        "mostly": 0.6
-      },
-      "out" : {
-        "unexpected_list": [["1/1/2016", "1/1/2016"], ["5/5/2016", "5/1/2020"]],
-        "unexpected_index_list": [{"a": "1/1/2016", "pk_index": 0, "b": "1/1/2016"}, {"a": "5/5/2016", "pk_index": 4, "b": "5/1/2020"}],
-        "success": true
-      }
-    },{
       "title" : "test_mostly",
       "exact_match_out" : false,
       "in": {

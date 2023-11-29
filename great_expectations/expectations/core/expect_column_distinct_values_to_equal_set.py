@@ -11,7 +11,6 @@ from great_expectations.expectations.expectation import (
     InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
-from great_expectations.expectations.metrics.util import parse_value_set
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -74,17 +73,13 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.value_counts",)
-    success_keys = (
-        "value_set",
-        "parse_strings_as_datetimes",
-    )
+    success_keys = ("value_set",)
 
     # Default values
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,
         "value_set": None,
-        "parse_strings_as_datetimes": None,
         "mostly": 1,
         "result_format": "BASIC",
         "include_config": True,
@@ -137,7 +132,6 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
         add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("value_set", RendererValueType.ARRAY),
-            ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
         )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
@@ -159,9 +153,6 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
                 renderer_configuration=renderer_configuration,
             )
             template_str += f"distinct values must match this set: {value_set_str}."
-
-            if params.parse_strings_as_datetimes:
-                template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -189,7 +180,6 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
             [
                 "column",
                 "value_set",
-                "parse_strings_as_datetimes",
                 "row_condition",
                 "condition_parser",
             ],
@@ -206,9 +196,6 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
             )
 
         template_str = f"distinct values must match this set: {values_string}."
-
-        if params.get("parse_strings_as_datetimes"):
-            template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -232,9 +219,6 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
             )
 
         template_str = f"distinct values must match this set: {values_string}."
-
-        if params.get("parse_strings_as_datetimes"):
-            template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -271,17 +255,11 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
-            "parse_strings_as_datetimes"
-        )
         observed_value_counts = metrics.get("column.value_counts")
         observed_value_set = set(observed_value_counts.index)
         value_set = self.get_success_kwargs(configuration).get("value_set")
 
-        if parse_strings_as_datetimes:
-            parsed_value_set = parse_value_set(value_set)
-        else:
-            parsed_value_set = value_set
+        parsed_value_set = value_set
 
         expected_value_set = set(parsed_value_set)
 
