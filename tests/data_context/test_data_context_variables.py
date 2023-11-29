@@ -29,8 +29,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     GXCloudConfig,
     IncludeRenderedContentConfig,
-    NotebookConfig,
-    NotebookTemplateConfig,
     ProgressBarsConfig,
 )
 from great_expectations.data_context.types.resource_identifiers import (
@@ -199,17 +197,6 @@ def data_docs_sites() -> dict:
 def anonymous_usage_statistics() -> AnonymizedUsageStatisticsConfig:
     return AnonymizedUsageStatisticsConfig(
         enabled=False,
-    )
-
-
-@pytest.fixture
-def notebooks() -> NotebookConfig:
-    return NotebookConfig(
-        class_name="SuiteEditNotebookRenderer",
-        module_name="great_expectations.render.renderer.v3.suite_edit_notebook_renderer",
-        header_markdown=NotebookTemplateConfig(
-            file_name="my_notebook_template.md",
-        ),
     )
 
 
@@ -397,11 +384,6 @@ def test_data_context_variables_get_with_substitutions(
             anonymous_usage_statistics,
             DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
             id="anonymous_usage_statistics setter",
-        ),
-        pytest.param(
-            notebooks,
-            DataContextVariableSchema.NOTEBOOKS,
-            id="notebooks setter",
         ),
         pytest.param(
             concurrency,
