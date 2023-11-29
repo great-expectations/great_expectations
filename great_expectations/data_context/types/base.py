@@ -1681,6 +1681,20 @@ class DataContextConfigSchema(Schema):
         ConcurrencyConfigSchema, required=False, allow_none=True
     )
 
+    batch_expectations = fields.Dict(
+        keys=fields.Str(),
+        required=False,
+        allow_none=True,
+        load_only=True,
+    )
+    batch_configs = fields.Dict(
+        keys=fields.Str(),
+        required=False,
+        allow_none=True,
+        load_only=True,
+    )
+
+
     # To ensure backwards compatability, we need to ensure that new options are "opt-in"
     # If a user has not explicitly configured the value, it will be None and will be wiped by the post_dump hook
     REMOVE_KEYS_IF_NONE = [
@@ -2457,6 +2471,8 @@ class DataContextConfig(BaseYamlConfig):
         concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
         progress_bars: Optional[ProgressBarsConfig] = None,
         include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
+        batch_expectations: Optional[Dict] = None,
+        batch_configs: Optional[Dict] = None,
     ) -> None:
         # Set defaults
         if config_version is None:
@@ -2519,6 +2535,9 @@ class DataContextConfig(BaseYamlConfig):
                 **include_rendered_content
             )
         self.include_rendered_content = include_rendered_content
+
+        self.batch_expectations = batch_expectations or {}
+        self.batch_configs = batch_configs or {}
 
         super().__init__(commented_map=commented_map)
 
