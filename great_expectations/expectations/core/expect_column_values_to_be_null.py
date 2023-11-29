@@ -4,7 +4,6 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
@@ -86,25 +85,6 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
 
     map_metric = "column_values.null"
     args_keys = ("column",)
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                           from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                                                  Expectation.
-        """
-        super().validate_configuration(configuration)
 
     @classmethod
     def _prescriptive_template(

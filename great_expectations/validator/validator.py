@@ -543,7 +543,9 @@ class Validator:
                 )
 
             try:
-                expectation = expectation_impl(configuration)
+                expectation = expectation_impl(
+                    meta=configuration.meta, **configuration.kwargs
+                )
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
 
                 if not self.interactive_evaluation and not self._active_validation:
@@ -551,7 +553,7 @@ class Validator:
                         expectation_config=copy.deepcopy(expectation.configuration)
                     )
                 else:
-                    validation_result = expectation.validate(
+                    validation_result = expectation.validate_(
                         validator=self,
                         evaluation_parameters=self._expectation_suite.evaluation_parameters,
                         data_context=self._data_context,
@@ -1120,11 +1122,13 @@ class Validator:
                 raise InvalidExpectationConfigurationError(str(e))
 
             evaluated_config = copy.deepcopy(configuration)
-            evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
+
+            if self.active_batch_id:
+                evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
             validation_dependencies: ValidationDependencies = expectation_impl(
-                evaluated_config
+                **evaluated_config.kwargs
             ).get_validation_dependencies(
                 configuration=evaluated_config,
                 execution_engine=self._execution_engine,
@@ -1398,7 +1402,7 @@ class Validator:
         """
 
         expectation_suite = copy.deepcopy(self.expectation_suite)
-        expectations = expectation_suite.expectations
+        expectations = expectation_suite.expectation_configurations
 
         discards: defaultdict[str, int] = defaultdict(int)
 
@@ -1461,7 +1465,7 @@ class Validator:
         ):  # Only add this if we added one of the settings above.
             settings_message += " settings filtered."
 
-        expectation_suite.expectations = expectations
+        expectation_suite.expectation_configurations = expectations
         if not suppress_logging:
             logger.info(message + settings_message)
         return expectation_suite
@@ -1652,7 +1656,7 @@ class Validator:
             # Group expectations by column
             columns: dict[Any, list[ExpectationConfiguration]] = {}
 
-            for expectation in expectation_suite.expectations:
+            for expectation in expectation_suite.expectation_configurations:
                 expectation.process_evaluation_parameters(
                     evaluation_parameters=runtime_evaluation_parameters,
                     interactive_evaluation=self.interactive_evaluation,

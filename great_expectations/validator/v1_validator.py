@@ -60,7 +60,9 @@ class Validator:
         self, expectation_suite: ExpectationSuite
     ) -> ExpectationSuiteValidationResult:
         """Run an expectation suite against the batch config"""
-        results = self._validate_expectation_configs(expectation_suite.expectations)
+        results = self._validate_expectation_configs(
+            expectation_suite.expectation_configurations
+        )
         statistics = calc_validation_statistics(results)
 
         # TODO: This was copy/pasted from Validator, but many fields were removed
