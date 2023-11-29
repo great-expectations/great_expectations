@@ -7,8 +7,7 @@ from great_expectations.compatibility.pydantic import validator
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.core.validators import (
-    validate_max_value,
-    validate_min_value,
+    validate_eval_parameter_dict,
 )
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
@@ -127,8 +126,8 @@ class ExpectColumnValuesToBeNormallyDistributed(ColumnAggregateExpectation):
     min_value: Union[float, dict, datetime.datetime, None] = None
     max_value: Union[float, dict, datetime.datetime, None] = None
 
-    _min_val = validator("min_value", allow_reuse=True)(validate_min_value)
-    _max_val = validator("max_value", allow_reuse=True)(validate_max_value)
+    _min_val = validator("min_value", allow_reuse=True)(validate_eval_parameter_dict)
+    _max_val = validator("max_value", allow_reuse=True)(validate_eval_parameter_dict)
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [

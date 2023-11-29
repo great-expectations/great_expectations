@@ -6,8 +6,7 @@ from typing import TYPE_CHECKING, Dict, Optional, Union
 from great_expectations.compatibility.pydantic import validator
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.core.validators import (
-    validate_max_value,
-    validate_min_value,
+    validate_eval_parameter_dict,
 )
 from great_expectations.expectations.expectation import (
     BatchExpectation,
@@ -77,8 +76,8 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
     min_value: Union[float, dict, datetime.datetime, None] = None
     max_value: Union[float, dict, datetime.datetime, None] = None
 
-    _min_val = validator("min_value", allow_reuse=True)(validate_min_value)
-    _max_val = validator("max_value", allow_reuse=True)(validate_max_value)
+    _min_val = validator("min_value", allow_reuse=True)(validate_eval_parameter_dict)
+    _max_val = validator("max_value", allow_reuse=True)(validate_eval_parameter_dict)
 
     library_metadata = {
         "maturity": "production",
