@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from great_expectations.compatibility.pydantic import validator
@@ -90,8 +90,8 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
         [expect_column_proportion_of_unique_values_to_be_between](https://greatexpectations.io/expectations/expect_column_proportion_of_unique_values_to_be_between)
     """
 
-    min_value: Union[float, dict, datetime.datetime, None] = None
-    max_value: Union[float, dict, datetime.datetime, None] = None
+    min_value: Union[float, dict, datetime, None] = None
+    max_value: Union[float, dict, datetime, None] = None
 
     _min_val = validator("min_value", allow_reuse=True)(validate_eval_parameter_dict)
     _max_val = validator("max_value", allow_reuse=True)(validate_eval_parameter_dict)

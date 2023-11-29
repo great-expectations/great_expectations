@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from great_expectations.compatibility.pydantic import validator
@@ -40,8 +41,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 if TYPE_CHECKING:
-    import datetime
-
     from great_expectations.core import (
         ExpectationConfiguration,
         ExpectationValidationResult,
@@ -97,8 +96,8 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
         [expect_column_max_to_be_between](https://greatexpectations.io/expectations/expect_column_max_to_be_between)
     """
 
-    min_value: Union[float, dict, datetime.datetime, None] = None
-    max_value: Union[float, dict, datetime.datetime, None] = None
+    min_value: Union[float, dict, datetime, None] = None
+    max_value: Union[float, dict, datetime, None] = None
 
     _min_val = validator("min_value", allow_reuse=True)(validate_eval_parameter_dict)
     _max_val = validator("max_value", allow_reuse=True)(validate_eval_parameter_dict)
@@ -361,3 +360,6 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,
         )
+
+
+ExpectColumnMinToBeBetween.update_forward_refs()

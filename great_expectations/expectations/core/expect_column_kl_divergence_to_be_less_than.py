@@ -162,8 +162,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         parsers to crash when encountered. The python None token will be serialized to null in json.
     """
 
-    min_value: Union[float, dict, datetime.datetime, None] = None
-    max_value: Union[float, dict, datetime.datetime, None] = None
+    min_value: Union[float, dict, datetime, None] = None
+    max_value: Union[float, dict, datetime, None] = None
 
     _min_val = validator("min_value", allow_reuse=True)(validate_eval_parameter_dict)
     _max_val = validator("max_value", allow_reuse=True)(validate_eval_parameter_dict)

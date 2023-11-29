@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from typing import Dict, Union
 
 from scipy import stats
@@ -123,8 +123,8 @@ class ColumnNormallyDistributed(ColumnAggregateMetricProvider):
 class ExpectColumnValuesToBeNormallyDistributed(ColumnAggregateExpectation):
     """Expect column values to be normally distributed. NaN values are omitted."""
 
-    min_value: Union[float, dict, datetime.datetime, None] = None
-    max_value: Union[float, dict, datetime.datetime, None] = None
+    min_value: Union[float, dict, datetime, None] = None
+    max_value: Union[float, dict, datetime, None] = None
 
     _min_val = validator("min_value", allow_reuse=True)(validate_eval_parameter_dict)
     _max_val = validator("max_value", allow_reuse=True)(validate_eval_parameter_dict)
