@@ -191,57 +191,51 @@ class TestInit:
 class TestCRUDMethods:
     """Tests related to the 1.0 CRUD API."""
 
-    @pytest.mark.unit
-    def test_add_success(self, expect_column_values_to_be_in_set_col_a_with_meta):
-        suite = ExpectationSuite(expectation_suite_name="test-suite")
-        expectation = ExpectColumnValuesToBeInSet(
-            configuration=expect_column_values_to_be_in_set_col_a_with_meta
-        )
-        created_expectation = suite.add(expectation=expectation)
-        assert created_expectation == expectation
-        assert (
-            suite.expectations[0].configuration
-            == expect_column_values_to_be_in_set_col_a_with_meta
-        )
+    @pytest.fixture
+    def expectation_params(self):
+        return {"column": "a", "value_set": [1, 2, 3], "result_format": "BASIC"}
 
     @pytest.mark.unit
-    def test_add_fails_when_expectation_already_exists(
-        self, expect_column_values_to_be_in_set_col_a_with_meta
+    def test_add_success(self, expectation_params):
+        suite = ExpectationSuite(expectation_suite_name="test-suite")
+        expectation = ExpectColumnValuesToBeInSet(**expectation_params)
+        created_expectation = suite.add(expectation=expectation)
+        assert created_expectation == expectation
+
+    @pytest.mark.unit
+    def test_add_doesnt_duplicate_when_expectation_already_exists(
+        self, expectation_params
     ):
         suite = ExpectationSuite(
             expectation_suite_name="test-suite",
-            expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
+            expectations=[
+                ExpectColumnValuesToBeInSet(**expectation_params).configuration
+            ],
         )
-        expectation = ExpectColumnValuesToBeInSet(
-            configuration=expect_column_values_to_be_in_set_col_a_with_meta
-        )
-        with pytest.raises(ValueError, match="configuration already exists"):
-            suite.add(expectation=expectation)
+        expectation = ExpectColumnValuesToBeInSet(**expectation_params)
+        suite.add(expectation=expectation)
+        assert len(suite.expectations) == 1
 
     @pytest.mark.unit
-    def test_delete_success(self, expect_column_values_to_be_in_set_col_a_with_meta):
+    def test_delete_success(self, expectation_params):
         suite = ExpectationSuite(
             expectation_suite_name="test-suite",
-            expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
+            expectations=[
+                ExpectColumnValuesToBeInSet(**expectation_params).configuration
+            ],
         )
-        expectation = ExpectColumnValuesToBeInSet(
-            configuration=expect_column_values_to_be_in_set_col_a_with_meta
-        )
+        expectation = ExpectColumnValuesToBeInSet(**expectation_params)
         deleted_expectation = suite.delete(expectation=expectation)
         assert deleted_expectation == expectation
         assert suite.expectations == []
 
     @pytest.mark.unit
-    def test_delete_fails_when_expectation_is_not_found(
-        self, expect_column_values_to_be_in_set_col_a_with_meta
-    ):
+    def test_delete_fails_when_expectation_is_not_found(self, expectation_params):
         suite = ExpectationSuite(
             expectation_suite_name="test-suite",
         )
-        expectation = ExpectColumnValuesToBeInSet(
-            configuration=expect_column_values_to_be_in_set_col_a_with_meta
-        )
-        with pytest.raises(ValueError, match="No matching expectation was found."):
+        expectation = ExpectColumnValuesToBeInSet(**expectation_params)
+        with pytest.raises(KeyError, match="No matching expectation was found."):
             suite.delete(expectation=expectation)
 
 

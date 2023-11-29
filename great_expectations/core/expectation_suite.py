@@ -145,19 +145,15 @@ class ExpectationSuite(SerializableDictDot):
         ]
 
     def add(self, expectation: Expectation) -> Expectation:
-        """Add an Expectation to the collection.
-
-        Raises:
-            ValueError: Suite already has an Expectation with the same configuration.
-        """
-        if any(
+        """Add an Expectation to the collection."""
+        if not any(
             expectation.configuration == existing_config
             for existing_config in self.expectation_configurations
         ):
-            raise ValueError(
-                "An Expectation with this configuration already exists in this ExpectationSuite."
-            )
-        self.expectation_configurations.append(expectation.configuration)
+            self.expectation_configurations.append(expectation.configuration)
+        else:
+            pass  # suite is a set-like collection
+
         return expectation
 
     def delete(self, expectation: Expectation) -> Expectation:
@@ -172,7 +168,7 @@ class ExpectationSuite(SerializableDictDot):
             if exp_config != expectation.configuration
         ]
         if len(updated_expectation_configs) != len(self.expectation_configurations) - 1:
-            raise ValueError("No matching expectation was found.")
+            raise KeyError("No matching expectation was found.")
         self.expectation_configurations = updated_expectation_configs
         return expectation
 
