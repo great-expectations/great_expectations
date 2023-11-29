@@ -103,13 +103,11 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     success_keys = (
         "value_set",
         "mostly",
-        "parse_strings_as_datetimes",
     )
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1,
-        "parse_strings_as_datetimes": False,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
@@ -159,7 +157,6 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             ("column", RendererValueType.STRING),
             ("value_set", RendererValueType.ARRAY),
             ("mostly", RendererValueType.NUMBER),
-            ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
         )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
@@ -190,9 +187,6 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             else:
                 template_str += "."
 
-            if params.parse_strings_as_datetimes:
-                template_str += " Values should be parsed as datetimes."
-
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
@@ -220,7 +214,6 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
                 "column",
                 "value_set",
                 "mostly",
-                "parse_strings_as_datetimes",
                 "row_condition",
                 "condition_parser",
             ],
@@ -246,9 +239,6 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-
-        if params.get("parse_strings_as_datetimes"):
-            template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"

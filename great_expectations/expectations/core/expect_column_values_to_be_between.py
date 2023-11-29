@@ -105,7 +105,6 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "strict_max",
         "allow_cross_type_comparisons",
         "mostly",
-        "parse_strings_as_datetimes",
         "auto",
         "profiler_config",
     )
@@ -216,7 +215,6 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "max_value": None,
         "strict_min": False,
         "strict_max": False,  # tolerance=1e-9,
-        "parse_strings_as_datetimes": False,
         "allow_cross_type_comparisons": None,
         "result_format": "BASIC",
         "include_config": True,

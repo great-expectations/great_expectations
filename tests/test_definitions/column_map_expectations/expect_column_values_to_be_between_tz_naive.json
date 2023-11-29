@@ -144,21 +144,6 @@
         }
       },
       {
-        "title": "basic_positive_test_with_timestamps",
-        "exact_match_out": false,
-        "out": {
-          "unexpected_list": [],
-          "unexpected_index_list": [],
-          "success": true
-        },
-        "in": {
-          "column": "ts",
-          "max_value": "Jan 01 2020 12:00:02",
-          "min_value": "Jan 01 1970 12:00:00",
-          "parse_strings_as_datetimes": true
-        }
-      },
-      {
         "title" : "missing_min_value",
         "exact_match_out": false,
         "out": {
@@ -245,44 +230,6 @@
           "column": "x",
           "max_value": 10,
           "min_value": 3
-        }
-      },
-      {
-        "title": "basic_negative_test_with_timestamps_pandas_spark_select_sql",
-        "exact_match_out": false,
-        "only_for": ["pandas", "spark", "postgresql", "mssql", "mysql"],
-        "out": {
-          "unexpected_index_list":  [{"ts": "1970-01-01T12:00:01", "pk_index": 0}, {"ts": "2001-01-01T12:00:01", "pk_index": 9}],
-          "success": false
-        },
-        "in": {
-          "column": "ts",
-          "max_value": "Jan 01 2001 12:00:00",
-          "min_value": "Jan 01 1990 12:00:00",
-          "parse_strings_as_datetimes": true
-        }
-      },
-      {
-        "title": "basic_negative_test_with_timestamps_other_sql",
-        "exact_match_out": false,
-        "suppress_test_for": [
-          "pandas",
-          "spark",
-          "postgresql",
-          "mssql",
-          "mysql",
-          "bigquery",
-          "snowflake"
-        ],
-        "out": {
-          "unexpected_index_list":  [{"ts": "1970-01-01 12:00:01", "pk_index": 0}, {"ts": "2001-01-01 12:00:01", "pk_index": 9}],
-          "success": false
-        },
-        "in": {
-          "column": "ts",
-          "max_value": "Jan 01 2001 12:00:00",
-          "min_value": "Jan 01 1990 12:00:00",
-          "parse_strings_as_datetimes": true
         }
       },
       {

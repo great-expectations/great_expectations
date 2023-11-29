@@ -69,7 +69,7 @@
             "catch_exceptions": true
           },
           "out": {
-            "traceback_substring": "must be an integer or float"
+            "traceback_substring": "is not a valid float"
           }
         }
       ]

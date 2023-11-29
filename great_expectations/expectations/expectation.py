@@ -38,7 +38,7 @@ from typing_extensions import ParamSpec
 
 from great_expectations import __version__ as ge_version
 from great_expectations.compatibility import pydantic
-from great_expectations.compatibility.pydantic import ModelMetaclass
+from great_expectations.compatibility.pydantic import Field, ModelMetaclass
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (
     deprecated_method_or_class,
@@ -78,6 +78,7 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
+from great_expectations.core.result_format import ResultFormat, ResultFormatDict
 from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
     ExpectationNotFoundError,
@@ -134,7 +135,6 @@ from great_expectations.util import camel_to_snake, is_parseable_date
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import ValidationDependencies, Validator
-from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
@@ -335,7 +335,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         arbitrary_types_allowed = True
         extra = pydantic.Extra.allow
 
+    id: Union[str, None] = None
     meta: Union[dict, None] = None
+    notes: Union[str, None] = None
+    result_format: Union[ResultFormat, ResultFormatDict] = ResultFormat.BASIC
 
     version: ClassVar[str] = ge_version
     domain_keys: ClassVar[Tuple[str, ...]] = ()
@@ -350,27 +353,37 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     ] = {
         "include_config": True,
         "catch_exceptions": False,
-        "result_format": "BASIC",
+        "result_format": ResultFormat.BASIC,
     }
     args_keys: ClassVar[Tuple[str, ...]] = ()
 
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
 
-    def __init__(self, meta: dict | None = None, **kwargs) -> None:
+    def __init__(
+        self,
+        id: str | None = None,
+        meta: dict | None = None,
+        result_format: ResultFormat | ResultFormatDict = ResultFormat.BASIC,
+        **kwargs,
+    ) -> None:
         # Safety precaution to prevent old-style instantiation
         if "configuration" in kwargs:
             raise ValueError(
                 "Cannot directly pass configuration into Expectation constructor; please pass in individual success keys and domain kwargs."
             )
 
-        super().__init__(**kwargs)
+        super().__init__(id=id, meta=meta, result_format=result_format, **kwargs)
+
+        # Add back result format for configuration validation
+        kwargs["result_format"] = result_format
 
         # Everything below is purely to maintain current validation logic but should be migrated to Pydantic validators
         configuration = ExpectationConfiguration(
             expectation_type=camel_to_snake(self.__class__.__name__),
             kwargs=kwargs,
             meta=meta,
+            ge_cloud_id=id,
         )
         self.validate_configuration(configuration)
 
@@ -1104,7 +1117,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         result_format = parse_result_format(
             runtime_configuration.get("result_format", {})
         )
-        if result_format.get("result_format") == "BOOLEAN_ONLY":
+        if result_format.get("result_format") == ResultFormat.BOOLEAN_ONLY:
             if isinstance(expectation_validation_result, ExpectationValidationResult):
                 expectation_validation_result.result = {}
             else:
@@ -1245,24 +1258,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validates the configuration for the Expectation.
-
-        For all expectations, the configuration's `expectation_type` needs to match the type of the expectation being
-        configured. This method is meant to be overridden by specific expectations to provide additional validation
-        checks as required. Overriding methods should call `super().validate_configuration(configuration)`.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required
-                by the Expectation.
-        """
-        if not configuration:
-            configuration = self.configuration
-        try:
-            assert (
-                configuration.expectation_type == self.expectation_type
-            ), f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
+        pass  # no-op
 
     # Renamed from validate due to collision with Pydantic method of the same name
     @public_api
@@ -2363,6 +2359,11 @@ class BatchExpectation(Expectation, ABC):
             expectation.
     """
 
+    batch_id: Union[str, None] = None
+    row_condition: Union[str, None] = None
+    condition_parser: Union[str, None] = None
+    mostly: float = Field(default=1.0, ge=0.0, le=1.0)
+
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
         "table",
@@ -2443,7 +2444,7 @@ class BatchExpectation(Expectation, ABC):
 
         return True
 
-    def _validate_metric_value_between(  # noqa: C901, PLR0912, PLR0913
+    def _validate_metric_value_between(  # noqa: PLR0912, PLR0913
         self,
         metric_name,
         configuration: ExpectationConfiguration,
@@ -2469,25 +2470,6 @@ class BatchExpectation(Expectation, ABC):
         strict_max: Optional[bool] = self.get_success_kwargs(
             configuration=configuration
         ).get("strict_max")
-
-        parse_strings_as_datetimes: Optional[bool] = self.get_success_kwargs(
-            configuration=configuration
-        ).get("parse_strings_as_datetimes")
-
-        if parse_strings_as_datetimes:
-            warn_deprecated_parse_strings_as_datetimes()
-
-            if min_value is not None:
-                try:
-                    min_value = parse(min_value)
-                except TypeError:
-                    pass
-
-            if max_value is not None:
-                try:
-                    max_value = parse(max_value)
-                except TypeError:
-                    pass
 
         if not isinstance(metric_value, datetime.datetime) and pd.isnull(metric_value):
             return {"success": False, "result": {"observed_value": None}}
@@ -2534,32 +2516,6 @@ representation."""
 
 
 @public_api
-class TableExpectation(BatchExpectation, ABC):
-    """Base class for TableExpectations.
-
-    WARNING: TableExpectation will be deprecated in a future release. Please use BatchExpectation instead.
-
-    TableExpectations answer a semantic question about the table itself.
-
-    For example, `expect_table_column_count_to_equal` and `expect_table_row_count_to_equal` answer
-    how many columns and rows are in your table.
-
-    TableExpectations must implement a `_validate(...)` method containing logic
-    for determining whether the Expectation is successfully validated.
-
-    TableExpectations may optionally provide implementations of `validate_configuration`,
-    which should raise an error if the configuration will not be usable for the Expectation.
-
-    Raises:
-        InvalidExpectationConfigurationError: The configuration does not contain the values required by the Expectation.
-
-    Args:
-        domain_keys (tuple): A tuple of the keys used to determine the domain of the
-            expectation.
-    """
-
-
-@public_api
 class QueryExpectation(BatchExpectation, ABC):
     """Base class for QueryExpectations.
 
@@ -2594,7 +2550,7 @@ class QueryExpectation(BatchExpectation, ABC):
     """
 
     default_kwarg_values: ClassVar[Dict] = {
-        "result_format": "BASIC",
+        "result_format": ResultFormat.BASIC,
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
@@ -2693,52 +2649,10 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
         InvalidExpectationConfigurationError: If no `column` is specified
     """
 
+    column: str
+
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
-
-    @override
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        super().validate_configuration(configuration=configuration)
-        if not configuration:
-            configuration = self.configuration
-        # Ensuring basic configuration parameters are properly set
-        try:
-            assert (
-                "column" in configuration.kwargs
-            ), "'column' parameter is required for column expectations"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-
-
-@public_api
-class ColumnExpectation(ColumnAggregateExpectation, ABC):
-    """Base class for column aggregate Expectations.
-
-    These types of Expectation produce an aggregate metric for a column, such as the mean, standard deviation,
-    number of unique values, column type, etc.
-
-    WARNING: This class will be deprecated in favor of ColumnAggregateExpectation, and removed in a future release.
-    If you're using this class, please update your code to use ColumnAggregateExpectation instead.
-    There is no change in functionality between the two classes; just a name change for clarity.
-
-    --Documentation--
-        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations/
-
-    Args:
-     domain_keys (tuple): A tuple of the keys used to determine the domain of the
-         expectation.
-     success_keys (tuple): A tuple of the keys used to determine the success of
-         the expectation.
-     default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
-         kwargs from the Expectation Configuration.
-
-         - A  "column" key is required for column expectations.
-
-    Raises:
-        InvalidExpectationConfigurationError: If no `column` is specified
-    """
 
 
 @public_api
@@ -2767,6 +2681,8 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             kwargs from the Expectation Configuration.
     """
 
+    column: str
+
     map_metric: ClassVar[Optional[str]] = None
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -2781,7 +2697,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1,
-        "result_format": "BASIC",
+        "result_format": ResultFormat.BASIC,
         "include_config": True,
         "catch_exceptions": True,
     }
@@ -2790,21 +2706,6 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     @override
     def is_abstract(cls) -> bool:
         return not cls.map_metric or super().is_abstract()
-
-    @override
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        super().validate_configuration(configuration=configuration)
-        if not configuration:
-            configuration = self.configuration
-        try:
-            assert (
-                "column" in configuration.kwargs
-            ), "'column' parameter is required for column map expectations"
-            _validate_mostly_config(configuration)
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @override
     def get_validation_dependencies(
@@ -2879,7 +2780,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             bool
         ] = validation_dependencies.result_format.get("include_unexpected_rows")
 
-        if result_format_str == "BOOLEAN_ONLY":
+        if result_format_str == ResultFormat.BOOLEAN_ONLY:
             return validation_dependencies
 
         metric_kwargs = get_metric_kwargs(
@@ -2911,7 +2812,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
                 ),
             )
 
-        if result_format_str in ["BASIC"]:
+        if result_format_str == ResultFormat.BASIC:
             return validation_dependencies
 
         metric_kwargs = get_metric_kwargs(
@@ -3049,6 +2950,9 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             kwargs from the Expectation Configuration.
     """
 
+    column_A: str
+    column_B: str
+
     map_metric: ClassVar[Optional[str]] = None
     domain_keys = (
         "batch_id",
@@ -3064,7 +2968,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1,
-        "result_format": "BASIC",
+        "result_format": ResultFormat.BASIC,
         "include_config": True,
         "catch_exceptions": True,
     }
@@ -3073,24 +2977,6 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
     @override
     def is_abstract(cls) -> bool:
         return cls.map_metric is None or super().is_abstract()
-
-    @override
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        super().validate_configuration(configuration=configuration)
-        if not configuration:
-            configuration = self.configuration
-        try:
-            assert (
-                "column_A" in configuration.kwargs
-            ), "'column_A' parameter is required for column pair map expectations"
-            assert (
-                "column_B" in configuration.kwargs
-            ), "'column_B' parameter is required for column pair map expectations"
-            _validate_mostly_config(configuration)
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @override
     def get_validation_dependencies(
@@ -3163,7 +3049,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             bool
         ] = validation_dependencies.result_format.get("include_unexpected_rows")
 
-        if result_format_str == "BOOLEAN_ONLY":
+        if result_format_str == ResultFormat.BOOLEAN_ONLY:
             return validation_dependencies
 
         metric_kwargs = get_metric_kwargs(
@@ -3195,7 +3081,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
                 ),
             )
 
-        if result_format_str in ["BASIC"]:
+        if result_format_str == ResultFormat.BASIC:
             return validation_dependencies
 
         metric_kwargs = get_metric_kwargs(
@@ -3321,6 +3207,8 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             kwargs from the Expectation Configuration.
     """
 
+    column_list: List[str]
+
     map_metric: ClassVar[Optional[str]] = None
     domain_keys = (
         "batch_id",
@@ -3337,7 +3225,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1,
         "ignore_row_if": "all_values_are_missing",
-        "result_format": "BASIC",
+        "result_format": ResultFormat.BASIC,
         "include_config": True,
         "catch_exceptions": True,
     }
@@ -3346,21 +3234,6 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
     @override
     def is_abstract(cls) -> bool:
         return cls.map_metric is None or super().is_abstract()
-
-    @override
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        super().validate_configuration(configuration=configuration)
-        if not configuration:
-            configuration = self.configuration
-        try:
-            assert (
-                "column_list" in configuration.kwargs
-            ), "'column_list' parameter is required for multicolumn map expectations"
-            _validate_mostly_config(configuration)
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @override
     def get_validation_dependencies(
@@ -3435,7 +3308,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             bool
         ] = validation_dependencies.result_format.get("include_unexpected_rows")
 
-        if result_format_str == "BOOLEAN_ONLY":
+        if result_format_str == ResultFormat.BOOLEAN_ONLY:
             return validation_dependencies
 
         metric_kwargs = get_metric_kwargs(
@@ -3452,7 +3325,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             ),
         )
 
-        if result_format_str in ["BASIC"]:
+        if result_format_str == ResultFormat.BASIC:
             return validation_dependencies
 
         if include_unexpected_rows:
@@ -3599,7 +3472,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     # Incrementally add to result and return when all values for the specified level are present
     return_obj: Dict[str, Any] = {"success": success}
 
-    if result_format["result_format"] == "BOOLEAN_ONLY":
+    if result_format["result_format"] == ResultFormat.BOOLEAN_ONLY:
         return return_obj
 
     skip_missing = False
@@ -3656,7 +3529,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
             }
         )
 
-    if result_format["result_format"] == "BASIC":
+    if result_format["result_format"] == ResultFormat.BASIC:
         return return_obj
 
     if unexpected_list is not None and not exclude_unexpected_values:
@@ -3704,7 +3577,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     }
                 )
 
-    if result_format["result_format"] == "SUMMARY":
+    if result_format["result_format"] == ResultFormat.SUMMARY:
         return return_obj
 
     if unexpected_list is not None and not exclude_unexpected_values:
@@ -3713,28 +3586,10 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
         return_obj["result"].update({"unexpected_index_list": unexpected_index_list})
     if unexpected_index_query is not None:
         return_obj["result"].update({"unexpected_index_query": unexpected_index_query})
-    if result_format["result_format"] == "COMPLETE":
+    if result_format["result_format"] == ResultFormat.COMPLETE:
         return return_obj
 
     raise ValueError(f"Unknown result_format {result_format['result_format']}.")
-
-
-def _validate_mostly_config(configuration: ExpectationConfiguration) -> None:
-    """
-    Validates "mostly" in ExpectationConfiguration is a number if it exists.
-
-    Args:
-        configuration: The ExpectationConfiguration to be validated
-
-    Raises:
-        AssertionError: An error is mostly exists in the configuration but is not between 0 and 1.
-    """
-    if "mostly" in configuration.kwargs:
-        mostly = configuration.kwargs["mostly"]
-        assert isinstance(
-            mostly, (int, float)
-        ), "'mostly' parameter must be an integer or float"
-        assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
 
 
 def _validate_dependencies_against_available_metrics(
