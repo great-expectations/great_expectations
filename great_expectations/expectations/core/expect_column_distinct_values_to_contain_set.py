@@ -10,9 +10,6 @@ from great_expectations.expectations.expectation import (
     InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
-
-# NOTE: Necessary to import the metrics code BEFORE expectations are run to trigger global registry
-from great_expectations.expectations.metrics.util import parse_value_set  # noqa: F401
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
