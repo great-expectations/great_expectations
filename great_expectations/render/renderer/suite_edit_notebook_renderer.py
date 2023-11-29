@@ -8,10 +8,6 @@ import nbformat
 
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.data_context.types.base import (
-    NotebookConfig,  # noqa: TCH001
-    NotebookTemplateConfig,  # noqa: TCH001
-)
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
@@ -36,18 +32,18 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def __init__(  # noqa: PLR0913
         self,
         custom_templates_module: Optional[str] = None,
-        header_markdown: Optional[NotebookTemplateConfig] = None,
-        footer_markdown: Optional[NotebookTemplateConfig] = None,
-        table_expectations_header_markdown: Optional[NotebookTemplateConfig] = None,
-        column_expectations_header_markdown: Optional[NotebookTemplateConfig] = None,
-        table_expectations_not_found_markdown: Optional[NotebookTemplateConfig] = None,
-        column_expectations_not_found_markdown: Optional[NotebookTemplateConfig] = None,
-        authoring_intro_markdown: Optional[NotebookTemplateConfig] = None,
-        column_expectations_markdown: Optional[NotebookTemplateConfig] = None,
-        header_code: Optional[NotebookTemplateConfig] = None,
-        footer_code: Optional[NotebookTemplateConfig] = None,
-        column_expectation_code: Optional[NotebookTemplateConfig] = None,
-        table_expectation_code: Optional[NotebookTemplateConfig] = None,
+        header_markdown: Optional[dict] = None,
+        footer_markdown: Optional[dict] = None,
+        table_expectations_header_markdown: Optional[dict] = None,
+        column_expectations_header_markdown: Optional[dict] = None,
+        table_expectations_not_found_markdown: Optional[dict] = None,
+        column_expectations_not_found_markdown: Optional[dict] = None,
+        authoring_intro_markdown: Optional[dict] = None,
+        column_expectations_markdown: Optional[dict] = None,
+        header_code: Optional[dict] = None,
+        footer_code: Optional[dict] = None,
+        column_expectation_code: Optional[dict] = None,
+        table_expectation_code: Optional[dict] = None,
         context: Optional[AbstractDataContext] = None,
     ) -> None:
         super().__init__()
@@ -93,7 +89,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
     @staticmethod
     def from_data_context(data_context):
-        suite_edit_notebook_config: Optional[NotebookConfig] = None
+        suite_edit_notebook_config: Optional[dict] = None
         if data_context.notebooks and data_context.notebooks.get("suite_edit"):
             suite_edit_notebook_config = data_context.notebooks.get("suite_edit")
 
@@ -143,7 +139,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
     def render_with_overwrite(
         self,
-        notebook_config: Optional[NotebookTemplateConfig],
+        notebook_config: Optional[dict],
         default_file_name: str,
         **default_kwargs,
     ):
