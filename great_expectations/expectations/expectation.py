@@ -135,7 +135,6 @@ from great_expectations.util import camel_to_snake, is_parseable_date
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import ValidationDependencies, Validator
-from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
@@ -2444,7 +2443,7 @@ class BatchExpectation(Expectation, ABC):
 
         return True
 
-    def _validate_metric_value_between(  # noqa: C901, PLR0912, PLR0913
+    def _validate_metric_value_between(  # noqa: PLR0912, PLR0913
         self,
         metric_name,
         configuration: ExpectationConfiguration,
@@ -2470,25 +2469,6 @@ class BatchExpectation(Expectation, ABC):
         strict_max: Optional[bool] = self.get_success_kwargs(
             configuration=configuration
         ).get("strict_max")
-
-        parse_strings_as_datetimes: Optional[bool] = self.get_success_kwargs(
-            configuration=configuration
-        ).get("parse_strings_as_datetimes")
-
-        if parse_strings_as_datetimes:
-            warn_deprecated_parse_strings_as_datetimes()
-
-            if min_value is not None:
-                try:
-                    min_value = parse(min_value)
-                except TypeError:
-                    pass
-
-            if max_value is not None:
-                try:
-                    max_value = parse(max_value)
-                except TypeError:
-                    pass
 
         if not isinstance(metric_value, datetime.datetime) and pd.isnull(metric_value):
             return {"success": False, "result": {"observed_value": None}}

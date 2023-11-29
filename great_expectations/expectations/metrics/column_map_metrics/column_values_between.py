@@ -17,7 +17,6 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 
 class ColumnValuesBetween(ColumnMapMetricProvider):
@@ -27,19 +26,17 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         "max_value",
         "strict_min",
         "strict_max",
-        "parse_strings_as_datetimes",
         "allow_cross_type_comparisons",
     )
 
-    @column_condition_partial(engine=PandasExecutionEngine)  # type: ignore[misc] # untyped-decorator
-    def _pandas(  # noqa: C901, PLR0912, PLR0913
+    @column_condition_partial(engine=PandasExecutionEngine)
+    def _pandas(  # noqa: C901, PLR0913
         cls,
         column,
         min_value=None,
         max_value=None,
         strict_min=None,
         strict_max=None,
-        parse_strings_as_datetimes: bool = False,
         allow_cross_type_comparisons=None,
         **kwargs,
     ):
@@ -49,28 +46,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         if allow_cross_type_comparisons:
             raise NotImplementedError
 
-        if parse_strings_as_datetimes:
-            warn_deprecated_parse_strings_as_datetimes()
-
-            if min_value is not None:
-                try:
-                    min_value = parse(min_value)
-                except TypeError:
-                    pass
-
-            if max_value is not None:
-                try:
-                    max_value = parse(max_value)
-                except TypeError:
-                    pass
-
-            try:
-                temp_column = column.map(parse)
-            except TypeError:
-                temp_column = column
-
-        else:
-            temp_column = column
+        temp_column = column
 
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
@@ -186,32 +162,16 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         else:
             return (min_value <= column) & (column <= max_value)
 
-    @column_condition_partial(engine=SqlAlchemyExecutionEngine)  # type: ignore[misc] # untyped-decorator
-    def _sqlalchemy(  # noqa: PLR0911, PLR0912, PLR0913
+    @column_condition_partial(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(  # noqa: PLR0911, PLR0913
         cls,
         column,
         min_value=None,
         max_value=None,
         strict_min=None,
         strict_max=None,
-        parse_strings_as_datetimes: bool = False,
         **kwargs,
     ):
-        if parse_strings_as_datetimes:
-            warn_deprecated_parse_strings_as_datetimes()
-
-            if min_value is not None:
-                try:
-                    min_value = parse(min_value)
-                except TypeError:
-                    pass
-
-            if max_value is not None:
-                try:
-                    max_value = parse(max_value)
-                except TypeError:
-                    pass
-
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
 
@@ -254,32 +214,16 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
                 column <= sa.literal(max_value),
             )
 
-    @column_condition_partial(engine=SparkDFExecutionEngine)  # type: ignore[misc] # untyped-decorator
-    def _spark(  # noqa: PLR0911, PLR0912, PLR0913
+    @column_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(  # noqa: PLR0911, PLR0913
         cls,
         column,
         min_value=None,
         max_value=None,
         strict_min=None,
         strict_max=None,
-        parse_strings_as_datetimes: bool = False,
         **kwargs,
     ):
-        if parse_strings_as_datetimes:
-            warn_deprecated_parse_strings_as_datetimes()
-
-            if min_value is not None:
-                try:
-                    min_value = parse(min_value)
-                except TypeError:
-                    pass
-
-            if max_value is not None:
-                try:
-                    max_value = parse(max_value)
-                except TypeError:
-                    pass
-
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
 
