@@ -22,6 +22,7 @@ class BatchConfig(pydantic.BaseModel):
         arbitrary_types_allowed = True
 
     context: AbstractDataContext
+    name: str
     datasource_name: str
     data_asset_name: str
 

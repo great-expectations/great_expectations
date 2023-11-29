@@ -116,7 +116,6 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
         "strict_min",
         "max_value",
         "strict_max",
-        "parse_strings_as_datetimes",
         "auto",
         "profiler_config",
     )
@@ -197,7 +196,6 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
-        "parse_strings_as_datetimes": False,
         "auto": False,
         "profiler_config": default_profiler_config,
     }
@@ -233,7 +231,6 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
             ("column", RendererValueType.STRING),
             ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
             ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
-            ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
             ("strict_min", RendererValueType.BOOLEAN),
             ("strict_max", RendererValueType.BOOLEAN),
         )
@@ -266,9 +263,6 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
             else:
                 template_str = f"maximum value must be {at_least_str} $min_value."
 
-        if params.parse_strings_as_datetimes:
-            template_str += " Values should be parsed as datetimes."
-
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
@@ -298,7 +292,6 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
                 "column",
                 "min_value",
                 "max_value",
-                "parse_strings_as_datetimes",
                 "row_condition",
                 "condition_parser",
                 "strict_min",
@@ -319,9 +312,6 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
                 template_str = f"maximum value must be {at_least_str} $min_value."
             else:
                 template_str = ""
-
-        if params.get("parse_strings_as_datetimes"):
-            template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
             template_str = f"$column {template_str}"

@@ -468,20 +468,9 @@ def test_case_runner_v3_api(test_case):
     if test_case["skip"]:
         pytest.skip()
 
-    # Note: this should never be done in practice, but we are wiping expectations to reuse batches during testing.
-    # test_case["batch"]._initialize_expectations()
-    if "parse_strings_as_datetimes" in test_case["test"]["in"]:
-        with pytest.deprecated_call():
-            evaluate_json_test_v3_api(
-                validator=test_case["validator_with_data"],
-                expectation_type=test_case["expectation_type"],
-                test=test_case["test"],
-                pk_column=test_case["pk_column"],
-            )
-    else:
-        evaluate_json_test_v3_api(
-            validator=test_case["validator_with_data"],
-            expectation_type=test_case["expectation_type"],
-            test=test_case["test"],
-            pk_column=test_case["pk_column"],
-        )
+    evaluate_json_test_v3_api(
+        validator=test_case["validator_with_data"],
+        expectation_type=test_case["expectation_type"],
+        test=test_case["test"],
+        pk_column=test_case["pk_column"],
+    )
