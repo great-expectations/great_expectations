@@ -35,7 +35,6 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
             "expectation_validation_result": False,
             "globally": False,
         },
-        "notebooks": None,
         "plugins_directory": "plugins/",
         "stores": {
             "evaluation_parameter_store": {

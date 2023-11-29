@@ -167,8 +167,6 @@ gx/
         .gitkeep
     expectations/
         .gitkeep
-    notebooks/
-        .gitkeep
     plugins/
         custom_store_backends/
             __init__.py
@@ -230,8 +228,6 @@ gx/
         .gitkeep
     expectations/
         .ge_store_backend_id
-        .gitkeep
-    notebooks/
         .gitkeep
     plugins/
         custom_store_backends/
@@ -346,8 +342,6 @@ great_expectations/
     expectations/
         .ge_store_backend_id
         .gitkeep
-    notebooks/
-        .gitkeep
     plugins/
         custom_store_backends/
             __init__.py
@@ -451,8 +445,6 @@ gx/
     expectations/
         .ge_store_backend_id
         .gitkeep
-    notebooks/
-        .gitkeep
     plugins/
         custom_store_backends/
             __init__.py
@@ -511,113 +503,5 @@ gx/
     ) as f:
         obs_upgrade_log_dict: dict = json.load(f)
         obs_upgrade_log_dict["exceptions"][0]["exception_message"] = ""
-
-    assert obs_upgrade_log_dict == expected_upgrade_log_dict
-
-
-@freeze_time("01/19/2021 13:26:39")
-def test_v2_to_v3_project_upgrade_without_manual_steps(
-    v20_project_directory_with_v30_configuration_and_no_checkpoints, caplog
-):
-    runner: CliRunner = CliRunner(mix_stderr=False)
-
-    result: Result = runner.invoke(
-        cli,
-        [
-            "-c",
-            v20_project_directory_with_v30_configuration_and_no_checkpoints,
-            "project",
-            "upgrade",
-        ],
-        input="\n",
-        catch_exceptions=False,
-    )
-    stdout: str = escape_ansi(result.stdout).strip()
-
-    with open(
-        file_relative_path(
-            __file__,
-            "../../test_fixtures/upgrade_helper/test_v2_to_v3_project_upgrade_without_manual_steps_expected_stdout.fixture",
-        )
-    ) as f:
-        expected_stdout: str = f.read().strip()
-        expected_stdout = expected_stdout.replace(
-            "GX_PROJECT_DIR",
-            v20_project_directory_with_v30_configuration_and_no_checkpoints,
-        )
-        assert stdout == expected_stdout
-
-    expected_project_tree_str: str = """\
-gx/
-    .gitignore
-    great_expectations.yml
-    expectations/
-        .ge_store_backend_id
-        .gitkeep
-    notebooks/
-        .gitkeep
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
-    plugins/
-        custom_data_docs/
-            styles/
-                data_docs_custom_styles.css
-    uncommitted/
-        config_variables.yml
-        data_docs/
-            local_site/
-                expectations/
-                    .gitkeep
-                static/
-                    .gitkeep
-                validations/
-                    diabetic_data/
-                        warning/
-                            20200430T191246.763896Z/
-                                c3b4c5df224fef4b1a056a0f3b93aba5.html
-        logs/
-            project_upgrades/
-                UpgradeHelperV13_20210119T132639.000000Z.json
-        validations/
-            .ge_store_backend_id
-            diabetic_data/
-                warning/
-                    20200430T191246.763896Z/
-                        c3b4c5df224fef4b1a056a0f3b93aba5.json
-"""
-    obs_project_tree_str: str = gen_directory_tree_str(
-        startpath=v20_project_directory_with_v30_configuration_and_no_checkpoints
-    )
-    assert obs_project_tree_str == expected_project_tree_str
-    # make sure config number incremented
-    assert (
-        FileDataContext.get_ge_config_version(
-            context_root_dir=v20_project_directory_with_v30_configuration_and_no_checkpoints
-        )
-        == 3.0
-    )
-
-    with open(
-        file_relative_path(
-            __file__,
-            "../../test_fixtures/upgrade_helper/UpgradeHelperV13_upgrade_without_manual_steps_log.json",
-        )
-    ) as f:
-        expected_upgrade_log_dict: dict = json.load(f)
-        expected_upgrade_log_str: str = json.dumps(expected_upgrade_log_dict)
-        expected_upgrade_log_str = expected_upgrade_log_str.replace(
-            "GX_PROJECT_DIR",
-            v20_project_directory_with_v30_configuration_and_no_checkpoints,
-        )
-        expected_upgrade_log_dict = json.loads(expected_upgrade_log_str)
-
-    with open(
-        f"{v20_project_directory_with_v30_configuration_and_no_checkpoints}/uncommitted/logs/project_upgrades/UpgradeHelperV13_20210119T132639.000000Z.json"
-    ) as f:
-        obs_upgrade_log_dict: dict = json.load(f)
 
     assert obs_upgrade_log_dict == expected_upgrade_log_dict

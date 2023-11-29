@@ -71,7 +71,6 @@ def data_context_config_dict() -> dict:
             data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
             usage_statistics_url=USAGE_STATISTICS_QA_URL,
         ),
-        "notebooks": None,
         "concurrency": None,
         "progress_bars": None,
         "include_rendered_content": {
@@ -266,10 +265,6 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
         pytest.param(
             DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
             id="anonymous_usage_statistics getter",
-        ),
-        pytest.param(
-            DataContextVariableSchema.NOTEBOOKS,
-            id="notebooks getter",
         ),
         pytest.param(
             DataContextVariableSchema.CONCURRENCY,
@@ -468,7 +463,6 @@ def test_data_context_variables_save_config(
             "config_variables_file_path",
             "config_version",
             "data_docs_sites",
-            "notebooks",
             "plugins_directory",
             "stores",
             "include_rendered_content",
