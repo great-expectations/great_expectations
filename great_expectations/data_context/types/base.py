@@ -2304,9 +2304,6 @@ class DataContextConfig(BaseYamlConfig):
             globally, at the ExpectationSuite or ExpectationValidationResults-level.
     """
 
-    # TODO: <Alex>ALEX (does not work yet)</Alex>
-    # _config_schema_class = DataContextConfigSchema
-
     def __init__(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         config_version: Optional[float] = None,
