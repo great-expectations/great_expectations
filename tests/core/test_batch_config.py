@@ -49,6 +49,7 @@ def test_data_asset(
     mock_asset: DataAsset,
 ):
     batch_config = BatchConfig(
+        name="test_batch_config",
         context=data_context,
         datasource_name=fds_data_context_datasource_name,
         data_asset_name=mock_asset_name,
@@ -71,6 +72,7 @@ def test_build_batch_request(
     mock_asset_name: str,
 ):
     batch_config = BatchConfig(
+        name="test_batch_config",
         context=data_context,
         datasource_name=fds_data_context_datasource_name,
         data_asset_name=mock_asset_name,

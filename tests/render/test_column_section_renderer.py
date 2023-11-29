@@ -1395,7 +1395,6 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                             "min_value": None,
                             "max_value": None,
                             "result_format": "SUMMARY",
-                            "parse_strings_as_datetimes": None,
                             "row_condition": None,
                             "condition_parser": None,
                             "strict_max": None,
@@ -1502,7 +1501,6 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                                 "min_value": {"$PARAMETER": "MIN_VAL_PARAM * 2"},
                                 "max_value": {"$PARAMETER": "MAX_VAL_PARAM"},
                                 "result_format": "SUMMARY",
-                                "parse_strings_as_datetimes": None,
                                 "row_condition": None,
                                 "condition_parser": None,
                                 "strict_min": None,
@@ -1637,7 +1635,6 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                             "min_value": {
                                 "$PARAMETER": "now() " "- " "timedelta(weeks=208)"
                             },
-                            "parse_strings_as_datetimes": None,
                             "result_format": "SUMMARY",
                             "row_condition": None,
                             "strict_max": None,

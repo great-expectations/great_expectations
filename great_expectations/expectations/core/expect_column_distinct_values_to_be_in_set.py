@@ -14,7 +14,6 @@ from great_expectations.expectations.expectation import (
     InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
-from great_expectations.expectations.metrics.util import parse_value_set
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
     LegacyRendererType,
@@ -116,15 +115,11 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.value_counts",)
-    success_keys = (
-        "value_set",
-        "parse_strings_as_datetimes",
-    )
+    success_keys = ("value_set",)
 
     # Default values
     default_kwarg_values = {
         "value_set": None,
-        "parse_strings_as_datetimes": False,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
@@ -366,17 +361,11 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
-            "parse_strings_as_datetimes"
-        )
         observed_value_counts = metrics.get("column.value_counts")
         observed_value_set = set(observed_value_counts.index)
         value_set = self.get_success_kwargs(configuration).get("value_set") or []
 
-        if parse_strings_as_datetimes:
-            parsed_value_set = parse_value_set(value_set)
-        else:
-            parsed_value_set = value_set
+        parsed_value_set = value_set
 
         expected_value_set = set(parsed_value_set)
 

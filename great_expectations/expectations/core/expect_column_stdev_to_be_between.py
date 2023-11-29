@@ -213,7 +213,6 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
             ("column", RendererValueType.STRING),
             ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
             ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
-            ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
             ("strict_min", RendererValueType.BOOLEAN),
             ("strict_max", RendererValueType.BOOLEAN),
         )
