@@ -1517,6 +1517,12 @@ class GXCloudConfig(DictDot):
 
 
 class DataContextConfigSchema(Schema):
+    batch_configs = fields.Dict(
+        keys=fields.Str(),
+        required=False,
+        allow_none=True,
+        load_only=True,
+    )
     config_version = fields.Number(
         validate=lambda x: 0 < x < 100,  # noqa: PLR2004
         error_messages={"invalid": "config version must " "be a number."},
@@ -2273,6 +2279,7 @@ class DataContextConfig(BaseYamlConfig):
         - https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file/
 
     Args:
+        batch_configs: (Optional[Dict]): a dictionary of batch_config dicts.
         config_version (Optional[float]): config version of this DataContext.
         datasources (Optional[Union[Dict[str, DatasourceConfig], Dict[str, Dict[str, Union[Dict[str, str], str, dict]]]]):
             DatasourceConfig or Dict containing configurations for Datasources associated with DataContext.
@@ -2306,6 +2313,7 @@ class DataContextConfig(BaseYamlConfig):
 
     def __init__(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
+        batch_configs: Optional[Dict] = None,
         config_version: Optional[float] = None,
         datasources: Optional[
             Union[
@@ -2362,6 +2370,7 @@ class DataContextConfig(BaseYamlConfig):
         self._config_version = config_version
         if datasources is None:
             datasources = {}  # type: ignore[assignment]
+        self.batch_configs = batch_configs or {}
         self.datasources = datasources
         self.fluent_datasources = fluent_datasources or {}
         self.expectations_store_name = expectations_store_name
