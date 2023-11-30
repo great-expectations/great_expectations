@@ -1090,6 +1090,7 @@ configuration to continue.
     def make_execution_engine_config(self, data, **kwargs):
         return ExecutionEngineConfig(**data)
 
+
 class DatasourceConfig(AbstractConfig):
     def __init__(  # noqa: C901, PLR0912, PLR0913
         self,
@@ -2403,7 +2404,6 @@ class DataContextConfig(BaseYamlConfig):
                 **include_rendered_content
             )
         self.include_rendered_content = include_rendered_content
-
 
         super().__init__(commented_map=commented_map)
 
