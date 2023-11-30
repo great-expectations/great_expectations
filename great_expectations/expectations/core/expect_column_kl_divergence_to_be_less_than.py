@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import altair as alt
@@ -51,8 +52,6 @@ from great_expectations.validator.metrics_calculator import (
 )
 
 if TYPE_CHECKING:
-    import datetime
-
     from great_expectations.core import (
         ExpectationConfiguration,
         ExpectationValidationResult,
