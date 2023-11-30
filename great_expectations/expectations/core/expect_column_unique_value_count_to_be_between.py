@@ -1,14 +1,11 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_evaluation_parameter_string,
@@ -43,6 +40,11 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 

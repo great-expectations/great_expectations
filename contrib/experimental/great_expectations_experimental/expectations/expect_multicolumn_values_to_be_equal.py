@@ -1,4 +1,6 @@
-import datetime
+from __future__ import annotations
+
+from datetime import datetime
 from functools import reduce
 from typing import TYPE_CHECKING, Dict, Optional, Union
 

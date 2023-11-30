@@ -1,13 +1,11 @@
+from __future__ import annotations
+
 import logging
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
 from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+    EvaluationParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
@@ -19,6 +17,12 @@ from great_expectations.render.util import (
     num_to_str,
     substitute_none_for_missing,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
 
 logger = logging.getLogger(__name__)
 

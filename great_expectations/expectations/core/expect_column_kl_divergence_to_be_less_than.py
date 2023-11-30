@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import altair as alt
@@ -8,6 +9,9 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
+)
 from great_expectations.execution_engine.util import (
     is_valid_categorical_partition_object,
     is_valid_partition_object,
@@ -47,14 +51,9 @@ from great_expectations.validator.metrics_calculator import (
 )
 
 if TYPE_CHECKING:
-    import datetime
-
     from great_expectations.core import (
         ExpectationConfiguration,
         ExpectationValidationResult,
-    )
-    from great_expectations.core.evaluation_parameters import (
-        EvaluationParameterDict,
     )
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer_configuration import AddParamArgs
