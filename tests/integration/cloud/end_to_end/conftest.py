@@ -131,7 +131,7 @@ def checkpoint(
     assert (
         len(checkpoint.validations) == 1
     ), "Checkpoint was not updated in the previous method call."
-
+    yield checkpoint
     context.delete_checkpoint(
         name=checkpoint_name,
     )
