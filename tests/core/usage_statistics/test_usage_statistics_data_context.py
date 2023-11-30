@@ -40,8 +40,6 @@ def test_enabled_methods_map_to_appropriate_usage_stats_events():
         "get_batch_list": UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST,
         "open_data_docs": UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS,
         "run_checkpoint": UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT,
-        "run_profiler_on_data": UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_ON_DATA,
-        "run_profiler_with_dynamic_arguments": UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS,
         "run_validation_operator": UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR,
         "save_expectation_suite": UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
         "update_expectation_suite": UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
@@ -84,18 +82,6 @@ def test_enabled_methods_map_to_appropriate_usage_stats_events():
             UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT,
             [],
             id="run_checkpoint",
-        ),
-        pytest.param(
-            "run_profiler_on_data",
-            UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_ON_DATA,
-            [],
-            id="run_profiler_on_data",
-        ),
-        pytest.param(
-            "run_profiler_with_dynamic_arguments",
-            UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS,
-            [],
-            id="run_profiler_with_dynamic_arguments",
         ),
         pytest.param(
             "run_validation_operator",

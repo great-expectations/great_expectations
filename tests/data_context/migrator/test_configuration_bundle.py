@@ -28,7 +28,6 @@ class TestConfigurationBundleCreate:
         assert config_bundle._data_context_variables is not None
         assert len(config_bundle.expectation_suites) == 1
         assert len(config_bundle.checkpoints) == 1
-        assert len(config_bundle.profilers) == 1
         assert len(config_bundle.validation_results) == 1
         assert len(config_bundle.datasources) == 1
 
@@ -106,7 +105,6 @@ class TestConfigurationBundleSerialization:
         context = StubBaseDataContext(
             checkpoint_names=tuple(),
             expectation_suite_names=tuple(),
-            profiler_names=tuple(),
             validation_results_keys=tuple(),
             datasource_names=tuple(),
         )
