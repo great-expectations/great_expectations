@@ -1,11 +1,14 @@
-from typing import TYPE_CHECKING, ClassVar, List, Optional
+from datetime import datetime
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Union
 
-import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.pydantic import root_validator, validator
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.expectations.core.validators import (
+    validate_eval_parameter_dict,
+)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -86,6 +89,23 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     See Also:
         [expect_column_value_lengths_to_be_between](https://greatexpectations.io/expectations/expect_column_value_lengths_to_be_between)
     """
+
+    min_value: Union[float, dict, datetime, None] = None
+    max_value: Union[float, dict, datetime, None] = None
+
+    _min_val = validator("min_value", allow_reuse=True)(validate_eval_parameter_dict)
+    _max_val = validator("max_value", allow_reuse=True)(validate_eval_parameter_dict)
+
+    @classmethod
+    @root_validator(pre=True)
+    def check_min_val_or_max_val(cls, values: dict) -> dict:
+        min_val = values.get("min_val")
+        max_val = values.get("max_val")
+
+        if min_val is None and max_val is None:
+            raise ValueError("min_value and max_value cannot both be None")
+
+        return values
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -230,51 +250,6 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "strict_min",
         "strict_max",
     )
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        For `expect_column_values_to_be_between` it is required that:
-
-        - One of `min_value` or `max_value` is not `None`.
-
-        - `min_value` and `max_value` are one of the following types: `datetime`, `float`, `int`, or `dict`
-
-        - If `min_value` or `max_value` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
-          dictionary keys must be `$PARAMETER`.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                           from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                                                  Expectation.
-        """
-        # Setting up a configuration
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-
-        min_val = None
-        max_val = None
-        if "min_value" in configuration.kwargs:
-            min_val = configuration.kwargs["min_value"]
-        if "max_value" in configuration.kwargs:
-            max_val = configuration.kwargs["max_value"]
-        try:
-            assert (
-                min_val is not None or max_val is not None
-            ), "min_value and max_value cannot both be None"
-        except AssertionError as e:
-            raise gx_exceptions.InvalidExpectationConfigurationError(str(e))
-
-        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     def _prescriptive_template(

@@ -1,9 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Optional
+from datetime import datetime
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
+from great_expectations.compatibility.pydantic import validator
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.expectations.core.validators import (
+    validate_eval_parameter_dict,
+)
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -69,6 +73,12 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
         [expect_table_column_count_to_equal](https://greatexpectations.io/expectations/expect_table_column_count_to_equal)
     """
 
+    min_value: Union[float, dict, datetime, None] = None
+    max_value: Union[float, dict, datetime, None] = None
+
+    _min_val = validator("min_value", allow_reuse=True)(validate_eval_parameter_dict)
+    _max_val = validator("max_value", allow_reuse=True)(validate_eval_parameter_dict)
+
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation"],
@@ -97,27 +107,6 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
         "min_value",
         "max_value",
     )
-
-    @override
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates the configuration for the Expectation.
-
-        For this expectation, `configuraton.kwargs` may contain `min_value` and `max_value` as a number.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided,
-                it will be pulled from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required
-                by the Expectation.
-        """
-        super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     @override
