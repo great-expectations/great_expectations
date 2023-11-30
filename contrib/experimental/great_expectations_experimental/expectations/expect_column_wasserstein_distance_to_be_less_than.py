@@ -1,14 +1,15 @@
+from __future__ import annotations
+
 import datetime
 from typing import Dict, Union
 
 from scipy import stats
 
-from great_expectations.compatibility.pydantic import validator
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.core.validators import (
-    validate_eval_parameter_dict,
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
 )
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
@@ -142,11 +143,8 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnAggregateExpectation):
         [Wasserstein Metric on Wikipedia](https://en.wikipedia.org/wiki/Wasserstein_metric)
     """
 
-    min_value: Union[float, dict, datetime, None] = None
-    max_value: Union[float, dict, datetime, None] = None
-
-    _min_val = validator("min_value", allow_reuse=True)(validate_eval_parameter_dict)
-    _max_val = validator("max_value", allow_reuse=True)(validate_eval_parameter_dict)
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.custom.wasserstein",)
