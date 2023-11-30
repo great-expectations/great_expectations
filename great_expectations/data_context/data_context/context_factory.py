@@ -12,7 +12,6 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility.pydantic import BaseModel
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
 )
@@ -42,18 +41,6 @@ if TYPE_CHECKING:
 ContextModes: TypeAlias = Literal["file", "cloud", "ephemeral"]
 
 
-class ProjectParameters(BaseModel):
-    project_config: DataContextConfig | Mapping | None = None
-    context_root_dir: PathStr | None = None
-    project_root_dir: PathStr | None = None
-    runtime_environment: dict | None = None
-    cloud_base_url: str | None = None
-    cloud_access_token: str | None = None
-    cloud_organization_id: str | None = None
-    cloud_mode: bool | None = None
-    mode: ContextModes | None = None
-
-
 class ProjectManager:
     """Singleton class to manage projects in the global namespace."""
 
@@ -62,55 +49,85 @@ class ProjectManager:
     def __init__(self):
         self._project = None
 
-    def get_project(self, project_parameters: ProjectParameters) -> AbstractDataContext:
+    def get_project(  # noqa: PLR0913
+        self,
+        project_config: DataContextConfig | Mapping | None = None,
+        context_root_dir: PathStr | None = None,
+        project_root_dir: PathStr | None = None,
+        runtime_environment: dict | None = None,
+        cloud_base_url: str | None = None,
+        cloud_access_token: str | None = None,
+        cloud_organization_id: str | None = None,
+        cloud_mode: bool | None = None,
+        mode: ContextModes | None = None,
+    ) -> AbstractDataContext:
         if not self._project:
-            self._project = self._build_context(project_parameters=project_parameters)
+            self._project = self._build_context(
+                project_config=project_config,
+                context_root_dir=context_root_dir,
+                project_root_dir=project_root_dir,
+                runtime_environment=runtime_environment,
+                cloud_base_url=cloud_base_url,
+                cloud_access_token=cloud_access_token,
+                cloud_organization_id=cloud_organization_id,
+                cloud_mode=cloud_mode,
+                mode=mode,
+            )
         return self._project
 
     def set_project(self, project: AbstractDataContext) -> None:
         self._project = project
 
-    def _build_context(
-        self, project_parameters: ProjectParameters
+    def _build_context(  # noqa: PLR0913
+        self,
+        project_config: DataContextConfig | Mapping | None = None,
+        context_root_dir: PathStr | None = None,
+        project_root_dir: PathStr | None = None,
+        runtime_environment: dict | None = None,
+        cloud_base_url: str | None = None,
+        cloud_access_token: str | None = None,
+        cloud_organization_id: str | None = None,
+        cloud_mode: bool | None = None,
+        mode: ContextModes | None = None,
     ) -> AbstractDataContext:
-        project_config = self._prepare_project_config(project_parameters.project_config)
+        project_config = self._prepare_project_config(project_config)
 
         param_lookup: dict[ContextModes | None, dict] = {
             "ephemeral": dict(
                 project_config=project_config,
-                runtime_environment=project_parameters.runtime_environment,
+                runtime_environment=runtime_environment,
             ),
             "file": dict(
                 project_config=project_config,
-                context_root_dir=project_parameters.context_root_dir,
-                project_root_dir=project_parameters.project_root_dir or Path.cwd(),
-                runtime_environment=project_parameters.runtime_environment,
+                context_root_dir=context_root_dir,
+                project_root_dir=project_root_dir or Path.cwd(),
+                runtime_environment=runtime_environment,
             ),
             "cloud": dict(
                 project_config=project_config,
-                context_root_dir=project_parameters.context_root_dir,
-                project_root_dir=project_parameters.project_root_dir,
-                runtime_environment=project_parameters.runtime_environment,
-                cloud_base_url=project_parameters.cloud_base_url,
-                cloud_access_token=project_parameters.cloud_access_token,
-                cloud_organization_id=project_parameters.cloud_organization_id,
+                context_root_dir=context_root_dir,
+                project_root_dir=project_root_dir,
+                runtime_environment=runtime_environment,
+                cloud_base_url=cloud_base_url,
+                cloud_access_token=cloud_access_token,
+                cloud_organization_id=cloud_organization_id,
             ),
             None: dict(
                 project_config=project_config,
-                context_root_dir=project_parameters.context_root_dir,
-                project_root_dir=project_parameters.project_root_dir,
-                runtime_environment=project_parameters.runtime_environment,
-                cloud_base_url=project_parameters.cloud_base_url,
-                cloud_access_token=project_parameters.cloud_access_token,
-                cloud_organization_id=project_parameters.cloud_organization_id,
-                cloud_mode=project_parameters.cloud_mode,
+                context_root_dir=context_root_dir,
+                project_root_dir=project_root_dir,
+                runtime_environment=runtime_environment,
+                cloud_base_url=cloud_base_url,
+                cloud_access_token=cloud_access_token,
+                cloud_organization_id=cloud_organization_id,
+                cloud_mode=cloud_mode,
             ),
         }
         try:
-            kwargs = param_lookup[project_parameters.mode]
+            kwargs = param_lookup[mode]
         except KeyError:
             raise ValueError(
-                f"Unknown mode {project_parameters.mode}. Please choose one of: ephemeral, file, cloud."
+                f"Unknown mode {mode}. Please choose one of: ephemeral, file, cloud."
             )
 
         from great_expectations.data_context.data_context import (
@@ -140,15 +157,15 @@ class ProjectManager:
             None: self._get_default_context,
         }
 
-        context_fn = context_fn_map[project_parameters.mode]
+        context_fn = context_fn_map[mode]
         context = context_fn(**kwargs)
 
-        expected_type = expected_ctx_types[project_parameters.mode]
+        expected_type = expected_ctx_types[mode]
         if not isinstance(context, expected_type):
             # example I want an ephemeral context but the presence of a GX_CLOUD env var gives me a cloud context
             # this kind of thing should not be possible but there may be some edge cases
             raise ValueError(
-                f"Provided mode {project_parameters.mode} returned context of type {type(context).__name__} instead of {expected_type.__name__}; please check your input arguments."
+                f"Provided mode {mode} returned context of type {type(context).__name__} instead of {expected_type.__name__}; please check your input arguments."
             )
 
         return context
@@ -441,7 +458,7 @@ def get_context(  # noqa: PLR0913
     Raises:
         GXCloudConfigurationError: Cloud mode enabled, but missing configuration.
     """
-    project_parameters = ProjectParameters(
+    return _project_manager.get_project(
         project_config=project_config,
         context_root_dir=context_root_dir,
         project_root_dir=project_root_dir,
@@ -452,7 +469,6 @@ def get_context(  # noqa: PLR0913
         cloud_mode=cloud_mode,
         mode=mode,
     )
-    return _project_manager.get_project(project_parameters=project_parameters)
 
 
 set_context = _project_manager.set_project
