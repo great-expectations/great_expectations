@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
-    Any,
     Callable,
     Literal,
     Mapping,
@@ -38,7 +37,7 @@ if TYPE_CHECKING:
         EphemeralDataContext,
         FileDataContext,
     )
-    from great_expectations.data_context.store import Store
+    from great_expectations.data_context.store import ExpectationsStore
     from great_expectations.data_context.types.base import DataContextConfig
 
 ContextModes: TypeAlias = Literal["file", "cloud", "ephemeral"]
@@ -80,18 +79,12 @@ class ProjectManager:
     def set_project(self, project: AbstractDataContext) -> None:
         self._project = project
 
-    def get_store(self, model: Any) -> Store:
+    def get_expectations_store(self) -> ExpectationsStore:
         if not self._project:
             raise RuntimeError(
-                "DataContext must be initialized before using `get_store`."
+                "DataContext must be initialized before using `get_expectations_store`."
             )
-        # todo: do something more elegant here
-        from great_expectations.core import ExpectationSuite
-
-        if isinstance(model, ExpectationSuite):
-            return self._project.expectations_store
-        else:
-            raise NotImplementedError
+        return self._project.expectations_store
 
     def _build_context(  # noqa: PLR0913
         self,
@@ -329,7 +322,7 @@ class ProjectManager:
 
 
 # global singleton
-_project_manager = ProjectManager()
+project_manager = ProjectManager()
 
 
 @overload
@@ -474,7 +467,7 @@ def get_context(  # noqa: PLR0913
     Raises:
         GXCloudConfigurationError: Cloud mode enabled, but missing configuration.
     """
-    return _project_manager.get_project(
+    return project_manager.get_project(
         project_config=project_config,
         context_root_dir=context_root_dir,
         project_root_dir=project_root_dir,
@@ -487,5 +480,5 @@ def get_context(  # noqa: PLR0913
     )
 
 
-set_context = _project_manager.set_project
-get_store_from_global_context = _project_manager.get_store
+set_context = project_manager.set_project
+get_store_from_global_context = project_manager.get_store
