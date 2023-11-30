@@ -61,23 +61,6 @@ class TestProjectManagerStores:
             project_manager.get_validations_store()
 
     @pytest.mark.unit
-    def test_get_profiler_store_success(self):
-        context = Mock(spec=AbstractDataContext)
-        project_manager = ProjectManager()
-        project_manager.set_project(project=context)
-
-        store = project_manager.get_profiler_store()
-
-        assert store == context.profiler_store
-
-    @pytest.mark.unit
-    def test_get_profiler_store_fails_without_context(self):
-        project_manager = ProjectManager()
-
-        with pytest.raises(RuntimeError, match=self.missing_project_error_str):
-            project_manager.get_profiler_store()
-
-    @pytest.mark.unit
     def test_get_evaluation_parameters_store_success(self):
         context = Mock(spec=AbstractDataContext)
         project_manager = ProjectManager()

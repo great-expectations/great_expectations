@@ -41,7 +41,6 @@ if TYPE_CHECKING:
         CheckpointStore,
         EvaluationParameterStore,
         ExpectationsStore,
-        ProfilerStore,
         ValidationsStore,
     )
     from great_expectations.data_context.types.base import DataContextConfig
@@ -108,14 +107,6 @@ class ProjectManager:
                 + "Please call `get_context()` first, then try your action again."
             )
         return self._project.validations_store
-
-    def get_profiler_store(self) -> ProfilerStore:
-        if not self._project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `get_context()` first, then try your action again."
-            )
-        return self._project.profiler_store
 
     def get_evaluation_parameters_store(self) -> EvaluationParameterStore:
         if not self._project:
