@@ -4,7 +4,7 @@ This example shows how to configure an assets for a variety of scenarios in Grea
 
 # <snippet name="tutorials/quickstart/quickstart.py import_gx">
 import great_expectations as gx
-from great_expectations.splitters import YearMonthDaySplitter, RangeSplitter
+from great_expectations.splitters import RangeSplitter, YearMonthDaySplitter
 
 # </snippet>
 

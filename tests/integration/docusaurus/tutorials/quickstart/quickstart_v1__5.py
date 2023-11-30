@@ -3,11 +3,8 @@ This example shows how to use row conditions to create conditional expectations.
 """
 # <snippet name="tutorials/quickstart/quickstart.py import_gx">
 import great_expectations as gx
-from great_expectations.expectations import (
-    ExpectColumnValuesToNotBeNull,
-    ExpectColumnValuesToBeBetween,
-)
 from great_expectations.splitters import YearMonthDaySplitter
+
 # </snippet>
 
 # Set up
@@ -21,15 +18,15 @@ datasource = context.sources.add_postresql(
     name="warehouse", connection_string="postgresql://localhost"
 )
 asset = datasource.add_table_asset(table_name="taxi")
-daily = asset.add_batch_config(name="daily", splitters=[YearMonthDaySplitter(column="pu_datetime")])
+daily = asset.add_batch_config(
+    name="daily", splitters=[YearMonthDaySplitter(column="pu_datetime")]
+)
 # </snippet>
 
 # Create Expectations
 # <snippet name="tutorials/quickstart/quickstart.py create_expectation">
 suite = context.add_expectation_suite("taxi")
-suite.add(
-    gxe.ExpectColumnValuesToNotBeNull("pickup_datetime")
-)
+suite.add(gxe.ExpectColumnValuesToNotBeNull("pickup_datetime"))
 suite.add(
     gxe.ExpectColumnValuesToBeBetween("passenger_count", min_value=1, max_value=6)
 )
@@ -53,9 +50,7 @@ ratecode_1_suite = context.add_expectation_suite("taxi.ratecode_1")
 # )
 ratecode_1_suite.add(
     # This is a "dumb" expectation, but I just want to know my splitter worked
-    gxe.ExpectColumnValuesToBeInSet(
-        column="ratecodeid", value_set=[1]
-    )
+    gxe.ExpectColumnValuesToBeInSet(column="ratecodeid", value_set=[1])
 )
 ratecode_1_suite.add(
     gxe.ExpectColumnMinToBeBetween(
@@ -66,9 +61,7 @@ ratecode_1_suite.add(
 )
 batch = ratecode_1_batch_config.get_batch(date="2023-01-23")
 # TODO: confirm we can use `validate` with both expectation and suite (or is this validate_suite?)
-batch.validate(
-    ratecode_1_suite
-)  
+batch.validate(ratecode_1_suite)
 
 
 # Validate data
@@ -80,7 +73,7 @@ validation.add(
     expectation_suite=suite,
     # Oops! I lost my reference and need to get it by name
     batch_config=context.sources.postgresql.get_asset("taxi").get_batch_config("daily"),
-    actions=[sendslack]
+    actions=[sendslack],
 )
 validation.add(name="r1", expectation_suite=r1_suite, batch_config=r1)
 # </snippet>

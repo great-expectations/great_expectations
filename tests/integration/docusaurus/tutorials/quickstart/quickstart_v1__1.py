@@ -11,6 +11,7 @@ This workflow is not recommended for use in production environments because:
 # <snippet name="tutorials/quickstart/quickstart.py import_gx">
 import great_expectations as gx
 import great_expectations.expectations as gxe
+
 # </snippet>
 
 # Set up
@@ -31,7 +32,9 @@ batch = context.sources.pandas_default.read_csv(
 # BatchOptions: (none needed)
 
 # TODO: ticket We can also use a SQL query as a data source
-context.sources.add_postgresql(name="postgresql", connection_string="postgresql://localhost")
+context.sources.add_postgresql(
+    name="postgresql", connection_string="postgresql://localhost"
+)
 batch = context.sources.postgresql.query_batch("SELECT * FROM taxi LIMIT 1000")
 # </snippet>
 
@@ -41,8 +44,13 @@ batch = context.sources.postgresql.query_batch("SELECT * FROM taxi LIMIT 1000")
 # Demo beats:
 # 1. TODO: Check with champions on positional args -- proposal is to allow positional args only for domain
 # 2. Notice that the "notes" option is now a top-level concern!
-expectation = gxe.ExpectColumnValuesToNotBeNull("pu_datetime", notes="These are filtered out upstream, because the entire record is garbage if there is no pu_datetime")
-batch.validate(expectation)  # returns a result that we expect them to review in a REPL loop
+expectation = gxe.ExpectColumnValuesToNotBeNull(
+    "pu_datetime",
+    notes="These are filtered out upstream, because the entire record is garbage if there is no pu_datetime",
+)
+batch.validate(
+    expectation
+)  # returns a result that we expect them to review in a REPL loop
 # Review the results of the expectation! Change parameters as needed.
 expectation.mostly = 0.8
 batch.validate(expectation)

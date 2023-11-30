@@ -8,11 +8,13 @@ It serves as an example for how a user is likely to build expectations for a pro
 # <snippet name="tutorials/quickstart/quickstart.py import_gx">
 import great_expectations as gx
 from great_expectations.expectations import (
-    ExpectColumnValuesToNotBeNull,
     ExpectColumnValuesToBeBetween,
+    ExpectColumnValuesToNotBeNull,
 )
+
 # TODO: @tyler Ticket for splitters, including the correct namespace and validating the list of ones that will work
-from great_expectations.splitters import YearMonthDaySplitter, RangeSplitter
+from great_expectations.splitters import YearMonthDaySplitter
+
 # </snippet>
 
 # Set up
@@ -36,9 +38,7 @@ daily = asset.add_batch_config(
 # <snippet name="tutorials/quickstart/quickstart.py create_expectation">
 suite = context.add_expectation_suite("taxi")
 suite.add(ExpectColumnValuesToNotBeNull("pickup_datetime"))
-suite.add(
-    ExpectColumnValuesToBeBetween("passenger_count", min_value=1, max_value=6)
-)
+suite.add(ExpectColumnValuesToBeBetween("passenger_count", min_value=1, max_value=6))
 # </snippet>
 
 
@@ -51,7 +51,7 @@ validation = context.validations.add(
 )
 
 checkpoint = context.checkpoints.add(
-    name="taxi", validations = [validation], action_list=[SendSlackNotificationAction()]
+    name="taxi", validations=[validation], action_list=[SendSlackNotificationAction()]
 )
 
 # TODO: why both a validation and a checkpoint here??
