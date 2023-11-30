@@ -443,7 +443,6 @@ def get_context(  # noqa: PLR0913
     Raises:
         GXCloudConfigurationError: Cloud mode enabled, but missing configuration.
     """
-    from great_expectations.data_context.types.base import DataContextConfig
     ProjectParameters.update_forward_refs()
     project_parameters = ProjectParameters(
         project_config=project_config,
