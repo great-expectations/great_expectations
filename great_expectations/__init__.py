@@ -11,7 +11,11 @@ from great_expectations.expectations.registry import (
 
 del get_versions  # isort:skip
 
-from great_expectations.data_context import get_context
+from great_expectations.data_context import (
+    get_context,
+    get_store_from_global_context,
+    set_context,
+)
 
 # By placing this registry function in our top-level __init__,  we ensure that all
 # GX workflows have populated expectation registries before they are used.
