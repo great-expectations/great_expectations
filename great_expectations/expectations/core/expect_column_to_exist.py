@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
+from great_expectations.compatibility.pydantic import validator
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.expectations.core.validators import validate_eval_parameter_dict
 from great_expectations.expectations.expectation import (
     BatchExpectation,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -58,6 +58,12 @@ class ExpectColumnToExist(BatchExpectation):
         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
 
+    column_index: Union[int, dict, None]
+
+    _column_index = validator("column_index", allow_reuse=True)(
+        validate_eval_parameter_dict
+    )
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
@@ -82,49 +88,6 @@ class ExpectColumnToExist(BatchExpectation):
         "column_index": None,
     }
     args_keys = ("column", "column_index")
-
-    @public_api
-    @override
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        For `expect_column_to_exist` it is required that the `configuration.kwargs` contain a `column` key that is a
-        string (the name of the column). Also, if `configuration.kwargs` contains `column_index`, then `column_index`
-        must be an `int` or `dict`; if a `dict`, then `column_index` must contain the `$PARAMETER` key.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                Expectation.
-        """
-        # Setting up a configuration
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-
-        # Ensuring that a proper value has been provided
-        try:
-            assert "column" in configuration.kwargs, "A column name must be provided"
-            assert isinstance(
-                configuration.kwargs["column"], str
-            ), "Column name must be a string"
-            assert (
-                isinstance(configuration.kwargs.get("column_index"), (int, dict))
-                or configuration.kwargs.get("column_index") is None
-            ), "column_index must be an integer, dict, or None"
-            if isinstance(configuration.kwargs.get("column_index"), dict):
-                assert "$PARAMETER" in configuration.kwargs.get(
-                    "column_index", tuple()
-                ), 'Evaluation Parameter dict for column_index kwarg must have "$PARAMETER" key.'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     @override
