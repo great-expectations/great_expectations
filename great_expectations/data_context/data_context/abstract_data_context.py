@@ -1261,6 +1261,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         return self.checkpoint_store.list_checkpoints()
 
+    def list_checkpoint_names(self) -> list[str]:
+        names: list[str] = []
+        for checkpoint in self.list_checkpoints():
+            if isinstance(checkpoint, str):
+                names.append(checkpoint)
+            else:
+                names.append(checkpoint.to_tuple()[2])
+        return names
+
     def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         """List existing Profiler identifiers on this context.
 
@@ -1476,6 +1485,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         ) in self.fluent_datasources.items():
             datasources.append(fluent_datasource_config.dict())
         return datasources
+
+    def list_datasource_names(self) -> list[str]:
+        return list(self.datasources.keys())
 
     @public_api
     def delete_datasource(self, datasource_name: Optional[str]) -> None:

@@ -495,14 +495,14 @@ class ConfigurationIdentifier(DataContextKey):
     def configuration_key(self) -> str:
         return self._configuration_key
 
-    def to_tuple(self):
+    def to_tuple(self) -> tuple:
         return tuple(self.configuration_key.split("."))
 
-    def to_fixed_length_tuple(self):
+    def to_fixed_length_tuple(self) -> tuple[str]:
         return (self.configuration_key,)
 
     @classmethod
-    def from_tuple(cls, tuple_):
+    def from_tuple(cls, tuple_: tuple):
         return cls(".".join(tuple_))
 
     @classmethod
