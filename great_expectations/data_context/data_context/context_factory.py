@@ -61,18 +61,17 @@ class ProjectManager:
         cloud_mode: bool | None = None,
         mode: ContextModes | None = None,
     ) -> AbstractDataContext:
-        if not self._project:
-            self._project = self._build_context(
-                project_config=project_config,
-                context_root_dir=context_root_dir,
-                project_root_dir=project_root_dir,
-                runtime_environment=runtime_environment,
-                cloud_base_url=cloud_base_url,
-                cloud_access_token=cloud_access_token,
-                cloud_organization_id=cloud_organization_id,
-                cloud_mode=cloud_mode,
-                mode=mode,
-            )
+        self._project = self._build_context(
+            project_config=project_config,
+            context_root_dir=context_root_dir,
+            project_root_dir=project_root_dir,
+            runtime_environment=runtime_environment,
+            cloud_base_url=cloud_base_url,
+            cloud_access_token=cloud_access_token,
+            cloud_organization_id=cloud_organization_id,
+            cloud_mode=cloud_mode,
+            mode=mode,
+        )
         return self._project
 
     def set_project(self, project: AbstractDataContext) -> None:
