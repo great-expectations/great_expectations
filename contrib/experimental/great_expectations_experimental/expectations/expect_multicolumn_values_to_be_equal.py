@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from functools import reduce
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
