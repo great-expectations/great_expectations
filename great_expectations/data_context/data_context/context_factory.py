@@ -7,7 +7,9 @@ from typing import (
     Callable,
     Literal,
     Mapping,
+    Optional,
     Type,
+    Union,
     overload,
 )
 
@@ -43,15 +45,15 @@ ContextModes: TypeAlias = Literal["file", "cloud", "ephemeral"]
 
 
 class ProjectParameters(BaseModel):
-    project_config: DataContextConfig | Mapping | None = None
-    context_root_dir: PathStr | None = None
-    project_root_dir: PathStr | None = None
-    runtime_environment: dict | None = None
-    cloud_base_url: str | None = None
-    cloud_access_token: str | None = None
-    cloud_organization_id: str | None = None
-    cloud_mode: bool | None = None
-    mode: ContextModes | None = None
+    project_config: Union[DataContextConfig, Mapping, None] = None
+    context_root_dir: Optional[PathStr] = None
+    project_root_dir: Optional[PathStr] = None
+    runtime_environment: Optional[dict] = None
+    cloud_base_url: Optional[str] = None
+    cloud_access_token: Optional[str] = None
+    cloud_organization_id: Optional[str] = None
+    cloud_mode: Optional[bool] = None
+    mode: Optional[ContextModes] = None
 
 
 class ProjectManager:
