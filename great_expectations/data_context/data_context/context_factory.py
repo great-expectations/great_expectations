@@ -49,7 +49,7 @@ class ProjectManager:
     def __init__(self):
         self._project = None
 
-    def get_context(  # noqa: PLR0913
+    def get_project(  # noqa: PLR0913
         self,
         project_config: DataContextConfig | Mapping | None = None,
         context_root_dir: PathStr | None = None,
@@ -74,6 +74,9 @@ class ProjectManager:
                 mode=mode,
             )
         return self._project
+
+    def set_project(self, project: AbstractDataContext) -> None:
+        self._project = project
 
     def _build_context(  # noqa: PLR0913
         self,
@@ -455,7 +458,7 @@ def get_context(  # noqa: PLR0913
     Raises:
         GXCloudConfigurationError: Cloud mode enabled, but missing configuration.
     """
-    return _project_manager.get_context(
+    return _project_manager.get_project(
         project_config=project_config,
         context_root_dir=context_root_dir,
         project_root_dir=project_root_dir,
@@ -466,3 +469,6 @@ def get_context(  # noqa: PLR0913
         cloud_mode=cloud_mode,
         mode=mode,
     )
+
+
+set_context = _project_manager.set_project
