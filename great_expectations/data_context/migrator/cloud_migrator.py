@@ -240,7 +240,7 @@ class CloudMigrator:
         print("[Step 1/4]: Bundling context configuration")
         for name, collection in to_print:
             # ExpectationSuite is not AbstractConfig but contains required `name`
-            self._print_object_summary(obj_name=name, obj_collection=collection)
+            self._print_object_summary(obj_name=name, obj_collection=collection)  # type: ignore[arg-type]
 
     def _print_object_summary(
         self, obj_name: str, obj_collection: List[AbstractConfig]
