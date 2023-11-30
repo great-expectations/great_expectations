@@ -16,6 +16,8 @@ packaging
 pandas>=1.1.0; python_version <= "3.8"
 pandas>=1.1.3; python_version == "3.9"
 pandas>=1.3.0; python_version >= "3.10"
+# analytics
+posthog>=2.1.0,<3
 # patch version updates `typing_extensions` to the needed version
 pydantic>=1.9.2
 pyparsing>=2.4
