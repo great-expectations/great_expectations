@@ -4,7 +4,9 @@ from typing import Dict, Union
 from scipy import stats
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.evaluation_parameters import EvaluationParameterDict
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (

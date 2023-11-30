@@ -53,7 +53,9 @@ if TYPE_CHECKING:
         ExpectationConfiguration,
         ExpectationValidationResult,
     )
-    from great_expectations.core.evaluation_parameters import EvaluationParameterDict
+    from great_expectations.core.evaluation_parameters import (
+        EvaluationParameterDict,
+    )
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer_configuration import AddParamArgs
     from great_expectations.validator.validator import (

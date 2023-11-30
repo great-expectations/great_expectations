@@ -39,7 +39,9 @@ try:
 except ImportError:
     pass
 
-
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
+)
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.render.renderer.renderer import renderer
 
@@ -48,7 +50,6 @@ if TYPE_CHECKING:
         ExpectationConfiguration,
         ExpectationValidationResult,
     )
-    from great_expectations.core.evaluation_parameters import EvaluationParameterDict
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer_configuration import AddParamArgs
 

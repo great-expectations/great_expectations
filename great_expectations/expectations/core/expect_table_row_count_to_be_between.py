@@ -4,6 +4,9 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
+)
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -36,7 +39,6 @@ if TYPE_CHECKING:
         ExpectationConfiguration,
         ExpectationValidationResult,
     )
-    from great_expectations.core.evaluation_parameters import EvaluationParameterDict
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer_configuration import AddParamArgs
 

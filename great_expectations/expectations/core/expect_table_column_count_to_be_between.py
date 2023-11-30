@@ -4,6 +4,9 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
+)
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -24,7 +27,6 @@ if TYPE_CHECKING:
         ExpectationConfiguration,
         ExpectationValidationResult,
     )
-    from great_expectations.core.evaluation_parameters import EvaluationParameterDict
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer_configuration import AddParamArgs
 
@@ -70,8 +72,8 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
         [expect_table_column_count_to_equal](https://greatexpectations.io/expectations/expect_table_column_count_to_equal)
     """
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, EvaluationParameterDict, datetime, None]
+    max_value: Union[float, EvaluationParameterDict, datetime, None]
 
     library_metadata = {
         "maturity": "production",
