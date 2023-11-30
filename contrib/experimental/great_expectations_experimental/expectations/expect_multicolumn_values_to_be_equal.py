@@ -1,8 +1,10 @@
+import datetime
 from functools import reduce
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import sqlalchemy as sa
 
+from great_expectations.compatibility.pydantic import validator
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -18,6 +20,9 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
+)
+from great_expectations.expectations.core.validators import (
+    validate_eval_parameter_dict,
 )
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
@@ -134,6 +139,12 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
         [expect_column_pair_values_to_be_equal](https://greatexpectations.io/expectations/expect_column_pair_values_to_be_equal)
     """
 
+    min_value: Union[float, dict, datetime, None] = None
+    max_value: Union[float, dict, datetime, None] = None
+
+    _min_val = validator("min_value", allow_reuse=True)(validate_eval_parameter_dict)
+    _max_val = validator("max_value", allow_reuse=True)(validate_eval_parameter_dict)
+
     map_metric = "multicolumn_values_to_be_equal"
 
     examples = [
@@ -210,7 +221,6 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
                 not contain the values required by the Expectation."
         """
         super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
 
         try:
             assert "column_list" in configuration.kwargs, "column_list is required"

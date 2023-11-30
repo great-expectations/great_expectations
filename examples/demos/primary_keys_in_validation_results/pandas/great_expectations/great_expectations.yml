@@ -113,4 +113,3 @@ include_rendered_content:
   expectation_validation_result: false
   expectation_suite: false
   globally: false
-notebooks:
