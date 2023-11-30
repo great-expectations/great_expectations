@@ -19,7 +19,7 @@ Here’s an overview of the components of a typical Great Expectations deploymen
   * [Connecting to Data](#connecting-to-data)
   * [Options for hosting Data Docs](#options-for-hosting-data-docs)
   * [Additional Checkpoints and Actions](#additional-checkpoints-and-actions)
-  * [How to update Data Docs as a Validation Action](../guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action.md)
+  * [How to update Data Docs as a Validation Action](/docs/guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action.md)
 
 ## Options for storing Great Expectations configuration
 The simplest way to manage your Great Expectations configuration is usually by committing great_expectations/great_expectations.yml to Git. However, it’s not usually a good idea to commit credentials to source control. In some situations, you might need to deploy without access to source control (or maybe even a file system).
