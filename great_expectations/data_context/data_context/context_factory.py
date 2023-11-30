@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Callable,
-    ForwardRef,
     Literal,
     Mapping,
     Optional,
@@ -40,13 +39,13 @@ if TYPE_CHECKING:
         EphemeralDataContext,
         FileDataContext,
     )
-    from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.base import DataContextConfig
 
 ContextModes: TypeAlias = Literal["file", "cloud", "ephemeral"]
 
 
 class ProjectParameters(BaseModel):
-    project_config: Union[DataContextConfig, Mapping, ForwardRef, None] = None
+    project_config: Union[DataContextConfig, Mapping, None] = None
     context_root_dir: Optional[PathStr] = None
     project_root_dir: Optional[PathStr] = None
     runtime_environment: Optional[dict] = None
