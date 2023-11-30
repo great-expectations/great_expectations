@@ -1,6 +1,10 @@
+"""
+This example shows editing an existing expectation suite.
+"""
+
 # <snippet name="tutorials/quickstart/quickstart.py import_gx">
 import great_expectations as gx
-
+import great_expectations.expectations as gxe
 # </snippet>
 
 # Set up
@@ -19,20 +23,23 @@ batch = context.sources.pandas_default.read_csv(
 # <snippet name="tutorials/quickstart/quickstart.py update_expectation">
 suite = context.get_expectation_suite("quickstart")
 # Note how we find expectations now. It's a list filtering operation left to the user.
-expectation = [expectation in suite.expectations if expectation.expectation_type == "expect_column_values_to_not_be_null" and expectation.column == "pickup_datetime"][0]
-expectation = [expectation in suite.expectations if isinstance(expectation, ExpectColumnValuesToNotBeNull) and expectation.column == "pickup_datetime"][0]  # Expectations are of the Expectation Type
+expectation = [expectation for expectation in suite.expectations if expectation.expectation_type == "expect_column_values_to_not_be_null" and expectation.column == "pickup_datetime"][0]
+  # Expectations are of the Expectation Type
+expectation = [expectation for expectation in suite.expectations if isinstance(expectation, gxe.ExpectColumnValuesToNotBeNull) and expectation.column == "pickup_datetime"][0]
 expectation.mostly = 0.9
-# suite.update(expectation)  # TODO: resolve persistence question. I think this should become unnecessary
+# TODO: ticket to add this to expectation
+expectation.save()  # We explicitly save the change
 # </snippet>
 
 
-expectation = gx.ExpectColumnValuesToBeInSet(column="id", value_set={1,2,3})
-expectation = gx.ExpectColumnValuesToBeInSet(column="id", value_set=[1,2,3])  # Note we allow both types here with pydantic validation and coercion
+expectation = gxe.ExpectColumnValuesToBeInSet(column="id", value_set={1,2,3})
+expectation = gxe.ExpectColumnValuesToBeInSet(column="id", value_set=[1,2,3])  # Note we allow both types here with pydantic validation and coercion
 batch.validate(expectation)
 
 # Demo beat: notice we can use natural python operations on parameters now!
+# This was a big pain point before!
 expectation.value_set.add(4)
 batch.validate(expectation)
-suite.add_expectation(
+suite.add(
     expectation
 )
