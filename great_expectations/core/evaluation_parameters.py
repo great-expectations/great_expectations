@@ -7,7 +7,7 @@ import math
 import operator
 import traceback
 from collections import namedtuple
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, TypedDict, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 import dateutil
 from pyparsing import (
@@ -26,6 +26,7 @@ from pyparsing import (
     delimitedList,
     dictOf,
 )
+from typing_extensions import TypedDict
 
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import convert_to_json_serializable
