@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
-from great_expectations.compatibility.pydantic import validator
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.expectations.core.validators import validate_eval_parameter_dict
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
+)
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -58,11 +59,7 @@ class ExpectColumnToExist(BatchExpectation):
         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
 
-    column_index: Union[int, dict, None]
-
-    _column_index = validator("column_index", allow_reuse=True)(
-        validate_eval_parameter_dict
-    )
+    column_index: Union[int, EvaluationParameterDict, None]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

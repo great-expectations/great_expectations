@@ -1,12 +1,13 @@
 from typing import Dict, Optional, Union
 
-from great_expectations.compatibility.pydantic import validator
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.core.validators import validate_eval_parameter_dict
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -52,9 +53,7 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
         [expect_table_column_count_to_be_between](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between)
     """
 
-    value: Union[int, dict]
-
-    _value = validator("value", allow_reuse=True)(validate_eval_parameter_dict)
+    value: Union[int, EvaluationParameterDict]
 
     library_metadata = {
         "maturity": "production",

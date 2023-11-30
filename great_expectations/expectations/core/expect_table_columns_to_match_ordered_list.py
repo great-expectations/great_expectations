@@ -1,13 +1,14 @@
 from itertools import zip_longest
 from typing import Dict, Optional, Union
 
-from great_expectations.compatibility.pydantic import validator
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.core.validators import validate_eval_parameter_dict
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -50,11 +51,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
 
-    column_list: Union[list, set, dict, None]
-
-    _column_list = validator("column_list", allow_reuse=True)(
-        validate_eval_parameter_dict
-    )
+    column_list: Union[list, set, EvaluationParameterDict, None]
 
     library_metadata = {
         "maturity": "production",

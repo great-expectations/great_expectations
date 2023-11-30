@@ -1,11 +1,12 @@
 from typing import TYPE_CHECKING, List, Optional, Union
 
-from great_expectations.compatibility.pydantic import validator
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.expectations.core.validators import validate_eval_parameter_dict
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
 )
@@ -110,9 +111,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         [expect_column_values_to_not_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_not_be_in_set)
     """
 
-    value_set: Union[list, set, dict, None]
-
-    _value_set = validator("value_set", allow_reuse=True)(validate_eval_parameter_dict)
+    value_set: Union[list, set, EvaluationParameterDict, None]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

@@ -3,13 +3,14 @@ from typing import TYPE_CHECKING, Dict, Optional, Union
 import numpy as np
 import pandas as pd
 
-from great_expectations.compatibility.pydantic import validator
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.core.validators import validate_eval_parameter_dict
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -89,9 +90,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         [expect_column_values_to_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_be_in_set)
     """
 
-    value_set: Union[list, set, dict, None]
-
-    _value_set = validator("value_set", allow_reuse=True)(validate_eval_parameter_dict)
+    value_set: Union[list, set, EvaluationParameterDict, None]
 
     library_metadata = {
         "maturity": "production",

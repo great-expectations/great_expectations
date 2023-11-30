@@ -1,12 +1,13 @@
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
-from great_expectations.compatibility.pydantic import validator
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.core.validators import validate_eval_parameter_dict
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -67,12 +68,8 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
 
-    column_set: Union[list, set, dict, None]
+    column_set: Union[list, set, EvaluationParameterDict, None]
     exact_match: Union[bool, None]
-
-    _column_set = validator("column_set", allow_reuse=True)(
-        validate_eval_parameter_dict
-    )
 
     library_metadata = {
         "maturity": "production",
