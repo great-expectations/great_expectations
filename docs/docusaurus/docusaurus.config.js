@@ -102,11 +102,11 @@ module.exports = {
         },
         {
           label: 'GX CLOUD',
-          to: '/docs/cloud/about_gx',
+          to: '/docs/cloud/',
         },
         {
           label: 'GX OSS',
-          to: '/docs/guides/setup/get_started_lp',
+          to: '/docs/oss/',
         },
         {
           label: 'GX OSS API',

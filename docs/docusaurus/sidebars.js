@@ -263,7 +263,7 @@ module.exports = {
         },
       ],
   gx_core: [
-      { type: 'doc', id: 'gx_oss_lp' },
+      { type: 'doc', id: 'oss/gx_oss_lp' },
         {
           type: 'category',
           label: 'Get started with GX OSS',
