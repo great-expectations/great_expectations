@@ -105,7 +105,6 @@ class TestConfigurationBundleSerialization:
         context = StubBaseDataContext(
             checkpoint_names=tuple(),
             expectation_suite_names=tuple(),
-            profiler_names=tuple(),
             validation_results_keys=tuple(),
             datasource_names=tuple(),
         )

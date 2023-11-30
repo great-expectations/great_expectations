@@ -24,9 +24,6 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     DatasourceConfigSchema,
 )
-from great_expectations.rule_based_profiler.config.base import (
-    RuleBasedProfilerConfigSchema,
-)
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -141,10 +138,6 @@ class ConfigurationBundleSchema(Schema):
     )
     checkpoints = fields.List(
         fields.Nested(CheckpointConfigSchema, allow_none=True, required=True),
-        required=True,
-    )
-    profilers = fields.List(
-        fields.Nested(RuleBasedProfilerConfigSchema, allow_none=True, required=True),
         required=True,
     )
     validation_results = fields.Dict(
