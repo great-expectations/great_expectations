@@ -7,7 +7,7 @@ import math
 import operator
 import traceback
 from collections import namedtuple
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, TypedDict, Union
 
 import dateutil
 from pyparsing import (
@@ -36,6 +36,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 _epsilon = 1e-12
+
+EvaluationParameterDict = TypedDict("EvaluationParameterDict", {"$PARAMETER": str})
 
 
 class EvaluationParameterParser:

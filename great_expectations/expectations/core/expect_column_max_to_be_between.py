@@ -3,11 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
-from great_expectations.compatibility.pydantic import validator
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.expectations.core.validators import (
-    validate_eval_parameter_dict,
-)
 from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
@@ -52,6 +48,7 @@ if TYPE_CHECKING:
         ExpectationConfiguration,
         ExpectationValidationResult,
     )
+    from great_expectations.core.evaluation_parameters import EvaluationParameterDict
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer_configuration import AddParamArgs
 
@@ -103,11 +100,8 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
         [expect_column_min_to_be_between](https://greatexpectations.io/expectations/expect_column_min_to_be_between)
     """
 
-    min_value: Union[float, dict, datetime, None] = None
-    max_value: Union[float, dict, datetime, None] = None
-
-    _min_val = validator("min_value", allow_reuse=True)(validate_eval_parameter_dict)
-    _max_val = validator("max_value", allow_reuse=True)(validate_eval_parameter_dict)
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

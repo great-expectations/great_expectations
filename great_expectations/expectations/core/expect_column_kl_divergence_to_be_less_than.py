@@ -8,13 +8,9 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from great_expectations.compatibility.pydantic import validator
 from great_expectations.execution_engine.util import (
     is_valid_categorical_partition_object,
     is_valid_partition_object,
-)
-from great_expectations.expectations.core.validators import (
-    validate_eval_parameter_dict,
 )
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
@@ -57,6 +53,7 @@ if TYPE_CHECKING:
         ExpectationConfiguration,
         ExpectationValidationResult,
     )
+    from great_expectations.core.evaluation_parameters import EvaluationParameterDict
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer_configuration import AddParamArgs
     from great_expectations.validator.validator import (
@@ -162,11 +159,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         parsers to crash when encountered. The python None token will be serialized to null in json.
     """
 
-    min_value: Union[float, dict, datetime, None] = None
-    max_value: Union[float, dict, datetime, None] = None
-
-    _min_val = validator("min_value", allow_reuse=True)(validate_eval_parameter_dict)
-    _max_val = validator("max_value", allow_reuse=True)(validate_eval_parameter_dict)
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

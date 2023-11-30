@@ -3,14 +3,10 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple, Union
 
-from great_expectations.compatibility.pydantic import validator
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
-)
-from great_expectations.expectations.core.validators import (
-    validate_eval_parameter_dict,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -39,6 +35,7 @@ if TYPE_CHECKING:
         ExpectationConfiguration,
         ExpectationValidationResult,
     )
+    from great_expectations.core.evaluation_parameters import EvaluationParameterDict
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer_configuration import AddParamArgs
 
@@ -83,11 +80,8 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         [expect_column_values_to_be_null](https://greatexpectations.io/expectations/expect_column_values_to_be_null)
     """
 
-    min_value: Union[float, dict, datetime, None] = None
-    max_value: Union[float, dict, datetime, None] = None
-
-    _min_val = validator("min_value", allow_reuse=True)(validate_eval_parameter_dict)
-    _max_val = validator("max_value", allow_reuse=True)(validate_eval_parameter_dict)
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
 
     library_metadata: ClassVar[dict] = {
         "maturity": "production",
