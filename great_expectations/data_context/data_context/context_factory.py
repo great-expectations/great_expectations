@@ -13,6 +13,7 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
 )
@@ -390,6 +391,7 @@ def get_context(  # noqa: PLR0913
     ...
 
 
+@public_api
 def get_context(  # noqa: PLR0913
     project_config: DataContextConfig | Mapping | None = None,
     context_root_dir: PathStr | None = None,
