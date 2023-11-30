@@ -70,7 +70,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
     column_set: Union[list, set, dict, None]
     exact_match: bool
 
-    _column_set = validator("column_list", allow_reuse=True)(
+    _column_set = validator("column_set", allow_reuse=True)(
         validate_eval_parameter_dict
     )
 
