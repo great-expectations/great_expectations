@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
+    Any,
     Callable,
     Literal,
     Mapping,
@@ -36,6 +37,7 @@ if TYPE_CHECKING:
         EphemeralDataContext,
         FileDataContext,
     )
+    from great_expectations.data_context.store import Store
     from great_expectations.data_context.types.base import DataContextConfig
 
 ContextModes: TypeAlias = Literal["file", "cloud", "ephemeral"]
@@ -76,6 +78,15 @@ class ProjectManager:
 
     def set_project(self, project: AbstractDataContext) -> None:
         self._project = project
+
+    def get_store(self, model: Any) -> Store:
+        # todo: do something more elegant here
+        from great_expectations.core import ExpectationSuite
+
+        if isinstance(model, ExpectationSuite):
+            return self._project.expectations_store
+        else:
+            raise NotImplementedError
 
     def _build_context(  # noqa: PLR0913
         self,
@@ -471,3 +482,4 @@ def get_context(  # noqa: PLR0913
 
 
 set_context = _project_manager.set_project
+get_store_from_global_context = _project_manager.get_store
