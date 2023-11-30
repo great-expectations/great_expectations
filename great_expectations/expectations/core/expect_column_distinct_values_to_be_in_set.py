@@ -9,6 +9,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.core.validators import validate_eval_parameter_dict
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_evaluation_parameter_string,
@@ -104,7 +105,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
 
     value_set: Union[list, set, dict, None]
 
-    _value_set = validator("value_set", allow_reuse=True)(...)
+    _value_set = validator("value_set", allow_reuse=True)(validate_eval_parameter_dict)
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
