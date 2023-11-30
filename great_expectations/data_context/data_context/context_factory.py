@@ -44,7 +44,38 @@ ContextModes: TypeAlias = Literal["file", "cloud", "ephemeral"]
 class ProjectManager:
     """Singleton class to manage projects in the global namespace."""
 
+    _project: AbstractDataContext | None
+
+    def __init__(self):
+        self._project = None
+
     def get_context(  # noqa: PLR0913
+        self,
+        project_config: DataContextConfig | Mapping | None = None,
+        context_root_dir: PathStr | None = None,
+        project_root_dir: PathStr | None = None,
+        runtime_environment: dict | None = None,
+        cloud_base_url: str | None = None,
+        cloud_access_token: str | None = None,
+        cloud_organization_id: str | None = None,
+        cloud_mode: bool | None = None,
+        mode: ContextModes | None = None,
+    ) -> AbstractDataContext:
+        if not self._project:
+            self._project = self._build_context(
+                project_config=project_config,
+                context_root_dir=context_root_dir,
+                project_root_dir=project_root_dir,
+                runtime_environment=runtime_environment,
+                cloud_base_url=cloud_base_url,
+                cloud_access_token=cloud_access_token,
+                cloud_organization_id=cloud_organization_id,
+                cloud_mode=cloud_mode,
+                mode=mode,
+            )
+        return self._project
+
+    def _build_context(  # noqa: PLR0913
         self,
         project_config: DataContextConfig | Mapping | None = None,
         context_root_dir: PathStr | None = None,
@@ -120,7 +151,7 @@ class ProjectManager:
             "ephemeral": self._get_ephemeral_context,
             "file": self._get_file_context,
             "cloud": self._get_cloud_context,
-            None: self._get_context,
+            None: self._get_default_context,
         }
 
         context_fn = context_fn_map[mode]
@@ -136,7 +167,7 @@ class ProjectManager:
 
         return context
 
-    def _get_context(  # noqa: PLR0913
+    def _get_default_context(  # noqa: PLR0913
         self,
         project_config: DataContextConfig | None = None,
         context_root_dir: PathStr | None = None,
@@ -147,6 +178,7 @@ class ProjectManager:
         cloud_organization_id: str | None = None,
         cloud_mode: bool | None = None,
     ) -> AbstractDataContext:
+        """Infer which type of DataContext a user wants based on available parameters."""
         # First, check for GX Cloud conditions
         cloud_context = self._get_cloud_context(
             project_config=project_config,
