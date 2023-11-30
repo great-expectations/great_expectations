@@ -39,7 +39,7 @@ if TYPE_CHECKING:
         EphemeralDataContext,
         FileDataContext,
     )
-    from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.base import DataContextConfig
 
 ContextModes: TypeAlias = Literal["file", "cloud", "ephemeral"]
 
@@ -443,7 +443,6 @@ def get_context(  # noqa: PLR0913
     Raises:
         GXCloudConfigurationError: Cloud mode enabled, but missing configuration.
     """
-    ProjectParameters.update_forward_refs()
     project_parameters = ProjectParameters(
         project_config=project_config,
         context_root_dir=context_root_dir,
