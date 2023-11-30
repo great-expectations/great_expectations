@@ -1090,7 +1090,6 @@ configuration to continue.
     def make_execution_engine_config(self, data, **kwargs):
         return ExecutionEngineConfig(**data)
 
-
 class DatasourceConfig(AbstractConfig):
     def __init__(  # noqa: C901, PLR0912, PLR0913
         self,
@@ -1517,6 +1516,12 @@ class GXCloudConfig(DictDot):
 
 
 class DataContextConfigSchema(Schema):
+    batch_configs = fields.Dict(
+        keys=fields.Str(),
+        required=False,
+        allow_none=True,
+        load_only=True,
+    )
     config_version = fields.Number(
         validate=lambda x: 0 < x < 100,  # noqa: PLR2004
         error_messages={"invalid": "config version must " "be a number."},
@@ -1557,20 +1562,6 @@ class DataContextConfigSchema(Schema):
     concurrency = fields.Nested(
         ConcurrencyConfigSchema, required=False, allow_none=True
     )
-
-    batch_expectations = fields.Dict(
-        keys=fields.Str(),
-        required=False,
-        allow_none=True,
-        load_only=True,
-    )
-    batch_configs = fields.Dict(
-        keys=fields.Str(),
-        required=False,
-        allow_none=True,
-        load_only=True,
-    )
-
 
     # To ensure backwards compatability, we need to ensure that new options are "opt-in"
     # If a user has not explicitly configured the value, it will be None and will be wiped by the post_dump hook
@@ -2287,6 +2278,7 @@ class DataContextConfig(BaseYamlConfig):
         - https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file/
 
     Args:
+        batch_configs: (Optional[Dict]): a dictionary of batch_config dicts.
         config_version (Optional[float]): config version of this DataContext.
         datasources (Optional[Union[Dict[str, DatasourceConfig], Dict[str, Dict[str, Union[Dict[str, str], str, dict]]]]):
             DatasourceConfig or Dict containing configurations for Datasources associated with DataContext.
@@ -2320,6 +2312,7 @@ class DataContextConfig(BaseYamlConfig):
 
     def __init__(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
+        batch_configs: Optional[Dict] = None,
         config_version: Optional[float] = None,
         datasources: Optional[
             Union[
@@ -2345,8 +2338,6 @@ class DataContextConfig(BaseYamlConfig):
         concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
         progress_bars: Optional[ProgressBarsConfig] = None,
         include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
-        batch_expectations: Optional[Dict] = None,
-        batch_configs: Optional[Dict] = None,
     ) -> None:
         if notebooks:
             warnings.warn("The `notebooks` parameter no longer supported.", UserWarning)
@@ -2378,6 +2369,7 @@ class DataContextConfig(BaseYamlConfig):
         self._config_version = config_version
         if datasources is None:
             datasources = {}  # type: ignore[assignment]
+        self.batch_configs = batch_configs or {}
         self.datasources = datasources
         self.fluent_datasources = fluent_datasources or {}
         self.expectations_store_name = expectations_store_name
@@ -2412,8 +2404,6 @@ class DataContextConfig(BaseYamlConfig):
             )
         self.include_rendered_content = include_rendered_content
 
-        self.batch_expectations = batch_expectations or {}
-        self.batch_configs = batch_configs or {}
 
         super().__init__(commented_map=commented_map)
 
