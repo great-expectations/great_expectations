@@ -25,9 +25,7 @@ from great_expectations.data_context.types.base import (
     DatasourceConfigSchema,
 )
 from great_expectations.rule_based_profiler.config.base import (
-    RuleBasedProfilerConfig,
     RuleBasedProfilerConfigSchema,
-    ruleBasedProfilerConfigSchema,
 )
 
 if TYPE_CHECKING:
@@ -47,7 +45,6 @@ class ConfigurationBundle:
         self._datasources = self._get_all_datasources()
         self._expectation_suites = self._get_all_expectation_suites()
         self._checkpoints = self._get_all_checkpoints()
-        self._profilers = self._get_all_profilers()
 
         # Treated slightly differently as we require the keys downstream when printing migration status.
         self._validation_results = self._get_all_validation_results()
@@ -86,10 +83,6 @@ class ConfigurationBundle:
         return self._checkpoints
 
     @property
-    def profilers(self) -> List[RuleBasedProfilerConfig]:
-        return self._profilers
-
-    @property
     def validation_results(self) -> Dict[str, ExpectationSuiteValidationResult]:
         return self._validation_results
 
@@ -118,19 +111,6 @@ class ConfigurationBundle:
         return [
             self._context.checkpoint_store.get_checkpoint(name=checkpoint_name, id=None)
             for checkpoint_name in self._context.list_checkpoints()
-        ]
-
-    def _get_all_profilers(self) -> List[RuleBasedProfilerConfig]:
-        def round_trip_profiler_config(
-            profiler_config: RuleBasedProfilerConfig,
-        ) -> RuleBasedProfilerConfig:
-            return ruleBasedProfilerConfigSchema.load(
-                ruleBasedProfilerConfigSchema.dump(profiler_config)
-            )
-
-        return [
-            round_trip_profiler_config(self._context.get_profiler(name).config)  # type: ignore[arg-type] # expected str | None
-            for name in self._context.list_profilers()
         ]
 
     def _get_all_validation_results(
