@@ -37,7 +37,13 @@ if TYPE_CHECKING:
         EphemeralDataContext,
         FileDataContext,
     )
-    from great_expectations.data_context.store import ExpectationsStore
+    from great_expectations.data_context.store import (
+        CheckpointStore,
+        EvaluationParameterStore,
+        ExpectationsStore,
+        ProfilerStore,
+        ValidationsStore,
+    )
     from great_expectations.data_context.types.base import DataContextConfig
 
 ContextModes: TypeAlias = Literal["file", "cloud", "ephemeral"]
@@ -80,11 +86,36 @@ class ProjectManager:
         self._project = project
 
     def get_expectations_store(self) -> ExpectationsStore:
+        self._raise_for_missing_project()
+        return self._project.expectations_store
+
+    def get_checkpoints_store(self) -> CheckpointStore:
+        self._raise_for_missing_project()
+        return self._project.checkpoint_store
+
+    def get_validations_store(self) -> ValidationsStore:
+        self._raise_for_missing_project()
+        return self._project.validations_store
+
+    def get_profiler_store(self) -> ProfilerStore:
+        self._raise_for_missing_project()
+        return self._project.profiler_store
+
+    def get_evaluation_parameters_store(self) -> EvaluationParameterStore:
+        self._raise_for_missing_project()
+        return self._project.evaluation_parameter_store
+
+    def _raise_for_missing_project(self) -> None:
+        """Raise a useful error if callers attempt to access store before a project is initialized.
+
+        Raises:
+            RuntimeError
+        """
         if not self._project:
             raise RuntimeError(
-                "DataContext must be initialized before using `get_expectations_store`."
+                "This action requires an active DataContext. "
+                + "Please call `get_context()` first, then try your action again."
             )
-        return self._project.expectations_store
 
     def _build_context(  # noqa: PLR0913
         self,
@@ -481,4 +512,3 @@ def get_context(  # noqa: PLR0913
 
 
 set_context = project_manager.set_project
-get_store_from_global_context = project_manager.get_store

@@ -6,7 +6,7 @@ from great_expectations.data_context.data_context.cloud_data_context import (
 )
 from great_expectations.data_context.data_context.context_factory import (
     get_context,
-    get_store_from_global_context,
+    project_manager,
     set_context,
 )
 from great_expectations.data_context.data_context.ephemeral_data_context import (
