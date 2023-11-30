@@ -35,6 +35,7 @@ from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.analytics.events import DataContextInitializedEvent
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
@@ -133,6 +134,8 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
     send_usage_message,
     usage_statistics_enabled_method,
 )
+from great_expectations.analytics.client import init as init_analytics
+from great_expectations.analytics.client import submit as submit_event
 from great_expectations.checkpoint import Checkpoint
 
 SQLAlchemyError = sqlalchemy.SQLAlchemyError
@@ -338,6 +341,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._attach_fluent_config_datasources_and_build_data_connectors(
             self.fluent_config
         )
+        oss_id = self._get_oss_id()
+        init_analytics(
+            user_id=oss_id,
+            data_context_id=uuid.UUID(self._data_context_id),
+            oss_id=oss_id,
+        )
+        submit_event(event=DataContextInitializedEvent())
 
     def _init_config_provider(self) -> _ConfigurationProvider:
         config_provider = _ConfigurationProvider()
