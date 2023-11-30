@@ -1,14 +1,14 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
+from great_expectations.compatibility.pydantic import validator
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.core.validators import validate_eval_parameter_dict
 from great_expectations.expectations.expectation import (
     BatchExpectation,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -52,6 +52,10 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
         [expect_table_column_count_to_be_between](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between)
     """
 
+    value: Union[int, dict]
+
+    _value = validator("value", allow_reuse=True)(validate_eval_parameter_dict)
+
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation"],
@@ -73,42 +77,6 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
         "meta": None,
     }
     args_keys = ("value",)
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates the configuration for the Expectation.
-
-        For this expectation, `configuraton.kwargs` may contain `min_value` and `max_value` as a number.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided,
-                it will be pulled from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required
-                by the Expectation.
-        """
-        # Setting up a configuration
-        super().validate_configuration(configuration)
-
-        # Ensuring that a proper value has been provided
-        try:
-            assert (
-                "value" in configuration.kwargs
-            ), "An expected column count must be provided"
-            assert isinstance(
-                configuration.kwargs["value"], (int, dict)
-            ), "Provided threshold must be an integer"
-            if isinstance(configuration.kwargs["value"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["value"]
-                ), 'Evaluation Parameter dict for value kwarg must have "$PARAMETER" key.'
-
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     def _prescriptive_template(
