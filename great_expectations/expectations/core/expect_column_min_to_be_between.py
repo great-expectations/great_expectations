@@ -354,6 +354,3 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,
         )
-
-
-ExpectColumnMinToBeBetween.update_forward_refs()
