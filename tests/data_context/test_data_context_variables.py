@@ -50,7 +50,6 @@ def data_context_config_dict() -> dict:
         "validations_store_name": "validations_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
-        "profiler_store_name": "profiler_store",
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "stores": {
             "expectations_store": {
@@ -168,11 +167,11 @@ def cloud_data_context(
 
 def stores() -> dict:
     return {
-        "profiler_store": {
-            "class_name": "ProfilerStore",
+        "checkpoint_store": {
+            "class_name": "CheckpointStore",
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "profilers/",
+                "base_directory": "checkpoints/",
             },
         },
     }
@@ -252,10 +251,6 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
         pytest.param(
             DataContextVariableSchema.CHECKPOINT_STORE_NAME,
             id="checkpoint_store getter",
-        ),
-        pytest.param(
-            DataContextVariableSchema.PROFILER_STORE_NAME,
-            id="profiler_store getter",
         ),
         pytest.param(DataContextVariableSchema.STORES, id="stores getter"),
         pytest.param(
