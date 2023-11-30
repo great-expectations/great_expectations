@@ -15,6 +15,8 @@ from great_expectations.core.expectation_suite import (
 )
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.store import ExpectationsStore
+from great_expectations.data_context.types.resource_identifiers import ExpectationSuiteIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.core import (
@@ -238,6 +240,33 @@ class TestCRUDMethods:
         with pytest.raises(KeyError, match="No matching expectation was found."):
             suite.delete(expectation=expectation)
 
+
+    @pytest.mark.unit
+    def test_save_success(self):
+        name = "test-suite"
+        expectations_store = MagicMock(spec=ExpectationsStore)
+        suite = ExpectationSuite(
+            expectation_suite_name=name,
+            _store=expectations_store
+        )
+
+        suite.save()
+
+        expected_key = ExpectationSuiteIdentifier(
+            expectation_suite_name=name
+        )
+        expectations_store.add.assert_called_once_with(
+            key=expected_key,
+            value=suite
+        )
+
+    @pytest.mark.unit
+    def test_save_fails_if_suite_doesnt_have_store(self):
+        suite = ExpectationSuite(
+            expectation_suite_name="test-suite",
+        )
+        with pytest.raises(RuntimeError, match= "ExpectationSuite must be added to a DataContext before it can be persisted"):
+            suite.save()
 
 class TestAddCitation:
     @pytest.mark.unit

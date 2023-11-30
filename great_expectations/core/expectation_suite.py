@@ -46,6 +46,7 @@ from great_expectations.core.util import (
     nested_update,
     parse_string_to_datetime,
 )
+from great_expectations.data_context.types.resource_identifiers import ExpectationSuiteIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import (
@@ -58,7 +59,7 @@ from great_expectations.util import deep_filter_properties_iterable
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
     from great_expectations.data_context import AbstractDataContext
-    from great_expectations.data_context.store import Store
+    from great_expectations.data_context.store import Store, ExpectationsStore
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
@@ -102,7 +103,7 @@ class ExpectationSuite(SerializableDictDot):
         execution_engine_type: Optional[Type[ExecutionEngine]] = None,
         meta: Optional[dict] = None,
         ge_cloud_id: Optional[str] = None,
-        _store: Optional[Store] = None,
+        _store: Optional[ExpectationsStore] = None,
     ) -> None:
         self.expectation_suite_name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
@@ -154,6 +155,9 @@ class ExpectationSuite(SerializableDictDot):
         else:
             pass  # suite is a set-like collection
 
+        # persist changes if suite has a store, and rollback on error
+        if self._store:
+
         return expectation
 
     def delete(self, expectation: Expectation) -> Expectation:
@@ -171,6 +175,36 @@ class ExpectationSuite(SerializableDictDot):
             raise KeyError("No matching expectation was found.")
         self.expectation_configurations = updated_expectation_configs
         return expectation
+
+    def save(self) -> None:
+        """Save this ExpectationSuite.
+
+        Raises:
+            RuntimeError: the Suite has not been added to a DataContext.
+        """
+        self._save()
+
+    def _save_with_rollback(self, rollback_fn: Callable[[], None]) -> None:
+        """Save current state, and invoke rollback_fn on error."""
+        try:
+            self._save()
+        except Exception as exc:
+            # rollback changes
+            rollback_fn()
+            raise exc
+
+    def _save(self) -> None:
+
+        if self._store is None:
+            # todo: improve this error message
+            raise RuntimeError("ExpectationSuite must be added to a DataContext " +
+                               "before it can be persisted using `DataContext.add_expectation_suite`.")
+        key = ExpectationSuiteIdentifier(
+            expectation_suite_name=self.expectation_suite_name
+        )
+        self._store.add(
+            key=key, value=self
+        )
 
     def add_citation(  # noqa: PLR0913
         self,
