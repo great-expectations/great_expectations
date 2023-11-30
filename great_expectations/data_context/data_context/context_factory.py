@@ -80,6 +80,10 @@ class ProjectManager:
         self._project = project
 
     def get_store(self, model: Any) -> Store:
+        if not self._project:
+            raise RuntimeError(
+                "DataContext must be initialized before using `get_store`."
+            )
         # todo: do something more elegant here
         from great_expectations.core import ExpectationSuite
 
