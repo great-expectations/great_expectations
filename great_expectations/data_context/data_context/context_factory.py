@@ -132,7 +132,7 @@ def get_context(  # noqa: PLR0913
 
     - Path defined in a GX_HOME environment variable.
     - The current directory.
-    - Parent directories of the current directory (e.g. in case you invoke the CLI in a sub folder of your Great Expectations directory).
+    - Parent directories of the current directory.
 
     Relevant parameters
 
