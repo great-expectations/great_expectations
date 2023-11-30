@@ -79,6 +79,7 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
     """
 
     value_pairs_set: List[Tuple[Any, Any]]
+    ignore_row_if: str = "both_values_are_missing"
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
