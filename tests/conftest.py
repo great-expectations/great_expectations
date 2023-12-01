@@ -1525,7 +1525,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
         config_version=1,
-        slack_webhook="https://hooks.slack.com/foo/bar",
         action_list=[
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
