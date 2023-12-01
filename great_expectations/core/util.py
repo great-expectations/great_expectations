@@ -830,20 +830,21 @@ def get_or_create_spark_application(
         current_spark_config=spark_session.sparkContext.getConf().getAll(),
         desired_spark_config=spark_config,
     ):
-        if not sc_stopped:
-            try:
-                # We need to stop the old/default Spark session in order to reconfigure it with the desired options.
-                logger.info("Stopping existing spark context to reconfigure.")
-                spark_session.sparkContext.stop()
-            except AttributeError:
-                logger.error(
-                    "Unable to load spark context; install optional spark dependency for support."
-                )
-        spark_session = get_or_create_spark_session(spark_config=spark_config)
-        if spark_session is None:
-            raise ValueError("SparkContext could not be started.")
-        # noinspection PyProtectedMember,PyUnresolvedReferences
-        sc_stopped = spark_session.sparkContext._jsc.sc().isStopped()
+        pass
+        # if not sc_stopped:
+        #     try:
+        #         # We need to stop the old/default Spark session in order to reconfigure it with the desired options.
+        #         logger.info("Stopping existing spark context to reconfigure.")
+        #         spark_session.sparkContext.stop()
+        #     except AttributeError:
+        #         logger.error(
+        #             "Unable to load spark context; install optional spark dependency for support."
+        #         )
+        # spark_session = get_or_create_spark_session(spark_config=spark_config)
+        # if spark_session is None:
+        #     raise ValueError("SparkContext could not be started.")
+        # # noinspection PyProtectedMember,PyUnresolvedReferences
+        # sc_stopped = spark_session.sparkContext._jsc.sc().isStopped()
 
     if sc_stopped:
         raise ValueError("SparkContext stopped unexpectedly.")
@@ -902,7 +903,10 @@ def get_or_create_spark_session(
         #     if k != "spark.app.name":
         #         builder.config(k, v)
 
-        spark_session = builder.getOrCreate()
+        if not in_databricks():
+            spark_session = builder.getOrCreate()
+        else:
+            spark_session = spark
         # noinspection PyProtectedMember,PyUnresolvedReferences
         # if spark_session.sparkContext._jsc.sc().isStopped():
         #     raise ValueError("SparkContext stopped unexpectedly.")
