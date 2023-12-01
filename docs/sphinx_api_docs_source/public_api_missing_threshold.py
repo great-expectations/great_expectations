@@ -58,7 +58,6 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/expectations/core/expect_column_values_to_match_regex.py Name: validate_configuration",
     "File: great_expectations/expectations/core/expect_column_values_to_match_regex_list.py Name: validate_configuration",
     "File: great_expectations/expectations/core/expect_column_values_to_match_strftime_format.py Name: validate_configuration",
-    "File: great_expectations/expectations/core/expect_column_values_to_not_match_like_pattern.py Name: validate_configuration",
     "File: great_expectations/expectations/core/expect_column_values_to_not_match_like_pattern_list.py Name: validate_configuration",
     "File: great_expectations/expectations/core/expect_column_values_to_not_match_regex.py Name: validate_configuration",
     "File: great_expectations/expectations/core/expect_column_values_to_not_match_regex_list.py Name: validate_configuration",
