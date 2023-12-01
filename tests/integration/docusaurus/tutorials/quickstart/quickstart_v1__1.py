@@ -4,15 +4,16 @@ notebook environment. It is useful to explore and understand how Great Expectati
 works, using your own data.
 
 Note:
-- Do not follow this workflow when you are building a durable workflow because it uses 
-ephemeral assets. 
-- Do not use this workflow for embedding in a pipeline or CI system, because it uses an 
+- Do not follow this workflow when you are building a durable workflow because it uses
+ephemeral assets.
+- Do not use this workflow for embedding in a pipeline or CI system, because it uses an
 iterative process for trying and refining expectations.
 """
 
 # <snippet name="tutorials/quickstart/quickstart.py import_gx">
 import great_expectations as gx
 import great_expectations.expectations as gxe
+
 # </snippet>
 
 # Set up
@@ -46,9 +47,7 @@ expectation = gxe.ExpectColumnValuesToNotBeNull(
     "pu_datetime",
     notes="These are filtered out upstream, because the entire record is garbage if there is no pu_datetime",
 )
-batch.validate(
-    expectation
-)
+batch.validate(expectation)
 # Review the results of the expectation! Change parameters as needed.
 expectation.mostly = 0.8
 batch.validate(expectation)

@@ -34,18 +34,20 @@ suite.add(
 
 suite.add(
     gxe.ExpectColumnValuesToBeInSet(column="ratecodeid", value_set=[1]),
-    row_conditions=[ColumnValueSplitter("ratecodeid", value=1)]
+    row_conditions=[ColumnValueSplitter("ratecodeid", value=1)],
 )
 suite.add(
     gxe.ExpectColumnValuesToBeInSet(
-        column="ratecodeid", value_set=[12],
-        row_conditions=[ColumnValueSplitter("ratecodeid", value=12)]
+        column="ratecodeid",
+        value_set=[12],
+        row_conditions=[ColumnValueSplitter("ratecodeid", value=12)],
     ),
 )
 
 
-validation = context.validations.add(name="taxi", batch_config=daily, expectation_suite=suite)
-
+validation = context.validations.add(
+    name="taxi", batch_config=daily, expectation_suite=suite
+)
 
 
 # Add Conditional Expectations
