@@ -141,7 +141,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         [expect_column_median_to_be_between](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
     """
 
-    quantile_ranges: QuantileRange
+    quantile_ranges: Optional[QuantileRange] = None
     allow_relative_error: Union[bool, str] = False
 
     # This dictionary contains metadata for display in the public gallery
