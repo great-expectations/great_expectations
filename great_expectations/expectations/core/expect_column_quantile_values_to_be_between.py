@@ -60,7 +60,7 @@ if TYPE_CHECKING:
 
 class QuantileRange(TypedDict):
     quantiles: List[float]
-    value_ranges: List[List[Number]]
+    value_ranges: List[List[Optional[Number]]]
 
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
