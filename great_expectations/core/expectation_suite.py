@@ -167,14 +167,17 @@ class ExpectationSuite(SerializableDictDot):
         Raises:
             ValueError: Expectation not found in suite.
         """
-        updated_expectation_configs = [
+        remaining_expectation_configs = [
             exp_config
             for exp_config in self.expectation_configurations
             if exp_config != expectation.configuration
         ]
-        if len(updated_expectation_configs) != len(self.expectation_configurations) - 1:
+        if (
+            len(remaining_expectation_configs)
+            != len(self.expectation_configurations) - 1
+        ):
             raise KeyError("No matching expectation was found.")
-        self.expectation_configurations = updated_expectation_configs
+        self.expectation_configurations = remaining_expectation_configs
 
         try:
             self.save()
