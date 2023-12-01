@@ -100,7 +100,7 @@ The following table lists the available Data Asset metrics.
 
 ## Add an Expectation to a Data Asset column
 
-When you create an Expectation after fetching metrics for a Data Asset, the column names and some values are autopopulated for you and this can simplify the creation of new Expectations. Data Asset Metrics can also help you determine what Expectations might be useful and how they should be configured. When you create new Expectations after fetching Data Asset Metrics, you create the Expectation Suite and add Expectations to it at the same time. 
+When you create an Expectation after fetching metrics for a Data Asset, the column names and some values are autopopulated for you and this can simplify the creation of new Expectations. Data Asset Metrics can also help you determine what Expectations might be useful and how they should be configured. When you create new Expectations after fetching Data Asset Metrics, you can add them to an existing Expectation Suite, or you can create a new Expectation Suite and add the Expectations to it. 
 
 1. In GX Cloud, click **Data Assets** and then select a Data Asset in the **Data Assets** list.
 
