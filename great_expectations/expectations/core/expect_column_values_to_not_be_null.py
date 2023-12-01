@@ -82,9 +82,6 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         [expect_column_values_to_be_null](https://greatexpectations.io/expectations/expect_column_values_to_be_null)
     """
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
-
     library_metadata: ClassVar[dict] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
