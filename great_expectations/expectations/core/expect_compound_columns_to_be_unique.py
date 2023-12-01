@@ -1,11 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime
 from typing import TYPE_CHECKING, Optional, Union
 
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
-)
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
     render_evaluation_parameter_string,
@@ -63,8 +59,6 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
 
     column_list: Union[tuple, list]
     ignore_row_if: str = "all_value_are_missing"
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
