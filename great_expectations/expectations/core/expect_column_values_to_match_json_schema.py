@@ -70,6 +70,8 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
         [The JSON-schema docs](https://json-schema.org)
     """
 
+    json_schema: str
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
