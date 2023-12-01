@@ -907,9 +907,9 @@ def get_or_create_spark_session(
             spark_session = builder.getOrCreate()
         else:
             # TODO: try this
-            # spark_session = builder.getOrCreate()
-            from databricks.sdk.runtime import spark as dbx_spark
-            spark_session = dbx_spark
+            spark_session = builder.getOrCreate()
+            # from databricks.sdk.runtime import spark as dbx_spark
+            # spark_session = dbx_spark
         # noinspection PyProtectedMember,PyUnresolvedReferences
         # if spark_session.sparkContext._jsc.sc().isStopped():
         #     raise ValueError("SparkContext stopped unexpectedly.")
