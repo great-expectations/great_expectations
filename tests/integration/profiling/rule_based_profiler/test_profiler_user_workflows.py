@@ -992,7 +992,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
     }
 
-    with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
+    with pytest.raises(gx_exceptions.MetricResolutionError) as e:
         # noinspection PyUnusedLocal
         result = validator.expect_column_values_to_be_between(
             column=column_name,
@@ -1172,7 +1172,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
         }
 
-        with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
+        with pytest.raises(gx_exceptions.MetricResolutionError) as e:
             # noinspection PyUnusedLocal
             result = validator.expect_column_values_to_be_between(
                 column=column_name,
@@ -1423,7 +1423,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
         }
 
-        with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
+        with pytest.raises(gx_exceptions.MetricResolutionError) as e:
             # noinspection PyUnusedLocal
             result = validator.expect_column_values_to_be_between(
                 column=column_name,

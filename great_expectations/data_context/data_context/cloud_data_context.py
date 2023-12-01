@@ -63,7 +63,6 @@ from great_expectations.data_context.types.resource_identifiers import GXCloudId
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
-from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -843,13 +842,6 @@ class CloudDataContext(SerializableDataContext):
     @override
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         return self.checkpoint_store.list_checkpoints(ge_cloud_mode=True)
-
-    @override
-    def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
-        return RuleBasedProfiler.list_profilers(
-            profiler_store=self.profiler_store,
-            ge_cloud_mode=True,
-        )
 
     @override
     def _init_site_builder_for_data_docs_site_creation(

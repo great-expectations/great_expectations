@@ -1,17 +1,17 @@
+from __future__ import annotations
+
 import logging
-from typing import TYPE_CHECKING, Dict, Optional
+from datetime import datetime
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import altair as alt
 import numpy as np
 import pandas as pd
 from scipy import stats
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.util import (
     is_valid_categorical_partition_object,
     is_valid_partition_object,
@@ -49,12 +49,17 @@ from great_expectations.validator.metrics_calculator import (
     MetricsCalculator,
     _MetricsDict,
 )
-from great_expectations.validator.validator import (
-    ValidationDependencies,
-)
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer_configuration import AddParamArgs
+    from great_expectations.validator.validator import (
+        ValidationDependencies,
+    )
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -155,6 +160,9 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         parsers to crash when encountered. The python None token will be serialized to null in json.
     """
 
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
@@ -191,28 +199,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         "partition_object",
         "threshold",
     )
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates configuration for the Expectation.
-
-        For `expect_column_kl_divergence_to_be_less_than`, `configuraton.kwargs` may contain `min_value` and
-        `max_value` whose value is either a number or date.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: The configuration to be validated.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the
-                Expectation.
-        """
-        super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
 
     def get_validation_dependencies(
         self,

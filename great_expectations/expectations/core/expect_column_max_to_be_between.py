@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional
+from datetime import datetime
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
@@ -39,7 +39,9 @@ try:
 except ImportError:
     pass
 
-
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
+)
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.render.renderer.renderer import renderer
 
@@ -99,6 +101,9 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
         [expect_column_min_to_be_between](https://greatexpectations.io/expectations/expect_column_min_to_be_between)
     """
 
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
@@ -116,7 +121,6 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
         "strict_min",
         "max_value",
         "strict_max",
-        "parse_strings_as_datetimes",
         "auto",
         "profiler_config",
     )
@@ -197,31 +201,10 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
-        "parse_strings_as_datetimes": False,
         "auto": False,
         "profiler_config": default_profiler_config,
     }
     args_keys = ("column", "min_value", "max_value", "strict_min", "strict_max")
-
-    @override
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration for the Expectation.
-
-        For this expectation, `configuraton.kwargs` may contain `min_value` and `max_value` whose value is either
-        a number or date.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-
-        Raises:
-            InvalidExpectationConfigurationError: if the config is not validated successfully
-        """
-        super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     @override
@@ -233,7 +216,6 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
             ("column", RendererValueType.STRING),
             ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
             ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
-            ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
             ("strict_min", RendererValueType.BOOLEAN),
             ("strict_max", RendererValueType.BOOLEAN),
         )
@@ -266,9 +248,6 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
             else:
                 template_str = f"maximum value must be {at_least_str} $min_value."
 
-        if params.parse_strings_as_datetimes:
-            template_str += " Values should be parsed as datetimes."
-
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
@@ -298,7 +277,6 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
                 "column",
                 "min_value",
                 "max_value",
-                "parse_strings_as_datetimes",
                 "row_condition",
                 "condition_parser",
                 "strict_min",
@@ -319,9 +297,6 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
                 template_str = f"maximum value must be {at_least_str} $min_value."
             else:
                 template_str = ""
-
-        if params.get("parse_strings_as_datetimes"):
-            template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
             template_str = f"$column {template_str}"

@@ -74,7 +74,6 @@ def construct_data_context_config():
             "validation_operators": validation_operators,
             "stores": stores,
             "data_docs_sites": data_docs_sites,
-            "notebooks": None,
             "config_variables_file_path": None,
             "anonymous_usage_statistics": {
                 "data_context_id": data_context_id,

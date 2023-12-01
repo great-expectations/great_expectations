@@ -131,11 +131,10 @@ from great_expectations.self_check.util import (
     generate_dataset_name_from_expectation_name,
     generate_expectation_tests,
 )
-from great_expectations.util import camel_to_snake, is_parseable_date
+from great_expectations.util import camel_to_snake
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import ValidationDependencies, Validator
-from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
@@ -338,6 +337,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     id: Union[str, None] = None
     meta: Union[dict, None] = None
+    notes: Union[str, None] = None
     result_format: Union[ResultFormat, ResultFormatDict] = ResultFormat.BASIC
 
     version: ClassVar[str] = ge_version
@@ -2407,44 +2407,7 @@ class BatchExpectation(Expectation, ABC):
 
         return validation_dependencies
 
-    @staticmethod
-    def validate_metric_value_between_configuration(
-        configuration: Optional[ExpectationConfiguration] = None,
-    ) -> bool:
-        if not configuration:
-            return True
-
-        # Validating that Minimum and Maximum values are of the proper format and type
-        min_val = configuration.kwargs.get("min_value")
-        max_val = configuration.kwargs.get("max_value")
-
-        try:
-            assert (
-                min_val is None
-                or is_parseable_date(min_val)
-                or isinstance(min_val, (float, int, dict, datetime.datetime))
-            ), "Provided min threshold must be a datetime (for datetime columns) or number"
-            if isinstance(min_val, dict):
-                assert (
-                    "$PARAMETER" in min_val
-                ), 'Evaluation Parameter dict for min_value kwarg must have "$PARAMETER" key'
-
-            assert (
-                max_val is None
-                or is_parseable_date(max_val)
-                or isinstance(max_val, (float, int, dict, datetime.datetime))
-            ), "Provided max threshold must be a datetime (for datetime columns) or number"
-            if isinstance(max_val, dict):
-                assert (
-                    "$PARAMETER" in max_val
-                ), 'Evaluation Parameter dict for max_value kwarg must have "$PARAMETER" key'
-
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-
-        return True
-
-    def _validate_metric_value_between(  # noqa: C901, PLR0912, PLR0913
+    def _validate_metric_value_between(  # noqa: PLR0912, PLR0913
         self,
         metric_name,
         configuration: ExpectationConfiguration,
@@ -2470,25 +2433,6 @@ class BatchExpectation(Expectation, ABC):
         strict_max: Optional[bool] = self.get_success_kwargs(
             configuration=configuration
         ).get("strict_max")
-
-        parse_strings_as_datetimes: Optional[bool] = self.get_success_kwargs(
-            configuration=configuration
-        ).get("parse_strings_as_datetimes")
-
-        if parse_strings_as_datetimes:
-            warn_deprecated_parse_strings_as_datetimes()
-
-            if min_value is not None:
-                try:
-                    min_value = parse(min_value)
-                except TypeError:
-                    pass
-
-            if max_value is not None:
-                try:
-                    max_value = parse(max_value)
-                except TypeError:
-                    pass
 
         if not isinstance(metric_value, datetime.datetime) and pd.isnull(metric_value):
             return {"success": False, "result": {"observed_value": None}}
