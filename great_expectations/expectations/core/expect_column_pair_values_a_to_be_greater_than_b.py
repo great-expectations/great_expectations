@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Literal, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -36,7 +36,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         or_equal (boolean or None): If True, then values can be equal, not strictly greater
 
     Keyword Args:
-        ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither
+        ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither"
 
     Other Parameters:
         result_format (str or None): \
@@ -58,7 +58,9 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     """
 
     or_equal: Union[bool, None] = None
-    ignore_row_if: str = "both_values_are_missing"
+    ignore_row_if: Literal[
+        "both_values_are_missing", "either_value_is_missing", "neither"
+    ] = "both_values_are_missing"
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

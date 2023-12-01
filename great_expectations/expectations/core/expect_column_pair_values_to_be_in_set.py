@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple
+from typing import Any, List, Literal, Tuple
 
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
@@ -79,7 +79,9 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
     """
 
     value_pairs_set: List[Tuple[Any, Any]]
-    ignore_row_if: str = "both_values_are_missing"
+    ignore_row_if: Literal[
+        "both_values_are_missing", "either_value_is_missing", "neither"
+    ] = "both_values_are_missing"
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
