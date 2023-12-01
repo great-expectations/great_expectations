@@ -72,7 +72,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     Args:
         column (str): \
             The column name.
-        type_list (list[str]): \
+        type_list (list[str] or None): \
             A list of strings representing the data type that each column should have as entries. Valid types are \
             defined by the current backend implementation and are dynamically loaded. For example, valid types for \
             PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
