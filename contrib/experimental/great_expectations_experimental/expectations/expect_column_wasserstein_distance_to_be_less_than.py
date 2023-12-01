@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+from datetime import datetime
 from typing import Dict, Union
 
 from scipy import stats
