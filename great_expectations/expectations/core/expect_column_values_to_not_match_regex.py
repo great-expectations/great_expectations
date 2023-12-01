@@ -1,12 +1,12 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core.evaluation_parameters import EvaluationParameterDict
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import (
@@ -95,6 +95,8 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
     """
 
+    regex: Union[str, EvaluationParameterDict]
+
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
@@ -172,38 +174,6 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         "column",
         "regex",
     )
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates the configuration of an Expectation.
-
-        For `expect_column_values_to_not_match_regex` it is required that:
-            - 'regex' kwarg is of type str or dict
-            - if dict, assert a key "$PARAMETER" is present
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                                  from the configuration attribute of the Expectation instance.
-
-        Raises:
-            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
-                                  Expectation."
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert "regex" in configuration.kwargs, "regex is required"
-            assert isinstance(
-                configuration.kwargs["regex"], (str, dict)
-            ), "regex must be a string or dict"
-            if isinstance(configuration.kwargs["regex"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["regex"]
-                ), 'Evaluation Parameter dict for regex kwarg must have "$PARAMETER" key.'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     def _prescriptive_template(
