@@ -894,13 +894,13 @@ def get_or_create_spark_session(
 
         builder = pyspark.SparkSession.builder
 
-        app_name: Optional[str] = spark_config.get("spark.app.name")
-        if app_name:
-            builder.appName(app_name)
+        # app_name: Optional[str] = spark_config.get("spark.app.name")
+        # if app_name:
+        #     builder.appName(app_name)
 
-        for k, v in spark_config.items():
-            if k != "spark.app.name":
-                builder.config(k, v)
+        # for k, v in spark_config.items():
+        #     if k != "spark.app.name":
+        #         builder.config(k, v)
 
         spark_session = builder.getOrCreate()
         # noinspection PyProtectedMember,PyUnresolvedReferences
