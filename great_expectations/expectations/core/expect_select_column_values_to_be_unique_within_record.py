@@ -73,9 +73,6 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
-
     library_metadata = {
         "maturity": "production",
         "tags": [
