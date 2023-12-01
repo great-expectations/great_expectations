@@ -227,10 +227,6 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
             ],
             "default": "BASIC",
         },
-        "include_config": {
-            "oneOf": [{"type": "null"}, {"type": "boolean"}],
-            "default": "true",
-        },
         "catch_exceptions": {
             "oneOf": [{"type": "null"}, {"type": "boolean"}],
             "default": "false",
