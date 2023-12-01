@@ -152,9 +152,8 @@ def in_databricks() -> bool:
     Returns:
         bool
     """
-    print("testing whether in databricsk")
     return True
-    return "DATABRICKS_RUNTIME_VERSION" in os.environ  # noqa: TID251
+#    return "DATABRICKS_RUNTIME_VERSION" in os.environ  # noqa: TID251
 
 
 def determine_progress_bar_method_by_environment() -> Callable:
@@ -821,6 +820,7 @@ def get_or_create_spark_application(
         raise ValueError("SparkContext could not be started.")
 
     sc_stopped = False
+    # MOVE INTO TESTING FRAMEWORK
     # noinspection PyUnresolvedReferences
     # if in_databricks():
     #     sc_stopped: bool = spark.is_stopped
@@ -877,39 +877,23 @@ def get_or_create_spark_session(
         else:
             spark_config = copy.deepcopy(spark_config)
 
-        # if in_databricks():
-        #     print("in databricks!")
-        #     spark_session = pyspark.SparkSession.getActiveSession()
-        #     if not spark_session:
-        #         raise ValueError("SparkSession not available")
-        #     if spark_session.sparkContext.isStopped:
-        #         raise ValueError("SparkContext not available")
-        #     app_name: Optional[str] = spark_config.pop("spark.app.name", None)
-        #     if app_name:
-        #         print("skipping app name")
-
-        #     # TODO: note that this can raise
-        #     for k, v in spark_config.items():
-        #         spark_session.conf.set(k, v)
-        # else:
-
         builder = pyspark.SparkSession.builder
 
-        # app_name: Optional[str] = spark_config.get("spark.app.name")
-        # if app_name:
-        #     builder.appName(app_name)
+        app_name: Optional[str] = spark_config.get("spark.app.name")
 
-        # for k, v in spark_config.items():
-        #     if k != "spark.app.name":
-        #         builder.config(k, v)
+        if app_name:
+            if in_databricks():
+                # warn
+                pass
+            else:
+                builder.appName(app_name)
 
-        if not in_databricks():
-            spark_session = builder.getOrCreate()
-        else:
-            # TODO: try this
-            spark_session = builder.getOrCreate()
-            # from databricks.sdk.runtime import spark as dbx_spark
-            # spark_session = dbx_spark
+        # user could get in trouble here if they try to set config options that are not allowed in their runtime
+        for k, v in spark_config.items():
+            if k != "spark.app.name":
+                builder.config(k, v)
+
+        spark_session = builder.getOrCreate()
         # noinspection PyProtectedMember,PyUnresolvedReferences
         # if spark_session.sparkContext._jsc.sc().isStopped():
         #     raise ValueError("SparkContext stopped unexpectedly.")
