@@ -107,7 +107,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         [expect_column_values_to_be_of_type](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type)
     """
 
-    type_list: Union[List[str], EvaluationParameterDict]
+    type_list: Union[List[str], EvaluationParameterDict, None]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

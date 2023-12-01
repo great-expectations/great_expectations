@@ -83,9 +83,9 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
     Args:
         column (str): \
             The column name.
-        partition_object (dict): \
+        partition_object (dict or None): \
             The expected partition object (see [partition_object](https://docs.greatexpectations.io/docs/reference/expectations/distributional_expectations/#partition-objects)).
-        threshold (float): \
+        threshold (float or None): \
             The maximum KL divergence to for which to return success=True. If KL divergence is larger than the \
             provided threshold, the test will return success=False.
 
@@ -161,8 +161,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         parsers to crash when encountered. The python None token will be serialized to null in json.
     """
 
-    partition_object: dict
-    threshold: float
+    partition_object: Union[dict, None]
+    threshold: Union[float, None]
     internal_weight_holdout: Union[float, None] = Field(None, ge=0, le=1)
     tail_weight_holdout: Union[float, None] = Field(None, ge=0, le=1)
     bucketize_data: bool = False

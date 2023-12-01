@@ -78,7 +78,7 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
     """
 
     regex_list: Union[List[str], EvaluationParameterDict]
-    match_on: Literal["any", "all"]
+    match_on: Literal["any", "all"] = "any"
 
     library_metadata = {
         "maturity": "production",

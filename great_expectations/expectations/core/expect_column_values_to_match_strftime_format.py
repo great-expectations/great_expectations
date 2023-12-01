@@ -1,10 +1,12 @@
+from __future__ import annotations
+
+from datetime import datetime
 from typing import TYPE_CHECKING, List, Optional, Union
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+from great_expectations.compatibility import pydantic
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.core.evaluation_parameters import EvaluationParameterDict
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -34,6 +36,10 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -74,6 +80,24 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
     """
 
     strftime_format: Union[str, EvaluationParameterDict]
+
+    @classmethod
+    @pydantic.validator("strftime_format", pre=True)
+    def validate_strftime_format(
+        cls, strftime_format: str | EvaluationParameterDict
+    ) -> str | EvaluationParameterDict:
+        if isinstance(strftime_format, str):
+            try:
+                datetime.strptime(  # noqa: DTZ007
+                    datetime.strftime(datetime.now(), strftime_format),  # noqa: DTZ005
+                    strftime_format,
+                )
+            except ValueError as e:
+                raise ValueError(
+                    f"Unable to use provided strftime_format. {e!s}"
+                ) from e
+
+        return strftime_format
 
     library_metadata = {
         "maturity": "production",
