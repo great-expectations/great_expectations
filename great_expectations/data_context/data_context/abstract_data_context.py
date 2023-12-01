@@ -1513,11 +1513,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = ...,
         validations: list[CheckpointValidationConfig] | list[dict] | None = ...,
         profilers: list[dict] | None = ...,
-        # the following four arguments are used by SimpleCheckpoint
-        site_names: str | list[str] | None = ...,
-        slack_webhook: str | None = ...,
-        notify_on: str | None = ...,
-        notify_with: str | list[str] | None = ...,
         ge_cloud_id: str | None = ...,
         expectation_suite_ge_cloud_id: str | None = ...,
         default_validation_id: str | None = ...,
@@ -1549,10 +1544,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: None = ...,
         validations: None = ...,
         profilers: None = ...,
-        site_names: None = ...,
-        slack_webhook: None = ...,
-        notify_on: None = ...,
-        notify_with: None = ...,
         ge_cloud_id: None = ...,
         expectation_suite_ge_cloud_id: None = ...,
         default_validation_id: None = ...,
@@ -1603,11 +1594,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
         profilers: list[dict] | None = None,
-        # the following four arguments are used by SimpleCheckpoint
-        site_names: str | list[str] | None = None,
-        slack_webhook: str | None = None,
-        notify_on: str | None = None,
-        notify_with: str | list[str] | None = None,
         ge_cloud_id: str | None = None,
         expectation_suite_ge_cloud_id: str | None = None,
         default_validation_id: str | None = None,
@@ -1635,10 +1621,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
             profilers: The profilers to use in generating this checkpoint.
-            site_names: The site names to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
-            slack_webhook: The slack webhook to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
-            notify_on: The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
-            notify_with: The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             ge_cloud_id: The GE Cloud ID to use in generating this checkpoint.
             expectation_suite_ge_cloud_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             default_validation_id: The default validation ID to use in generating this checkpoint.
@@ -1673,10 +1655,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            site_names=site_names,
-            slack_webhook=slack_webhook,
-            notify_on=notify_on,
-            notify_with=notify_with,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
             validator=validator,
@@ -1735,10 +1713,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
         profilers: list[dict] | None = ...,
-        site_names: str | list[str] | None = ...,
-        slack_webhook: str | None = ...,
-        notify_on: str | None = ...,
-        notify_with: str | list[str] | None = ...,
         expectation_suite_id: str | None = ...,
         default_validation_id: str | None = ...,
         validator: Validator | None = ...,
@@ -1767,10 +1741,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: None = ...,
         validations: None = ...,
         profilers: None = ...,
-        site_names: None = ...,
-        slack_webhook: None = ...,
-        notify_on: None = ...,
-        notify_with: None = ...,
         expectation_suite_id: None = ...,
         default_validation_id: None = ...,
         validator: Validator | None = ...,
@@ -1805,11 +1775,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
         profilers: list[dict] | None = None,
-        # the following four arguments are used by SimpleCheckpoint
-        site_names: str | list[str] | None = None,
-        slack_webhook: str | None = None,
-        notify_on: str | None = None,
-        notify_with: str | list[str] | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
         validator: Validator | None = None,
@@ -1832,10 +1797,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
             profilers: The profilers to use in generating this checkpoint.
-            site_names: The site names to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
-            slack_webhook: The slack webhook to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
-            notify_on: The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
-            notify_with: The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             default_validation_id: The default validation ID to use in generating this checkpoint.
             validator: An existing validator used to generate a validations list.
@@ -1859,10 +1820,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            site_names=site_names,
-            slack_webhook=slack_webhook,
-            notify_on=notify_on,
-            notify_with=notify_with,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
             validator=validator,
@@ -1896,10 +1853,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationConfig] | list[dict] | None = None,
         profilers: list[dict] | None = None,
-        site_names: str | list[str] | None = None,
-        slack_webhook: str | None = None,
-        notify_on: str | None = None,
-        notify_with: str | list[str] | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
         validator: Validator | None = None,
@@ -1935,10 +1888,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 runtime_configuration=runtime_configuration,
                 validations=validations,
                 profilers=profilers,
-                site_names=site_names,
-                slack_webhook=slack_webhook,
-                notify_on=notify_on,
-                notify_with=notify_with,
                 ge_cloud_id=id,
                 expectation_suite_ge_cloud_id=expectation_suite_id,
                 default_validation_id=default_validation_id,

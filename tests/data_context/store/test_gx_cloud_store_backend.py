@@ -18,6 +18,7 @@ import pytest
 import responses
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
     GXCloudRESTResource,
@@ -216,8 +217,21 @@ def test_set(
 
     my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
-        class_name="SimpleCheckpoint",
         config_version=1,
+        action_list=[
+            ActionDict(
+                name="store_validation_result",
+                action=ActionDetails(class_name="StoreValidationResultAction"),
+            ),
+            ActionDict(
+                name="store_evaluation_params",
+                action=ActionDetails(class_name="StoreEvaluationParametersAction"),
+            ),
+            ActionDict(
+                name="update_data_docs",
+                action=ActionDetails(class_name="UpdateDataDocsAction"),
+            ),
+        ],
     )
     my_simple_checkpoint_config_serialized = (
         my_simple_checkpoint_config.get_schema_class()().dump(
@@ -243,7 +257,7 @@ def test_set(
                                 ("config_version", 1.0),
                                 ("template_name", None),
                                 ("module_name", "great_expectations.checkpoint"),
-                                ("class_name", "SimpleCheckpoint"),
+                                ("class_name", "Checkpoint"),
                                 ("run_name_template", None),
                                 ("expectation_suite_name", None),
                                 ("batch_request", {}),

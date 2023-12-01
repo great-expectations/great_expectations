@@ -108,7 +108,7 @@ class BaseCheckpoint(ConfigPeer):
     in the form of interface methods (which can be overwritten by subclasses) and their reference implementation.
 
     While not technically categorized as abstract class, "BaseCheckpoint" serves as parent class; it must never be
-    instantiated directly (only its descendants, such as "Checkpoint" and "SimpleCheckpoint", should be instantiated).
+    instantiated directly (only its descendants, such as "Checkpoint", should be instantiated).
     """
 
     DEFAULT_ACTION_LIST: ClassVar[
@@ -921,7 +921,7 @@ constructor arguments.
         config_version: Optional[Union[int, float]] = 1.0,
         template_name: Optional[str] = None,
         module_name: str = "great_expectations.checkpoint",
-        class_name: Literal["Checkpoint", "SimpleCheckpoint"] = "Checkpoint",
+        class_name: Literal["Checkpoint"] = "Checkpoint",
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
@@ -932,11 +932,6 @@ constructor arguments.
             Union[list[dict], list[CheckpointValidationConfig]]
         ] = None,
         profilers: Optional[list[dict]] = None,
-        # the following four arguments are used by SimpleCheckpoint
-        site_names: Optional[Union[str, list[str]]] = None,
-        slack_webhook: Optional[str] = None,
-        notify_on: Optional[str] = None,
-        notify_with: Optional[Union[str, list[str]]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
@@ -994,7 +989,7 @@ constructor arguments.
         )
         if not issubclass(klass, Checkpoint):
             raise gx_exceptions.InvalidCheckpointConfigError(
-                f'Custom class "{klass.__name__}" must extend either "Checkpoint" or "SimpleCheckpoint" (exclusively).'
+                f'Custom class "{klass.__name__}" must extend "Checkpoint" (exclusively).'
             )
 
         checkpoint_config = deep_filter_properties_iterable(

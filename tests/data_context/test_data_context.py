@@ -2698,12 +2698,25 @@ def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_
     )
 
     checkpoint_config = {
-        "class_name": "SimpleCheckpoint",
         "validations": [
             {"batch_request": batch_request, "expectation_suite_name": suite_name}
         ],
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {"class_name": "StoreValidationResultAction"},
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+            },
+            {
+                "name": "update_data_docs",
+                "action": {"class_name": "UpdateDataDocsAction"},
+            },
+        ],
     }
-    checkpoint = SimpleCheckpoint(
+    checkpoint = Checkpoint(
         f"_tmp_checkpoint_{suite_name}", context, **checkpoint_config
     )
     checkpoint_result = checkpoint.run()

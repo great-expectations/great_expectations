@@ -6,7 +6,6 @@ adding an exclude directive to docs/sphinx_api_docs_source/public_api_excludes.p
 
 ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/checkpoint/actions.py Name: _run",
-    "File: great_expectations/checkpoint/checkpoint.py Name: SimpleCheckpoint",
     "File: great_expectations/compatibility/not_imported.py Name: is_version_greater_or_equal",
     "File: great_expectations/core/batch.py Name: head",
     "File: great_expectations/core/batch_config.py Name: BatchConfig",

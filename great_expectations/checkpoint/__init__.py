@@ -14,7 +14,6 @@ from .actions import (
     ValidationAction,
 )
 from .checkpoint import Checkpoint
-from .configurator import SimpleCheckpointConfigurator
 
 for module_name, package_name in [
     (".actions", "great_expectations.checkpoint"),
