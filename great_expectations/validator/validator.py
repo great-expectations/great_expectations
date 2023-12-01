@@ -174,7 +174,6 @@ class Validator:
     """
 
     DEFAULT_RUNTIME_CONFIGURATION = {
-        "include_config": True,
         "catch_exceptions": False,
         "result_format": "BASIC",
     }

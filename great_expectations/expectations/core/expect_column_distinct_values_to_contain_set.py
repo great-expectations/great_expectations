@@ -82,7 +82,6 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
     default_kwarg_values = {
         "value_set": None,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
     }
     args_keys = (
