@@ -1,14 +1,15 @@
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -61,6 +62,8 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
         [expect_column_distinct_values_to_contain_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_contain_set)
     """
 
+    value_set: Union[list, set, EvaluationParameterDict, None]
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
@@ -89,40 +92,6 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
         "column",
         "value_set",
     )
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates configuration for the Expectation.
-
-        For `expect_column_distinct_values_to_equal_set` we require that the `configuraton.kwargs` contain
-        a `value_set` key that is either a `list`, `set`, or `dict`.
-
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: The configuration to be validated.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the
-                Expectation.
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert "value_set" in configuration.kwargs, "value_set is required"
-            assert isinstance(
-                configuration.kwargs["value_set"], (list, set, dict)
-            ), "value_set must be a list or a set"
-            if isinstance(configuration.kwargs["value_set"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["value_set"]
-                ), 'Evaluation Parameter dict for value_set kwarg must have "$PARAMETER" key'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     def _prescriptive_template(

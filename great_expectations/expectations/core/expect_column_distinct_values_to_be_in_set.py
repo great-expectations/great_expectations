@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import altair as alt
 import pandas as pd
@@ -7,11 +7,12 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import (
@@ -102,6 +103,8 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
         [expect_column_distinct_values_to_contain_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_contain_set)
         [expect_column_distinct_values_to_equal_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_equal_set)
     """
+
+    value_set: Union[list, set, EvaluationParameterDict, None]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -319,40 +322,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
         )
 
         return new_block
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates configuration for the Expectation.
-
-        For `expect_column_distinct_values_to_be_in_set` we require that the `configuraton.kwargs` contain
-        a `value_set` key that is either a `list`, `set`, or `dict`.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: The ExpectationConfiguration to be validated.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                Expectation.
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert "value_set" in configuration.kwargs, "value_set is required"
-            assert (
-                isinstance(configuration.kwargs["value_set"], (list, set, dict))
-                or configuration.kwargs["value_set"] is None
-            ), "value_set must be a list, set, or None"
-            if isinstance(configuration.kwargs["value_set"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["value_set"]
-                ), 'Evaluation Parameter dict for value_set kwarg must have "$PARAMETER" key'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     def _validate(
         self,
