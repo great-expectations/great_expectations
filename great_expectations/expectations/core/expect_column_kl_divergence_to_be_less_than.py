@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+from great_expectations.compatibility.pydantic import Field
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
 )
@@ -160,6 +161,11 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         parsers to crash when encountered. The python None token will be serialized to null in json.
     """
 
+    partition_object: dict
+    threshold: float
+    internal_weight_holdout: Union[float, None] = Field(None, ge=0, le=1)
+    tail_weight_holdout: Union[float, None] = Field(None, ge=0, le=1)
+    bucketize_data: bool = False
     min_value: Union[float, EvaluationParameterDict, datetime, None] = None
     max_value: Union[float, EvaluationParameterDict, datetime, None] = None
 

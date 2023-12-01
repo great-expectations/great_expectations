@@ -564,7 +564,7 @@
           "exact_match_out": false,
           "in": {
             "column": "s",
-            "type_list": null
+            "type_list": []
           },
           "out": {
             "success": true
