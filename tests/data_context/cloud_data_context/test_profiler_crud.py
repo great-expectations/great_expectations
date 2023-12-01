@@ -1,12 +1,7 @@
 from typing import Callable, Tuple
-from unittest import mock
 
 import pytest
 
-from great_expectations.data_context import get_context
-from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
-from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from tests.data_context.conftest import MockResponse
 
@@ -193,45 +188,3 @@ def mock_get_all_profilers_json(
         ]
     }
     return mock_json
-
-
-@pytest.mark.cloud
-def test_list_profilers(
-    empty_ge_cloud_data_context_config: DataContextConfig,
-    ge_cloud_config: GXCloudConfig,
-    profiler_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]],
-    mock_get_all_profilers_json: dict,
-) -> None:
-    project_path_name = "foo/bar/baz"
-
-    context = get_context(
-        project_config=empty_ge_cloud_data_context_config,
-        context_root_dir=project_path_name,
-        cloud_base_url=ge_cloud_config.base_url,
-        cloud_organization_id=ge_cloud_config.organization_id,
-        cloud_access_token=ge_cloud_config.access_token,
-        cloud_mode=True,
-    )
-
-    profiler_1, profiler_2 = profiler_names_and_ids
-    profiler_name_1, profiler_id_1 = profiler_1
-    profiler_name_2, profiler_id_2 = profiler_2
-
-    with mock.patch("requests.Session.get", autospec=True) as mock_get:
-        mock_get.return_value = mock.Mock(
-            status_code=200, json=lambda: mock_get_all_profilers_json
-        )
-        profilers = context.list_profilers()
-
-    assert profilers == [
-        GXCloudIdentifier(
-            resource_type=GXCloudRESTResource.PROFILER,
-            id=profiler_id_1,
-            resource_name=profiler_name_1,
-        ),
-        GXCloudIdentifier(
-            resource_type=GXCloudRESTResource.PROFILER,
-            id=profiler_id_2,
-            resource_name=profiler_name_2,
-        ),
-    ]

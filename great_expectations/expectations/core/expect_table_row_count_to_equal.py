@@ -1,15 +1,13 @@
-from typing import Dict, List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
 )
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     BatchExpectation,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -19,6 +17,13 @@ from great_expectations.render.renderer_configuration import (
     RendererValueType,
 )
 from great_expectations.render.util import substitute_none_for_missing
+
+if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
 
 
 class ExpectTableRowCountToEqual(BatchExpectation):
@@ -53,6 +58,8 @@ class ExpectTableRowCountToEqual(BatchExpectation):
         [expect_table_row_count_to_be_between](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between)
     """
 
+    value: Union[int, EvaluationParameterDict]
+
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation"],
@@ -74,50 +81,6 @@ class ExpectTableRowCountToEqual(BatchExpectation):
         "meta": None,
     }
     args_keys = ("value",)
-
-    @public_api
-    @override
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validate the configuration of an Expectation.
-
-        For `expect_table_row_count_to_equal` we require that the `configuraton.kwargs` contain
-        a `value` key that is either an `int` or a `dict` with an Evaluation Parameter.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                from the configuration attribute of the Expectation instance.
-
-        Raises:
-            `InvalidExpectationConfigurationError`: The configuration does not contain the values required
-                by the Expectation.
-        """
-
-        # Setting up a configuration
-        super().validate_configuration(configuration)
-
-        value: Optional[int] = (
-            configuration.kwargs.get("value")
-            if configuration and configuration.kwargs
-            else None
-        )
-
-        try:
-            assert value is not None, "An expected row count must be provided"
-
-            if not isinstance(value, (int, dict)):
-                raise ValueError("Provided row count must be an integer")
-
-            if isinstance(value, dict):
-                assert (
-                    "$PARAMETER" in value
-                ), 'Evaluation Parameter dict for value kwarg must have "$PARAMETER" key.'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     @override

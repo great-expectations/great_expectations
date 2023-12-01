@@ -1,18 +1,17 @@
-from typing import TYPE_CHECKING, Dict, List, Optional
-
-import pandas as pd
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
-from great_expectations.expectations.metrics.util import parse_value_set
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -23,7 +22,6 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
@@ -64,6 +62,8 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
         [expect_column_distinct_values_to_equal_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_equal_set)
     """
 
+    value_set: Union[list, set, EvaluationParameterDict, None]
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
@@ -76,15 +76,11 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.value_counts",)
-    success_keys = (
-        "value_set",
-        "parse_strings_as_datetimes",
-    )
+    success_keys = ("value_set",)
 
     # Default values
     default_kwarg_values = {
         "value_set": None,
-        "parse_strings_as_datetimes": False,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
@@ -94,35 +90,6 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
         "value_set",
     )
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration for the Expectation.
-
-        For `expect_column_distinct_values_to_contain_set`
-        we require that the `configuraton.kwargs` contain a `value_set` key that is either a `list`, `set`,
-        or `dict`.
-
-        Args:
-            configuration: The ExpectationConfiguration to be validated.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert "value_set" in configuration.kwargs, "value_set is required"
-            assert isinstance(
-                configuration.kwargs["value_set"], (list, set, dict)
-            ), "value_set must be a list or a set"
-            if isinstance(configuration.kwargs["value_set"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["value_set"]
-                ), 'Evaluation Parameter dict for value_set kwarg must have "$PARAMETER" key'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-
     @classmethod
     def _prescriptive_template(
         cls,
@@ -131,7 +98,6 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
         add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("value_set", RendererValueType.ARRAY),
-            ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
         )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
@@ -153,9 +119,6 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
                 renderer_configuration=renderer_configuration,
             )
             template_str = f"distinct values must contain this set: {value_set_str}."
-
-            if params.parse_strings_as_datetimes:
-                template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -183,7 +146,6 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
             [
                 "column",
                 "value_set",
-                "parse_strings_as_datetimes",
                 "row_condition",
                 "condition_parser",
             ],
@@ -200,9 +162,6 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
             )
 
         template_str = f"distinct values must contain this set: {values_string}."
-
-        if params.get("parse_strings_as_datetimes"):
-            template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -239,18 +198,10 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
-            "parse_strings_as_datetimes"
-        )
         observed_value_counts = metrics.get("column.value_counts")
         value_set = self.get_success_kwargs(configuration).get("value_set")
 
-        if parse_strings_as_datetimes:
-            warn_deprecated_parse_strings_as_datetimes()
-            parsed_value_set = parse_value_set(value_set)
-            observed_value_counts.index = pd.to_datetime(observed_value_counts.index)
-        else:
-            parsed_value_set = value_set
+        parsed_value_set = value_set
 
         observed_value_set = set(observed_value_counts.index)
         expected_value_set = set(parsed_value_set)

@@ -62,20 +62,6 @@
             "pandas"
           ]
     },{
-      "title" : "positive_test_with_parse_strings_as_datetimes",
-      "exact_match_out" : false,
-      "in": {
-        "column": "zz",
-        "parse_strings_as_datetimes": true
-      },
-      "_note": "deprecating this test 20201109 because we are dropping support for parse_strings_as_datetimes; added empty only_for",
-      "only_for": [],
-      "out": {
-        "unexpected_list": [],
-        "unexpected_index_list": [],
-        "success": true
-      }
-    },{
       "title" : "positive_test_with_interspersed_nulls",
       "exact_match_out" : false,
       "in": {

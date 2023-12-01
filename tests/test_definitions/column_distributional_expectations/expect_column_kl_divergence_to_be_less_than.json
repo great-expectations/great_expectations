@@ -675,7 +675,7 @@
           "catch_exceptions": true
         },
         "out": {
-          "traceback_substring": "ValueError"
+          "traceback_substring": "less than or equal to 1"
         }
       },
       {
@@ -693,7 +693,7 @@
           "catch_exceptions": true
         },
         "out": {
-          "traceback_substring": "ValueError"
+          "traceback_substring": "less than or equal to 1"
         }
       }
     ]
