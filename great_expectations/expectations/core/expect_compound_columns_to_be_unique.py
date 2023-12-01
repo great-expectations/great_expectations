@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Union
 
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
@@ -56,6 +56,9 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
 
         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
+
+    column_list: Union[tuple, list]
+    ignore_row_if: str = "all_value_are_missing"
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
