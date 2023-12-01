@@ -81,8 +81,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
 
     strftime_format: Union[str, EvaluationParameterDict]
 
-    @classmethod
-    @pydantic.validator("strftime_format", pre=True)
+    @pydantic.validator("strftime_format")
     def validate_strftime_format(
         cls, strftime_format: str | EvaluationParameterDict
     ) -> str | EvaluationParameterDict:
