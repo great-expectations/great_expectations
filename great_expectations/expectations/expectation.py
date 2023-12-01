@@ -287,14 +287,6 @@ class MetaExpectation(ModelMetaclass):
 
         # noinspection PyUnresolvedReferences
         newclass._register_renderer_functions()
-        default_kwarg_values = {}
-        for base in reversed(bases):
-            default_kwargs = getattr(base, "default_kwarg_values", {})
-            default_kwarg_values = nested_update(default_kwarg_values, default_kwargs)
-
-        newclass.default_kwarg_values = nested_update(
-            default_kwarg_values, attrs.get("default_kwarg_values", {})
-        )
         return newclass
 
 
@@ -1168,11 +1160,16 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             metric_configurations={}, result_format=result_format
         )
 
+    def _get_default_value(self, key: str) -> Any:
+        field = self.__fields__.get(key)
+
+        return field.default if field and field.required else None
+
     def get_domain_kwargs(
         self, configuration: ExpectationConfiguration
     ) -> Dict[str, Optional[str]]:
         domain_kwargs: Dict[str, Optional[str]] = {
-            key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
+            key: configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.domain_keys
         }
         missing_kwargs: Union[set, Set[str]] = set(self.domain_keys) - set(
@@ -1201,7 +1198,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             configuration=configuration
         )
         success_kwargs: Dict[str, Any] = {
-            key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
+            key: configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.success_keys
         }
         success_kwargs.update(domain_kwargs)
@@ -1222,7 +1219,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
         success_kwargs = self.get_success_kwargs(configuration=configuration)
         runtime_kwargs = {
-            key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
+            key: configuration.kwargs.get(key, self._get_default_value(key))
             for key in self.runtime_keys
         }
         runtime_kwargs.update(success_kwargs)
