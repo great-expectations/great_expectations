@@ -1,7 +1,8 @@
 from numbers import Number
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, TypedDict, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Union
 
 import numpy as np
+from typing_extensions import TypedDict
 
 from great_expectations.core import (
     ExpectationConfiguration,
