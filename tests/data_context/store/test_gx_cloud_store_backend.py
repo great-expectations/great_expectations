@@ -261,7 +261,29 @@ def test_set(
                                 ("run_name_template", None),
                                 ("expectation_suite_name", None),
                                 ("batch_request", {}),
-                                ("action_list", []),
+                                (
+                                    "action_list",
+                                    [
+                                        {
+                                            "name": "store_validation_result",
+                                            "action": {
+                                                "class_name": "StoreValidationResultAction",
+                                            },
+                                        },
+                                        {
+                                            "name": "store_evaluation_params",
+                                            "action": {
+                                                "class_name": "StoreEvaluationParametersAction",
+                                            },
+                                        },
+                                        {
+                                            "name": "update_data_docs",
+                                            "action": {
+                                                "class_name": "UpdateDataDocsAction",
+                                            },
+                                        },
+                                    ],
+                                ),
                                 ("evaluation_parameters", {}),
                                 ("runtime_configuration", {}),
                                 ("validations", []),
