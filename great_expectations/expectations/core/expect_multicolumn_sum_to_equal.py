@@ -1,12 +1,8 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional
 
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
-)
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
 )
@@ -58,9 +54,6 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
 
         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
-
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
