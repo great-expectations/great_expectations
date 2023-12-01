@@ -202,15 +202,18 @@ class TestCRUDMethods:
     )
 
     @pytest.fixture
-    def expectation_params(self):
-        return {"column": "a", "value_set": [1, 2, 3], "result_format": "BASIC"}
+    def expectation(self) -> ExpectColumnValuesToBeInSet:
+        return ExpectColumnValuesToBeInSet(
+            column="a",
+            value_set=[1, 2, 3],
+            result_format="BASIC",
+        )
 
     @pytest.mark.unit
-    def test_add_success(self, expectation_params):
+    def test_add_success(self, expectation):
         context = Mock(spec=AbstractDataContext)
         set_context(project=context)
         suite = ExpectationSuite(expectation_suite_name=self.expectation_suite_name)
-        expectation = ExpectColumnValuesToBeInSet(**expectation_params)
 
         created_expectation = suite.add(expectation=expectation)
 
@@ -221,18 +224,13 @@ class TestCRUDMethods:
         )
 
     @pytest.mark.unit
-    def test_add_doesnt_duplicate_when_expectation_already_exists(
-        self, expectation_params
-    ):
+    def test_add_doesnt_duplicate_when_expectation_already_exists(self, expectation):
         context = Mock(spec=AbstractDataContext)
         set_context(project=context)
         suite = ExpectationSuite(
             expectation_suite_name=self.expectation_suite_name,
-            expectations=[
-                ExpectColumnValuesToBeInSet(**expectation_params).configuration
-            ],
+            expectations=[expectation.configuration],
         )
-        expectation = ExpectColumnValuesToBeInSet(**expectation_params)
 
         suite.add(expectation=expectation)
 
@@ -242,7 +240,7 @@ class TestCRUDMethods:
         )
 
     @pytest.mark.unit
-    def test_add_doesnt_mutate_suite_when_save_fails(self, expectation_params):
+    def test_add_doesnt_mutate_suite_when_save_fails(self, expectation):
         context = Mock(spec=AbstractDataContext)
         context.expectations_store.set.side_effect = (
             ConnectionError()
@@ -251,23 +249,20 @@ class TestCRUDMethods:
         suite = ExpectationSuite(
             expectation_suite_name="test-suite",
         )
-        expectation = ExpectColumnValuesToBeInSet(**expectation_params)
+
         with pytest.raises(ConnectionError):  # exception type isn't important
             suite.add(expectation=expectation)
 
         assert len(suite.expectations) == 0, "Expectation must not be added to Suite."
 
     @pytest.mark.unit
-    def test_delete_success(self, expectation_params):
+    def test_delete_success(self, expectation):
         context = Mock(spec=AbstractDataContext)
         set_context(project=context)
         suite = ExpectationSuite(
             expectation_suite_name=self.expectation_suite_name,
-            expectations=[
-                ExpectColumnValuesToBeInSet(**expectation_params).configuration
-            ],
+            expectations=[expectation.configuration],
         )
-        expectation = ExpectColumnValuesToBeInSet(**expectation_params)
 
         deleted_expectation = suite.delete(expectation=expectation)
 
@@ -278,20 +273,20 @@ class TestCRUDMethods:
         )
 
     @pytest.mark.unit
-    def test_delete_fails_when_expectation_is_not_found(self, expectation_params):
+    def test_delete_fails_when_expectation_is_not_found(self, expectation):
         context = Mock(spec=AbstractDataContext)
         set_context(project=context)
         suite = ExpectationSuite(
             expectation_suite_name="test-suite",
         )
-        expectation = ExpectColumnValuesToBeInSet(**expectation_params)
+
         with pytest.raises(KeyError, match="No matching expectation was found."):
             suite.delete(expectation=expectation)
 
         context.expectations_store.set.assert_not_called()
 
     @pytest.mark.unit
-    def test_delete_doesnt_mutate_suite_when_save_fails(self, expectation_params):
+    def test_delete_doesnt_mutate_suite_when_save_fails(self, expectation):
         context = Mock(spec=AbstractDataContext)
         context.expectations_store.set.side_effect = (
             ConnectionError()
@@ -300,10 +295,10 @@ class TestCRUDMethods:
         suite = ExpectationSuite(
             expectation_suite_name="test-suite",
             expectations=[
-                ExpectColumnValuesToBeInSet(**expectation_params).configuration,
+                expectation.configuration,
             ],
         )
-        expectation = ExpectColumnValuesToBeInSet(**expectation_params)
+
         with pytest.raises(ConnectionError):  # exception type isn't important
             suite.delete(expectation=expectation)
 
