@@ -24,10 +24,11 @@
         "title": "empty_value_set",
         "exact_match_out": false,
         "in": {
-          "column": "x"
+          "column": "x",
+          "value_set": []
         },
         "out": {
-          "success": true
+          "success": false
         }
       },
       {

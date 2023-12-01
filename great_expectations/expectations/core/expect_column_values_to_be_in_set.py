@@ -111,7 +111,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         [expect_column_values_to_not_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_not_be_in_set)
     """
 
-    value_set: Union[list, set, EvaluationParameterDict] = ()
+    value_set: Union[list, set, EvaluationParameterDict]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
