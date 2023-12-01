@@ -152,6 +152,8 @@ def in_databricks() -> bool:
     Returns:
         bool
     """
+    print("testing whether in databricsk")
+    return True
     return "DATABRICKS_RUNTIME_VERSION" in os.environ  # noqa: TID251
 
 
@@ -818,8 +820,12 @@ def get_or_create_spark_application(
     if spark_session is None:
         raise ValueError("SparkContext could not be started.")
 
+    sc_stopped = False
     # noinspection PyUnresolvedReferences
-    sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
+    # if in_databricks():
+    #     sc_stopped: bool = spark.is_stopped
+    # else:
+    #     sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
     if not force_reuse_spark_context and spark_restart_required(
         current_spark_config=spark_session.sparkContext.getConf().getAll(),
         desired_spark_config=spark_config,
@@ -870,6 +876,22 @@ def get_or_create_spark_session(
         else:
             spark_config = copy.deepcopy(spark_config)
 
+        # if in_databricks():
+        #     print("in databricks!")
+        #     spark_session = pyspark.SparkSession.getActiveSession()
+        #     if not spark_session:
+        #         raise ValueError("SparkSession not available")
+        #     if spark_session.sparkContext.isStopped:
+        #         raise ValueError("SparkContext not available")
+        #     app_name: Optional[str] = spark_config.pop("spark.app.name", None)
+        #     if app_name:
+        #         print("skipping app name")
+
+        #     # TODO: note that this can raise
+        #     for k, v in spark_config.items():
+        #         spark_session.conf.set(k, v)
+        # else:
+
         builder = pyspark.SparkSession.builder
 
         app_name: Optional[str] = spark_config.get("spark.app.name")
@@ -882,8 +904,8 @@ def get_or_create_spark_session(
 
         spark_session = builder.getOrCreate()
         # noinspection PyProtectedMember,PyUnresolvedReferences
-        if spark_session.sparkContext._jsc.sc().isStopped():
-            raise ValueError("SparkContext stopped unexpectedly.")
+        # if spark_session.sparkContext._jsc.sc().isStopped():
+        #     raise ValueError("SparkContext stopped unexpectedly.")
 
     except AttributeError:
         logger.error(

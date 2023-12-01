@@ -203,7 +203,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
             force_reuse_spark_context=force_reuse_spark_context,
         )
 
-        spark_config.update({k: v for (k, v) in spark.sparkContext.getConf().getAll()})
+        # spark_config.update({k: v for (k, v) in spark.sparkContext.getConf().getAll()})
 
         self.spark = spark
 

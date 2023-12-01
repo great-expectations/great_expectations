@@ -151,3 +151,5 @@ Pipfile.lock
 
 # contract testing files
 tests/integration/cloud/rest_contracts/pacts
+
+.databricks
