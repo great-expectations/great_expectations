@@ -1,35 +1,33 @@
 """
-This workflow demonstrates how to use Great Expectations in a quick-start
+This guide demonstrates how to use Great Expectations in a quick-start
 notebook environment. It is useful to explore and understand how Great Expectations
 works, using your own data.
 
-This workflow is not recommended for use in production environments because:
-1. it uses ephemeral assets
-2. it uses an iterative workflow of trying and refining expectations.
+Note:
+- Do not follow this workflow when you are building a durable workflow because it uses 
+ephemeral assets. 
+- Do not use this workflow for embedding in a pipeline or CI system, because it uses an 
+iterative process for trying and refining expectations.
 """
 
 # <snippet name="tutorials/quickstart/quickstart.py import_gx">
 import great_expectations as gx
 import great_expectations.expectations as gxe
-
 # </snippet>
 
 # Set up
 # <snippet name="tutorials/quickstart/quickstart.py get_context">
-context = gx.get_context()
+# NOTE: Context is a singleton now. Once the context has been set instantiated in a session
+context = gx.set_context()
 # </snippet>
 
 # Connect to data
-# <snippet name="tutorials/quickstart/quickstart.py connect_to_data">
+# <snippet name="tutorials/quickstart/quickstart.py connect_to_data pandas">
 batch = context.sources.pandas_default.read_csv(
     "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 )
+# </snippet>
 
-# What happened in the background?
-# Datsource: "default_pandas_datasource"
-# Asset: "#ephemeral_pandas_asset" -- CSVAsset (path lives here)
-# BatchConfig (Splitters): No Splitters
-# BatchOptions: (none needed)
 
 # TODO: ticket We can also use a SQL query as a data source
 context.sources.add_postgresql(
@@ -50,7 +48,7 @@ expectation = gxe.ExpectColumnValuesToNotBeNull(
 )
 batch.validate(
     expectation
-)  # returns a result that we expect them to review in a REPL loop
+)
 # Review the results of the expectation! Change parameters as needed.
 expectation.mostly = 0.8
 batch.validate(expectation)

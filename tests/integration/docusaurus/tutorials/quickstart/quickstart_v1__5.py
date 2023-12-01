@@ -32,13 +32,26 @@ suite.add(
 )
 # </snippet>
 
+suite.add(
+    gxe.ExpectColumnValuesToBeInSet(column="ratecodeid", value_set=[1]),
+    row_conditions=[ColumnValueSplitter("ratecodeid", value=1)]
+)
+suite.add(
+    gxe.ExpectColumnValuesToBeInSet(
+        column="ratecodeid", value_set=[12],
+        row_conditions=[ColumnValueSplitter("ratecodeid", value=12)]
+    ),
+)
+
+
+validation = context.validations.add(name="taxi", batch_config=daily, expectation_suite=suite)
+
+
+
 # Add Conditional Expectations
 # <snippet name="tutorials/quickstart/quickstart.py add_conditional_expectation">
 # TODO: JPC - I'm back to thinking we want to create this as a batch config *from* the other one
-ratecode_1_batch_config = daily.add_batch_config(
-    name="ratecode_1",
-    splitters=[ColumnValueSplitter("ratecodeid", value=1)],
-)
+
 ratecode_1_suite = context.add_expectation_suite("taxi.ratecode_1")
 # Older version:
 # ratecode_1_batch = asset.add_batch_config(
