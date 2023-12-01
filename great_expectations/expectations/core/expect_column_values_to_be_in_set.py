@@ -4,10 +4,11 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    InvalidExpectationConfigurationError,
 )
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
@@ -109,6 +110,8 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     See Also:
         [expect_column_values_to_not_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_not_be_in_set)
     """
+
+    value_set: Union[list, set, EvaluationParameterDict]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -368,50 +371,3 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         )
 
         return new_block
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        For `expect_column_values_to_be_in_set` it is required that:
-
-        - `value_set` has been provided.
-
-        - `value_set` is one of the following types: `list`, `set`, or `dict`
-
-        - If `value_set` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
-          dictionary keys must be `$PARAMETER`.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                           from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                                                  Expectation.
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        # supports extensibility by allowing value_set to not be provided in config but captured via child-class
-        # default_kwarg_values, e.g. parameterized expectations
-        value_set = configuration.kwargs.get(
-            "value_set"
-        ) or self.default_kwarg_values.get("value_set")
-        try:
-            assert (
-                "value_set" in configuration.kwargs or value_set
-            ), "value_set is required"
-            assert isinstance(
-                value_set, (list, set, dict)
-            ), "value_set must be a list, set, or dict"
-            if isinstance(value_set, dict):
-                assert (
-                    "$PARAMETER" in value_set
-                ), 'Evaluation Parameter dict for value_set kwarg must have "$PARAMETER" key.'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
