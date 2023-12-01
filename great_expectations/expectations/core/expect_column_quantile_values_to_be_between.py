@@ -141,7 +141,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     """
 
     quantile_ranges: QuantileRange
-    allow_relative_error: Union[bool, str]
+    allow_relative_error: Union[bool, str] = False
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
