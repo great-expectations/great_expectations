@@ -54,7 +54,6 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/datasource/simple_sqlalchemy_datasource.py Name: SimpleSqlalchemyDatasource",
     "File: great_expectations/exceptions/exceptions.py Name: InvalidExpectationConfigurationError",
     "File: great_expectations/expectations/core/expect_column_values_to_match_like_pattern_list.py Name: validate_configuration",
-    "File: great_expectations/expectations/core/expect_column_values_to_not_match_like_pattern.py Name: validate_configuration",
     "File: great_expectations/expectations/core/expect_column_values_to_not_match_like_pattern_list.py Name: validate_configuration",
     "File: great_expectations/expectations/expectation.py Name: is_expectation_auto_initializing",
     "File: great_expectations/expectations/expectation.py Name: validate_configuration",
