@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, TypedDict, Union
 
 import numpy as np
 
@@ -55,6 +55,11 @@ from great_expectations.validator.validator import (
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
+
+
+class QuantileRange(TypedDict):
+    quantiles: List[float]
+    value_ranges: List[List[Number]]
 
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
@@ -134,6 +139,9 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         [expect_column_max_to_be_between](https://greatexpectations.io/expectations/expect_column_max_to_be_between)
         [expect_column_median_to_be_between](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
     """
+
+    quantile_ranges: QuantileRange
+    allow_relative_error: Union[bool, str]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

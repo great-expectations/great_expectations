@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, List, Literal, Optional, Union
 
 from great_expectations.core.evaluation_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
@@ -60,7 +60,9 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
     """
 
     sum_total: int
-    ignore_row_if: str = "both_values_are_missing"
+    ignore_row_if: Literal[
+        "all_values_are_missing", "any_value_is_missing", "never"
+    ] = "all_values_are_missing"
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
