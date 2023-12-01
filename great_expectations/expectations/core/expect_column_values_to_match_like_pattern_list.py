@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, List, Literal, Optional, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.evaluation_parameters import (
@@ -76,6 +76,7 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
     """
 
     like_pattern_list: Union[List[str], EvaluationParameterDict]
+    match_on: Literal["any", "all"] = "any"
 
     @pydantic.validator("like_pattern_list")
     def validate_like_pattern_list(
