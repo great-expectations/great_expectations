@@ -61,6 +61,8 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
 
+    column_list: Union[tuple, list]
+    ignore_row_if: str = "all_value_are_missing"
     min_value: Union[float, EvaluationParameterDict, datetime, None] = None
     max_value: Union[float, EvaluationParameterDict, datetime, None] = None
 
