@@ -214,9 +214,7 @@ class AbstractDataContext(ConfigPeer, ABC):
          - ✅
          - ✅
          - ✅
-         - ✅
        * - `add`
-         - ✅
          - ✅
          - ✅
          - ✅
@@ -226,15 +224,12 @@ class AbstractDataContext(ConfigPeer, ABC):
          - ✅
          - ✅
          - ✅
-         - ✅
        * - `add_or_update`
          - ❌
          - ✅
          - ✅
          - ✅
-         - ✅
        * - `delete`
-         - ✅
          - ✅
          - ✅
          - ✅
