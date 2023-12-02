@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterator, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 import pandas as pd
 
@@ -11,7 +11,6 @@ from great_expectations.compatibility.not_imported import (
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.sqlalchemy_and_pandas import (
     pandas_read_sql,
-    pandas_read_sql_query,
 )
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     read_sql_table_as_df,
@@ -84,6 +83,8 @@ class TableHead(TableMetricProvider):
             else cls.default_kwarg_values["n_rows"]
         )
 
+        selectable.element = selectable.element.limit(n_rows)
+
         if is_version_less_than(pd.__version__, "1.4.0"):
             df = TableHead._sqlalchemy_head_pandas_less_than14(
                 selectable=selectable,
@@ -102,34 +103,22 @@ class TableHead(TableMetricProvider):
             )
             return df
         try:
-            df_chunk_iterator: Iterator[pd.DataFrame]
             if table_name and not isinstance(table_name, sqlalchemy._anonymous_label):
                 with execution_engine.get_connection() as con:
-                    # passing chunksize causes the Iterator to be returned
-                    df_chunk_iterator = read_sql_table_as_df(
+                    df = read_sql_table_as_df(
                         table_name=getattr(selectable, "name", None),
                         schema=getattr(selectable, "schema", None),
                         con=con,
-                        chunksize=abs(n_rows),
                         dialect=dialect,
                     )
-                    df = TableHead._get_head_df_from_df_iterator(
-                        df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
-                    )
             else:
-                # passing chunksize causes the Iterator to be returned
                 with execution_engine.get_connection() as con:
                     # convert subquery into query using select_from()
                     if not selectable.supports_execution:
                         selectable = sa.select(sa.text("*")).select_from(selectable)
-                    df_chunk_iterator = pandas_read_sql_query(
+                    df = pandas_read_sql(
                         sql=selectable,
                         con=con,
-                        execution_engine=execution_engine,
-                        chunksize=abs(n_rows),
-                    )
-                    df = TableHead._get_head_df_from_df_iterator(
-                        df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
                     )
         except StopIteration:
             # empty table. At least try to get the column names
@@ -138,26 +127,6 @@ class TableHead(TableMetricProvider):
                 MetricConfiguration("table.columns", metric_domain_kwargs)
             )
             df = pd.DataFrame(columns=columns)
-        return df
-
-    @staticmethod
-    def _get_head_df_from_df_iterator(
-        df_chunk_iterator: Iterator[pd.DataFrame], n_rows: int
-    ) -> pd.DataFrame:
-        if n_rows > 0:
-            df = next(df_chunk_iterator)
-        else:
-            # if n_rows is zero or negative, remove the last chunk
-            df_chunk_list: list[pd.DataFrame]
-            df_last_chunk: pd.DataFrame
-            *df_chunk_list, df_last_chunk = df_chunk_iterator
-            if df_chunk_list:
-                df = pd.concat(objs=df_chunk_list, ignore_index=True)
-            else:
-                # if n_rows is zero, the last chunk is the entire dataframe,
-                # so we truncate it to preserve the header
-                df = df_last_chunk.head(0)
-
         return df
 
     @metric_value(engine=SparkDFExecutionEngine)
@@ -255,17 +224,5 @@ class TableHead(TableMetricProvider):
                 compile_kwargs={"literal_binds": True},
             )
 
-        if n_rows <= 0 and not fetch_all:
-            with execution_engine.get_connection() as con:
-                df_chunk_iterator = pandas_read_sql(
-                    sql=sql, con=con, chunksize=abs(n_rows)
-                )
-                df = TableHead._get_head_df_from_df_iterator(
-                    df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
-                )
-        else:
-            with execution_engine.get_connection() as con:
-                df = pandas_read_sql_query(
-                    sql=sql, con=con, execution_engine=execution_engine
-                )
-        return df
+        with execution_engine.get_connection() as con:
+            return pandas_read_sql(sql=sql, con=con)
