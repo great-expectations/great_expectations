@@ -39,8 +39,8 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
     Args:
         column (str): \
             The column name.
-        json_schema  (str): \
-            The JSON schema (in string form) to match
+        json_schema  (dict): \
+            The JSON schema to match
 
     Keyword Args:
         mostly (None or a float between 0 and 1): \
@@ -69,6 +69,8 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
         [expect_column_values_to_be_json_parseable](https://greatexpectations.io/expectations/expect_column_values_to_be_json_parseable)
         [The JSON-schema docs](https://json-schema.org)
     """
+
+    json_schema: dict
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

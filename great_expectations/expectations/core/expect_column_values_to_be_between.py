@@ -94,6 +94,8 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
     min_value: Union[float, EvaluationParameterDict, datetime, None] = None
     max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    strict_min: bool = False
+    strict_max: bool = False
 
     @classmethod
     @root_validator(pre=True)

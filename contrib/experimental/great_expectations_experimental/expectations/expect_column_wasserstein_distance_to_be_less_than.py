@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import datetime
+from datetime import datetime
 from typing import Dict, Union
 
 from scipy import stats
@@ -176,7 +176,6 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnAggregateExpectation):
         "raw_values": None,
         "partition": None,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
     }
 

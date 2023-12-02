@@ -1980,7 +1980,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """Validate using an existing Checkpoint.
 
         Args:
-            checkpoint_name: The name of a Checkpoint defined via the CLI or by manually creating a yml file
+            checkpoint_name: The name of a Checkpoint
             template_name: The name of a Checkpoint template to retrieve from the CheckpointStore
             run_name_template: The template to use for run_name
             expectation_suite_name: Expectation suite to be used by Checkpoint run
