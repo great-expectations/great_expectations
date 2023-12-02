@@ -46,9 +46,6 @@ from great_expectations.core.util import (
     nested_update,
     parse_string_to_datetime,
 )
-from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
-)
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import (
@@ -191,9 +188,7 @@ class ExpectationSuite(SerializableDictDot):
 
     def save(self) -> None:
         """Save this ExpectationSuite."""
-        key = ExpectationSuiteIdentifier(
-            expectation_suite_name=self.expectation_suite_name
-        )
+        key = self._store.build_key(suite=self)
         self._store.set(key=key, value=self)
 
     def add_citation(  # noqa: PLR0913
