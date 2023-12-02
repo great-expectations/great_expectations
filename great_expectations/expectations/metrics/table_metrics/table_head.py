@@ -83,8 +83,7 @@ class TableHead(TableMetricProvider):
             else cls.default_kwarg_values["n_rows"]
         )
 
-        selectable.element = selectable.element.limit(n_rows)
-
+        # historical bug; sqlalchemy < 1.4.0 does not apply limit correctly
         if is_version_less_than(pd.__version__, "1.4.0"):
             df = TableHead._sqlalchemy_head_pandas_less_than14(
                 selectable=selectable,
@@ -93,6 +92,8 @@ class TableHead(TableMetricProvider):
                 n_rows=n_rows,
             )
             return df
+
+        selectable.element = selectable.element.limit(n_rows)
 
         if metric_value_kwargs["fetch_all"]:
             df = TableHead._return_full_sql_table_as_head(
