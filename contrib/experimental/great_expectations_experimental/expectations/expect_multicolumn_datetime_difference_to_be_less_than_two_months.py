@@ -156,7 +156,6 @@ class ExpectMulticolumnDatetimeDifferenceToBeLessThanTwoMonths(
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
         "base": 2,
     }
