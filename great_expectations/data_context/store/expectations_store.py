@@ -235,7 +235,7 @@ class ExpectationsStore(Store):
         else:
             return self._expectationSuiteSchema.loads(value)
 
-    def build_key(
+    def get_key(
         self, suite: ExpectationSuite
     ) -> GXCloudIdentifier | ExpectationSuiteIdentifier:
         """Given an ExpectationSuite, build the correct key for use in the ExpectationsStore."""

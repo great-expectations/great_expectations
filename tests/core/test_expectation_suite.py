@@ -17,9 +17,6 @@ from great_expectations.core.expectation_suite import (
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext
-from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
-)
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.core import (
@@ -197,9 +194,6 @@ class TestCRUDMethods:
     """Tests related to the 1.0 CRUD API."""
 
     expectation_suite_name = "test-suite"
-    store_key = ExpectationSuiteIdentifier(
-        expectation_suite_name=expectation_suite_name
-    )
 
     @pytest.fixture
     def expectation(self) -> ExpectColumnValuesToBeInSet:
@@ -214,13 +208,14 @@ class TestCRUDMethods:
         context = Mock(spec=AbstractDataContext)
         set_context(project=context)
         suite = ExpectationSuite(expectation_suite_name=self.expectation_suite_name)
+        store_key = context.expectations_store.get_key.return_value
 
         created_expectation = suite.add(expectation=expectation)
 
         assert created_expectation == expectation
 
         context.expectations_store.set.assert_called_once_with(
-            key=self.store_key, value=suite
+            key=store_key, value=suite
         )
 
     @pytest.mark.unit
@@ -231,12 +226,13 @@ class TestCRUDMethods:
             expectation_suite_name=self.expectation_suite_name,
             expectations=[expectation.configuration],
         )
+        store_key = context.expectations_store.get_key.return_value
 
         suite.add(expectation=expectation)
 
         assert len(suite.expectations) == 1
         context.expectations_store.set.assert_called_once_with(
-            key=self.store_key, value=suite
+            key=store_key, value=suite
         )
 
     @pytest.mark.unit
@@ -263,13 +259,14 @@ class TestCRUDMethods:
             expectation_suite_name=self.expectation_suite_name,
             expectations=[expectation.configuration],
         )
+        store_key = context.expectations_store.get_key.return_value
 
         deleted_expectation = suite.delete(expectation=expectation)
 
         assert deleted_expectation == expectation
         assert suite.expectations == []
         context.expectations_store.set.assert_called_once_with(
-            key=self.store_key, value=suite
+            key=store_key, value=suite
         )
 
     @pytest.mark.unit
@@ -311,11 +308,12 @@ class TestCRUDMethods:
         suite = ExpectationSuite(
             expectation_suite_name=self.expectation_suite_name,
         )
+        store_key = context.expectations_store.get_key.return_value
 
         suite.save()
 
         context.expectations_store.set.assert_called_once_with(
-            key=self.store_key, value=suite
+            key=store_key, value=suite
         )
 
 

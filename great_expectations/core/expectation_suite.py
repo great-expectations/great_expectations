@@ -188,7 +188,7 @@ class ExpectationSuite(SerializableDictDot):
 
     def save(self) -> None:
         """Save this ExpectationSuite."""
-        key = self._store.build_key(suite=self)
+        key = self._store.get_key(suite=self)
         self._store.set(key=key, value=self)
 
     def add_citation(  # noqa: PLR0913
