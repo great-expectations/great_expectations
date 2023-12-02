@@ -239,6 +239,7 @@ class ExpectationsStore(Store):
         self, suite: ExpectationSuite
     ) -> GXCloudIdentifier | ExpectationSuiteIdentifier:
         """Given an ExpectationSuite, build the correct key for use in the ExpectationsStore."""
+        key: GXCloudIdentifier | ExpectationSuiteIdentifier
         if self.cloud_mode:
             key = GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
