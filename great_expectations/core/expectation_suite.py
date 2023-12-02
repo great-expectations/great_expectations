@@ -149,12 +149,15 @@ class ExpectationSuite(SerializableDictDot):
             self.expectation_configurations.append(expectation.configuration)
         else:
             pass  # suite is a set-like collection
-        try:
-            self.save()
-        except Exception as exc:
-            # rollback this change
-            self.expectation_configurations.pop()
-            raise exc
+
+        if self._has_been_saved():
+            # only persist on add if the suite has already been saved
+            try:
+                self.save()
+            except Exception as exc:
+                # rollback this change
+                self.expectation_configurations.pop()
+                raise exc
 
         return expectation
 
@@ -176,13 +179,15 @@ class ExpectationSuite(SerializableDictDot):
             raise KeyError("No matching expectation was found.")
         self.expectation_configurations = remaining_expectation_configs
 
-        try:
-            self.save()
-        except Exception as exc:
-            # rollback this change
-            # expectation suite is set-like so order of expectations doesn't matter
-            self.expectation_configurations.append(expectation.configuration)
-            raise exc
+        if self._has_been_saved():
+            # only persist on delete if the suite has already been saved
+            try:
+                self.save()
+            except Exception as exc:
+                # rollback this change
+                # expectation suite is set-like so order of expectations doesn't matter
+                self.expectation_configurations.append(expectation.configuration)
+                raise exc
 
         return expectation
 
@@ -190,6 +195,10 @@ class ExpectationSuite(SerializableDictDot):
         """Save this ExpectationSuite."""
         key = self._store.get_key(suite=self)
         self._store.set(key=key, value=self)
+
+    def _has_been_saved(self) -> bool:
+        key = self._store.get_key(suite=self)
+        return self._store.has_key(key=key)
 
     def add_citation(  # noqa: PLR0913
         self,

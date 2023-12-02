@@ -204,23 +204,42 @@ class TestCRUDMethods:
         )
 
     @pytest.mark.unit
-    def test_add_success(self, expectation):
+    def test_add_success_with_saved_suite(self, expectation):
         context = Mock(spec=AbstractDataContext)
         set_context(project=context)
         suite = ExpectationSuite(expectation_suite_name=self.expectation_suite_name)
+        context.expectations_store.has_key.return_value = True
         store_key = context.expectations_store.get_key.return_value
 
         created_expectation = suite.add(expectation=expectation)
 
         assert created_expectation == expectation
 
+        # expect that the data context is kept in sync with the mutation
         context.expectations_store.set.assert_called_once_with(
             key=store_key, value=suite
         )
 
     @pytest.mark.unit
+    def test_add_success_with_unsaved_suite(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        context.expectations_store.has_key.return_value = False
+        set_context(project=context)
+        suite = ExpectationSuite(expectation_suite_name=self.expectation_suite_name)
+
+        created_expectation = suite.add(expectation=expectation)
+
+        assert created_expectation == expectation
+        assert len(suite.expectations) == 1
+
+        # expect that adding an expectation to this suite doesnt have the side effect of
+        # persisting the suite to the data context
+        context.expectations_store.set.assert_not_called()
+
+    @pytest.mark.unit
     def test_add_doesnt_duplicate_when_expectation_already_exists(self, expectation):
         context = Mock(spec=AbstractDataContext)
+        context.expectations_store.has_key.return_value = True
         set_context(project=context)
         suite = ExpectationSuite(
             expectation_suite_name=self.expectation_suite_name,
@@ -231,9 +250,9 @@ class TestCRUDMethods:
         suite.add(expectation=expectation)
 
         assert len(suite.expectations) == 1
-        context.expectations_store.set.assert_called_once_with(
-            key=store_key, value=suite
-        )
+
+        # expect that the data context is kept in sync with the mutation
+        context.expectations_store.set.assert_called_with(key=store_key, value=suite)
 
     @pytest.mark.unit
     def test_add_doesnt_mutate_suite_when_save_fails(self, expectation):
@@ -241,6 +260,7 @@ class TestCRUDMethods:
         context.expectations_store.set.side_effect = (
             ConnectionError()
         )  # arbitrary exception
+        context.expectations_store.has_key.return_value = True
         set_context(project=context)
         suite = ExpectationSuite(
             expectation_suite_name="test-suite",
@@ -252,9 +272,10 @@ class TestCRUDMethods:
         assert len(suite.expectations) == 0, "Expectation must not be added to Suite."
 
     @pytest.mark.unit
-    def test_delete_success(self, expectation):
+    def test_delete_success_with_saved_suite(self, expectation):
         context = Mock(spec=AbstractDataContext)
         set_context(project=context)
+        context.expectations_store.has_key.return_value = True
         suite = ExpectationSuite(
             expectation_suite_name=self.expectation_suite_name,
             expectations=[expectation.configuration],
@@ -265,9 +286,29 @@ class TestCRUDMethods:
 
         assert deleted_expectation == expectation
         assert suite.expectations == []
+
+        # expect that the data context is kept in sync with the mutation
         context.expectations_store.set.assert_called_once_with(
             key=store_key, value=suite
         )
+
+    @pytest.mark.unit
+    def test_delete_success_with_unsaved_suite(self, expectation):
+        context = Mock(spec=AbstractDataContext)
+        set_context(project=context)
+        context.expectations_store.has_key.return_value = False
+        suite = ExpectationSuite(
+            expectation_suite_name=self.expectation_suite_name,
+            expectations=[expectation.configuration],
+        )
+
+        deleted_expectation = suite.delete(expectation=expectation)
+
+        assert deleted_expectation == expectation
+        assert suite.expectations == []
+        # expect that deleting an expectation from this suite doesnt have the side effect of
+        # persisting the suite to the data context
+        context.expectations_store.set.assert_not_called()
 
     @pytest.mark.unit
     def test_delete_fails_when_expectation_is_not_found(self, expectation):
@@ -285,6 +326,7 @@ class TestCRUDMethods:
     @pytest.mark.unit
     def test_delete_doesnt_mutate_suite_when_save_fails(self, expectation):
         context = Mock(spec=AbstractDataContext)
+        context.expectations_store.has_key.return_value = True
         context.expectations_store.set.side_effect = (
             ConnectionError()
         )  # arbitrary exception
@@ -304,6 +346,7 @@ class TestCRUDMethods:
     @pytest.mark.unit
     def test_save_success(self):
         context = Mock(spec=AbstractDataContext)
+        context.expectations_store.has_key.return_value = True
         set_context(project=context)
         suite = ExpectationSuite(
             expectation_suite_name=self.expectation_suite_name,
@@ -312,6 +355,7 @@ class TestCRUDMethods:
 
         suite.save()
 
+        # expect that the data context is kept in sync
         context.expectations_store.set.assert_called_once_with(
             key=store_key, value=suite
         )
