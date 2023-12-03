@@ -174,7 +174,6 @@ class Validator:
     """
 
     DEFAULT_RUNTIME_CONFIGURATION = {
-        "include_config": True,
         "catch_exceptions": False,
         "result_format": "BASIC",
     }
@@ -1329,7 +1328,6 @@ class Validator:
             Ex::
 
                 {
-                    "include_config" : True,
                     "catch_exceptions" : False,
                     "result_format" : 'BASIC'
                 }
@@ -1524,7 +1522,6 @@ class Validator:
                 "Unable to save config: filepath or data_context must be available."
             )
 
-    # TODO: <Alex>Should "include_config" also be an argument of this method?</Alex>
     @public_api
     @deprecated_argument(
         argument_name="run_id",

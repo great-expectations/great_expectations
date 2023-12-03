@@ -115,8 +115,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
+
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -127,7 +126,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     Notes:
         * min_value and max_value are both inclusive.
@@ -245,7 +244,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         "quantile_ranges": None,
         "result_format": "BASIC",
         "allow_relative_error": False,
-        "include_config": True,
         "catch_exceptions": False,
         "meta": None,
         "auto": False,
