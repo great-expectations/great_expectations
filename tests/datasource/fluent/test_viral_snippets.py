@@ -305,7 +305,7 @@ def test_quickstart_workflow(
     # Create Expectations
     validator.expect_column_values_to_not_be_null("pickup_datetime")
     validator.expect_column_values_to_be_between(
-        "passenger_count", min_value=0, max_value=9
+        "passenger_count", min_value=1, max_value=6
     )
     validator.save_expectation_suite()
 

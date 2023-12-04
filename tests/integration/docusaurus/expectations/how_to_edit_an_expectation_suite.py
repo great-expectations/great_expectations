@@ -25,7 +25,9 @@ validator = context.sources.pandas_default.read_csv(
 
 
 validator.expect_column_values_to_not_be_null("pickup_datetime")
-validator.expect_column_values_to_be_between("passenger_count", auto=True)
+validator.expect_column_values_to_be_between(
+    "passenger_count", min_value=1, max_value=6
+)
 
 my_suite = validator.get_expectation_suite()
 
@@ -39,14 +41,13 @@ output = output.replace("                                            ", " ")
 output = output.replace("\n", "")
 assert (
     str(output)
-    == "[ { 'expect_column_values_to_be_between': { 'auto': True, 'column': 'passenger_count', 'domain': 'column', 'max_value': 6, 'min_value': 1, 'mostly': 1.0, 'strict_max': False, 'strict_min': False}},  { 'expect_column_values_to_not_be_null': { 'column': 'pickup_datetime',  'domain': 'column'}}]"
+    == "[ { 'expect_column_values_to_be_between': { 'column': 'passenger_count', 'domain': 'column', 'max_value': 6, 'min_value': 1, 'mostly': 1.0, 'strict_max': False, 'strict_min': False}},  { 'expect_column_values_to_not_be_null': { 'column': 'pickup_datetime',  'domain': 'column'}}]"
 )
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite example_dict_1">
 
 {
     "expect_column_values_to_be_between": {
-        "auto": True,
         "column": "passenger_count",
         "domain": "column",
         "max_value": 6,
@@ -62,7 +63,6 @@ assert (
 config = ExpectationConfiguration(
     expectation_type="expect_column_values_to_be_between",
     kwargs={
-        "auto": True,
         "column": "passenger_count",
         "domain": "column",
         "max_value": 6,
@@ -79,7 +79,6 @@ config = ExpectationConfiguration(
 updated_config = ExpectationConfiguration(
     expectation_type="expect_column_values_to_be_between",
     kwargs={
-        "auto": True,
         "column": "passenger_count",
         "domain": "column",
         "min_value": 1,
