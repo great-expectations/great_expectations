@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Literal, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -56,7 +56,9 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
 
-    ignore_row_if: str = "both_values_are_missing"
+    ignore_row_if: Literal[
+        "both_values_are_missing", "either_value_is_missing", "neither"
+    ] = "both_values_are_missing"
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

@@ -1,10 +1,10 @@
-from typing import List, Optional
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-)
-from great_expectations.core.expectation_validation_result import (
-    ExpectationValidationResult,
+from typing import TYPE_CHECKING, List, Optional, Union
+
+from great_expectations.compatibility import pydantic
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -16,6 +16,14 @@ from great_expectations.render.components import (
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
+
+if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+    )
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationValidationResult,
+    )
 
 
 class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
@@ -62,6 +70,19 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
         [expect_column_values_to_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_match_like_pattern_list)
         [expect_column_values_to_not_match_like_pattern](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern)
     """
+
+    like_pattern_list: Union[List[str], EvaluationParameterDict]
+
+    @pydantic.validator("like_pattern_list")
+    def validate_like_pattern_list(
+        cls, like_pattern_list: list[str] | EvaluationParameterDict
+    ) -> list[str] | EvaluationParameterDict:
+        if len(like_pattern_list) < 1:
+            raise ValueError(
+                "At least one like_pattern must be supplied in the like_pattern_list."
+            )
+
+        return like_pattern_list
 
     library_metadata = {
         "maturity": "production",

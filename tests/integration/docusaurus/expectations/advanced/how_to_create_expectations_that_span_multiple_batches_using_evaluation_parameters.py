@@ -2,6 +2,7 @@ import pathlib
 
 # <snippet name="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py get_context">
 import great_expectations as gx
+from great_expectations.core.result_format import ResultFormat
 
 context = gx.get_context()
 # </snippet>
@@ -65,7 +66,8 @@ expected_validation_result = {
         "kwargs": {
             "value": {
                 "$PARAMETER": "urn:great_expectations:validations:upstream_expectation_suite:expect_table_row_count_to_be_between.result.observed_value"
-            }
+            },
+            "result_format": ResultFormat.BASIC,
         },
         "expectation_type": "expect_table_row_count_to_equal",
         "meta": {},
