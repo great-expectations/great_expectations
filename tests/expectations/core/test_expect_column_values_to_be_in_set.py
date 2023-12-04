@@ -1,7 +1,9 @@
+from typing import List
+
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions.exceptions
+from great_expectations.compatibility import pydantic
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.expectations.core.expect_column_values_to_be_in_set import (
@@ -11,6 +13,7 @@ from great_expectations.expectations.core.expect_column_values_to_be_in_set impo
 
 # <snippet name="tests/expectations/core/test_expect_column_values_to_be_in_set.py ExpectColumnValuesToBeTwoLetterCountryCode_class_def">
 class ExpectColumnValuesToBeTwoLetterCountryCode(ExpectColumnValuesToBeInSet):
+    value_set: List[str] = ["FR", "DE", "CH", "ES", "IT", "BE", "NL", "PL"]
     default_kwarg_values = {
         "value_set": ["FR", "DE", "CH", "ES", "IT", "BE", "NL", "PL"],
     }
@@ -165,7 +168,7 @@ def test_expect_column_values_country_pass(
 
 
 @pytest.mark.big
-def test_expect_column_values_to_be_in_set_no_set(
+def test_expect_column_values_to_be_in_set_invalid_set(
     data_context_with_datasource_pandas_engine,
 ):
     context: AbstractDataContext = data_context_with_datasource_pandas_engine
@@ -195,7 +198,5 @@ def test_expect_column_values_to_be_in_set_no_set(
         batch_request=batch_request,
         create_expectation_suite_with_name="test",
     )
-    with pytest.raises(
-        great_expectations.exceptions.exceptions.InvalidExpectationConfigurationError
-    ):
-        result = validator.expect_column_values_to_be_in_set(column="a")  # noqa: F841
+    with pytest.raises(pydantic.ValidationError):
+        _ = validator.expect_column_values_to_be_in_set(column="a", value_set="foo")

@@ -1,12 +1,12 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core.evaluation_parameters import EvaluationParameterDict
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -86,6 +86,8 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
     """
 
+    regex: Union[str, EvaluationParameterDict]
+
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
@@ -164,39 +166,6 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         "column",
         "regex",
     )
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration for the Expectation.
-
-        For `expect_column_values_to_match_regex`
-        we require that the `configuraton.kwargs` contain a `regex` key that is either a `str` or `dict`
-        containing `$PARAMETER` key and `str` value.
-
-        Args:
-            configuration: The ExpectationConfiguration to be validated.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-
-        # supports extensibility by allowing value_set to not be provided in config but captured via child-class default_kwarg_values, e.g. parameterized expectations
-        regex = configuration.kwargs.get("regex") or self.default_kwarg_values.get(
-            "regex"
-        )
-
-        try:
-            assert "regex" in configuration.kwargs or regex, "regex is required"
-            assert isinstance(regex, (str, dict)), "regex must be a string"
-            if isinstance(regex, dict):
-                assert (
-                    "$PARAMETER" in regex
-                ), 'Evaluation Parameter dict for regex kwarg must have "$PARAMETER" key.'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.QUESTION)

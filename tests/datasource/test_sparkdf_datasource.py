@@ -4,7 +4,6 @@ import re
 import pandas as pd
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -422,7 +421,7 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):
 def test_spark_datasource_processes_dataset_options(
     test_folder_connection_path_csv, test_backends, empty_data_context
 ):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")
     datasource = SparkDFDatasource(

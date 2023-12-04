@@ -1,13 +1,11 @@
 import glob
 import json
 import os
-from typing import cast
 
 import pandas as pd
 import pytest
 
 import great_expectations.compatibility.bigquery as BigQueryDialect
-from great_expectations import DataContext
 from great_expectations.compatibility import snowflake, sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     SQLALCHEMY_NOT_IMPORTED,
@@ -139,9 +137,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     data=dataset,
                                     table_name=dataset_name,
                                     schemas=schemas,
-                                    context=cast(
-                                        DataContext, build_in_memory_runtime_context()
-                                    ),
+                                    context=build_in_memory_runtime_context(),
                                     pk_column=pk_column,
                                 )
 
@@ -472,20 +468,9 @@ def test_case_runner_v3_api(test_case):
     if test_case["skip"]:
         pytest.skip()
 
-    # Note: this should never be done in practice, but we are wiping expectations to reuse batches during testing.
-    # test_case["batch"]._initialize_expectations()
-    if "parse_strings_as_datetimes" in test_case["test"]["in"]:
-        with pytest.deprecated_call():
-            evaluate_json_test_v3_api(
-                validator=test_case["validator_with_data"],
-                expectation_type=test_case["expectation_type"],
-                test=test_case["test"],
-                pk_column=test_case["pk_column"],
-            )
-    else:
-        evaluate_json_test_v3_api(
-            validator=test_case["validator_with_data"],
-            expectation_type=test_case["expectation_type"],
-            test=test_case["test"],
-            pk_column=test_case["pk_column"],
-        )
+    evaluate_json_test_v3_api(
+        validator=test_case["validator_with_data"],
+        expectation_type=test_case["expectation_type"],
+        test=test_case["test"],
+        pk_column=test_case["pk_column"],
+    )

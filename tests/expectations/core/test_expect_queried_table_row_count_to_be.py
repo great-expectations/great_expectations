@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, cast
+from typing import TYPE_CHECKING
 
 import pytest
 from contrib.experimental.great_expectations_experimental.expectations.expect_queried_table_row_count_to_be import (
@@ -7,7 +7,6 @@ from contrib.experimental.great_expectations_experimental.expectations.expect_qu
 
 # noinspection PyUnresolvedReferences
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.data_context import DataContext
 from great_expectations.self_check.util import get_test_validator_with_data
 from great_expectations.util import build_in_memory_runtime_context
 from great_expectations.validator.validator import (
@@ -54,7 +53,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
     row_condition,
     titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
 
     validator: Validator = context.get_validator(batch_request=batch_request)
 
@@ -103,7 +102,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
     row_condition,
     titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
 
     validator: Validator = context.get_validator(batch_request=batch_request)
 
@@ -141,9 +140,8 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
 ):
     df: pd.DataFrame = titanic_df
 
-    context: Optional[DataContext] = cast(
-        DataContext, build_in_memory_runtime_context(include_pandas=False)
-    )
+    context = build_in_memory_runtime_context(include_pandas=False)
+
     validator = get_test_validator_with_data(
         execution_engine="spark",
         data=df,
@@ -189,9 +187,8 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
 ):
     df: pd.DataFrame = titanic_df
 
-    context: Optional[DataContext] = cast(
-        DataContext, build_in_memory_runtime_context(include_pandas=False)
-    )
+    context = build_in_memory_runtime_context(include_pandas=False)
+
     validator = get_test_validator_with_data(
         execution_engine="spark",
         data=df,

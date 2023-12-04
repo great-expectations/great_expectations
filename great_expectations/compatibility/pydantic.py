@@ -9,6 +9,8 @@ if is_version_greater_or_equal(version=pydantic.VERSION, compare_version="2.0.0"
     from pydantic.v1 import *  # noqa: F403
     from pydantic.v1 import (
         AnyUrl,
+        BaseSettings,
+        HttpUrl,
         UrlError,
         error_wrappers,
         errors,
@@ -27,6 +29,8 @@ else:
     from pydantic import *  # type: ignore[assignment,no-redef] # noqa: F403
     from pydantic import (  # type: ignore[no-redef]
         AnyUrl,
+        BaseSettings,
+        HttpUrl,
         UrlError,
         error_wrappers,
         errors,
@@ -42,11 +46,13 @@ else:
 
 __all__ = [
     "AnyUrl",
+    "BaseSettings",
     "error_wrappers",
     "errors",
     "fields",
     "GenericModel",
     "generics",
+    "HttpUrl",
     "json",
     "ModelMetaclass",
     "networks",

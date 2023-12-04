@@ -98,7 +98,6 @@ class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(
         "percentage": 0.1,
         "mostly": 1.0,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
     }
 

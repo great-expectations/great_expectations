@@ -1,11 +1,12 @@
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     BatchExpectation,
@@ -66,6 +67,9 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
 
         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
+
+    column_set: Union[list, set, EvaluationParameterDict, None]
+    exact_match: Union[bool, None]
 
     library_metadata = {
         "maturity": "production",
@@ -144,47 +148,6 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         "column_set",
         "exact_match",
     )
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        For this expectation it is required that:
-
-        - `column_set` has been provided.
-        - `column_set` is one of the following types: `list`, `set`, or `None`
-        - If `column_set` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
-          dictionary keys must be `$PARAMETER`.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                Expectation.
-        """
-        # Setting up a configuration
-        super().validate_configuration(configuration)
-
-        # Ensuring that a proper value has been provided
-        try:
-            assert "column_set" in configuration.kwargs, "column_set is required"
-            assert (
-                isinstance(configuration.kwargs["column_set"], (list, set, dict))
-                or configuration.kwargs["column_set"] is None
-            ), "column_set must be a list, set, or None"
-            if isinstance(configuration.kwargs["column_set"], dict):
-                assert (
-                    "$PARAMETER" in configuration.kwargs["column_set"]
-                ), 'Evaluation Parameter dict for column_set kwarg must have "$PARAMETER" key.'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     def _prescriptive_template(

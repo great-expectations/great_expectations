@@ -1,9 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional
+from datetime import datetime
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
+)
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_evaluation_parameter_string,
@@ -67,8 +70,7 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
+
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -79,7 +81,7 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     Notes:
         * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
@@ -92,6 +94,11 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
         [expect_column_median_to_be_between](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
         [expect_column_stdev_to_be_between](https://greatexpectations.io/expectations/expect_column_stdev_to_be_between)
     """
+
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    strict_min: bool = False
+    strict_max: bool = False
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -189,7 +196,6 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
         "strict_min": None,
         "strict_max": None,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
         "auto": False,
         "profiler_config": default_profiler_config,
@@ -223,10 +229,6 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
             ],
             "default": "BASIC",
         },
-        "include_config": {
-            "oneOf": [{"type": "null"}, {"type": "boolean"}],
-            "default": "true",
-        },
         "catch_exceptions": {
             "oneOf": [{"type": "null"}, {"type": "boolean"}],
             "default": "false",
@@ -252,26 +254,6 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
         },
         "required": ["column"],
     }
-
-    @override
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates configuration for the Expectation.
-
-        For `expect_column_mean_to_be_between`, `configuraton.kwargs` may contain `min_value` and
-        `max_value` whose value is either a number or date.
-
-        Args:
-            configuration: The configuration to be validated.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the
-                Expectation.
-        """
-        super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     @override
