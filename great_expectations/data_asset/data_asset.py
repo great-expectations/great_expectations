@@ -131,9 +131,6 @@ class DataAsset:
             signature from the implementing method.
 
             @expectation intercepts and takes action based on the following parameters:
-                * include_config (boolean or None) : \
-                    If True, then include the generated expectation config as part of the result object. \
-                    For more detail, see :ref:`include_config`.
                 * catch_exceptions (boolean or None) : \
                     If True, then catch exceptions and include them as part of the result object. \
                     For more detail, see :ref:`catch_exceptions`.

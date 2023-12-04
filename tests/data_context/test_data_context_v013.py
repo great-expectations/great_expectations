@@ -225,6 +225,7 @@ def test_get_config(empty_data_context):
     print(context.get_config(mode=ConfigOutputModes.DICT).keys())
 
     assert set(context.get_config(mode=ConfigOutputModes.DICT).keys()) == {
+        "batch_configs",
         "config_version",
         "datasources",
         "config_variables_file_path",

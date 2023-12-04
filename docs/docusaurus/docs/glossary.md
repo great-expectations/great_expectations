@@ -11,8 +11,6 @@ pagination_prev: null
 
 [**Batch Request:**](./terms/batch_request.md) Provided to a Data Source in order to create a Batch.
 
-[**CLI:**](./terms/cli.md) Command Line Interface
-
 [**Checkpoint:**](./terms/checkpoint.md) The primary means for validating data in a production deployment of Great Expectations.
 
 [**Checkpoint Store:**](./terms/checkpoint_store.md) A connector to store and retrieve information about means for validating data in a production deployment of Great Expectations.

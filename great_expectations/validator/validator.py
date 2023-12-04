@@ -174,7 +174,6 @@ class Validator:
     """
 
     DEFAULT_RUNTIME_CONFIGURATION = {
-        "include_config": True,
         "catch_exceptions": False,
         "result_format": "BASIC",
     }
@@ -1122,7 +1121,9 @@ class Validator:
                 raise InvalidExpectationConfigurationError(str(e))
 
             evaluated_config = copy.deepcopy(configuration)
-            evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
+
+            if self.active_batch_id:
+                evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
             validation_dependencies: ValidationDependencies = expectation_impl(
@@ -1327,7 +1328,6 @@ class Validator:
             Ex::
 
                 {
-                    "include_config" : True,
                     "catch_exceptions" : False,
                     "result_format" : 'BASIC'
                 }
@@ -1522,7 +1522,6 @@ class Validator:
                 "Unable to save config: filepath or data_context must be available."
             )
 
-    # TODO: <Alex>Should "include_config" also be an argument of this method?</Alex>
     @public_api
     @deprecated_argument(
         argument_name="run_id",

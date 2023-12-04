@@ -1,13 +1,14 @@
-from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+from datetime import datetime
+from typing import TYPE_CHECKING, List, Optional, Union
+
+from great_expectations.compatibility import pydantic
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -35,6 +36,10 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -47,7 +52,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
     Args:
         column (str): \
             The column name.
-        strftime_format (str): \
+        strftime_format (str or EvaluationParameterDict): \
             A strftime format string to use for matching
 
     Keyword Args:
@@ -73,6 +78,25 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
 
         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
+
+    strftime_format: Union[str, EvaluationParameterDict]
+
+    @pydantic.validator("strftime_format")
+    def validate_strftime_format(
+        cls, strftime_format: str | EvaluationParameterDict
+    ) -> str | EvaluationParameterDict:
+        if isinstance(strftime_format, str):
+            try:
+                datetime.strptime(  # noqa: DTZ007
+                    datetime.strftime(datetime.now(), strftime_format),  # noqa: DTZ005
+                    strftime_format,
+                )
+            except ValueError as e:
+                raise ValueError(
+                    f"Unable to use provided strftime_format. {e!s}"
+                ) from e
+
+        return strftime_format
 
     library_metadata = {
         "maturity": "production",
@@ -151,44 +175,6 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
         "column",
         "strftime_format",
     )
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration for the Expectation.
-
-        For `expect_column_values_to_match_strftime_format`
-        we require that the `configuraton.kwargs` contain a `strftime_format` key that is either a `str` or `dict`
-        containing `$PARAMETER` key and `str` value.
-
-        Args:
-            configuration: The ExpectationConfiguration to be validated.
-
-        Raises:
-            ValueError: The provided `strftime_format` cannot be used or parsed
-            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-
-        assert "strftime_format" in configuration.kwargs, "strftime_format is required"
-
-        strftime_format = configuration.kwargs["strftime_format"]
-
-        try:
-            if isinstance(strftime_format, dict):
-                assert (
-                    "$PARAMETER" in strftime_format
-                ), 'Evaluation Parameter dict for strftime_format kwarg must have "$PARAMETER" key.'
-            else:
-                datetime.strptime(  # noqa: DTZ007
-                    datetime.strftime(datetime.now(), strftime_format),  # noqa: DTZ005
-                    strftime_format,
-                )
-        except ValueError as e:
-            raise ValueError(f"Unable to use provided strftime_format. {e!s}")
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     def _prescriptive_template(

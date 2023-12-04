@@ -70,7 +70,7 @@ module.exports = {
             },
             {
               type: 'link',
-              label: 'Securely manage GX API Data Source connection strings',
+              label: 'Secure your GX API Data Source connection strings',
               href: '/docs/cloud/set_up_gx_cloud#secure-your-gx-api-data-source-connection-strings',
             },
           ]
@@ -128,8 +128,8 @@ module.exports = {
           items: [
             {
               type: 'link',
-              label: 'Available Expectation types',
-              href: '/docs/cloud/expectations/manage_expectations#available-expectation-types',
+              label: 'Available Expectations',
+              href: '/docs/cloud/expectations/manage_expectations#available-expectations',
             },
             {
               type: 'link',
@@ -410,7 +410,6 @@ module.exports = {
                 'guides/validation/validation_actions/how_to_collect_openlineage_metadata_using_a_validation_action',
                 'guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action',
-                'guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action',
                 'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
               ]
             },
@@ -501,7 +500,6 @@ module.exports = {
         'terms/batch_request',
         'terms/custom_expectation',
         'terms/checkpoint',
-        'terms/cli',
         'terms/datasource',
         'terms/data_context',
         'terms/data_asset',

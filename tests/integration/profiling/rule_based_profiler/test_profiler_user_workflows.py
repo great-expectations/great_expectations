@@ -428,7 +428,6 @@ def test_alice_expect_column_values_to_match_regex_auto_yes_default_profiler_con
     result: ExpectationValidationResult = validator.expect_column_values_to_match_regex(
         column="id",
         result_format="SUMMARY",
-        include_config=True,
         auto=True,
     )
 
@@ -448,7 +447,6 @@ def test_alice_expect_column_values_to_match_regex_auto_yes_default_profiler_con
         "auto": True,
         "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
         "column": "id",
-        "include_config": True,
         "mostly": 1.0,
         "result_format": "SUMMARY",
     }
@@ -465,7 +463,6 @@ def test_alice_expect_column_values_to_not_match_regex_auto_yes_default_profiler
         validator.expect_column_values_to_not_match_regex(
             column="id",
             result_format="SUMMARY",
-            include_config=True,
             auto=True,
         )
     )
@@ -486,7 +483,6 @@ def test_alice_expect_column_values_to_not_match_regex_auto_yes_default_profiler
         "auto": True,
         "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
         "column": "id",
-        "include_config": True,
         "mostly": 1.0,
         "result_format": "SUMMARY",
     }
@@ -504,7 +500,6 @@ def test_alice_expect_column_values_to_match_stftime_format_auto_yes_default_pro
         validator.expect_column_values_to_match_strftime_format(
             column="event_ts",
             result_format="SUMMARY",
-            include_config=True,
             auto=True,
         )
     )
@@ -516,7 +511,6 @@ def test_alice_expect_column_values_to_match_stftime_format_auto_yes_default_pro
         "auto": True,
         "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
         "column": "event_ts",
-        "include_config": True,
         "mostly": 1.0,
         "strftime_format": "%Y-%m-%d %H:%M:%S",
         "result_format": "SUMMARY",
@@ -535,7 +529,6 @@ def test_alice_expect_column_value_lengths_to_be_between_auto_yes_default_profil
         validator.expect_column_value_lengths_to_be_between(
             column="user_agent",
             result_format="SUMMARY",
-            include_config=True,
             auto=True,
         )
     )
@@ -547,7 +540,6 @@ def test_alice_expect_column_value_lengths_to_be_between_auto_yes_default_profil
         "auto": True,
         "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
         "column": "user_agent",
-        "include_config": True,
         "max_value": 115,  # Chetan - 20220516 - Note that all values in the dataset are of equal length
         "min_value": 115,  # TODO - we should add an additional test upon using an updated dataset (confirmed behavior through UAT)
         "mostly": 1.0,
@@ -926,7 +918,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     result = validator.expect_column_values_to_be_between(
         column=column_name,
         result_format="SUMMARY",
-        include_config=True,
         auto=True,
         profiler_config=None,
     )
@@ -939,7 +930,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "strict_max": False,
         "mostly": 1.0,
         "result_format": "SUMMARY",
-        "include_config": True,
         "auto": True,
         "profiler_config": None,
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
@@ -949,7 +939,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         column=column_name,
         min_value=0.0,
         result_format="SUMMARY",
-        include_config=True,
         auto=True,
         profiler_config=None,
     )
@@ -962,7 +951,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "strict_max": False,
         "mostly": 1.0,
         "result_format": "SUMMARY",
-        "include_config": True,
         "auto": True,
         "profiler_config": None,
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
@@ -973,7 +961,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         min_value=0.0,
         mostly=8.75e-1,
         result_format="SUMMARY",
-        include_config=True,
         auto=True,
         profiler_config=None,
     )
@@ -986,19 +973,17 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "strict_max": False,
         "mostly": 8.75e-1,
         "result_format": "SUMMARY",
-        "include_config": True,
         "auto": True,
         "profiler_config": None,
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
     }
 
-    with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
+    with pytest.raises(gx_exceptions.MetricResolutionError) as e:
         # noinspection PyUnusedLocal
         result = validator.expect_column_values_to_be_between(
             column=column_name,
             mostly=1.0,
             result_format="SUMMARY",
-            include_config=True,
             auto=False,
             profiler_config=None,
         )
@@ -1010,7 +995,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         max_value=3004.0,
         mostly=1.0,
         result_format="SUMMARY",
-        include_config=True,
     )
     assert result.success
     assert result.expectation_config["kwargs"] == {
@@ -1019,7 +1003,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "max_value": 3004.0,
         "mostly": 1.0,
         "result_format": "SUMMARY",
-        "include_config": True,
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
     }
 
@@ -1112,7 +1095,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         result = validator.expect_column_values_to_be_between(
             column=column_name,
             result_format="SUMMARY",
-            include_config=True,
             auto=True,
             profiler_config=custom_profiler_config.to_json_dict(),
         )
@@ -1123,7 +1105,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             "strict_min": False,
             "mostly": 1.0,
             "result_format": "SUMMARY",
-            "include_config": True,
             "auto": True,
             "profiler_config": custom_profiler_config.to_json_dict(),
             "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
@@ -1133,7 +1114,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             column=column_name,
             min_value=0.0,
             result_format="SUMMARY",
-            include_config=True,
             auto=True,
             profiler_config=custom_profiler_config,
         )
@@ -1144,7 +1124,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             "strict_min": False,
             "mostly": 1.0,
             "result_format": "SUMMARY",
-            "include_config": True,
             "auto": True,
             "profiler_config": custom_profiler_config.to_json_dict(),
             "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
@@ -1155,7 +1134,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             min_value=0.0,
             mostly=8.75e-1,
             result_format="SUMMARY",
-            include_config=True,
             auto=True,
             profiler_config=custom_profiler_config,
         )
@@ -1166,19 +1144,17 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             "strict_min": False,
             "mostly": 8.75e-1,
             "result_format": "SUMMARY",
-            "include_config": True,
             "auto": True,
             "profiler_config": custom_profiler_config.to_json_dict(),
             "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
         }
 
-        with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
+        with pytest.raises(gx_exceptions.MetricResolutionError) as e:
             # noinspection PyUnusedLocal
             result = validator.expect_column_values_to_be_between(
                 column=column_name,
                 mostly=1.0,
                 result_format="SUMMARY",
-                include_config=True,
                 auto=False,
                 profiler_config=custom_profiler_config,
             )
@@ -1245,7 +1221,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             column=column_name,
             mostly=1.0,
             result_format="SUMMARY",
-            include_config=True,
             auto=True,
             profiler_config=custom_profiler_config,
         )
@@ -1256,7 +1231,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             "strict_min": False,
             "mostly": 1.0,
             "result_format": "SUMMARY",
-            "include_config": True,
             "auto": True,
             "profiler_config": custom_profiler_config.to_json_dict(),
             "batch_id": "0808e185a52825d22356de2fe00a8f5f",
@@ -1267,7 +1241,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             min_value=-21.0,
             mostly=1.0,
             result_format="SUMMARY",
-            include_config=True,
             auto=False,
         )
         assert result.success
@@ -1276,7 +1249,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             "min_value": -21.0,
             "mostly": 1.0,
             "result_format": "SUMMARY",
-            "include_config": True,
             "auto": False,
             "batch_id": "0808e185a52825d22356de2fe00a8f5f",
         }
@@ -1363,7 +1335,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         result = validator.expect_column_values_to_be_between(
             column=column_name,
             result_format="SUMMARY",
-            include_config=True,
             auto=True,
             profiler_config=custom_profiler_config,
         )
@@ -1374,7 +1345,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             "strict_min": False,
             "mostly": 1.0,
             "result_format": "SUMMARY",
-            "include_config": True,
             "auto": True,
             "profiler_config": custom_profiler_config.to_json_dict(),
             "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
@@ -1384,7 +1354,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             column=column_name,
             min_value=0.0,
             result_format="SUMMARY",
-            include_config=True,
             auto=True,
             profiler_config=custom_profiler_config,
         )
@@ -1395,7 +1364,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             "strict_min": False,
             "mostly": 1.0,
             "result_format": "SUMMARY",
-            "include_config": True,
             "auto": True,
             "profiler_config": custom_profiler_config.to_json_dict(),
             "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
@@ -1406,7 +1374,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             min_value=0.0,
             mostly=8.75e-1,
             result_format="SUMMARY",
-            include_config=True,
             auto=True,
             profiler_config=custom_profiler_config,
         )
@@ -1417,19 +1384,17 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             "strict_min": False,
             "mostly": 8.75e-1,
             "result_format": "SUMMARY",
-            "include_config": True,
             "auto": True,
             "profiler_config": custom_profiler_config.to_json_dict(),
             "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
         }
 
-        with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
+        with pytest.raises(gx_exceptions.MetricResolutionError) as e:
             # noinspection PyUnusedLocal
             result = validator.expect_column_values_to_be_between(
                 column=column_name,
                 mostly=1.0,
                 result_format="SUMMARY",
-                include_config=True,
                 auto=False,
                 profiler_config=custom_profiler_config,
             )
@@ -1504,7 +1469,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             column=column_name,
             mostly=1.0,
             result_format="SUMMARY",
-            include_config=True,
             auto=True,
             profiler_config=custom_profiler_config,
         )
@@ -1515,7 +1479,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             "strict_min": False,
             "mostly": 1.0,
             "result_format": "SUMMARY",
-            "include_config": True,
             "auto": True,
             "profiler_config": custom_profiler_config.to_json_dict(),
             "batch_id": "0808e185a52825d22356de2fe00a8f5f",
@@ -1526,7 +1489,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             min_value=-21.0,
             mostly=1.0,
             result_format="SUMMARY",
-            include_config=True,
             auto=False,
         )
         assert result.success
@@ -1535,7 +1497,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             "min_value": -21.0,
             "mostly": 1.0,
             "result_format": "SUMMARY",
-            "include_config": True,
             "auto": False,
             "batch_id": "0808e185a52825d22356de2fe00a8f5f",
         }
@@ -1691,7 +1652,6 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
     result: ExpectationValidationResult = (
         validator.expect_table_row_count_to_be_between(
             result_format="SUMMARY",
-            include_config=True,
             auto=True,
         )
     )
@@ -1712,7 +1672,6 @@ def test_quentin_expect_expect_table_columns_to_match_set_auto_yes_default_profi
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
     result: ExpectationValidationResult = validator.expect_table_columns_to_match_set(
         result_format="SUMMARY",
-        include_config=True,
         auto=True,
     )
     assert result.success
@@ -1726,7 +1685,6 @@ def test_quentin_expect_expect_table_columns_to_match_set_auto_yes_default_profi
     assert expectation_config_kwargs == {
         "exact_match": None,
         "result_format": "SUMMARY",
-        "include_config": True,
         "auto": True,
         "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
     }
@@ -1985,7 +1943,6 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
         result = validator.expect_column_quantile_values_to_be_between(
             column="fare_amount",
             result_format="SUMMARY",
-            include_config=True,
             auto=True,
             profiler_config=custom_profiler_config,
         )
@@ -2088,7 +2045,6 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
         result = validator.expect_column_quantile_values_to_be_between(
             column="fare_amount",
             result_format="SUMMARY",
-            include_config=True,
             auto=True,
             profiler_config=custom_profiler_config,
         )
@@ -2111,7 +2067,6 @@ def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_con
     result: ExpectationValidationResult = validator.expect_column_values_to_be_in_set(
         column="passenger_count",
         result_format="SUMMARY",
-        include_config=True,
         auto=True,
     )
     assert result.success
@@ -2127,7 +2082,6 @@ def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_con
         "column": "passenger_count",
         "mostly": 1.0,
         "result_format": "SUMMARY",
-        "include_config": True,
         "auto": True,
         "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
     }
@@ -2154,7 +2108,6 @@ def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_confi
     result: ExpectationValidationResult = validator.expect_column_min_to_be_between(
         column="fare_amount",
         result_format="SUMMARY",
-        include_config=True,
         auto=True,
     )
 
@@ -2174,7 +2127,6 @@ def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_confi
         "strict_min": False,
         "strict_max": False,
         "result_format": "SUMMARY",
-        "include_config": True,
         "auto": True,
         "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
     }
@@ -2196,7 +2148,6 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
     result: ExpectationValidationResult = validator.expect_column_max_to_be_between(
         column="fare_amount",
         result_format="SUMMARY",
-        include_config=True,
         auto=True,
     )
     assert result.success
@@ -2217,7 +2168,6 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
         "strict_min": False,
         "strict_max": False,
         "result_format": "SUMMARY",
-        "include_config": True,
         "auto": True,
         "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
     }
@@ -2269,7 +2219,6 @@ def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default
         result = validator.expect_column_unique_value_count_to_be_between(
             column=column_name,
             result_format="SUMMARY",
-            include_config=True,
             auto=True,
         )
         assert result.success
@@ -2290,7 +2239,6 @@ def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default
             "strict_min": False,
             "strict_max": False,
             "result_format": "SUMMARY",
-            "include_config": True,
             "auto": True,
             "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
         }
@@ -2327,7 +2275,6 @@ def test_quentin_expect_column_proportion_of_unique_values_to_be_between_auto_ye
         result = validator.expect_column_proportion_of_unique_values_to_be_between(
             column=column_name,
             result_format="SUMMARY",
-            include_config=True,
             auto=True,
         )
         assert result.success
@@ -2348,7 +2295,6 @@ def test_quentin_expect_column_proportion_of_unique_values_to_be_between_auto_ye
             "strict_min": False,
             "strict_max": False,
             "result_format": "SUMMARY",
-            "include_config": True,
             "auto": True,
             "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
         }
@@ -2385,7 +2331,6 @@ def test_quentin_expect_column_sum_to_be_between_auto_yes_default_profiler_confi
         result = validator.expect_column_sum_to_be_between(
             column=column_name,
             result_format="SUMMARY",
-            include_config=True,
             auto=True,
         )
         assert result.success
@@ -2406,7 +2351,6 @@ def test_quentin_expect_column_sum_to_be_between_auto_yes_default_profiler_confi
             "strict_min": False,
             "strict_max": False,
             "result_format": "SUMMARY",
-            "include_config": True,
             "auto": True,
             "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
         }
@@ -2440,7 +2384,6 @@ def test_quentin_expect_column_stdev_to_be_between_auto_yes_default_profiler_con
         result = validator.expect_column_stdev_to_be_between(
             column=column_name,
             result_format="SUMMARY",
-            include_config=True,
             auto=True,
         )
         assert result.success
@@ -2461,7 +2404,6 @@ def test_quentin_expect_column_stdev_to_be_between_auto_yes_default_profiler_con
             "strict_min": False,
             "strict_max": False,
             "result_format": "SUMMARY",
-            "include_config": True,
             "auto": True,
             "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
         }
