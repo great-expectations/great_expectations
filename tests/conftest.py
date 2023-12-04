@@ -20,12 +20,12 @@ import pytest
 from freezegun import freeze_time
 
 import great_expectations as gx
+from great_expectations import project_manager
 from great_expectations.checkpoint.configurator import (
     ActionDetails,
     ActionDict,
     ActionDicts,
 )
-from great_expectations import project_manager
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
