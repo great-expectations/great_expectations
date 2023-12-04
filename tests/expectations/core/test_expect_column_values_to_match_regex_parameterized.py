@@ -1,23 +1,15 @@
-from typing import Optional
-
 import pandas as pd
 import pytest
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.expectations.core import ExpectColumnValuesToMatchRegex
 
 
 class ExpectColumnValuesAsStringToBePositiveInteger(ExpectColumnValuesToMatchRegex):
+    regex: str = "^\\d+$"
     default_kwarg_values = {
         "regex": "^\\d+$",
     }
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ):
-        super().validate_configuration(configuration)
-        assert "regex" not in configuration.kwargs, "regex cannot be altered"
 
 
 @pytest.mark.big

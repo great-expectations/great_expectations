@@ -2,12 +2,13 @@ from numbers import Number
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Union
 
 import numpy as np
+from typing_extensions import TypedDict
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
@@ -55,6 +56,11 @@ from great_expectations.validator.validator import (
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
+
+
+class QuantileRange(TypedDict):
+    quantiles: List[float]
+    value_ranges: List[List[Union[None, int, float]]]
 
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
@@ -109,8 +115,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
+
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -121,7 +126,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     Notes:
         * min_value and max_value are both inclusive.
@@ -134,6 +139,9 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         [expect_column_max_to_be_between](https://greatexpectations.io/expectations/expect_column_max_to_be_between)
         [expect_column_median_to_be_between](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
     """
+
+    quantile_ranges: QuantileRange
+    allow_relative_error: Union[bool, str] = False
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -236,7 +244,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         "quantile_ranges": None,
         "result_format": "BASIC",
         "allow_relative_error": False,
-        "include_config": True,
         "catch_exceptions": False,
         "meta": None,
         "auto": False,
@@ -248,55 +255,26 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         "allow_relative_error",
     )
 
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        For `expect_column_quantile_values_to_be_between` it is required that the `configuration.kwargs` contain a
-        `quantile_ranges` key that is a `dict`. Also, `quantile_ranges` must contain a `value_ranges` key that is a
-        list of ordered pairs, as well as a `quantiles` key that is a list of the same length as `values_ranges`.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                Expectation.
-            ValueError: `value_ranges` and `quantiles` are not the same length.
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
+    @pydantic.validator("quantile_ranges")
+    def validate_quantile_ranges(
+        cls, quantile_ranges: QuantileRange
+    ) -> Optional[QuantileRange]:
         try:
-            assert (
-                "quantile_ranges" in configuration.kwargs
-            ), "quantile_ranges must be provided"
-            assert isinstance(
-                configuration.kwargs["quantile_ranges"], dict
-            ), "quantile_ranges should be a dictionary"
-
             assert all(
-                True if None in x or x == sorted(x) else False
-                for x in configuration.kwargs["quantile_ranges"]["value_ranges"]
+                True
+                if None in x
+                else x == sorted([val for val in x if val is not None])
+                for x in quantile_ranges["value_ranges"]
             ), "quantile_ranges must consist of ordered pairs"
-
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-        # Ensuring actual quantiles and their value ranges match up
-        quantile_ranges = configuration.kwargs["quantile_ranges"]
-        quantiles = quantile_ranges["quantiles"]
-        quantile_value_ranges = quantile_ranges["value_ranges"]
-
-        if len(quantiles) != len(quantile_value_ranges):
+        if len(quantile_ranges["quantiles"]) != len(quantile_ranges["value_ranges"]):
             raise ValueError(
                 "quantile_values and quantiles must have the same number of elements"
             )
+
+        return quantile_ranges
 
     @classmethod
     def _prescriptive_template(

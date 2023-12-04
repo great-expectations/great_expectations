@@ -103,6 +103,8 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
 
     min_value: Union[float, EvaluationParameterDict, datetime, None] = None
     max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    strict_min: bool = False
+    strict_max: bool = False
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

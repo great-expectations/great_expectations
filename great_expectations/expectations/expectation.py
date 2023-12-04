@@ -335,14 +335,12 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     domain_keys: ClassVar[Tuple[str, ...]] = ()
     success_keys: ClassVar[Tuple[str, ...]] = ()
     runtime_keys: ClassVar[Tuple[str, ...]] = (
-        "include_config",
         "catch_exceptions",
         "result_format",
     )
     default_kwarg_values: ClassVar[
         dict[str, Union[bool, str, float, RuleBasedProfilerConfig, None]]
     ] = {
-        "include_config": True,
         "catch_exceptions": False,
         "result_format": ResultFormat.BASIC,
     }
@@ -2518,7 +2516,6 @@ class QueryExpectation(BatchExpectation, ABC):
 
     default_kwarg_values: ClassVar[Dict] = {
         "result_format": ResultFormat.BASIC,
-        "include_config": True,
         "catch_exceptions": False,
         "meta": None,
         "row_condition": None,
@@ -2665,7 +2662,6 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1,
         "result_format": ResultFormat.BASIC,
-        "include_config": True,
         "catch_exceptions": True,
     }
 
@@ -2934,7 +2930,6 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1,
         "result_format": ResultFormat.BASIC,
-        "include_config": True,
         "catch_exceptions": True,
     }
 
@@ -3189,7 +3184,6 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         "mostly": 1,
         "ignore_row_if": "all_values_are_missing",
         "result_format": ResultFormat.BASIC,
-        "include_config": True,
         "catch_exceptions": True,
     }
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Union
 
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
@@ -68,6 +68,9 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
 
         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
+
+    column_list: Union[tuple, list]
+    ignore_row_if: str = "all_values_are_missing"
 
     library_metadata = {
         "maturity": "production",
