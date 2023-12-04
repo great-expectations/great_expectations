@@ -1,5 +1,7 @@
 ---
 title: Changelog
+pagination_next: null
+pagination_prev: null
 ---
 
 ### Deprecation policy
