@@ -263,7 +263,6 @@ def test_content_block_list_available_expectations():
         "expect_table_columns_to_match_set",
         "expect_table_row_count_to_be_between",
         "expect_table_row_count_to_equal",
-        "expect_column_pair_cramers_phi_value_to_be_less_than",
     }
     assert known_validation_results_implemented_expectations <= set(
         available_expectations
