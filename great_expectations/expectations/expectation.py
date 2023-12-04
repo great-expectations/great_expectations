@@ -2867,7 +2867,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             success = _mostly_success(
                 nonnull_count,
                 unexpected_count,
-                self.get_success_kwargs().get("mostly"),
+                self.get_success_kwargs()["mostly"],
             )
 
         return _format_map_output(
@@ -3121,7 +3121,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             success = _mostly_success(
                 filtered_row_count,
                 unexpected_count,
-                self.get_success_kwargs().get("mostly"),
+                self.get_success_kwargs()["mostly"],
             )
 
         return _format_map_output(
@@ -3382,7 +3382,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             success = _mostly_success(
                 filtered_row_count,
                 unexpected_count,
-                self.get_success_kwargs().get("mostly"),
+                self.get_success_kwargs()["mostly"],
             )
 
         return _format_map_output(
