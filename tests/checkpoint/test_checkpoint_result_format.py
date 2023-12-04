@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING, Any, Dict, List
 
 import pytest
 
-from great_expectations.checkpoint.checkpoint import SimpleCheckpoint
+from great_expectations.checkpoint.checkpoint import Checkpoint
+from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -3636,7 +3637,7 @@ def test_rendered_content_bool_only_respected(
     )
     validator.save_expectation_suite(discard_failed_expectations=False)
 
-    checkpoint = SimpleCheckpoint(
+    checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
         validations=[
@@ -3648,6 +3649,12 @@ def test_rendered_content_bool_only_respected(
         runtime_configuration={
             "result_format": result_format,
         },
+        action_list=[
+            ActionDict(
+                name="store_validation_result",
+                action=ActionDetails(class_name="StoreValidationResultAction"),
+            ),
+        ],
     )
 
     checkpoint_result = checkpoint.run()
