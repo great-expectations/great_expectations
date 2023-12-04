@@ -21,7 +21,6 @@ class ExpectColumnBootstrappedKsTestPValueToBeGreaterThan(BatchExpectation):
 
     metric_dependencies = tuple()
     success_keys = ()
-    default_kwarg_values = {}
     args_keys = (
         "column",
         "distribution",
