@@ -1165,8 +1165,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
         if isinstance(field, pydantic.fields.ModelField):
             return field.default if not field.required else None
-        elif field is not None:
-            return field.default if not field.is_required() else None
         else:
             return None
 
