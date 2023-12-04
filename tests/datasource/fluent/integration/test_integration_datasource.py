@@ -9,7 +9,8 @@ import pandas as pd
 import pytest
 
 import great_expectations as gx
-from great_expectations.checkpoint import SimpleCheckpoint
+from great_expectations.checkpoint import Checkpoint
+from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.compatibility import pydantic
 from great_expectations.data_context import (
     AbstractDataContext,
@@ -447,17 +448,23 @@ def test_simple_checkpoint_run(
     expectation_suite_name = "my_expectation_suite"
     context.add_expectation_suite(expectation_suite_name)
 
-    checkpoint = SimpleCheckpoint(
+    checkpoint = Checkpoint(
         "my_checkpoint",
         data_context=context,
         expectation_suite_name=expectation_suite_name,
         batch_request=batch_request,
+        action_list=[
+            ActionDict(
+                name="store_validation_result",
+                action=ActionDetails(class_name="StoreValidationResultAction"),
+            ),
+        ],
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "SimpleCheckpoint"
+    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
 
-    checkpoint = SimpleCheckpoint(
+    checkpoint = Checkpoint(
         "my_checkpoint",
         data_context=context,
         validations=[
@@ -466,10 +473,16 @@ def test_simple_checkpoint_run(
                 "batch_request": batch_request,
             }
         ],
+        action_list=[
+            ActionDict(
+                name="store_validation_result",
+                action=ActionDetails(class_name="StoreValidationResultAction"),
+            ),
+        ],
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "SimpleCheckpoint"
+    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
 
 
 @pytest.mark.filesystem
@@ -491,15 +504,21 @@ def test_simple_checkpoint_run_with_nonstring_path_option(empty_data_context):
     )
     expectation_suite_name = "my_expectation_suite"
     context.add_expectation_suite(expectation_suite_name)
-    checkpoint = SimpleCheckpoint(
+    checkpoint = Checkpoint(
         "my_checkpoint",
         data_context=context,
         expectation_suite_name=expectation_suite_name,
         batch_request=batch_request,
+        action_list=[
+            ActionDict(
+                name="store_validation_result",
+                action=ActionDetails(class_name="StoreValidationResultAction"),
+            ),
+        ],
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "SimpleCheckpoint"
+    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
 
 
 @pytest.mark.parametrize(

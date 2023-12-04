@@ -20,6 +20,11 @@ import pytest
 from freezegun import freeze_time
 
 import great_expectations as gx
+from great_expectations.checkpoint.configurator import (
+    ActionDetails,
+    ActionDict,
+    ActionDicts,
+)
 from great_expectations import project_manager
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
@@ -1503,11 +1508,15 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=nested_checkpoint_template_config_3,
     )
 
-    # add minimal SimpleCheckpoint
+    # add minimal Checkpoint
     simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
-        class_name="SimpleCheckpoint",
         config_version=1,
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+        ],
     )
     simple_checkpoint_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_config.name
@@ -1517,12 +1526,19 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=simple_checkpoint_config,
     )
 
-    # add SimpleCheckpoint with slack webhook
     simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        slack_webhook="https://hooks.slack.com/foo/bar",
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+            ActionDicts.build_slack_action(
+                webhook="https://hooks.slack.com/foo/bar",
+                notify_on="all",
+                notify_with="all",
+            ),
+        ],
     )
     simple_checkpoint_with_slack_webhook_config_key: ConfigurationIdentifier = (
         ConfigurationIdentifier(
@@ -1534,13 +1550,19 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=simple_checkpoint_with_slack_webhook_config,
     )
 
-    # add SimpleCheckpoint with slack webhook and notify_with
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        slack_webhook="https://hooks.slack.com/foo/bar",
-        notify_with="all",
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+            ActionDicts.build_slack_action(
+                webhook="https://hooks.slack.com/foo/bar",
+                notify_on="all",
+                notify_with="all",
+            ),
+        ],
     )
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config.name
@@ -1550,12 +1572,20 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=simple_checkpoint_with_slack_webhook_and_notify_with_all_config,
     )
 
-    # add SimpleCheckpoint with site_names
     simple_checkpoint_with_site_names_config = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        site_names=["local_site"],
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDict(
+                name="update_data_docs",
+                action=ActionDetails(
+                    class_name="UpdateDataDocsAction",
+                    site_names=["local_site"],
+                ),
+            ),
+        ],
     )
     simple_checkpoint_with_site_names_config_key: ConfigurationIdentifier = (
         ConfigurationIdentifier(
@@ -2088,11 +2118,14 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         value=nested_checkpoint_template_config_3,
     )
 
-    # add minimal SimpleCheckpoint
     simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
-        class_name="SimpleCheckpoint",
         config_version=1,
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+        ],
     )
     simple_checkpoint_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_config.name
@@ -2102,12 +2135,19 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         value=simple_checkpoint_config,
     )
 
-    # add SimpleCheckpoint with slack webhook
     simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        slack_webhook="https://hooks.slack.com/foo/bar",
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+            ActionDicts.build_slack_action(
+                webhook="https://hooks.slack.com/foo/bar",
+                notify_on="all",
+                notify_with="all",
+            ),
+        ],
     )
     simple_checkpoint_with_slack_webhook_config_key: ConfigurationIdentifier = (
         ConfigurationIdentifier(
@@ -2119,13 +2159,19 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         value=simple_checkpoint_with_slack_webhook_config,
     )
 
-    # add SimpleCheckpoint with slack webhook and notify_with
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        slack_webhook="https://hooks.slack.com/foo/bar",
-        notify_with="all",
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+            ActionDicts.build_slack_action(
+                webhook="https://hooks.slack.com/foo/bar",
+                notify_on="all",
+                notify_with="all",
+            ),
+        ],
     )
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config.name
@@ -2135,12 +2181,20 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         value=simple_checkpoint_with_slack_webhook_and_notify_with_all_config,
     )
 
-    # add SimpleCheckpoint with site_names
     simple_checkpoint_with_site_names_config = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        site_names=["local_site"],
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDict(
+                name="update_data_docs",
+                action=ActionDetails(
+                    class_name="UpdateDataDocsAction",
+                    site_names=["local_site"],
+                ),
+            ),
+        ],
     )
     simple_checkpoint_with_site_names_config_key: ConfigurationIdentifier = (
         ConfigurationIdentifier(
