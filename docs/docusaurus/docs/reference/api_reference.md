@@ -1,5 +1,6 @@
 ---
 title: API reference
+displayed_sidebar: gx_apis
 ---
 
 Great Expectations (GX) API reference content is generated from classes and methods docstrings.
