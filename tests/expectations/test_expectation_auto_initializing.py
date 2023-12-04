@@ -31,6 +31,6 @@ def test_expectation_is_expectation_auto_initializing(capsys):
     )
     captured = capsys.readouterr()
     assert (
-        "The Expectation expect_column_mean_to_be_between is able to be auto-initialized. Please run by using the auto=True parameter."
+        "The Expectation expect_column_mean_to_be_between is able to be auto-initialized. Please run by using the _auto=True parameter."
         in captured.out
     )
