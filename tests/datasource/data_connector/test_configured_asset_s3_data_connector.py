@@ -9,7 +9,6 @@ import pytest
 from moto import mock_s3
 
 import great_expectations.exceptions.exceptions as gx_exceptions
-from great_expectations import DataContext
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -109,7 +108,7 @@ def test_basic_instantiation():
 )
 @mock_s3
 def test_instantiation_from_a_config(mock_emit, empty_data_context_stats_enabled):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
@@ -196,7 +195,7 @@ def test_instantiation_from_a_config(mock_emit, empty_data_context_stats_enabled
 def test_instantiation_from_a_config_regex_does_not_match_paths(
     mock_emit, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"

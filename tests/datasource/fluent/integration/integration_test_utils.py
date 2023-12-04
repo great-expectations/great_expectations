@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING, Dict, Tuple
 
 import pytest
 
-from great_expectations.checkpoint import SimpleCheckpoint
+from great_expectations.checkpoint import Checkpoint
+from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.data_context import AbstractDataContext
@@ -65,9 +66,22 @@ def run_checkpoint_and_data_doc(
 
     # Configure and run a checkpoint
     checkpoint_config = {
-        "class_name": "SimpleCheckpoint",
         "validations": [
             {"batch_request": batch_request, "expectation_suite_name": suite_name}
+        ],
+        "action_list": [
+            ActionDict(
+                name="store_validation_result",
+                action=ActionDetails(class_name="StoreValidationResultAction"),
+            ),
+            ActionDict(
+                name="store_evaluation_params",
+                action=ActionDetails(class_name="StoreEvaluationParametersAction"),
+            ),
+            ActionDict(
+                name="update_data_docs",
+                action=ActionDetails(class_name="UpdateDataDocsAction"),
+            ),
         ],
     }
     metadata = validator.active_batch.metadata  # type: ignore[union-attr] # active_batch could be None
@@ -77,7 +91,7 @@ def run_checkpoint_and_data_doc(
         checkpoint_name = (
             f"batch_with_year_{metadata['year']}_month_{metadata['month']}_{suite_name}"
         )
-    checkpoint = SimpleCheckpoint(
+    checkpoint = Checkpoint(
         checkpoint_name,
         context,
         **checkpoint_config,  # type: ignore[arg-type]
@@ -363,15 +377,28 @@ def _configure_and_run_data_assistant(
 
     # Run a checkpoint
     checkpoint_config = {
-        "class_name": "SimpleCheckpoint",
         "validations": [
             {
                 "batch_request": batch_request,
                 "expectation_suite_name": expectation_suite_name,
             }
         ],
+        "action_list": [
+            ActionDict(
+                name="store_validation_result",
+                action=ActionDetails(class_name="StoreValidationResultAction"),
+            ),
+            ActionDict(
+                name="store_evaluation_params",
+                action=ActionDetails(class_name="StoreEvaluationParametersAction"),
+            ),
+            ActionDict(
+                name="update_data_docs",
+                action=ActionDetails(class_name="UpdateDataDocsAction"),
+            ),
+        ],
     }
-    checkpoint = SimpleCheckpoint(
+    checkpoint = Checkpoint(
         f"yellow_tripdata_sample_{expectation_suite_name}",
         context,
         **checkpoint_config,  # type: ignore[arg-type]

@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
@@ -115,16 +115,9 @@ class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
         "row_condition": None,
         "condition_parser": None,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
     }
     args_keys = ("column", "datetime_format")
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        """Validating that user has inputted a value set and that configuration has been initialized"""
-        super().validate_configuration(configuration)
 
     @classmethod
     def _atomic_prescriptive_template(

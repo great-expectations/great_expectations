@@ -2103,17 +2103,6 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 ):
                     continue
 
-                # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
-                if (
-                    "allow_cross_type_comparisons" in test["input"]
-                    and validator_with_data
-                    and isinstance(
-                        validator_with_data.execution_engine.batch_manager.active_batch_data,
-                        SqlAlchemyBatchData,
-                    )
-                ):
-                    continue
-
                 parametrized_tests.append(
                     {
                         "expectation_type": expectation_type,
@@ -2229,67 +2218,6 @@ def sort_unexpected_values(test_value_list, result_value_list):
     return test_value_list, result_value_list
 
 
-def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
-    """
-    This method will evaluate the result of a test build using the Great Expectations json test format.
-
-    NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_test_for' with a list
-        of DataAsset types to suppress, such as ['SQLAlchemy', 'Pandas'].
-
-    :param data_asset: (DataAsset) A great expectations DataAsset
-    :param expectation_type: (string) the name of the expectation to be run using the test input
-    :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
-        - title: (string) the name of the test
-        - exact_match_out: (boolean) If true, match the 'out' dictionary exactly against the result of the expectation
-        - in: (dict or list) a dictionary of keyword arguments to use to evaluate the expectation or a list of positional arguments
-        - out: (dict) the dictionary keys against which to make assertions. Unless exact_match_out is true, keys must\
-            come from the following list:
-              - success
-              - observed_value
-              - unexpected_index_list
-              - unexpected_list
-              - details
-              - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
-    :return: None. asserts correctness of results.
-    """
-
-    data_asset.set_default_expectation_argument("result_format", "COMPLETE")
-    data_asset.set_default_expectation_argument("include_config", False)
-
-    if "title" not in test:
-        raise ValueError("Invalid test configuration detected: 'title' is required.")
-
-    if "exact_match_out" not in test:
-        raise ValueError(
-            "Invalid test configuration detected: 'exact_match_out' is required."
-        )
-
-    if "input" not in test:
-        if "in" in test:
-            test["input"] = test["in"]
-        else:
-            raise ValueError(
-                "Invalid test configuration detected: 'input' is required."
-            )
-
-    if "output" not in test:
-        if "out" in test:
-            test["output"] = test["out"]
-        else:
-            raise ValueError(
-                "Invalid test configuration detected: 'output' is required."
-            )
-
-    # Support tests with positional arguments
-    if isinstance(test["input"], list):
-        result = getattr(data_asset, expectation_type)(*test["input"])
-    # As well as keyword arguments
-    else:
-        result = getattr(data_asset, expectation_type)(**test["input"])
-
-    check_json_test_result(test=test, result=result, data_asset=data_asset)
-
-
 def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
     validator: Validator,
     expectation_type: str,
@@ -2336,7 +2264,6 @@ def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
     # noinspection PyProtectedMember
     validator._initialize_expectations(expectation_suite=expectation_suite)
     # validator.set_default_expectation_argument("result_format", "COMPLETE")
-    # validator.set_default_expectation_argument("include_config", False)
 
     if "title" not in test:
         raise ValueError("Invalid test configuration detected: 'title' is required.")
@@ -2377,14 +2304,12 @@ def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
                         "result_format": "COMPLETE",
                         "unexpected_index_column_names": ["pk_index"],
                     },
-                    "include_config": False,
                 }
             else:
                 runtime_kwargs = {
                     "result_format": {
                         "result_format": "COMPLETE",
                     },
-                    "include_config": False,
                 }
             runtime_kwargs.update(kwargs)
             result = getattr(validator, expectation_type)(**runtime_kwargs)

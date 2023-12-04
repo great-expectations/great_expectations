@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_configuration import parse_result_format
@@ -90,28 +90,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     }
 
     map_metric: ClassVar[str] = "column_values.nonnull"
-    args_keys: ClassVar[tuple[str, ...]] = ("column",)
-
-    @override
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates the configuration of an Expectation.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                                  from the configuration attribute of the Expectation instance.
-
-        Raises:
-            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
-                                                                           Expectation."
-        """
-        super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
+    args_keys: ClassVar[Tuple[str, ...]] = ("column",)
 
     @classmethod
     @override

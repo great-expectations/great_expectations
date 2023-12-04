@@ -39,8 +39,8 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
     Args:
         column (str): \
             The column name.
-        json_schema  (str): \
-            The JSON schema (in string form) to match
+        json_schema  (dict): \
+            The JSON schema to match
 
     Keyword Args:
         mostly (None or a float between 0 and 1): \
@@ -70,6 +70,8 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
         [The JSON-schema docs](https://json-schema.org)
     """
 
+    json_schema: dict
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
@@ -98,25 +100,6 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
         "column",
         "json_schema",
     )
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validate the configuration of an Expectation.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-            from the configuration attribute of the Expectation instance.
-
-        Raises:
-            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
-            Expectation
-        """
-        super().validate_configuration(configuration)
 
     @classmethod
     def _prescriptive_template(

@@ -1,9 +1,7 @@
-from typing import TYPE_CHECKING, Optional
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
+from typing import TYPE_CHECKING, Optional, Union
+
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
     render_evaluation_parameter_string,
@@ -21,6 +19,10 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -67,6 +69,9 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
 
+    column_list: Union[tuple, list]
+    ignore_row_if: str = "all_values_are_missing"
+
     library_metadata = {
         "maturity": "production",
         "tags": [
@@ -91,26 +96,6 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
         "catch_exceptions": False,
     }
     args_keys = ("column_list",)
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates the configuration for the Expectation.
-
-        The configuration will also be validated using each of the `validate_configuration` methods
-        in its Expectation superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided,
-                it will be pulled from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required
-                by the Expectation.
-        """
-        super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     def _prescriptive_template(

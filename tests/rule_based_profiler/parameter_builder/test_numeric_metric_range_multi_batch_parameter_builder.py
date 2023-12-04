@@ -8,7 +8,6 @@ from scipy import stats
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import NP_EPSILON
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -29,9 +28,7 @@ pytestmark = pytest.mark.big
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {
@@ -156,9 +153,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
 def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -355,9 +350,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
 def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -476,9 +469,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
 def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evaluation_dependency_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: Dict[str, str] = {
         "datasource_name": "taxi_pandas",
@@ -690,9 +681,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_one(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {
@@ -748,9 +737,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_negative(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {
@@ -807,9 +794,7 @@ provided.
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_zero(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {
@@ -865,9 +850,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_very_small(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {
@@ -930,9 +913,7 @@ to 0.  A false_positive_rate of {NP_EPSILON} has been selected instead.
 def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {
@@ -1061,9 +1042,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
     This tests whether kde gives a wider estimate for the max
     """
 
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {
@@ -1186,9 +1165,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
     This tests whether a change to bw_method results in a change to the range
     """
 
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {
