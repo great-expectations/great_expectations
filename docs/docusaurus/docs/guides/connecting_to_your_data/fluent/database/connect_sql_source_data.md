@@ -60,7 +60,7 @@ The following code is an example of a Snowflake connection string format:
  my_connection_string = "snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME_OR_LOCATOR>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>"
 ```
 
-:::info <a id="account-names">Account Names and Locators</a>
+:::info Account Names and Locators
 
 Snowflake accepts both account names and account locators as valid account identifiers when constructing a connection string. 
 
