@@ -2103,17 +2103,6 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 ):
                     continue
 
-                # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
-                if (
-                    "allow_cross_type_comparisons" in test["input"]
-                    and validator_with_data
-                    and isinstance(
-                        validator_with_data.execution_engine.batch_manager.active_batch_data,
-                        SqlAlchemyBatchData,
-                    )
-                ):
-                    continue
-
                 parametrized_tests.append(
                     {
                         "expectation_type": expectation_type,
