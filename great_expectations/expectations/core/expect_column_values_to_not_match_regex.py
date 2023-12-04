@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -23,18 +23,6 @@ from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
-)
-from great_expectations.rule_based_profiler.config.base import (
-    ParameterBuilderConfig,
-    RuleBasedProfilerConfig,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
-    VARIABLES_KEY,
 )
 
 if TYPE_CHECKING:
@@ -112,52 +100,6 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
     success_keys = (
         "regex",
         "mostly",
-        "_auto",
-        "_profiler_config",
-    )
-
-    _regex_pattern_string_parameter_builder_config: ParameterBuilderConfig = (
-        ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="RegexPatternStringParameterBuilder",
-            name="regex_pattern_string_parameter_builder",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=None,
-        )
-    )
-    _validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        _regex_pattern_string_parameter_builder_config
-    ]
-    _default_profiler_config = RuleBasedProfilerConfig(
-        name="expect_column_values_to_not_match_regex",  # Convention: use "expectation_type" as profiler name.
-        config_version=1.0,
-        variables={},
-        rules={
-            "default_expect_column_values_to_not_match_regex_rule": {
-                "variables": {
-                    "mostly": 1.0,
-                },
-                "domain_builder": {
-                    "class_name": "ColumnDomainBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                },
-                "expectation_configuration_builders": [
-                    {
-                        "expectation_type": "expect_column_values_to_not_match_regex",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": _validation_parameter_builder_configs,
-                        "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "regex": f"{PARAMETER_KEY}{_regex_pattern_string_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
-                        "mostly": f"{VARIABLES_KEY}mostly",
-                        "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{_regex_pattern_string_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-                        },
-                    },
-                ],
-            },
-        },
     )
 
     default_kwarg_values = {
@@ -167,8 +109,6 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": True,
-        "_auto": False,
-        "_profiler_config": _default_profiler_config,
     }
     args_keys = (
         "column",

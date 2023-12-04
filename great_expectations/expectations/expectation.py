@@ -80,7 +80,6 @@ from great_expectations.core.metric_function_types import (
 from great_expectations.core.result_format import ResultFormat, ResultFormatDict
 from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
-    ExpectationNotFoundError,
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
@@ -92,7 +91,6 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.registry import (
     _registered_metrics,
     _registered_renderers,
-    get_expectation_impl,
     get_metric_kwargs,
     register_expectation,
     register_renderer,
@@ -1702,33 +1700,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
                                 kwargs=test.input,
                             )
         return None
-
-    @staticmethod
-    def is_expectation_auto_initializing(name: str) -> bool:
-        """
-        Given the name of an Expectation, returns a boolean that represents whether an Expectation can be auto-intialized.
-
-        Args:
-            name (str): name of Expectation
-
-        Returns:
-            boolean that represents whether an Expectation can be auto-initialized. Information also outputted to logger.
-        """
-
-        expectation_impl: MetaExpectation = get_expectation_impl(name)
-        if not expectation_impl:
-            raise ExpectationNotFoundError(
-                f"Expectation {name} was not found in the list of registered Expectations. "
-                f"Please check your configuration and try again"
-            )
-        if "_auto" in expectation_impl.default_kwarg_values:
-            print(
-                f"The Expectation {name} is able to be auto-initialized. Please run by using the _auto=True parameter."
-            )
-            return True
-        else:
-            print(f"The Expectation {name} is not able to be auto-initialized.")
-            return False
 
     @staticmethod
     def _add_array_params(

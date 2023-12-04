@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -19,18 +19,6 @@ from great_expectations.render.renderer_configuration import (
     RendererValueType,
 )
 from great_expectations.render.util import substitute_none_for_missing
-from great_expectations.rule_based_profiler.config import (
-    ParameterBuilderConfig,
-    RuleBasedProfilerConfig,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
-    VARIABLES_KEY,
-)
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
@@ -86,63 +74,13 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
     success_keys = (
         "column_set",
         "exact_match",
-        "_auto",
-        "_profiler_config",
-    )
-
-    _mean_table_columns_set_match_multi_batch_parameter_builder_config = (
-        ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="MeanTableColumnsSetMatchMultiBatchParameterBuilder",
-            name="column_names_set_estimator",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=None,
-        )
-    )
-    _validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        _mean_table_columns_set_match_multi_batch_parameter_builder_config,
-    ]
-    _default_profiler_config = RuleBasedProfilerConfig(
-        name="expect_table_columns_to_match_set",  # Convention: use "expectation_type" as profiler name.
-        config_version=1.0,
-        variables={},
-        rules={
-            "expect_table_columns_to_match_set": {
-                "variables": {
-                    "exact_match": None,
-                    "success_ratio": 1.0,
-                },
-                "domain_builder": {
-                    "class_name": "TableDomainBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                },
-                "expectation_configuration_builders": [
-                    {
-                        "expectation_type": "expect_table_columns_to_match_set",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": _validation_parameter_builder_configs,
-                        "condition": f"{PARAMETER_KEY}{_mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}success_ratio >= {VARIABLES_KEY}success_ratio",
-                        "column_set": f"{PARAMETER_KEY}{_mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
-                        "exact_match": f"{VARIABLES_KEY}exact_match",
-                        "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{_mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-                        },
-                    },
-                ],
-            },
-        },
     )
 
     default_kwarg_values = {
         "column_set": None,
         "exact_match": True,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
-        "_auto": False,
-        "_profiler_config": _default_profiler_config,
     }
     args_keys = (
         "column_set",
