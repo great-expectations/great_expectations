@@ -5,6 +5,7 @@ hide_table_of_contents: true
 pagination_next: null
 pagination_prev: null
 slug: '/cloud/'
+displayed_sidebar: gx_cloud
 ---
 
 import LinkCardGrid from '/docs/components/LinkCardGrid';

@@ -1,6 +1,5 @@
 module.exports = {
   gx_cloud: [
-      { type: 'doc', id: 'cloud/gx_cloud_lp' },
         {
           type: 'category',
           label: 'About GX Cloud',
@@ -262,8 +261,7 @@ module.exports = {
           ]
         },
       ],
-  gx_core: [
-      { type: 'doc', id: 'oss/gx_oss_lp' },
+  gx_oss: [
         {
           type: 'category',
           label: 'Get started with GX OSS',
@@ -273,8 +271,8 @@ module.exports = {
             {
               type: 'doc', id: 'conceptual_guides/gx_overview', label: 'GX Overview'
             },
-            'tutorials/getting_started/how_to_use_great_expectations_in_databricks',
-            'tutorials/getting_started/how_to_use_great_expectations_with_sql',
+            'oss/get_started/get_started_with_gx_and_databricks',
+            'oss/get_started/get_started_with_gx_and_sql',
           ]
         },
         {

@@ -411,3 +411,8 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs/deployment_patterns/index /docs/category/integrations
 /docs/guides/validation/validate_data_overview /docs/guides/validation/validate_data_lp
 /docs/guides/connecting_to_your_data/connect_to_data_overview /docs/guides/connecting_to_your_data/connect_to_data_lp
+
+
+# Redirects for OSS folder reorg
+/docs/tutorials/getting_started/how_to_use_great_expectations_in_databricks /docs/oss/get_started/get_started_with_gx_and_databricks
+/docs/tutorials/getting_started/how_to_use_great_expectations_with_sql /docs/oss/get_started/get_started_with_gx_and_sql
