@@ -12,7 +12,9 @@ batch_request = asset.build_batch_request()
 validator = context.get_validator(batch_request=batch_request)
 
 validator.expect_column_values_to_not_be_null("pickup_datetime")
-validator.expect_column_values_to_be_between("passenger_count", auto=True)
+validator.expect_column_values_to_be_between(
+    "passenger_count", min_value=1, max_value=6
+)
 
 taxi_suite = validator.get_expectation_suite()
 taxi_suite.expectation_suite_name = "taxi_suite"
