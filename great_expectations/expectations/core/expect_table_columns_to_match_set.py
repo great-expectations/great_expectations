@@ -86,11 +86,11 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
     success_keys = (
         "column_set",
         "exact_match",
-        "auto",
-        "profiler_config",
+        "_auto",
+        "_profiler_config",
     )
 
-    mean_table_columns_set_match_multi_batch_parameter_builder_config = (
+    _mean_table_columns_set_match_multi_batch_parameter_builder_config = (
         ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
             class_name="MeanTableColumnsSetMatchMultiBatchParameterBuilder",
@@ -100,10 +100,10 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
             evaluation_parameter_builder_configs=None,
         )
     )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        mean_table_columns_set_match_multi_batch_parameter_builder_config,
+    _validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+        _mean_table_columns_set_match_multi_batch_parameter_builder_config,
     ]
-    default_profiler_config = RuleBasedProfilerConfig(
+    _default_profiler_config = RuleBasedProfilerConfig(
         name="expect_table_columns_to_match_set",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},
@@ -122,12 +122,12 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
                         "expectation_type": "expect_table_columns_to_match_set",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
-                        "condition": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}success_ratio >= {VARIABLES_KEY}success_ratio",
-                        "column_set": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+                        "validation_parameter_builder_configs": _validation_parameter_builder_configs,
+                        "condition": f"{PARAMETER_KEY}{_mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}success_ratio >= {VARIABLES_KEY}success_ratio",
+                        "column_set": f"{PARAMETER_KEY}{_mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
                         "exact_match": f"{VARIABLES_KEY}exact_match",
                         "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                            "profiler_details": f"{PARAMETER_KEY}{_mean_table_columns_set_match_multi_batch_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                         },
                     },
                 ],
@@ -141,8 +141,8 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
-        "auto": False,
-        "profiler_config": default_profiler_config,
+        "_auto": False,
+        "_profiler_config": _default_profiler_config,
     }
     args_keys = (
         "column_set",

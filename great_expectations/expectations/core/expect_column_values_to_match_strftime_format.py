@@ -113,11 +113,11 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
     success_keys = (
         "strftime_format",
         "mostly",
-        "auto",
-        "profiler_config",
+        "_auto",
+        "_profiler_config",
     )
 
-    date_format_string_parameter_builder_config: ParameterBuilderConfig = (
+    _date_format_string_parameter_builder_config: ParameterBuilderConfig = (
         ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
             class_name="SimpleDateFormatStringParameterBuilder",
@@ -127,10 +127,10 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
             evaluation_parameter_builder_configs=None,
         )
     )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        date_format_string_parameter_builder_config
+    _validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+        _date_format_string_parameter_builder_config
     ]
-    default_profiler_config = RuleBasedProfilerConfig(
+    _default_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_values_to_match_strftime_format",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},
@@ -148,12 +148,12 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
                         "expectation_type": "expect_column_values_to_match_strftime_format",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
+                        "validation_parameter_builder_configs": _validation_parameter_builder_configs,
                         "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "strftime_format": f"{PARAMETER_KEY}{date_format_string_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+                        "strftime_format": f"{PARAMETER_KEY}{_date_format_string_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
                         "mostly": f"{VARIABLES_KEY}mostly",
                         "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{date_format_string_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                            "profiler_details": f"{PARAMETER_KEY}{_date_format_string_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                         },
                     },
                 ],
@@ -168,8 +168,8 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": True,
-        "auto": False,
-        "profiler_config": default_profiler_config,
+        "_auto": False,
+        "_profiler_config": _default_profiler_config,
     }
     args_keys = (
         "column",

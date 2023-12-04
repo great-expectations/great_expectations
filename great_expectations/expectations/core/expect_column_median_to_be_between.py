@@ -114,11 +114,11 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
         "strict_min",
         "max_value",
         "strict_max",
-        "auto",
-        "profiler_config",
+        "_auto",
+        "_profiler_config",
     )
 
-    median_range_estimator_parameter_builder_config = ParameterBuilderConfig(
+    _median_range_estimator_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="median_range_estimator",
@@ -141,10 +141,10 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
         round_decimals=f"{VARIABLES_KEY}round_decimals",
         evaluation_parameter_builder_configs=None,
     )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        median_range_estimator_parameter_builder_config,
+    _validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+        _median_range_estimator_parameter_builder_config,
     ]
-    default_profiler_config = RuleBasedProfilerConfig(
+    _default_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_median_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},
@@ -170,14 +170,14 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
                         "expectation_type": "expect_column_median_to_be_between",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
+                        "validation_parameter_builder_configs": _validation_parameter_builder_configs,
                         "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "min_value": f"{PARAMETER_KEY}{median_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
-                        "max_value": f"{PARAMETER_KEY}{median_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
+                        "min_value": f"{PARAMETER_KEY}{_median_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
+                        "max_value": f"{PARAMETER_KEY}{_median_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
                         "strict_min": f"{VARIABLES_KEY}strict_min",
                         "strict_max": f"{VARIABLES_KEY}strict_max",
                         "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{median_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                            "profiler_details": f"{PARAMETER_KEY}{_median_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                         },
                     },
                 ],
@@ -194,8 +194,8 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
-        "auto": False,
-        "profiler_config": default_profiler_config,
+        "_auto": False,
+        "_profiler_config": _default_profiler_config,
     }
     args_keys = (
         "column",

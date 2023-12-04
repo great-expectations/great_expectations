@@ -133,11 +133,11 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     success_keys = (
         "value_set",
         "mostly",
-        "auto",
-        "profiler_config",
+        "_auto",
+        "_profiler_config",
     )
 
-    value_set_estimator_parameter_builder_config: ParameterBuilderConfig = (
+    _value_set_estimator_parameter_builder_config: ParameterBuilderConfig = (
         ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
             class_name="ValueSetMultiBatchParameterBuilder",
@@ -147,10 +147,10 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             evaluation_parameter_builder_configs=None,
         )
     )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        value_set_estimator_parameter_builder_config,
+    _validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+        _value_set_estimator_parameter_builder_config,
     ]
-    default_profiler_config = RuleBasedProfilerConfig(
+    _default_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_values_to_be_in_set",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},
@@ -168,12 +168,12 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                         "expectation_type": "expect_column_values_to_be_in_set",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
+                        "validation_parameter_builder_configs": _validation_parameter_builder_configs,
                         "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "value_set": f"{PARAMETER_KEY}{value_set_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+                        "value_set": f"{PARAMETER_KEY}{_value_set_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
                         "mostly": f"{VARIABLES_KEY}mostly",
                         "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{value_set_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                            "profiler_details": f"{PARAMETER_KEY}{_value_set_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                         },
                     },
                 ],
@@ -183,8 +183,8 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
     default_kwarg_values = {
         "value_set": [],
-        "auto": False,
-        "profiler_config": default_profiler_config,
+        "_auto": False,
+        "_profiler_config": _default_profiler_config,
     }
 
     @classmethod

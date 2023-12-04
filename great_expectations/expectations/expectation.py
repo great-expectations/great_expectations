@@ -41,7 +41,6 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field, ModelMetaclass
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (
-    deprecated_method_or_class,
     public_api,
 )
 from great_expectations.core.expectation_configuration import (
@@ -1705,22 +1704,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         return None
 
     @staticmethod
-    @deprecated_method_or_class(
-        version="0.17.11", message="Please use is_expectation_auto_initializing instead"
-    )
-    def is_expectation_self_initializing(name: str) -> bool:
-        """
-        Given the name of an Expectation, returns a boolean that represents whether an Expectation can be auto-intialized.
-
-        Args:
-            name (str): name of Expectation
-
-        Returns:
-            boolean that represents whether an Expectation can be auto-initialized. Information also outputted to logger.
-        """
-        return Expectation.is_expectation_auto_initializing(name=name)
-
-    @staticmethod
     def is_expectation_auto_initializing(name: str) -> bool:
         """
         Given the name of an Expectation, returns a boolean that represents whether an Expectation can be auto-intialized.
@@ -1738,9 +1721,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
                 f"Expectation {name} was not found in the list of registered Expectations. "
                 f"Please check your configuration and try again"
             )
-        if "auto" in expectation_impl.default_kwarg_values:
+        if "_auto" in expectation_impl.default_kwarg_values:
             print(
-                f"The Expectation {name} is able to be auto-initialized. Please run by using the auto=True parameter."
+                f"The Expectation {name} is able to be auto-initialized. Please run by using the _auto=True parameter."
             )
             return True
         else:

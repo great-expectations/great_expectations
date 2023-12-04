@@ -157,11 +157,11 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     success_keys = (
         "quantile_ranges",
         "allow_relative_error",
-        "auto",
-        "profiler_config",
+        "_auto",
+        "_profiler_config",
     )
 
-    quantile_value_ranges_estimator_parameter_builder_config = ParameterBuilderConfig(
+    _quantile_value_ranges_estimator_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="quantile_value_ranges_estimator",
@@ -187,10 +187,10 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         round_decimals=f"{VARIABLES_KEY}round_decimals",
         evaluation_parameter_builder_configs=None,
     )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        quantile_value_ranges_estimator_parameter_builder_config,
+    _validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+        _quantile_value_ranges_estimator_parameter_builder_config,
     ]
-    default_profiler_config: ClassVar[
+    _default_profiler_config: ClassVar[
         RuleBasedProfilerConfig
     ] = RuleBasedProfilerConfig(
         name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
@@ -222,15 +222,15 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
                         "expectation_type": "expect_column_quantile_values_to_be_between",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
+                        "validation_parameter_builder_configs": _validation_parameter_builder_configs,
                         "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
                         "quantile_ranges": {
                             "quantiles": f"{VARIABLES_KEY}quantiles",
-                            "value_ranges": f"{PARAMETER_KEY}{quantile_value_ranges_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+                            "value_ranges": f"{PARAMETER_KEY}{_quantile_value_ranges_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
                         },
                         "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
                         "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{quantile_value_ranges_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                            "profiler_details": f"{PARAMETER_KEY}{_quantile_value_ranges_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                         },
                     }
                 ],
@@ -246,8 +246,8 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         "allow_relative_error": False,
         "catch_exceptions": False,
         "meta": None,
-        "auto": False,
-        "profiler_config": default_profiler_config,
+        "_auto": False,
+        "_profiler_config": _default_profiler_config,
     }
     args_keys = (
         "column",
