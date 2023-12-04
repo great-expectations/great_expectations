@@ -1152,12 +1152,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         )
 
     def _get_default_value(self, key: str) -> Any:
-        """Get default value for the model if it is not required.
-        NOTE: For reasons I'm unclear on, we can get back either a FieldInfo or a ModelField.
-        """
         field = self.__fields__.get(key)
 
-        if isinstance(field, pydantic.fields.ModelField):
+        if field is not None:
             return field.default if not field.required else None
         else:
             return None
@@ -2493,12 +2490,6 @@ class QueryExpectation(BatchExpectation, ABC):
     --Documentation--
         - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
     """
-
-    result_format: Union[ResultFormat, ResultFormatDict] = ResultFormat.BASIC
-    catch_exceptions: bool = False
-    meta: Optional[dict] = None
-    row_condition: Optional[str] = None
-    condition_parser: Optional[str] = None
 
     domain_keys: ClassVar[Tuple] = (
         "batch_id",
