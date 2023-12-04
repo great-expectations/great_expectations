@@ -140,6 +140,7 @@ class ExpectationSuite(SerializableDictDot):
             for expectation_configuration in self.expectation_configurations
         ]
 
+    @public_api
     def add(self, expectation: Expectation) -> Expectation:
         """Add an Expectation to the collection."""
         if not any(
@@ -161,6 +162,7 @@ class ExpectationSuite(SerializableDictDot):
 
         return expectation
 
+    @public_api
     def delete(self, expectation: Expectation) -> Expectation:
         """Delete an Expectation from the collection.
 
@@ -191,6 +193,7 @@ class ExpectationSuite(SerializableDictDot):
 
         return expectation
 
+    @public_api
     def save(self) -> None:
         """Save this ExpectationSuite."""
         key = self._store.get_key(suite=self)
