@@ -98,8 +98,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
     """
 
     EXPECTATION_SUCCESS_KEYS: Set[str] = {
-        "auto",
-        "profiler_config",
+        "_auto",
+        "_profiler_config",
     }
 
     def __init__(

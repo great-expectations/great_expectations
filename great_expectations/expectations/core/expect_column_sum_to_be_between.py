@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.evaluation_parameters import (
@@ -21,18 +21,6 @@ from great_expectations.render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
-)
-from great_expectations.rule_based_profiler.config import (
-    ParameterBuilderConfig,
-    RuleBasedProfilerConfig,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
-    VARIABLES_KEY,
 )
 
 if TYPE_CHECKING:
@@ -110,75 +98,6 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
         "strict_min",
         "max_value",
         "strict_max",
-        "auto",
-        "profiler_config",
-    )
-
-    column_sum_range_estimator_parameter_builder_config = ParameterBuilderConfig(
-        module_name="great_expectations.rule_based_profiler.parameter_builder",
-        class_name="NumericMetricRangeMultiBatchParameterBuilder",
-        name="column_sum_range_estimator",
-        metric_name="column.sum",
-        metric_multi_batch_parameter_builder_name=None,
-        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        metric_value_kwargs=None,
-        enforce_numeric_metric=True,
-        replace_nan_with_zero=True,
-        reduce_scalar_metric=True,
-        false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-        estimator=f"{VARIABLES_KEY}estimator",
-        n_resamples=f"{VARIABLES_KEY}n_resamples",
-        random_seed=f"{VARIABLES_KEY}random_seed",
-        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
-        quantile_bias_correction=f"{VARIABLES_KEY}quantile_bias_correction",
-        quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
-        include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
-        truncate_values=f"{VARIABLES_KEY}truncate_values",
-        round_decimals=f"{VARIABLES_KEY}round_decimals",
-        evaluation_parameter_builder_configs=None,
-    )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        column_sum_range_estimator_parameter_builder_config,
-    ]
-    default_profiler_config = RuleBasedProfilerConfig(
-        name="expect_column_sum_to_be_between",  # Convention: use "expectation_type" as profiler name.
-        config_version=1.0,
-        variables={},
-        rules={
-            "default_expect_column_sum_to_be_between_rule": {
-                "variables": {
-                    "strict_min": False,
-                    "strict_max": False,
-                    "estimator": "exact",
-                    "include_estimator_samples_histogram_in_details": False,
-                    "truncate_values": {
-                        "lower_bound": None,
-                        "upper_bound": None,
-                    },
-                    "round_decimals": None,
-                },
-                "domain_builder": {
-                    "class_name": "ColumnDomainBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                },
-                "expectation_configuration_builders": [
-                    {
-                        "expectation_type": "expect_column_sum_to_be_between",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
-                        "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "min_value": f"{PARAMETER_KEY}{column_sum_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
-                        "max_value": f"{PARAMETER_KEY}{column_sum_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
-                        "strict_min": f"{VARIABLES_KEY}strict_min",
-                        "strict_max": f"{VARIABLES_KEY}strict_max",
-                        "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{column_sum_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-                        },
-                    },
-                ],
-            },
-        },
     )
 
     # Default values
@@ -188,10 +107,7 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
         "strict_min": None,
         "strict_max": None,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
-        "auto": False,
-        "profiler_config": default_profiler_config,
     }
     args_keys = (
         "column",
