@@ -7,6 +7,7 @@ from great_expectations.compatibility import pydantic
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations import expectation
+from great_expectations.expectations.core import ExpectColumnMaxToBeBetween
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -212,3 +213,32 @@ def test_validate_dependencies_against_available_metrics_failure(metrics_dict):
             metrics=metrics_dict,
             configuration=expectation_configuration,
         )
+
+
+@pytest.mark.unit
+def test_expectation_configuration_stays_up_to_date():
+    expectation = ExpectColumnMaxToBeBetween(column="foo", min_value=0, max_value=10)
+
+    assert expectation.configuration == ExpectationConfiguration(
+        expectation_type="expect_column_max_to_be_between",
+        kwargs={
+            "column": "foo",
+            "min_value": 0,
+            "max_value": 10,
+        },
+    )
+
+    expectation.column = "bar"
+    expectation.min_value = 5
+    expectation.max_value = 15
+    expectation.mostly = 0.95
+
+    assert expectation.configuration == ExpectationConfiguration(
+        expectation_type="expect_column_max_to_be_between",
+        kwargs={
+            "column": "bar",
+            "mostly": 0.95,
+            "min_value": 5,
+            "max_value": 15,
+        },
+    )
