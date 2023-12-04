@@ -112,7 +112,6 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "max_value",
         "strict_min",
         "strict_max",
-        "allow_cross_type_comparisons",
         "mostly",
     )
 
@@ -124,7 +123,6 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "max_value": None,
         "strict_min": False,
         "strict_max": False,  # tolerance=1e-9,
-        "allow_cross_type_comparisons": None,
         "result_format": "BASIC",
         "catch_exceptions": False,
         "meta": None,

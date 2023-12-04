@@ -427,16 +427,6 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     )
                                 ):
                                     skip_test = True
-                            # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
-                            if (
-                                "allow_cross_type_comparisons" in test["in"]
-                                and validator_with_data
-                                and isinstance(
-                                    validator_with_data.active_batch_data,
-                                    SqlAlchemyBatchData,
-                                )
-                            ):
-                                skip_test = True
 
                             parametrized_tests.append(
                                 {
