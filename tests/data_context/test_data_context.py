@@ -13,7 +13,7 @@ import pytest
 from freezegun import freeze_time
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
+from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
 from great_expectations.core.batch import RuntimeBatchRequest
@@ -1752,7 +1752,7 @@ def test_add_checkpoint_from_yaml(mock_emit, empty_data_context_stats_enabled):
     What does this test and why?
     We should be able to add a checkpoint directly from a valid yaml configuration.
     test_yaml_config() should not automatically save a checkpoint if valid.
-    checkpoint yaml in a store should match the configuration, even if created from SimpleCheckpoints
+    checkpoint yaml in a store should match the configuration
     Note: This tests multiple items and could stand to be broken up.
     """
 
@@ -1765,7 +1765,7 @@ def test_add_checkpoint_from_yaml(mock_emit, empty_data_context_stats_enabled):
     checkpoint_yaml_config = f"""
 name: {checkpoint_name}
 config_version: 1.0
-class_name: SimpleCheckpoint
+class_name: Checkpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
@@ -1775,29 +1775,21 @@ validations:
       partition_request:
         index: -1
     expectation_suite_name: newsuite
+action_list:
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+  - name: store_evaluation_params
+    action:
+      class_name: StoreEvaluationParametersAction
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
     """
 
     checkpoint_from_test_yaml_config = context.test_yaml_config(
         checkpoint_yaml_config, name=checkpoint_name
     )
-    assert mock_emit.call_count == 1
-    # Substitute anonymized name since it changes for each run
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "SimpleCheckpoint",
-                },
-                "success": True,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
 
     # test_yaml_config() no longer stores checkpoints automatically
     assert checkpoint_name not in context.list_checkpoints()
@@ -1811,7 +1803,7 @@ validations:
 config_version: 1.0
 template_name:
 module_name: great_expectations.checkpoint
-class_name: SimpleCheckpoint
+class_name: Checkpoint
 run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
 expectation_suite_name:
 batch_request: {}
@@ -1908,7 +1900,7 @@ expectation_suite_ge_cloud_id:
     ) == {
         "name": "my_new_checkpoint",
         "config_version": 1.0,
-        "class_name": "SimpleCheckpoint",
+        "class_name": "Checkpoint",
         "module_name": "great_expectations.checkpoint",
         "run_name_template": "%Y%m%d-%H%M%S-my-run-name-template",
         "action_list": [
@@ -1945,9 +1937,6 @@ expectation_suite_ge_cloud_id:
 
     assert checkpoint_name in context.list_checkpoints()
     assert len(context.list_checkpoints()) == 1
-
-    # No other usage stats calls detected
-    assert mock_emit.call_count == 1
 
 
 @pytest.mark.filesystem
@@ -2709,12 +2698,25 @@ def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_
     )
 
     checkpoint_config = {
-        "class_name": "SimpleCheckpoint",
         "validations": [
             {"batch_request": batch_request, "expectation_suite_name": suite_name}
         ],
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {"class_name": "StoreValidationResultAction"},
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+            },
+            {
+                "name": "update_data_docs",
+                "action": {"class_name": "UpdateDataDocsAction"},
+            },
+        ],
     }
-    checkpoint = SimpleCheckpoint(
+    checkpoint = Checkpoint(
         f"_tmp_checkpoint_{suite_name}", context, **checkpoint_config
     )
     checkpoint_result = checkpoint.run()

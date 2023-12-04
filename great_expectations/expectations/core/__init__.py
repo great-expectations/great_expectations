@@ -17,9 +17,6 @@ from .expect_column_min_to_be_between import ExpectColumnMinToBeBetween
 from .expect_column_most_common_value_to_be_in_set import (
     ExpectColumnMostCommonValueToBeInSet,
 )
-from .expect_column_pair_cramers_phi_value_to_be_less_than import (
-    ExpectColumnPairCramersPhiValueToBeLessThan,
-)
 from .expect_column_pair_values_a_to_be_greater_than_b import (
     ExpectColumnPairValuesAToBeGreaterThanB,
 )

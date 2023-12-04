@@ -5,21 +5,22 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 Get an environment to run the code in this guide. Please choose an option below.
 
 <Tabs
-  groupId="yaml-or-python"
-  defaultValue='yaml'
-  values={[
-  {label: 'No CLI + filesystem', value:'yaml'},
-  {label: 'No CLI + no filesystem', value:'python'},
-  ]}>
+groupId="yaml-or-python"
+defaultValue='yaml'
+values={[
+{label: 'Filesystem', value:'yaml'},
+{label: 'No filesystem', value:'python'},
+]}>
 
- <TabItem value="yaml">
+<TabItem value="yaml">
 
-If you use Great Expectations in an environment that has filesystem access, and prefer not to use the <TechnicalTag tag="cli" text="CLI" />, run the code in this guide in a notebook or other Python script.
+If you use Great Expectations in an environment that has filesystem access, run the code in a notebook or other Python script.
 
 </TabItem>
 <TabItem value="python">
 
-If you use Great Expectations in an environment that has no filesystem (such as Databricks or AWS EMR), run the code in this guide in that system's preferred way.
+If you use Great Expectations in an environment that has no filesystem (such as Databricks or AWS EMR), run the code in
+this guide in that system's preferred way.
 
 </TabItem>
 

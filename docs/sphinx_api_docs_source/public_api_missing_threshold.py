@@ -6,7 +6,6 @@ adding an exclude directive to docs/sphinx_api_docs_source/public_api_excludes.p
 
 ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/checkpoint/actions.py Name: _run",
-    "File: great_expectations/checkpoint/checkpoint.py Name: SimpleCheckpoint",
     "File: great_expectations/compatibility/not_imported.py Name: is_version_greater_or_equal",
     "File: great_expectations/core/batch.py Name: head",
     "File: great_expectations/core/batch_config.py Name: BatchConfig",
@@ -55,7 +54,6 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/exceptions/exceptions.py Name: InvalidExpectationConfigurationError",
     "File: great_expectations/expectations/core/expect_column_values_to_match_like_pattern_list.py Name: validate_configuration",
     "File: great_expectations/expectations/core/expect_column_values_to_not_match_like_pattern_list.py Name: validate_configuration",
-    "File: great_expectations/expectations/expectation.py Name: is_expectation_auto_initializing",
     "File: great_expectations/expectations/expectation.py Name: validate_configuration",
     "File: great_expectations/expectations/metrics/map_metric_provider/column_pair_condition_partial.py Name: column_pair_condition_partial",
     "File: great_expectations/expectations/metrics/map_metric_provider/multicolumn_condition_partial.py Name: multicolumn_condition_partial",
