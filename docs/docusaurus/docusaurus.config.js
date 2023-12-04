@@ -110,7 +110,7 @@ module.exports = {
         },
         {
           label: 'GX OSS API',
-          to: '/docs/reference/api',
+          to: '/docs/reference/api_reference',
         },
         {
           label: 'LEARN',
