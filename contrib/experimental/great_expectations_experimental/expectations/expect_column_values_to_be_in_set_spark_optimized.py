@@ -98,9 +98,9 @@ class ExpectColumnValuesToBeInSetSparkOptimized(ColumnAggregateExpectation):
 
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
-        value_set = configuration.kwargs.get(
+        value_set = configuration.kwargs.get("value_set") or self._get_default_value(
             "value_set"
-        ) or self.default_kwarg_values.get("value_set")
+        )
         column = configuration.kwargs.get("column")
 
         try:
