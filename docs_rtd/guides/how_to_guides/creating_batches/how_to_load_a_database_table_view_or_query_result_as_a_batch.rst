@@ -166,7 +166,7 @@ This guide shows how to get a :ref:`batch <reference__core_concepts__batches>` o
               from great_expectations.core.batch import RuntimeBatchRequest
               from great_expectations.validator.validator import Validator
 
-              context: DataContext = gx.get_context()
+              context = gx.get_context()
 
           Create an in-code Data Context using these instructions: :ref:`How to instantiate a Data Context without a yml file <how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file>`
 

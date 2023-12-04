@@ -24,7 +24,6 @@ class DataContextStore(ConfigurationStore):
         DataContextVariableSchema.DATASOURCES,
         DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
         DataContextVariableSchema.EXPECTATIONS_STORE_NAME,
-        DataContextVariableSchema.PROFILER_STORE_NAME,
         DataContextVariableSchema.VALIDATIONS_STORE_NAME,
         DataContextVariableSchema.VALIDATION_OPERATORS,
     }

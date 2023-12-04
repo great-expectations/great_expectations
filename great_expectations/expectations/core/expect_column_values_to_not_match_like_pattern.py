@@ -1,19 +1,25 @@
-from typing import List, Optional
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-)
-from great_expectations.core.expectation_validation_result import (
-    ExpectationValidationResult,
+from typing import TYPE_CHECKING, List, Optional, Union
+
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    InvalidExpectationConfigurationError,
 )
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.components import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
+
+if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+    )
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationValidationResult,
+    )
 
 
 class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
@@ -61,6 +67,8 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
     """
 
+    like_pattern: Union[str, EvaluationParameterDict]
+
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
@@ -90,38 +98,6 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
         "column",
         "like_pattern",
     )
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """
-        Validates the configuration of an Expectation.
-
-        For `expect_column_values_to_not_match_like_pattern` it is required that:
-            - configuration's kwargs contains a key 'like_pattern' of type str or dict
-            - if 'like_pattern' is dict, assert key "$PARAMETER" is present
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                                  from the configuration attribute of the Expectation instance.
-
-        Raises:
-            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
-                                  Expectation."
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        try:
-            assert "like_pattern" in configuration.kwargs, "Must provide like_pattern"
-            assert isinstance(
-                configuration.kwargs.get("like_pattern"), (str, dict)
-            ), "like_pattern must be a string or dict"
-            if isinstance(configuration.kwargs.get("like_pattern"), dict):
-                assert "$PARAMETER" in configuration.kwargs.get(
-                    "like_pattern"
-                ), 'Evaluation Parameter dict for like_pattern kwarg must have "$PARAMETER" key.'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)

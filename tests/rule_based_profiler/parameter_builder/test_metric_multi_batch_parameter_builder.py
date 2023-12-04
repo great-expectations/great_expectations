@@ -4,7 +4,6 @@ import pytest
 
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
     ParameterBuilder,
@@ -25,9 +24,7 @@ pytestmark = pytest.mark.big
 def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {
@@ -108,9 +105,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
 def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {
@@ -195,9 +190,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
 def test_metric_multi_batch_parameter_builder_bobby_single_batch_yes(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
+    data_context = bobby_columnar_table_multi_batch_deterministic_data_context
 
     # BatchRequest yielding three batches
     batch_request: dict = {

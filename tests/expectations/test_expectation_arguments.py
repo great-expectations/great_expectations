@@ -6,7 +6,6 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import DataContext
 from great_expectations.compatibility import pyspark
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -64,7 +63,6 @@ def test_catch_exceptions_no_exceptions(
     expectation_arguments_without_meta: dict
 
     expectation_arguments_column: dict = {
-        "include_config": True,
         "column": "Name",  # use correct column to avoid error
     }
     expectation_arguments_without_meta = dict(
@@ -78,7 +76,6 @@ def test_catch_exceptions_no_exceptions(
     suite.add_expectation(expectation_configuration=expectation_configuration)
 
     expectation_arguments_table: dict = {
-        "include_config": True,
         "value": 4,
     }
     expectation_arguments_without_meta = dict(
@@ -179,7 +176,6 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
     expectation_arguments_without_meta: dict
 
     expectation_arguments_column: dict = {
-        "include_config": True,
         "column": "unknown_column",  # use intentionally incorrect column to force error in "MetricProvider" evaluations
     }
     expectation_arguments_without_meta = dict(
@@ -193,7 +189,6 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
     suite.add_expectation(expectation_configuration=expectation_configuration)
 
     expectation_arguments_table: dict = {
-        "include_config": True,
         "value": 4,
     }
     expectation_arguments_without_meta = dict(
@@ -295,7 +290,6 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     expectation_arguments_without_meta: dict
 
     expectation_arguments_column: dict = {
-        "include_config": True,
         "column": "unknown_column",  # use intentionally incorrect column to force error in "MetricProvider" evaluations
     }
     expectation_arguments_without_meta = dict(
@@ -309,7 +303,6 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     suite.add_expectation(expectation_configuration=expectation_configuration)
 
     expectation_arguments_table: dict = {
-        "include_config": True,
         "value": 4,
     }
     expectation_arguments_without_meta = dict(
@@ -447,7 +440,6 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
     expectation_arguments_without_meta: dict
 
     expectation_arguments_column: dict = {
-        "include_config": True,
         "column": "Name",  # use correct column to avoid error
     }
     expectation_arguments_without_meta = dict(
@@ -580,7 +572,6 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
             "kwargs": {
                 "catch_exceptions": False,
                 "result_format": {"result_format": "BOOLEAN_ONLY"},
-                "include_config": True,
                 "column": "Name",
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
             },
@@ -621,7 +612,6 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
                     "include_unexpected_rows": False,
                     "partial_unexpected_count": 20,
                 },
-                "include_config": True,
                 "column": "Name",
                 "Notes": "Some notes",
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
@@ -670,7 +660,6 @@ def test_result_format_configured_with_set_default_override(
     expectation_arguments_without_meta: dict
 
     expectation_arguments_column: dict = {
-        "include_config": True,
         "column": "Name",  # use correct column to avoid error
     }
     expectation_arguments_without_meta = dict(
@@ -724,7 +713,6 @@ def test_result_format_configured_with_set_default_override(
             "kwargs": {
                 "catch_exceptions": False,
                 "result_format": {"result_format": "SUMMARY"},
-                "include_config": True,
                 "column": "Name",
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
             },
@@ -788,7 +776,7 @@ def test_result_format_configured_with_set_default_override(
         "result": {},
         "expectation_config": {
             "kwargs": {
-                "include_config": True,
+                "result_format": "BASIC",  # Default from Expectation base class
                 "column": "Name",
                 "Notes": "Some notes",
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
@@ -818,7 +806,7 @@ def test_result_format_configured_with_set_default_override(
 def test_in_memory_runtime_context_configured_with_usage_stats_handler(
     mock_emit, in_memory_runtime_context, test_pandas_df
 ):
-    context: DataContext = in_memory_runtime_context
+    context = in_memory_runtime_context
 
     # manually set usage statistics handler
     handler = UsageStatisticsHandler(
@@ -849,7 +837,6 @@ def test_in_memory_runtime_context_configured_with_usage_stats_handler(
     expectation_arguments_without_meta: dict
 
     expectation_arguments_column: dict = {
-        "include_config": True,
         "column": "Name",  # use correct column to avoid error
     }
     expectation_arguments_without_meta = dict(

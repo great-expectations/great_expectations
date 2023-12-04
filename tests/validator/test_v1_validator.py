@@ -49,6 +49,7 @@ def batch_config(
 ) -> BatchConfig:
     return BatchConfig(
         context=fds_data_context,
+        name="test_batch_config",
         datasource_name=fds_data_context_datasource_name,
         data_asset_name="trip_asset",
     )
@@ -61,6 +62,7 @@ def batch_config_with_event_type_splitter(
 ) -> BatchConfig:
     return BatchConfig(
         context=fds_data_context,
+        name="test_batch_config",
         datasource_name=fds_data_context_datasource_name,
         data_asset_name="trip_asset_split_by_event_type",
     )

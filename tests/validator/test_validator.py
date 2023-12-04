@@ -950,6 +950,7 @@ def test_validate_expectation(multi_batch_taxi_validator):
         "min_value": 0,
         "max_value": 5,
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
+        "result_format": "BASIC",
     }
 
     expect_column_values_to_be_of_type_config = validator.validate_expectation(
@@ -960,6 +961,7 @@ def test_validate_expectation(multi_batch_taxi_validator):
         "column": "passenger_count",
         "type_": "int",
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
+        "result_format": "BASIC",
     }
 
 
