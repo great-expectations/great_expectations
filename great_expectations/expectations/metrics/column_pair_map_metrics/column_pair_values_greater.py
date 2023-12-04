@@ -21,20 +21,11 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
         "condition_parser",
         "ignore_row_if",
     )
-    condition_value_keys = (
-        "or_equal",
-        "allow_cross_type_comparisons",
-    )
+    condition_value_keys = ("or_equal",)
 
     # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):
-        allow_cross_type_comparisons: bool = (
-            kwargs.get("allow_cross_type_comparisons") or False
-        )
-        if allow_cross_type_comparisons:
-            raise NotImplementedError
-
         temp_column_A = column_A
         temp_column_B = column_B
 
@@ -47,12 +38,6 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
     # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column_A, column_B, **kwargs):
-        allow_cross_type_comparisons: bool = (
-            kwargs.get("allow_cross_type_comparisons") or False
-        )
-        if allow_cross_type_comparisons:
-            raise NotImplementedError
-
         or_equal: bool = kwargs.get("or_equal") or False
         if or_equal:
             return sa.or_(
@@ -65,12 +50,6 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
     # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column_A, column_B, **kwargs):
-        allow_cross_type_comparisons: bool = (
-            kwargs.get("allow_cross_type_comparisons") or False
-        )
-        if allow_cross_type_comparisons:
-            raise NotImplementedError
-
         temp_column_A = column_A
         temp_column_B = column_B
 
