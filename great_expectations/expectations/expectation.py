@@ -1161,9 +1161,17 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         )
 
     def _get_default_value(self, key: str) -> Any:
+        """Get default value for the model if it is not required.
+        NOTE: For reasons I'm unclear on, we can get back either a FieldInfo or a ModelField.
+        """
         field = self.__fields__.get(key)
 
-        return field.default if field and field.required else None
+        if isinstance(field, pydantic.fields.ModelField):
+            return field.default if not field.required else None
+        elif field is not None:
+            return field.default if not field.is_required() else None
+        else:
+            return None
 
     def get_domain_kwargs(
         self, configuration: ExpectationConfiguration
@@ -2864,9 +2872,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             success = _mostly_success(
                 nonnull_count,
                 unexpected_count,
-                self.get_success_kwargs().get(
-                    "mostly", self.default_kwarg_values.get("mostly")
-                ),
+                self.get_success_kwargs().get("mostly"),
             )
 
         return _format_map_output(
@@ -3121,9 +3127,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             success = _mostly_success(
                 filtered_row_count,
                 unexpected_count,
-                self.get_success_kwargs().get(
-                    "mostly", self.default_kwarg_values.get("mostly")
-                ),
+                self.get_success_kwargs().get("mostly"),
             )
 
         return _format_map_output(
@@ -3385,9 +3389,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             success = _mostly_success(
                 filtered_row_count,
                 unexpected_count,
-                self.get_success_kwargs().get(
-                    "mostly", self.default_kwarg_values.get("mostly")
-                ),
+                self.get_success_kwargs().get("mostly"),
             )
 
         return _format_map_output(
