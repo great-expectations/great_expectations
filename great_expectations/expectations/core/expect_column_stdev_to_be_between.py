@@ -188,6 +188,7 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
         "strict_min": False,
         "max_value": None,
         "strict_max": False,
+        "include_config": True,
         "result_format": "BASIC",
         "catch_exceptions": False,
         "_auto": False,

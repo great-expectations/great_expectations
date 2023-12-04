@@ -225,6 +225,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "strict_min": None,
         "strict_max": None,
         "mostly": 1,
+        "include_config": True,
         "result_format": "BASIC",
         "catch_exceptions": False,
         "_auto": False,

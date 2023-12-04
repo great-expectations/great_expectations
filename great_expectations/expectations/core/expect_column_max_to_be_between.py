@@ -201,6 +201,7 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
         "strict_min": None,
         "strict_max": None,
         "result_format": "BASIC",
+        "include_config": True,
         "catch_exceptions": False,
         "_auto": False,
         "_profiler_config": _default_profiler_config,
