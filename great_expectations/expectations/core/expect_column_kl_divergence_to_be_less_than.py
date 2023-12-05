@@ -163,9 +163,9 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
 
     partition_object: Union[dict, None]
     threshold: Union[float, None]
-    internal_weight_holdout: Union[float, None] = Field(None, ge=0, le=1)
-    tail_weight_holdout: Union[float, None] = Field(None, ge=0, le=1)
-    bucketize_data: bool = False
+    internal_weight_holdout: Union[float, None] = Field(0, ge=0, le=1)
+    tail_weight_holdout: Union[float, None] = Field(0, ge=0, le=1)
+    bucketize_data: bool = True
     min_value: Union[float, EvaluationParameterDict, datetime, None] = None
     max_value: Union[float, EvaluationParameterDict, datetime, None] = None
 
