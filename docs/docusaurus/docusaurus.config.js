@@ -117,8 +117,8 @@ module.exports = {
           to: '/docs/conceptual_guides/expectation_classes',
         },
         {
-          to: 'https://greatexpectations.io/gx-cloud',
-          label: 'GX Cloud',
+          to: 'https://greatexpectations.io/cloud',
+          label: 'Try GX Cloud',
           position: 'right',
           className: 'header-cloud-link',
           'aria-label': 'Early cloud access',
