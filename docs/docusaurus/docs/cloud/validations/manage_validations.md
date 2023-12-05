@@ -6,7 +6,7 @@ description: Create and manage Validations in GX Cloud.
 
 When you run a validation on an Expectation, a Checkpoint is added. The Checkpoint saves the Validation Results, runs the Actions you specify, and displays the Validation Results.
 
-To learn more about Validations, see [Validator](../../terms/validator.md).
+To learn more about Validations, see [Validator](../../oss/terms/validator.md).
 
 ## Prerequisites
 

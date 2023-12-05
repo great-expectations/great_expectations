@@ -36,4 +36,4 @@ To create and run a Checkpoint in code, see [How to create a new Checkpoint](../
 
 ## Use Data Docs
 
-To build and view Data Docs in your environment, see [Options for hosting Data Docs](../reference/customize_your_deployment.md#options-for-hosting-data-docs).
+To build and view Data Docs in your environment, see [Options for hosting Data Docs](../../reference/customize_your_deployment.md#options-for-hosting-data-docs).

@@ -11,7 +11,7 @@ displayed_sidebar: gx_oss
 import LinkCardGrid from '/docs/components/LinkCardGrid';
 import LinkCard from '/docs/components/LinkCard';
 
-<p class="DocItem__header-description">Use GX OSS to connect, test, and validate your Data Assets. If you're ready to get started see <a href='docs/guides/setup/get_started_lp'>Get started with GX OSS</a>.
+<p class="DocItem__header-description">Use GX OSS to connect, test, and validate your Data Assets. If you're ready to get started see <a href='/docs/oss/guides/setup/get_started_lp'>Get started with GX OSS</a>.
 
  GX Cloud might be the solution if you don't want to manage your own configurations and infrastructure. <a href='https://greatexpectations.io/cloud'>Sign up here</a> to learn more and get early access to GX Cloud.
 </p>
@@ -36,5 +36,5 @@ import LinkCard from '/docs/components/LinkCard';
 
 <LinkCardGrid>
   <LinkCard topIcon label="Reference" description="Supplemental information that will help you get the most out of GX OSS." href="/docs/reference/reference_overview" icon="/img/small_gx_logo.png" />
-  <LinkCard topIcon label="Contribute" description="Contribute to GX OSS documentation or code." href="/docs/contributing/contributing" icon="/img/small_gx_logo.png" />
+  <LinkCard topIcon label="Contribute" description="Contribute to GX OSS documentation or code." href="/docs/oss/contributing/contributing" icon="/img/small_gx_logo.png" />
 </LinkCardGrid>

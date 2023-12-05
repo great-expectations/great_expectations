@@ -27,5 +27,5 @@ import GXCard from '@site/src/components/GXCard';
   <LinkCard topIcon label="View GX APIs" description="View our available APIs." href="/docs/category/gx-oss-api" icon="/img/api_icon.svg" />
   <LinkCard topIcon label="Learn more about GX OSS features" description="Use tutorials and conceptual topics to learn everything you need to know about GX OSS features and functionality." href="/docs/conceptual_guides/learn_lp" icon="/img/overview_icon.svg" />
   <LinkCard topIcon label="View the GX glossary" description="Definitions for GX Cloud and GX OSS key terms and concepts." href="/docs/glossary" icon="/img/glossary_icon.svg" />
-  <LinkCard topIcon label="Review the changelog" description="View a summary of all changes released to GX Cloud and GX OSS." href="/docs/changelog" icon="/img/release_notes_icon.svg" />
+  <LinkCard topIcon label="Review the changelog" description="View a summary of all changes released to GX Cloud and GX OSS." href="/docs/oss/changelog" icon="/img/release_notes_icon.svg" />
 </LinkCardGrid>
