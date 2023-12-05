@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from great_expectations.core import (
@@ -156,8 +156,8 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                     or float(configuration.kwargs.get("min_value")).is_integer()
                 ), "min_value and max_value must be integers"
                 if isinstance(configuration.kwargs.get("min_value"), dict):
-                    assert "$PARAMETER" in configuration.kwargs.get(
-                        "min_value"
+                    assert (
+                        "$PARAMETER" in configuration.kwargs.get("min_value")
                     ), 'Evaluation Parameter dict for min_value kwarg must have "$PARAMETER" key.'
 
             if configuration.kwargs.get("max_value"):
@@ -166,8 +166,8 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                     or float(configuration.kwargs.get("max_value")).is_integer()
                 ), "min_value and max_value must be integers"
                 if isinstance(configuration.kwargs.get("max_value"), dict):
-                    assert "$PARAMETER" in configuration.kwargs.get(
-                        "max_value"
+                    assert (
+                        "$PARAMETER" in configuration.kwargs.get("max_value")
                     ), 'Evaluation Parameter dict for max_value kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
