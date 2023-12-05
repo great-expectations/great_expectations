@@ -355,36 +355,36 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
 
-    def __init__(
-        self,
-        id: str | None = None,
-        meta: dict | None = None,
-        result_format: ResultFormat | ResultFormatDict = ResultFormat.BASIC,
-        **kwargs,
-    ) -> None:
-        # Safety precaution to prevent old-style instantiation
-        if "configuration" in kwargs:
-            raise ValueError(
-                "Cannot directly pass configuration into Expectation constructor; please pass in individual success keys and domain kwargs."
-            )
+    # def __init__(
+    #     self,
+    #     id: str | None = None,
+    #     meta: dict | None = None,
+    #     result_format: ResultFormat | ResultFormatDict = ResultFormat.BASIC,
+    #     **kwargs,
+    # ) -> None:
+    #     # Safety precaution to prevent old-style instantiation
+    #     if "configuration" in kwargs:
+    #         raise ValueError(
+    #             "Cannot directly pass configuration into Expectation constructor; please pass in individual success keys and domain kwargs."
+    #         )
 
-        super().__init__(id=id, meta=meta, result_format=result_format, **kwargs)
+    #     super().__init__(id=id, meta=meta, result_format=result_format, **kwargs)
 
-        # Add back result format for configuration validation
-        kwargs["result_format"] = result_format
+    #     # Add back result format for configuration validation
+    #     kwargs["result_format"] = result_format
 
-        # Everything below is purely to maintain current validation logic but should be migrated to Pydantic validators
-        configuration = ExpectationConfiguration(
-            expectation_type=camel_to_snake(self.__class__.__name__),
-            kwargs=kwargs,
-            meta=meta,
-            ge_cloud_id=id,
-        )
-        self.validate_configuration(configuration)
+    #     # Everything below is purely to maintain current validation logic but should be migrated to Pydantic validators
+    #     configuration = ExpectationConfiguration(
+    #         expectation_type=camel_to_snake(self.__class__.__name__),
+    #         kwargs=kwargs,
+    #         meta=meta,
+    #         ge_cloud_id=id,
+    #     )
+    #     self.validate_configuration(configuration)
 
-        # Currently only used in Validator.validate_expectation
-        # Once the V1 Validator is live, we can remove this and its related property
-        self._configuration = configuration
+    #     # Currently only used in Validator.validate_expectation
+    #     # Once the V1 Validator is live, we can remove this and its related property
+    #     self._configuration = configuration
 
     @classmethod
     def is_abstract(cls) -> bool:
@@ -1305,7 +1305,15 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     @property
     def configuration(self) -> ExpectationConfiguration:
-        return self._configuration
+        kwargs = self.dict(exclude_defaults=True)
+        meta = kwargs.pop("meta", None)
+        id = kwargs.pop("id", None)
+        return ExpectationConfiguration(
+            expectation_type=camel_to_snake(self.__class__.__name__),
+            kwargs=kwargs,
+            meta=meta,
+            ge_cloud_id=id,
+        )
 
     @public_api
     def run_diagnostics(  # noqa: PLR0913
