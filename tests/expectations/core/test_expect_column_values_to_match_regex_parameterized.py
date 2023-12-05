@@ -7,9 +7,6 @@ from great_expectations.expectations.core import ExpectColumnValuesToMatchRegex
 
 class ExpectColumnValuesAsStringToBePositiveInteger(ExpectColumnValuesToMatchRegex):
     regex: str = "^\\d+$"
-    default_kwarg_values = {
-        "regex": "^\\d+$",
-    }
 
 
 @pytest.mark.big

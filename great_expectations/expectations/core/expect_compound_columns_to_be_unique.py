@@ -58,7 +58,6 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
     """
 
     column_list: Union[tuple, list]
-    ignore_row_if: str = "all_value_are_missing"
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
