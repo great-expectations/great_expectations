@@ -1085,21 +1085,15 @@ class SQLDatasource(Datasource):
         # Overrides get_execution_engine in Datasource
         # because we need to pass the kwargs as keyvalue args to the execution engine
         # when then passes them to the engine.
-        current_execution_engine_kwargs = self.dict(
-            exclude=self._get_exec_engine_excludes(),
-            config_provider=self._config_provider,
+        gx_execution_engin_type: Type[
+            SqlAlchemyExecutionEngine
+        ] = self.execution_engine_type
+
+        return gx_execution_engin_type(
+            self.name,
+            engine=self.get_engine(),
+            create_temp_table=self.create_temp_table,
         )
-        if (
-            current_execution_engine_kwargs != self._cached_execution_engine_kwargs
-            or not self._execution_engine
-        ):
-            self._cached_execution_engine_kwargs = current_execution_engine_kwargs
-            engine_kwargs = current_execution_engine_kwargs.pop("kwargs", {})
-            self._execution_engine = self._execution_engine_type()(
-                **current_execution_engine_kwargs,
-                **engine_kwargs,
-            )
-        return self._execution_engine
 
     @override
     def test_connection(self, test_assets: bool = True) -> None:
