@@ -25,6 +25,13 @@ module.exports = {
     ],
   ],
 
+  scripts: [
+    {
+      src: "/scripts/set-tab.js",
+      async: true,
+      defer: true,
+    },
+  ],
 
   themeConfig: {
     algolia: {

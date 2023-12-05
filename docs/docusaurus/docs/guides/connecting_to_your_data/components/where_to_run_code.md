@@ -14,8 +14,7 @@ values={[
 
 <TabItem value="yaml">
 
-If you use Great Expectations in an environment that has filesystem access, run the code in this guide in a notebook or
-other Python script.
+If you use Great Expectations in an environment that has filesystem access, run the code in a notebook or other Python script.
 
 </TabItem>
 <TabItem value="python">
