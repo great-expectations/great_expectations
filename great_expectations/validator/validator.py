@@ -422,8 +422,7 @@ class Validator:
         # )
 
         combined_dir = (
-            validator_attrs
-            | class_expectation_impls
+            validator_attrs | class_expectation_impls
             # | execution_engine_expectation_impls
         )
 
@@ -613,9 +612,7 @@ class Validator:
         profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
             "profiler_config"
         )
-        default_profiler_config = expectation_impl.default_kwarg_values.get(
-            "profiler_config"
-        )
+        default_profiler_config = expectation_impl.__fields__.get("profiler_config")
         if default_profiler_config and not isinstance(
             default_profiler_config, RuleBasedProfilerConfig
         ):
@@ -632,9 +629,7 @@ class Validator:
             BaseRuleBasedProfiler
         ] = self.build_rule_based_profiler_for_expectation(
             expectation_type=expectation_type
-        )(
-            *(), **expectation_kwargs
-        )
+        )(*(), **expectation_kwargs)
         if profiler is not None:
             profiler_result: RuleBasedProfilerResult = profiler.run(
                 variables=None,
@@ -753,17 +748,8 @@ class Validator:
             profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
                 "profiler_config"
             )
-            default_profiler_config = expectation_impl.default_kwarg_values.get(
-                "profiler_config"
-            )
-            if default_profiler_config and not isinstance(
-                default_profiler_config, RuleBasedProfilerConfig
-            ):
-                raise TypeError(
-                    "profiler_config must be None or RuleBasedProfilerConfig"
-                )
 
-            if auto and profiler_config is None and default_profiler_config is None:
+            if auto and profiler_config is None:
                 raise ValueError(
                     "Automatic Expectation argument estimation requires a Rule-Based Profiler to be provided."
                 )
@@ -774,16 +760,12 @@ class Validator:
                 # Save custom Rule-Based Profiler configuration for reconciling it with optionally-specified default
                 # Rule-Based Profiler configuration as an override argument to "BaseRuleBasedProfiler.run()" method.
                 override_profiler_config: Optional[RuleBasedProfilerConfig]
-                if default_profiler_config:
-                    override_profiler_config = copy.deepcopy(profiler_config)
-                else:
-                    override_profiler_config = None
 
                 """
                 If default Rule-Based Profiler configuration exists, use it as base with custom Rule-Based Profiler
                 configuration as override; otherwise, use custom Rule-Based Profiler configuration with no override.
                 """
-                profiler_config_to_use = default_profiler_config or profiler_config
+                profiler_config_to_use = profiler_config
                 if not isinstance(profiler_config_to_use, RuleBasedProfilerConfig):
                     raise TypeError(
                         "profiler_config must be None or RuleBasedProfilerConfig"
@@ -794,7 +776,7 @@ class Validator:
                     expectation_kwargs=expectation_kwargs,
                     success_keys=success_keys,
                     profiler_config=profiler_config_to_use,
-                    override_profiler_config=override_profiler_config,
+                    override_profiler_config=None,
                 )
             else:
                 profiler = None

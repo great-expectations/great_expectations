@@ -85,15 +85,6 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
         "mostly",
         "like_pattern",
     )
-    default_kwarg_values = {
-        "like_pattern": None,
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": True,
-    }
     args_keys = (
         "column",
         "like_pattern",

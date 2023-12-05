@@ -125,13 +125,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         "type_list",
         "mostly",
     )
-    default_kwarg_values = {
-        "type_list": None,
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
+
     args_keys = (
         "column",
         "type_list",

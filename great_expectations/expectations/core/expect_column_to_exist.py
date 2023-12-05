@@ -80,10 +80,6 @@ class ExpectColumnToExist(BatchExpectation):
         "batch_id",
         "table",
     )
-    default_kwarg_values = {
-        "column": None,
-        "column_index": None,
-    }
     args_keys = ("column", "column_index")
 
     @classmethod

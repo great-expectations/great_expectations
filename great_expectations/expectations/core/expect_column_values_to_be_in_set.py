@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING, List, Optional, Union
 
+from pydantic import Field
+
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -99,7 +101,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         [expect_column_values_to_not_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_not_be_in_set)
     """
 
-    value_set: Union[list, set, EvaluationParameterDict]
+    value_set: Union[list, set, EvaluationParameterDict] = Field(default_factory=list)
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -122,10 +124,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         "value_set",
         "mostly",
     )
-
-    default_kwarg_values = {
-        "value_set": [],
-    }
 
     @classmethod
     def _prescriptive_template(

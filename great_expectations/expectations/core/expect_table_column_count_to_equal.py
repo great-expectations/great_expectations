@@ -68,13 +68,6 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
 
     metric_dependencies = ("table.column_count",)
     success_keys = ("value",)
-    default_kwarg_values = {
-        "value": None,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-        "meta": None,
-    }
     args_keys = ("value",)
 
     @classmethod

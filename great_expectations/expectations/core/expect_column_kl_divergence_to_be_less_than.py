@@ -190,16 +190,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         "internal_weight_holdout",
         "bucketize_data",
     )
-    default_kwarg_values = {
-        "partition_object": None,
-        "threshold": None,
-        "tail_weight_holdout": 0,
-        "internal_weight_holdout": 0,
-        "bucketize_data": True,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "partition_object",

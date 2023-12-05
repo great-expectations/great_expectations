@@ -102,7 +102,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
         [expect_column_distinct_values_to_equal_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_equal_set)
     """
 
-    value_set: Union[list, set, EvaluationParameterDict, None]
+    value_set: Union[list, set, EvaluationParameterDict, None] = None
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -118,12 +118,6 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
     metric_dependencies = ("column.value_counts",)
     success_keys = ("value_set",)
 
-    # Default values
-    default_kwarg_values = {
-        "value_set": None,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column",
         "value_set",

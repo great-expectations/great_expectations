@@ -93,14 +93,6 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
         "ignore_row_if",
         "mostly",
     )
-    default_kwarg_values = {
-        "column_list": None,
-        "ignore_row_if": "all_values_are_missing",
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = ("column_list",)
 
     @classmethod

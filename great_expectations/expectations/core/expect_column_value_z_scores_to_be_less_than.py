@@ -69,15 +69,4 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     map_metric = "column_values.z_score.under_threshold"
     success_keys = ("threshold", "double_sided", "mostly")
 
-    # Default values
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,
-        "threshold": None,
-        "double_sided": True,
-        "mostly": 1,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = ("column", "threshold")

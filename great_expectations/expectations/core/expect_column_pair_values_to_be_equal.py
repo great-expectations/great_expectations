@@ -80,15 +80,6 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         "ignore_row_if",
         "mostly",
     )
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "ignore_row_if": "both_values_are_missing",
-        "mostly": 1.0,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column_A",
         "column_B",
