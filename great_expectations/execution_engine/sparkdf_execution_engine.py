@@ -40,7 +40,7 @@ from great_expectations.core.metric_domain_types import (
 from great_expectations.core.util import (
     AzureUrl,
     convert_to_json_serializable,
-    get_or_create_spark_application,
+    get_or_create_spark_session,
 )
 from great_expectations.exceptions import (
     BatchSpecError,
@@ -189,24 +189,20 @@ class SparkDFExecutionEngine(ExecutionEngine):
         self,
         *args,
         persist: bool = True,
-        force_reuse_spark_context: bool = True,
         spark_config: Optional[dict] = None,
         **kwargs,
     ) -> None:
         self._persist = persist
 
-        spark: pyspark.SparkSession = get_or_create_spark_application(
+        self.spark = pyspark.SparkSession = get_or_create_spark_session(
             spark_config=spark_config,
-            force_reuse_spark_context=force_reuse_spark_context,
         )
-
-        # spark_config.update({k: v for (k, v) in spark.sparkContext.getConf().getAll()})
-
-        self.spark = spark
 
         azure_options: dict = kwargs.pop("azure_options", {})
         self._azure_options = azure_options
 
+        if "force_reuse_spark_context" in kwargs:
+            kwargs.pop("force_reuse_spark_context")
         super().__init__(*args, **kwargs)
 
         self._config.update(

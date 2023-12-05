@@ -14,7 +14,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
     List,
     Mapping,
     MutableMapping,
@@ -784,102 +783,24 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
     return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix) if s3_url.suffix else None
 
 
-# noinspection PyPep8Naming
-def get_or_create_spark_application(
-    spark_config: Optional[Dict[str, Any]] = None,
-    force_reuse_spark_context: bool = True,
-) -> pyspark.SparkSession:
-    """Obtains configured Spark session if it has already been initialized; otherwise creates Spark session, configures it, and returns it to caller.
-
-    Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
-    Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
-    Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
-    This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
-    ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
-
-    Args:
-        spark_config: Dictionary containing Spark configuration (string-valued keys mapped to string-valued properties).
-        force_reuse_spark_context: Boolean flag indicating (if True) that creating new Spark context is forbidden.
-
-    Returns: SparkSession (new or existing as per "isStopped()" status).
-    """
-    if spark_config is None:
-        spark_config = {}
-    else:
-        spark_config = copy.deepcopy(spark_config)
-
-    name: Optional[str] = spark_config.get("spark.app.name")
-    if not name:
-        name = "default_great_expectations_spark_application"
-
-    spark_config.update({"spark.app.name": name})
-
-    spark_session: pyspark.SparkSession = get_or_create_spark_session(
-        spark_config=spark_config
-    )
-
-    # sc_stopped = False
-    # MOVE INTO TESTING FRAMEWORK
-    # noinspection PyUnresolvedReferences
-    # if in_databricks():
-    #     sc_stopped: bool = spark.is_stopped
-    # else:
-    #     sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
-    # if not force_reuse_spark_context and spark_restart_required(
-    #     current_spark_config=spark_session.sparkContext.getConf().getAll(),
-    #     desired_spark_config=spark_config,
-    # ):
-    #     pass
-    # if not sc_stopped:
-    #     try:
-    #         # We need to stop the old/default Spark session in order to reconfigure it with the desired options.
-    #         logger.info("Stopping existing spark context to reconfigure.")
-    #         spark_session.sparkContext.stop()
-    #     except AttributeError:
-    #         logger.error(
-    #             "Unable to load spark context; install optional spark dependency for support."
-    #         )
-    # spark_session = get_or_create_spark_session(spark_config=spark_config)
-    # if spark_session is None:
-    #     raise ValueError("SparkContext could not be started.")
-    # # noinspection PyProtectedMember,PyUnresolvedReferences
-    # sc_stopped = spark_session.sparkContext._jsc.sc().isStopped()
-
-    # if sc_stopped:
-    #     raise ValueError("SparkContext stopped unexpectedly.")
-
-    return spark_session
-
-
-# noinspection PyPep8Naming
 def get_or_create_spark_session(
-    spark_config: Optional[Dict[str, str]] = None,
+    spark_config: Optional[dict[str, str]] = None,
 ) -> pyspark.SparkSession:
     """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
-
-    Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
-    Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
-    Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
-    This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
-    ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
 
     Args:
         spark_config: Dictionary containing Spark configuration (string-valued keys mapped to string-valued properties).
 
     Returns:
-
+        SparkSession
     """
-    spark_session: pyspark.SparkSession
+    spark_config = spark_config or {}
+
     try:
-        if spark_config is None:
-            spark_config = {}
-        else:
-            spark_config = copy.deepcopy(spark_config)
-
         builder = pyspark.SparkSession.builder
+        spark_config = copy.deepcopy(spark_config)
 
-        app_name: Optional[str] = spark_config.get("spark.app.name")
-
+        app_name: str | None = spark_config.get("spark.app.name")
         if app_name:
             if in_databricks():
                 # warn
@@ -892,10 +813,19 @@ def get_or_create_spark_session(
             if k != "spark.app.name":
                 builder.config(k, v)
 
-        spark_session = builder.getOrCreate()
-        # noinspection PyProtectedMember,PyUnresolvedReferences
-        # if spark_session.sparkContext._jsc.sc().isStopped():
-        #     raise ValueError("SparkContext stopped unexpectedly.")
+        spark_session: pyspark.SparkSession = builder.getOrCreate()
+
+        # in a local pyspark-shell the context config cannot be updated
+        # unless you stop the Spark context and re-recreate it
+        retrieved_spark_config: pyspark.SparkConf = spark_session.sparkContext.getConf()
+        stopped = False
+        for key, value in spark_config.items():
+            if retrieved_spark_config.get(key) != value:
+                spark_session.stop()
+                stopped = True
+                break
+        if stopped:
+            spark_session = builder.getOrCreate()
 
     except AttributeError as e:
         logger.error(

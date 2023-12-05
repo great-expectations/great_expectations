@@ -20,7 +20,7 @@ if is_version_greater_or_equal(pd.__version__, "2.0.0"):
 
 context = gx.get_context()
 
-spark = gx.core.util.get_or_create_spark_application()
+spark = gx.core.util.get_or_create_spark_session()
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_spark.py datasource">

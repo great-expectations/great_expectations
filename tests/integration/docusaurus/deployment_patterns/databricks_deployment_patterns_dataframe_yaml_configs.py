@@ -16,9 +16,9 @@ from great_expectations.data_context.types.base import (
 yaml = YAMLHandler()
 # </snippet>
 
-from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.core.util import get_or_create_spark_session
 
-spark = get_or_create_spark_application()
+spark = get_or_create_spark_session()
 
 # 1. Install Great Expectations
 # %pip install great-expectations

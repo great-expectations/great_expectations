@@ -6,11 +6,11 @@ from packaging.version import Version
 from packaging.version import parse as parse_version
 
 from great_expectations.compatibility import pyspark
+from great_expectations.datasource.fluent import SparkDatasource
 
 logger = logging.getLogger(__name__)
 
 try:
-    from great_expectations.datasource import SparkDFDatasource
     from great_expectations.execution_engine import SparkDFExecutionEngine
 except ImportError:
     SparkDFDatasource = None
@@ -31,31 +31,31 @@ def test_current_pyspark_version_installed(spark_session):
 
 
 def test_spark_config_datasource(spark_session_v012):
-    name: str = "great_expectations-ds-config"
-    spark_config: Dict[str, Any] = {
+    name = "great_expectations-ds-config"
+    spark_config = {
         "spark.app.name": name,
         "spark.sql.catalogImplementation": "hive",
         "spark.executor.memory": "768m",
         # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
     }
-    source: SparkDFDatasource = SparkDFDatasource(
-        spark_config=spark_config, force_reuse_spark_context=False
+    spark_datasource = SparkDatasource(
+        name="my spark datasource",
+        spark_config=spark_config,
     )
-    spark_session: pyspark.SparkSession = source.spark
-    # noinspection PyProtectedMember
+    execution_engine: SparkDFExecutionEngine = spark_datasource.get_execution_engine()
+    spark_session: pyspark.SparkSession = execution_engine.spark
     sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
     assert not sc_stopped
 
     # Test that our values were set
-    conf: List[tuple] = source.spark.sparkContext.getConf().getAll()
+    conf: List[tuple] = spark_session.sparkContext.getConf().getAll()
     assert ("spark.app.name", name) in conf
     assert ("spark.sql.catalogImplementation", "hive") in conf
     assert ("spark.executor.memory", "768m") in conf
     spark_session.sparkContext.stop()
 
 
-def test_spark_config_execution_engine(spark_session):
-    old_app_id = spark_session.sparkContext.applicationId
+def test_spark_config_execution_engine_block_config(spark_session):
     new_spark_config: Dict[str, Any] = {
         "spark.app.name": "great_expectations-ee-config",
         "spark.sql.catalogImplementation": "hive",
@@ -73,14 +73,12 @@ def test_spark_config_execution_engine(spark_session):
     current_spark_config: List[
         tuple
     ] = execution_engine.spark.sparkContext.getConf().getAll()
-    assert old_app_id == execution_engine.spark.sparkContext.applicationId
     assert ("spark.sql.catalogImplementation", "hive") in current_spark_config
-    # Confirm that "spark.app.name" was not changed upon "SparkDFExecutionEngine" instantiation (from original value).
     assert (
         "spark.app.name",
-        "default_great_expectations_spark_application",
+        "great_expectations-ee-config",
     ) in current_spark_config
-    assert ("spark.executor.memory", "450m") in current_spark_config
+    assert ("spark.executor.memory", "512m") in current_spark_config
     # spark context config values cannot be changed by the builder no matter what
     assert current_spark_config != new_spark_config
     new_spark_session.sparkContext.stop()

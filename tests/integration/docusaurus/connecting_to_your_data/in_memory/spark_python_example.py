@@ -10,7 +10,7 @@ from great_expectations.data_context.types.base import (
 yaml = YAMLHandler()
 
 # Set up a basic spark session
-spark = gx.core.util.get_or_create_spark_application()
+spark = gx.core.util.get_or_create_spark_session()
 
 # basic dataframe
 data = [

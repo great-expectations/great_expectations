@@ -15,7 +15,7 @@ yaml = YAMLHandler()
 
 if __name__ == "__main__":
     ### critical part to reinitialize spark context
-    sc = gx.core.util.get_or_create_spark_application()
+    sc = gx.core.util.get_or_create_spark_session()
     spark = pyspark.SQLContext(sc)
 
     spark_file = "pyspark_df.parquet"

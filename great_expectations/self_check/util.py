@@ -56,7 +56,7 @@ from great_expectations.core import (
 )
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
 from great_expectations.core.util import (
-    get_or_create_spark_application,
+    get_or_create_spark_session,
     get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations.dataset import PandasDataset
@@ -512,7 +512,7 @@ def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
             "DataType": pyspark.types.DataType,
             "NullType": pyspark.types.NullType,
         }
-        spark = get_or_create_spark_application(
+        spark = get_or_create_spark_session(
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
                 "spark.executor.memory": "450m",
@@ -766,7 +766,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901, PLR0912, PLR0915
         "DecimalType": partial(pyspark.types.DecimalType, 38, 18),
     }
 
-    spark = get_or_create_spark_application(
+    spark = get_or_create_spark_session(
         spark_config={
             "spark.sql.catalogImplementation": "hive",
             "spark.executor.memory": "450m",

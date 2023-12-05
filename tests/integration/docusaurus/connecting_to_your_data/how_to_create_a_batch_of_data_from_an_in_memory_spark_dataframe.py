@@ -15,7 +15,7 @@ yaml = YAMLHandler()
 context: DataContext = gx.get_context()
 # </snippet>
 
-spark_session: pyspark.SparkSession = gx.core.util.get_or_create_spark_application()
+spark_session: pyspark.SparkSession = gx.core.util.get_or_create_spark_session()
 
 # create and load Expectation Suite
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py create_expectation_suite">
