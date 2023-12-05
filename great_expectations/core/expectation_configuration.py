@@ -20,7 +20,6 @@ import jsonpatch
 from marshmallow import Schema, ValidationError, fields, post_dump, post_load
 from typing_extensions import TypedDict
 
-from great_expectations.alias_types import JSONValues
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import new_argument, public_api
 from great_expectations.core.evaluation_parameters import (
@@ -50,6 +49,7 @@ from great_expectations.types import SerializableDictDot
 if TYPE_CHECKING:
     from pyparsing import ParseResults
 
+    from great_expectations.alias_types import JSONValues
     from great_expectations.core import ExpectationValidationResult
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.execution_engine import ExecutionEngine
