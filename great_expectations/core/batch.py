@@ -379,11 +379,11 @@ class BatchRequestBase(SerializableDictDot):
             batch_data: BatchRequestBase | dict = self.runtime_parameters["batch_data"]
             self.runtime_parameters["batch_data"] = str(type(batch_data))
 
-            serializeable_dict = convert_to_json_serializable(data=self.to_dict())
+            serializeable_dict = convert_to_json_serializable(data=self.to_dict())  # type: ignore[call-overload] # TypedDict is more specific dict type
             # after getting serializable_dict, restore original batch_data
             self.runtime_parameters["batch_data"] = batch_data
         else:
-            serializeable_dict = convert_to_json_serializable(data=self.to_dict())
+            serializeable_dict = convert_to_json_serializable(data=self.to_dict())  # type: ignore[call-overload] # TypedDict is more specific dict type
 
         return serializeable_dict
 

@@ -356,7 +356,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         return data
 
     try:
-        if not isinstance(data, list) and pd.isna(data):
+        if not isinstance(data, list) and pd.isna(data):  # type: ignore[arg-type]
             # pd.isna is functionally vectorized, but we only want to apply this to single objects
             # Hence, why we test for `not isinstance(list)`
             return None
@@ -372,8 +372,8 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         value_name = data.name or "value"
         return [
             {
-                index_name: convert_to_json_serializable(idx),
-                value_name: convert_to_json_serializable(val),
+                index_name: convert_to_json_serializable(idx),  # type: ignore[call-overload]
+                value_name: convert_to_json_serializable(val),  # type: ignore[dict-item]
             }
             for idx, val in data.items()
         ]
@@ -494,14 +494,14 @@ def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
         value_name = data.name or "value"
         _ = [
             {
-                index_name: ensure_json_serializable(idx),
-                value_name: ensure_json_serializable(val),
+                index_name: ensure_json_serializable(idx),  # type: ignore[func-returns-value]
+                value_name: ensure_json_serializable(val),  # type: ignore[func-returns-value]
             }
             for idx, val in data.items()
         ]
         return
 
-    if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):
+    if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function] # ensure pyspark is installed
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
         return ensure_json_serializable(

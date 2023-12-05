@@ -881,7 +881,7 @@ def build_pandas_validator_with_data(
     batch_definition: Optional[BatchDefinition] = None,
     context: Optional[AbstractDataContext] = None,
 ) -> Validator:
-    batch = Batch(data=df, batch_definition=batch_definition)
+    batch = Batch(data=df, batch_definition=batch_definition)  # type: ignore[arg-type]
 
     if context is None:
         context = build_in_memory_runtime_context(include_spark=False)
@@ -1216,7 +1216,7 @@ def build_spark_validator_with_data(
 def build_pandas_engine(
     df: pd.DataFrame,
 ) -> PandasExecutionEngine:
-    batch = Batch(data=df)
+    batch = Batch(data=df)  # type: ignore[arg-type]
     execution_engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     return execution_engine
 
@@ -1295,11 +1295,11 @@ def build_spark_engine(
                 )
                 for record in df.to_records(index=False)
             ]
-            schema = df.columns.tolist()
+            schema = df.columns.tolist()  # type: ignore[assignment]
         else:
             data = df
 
-        df = spark.createDataFrame(data=data, schema=schema)
+        df = spark.createDataFrame(data=data, schema=schema)  # type: ignore[type-var,arg-type]
 
     conf: Iterable[Tuple[str, str]] = spark.sparkContext.getConf().getAll()
     spark_config: Dict[str, Any] = dict(conf)
