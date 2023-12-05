@@ -176,7 +176,6 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnAggregateExpectation):
         "raw_values": None,
         "partition": None,
         "result_format": "BASIC",
-        "catch_exceptions": False,
     }
 
     examples = [

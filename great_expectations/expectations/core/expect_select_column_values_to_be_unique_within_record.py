@@ -56,9 +56,6 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
             If True, then include the expectation config as part of the result object.
-        catch_exceptions (boolean or None): \
-            If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
             A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
             modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
@@ -93,7 +90,6 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
         "ignore_row_if": "all_values_are_missing",
         "result_format": "BASIC",
         "include_config": True,
-        "catch_exceptions": False,
     }
     args_keys = ("column_list",)
 

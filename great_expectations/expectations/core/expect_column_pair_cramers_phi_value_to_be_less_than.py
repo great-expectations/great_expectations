@@ -57,7 +57,6 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
         "n_bins_B": None,
         "threshold": 0.1,
         "result_format": "BASIC",
-        "catch_exceptions": False,
     }
     args_keys = (
         "column_A",

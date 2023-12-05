@@ -929,7 +929,6 @@ def test_graph_validate_with_bad_config_catch_exceptions_false(
         ).graph_validate(
             configurations=[expectation_configuration],
             runtime_configuration={
-                "catch_exceptions": False,
                 "result_format": {"result_format": "BASIC"},
             },
         )

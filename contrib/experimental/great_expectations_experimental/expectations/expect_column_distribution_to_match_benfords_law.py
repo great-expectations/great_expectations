@@ -257,7 +257,7 @@ class ExpectColumnDistributionToMatchBenfordsLaw(ColumnAggregateExpectation):
     #     "strict_max": None,
     #     "result_format": "BASIC",
     #
-    #     "catch_exceptions": False,
+    #
     # }
 
     # @classmethod

@@ -174,7 +174,6 @@ class Validator:
     """
 
     DEFAULT_RUNTIME_CONFIGURATION = {
-        "catch_exceptions": False,
         "result_format": "BASIC",
     }
     RUNTIME_KEYS = DEFAULT_RUNTIME_CONFIGURATION.keys()

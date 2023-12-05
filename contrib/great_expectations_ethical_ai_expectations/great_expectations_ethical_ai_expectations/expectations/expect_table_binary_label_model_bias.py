@@ -198,7 +198,6 @@ class ExpectTableBinaryLabelModelBias(BatchExpectation):
         "result_format": "BASIC",
         "reference_group": None,
         "alpha": 0.05,
-        "catch_exceptions": False,
         "partial_success": False,
         "meta": None,
     }

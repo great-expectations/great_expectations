@@ -153,7 +153,6 @@ class ExpectColumnValuesToBeEqualToOrGreaterThanProfileMin(ColumnMapExpectation)
     default_kwarg_values = {
         "profile": None,
         "result_format": "BASIC",
-        "catch_exceptions": False,
     }
 
     # This object contains metadata for display in the public Gallery

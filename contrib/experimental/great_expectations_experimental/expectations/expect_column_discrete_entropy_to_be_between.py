@@ -228,7 +228,6 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
                         "column": "empty_column",
                         "min_value": 0,
                         "max_value": 0,
-                        "catch_exceptions": False,
                     },
                     "out": {"success": True, "observed_value": 0.0},
                 }
@@ -262,7 +261,6 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
         "strict_min": None,
         "strict_max": None,
         "result_format": "BASIC",
-        "catch_exceptions": False,
         "base": 2,
     }
 

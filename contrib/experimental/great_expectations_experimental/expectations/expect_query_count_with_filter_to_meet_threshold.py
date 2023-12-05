@@ -35,7 +35,6 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
 
     default_kwarg_values = {
         "result_format": "BASIC",
-        "catch_exceptions": False,
         "meta": None,
         "query": query,
     }

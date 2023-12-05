@@ -131,7 +131,6 @@ class ExpectTableLinearFeatureImportancesToBe(BatchExpectation):
         "y_column": None,
         "threshold": None,
         "result_format": "BASIC",
-        "catch_exceptions": False,
         "meta": None,
     }
 

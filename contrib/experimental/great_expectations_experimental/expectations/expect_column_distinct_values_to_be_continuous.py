@@ -115,7 +115,6 @@ class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
         "row_condition": None,
         "condition_parser": None,
         "result_format": "BASIC",
-        "catch_exceptions": False,
     }
     args_keys = ("column", "datetime_format")
 

@@ -33,7 +33,6 @@ class ExpectQueriedColumnPairValuesToHaveDiff(QueryExpectation):
 
     default_kwarg_values = {
         "result_format": "BASIC",
-        "catch_exceptions": False,
         "meta": None,
         "column_A": None,
         "column_B": None,

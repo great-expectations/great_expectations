@@ -347,7 +347,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     default_kwarg_values: ClassVar[
         dict[str, Union[bool, str, float, RuleBasedProfilerConfig, None]]
     ] = {
-        "catch_exceptions": False,
         "result_format": ResultFormat.BASIC,
     }
     args_keys: ClassVar[Tuple[str, ...]] = ()
@@ -2466,7 +2465,6 @@ class QueryExpectation(BatchExpectation, ABC):
 
     default_kwarg_values: ClassVar[Dict] = {
         "result_format": ResultFormat.BASIC,
-        "catch_exceptions": False,
         "meta": None,
         "row_condition": None,
         "condition_parser": None,

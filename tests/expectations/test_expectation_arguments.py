@@ -570,7 +570,6 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
     assert result.to_json_dict() == {
         "expectation_config": {
             "kwargs": {
-                "catch_exceptions": False,
                 "result_format": {"result_format": "BOOLEAN_ONLY"},
                 "column": "Name",
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
@@ -606,7 +605,6 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
             "expectation_type": "expect_column_values_to_not_be_null",
             "meta": {},
             "kwargs": {
-                "catch_exceptions": False,
                 "result_format": {
                     "result_format": "BOOLEAN_ONLY",
                     "include_unexpected_rows": False,
@@ -711,7 +709,6 @@ def test_result_format_configured_with_set_default_override(
         "result": {},
         "expectation_config": {
             "kwargs": {
-                "catch_exceptions": False,
                 "result_format": {"result_format": "SUMMARY"},
                 "column": "Name",
                 "batch_id": "bd7b9290f981fde37aabd403e8a507ea",

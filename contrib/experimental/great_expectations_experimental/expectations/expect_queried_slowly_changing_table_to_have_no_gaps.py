@@ -51,7 +51,6 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
 
     default_kwarg_values = {
         "result_format": "BASIC",
-        "catch_exceptions": False,
         "meta": None,
         "threshold": 0,
         "query": query,

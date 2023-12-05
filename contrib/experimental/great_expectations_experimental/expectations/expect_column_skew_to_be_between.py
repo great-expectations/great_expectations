@@ -320,7 +320,6 @@ class ExpectColumnSkewToBeBetween(ColumnAggregateExpectation):
         "strict_max": None,
         "abs": False,
         "result_format": "BASIC",
-        "catch_exceptions": False,
     }
 
     # @classmethod

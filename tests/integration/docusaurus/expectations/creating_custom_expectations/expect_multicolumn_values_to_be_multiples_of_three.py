@@ -100,7 +100,6 @@ class ExpectMulticolumnValuesToBeMultiplesOfThree(MulticolumnMapExpectation):
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1.0,
         "result_format": "BASIC",
-        "catch_exceptions": False,
     }
     args_keys = ("column_list",)
 

@@ -203,7 +203,6 @@ class ExpectColumnValuesToBeNormallyDistributed(ColumnAggregateExpectation):
         "strict_min": None,
         "strict_max": None,
         "result_format": "BASIC",
-        "catch_exceptions": False,
     }
 
     # @classmethod

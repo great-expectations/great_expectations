@@ -171,7 +171,6 @@ class ExpectColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold(
         "threshold": None,
         "data_label": None,
         "result_format": "BASIC",
-        "catch_exceptions": False,
     }
 
     # This object contains metadata for display in the public Gallery

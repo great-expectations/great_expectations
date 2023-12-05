@@ -98,7 +98,6 @@ class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(
         "percentage": 0.1,
         "mostly": 1.0,
         "result_format": "BASIC",
-        "catch_exceptions": False,
     }
 
     def validate_configuration(
