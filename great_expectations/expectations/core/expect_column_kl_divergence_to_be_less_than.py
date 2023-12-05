@@ -217,7 +217,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                 configuration, execution_engine, runtime_configuration
             )
         )
-        partition_object = configuration.kwargs["partition_object"]
+        partition_object = configuration.kwargs.get("partition_object")
         domain_kwargs = configuration.get_domain_kwargs()
         is_categorical = None
         bins = None

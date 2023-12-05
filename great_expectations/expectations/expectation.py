@@ -2386,6 +2386,18 @@ representation."""
 representation."""
                     )
 
+        if isinstance(min_value, datetime.datetime) or isinstance(
+            max_value, datetime.datetime
+        ):
+            if not isinstance(metric_value, datetime.datetime):
+                try:
+                    metric_value = parse(metric_value)
+                except TypeError:
+                    raise ValueError(
+                        f"""Could not parse "metric_value" of {metric_value} (of type "{type(metric_value)!s}) into datetime \
+representation."""
+                    )
+
         # Checking if mean lies between thresholds
         if min_value is not None:
             if strict_min:
