@@ -560,7 +560,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
               max_val = None
 
               # Setting up a configuration
-              super().validate_configuration()
+              super().validate_configuration(configuration)
               if configuration is None:
                   configuration = self.configuration
 
