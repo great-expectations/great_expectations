@@ -578,7 +578,7 @@ class Dataset(MetaDataset):
             }
 
     @DocInherit
-    @DataAsset.expectation(["column_set", "exact_match"])  # type: ignore[misc]
+    @DataAsset.expectation(["column_set", "exact_match"])  # type: ignore[misc] # don't care, legacy code
     def expect_table_columns_to_match_set(  # noqa: PLR0913
         self,
         column_set: Optional[Union[Set[str], List[str]]],
