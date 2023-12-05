@@ -1,0 +1,6 @@
+import data from '@site/docs/oss/term_tags/terms.json'
+
+<span class="tooltip">
+    <a href={'/docs/oss/' + data[props.tag].url}>{props.text}</a>
+    <span class="tooltiptext">{data[props.tag].definition}</span>
+</span>

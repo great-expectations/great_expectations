@@ -6,7 +6,7 @@ title: Get started with Great Expectations and Databricks
 import Prerequisites from '@site/docs/components/_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
 
 Use the information provided here to learn how you can use Great Expectations (GX) with [Databricks](https://databricks.com/).
 
@@ -125,7 +125,7 @@ df = spark.read.format("csv")\
   ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add datasource"
   ```
 
-3. Run the following command to set the [batching regex](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset/#create-a-batching_regex):
+3. Run the following command to set the [batching regex](https://docs.greatexpectations.io/docs/oss/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset/#create-a-batching_regex):
 
   ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose batching regex"
   ```
@@ -203,7 +203,7 @@ You'll create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for
 
   Your Checkpoint configuration includes the `store_validation_result` and `update_data_docs` actions. The `store_validation_result` action saves your validation results from the Checkpoint run and allows the results to be persisted for future use. The  `update_data_docs` action builds Data Docs files for the validations run in the Checkpoint.
 
-  To learn more about Data validation and customizing Checkpoints, see [Validate Data:Overview ](https://docs.greatexpectations.io/docs/guides/validation/validate_data_overview).
+  To learn more about Data validation and customizing Checkpoints, see [Validate Data:Overview ](https://docs.greatexpectations.io/docs/oss/guides/validation/validate_data_overview).
 
   To view the full Checkpoint configuration, run: `print(checkpoint.get_config().to_yaml_str())`.
 
@@ -234,5 +234,5 @@ displayHTML(data)
 
 ## Next steps
 
-Now that you've created and saved a Data Context, Data Source, Data Asset, Expectation Suite, and Checkpoint, see [Validate data with Expectations and Checkpoints](https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint) 
+Now that you've created and saved a Data Context, Data Source, Data Asset, Expectation Suite, and Checkpoint, see [Validate data with Expectations and Checkpoints](https://docs.greatexpectations.io/docs/oss/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint) 
 to create a script to run the Checkpoint without the need to recreate your Data Assets and Expectations. To move Databricks notebooks to production, see [Software Engineering Best Practices With Databricks Notebooks](https://www.databricks.com/blog/2022/06/25/software-engineering-best-practices-with-databricks-notebooks.html) from Databricks.

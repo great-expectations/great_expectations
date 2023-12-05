@@ -6,7 +6,7 @@ title: Get started with Great Expectations and SQL
 import Prerequisites from '@site/docs/components/_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/oss/term_tags/_tag.mdx';
 
 Use the information provided here to learn how you can use Great Expectations (GX) with a SQL Data Source. The following examples use a [PostgreSQL Database](https://www.postgresql.org/).
 
@@ -61,7 +61,7 @@ Run the following code to create a <TechnicalTag tag="data_context" text="Data C
   PG_CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/taxi_db"
   ```
 
-  Replace the connection string with the connection string for your database. For additional information about other connection methods, see [How to configure credentials](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials/). In this example, existing New York City taxi cab data is being used.
+  Replace the connection string with the connection string for your database. For additional information about other connection methods, see [How to configure credentials](https://docs.greatexpectations.io/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials/). In this example, existing New York City taxi cab data is being used.
 
 2. Run the following command to create a <TechnicalTag tag='datasource' text='Data Source' /> to represent the data available in your PostgreSQL database:
 
@@ -121,7 +121,7 @@ You'll create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for
 
   Your Checkpoint configuration includes the `store_validation_result` and `update_data_docs` actions. The `store_validation_result` action saves your validation results from the Checkpoint run and allows the results to be persisted for future use. The  `update_data_docs` action builds Data Docs files for the validations run in the Checkpoint.
 
-  To learn more about Data validation and customizing Checkpoints, see [Validate Data: Overview ](https://docs.greatexpectations.io/docs/guides/validation/validate_data_overview).
+  To learn more about Data validation and customizing Checkpoints, see [Validate Data: Overview ](https://docs.greatexpectations.io/docs/oss/guides/validation/validate_data_overview).
 
   To view the full Checkpoint configuration, run `print(checkpoint.get_config().to_yaml_str())`.
 
@@ -137,5 +137,5 @@ context.open_data_docs()
 
 ## Next steps
 
-Now that you've created and saved a Data Context, Data Source, Data Asset, Expectation Suite, and Checkpoint, see [Validate data with Expectations and Checkpoints](https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint) 
+Now that you've created and saved a Data Context, Data Source, Data Asset, Expectation Suite, and Checkpoint, see [Validate data with Expectations and Checkpoints](https://docs.greatexpectations.io/docs/oss/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint) 
 to create a script to run the Checkpoint without the need to recreate your Data Assets and Expectations.
