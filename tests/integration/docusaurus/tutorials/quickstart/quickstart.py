@@ -18,7 +18,9 @@ validator = context.sources.pandas_default.read_csv(
 # Create Expectations
 # <snippet name="tutorials/quickstart/quickstart.py create_expectation">
 validator.expect_column_values_to_not_be_null("pickup_datetime")
-validator.expect_column_values_to_be_between("passenger_count", auto=True)
+validator.expect_column_values_to_be_between(
+    "passenger_count", min_value=1, max_value=6
+)
 validator.save_expectation_suite()
 # </snippet>
 

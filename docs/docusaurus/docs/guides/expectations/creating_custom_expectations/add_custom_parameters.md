@@ -58,7 +58,6 @@ condition_value_keys = (
    "strict_min",       
    "strict_max",       
    "parse_strings_as_datetimes",
-   "allow_cross_type_comparisons",
 )
 @column_condition_partial(engine=PandasExecutionEngine)   
 def_pandas(       
@@ -69,7 +68,6 @@ def_pandas(
    strict_min=None,       
    strict_max=None,       
    parse_strings_as_datetimes: bool = False,
-   allow_cross_type_comparisons=None,       
    **kwargs   
 ):
 ```

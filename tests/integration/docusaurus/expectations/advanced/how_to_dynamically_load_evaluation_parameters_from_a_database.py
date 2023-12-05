@@ -69,6 +69,7 @@ expected_validator_results = """
         5,
         6
       ],
+      "result_format": "BASIC",
       "batch_id": "pg_datasource-postgres_taxi_data"
     }
   },

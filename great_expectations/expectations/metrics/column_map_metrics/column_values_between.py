@@ -26,7 +26,6 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         "max_value",
         "strict_min",
         "strict_max",
-        "allow_cross_type_comparisons",
     )
 
     @column_condition_partial(engine=PandasExecutionEngine)
@@ -37,14 +36,10 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         max_value=None,
         strict_min=None,
         strict_max=None,
-        allow_cross_type_comparisons=None,
         **kwargs,
     ):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
-
-        if allow_cross_type_comparisons:
-            raise NotImplementedError
 
         temp_column = column
 

@@ -1,11 +1,8 @@
-from copy import deepcopy
-from typing import Dict, Optional
+from __future__ import annotations
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
-from great_expectations.execution_engine import ExecutionEngine
+from copy import deepcopy
+from typing import TYPE_CHECKING, Dict, Optional
+
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -24,9 +21,16 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 from great_expectations.validator.metric_configuration import (
     MetricConfiguration,  # noqa: TCH001
 )
-from great_expectations.validator.validator import (
-    ValidationDependencies,
-)
+
+if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.validator.validator import (
+        ValidationDependencies,
+    )
 
 
 class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
@@ -61,6 +65,8 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
         [expect_table_row_count_to_be_between](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between)
         [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
     """
+
+    other_table_name: str
 
     library_metadata = {
         "maturity": "production",

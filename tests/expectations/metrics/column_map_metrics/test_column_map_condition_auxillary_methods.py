@@ -180,7 +180,6 @@ def test_sqlalchemy_column_map_condition_values(
         "strict_min": False,
         "strict_max": False,
         "parse_strings_as_datetimes": False,
-        "allow_cross_type_comparisons": None,
         "result_format": {
             "result_format": "COMPLETE",
             "partial_unexpected_count": 20,
@@ -255,7 +254,6 @@ def test_spark_column_map_condition_values(
         "strict_min": False,
         "strict_max": False,
         "parse_strings_as_datetimes": False,
-        "allow_cross_type_comparisons": None,
         "result_format": {
             "result_format": "COMPLETE",
             "partial_unexpected_count": 20,
