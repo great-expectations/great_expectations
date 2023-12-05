@@ -1,14 +1,7 @@
-from datetime import datetime
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Optional, Union
 
-from great_expectations.compatibility.pydantic import validator
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
-)
-from great_expectations.expectations.core.validators import (
-    validate_eval_parameter_dict,
-)
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
     render_evaluation_parameter_string,
@@ -26,6 +19,10 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core import (
+        ExpectationConfiguration,
+        ExpectationValidationResult,
+    )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
@@ -60,11 +57,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
 
-    min_value: Union[float, dict, datetime, None] = None
-    max_value: Union[float, dict, datetime, None] = None
-
-    _min_val = validator("min_value", allow_reuse=True)(validate_eval_parameter_dict)
-    _max_val = validator("max_value", allow_reuse=True)(validate_eval_parameter_dict)
+    column_list: Union[tuple, list]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

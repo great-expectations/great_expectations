@@ -358,24 +358,6 @@
     "expectation_type": "expect_column_values_to_be_between",
     "kwargs": {
       "column": "y",
-      "min_value": 0,
-      "max_value": 10,
-      "allow_cross_type_comparisons": true
-    }
-  },
-  {
-    "expectation_type": "expect_column_values_to_be_between",
-    "kwargs": {
-      "column": "numeric",
-      "min_value": 0,
-      "max_value": 10,
-      "allow_cross_type_comparisons": true
-    }
-  },
-  {
-    "expectation_type": "expect_column_values_to_be_between",
-    "kwargs": {
-      "column": "y",
       "max_value": null,
       "min_value": null,
       "catch_exceptions": true

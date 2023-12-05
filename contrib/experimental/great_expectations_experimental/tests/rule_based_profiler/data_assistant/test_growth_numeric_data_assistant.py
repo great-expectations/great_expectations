@@ -381,12 +381,31 @@ def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> 
     checkpoint_config: dict = {
         "name": "my_checkpoint",
         "config_version": 1,
-        "class_name": "SimpleCheckpoint",
         "validations": [
             {
                 "batch_request": single_batch_batch_request,
                 "expectation_suite_name": "taxi_data_2019_suite",
             }
+        ],
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
         ],
     }
     data_context.add_checkpoint(**checkpoint_config)
@@ -483,12 +502,31 @@ def test_spark_happy_path_growth_numeric_data_assistant(
     checkpoint_config: dict = {
         "name": "my_checkpoint",
         "config_version": 1,
-        "class_name": "SimpleCheckpoint",
         "validations": [
             {
                 "batch_request": single_batch_batch_request,
                 "expectation_suite_name": "taxi_data_2019_suite",
             }
+        ],
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
         ],
     }
     data_context.add_checkpoint(**checkpoint_config)
@@ -581,12 +619,31 @@ def test_sql_happy_path_growth_numeric_data_assistant(
     checkpoint_config: dict = {
         "name": "my_checkpoint",
         "config_version": 1,
-        "class_name": "SimpleCheckpoint",
         "validations": [
             {
                 "batch_request": single_batch_batch_request,
                 "expectation_suite_name": "taxi_data_2019_suite",
             }
+        ],
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
         ],
     }
     data_context.add_checkpoint(**checkpoint_config)

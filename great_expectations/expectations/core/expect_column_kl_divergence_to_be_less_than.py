@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import altair as alt
@@ -8,13 +9,13 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from great_expectations.compatibility.pydantic import validator
+from great_expectations.compatibility.pydantic import Field
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,  # noqa: TCH001
+)
 from great_expectations.execution_engine.util import (
     is_valid_categorical_partition_object,
     is_valid_partition_object,
-)
-from great_expectations.expectations.core.validators import (
-    validate_eval_parameter_dict,
 )
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
@@ -51,8 +52,6 @@ from great_expectations.validator.metrics_calculator import (
 )
 
 if TYPE_CHECKING:
-    import datetime
-
     from great_expectations.core import (
         ExpectationConfiguration,
         ExpectationValidationResult,
@@ -84,9 +83,9 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
     Args:
         column (str): \
             The column name.
-        partition_object (dict): \
+        partition_object (dict or None): \
             The expected partition object (see [partition_object](https://docs.greatexpectations.io/docs/reference/expectations/distributional_expectations/#partition-objects)).
-        threshold (float): \
+        threshold (float or None): \
             The maximum KL divergence to for which to return success=True. If KL divergence is larger than the \
             provided threshold, the test will return success=False.
 
@@ -162,11 +161,13 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         parsers to crash when encountered. The python None token will be serialized to null in json.
     """
 
-    min_value: Union[float, dict, datetime, None] = None
-    max_value: Union[float, dict, datetime, None] = None
-
-    _min_val = validator("min_value", allow_reuse=True)(validate_eval_parameter_dict)
-    _max_val = validator("max_value", allow_reuse=True)(validate_eval_parameter_dict)
+    partition_object: Union[dict, None]
+    threshold: Union[float, None]
+    internal_weight_holdout: Union[float, None] = Field(0, ge=0, le=1)
+    tail_weight_holdout: Union[float, None] = Field(0, ge=0, le=1)
+    bucketize_data: bool = True
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -222,7 +223,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         bins = None
         if partition_object is None:
             if configuration.kwargs.get(
-                "bucketize_data", self.default_kwarg_values["bucketize_data"]
+                "bucketize_data", self._get_default_value("bucketize_data")
             ):
                 is_categorical = False
                 partition_metric_configuration = MetricConfiguration(
@@ -375,20 +376,20 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         bucketize_data = configuration.kwargs.get(
-            "bucketize_data", self.default_kwarg_values["bucketize_data"]
+            "bucketize_data", self._get_default_value("bucketize_data")
         )
         partition_object = configuration.kwargs.get(
-            "partition_object", self.default_kwarg_values["partition_object"]
+            "partition_object", self._get_default_value("partition_object")
         )
         threshold = configuration.kwargs.get(
-            "threshold", self.default_kwarg_values["threshold"]
+            "threshold", self._get_default_value("threshold")
         )
         tail_weight_holdout = configuration.kwargs.get(
-            "tail_weight_holdout", self.default_kwarg_values["tail_weight_holdout"]
+            "tail_weight_holdout", self._get_default_value("tail_weight_holdout")
         )
         internal_weight_holdout = configuration.kwargs.get(
             "internal_weight_holdout",
-            self.default_kwarg_values["internal_weight_holdout"],
+            self._get_default_value("internal_weight_holdout"),
         )
         if partition_object is None:
             if bucketize_data:

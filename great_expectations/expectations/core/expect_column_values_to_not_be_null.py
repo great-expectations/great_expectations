@@ -1,16 +1,11 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
 
-from great_expectations.compatibility.pydantic import validator
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
-)
-from great_expectations.expectations.core.validators import (
-    validate_eval_parameter_dict,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -82,12 +77,6 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     See Also:
         [expect_column_values_to_be_null](https://greatexpectations.io/expectations/expect_column_values_to_be_null)
     """
-
-    min_value: Union[float, dict, datetime, None] = None
-    max_value: Union[float, dict, datetime, None] = None
-
-    _min_val = validator("min_value", allow_reuse=True)(validate_eval_parameter_dict)
-    _max_val = validator("max_value", allow_reuse=True)(validate_eval_parameter_dict)
 
     library_metadata: ClassVar[dict] = {
         "maturity": "production",
@@ -279,9 +268,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         result_format = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
+        mostly = self.get_success_kwargs().get("mostly")
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(
             f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"

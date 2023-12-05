@@ -21,14 +21,14 @@
         }
       },
       {
-        "title": "vacuously_true_empty_value_set",
+        "title": "empty_value_set",
         "exact_match_out": false,
         "in": {
           "column": "x",
-          "value_set": null
+          "value_set": []
         },
         "out": {
-          "success": true
+          "success": false
         }
       },
       {

@@ -338,7 +338,6 @@ module.exports = {
             'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
             'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
             'guides/expectations/how_to_edit_an_existing_expectationsuite',
-            'guides/expectations/how_to_use_auto_initializing_expectations',
             'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
             'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
             'guides/expectations/advanced/identify_failed_rows_expectations',
@@ -415,7 +414,6 @@ module.exports = {
             'guides/validation/validation_actions/how_to_collect_openlineage_metadata_using_a_validation_action',
             'guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action',
             'guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action',
-            'guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action',
             'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
           ]
         },
@@ -500,7 +498,6 @@ module.exports = {
             'terms/batch_request',
             'terms/custom_expectation',
             'terms/checkpoint',
-            'terms/cli',
             'terms/datasource',
             'terms/data_context',
             'terms/data_asset',
