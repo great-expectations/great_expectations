@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING, List, Optional, Union
 
-from pydantic import Field
-
+from great_expectations.compatibility import pydantic
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -101,7 +100,9 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         [expect_column_values_to_not_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_not_be_in_set)
     """
 
-    value_set: Union[list, set, EvaluationParameterDict] = Field(default_factory=list)
+    value_set: Union[list, set, EvaluationParameterDict] = pydantic.Field(
+        default_factory=list
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
