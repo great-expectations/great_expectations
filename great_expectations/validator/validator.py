@@ -422,7 +422,8 @@ class Validator:
         # )
 
         combined_dir = (
-            validator_attrs | class_expectation_impls
+            validator_attrs
+            | class_expectation_impls
             # | execution_engine_expectation_impls
         )
 
@@ -629,7 +630,9 @@ class Validator:
             BaseRuleBasedProfiler
         ] = self.build_rule_based_profiler_for_expectation(
             expectation_type=expectation_type
-        )(*(), **expectation_kwargs)
+        )(
+            *(), **expectation_kwargs
+        )
         if profiler is not None:
             profiler_result: RuleBasedProfilerResult = profiler.run(
                 variables=None,
@@ -703,7 +706,7 @@ class Validator:
         """
         expectation_impl = get_expectation_impl(expectation_type)
 
-        def inst_rule_based_profiler(  # noqa: PLR0912
+        def inst_rule_based_profiler(
             *args, **kwargs
         ) -> Optional[BaseRuleBasedProfiler]:
             if args is None:
