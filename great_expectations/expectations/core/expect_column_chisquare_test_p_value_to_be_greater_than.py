@@ -22,7 +22,6 @@ class ExpectColumnChiSquareTestPValueToBeGreaterThan(BatchExpectation):
 
     metric_dependencies = tuple()
     success_keys = ()
-    default_kwarg_values = {}
     args_keys = (
         "column",
         "partition_object",
