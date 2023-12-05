@@ -11,6 +11,7 @@ import pact
 import pytest
 from typing_extensions import Annotated, TypeAlias  # noqa: TCH002
 
+from great_expectations import project_manager
 from great_expectations.compatibility import pydantic
 from great_expectations.core.http import create_session
 from great_expectations.data_context import CloudDataContext
@@ -88,12 +89,14 @@ def cloud_data_context(
     # we can't override the base url to use the mock service due to
     # reliance on env vars, so instead we override with a real project config
     project_config = cloud_data_context.config
-    return CloudDataContext(
+    context = CloudDataContext(
         cloud_base_url=PACT_MOCK_SERVICE_URL,
         cloud_organization_id=EXISTING_ORGANIZATION_ID,
         cloud_access_token=cloud_access_token,
         project_config=project_config,
     )
+    project_manager.set_project(cloud_data_context)
+    return context
 
 
 def get_git_commit_hash() -> str:
