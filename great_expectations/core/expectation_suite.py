@@ -102,10 +102,11 @@ class ExpectationSuite(SerializableDictDot):
             str
         ] = None,  # for backwards compatibility - remove
     ) -> None:
-        assert name or expectation_suite_name, "Name is a required field."
         if name:
+            assert isinstance(name, str), "Name is a required field."
             self.expectation_suite_name = name
         else:
+            assert isinstance(expectation_suite_name, str), "Name is a required field."
             self.expectation_suite_name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
         self._data_context = data_context
