@@ -10,8 +10,10 @@ types-decorator
 types-jsonschema
 types-protobuf
 types-psycopg2
+types-pycurl
 types-python-dateutil
 types-pytz
+types-PyYAML
 types-requests
 types-six
 types-tabulate
