@@ -91,7 +91,6 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
         "value_set": None,
         "ties_okay": None,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
     }
     args_keys = (

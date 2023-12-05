@@ -69,7 +69,6 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
     default_kwarg_values = {
         "value": None,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
         "meta": None,
     }

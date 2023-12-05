@@ -86,7 +86,6 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
         "strictly": None,
         "mostly": 1,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
     }
     args_keys = ("column",)
