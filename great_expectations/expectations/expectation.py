@@ -41,7 +41,6 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field, ModelMetaclass
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import (
-    deprecated_method_or_class,
     public_api,
 )
 from great_expectations.core.expectation_configuration import (
@@ -81,7 +80,6 @@ from great_expectations.core.metric_function_types import (
 from great_expectations.core.result_format import ResultFormat, ResultFormatDict
 from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
-    ExpectationNotFoundError,
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
@@ -93,7 +91,6 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.registry import (
     _registered_metrics,
     _registered_renderers,
-    get_expectation_impl,
     get_metric_kwargs,
     register_expectation,
     register_renderer,
@@ -1703,49 +1700,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
                                 kwargs=test.input,
                             )
         return None
-
-    @staticmethod
-    @deprecated_method_or_class(
-        version="0.17.11", message="Please use is_expectation_auto_initializing instead"
-    )
-    def is_expectation_self_initializing(name: str) -> bool:
-        """
-        Given the name of an Expectation, returns a boolean that represents whether an Expectation can be auto-intialized.
-
-        Args:
-            name (str): name of Expectation
-
-        Returns:
-            boolean that represents whether an Expectation can be auto-initialized. Information also outputted to logger.
-        """
-        return Expectation.is_expectation_auto_initializing(name=name)
-
-    @staticmethod
-    def is_expectation_auto_initializing(name: str) -> bool:
-        """
-        Given the name of an Expectation, returns a boolean that represents whether an Expectation can be auto-intialized.
-
-        Args:
-            name (str): name of Expectation
-
-        Returns:
-            boolean that represents whether an Expectation can be auto-initialized. Information also outputted to logger.
-        """
-
-        expectation_impl: MetaExpectation = get_expectation_impl(name)
-        if not expectation_impl:
-            raise ExpectationNotFoundError(
-                f"Expectation {name} was not found in the list of registered Expectations. "
-                f"Please check your configuration and try again"
-            )
-        if "auto" in expectation_impl.default_kwarg_values:
-            print(
-                f"The Expectation {name} is able to be auto-initialized. Please run by using the auto=True parameter."
-            )
-            return True
-        else:
-            print(f"The Expectation {name} is not able to be auto-initialized.")
-            return False
 
     @staticmethod
     def _add_array_params(
