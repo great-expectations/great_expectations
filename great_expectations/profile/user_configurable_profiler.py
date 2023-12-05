@@ -738,7 +738,7 @@ type detected is "{type(self.profile_dataset)!s}", which is illegal.
         Returns:
             The ExpectationSuite
         """
-        expectations = suite.expectations
+        expectations = suite.expectation_configurations
         expectations_by_column = {}
         for expectation in expectations:
             domain = expectation["kwargs"].get("column") or "table_level_expectations"

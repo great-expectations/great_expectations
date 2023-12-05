@@ -44,7 +44,6 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
         "meta": None,
         "query": query,  # Passing the above `query` attribute here as a default kwarg allows for the Expectation to be run with the defaul query, or have that query overridden by passing a `query` kwarg into the expectation

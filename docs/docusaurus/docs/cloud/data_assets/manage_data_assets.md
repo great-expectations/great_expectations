@@ -98,6 +98,34 @@ The following table lists the available Data Asset metrics.
 | **Median**                                 | For numeric columns, the value in the middle of a data set.<br/> 50% of the data within the Data Asset has a value smaller or equal to the median, and 50% of the data within the Data Asset has a value that is higher or equal to the median.  |
 | **Null %**                                | The percentage of missing values in a column.             |
 
+## Add an Expectation to a Data Asset column
+
+When you create an Expectation after fetching metrics for a Data Asset, the column names and some values are autopopulated for you and this can simplify the creation of new Expectations. Data Asset Metrics can also help you determine what Expectations might be useful and how they should be configured. When you create new Expectations after fetching Data Asset Metrics, you can add them to an existing Expectation Suite, or you can create a new Expectation Suite and add the Expectations to it. 
+
+1. In GX Cloud, click **Data Assets** and then select a Data Asset in the **Data Assets** list.
+
+2. Click the **Overview** tab.
+
+3. Select one of the following options: 
+
+    - If you have not previously generated Data Asset metrics, click **Fetch Metrics**. 
+
+    - If you previously generated Data Asset metrics, click **Refresh** to refresh the metrics.
+
+4. Scroll to the end of the Data Asset Metrics list and click **Create Expectation**.
+
+5. Select one of the following options:
+
+    - To add an Expectation to a new Expectation Suite, click the **Create new Expectation Suite** tab and then enter a name for the new Expectation Suite.
+
+    - To add an Expectation to an existing Expectation Suite, click the **Add to existing Expectation Suite** tab and then select an existing Expectation Suite.
+
+6. Select an Expectation type. See [Available Expectation types](/docs/cloud/expectations/manage_expectations#available-expectation-types).
+
+7. Complete the fields in the **Create Expectation** pane.
+
+8. Click **Save** to add the Expectation, or click **Save & Add More** to add additional Expectations.
+
 
 ## Add a Data Asset to an Existing Data Source
 

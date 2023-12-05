@@ -97,8 +97,6 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        include_config (boolean): \
-            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
@@ -109,7 +107,7 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     See Also:
         [expect_column_values_to_be_xml_parseable](https://greatexpectations.io/expectations/expect_column_values_to_be_xml_parseable)
@@ -138,14 +136,8 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": True,
     }
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        super().validate_configuration(configuration)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")

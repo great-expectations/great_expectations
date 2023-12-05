@@ -6,7 +6,6 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
@@ -28,7 +27,7 @@ pytestmark = pytest.mark.big
 def test_meta_not_dict_exception(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -94,7 +93,7 @@ def test_meta_not_dict_exception(
 def test_condition_not_string_exception(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -159,7 +158,7 @@ def test_condition_not_string_exception(
 def test_default_expectation_configuration_builder_alice_null_condition_parameter_builder_validation_dependency_separate(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -226,7 +225,7 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
 def test_default_expectation_configuration_builder_alice_null_condition_parameter_builder_validation_dependency_included(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -287,7 +286,7 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
 def test_default_expectation_configuration_builder_alice_single_term_parameter_condition_true(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -354,7 +353,7 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
 def test_default_expectation_configuration_builder_alice_single_term_parameter_condition_false(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -421,7 +420,7 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
 def test_default_expectation_configuration_builder_alice_single_term_variable_condition_true(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -492,7 +491,7 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
 def test_default_expectation_configuration_builder_alice_single_term_variable_condition_false(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -563,7 +562,7 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
 def test_default_expectation_configuration_builder_alice_two_term_and_parameter_variable_condition_true(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -634,7 +633,7 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
 def test_default_expectation_configuration_builder_alice_two_term_and_parameter_variable_condition_false(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -705,7 +704,7 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
 def test_default_expectation_configuration_builder_alice_two_term_or_parameter_variable_condition_true(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -776,7 +775,7 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
 def test_default_expectation_configuration_builder_alice_two_term_or_parameter_variable_condition_false(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -847,7 +846,7 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
 def test_default_expectation_configuration_builder_alice_more_than_two_term_parameter_variable_condition_true(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -918,7 +917,7 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
 def test_default_expectation_configuration_builder_alice_more_than_two_term_parameter_variable_condition_false(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -989,7 +988,7 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
 def test_default_expectation_configuration_builder_alice_parentheses_parameter_variable_condition_true(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -1060,7 +1059,7 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
 def test_default_expectation_configuration_builder_alice_parentheses_parameter_variable_condition_false(
     alice_columnar_table_single_batch_context,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",

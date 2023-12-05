@@ -63,7 +63,6 @@ from great_expectations.data_context.types.resource_identifiers import GXCloudId
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
-from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -760,11 +759,6 @@ class CloudDataContext(SerializableDataContext):
         runtime_configuration: dict | None = None,
         validations: list[dict] | list[CheckpointValidationConfig] | None = None,
         profilers: list[dict] | None = None,
-        # the following four arguments are used by SimpleCheckpoint
-        site_names: str | list[str] | None = None,
-        slack_webhook: str | None = None,
-        notify_on: str | None = None,
-        notify_with: str | list[str] | None = None,
         ge_cloud_id: str | None = None,
         expectation_suite_ge_cloud_id: str | None = None,
         default_validation_id: str | None = None,
@@ -799,10 +793,6 @@ class CloudDataContext(SerializableDataContext):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            site_names=site_names,
-            slack_webhook=slack_webhook,
-            notify_on=notify_on,
-            notify_with=notify_with,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
             validator=validator,
@@ -843,13 +833,6 @@ class CloudDataContext(SerializableDataContext):
     @override
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         return self.checkpoint_store.list_checkpoints(ge_cloud_mode=True)
-
-    @override
-    def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
-        return RuleBasedProfiler.list_profilers(
-            profiler_store=self.profiler_store,
-            ge_cloud_mode=True,
-        )
 
     @override
     def _init_site_builder_for_data_docs_site_creation(

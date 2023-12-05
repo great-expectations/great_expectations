@@ -4,7 +4,6 @@ import re
 
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
@@ -77,7 +76,7 @@ def data_context_with_runtime_sql_datasource_for_testing_get_batch(
     sa,
     empty_data_context,
 ):
-    context: DataContext = empty_data_context
+    context = empty_data_context
     db_file_path: str = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
@@ -226,6 +225,7 @@ def test_get_config(empty_data_context):
     print(context.get_config(mode=ConfigOutputModes.DICT).keys())
 
     assert set(context.get_config(mode=ConfigOutputModes.DICT).keys()) == {
+        "batch_configs",
         "config_version",
         "datasources",
         "config_variables_file_path",
@@ -491,9 +491,7 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
     data_context_with_runtime_sql_datasource_for_testing_get_batch,
     sqlite_view_engine,
 ):
-    context: DataContext = (
-        data_context_with_runtime_sql_datasource_for_testing_get_batch
-    )
+    context = data_context_with_runtime_sql_datasource_for_testing_get_batch
 
     batch_list = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
@@ -552,9 +550,7 @@ def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_conne
     sa,
     data_context_with_runtime_sql_datasource_for_testing_get_batch,
 ):
-    context: DataContext = (
-        data_context_with_runtime_sql_datasource_for_testing_get_batch
-    )
+    context = data_context_with_runtime_sql_datasource_for_testing_get_batch
     my_expectation_suite: ExpectationSuite = context.add_expectation_suite(
         "my_expectations"
     )
@@ -588,7 +584,7 @@ def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
     sa,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     data_asset_path = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
@@ -663,7 +659,7 @@ def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connec
     sa,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     data_asset_path = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )

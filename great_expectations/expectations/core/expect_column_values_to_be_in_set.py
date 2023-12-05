@@ -4,10 +4,11 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.evaluation_parameters import (
+    EvaluationParameterDict,
+)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    InvalidExpectationConfigurationError,
 )
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
@@ -25,18 +26,6 @@ from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
-)
-from great_expectations.rule_based_profiler.config import (
-    ParameterBuilderConfig,
-    RuleBasedProfilerConfig,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
-    VARIABLES_KEY,
 )
 
 try:
@@ -87,8 +76,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         mostly (None or a float between 0 and 1): \
             Successful if at least mostly fraction of values match the expectation. \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
-        parse_strings_as_datetimes (boolean or None) : If True values provided in value_set will be parsed as \
-            datetimes before making comparisons.
 
     Other Parameters:
         result_format (str or None): \
@@ -112,6 +99,8 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         [expect_column_values_to_not_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_not_be_in_set)
     """
 
+    value_set: Union[list, set, EvaluationParameterDict]
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
@@ -132,60 +121,10 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     success_keys = (
         "value_set",
         "mostly",
-        "parse_strings_as_datetimes",
-        "auto",
-        "profiler_config",
-    )
-
-    value_set_estimator_parameter_builder_config: ParameterBuilderConfig = (
-        ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="ValueSetMultiBatchParameterBuilder",
-            name="value_set_estimator",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=None,
-        )
-    )
-    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        value_set_estimator_parameter_builder_config,
-    ]
-    default_profiler_config = RuleBasedProfilerConfig(
-        name="expect_column_values_to_be_in_set",  # Convention: use "expectation_type" as profiler name.
-        config_version=1.0,
-        variables={},
-        rules={
-            "default_expect_column_values_to_be_in_set_rule": {
-                "variables": {
-                    "mostly": 1.0,
-                },
-                "domain_builder": {
-                    "class_name": "ColumnDomainBuilder",
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                },
-                "expectation_configuration_builders": [
-                    {
-                        "expectation_type": "expect_column_values_to_be_in_set",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
-                        "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "value_set": f"{PARAMETER_KEY}{value_set_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
-                        "mostly": f"{VARIABLES_KEY}mostly",
-                        "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{value_set_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-                        },
-                    },
-                ],
-            },
-        },
     )
 
     default_kwarg_values = {
         "value_set": [],
-        "parse_strings_as_datetimes": False,
-        "auto": False,
-        "profiler_config": default_profiler_config,
     }
 
     @classmethod
@@ -197,7 +136,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             ("column", RendererValueType.STRING),
             ("value_set", RendererValueType.ARRAY),
             ("mostly", RendererValueType.NUMBER),
-            ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
         )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
@@ -228,9 +166,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             else:
                 template_str += "."
 
-            if params.parse_strings_as_datetimes:
-                template_str += " Values should be parsed as datetimes."
-
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
@@ -258,7 +193,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                 "column",
                 "value_set",
                 "mostly",
-                "parse_strings_as_datetimes",
                 "row_condition",
                 "condition_parser",
             ],
@@ -284,9 +218,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
-
-        if params.get("parse_strings_as_datetimes"):
-            template_str += " Values should be parsed as datetimes."
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -380,50 +311,3 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         )
 
         return new_block
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        For `expect_column_values_to_be_in_set` it is required that:
-
-        - `value_set` has been provided.
-
-        - `value_set` is one of the following types: `list`, `set`, or `dict`
-
-        - If `value_set` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
-          dictionary keys must be `$PARAMETER`.
-
-        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-        superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                           from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                                                  Expectation.
-        """
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-        # supports extensibility by allowing value_set to not be provided in config but captured via child-class
-        # default_kwarg_values, e.g. parameterized expectations
-        value_set = configuration.kwargs.get(
-            "value_set"
-        ) or self.default_kwarg_values.get("value_set")
-        try:
-            assert (
-                "value_set" in configuration.kwargs or value_set
-            ), "value_set is required"
-            assert isinstance(
-                value_set, (list, set, dict)
-            ), "value_set must be a list, set, or dict"
-            if isinstance(value_set, dict):
-                assert (
-                    "$PARAMETER" in value_set
-                ), 'Evaluation Parameter dict for value_set kwarg must have "$PARAMETER" key.'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))

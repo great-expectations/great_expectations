@@ -154,9 +154,6 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
                 result_format (str or None): \
                     Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
                     For more detail, see :ref:`result_format <result_format>`.
-                include_config (boolean): \
-                    If True, then include the expectation config as part of the result object. \
-                    For more detail, see :ref:`include_config`.
                 catch_exceptions (boolean or None): \
                     If True, then catch exceptions and include them as part of the result object. \
                     For more detail, see :ref:`catch_exceptions`.
@@ -165,8 +162,7 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
                     modification. For more detail, see :ref:`meta`.
             Returns:
                 An ExpectationSuiteValidationResult
-                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and :ref:`catch_exceptions`, and :ref:`meta`.
             Notes:
                 * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
                 * If min_value is None, then max_value is treated as an upper bound
@@ -266,7 +262,6 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
         "strict_min": None,
         "strict_max": None,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
         "base": 2,
     }

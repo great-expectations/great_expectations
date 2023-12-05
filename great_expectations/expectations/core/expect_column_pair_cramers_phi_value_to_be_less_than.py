@@ -25,8 +25,12 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
+# NOTE: This Expectation is incomplete and not ready for use.
+#       It should remain unexported until it meets the requirements set by our V1 API.
 class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
-    # This dictionary contains metadata for display in the public gallery
+    def __init__(self, *args, **kwargs):
+        raise NotImplementedError
+
     library_metadata = {
         "maturity": "production",
         "tags": [
@@ -53,7 +57,6 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
         "n_bins_B": None,
         "threshold": 0.1,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
     }
     args_keys = (

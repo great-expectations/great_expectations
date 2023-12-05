@@ -8,8 +8,8 @@ from __future__ import annotations
 import os
 from typing import List, Optional
 
-from great_expectations import DataContext
-from great_expectations.checkpoint import SimpleCheckpoint
+from great_expectations.checkpoint import Checkpoint
+from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context import AbstractDataContext, get_context
 from great_expectations.data_context.types.base import (
@@ -21,7 +21,7 @@ from great_expectations.data_context.types.base import (
 
 def create_checkpoint(
     number_of_tables: int, backend_api: str = "V3", html_dir: Optional[str] = None
-) -> SimpleCheckpoint:
+) -> Checkpoint:
     """Create a checkpoint from scratch, including setting up data sources/etc.
 
     Args:
@@ -236,7 +236,7 @@ def _create_context(
     data_connector_name: str,
     asset_names: List[str],
     html_dir: Optional[str] = None,
-) -> DataContext:
+):
     data_docs_sites = (
         {
             "local_site": {
@@ -315,7 +315,7 @@ def _add_checkpoint(
     data_connector_name: str,
     checkpoint_name: str,
     suite_and_asset_names: list | None = None,
-) -> SimpleCheckpoint:
+) -> Checkpoint:
     if suite_and_asset_names is None:
         suite_and_asset_names = []
     if backend_api == "V3":
@@ -333,9 +333,23 @@ def _add_checkpoint(
         ]
         return context.add_checkpoint(
             name=checkpoint_name,
-            class_name="SimpleCheckpoint",
+            class_name="Checkpoint",
             validations=validations,
             run_name_template="my_run_name",
+            action_list=[
+                ActionDict(
+                    name="store_validation_result",
+                    action=ActionDetails(class_name="StoreValidationResultAction"),
+                ),
+                ActionDict(
+                    name="store_evaluation_params",
+                    action=ActionDetails(class_name="StoreEvaluationParametersAction"),
+                ),
+                ActionDict(
+                    name="update_data_docs",
+                    action=ActionDetails(class_name="UpdateDataDocsAction"),
+                ),
+            ],
         )
     elif backend_api == "V2":
         batches = [

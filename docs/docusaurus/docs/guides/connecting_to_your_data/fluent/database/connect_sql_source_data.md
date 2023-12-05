@@ -20,6 +20,7 @@ import Tabs from '@theme/Tabs';
 Use the information provided here to connect to Data Assets stored in SQL databases. Great Expectations (GX) uses SQLAlchemy to connect to SQL Data Assets, and most of the SQL dialects supported by SQLAlchemy are also supported by GX. For more information about the SQL dialects supported by SQLAlchemy, see [Dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
 <Tabs
+  queryString="sql-database-type"
   groupId="connect-sql-source-data"
   defaultValue='sql'
   values={[

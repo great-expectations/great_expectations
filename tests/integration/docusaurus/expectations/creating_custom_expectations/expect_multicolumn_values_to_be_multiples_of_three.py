@@ -100,7 +100,6 @@ class ExpectMulticolumnValuesToBeMultiplesOfThree(MulticolumnMapExpectation):
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1.0,
         "result_format": "BASIC",
-        "include_config": True,
         "catch_exceptions": False,
     }
     args_keys = ("column_list",)
@@ -130,11 +129,15 @@ class ExpectMulticolumnValuesToBeMultiplesOfThree(MulticolumnMapExpectation):
 
 if __name__ == "__main__":
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py print_diagnostic_checklist">
-    ExpectMulticolumnValuesToBeMultiplesOfThree().print_diagnostic_checklist()
+    ExpectMulticolumnValuesToBeMultiplesOfThree(
+        column_list=["col_a", "col_b", "col_c"]
+    ).print_diagnostic_checklist()
     # </snippet>
 # Note to users: code below this line is only for integration testing -- ignore!
 
-diagnostics = ExpectMulticolumnValuesToBeMultiplesOfThree().run_diagnostics()
+diagnostics = ExpectMulticolumnValuesToBeMultiplesOfThree(
+    column_list=["col_a", "col_b", "col_c"]
+).run_diagnostics()
 
 for check in diagnostics["tests"]:
     assert check["test_passed"] is True

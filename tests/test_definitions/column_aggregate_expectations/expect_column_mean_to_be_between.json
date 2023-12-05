@@ -238,7 +238,7 @@
             "catch_exceptions": true
           },
           "out": {
-            "traceback_substring": "must be a datetime (for datetime columns) or number"
+            "traceback_substring": "invalid datetime format"
           }
         },
         {
@@ -250,7 +250,7 @@
             "catch_exceptions": true
           },
           "out": {
-            "traceback_substring": "must be a datetime (for datetime columns) or number"
+            "traceback_substring": "invalid datetime format"
           }
         }]},
     {

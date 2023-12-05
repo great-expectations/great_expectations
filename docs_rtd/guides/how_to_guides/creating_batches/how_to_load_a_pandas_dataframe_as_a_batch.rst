@@ -115,7 +115,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
             from great_expectations.core.batch import RuntimeBatchRequest
             from great_expectations.validator.validator import Validator
 
-            context: DataContext = gx.get_context()
+            context = gx.get_context()
 
           Create an in-code Data Context using these instructions: :ref:`How to instantiate a Data Context without a yml file <how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file>`
 

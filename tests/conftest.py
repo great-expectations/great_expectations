@@ -20,6 +20,12 @@ import pytest
 from freezegun import freeze_time
 
 import great_expectations as gx
+from great_expectations import project_manager
+from great_expectations.checkpoint.configurator import (
+    ActionDetails,
+    ActionDict,
+    ActionDicts,
+)
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -42,7 +48,6 @@ from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import (
     AbstractDataContext,
-    BaseDataContext,
     CloudDataContext,
     get_context,
 )
@@ -967,6 +972,7 @@ def empty_data_context(
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
     assert context.list_datasources() == []
+    project_manager.set_project(context)
     return context
 
 
@@ -1028,6 +1034,7 @@ def data_context_with_connection_to_metrics_db(
     )
     # noinspection PyProtectedMember
     context._save_project_config()
+    project_manager.set_project(context)
     return context
 
 
@@ -1179,7 +1186,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     )
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1213,7 +1220,7 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
     _: BaseDatasource = context.add_datasource(
         "my_additional_datasource", **yaml.load(datasource_config)
     )
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1282,6 +1289,7 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
     monkeypatch,
 ):
     context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    project_manager.set_project(context)
     return context
 
 
@@ -1500,11 +1508,15 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=nested_checkpoint_template_config_3,
     )
 
-    # add minimal SimpleCheckpoint
+    # add minimal Checkpoint
     simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
-        class_name="SimpleCheckpoint",
         config_version=1,
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+        ],
     )
     simple_checkpoint_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_config.name
@@ -1514,12 +1526,19 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=simple_checkpoint_config,
     )
 
-    # add SimpleCheckpoint with slack webhook
     simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        slack_webhook="https://hooks.slack.com/foo/bar",
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+            ActionDicts.build_slack_action(
+                webhook="https://hooks.slack.com/foo/bar",
+                notify_on="all",
+                notify_with="all",
+            ),
+        ],
     )
     simple_checkpoint_with_slack_webhook_config_key: ConfigurationIdentifier = (
         ConfigurationIdentifier(
@@ -1531,13 +1550,19 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=simple_checkpoint_with_slack_webhook_config,
     )
 
-    # add SimpleCheckpoint with slack webhook and notify_with
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        slack_webhook="https://hooks.slack.com/foo/bar",
-        notify_with="all",
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+            ActionDicts.build_slack_action(
+                webhook="https://hooks.slack.com/foo/bar",
+                notify_on="all",
+                notify_with="all",
+            ),
+        ],
     )
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config.name
@@ -1547,12 +1572,20 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=simple_checkpoint_with_slack_webhook_and_notify_with_all_config,
     )
 
-    # add SimpleCheckpoint with site_names
     simple_checkpoint_with_site_names_config = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        site_names=["local_site"],
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDict(
+                name="update_data_docs",
+                action=ActionDetails(
+                    class_name="UpdateDataDocsAction",
+                    site_names=["local_site"],
+                ),
+            ),
+        ],
     )
     simple_checkpoint_with_site_names_config_key: ConfigurationIdentifier = (
         ConfigurationIdentifier(
@@ -1566,7 +1599,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1649,6 +1682,7 @@ def deterministic_asset_data_connector_context(
     )
     # noinspection PyProtectedMember
     context._save_project_config()
+    project_manager.set_project(context)
     return context
 
 
@@ -1779,7 +1813,7 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1834,7 +1868,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1865,7 +1899,7 @@ def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoi
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -2084,11 +2118,14 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         value=nested_checkpoint_template_config_3,
     )
 
-    # add minimal SimpleCheckpoint
     simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
-        class_name="SimpleCheckpoint",
         config_version=1,
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+        ],
     )
     simple_checkpoint_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_config.name
@@ -2098,12 +2135,19 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         value=simple_checkpoint_config,
     )
 
-    # add SimpleCheckpoint with slack webhook
     simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        slack_webhook="https://hooks.slack.com/foo/bar",
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+            ActionDicts.build_slack_action(
+                webhook="https://hooks.slack.com/foo/bar",
+                notify_on="all",
+                notify_with="all",
+            ),
+        ],
     )
     simple_checkpoint_with_slack_webhook_config_key: ConfigurationIdentifier = (
         ConfigurationIdentifier(
@@ -2115,13 +2159,19 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         value=simple_checkpoint_with_slack_webhook_config,
     )
 
-    # add SimpleCheckpoint with slack webhook and notify_with
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        slack_webhook="https://hooks.slack.com/foo/bar",
-        notify_with="all",
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDicts.UPDATE_DATA_DOCS,
+            ActionDicts.build_slack_action(
+                webhook="https://hooks.slack.com/foo/bar",
+                notify_on="all",
+                notify_with="all",
+            ),
+        ],
     )
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config.name
@@ -2131,12 +2181,20 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
         value=simple_checkpoint_with_slack_webhook_and_notify_with_all_config,
     )
 
-    # add SimpleCheckpoint with site_names
     simple_checkpoint_with_site_names_config = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
-        class_name="SimpleCheckpoint",
         config_version=1,
-        site_names=["local_site"],
+        action_list=[
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+            ActionDict(
+                name="update_data_docs",
+                action=ActionDetails(
+                    class_name="UpdateDataDocsAction",
+                    site_names=["local_site"],
+                ),
+            ),
+        ],
     )
     simple_checkpoint_with_site_names_config_key: ConfigurationIdentifier = (
         ConfigurationIdentifier(
@@ -2150,7 +2208,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -2205,7 +2263,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -2236,7 +2294,7 @@ def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_stats_enabled
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -2253,6 +2311,7 @@ def empty_context_with_checkpoint(empty_data_context):
     )
     shutil.copy(fixture_path, checkpoints_file)
     assert os.path.isfile(checkpoints_file)  # noqa: PTH113
+    project_manager.set_project(context)
     return context
 
 
@@ -2265,6 +2324,7 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
+    project_manager.set_project(context)
     return context
 
 
@@ -2292,7 +2352,9 @@ def titanic_data_context(tmp_path_factory) -> FileDataContext:
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2319,7 +2381,9 @@ def titanic_data_context_no_data_docs_no_checkpoint_store(tmp_path_factory):
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2346,7 +2410,9 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2375,7 +2441,9 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2404,7 +2472,9 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2433,7 +2503,9 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture(scope="module")
@@ -3236,21 +3308,55 @@ def test_df(tmp_path_factory):
 
 
 @pytest.fixture
-def data_context_with_simple_sql_datasource_for_testing_get_batch(
-    sa, empty_data_context
-):
-    context = empty_data_context
-
+def sqlite_connection_string() -> str:
     db_file_path: str = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
             "test_sets", "test_cases_for_sql_data_connector.db"
         ),
     )
+    return f"sqlite:///{db_file_path}"
+
+
+@pytest.fixture
+def fds_data_context_datasource_name() -> str:
+    return "sqlite_datasource"
+
+
+@pytest.fixture
+def fds_data_context(
+    sa,
+    fds_data_context_datasource_name: str,
+    empty_data_context: AbstractDataContext,
+    sqlite_connection_string: str,
+) -> AbstractDataContext:
+    context = empty_data_context
+    datasource = context.sources.add_sqlite(
+        name=fds_data_context_datasource_name,
+        connection_string=sqlite_connection_string,
+    )
+
+    datasource.add_query_asset(
+        name="trip_asset",
+        query="SELECT * FROM table_partitioned_by_date_column__A",
+    )
+    datasource.add_query_asset(
+        name="trip_asset_split_by_event_type",
+        query="SELECT * FROM table_partitioned_by_date_column__A",
+    ).add_splitter_column_value("event_type")
+
+    return context
+
+
+@pytest.fixture
+def data_context_with_simple_sql_datasource_for_testing_get_batch(
+    sa, empty_data_context, sqlite_connection_string
+) -> AbstractDataContext:
+    context = empty_data_context
 
     datasource_config: str = f"""
 class_name: SimpleSqlalchemyDatasource
-connection_string: sqlite:///{db_file_path}
+connection_string: {sqlite_connection_string}
 introspection:
     whole_table: {{}}
 
@@ -3602,18 +3708,18 @@ def empty_base_data_context_in_cloud_mode(
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
-) -> BaseDataContext:
+) -> CloudDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir(exist_ok=True)
     project_path = str(project_path)
 
-    with pytest.deprecated_call():
-        context = gx.data_context.BaseDataContext(
-            project_config=empty_ge_cloud_data_context_config,
-            context_root_dir=project_path,
-            cloud_mode=True,
-            cloud_config=ge_cloud_config,
-        )
+    context = CloudDataContext(
+        project_config=empty_ge_cloud_data_context_config,
+        context_root_dir=project_path,
+        cloud_base_url=ge_cloud_config.base_url,
+        cloud_access_token=ge_cloud_config.access_token,
+        cloud_organization_id=ge_cloud_config.organization_id,
+    )
 
     return context
 
@@ -3719,7 +3825,7 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
-) -> BaseDataContext:
+) -> CloudDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path = str(project_path)
@@ -3728,13 +3834,13 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
     custom_ge_cloud_config = copy.deepcopy(ge_cloud_config)
     custom_ge_cloud_config.base_url = custom_base_url
 
-    with pytest.deprecated_call():
-        context = gx.data_context.BaseDataContext(
-            project_config=empty_ge_cloud_data_context_config,
-            context_root_dir=project_path,
-            cloud_mode=True,
-            cloud_config=custom_ge_cloud_config,
-        )
+    context = CloudDataContext(
+        project_config=empty_ge_cloud_data_context_config,
+        context_root_dir=project_path,
+        cloud_base_url=custom_ge_cloud_config.base_url,
+        cloud_access_token=custom_ge_cloud_config.access_token,
+        cloud_organization_id=custom_ge_cloud_config.organization_id,
+    )
     assert context.list_datasources() == []
     assert context.ge_cloud_config.base_url != ge_cloud_config.base_url
     assert context.ge_cloud_config.base_url == custom_base_url

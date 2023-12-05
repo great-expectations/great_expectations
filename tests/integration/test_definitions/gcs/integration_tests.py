@@ -48,26 +48,28 @@ connecting_to_your_data = [
 ]
 
 how_to_configure_metadata_store = [
-    IntegrationTestFixture(
-        name="how_to_configure_an_expectation_store_in_gcs",
-        user_flow_script="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.GCS],
-    ),
-    IntegrationTestFixture(
-        name="how_to_host_and_share_data_docs_on_gcs",
-        user_flow_script="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.GCS],
-    ),
-    IntegrationTestFixture(
-        name="how_to_configure_a_validation_result_store_in_gcs",
-        user_flow_script="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.GCS],
-    ),
+    # Chetan - 20231117 - These have been commented out due to their reliance on the CLI (which has been deleted).
+    #                     They should be re-enabled once they have been updated.
+    # IntegrationTestFixture(
+    #     name="how_to_configure_an_expectation_store_in_gcs",
+    #     user_flow_script="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     backend_dependencies=[BackendDependencies.GCS],
+    # ),
+    # IntegrationTestFixture(
+    #     name="how_to_host_and_share_data_docs_on_gcs",
+    #     user_flow_script="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    #     backend_dependencies=[BackendDependencies.GCS],
+    # ),
+    # IntegrationTestFixture(
+    #     name="how_to_configure_a_validation_result_store_in_gcs",
+    #     user_flow_script="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    #     backend_dependencies=[BackendDependencies.GCS],
+    # ),
 ]
 
 split_data = []
