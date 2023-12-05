@@ -244,6 +244,7 @@ class ExpectationsStore(Store):
             key = GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
                 id=suite.ge_cloud_id,
+                resource_name=suite.expectation_suite_name,
             )
         else:
             key = ExpectationSuiteIdentifier(

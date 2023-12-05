@@ -46,6 +46,7 @@ from great_expectations.core.util import (
     nested_update,
     parse_string_to_datetime,
 )
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import (
@@ -76,7 +77,8 @@ class ExpectationSuite(SerializableDictDot):
     """Set-like collection of Expectations.
 
     Args:
-        expectation_suite_name: Name of the Expectation Suite.
+        name: Name of the Expectation Suite
+        expectation_suite_name (deprecated): Name of the Expectation Suite.
         data_context: Data Context associated with this Expectation Suite.
         expectations: Expectation Configurations to associate with this Expectation Suite.
         evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
@@ -88,7 +90,7 @@ class ExpectationSuite(SerializableDictDot):
 
     def __init__(  # noqa: PLR0913
         self,
-        expectation_suite_name: str,
+        name: Optional[str] = None,
         data_context: Optional[AbstractDataContext] = None,
         expectations: Optional[Sequence[Union[dict, ExpectationConfiguration]]] = None,
         evaluation_parameters: Optional[dict] = None,
@@ -96,8 +98,14 @@ class ExpectationSuite(SerializableDictDot):
         execution_engine_type: Optional[Type[ExecutionEngine]] = None,
         meta: Optional[dict] = None,
         ge_cloud_id: Optional[str] = None,
+        expectation_suite_name: Optional[
+            str
+        ] = None,  # for backwards compatibility - remove
     ) -> None:
-        self.expectation_suite_name = expectation_suite_name
+        if name:
+            self.expectation_suite_name = name
+        else:
+            self.expectation_suite_name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
         self._data_context = data_context
 
@@ -197,7 +205,10 @@ class ExpectationSuite(SerializableDictDot):
     def save(self) -> None:
         """Save this ExpectationSuite."""
         key = self._store.get_key(suite=self)
-        self._store.set(key=key, value=self)
+        res = self._store.add_or_update(key=key, value=self)
+        # update
+        if self.ge_cloud_id is None and isinstance(res, GXCloudResourceRef):
+            self.ge_cloud_id = res.response["data"]["id"]
 
     def _has_been_saved(self) -> bool:
         key = self._store.get_key(suite=self)
