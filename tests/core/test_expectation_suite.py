@@ -216,7 +216,7 @@ class TestCRUDMethods:
         assert created_expectation == expectation
 
         # expect that the data context is kept in sync with the mutation
-        context.expectations_store.set.assert_called_once_with(
+        context.expectations_store.add_or_update.assert_called_once_with(
             key=store_key, value=suite
         )
 
@@ -252,12 +252,14 @@ class TestCRUDMethods:
         assert len(suite.expectations) == 1
 
         # expect that the data context is kept in sync with the mutation
-        context.expectations_store.set.assert_called_with(key=store_key, value=suite)
+        context.expectations_store.add_or_update.assert_called_with(
+            key=store_key, value=suite
+        )
 
     @pytest.mark.unit
     def test_add_doesnt_mutate_suite_when_save_fails(self, expectation):
         context = Mock(spec=AbstractDataContext)
-        context.expectations_store.set.side_effect = (
+        context.expectations_store.add_or_update.side_effect = (
             ConnectionError()
         )  # arbitrary exception
         context.expectations_store.has_key.return_value = True
@@ -288,7 +290,7 @@ class TestCRUDMethods:
         assert suite.expectations == []
 
         # expect that the data context is kept in sync with the mutation
-        context.expectations_store.set.assert_called_once_with(
+        context.expectations_store.add_or_update.assert_called_once_with(
             key=store_key, value=suite
         )
 
@@ -308,7 +310,7 @@ class TestCRUDMethods:
         assert suite.expectations == []
         # expect that deleting an expectation from this suite doesnt have the side effect of
         # persisting the suite to the data context
-        context.expectations_store.set.assert_not_called()
+        context.expectations_store.add_or_update.assert_not_called()
 
     @pytest.mark.unit
     def test_delete_fails_when_expectation_is_not_found(self, expectation):
@@ -327,7 +329,7 @@ class TestCRUDMethods:
     def test_delete_doesnt_mutate_suite_when_save_fails(self, expectation):
         context = Mock(spec=AbstractDataContext)
         context.expectations_store.has_key.return_value = True
-        context.expectations_store.set.side_effect = (
+        context.expectations_store.add_or_update.side_effect = (
             ConnectionError()
         )  # arbitrary exception
         set_context(project=context)
@@ -356,7 +358,7 @@ class TestCRUDMethods:
         suite.save()
 
         # expect that the data context is kept in sync
-        context.expectations_store.set.assert_called_once_with(
+        context.expectations_store.add_or_update.assert_called_once_with(
             key=store_key, value=suite
         )
 
