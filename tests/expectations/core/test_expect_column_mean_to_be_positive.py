@@ -1,7 +1,10 @@
+from datetime import datetime
+from typing import Union
 import pandas as pd
 import pytest
 
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.evaluation_parameters import EvaluationParameterDict
 from great_expectations.expectations.core.expect_column_mean_to_be_between import (
     ExpectColumnMeanToBeBetween,
 )
@@ -11,7 +14,7 @@ from great_expectations.expectations.core.expect_column_mean_to_be_between impor
 class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
     """Expect the mean of values in this column to be positive."""
 
-    min_value = 0
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = 0
     strict_min = True
 
     # </snippet>
