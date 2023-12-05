@@ -177,7 +177,7 @@ class ExpectationSuite(SerializableDictDot):
         """Delete an Expectation from the collection.
 
         Raises:
-            ValueError: Expectation not found in suite.
+            KeyError: Expectation not found in suite.
         """
         remaining_expectation_configs = [
             exp_config
@@ -208,11 +208,11 @@ class ExpectationSuite(SerializableDictDot):
         """Save this ExpectationSuite."""
         key = self._store.get_key(suite=self)
         res = self._store.add_or_update(key=key, value=self)
-        # update
         if self.ge_cloud_id is None and isinstance(res, GXCloudResourceRef):
             self.ge_cloud_id = res.response["data"]["id"]
 
     def _has_been_saved(self) -> bool:
+        """Has this ExpectationSuite been persisted to a DataContext?"""
         key = self._store.get_key(suite=self)
         return self._store.has_key(key=key)
 
