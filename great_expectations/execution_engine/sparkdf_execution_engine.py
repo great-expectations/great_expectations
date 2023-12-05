@@ -188,15 +188,12 @@ class SparkDFExecutionEngine(ExecutionEngine):
     def __init__(
         self,
         *args,
-        persist=True,
-        spark_config=None,
-        force_reuse_spark_context=True,
+        persist: bool = True,
+        force_reuse_spark_context: bool = True,
+        spark_config: Optional[dict] = None,
         **kwargs,
     ) -> None:
         self._persist = persist
-
-        if spark_config is None:
-            spark_config = {}
 
         spark: pyspark.SparkSession = get_or_create_spark_application(
             spark_config=spark_config,

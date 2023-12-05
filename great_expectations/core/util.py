@@ -151,7 +151,7 @@ def in_databricks() -> bool:
     Returns:
         bool
     """
-    return True
+    return False
 
 
 #    return "DATABRICKS_RUNTIME_VERSION" in os.environ
@@ -814,41 +814,39 @@ def get_or_create_spark_application(
 
     spark_config.update({"spark.app.name": name})
 
-    spark_session: Optional[pyspark.SparkSession] = get_or_create_spark_session(
+    spark_session: pyspark.SparkSession = get_or_create_spark_session(
         spark_config=spark_config
     )
-    if spark_session is None:
-        raise ValueError("SparkContext could not be started.")
 
-    sc_stopped = False
+    # sc_stopped = False
     # MOVE INTO TESTING FRAMEWORK
     # noinspection PyUnresolvedReferences
     # if in_databricks():
     #     sc_stopped: bool = spark.is_stopped
     # else:
     #     sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
-    if not force_reuse_spark_context and spark_restart_required(
-        current_spark_config=spark_session.sparkContext.getConf().getAll(),
-        desired_spark_config=spark_config,
-    ):
-        pass
-        # if not sc_stopped:
-        #     try:
-        #         # We need to stop the old/default Spark session in order to reconfigure it with the desired options.
-        #         logger.info("Stopping existing spark context to reconfigure.")
-        #         spark_session.sparkContext.stop()
-        #     except AttributeError:
-        #         logger.error(
-        #             "Unable to load spark context; install optional spark dependency for support."
-        #         )
-        # spark_session = get_or_create_spark_session(spark_config=spark_config)
-        # if spark_session is None:
-        #     raise ValueError("SparkContext could not be started.")
-        # # noinspection PyProtectedMember,PyUnresolvedReferences
-        # sc_stopped = spark_session.sparkContext._jsc.sc().isStopped()
+    # if not force_reuse_spark_context and spark_restart_required(
+    #     current_spark_config=spark_session.sparkContext.getConf().getAll(),
+    #     desired_spark_config=spark_config,
+    # ):
+    #     pass
+    # if not sc_stopped:
+    #     try:
+    #         # We need to stop the old/default Spark session in order to reconfigure it with the desired options.
+    #         logger.info("Stopping existing spark context to reconfigure.")
+    #         spark_session.sparkContext.stop()
+    #     except AttributeError:
+    #         logger.error(
+    #             "Unable to load spark context; install optional spark dependency for support."
+    #         )
+    # spark_session = get_or_create_spark_session(spark_config=spark_config)
+    # if spark_session is None:
+    #     raise ValueError("SparkContext could not be started.")
+    # # noinspection PyProtectedMember,PyUnresolvedReferences
+    # sc_stopped = spark_session.sparkContext._jsc.sc().isStopped()
 
-    if sc_stopped:
-        raise ValueError("SparkContext stopped unexpectedly.")
+    # if sc_stopped:
+    #     raise ValueError("SparkContext stopped unexpectedly.")
 
     return spark_session
 
@@ -856,7 +854,7 @@ def get_or_create_spark_application(
 # noinspection PyPep8Naming
 def get_or_create_spark_session(
     spark_config: Optional[Dict[str, str]] = None,
-) -> pyspark.SparkSession | None:
+) -> pyspark.SparkSession:
     """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
 
     Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
@@ -871,7 +869,7 @@ def get_or_create_spark_session(
     Returns:
 
     """
-    spark_session: Optional[pyspark.SparkSession]
+    spark_session: pyspark.SparkSession
     try:
         if spark_config is None:
             spark_config = {}
@@ -899,11 +897,11 @@ def get_or_create_spark_session(
         # if spark_session.sparkContext._jsc.sc().isStopped():
         #     raise ValueError("SparkContext stopped unexpectedly.")
 
-    except AttributeError:
+    except AttributeError as e:
         logger.error(
             "Unable to load spark context; install optional spark dependency for support."
         )
-        spark_session = None
+        raise e
 
     return spark_session
 

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-import json
 import logging
 import pathlib
 from typing import TYPE_CHECKING
@@ -118,7 +117,7 @@ def test_spark_config_passed_to_execution_engine(
     persist,
     spark_session,
 ):
-    spark_config: SparkConfig | None = {
+    spark_config: SparkConfig = {
         "spark.sql.catalogImplementation": "in-memory",
         "spark.app.name": "gx_spark_fluent_datasource_test",
         "spark.default.parallelism": 4,
@@ -132,10 +131,12 @@ def test_spark_config_passed_to_execution_engine(
         force_reuse_spark_context=False,
         persist=persist,
     )
-    spark_config = json.loads(json.dumps(spark_config), parse_int=str, parse_float=str)
+    execution_engine_spark_config = datasource.get_execution_engine().config[
+        "spark_config"
+    ]
     assert is_candidate_subset_of_target(
         candidate=spark_config,
-        target=datasource.get_execution_engine().config["spark_config"],
+        target=execution_engine_spark_config,
     )
 
 
