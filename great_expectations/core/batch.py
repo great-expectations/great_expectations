@@ -970,7 +970,7 @@ def batch_request_contains_runtime_parameters(
 
 
 @overload
-def get_batch_request_as_dict(  # type: ignore[misc] # Overload with None
+def get_batch_request_as_dict(  # type: ignore[overload-overlap] # Overload with None
     batch_request: BatchRequestBase
     | FluentBatchRequest
     | dict

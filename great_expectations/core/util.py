@@ -197,14 +197,14 @@ JSONConvertable: TypeAlias = Union[
 
 
 @overload
-def convert_to_json_serializable(  # type: ignore[misc] # overlap with `ToList`?
+def convert_to_json_serializable(
     data: ToDict,
 ) -> dict:
     ...
 
 
 @overload
-def convert_to_json_serializable(  # type: ignore[misc] # overlap with `ToDict`?
+def convert_to_json_serializable(
     data: ToList,
 ) -> list:
     ...
