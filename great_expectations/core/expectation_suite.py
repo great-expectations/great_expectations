@@ -102,6 +102,7 @@ class ExpectationSuite(SerializableDictDot):
             str
         ] = None,  # for backwards compatibility - remove
     ) -> None:
+        assert name or expectation_suite_name, "Name is a required field."
         if name:
             self.expectation_suite_name = name
         else:
