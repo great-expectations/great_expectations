@@ -1486,7 +1486,7 @@ class ExpectationConfiguration(SerializableDictDot):
         cls = get_expectation_impl(expectation_type)
         return {
             name: field.default if not field.required else None
-            for name, field in cls.__fields__
+            for name, field in cls.__fields__.items()
         }
 
 
