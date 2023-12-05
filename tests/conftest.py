@@ -20,6 +20,7 @@ import pytest
 from freezegun import freeze_time
 
 import great_expectations as gx
+from great_expectations import project_manager
 from great_expectations.checkpoint.configurator import (
     ActionDetails,
     ActionDict,
@@ -971,6 +972,7 @@ def empty_data_context(
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
     assert context.list_datasources() == []
+    project_manager.set_project(context)
     return context
 
 
@@ -1032,6 +1034,7 @@ def data_context_with_connection_to_metrics_db(
     )
     # noinspection PyProtectedMember
     context._save_project_config()
+    project_manager.set_project(context)
     return context
 
 
@@ -1183,7 +1186,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     )
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1217,7 +1220,7 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
     _: BaseDatasource = context.add_datasource(
         "my_additional_datasource", **yaml.load(datasource_config)
     )
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1286,6 +1289,7 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
     monkeypatch,
 ):
     context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    project_manager.set_project(context)
     return context
 
 
@@ -1595,7 +1599,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1678,6 +1682,7 @@ def deterministic_asset_data_connector_context(
     )
     # noinspection PyProtectedMember
     context._save_project_config()
+    project_manager.set_project(context)
     return context
 
 
@@ -1808,7 +1813,7 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1863,7 +1868,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -1894,7 +1899,7 @@ def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoi
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -2203,7 +2208,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -2258,7 +2263,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -2289,7 +2294,7 @@ def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_stats_enabled
 
     # noinspection PyProtectedMember
     context._save_project_config()
-
+    project_manager.set_project(context)
     return context
 
 
@@ -2306,6 +2311,7 @@ def empty_context_with_checkpoint(empty_data_context):
     )
     shutil.copy(fixture_path, checkpoints_file)
     assert os.path.isfile(checkpoints_file)  # noqa: PTH113
+    project_manager.set_project(context)
     return context
 
 
@@ -2318,6 +2324,7 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
+    project_manager.set_project(context)
     return context
 
 
@@ -2345,7 +2352,9 @@ def titanic_data_context(tmp_path_factory) -> FileDataContext:
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2372,7 +2381,9 @@ def titanic_data_context_no_data_docs_no_checkpoint_store(tmp_path_factory):
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2399,7 +2410,9 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2428,7 +2441,9 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2457,7 +2472,9 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture
@@ -2486,7 +2503,9 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
         titanic_csv_path,
         str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
-    return get_context(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
+    project_manager.set_project(context)
+    return context
 
 
 @pytest.fixture(scope="module")
