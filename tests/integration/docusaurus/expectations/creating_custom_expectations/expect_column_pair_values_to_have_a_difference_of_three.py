@@ -1,9 +1,7 @@
 # ruff: noqa: E711
-from typing import Optional
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -115,11 +113,9 @@ class ExpectColumnPairValuesToHaveADifferenceOfThree(ColumnPairMapExpectation):
         "column_B",
     )
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
+    def validate_configuration(self) -> None:
+        super().validate_configuration()
+        configuration = self.configuration
         try:
             assert (
                 "column_A" in configuration.kwargs

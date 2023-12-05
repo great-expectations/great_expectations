@@ -470,7 +470,7 @@ class ExpectTableChecksumToEqualOtherTable(BatchExpectation):
                 ), "ignore_columns input is not valid. Please provide comma seperated columns list"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        super().validate_configuration(configuration)
+        super().validate_configuration()
         return True
 
     @classmethod

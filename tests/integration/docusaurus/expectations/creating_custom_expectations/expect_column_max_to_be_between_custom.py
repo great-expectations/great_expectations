@@ -152,22 +152,18 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
     }
 
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py validate_config">
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
+    def validate_configuration(self) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
+
         Returns:
             None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
 
         # Setting up a configuration
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
+        super().validate_configuration()
+        configuration = self.configuration
         # </snippet>
 
         # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py validate_config_params">

@@ -271,7 +271,7 @@ class ExpectColumnValuesGeometryDistanceToAddressToBeBetween(ColumnMapExpectatio
             True if the configuration has been validated successfully. Otherwise, raises an exception
         """
 
-        super().validate_configuration(configuration)
+        super().validate_configuration()
         configuration = configuration or self.configuration
 
         min_val = None

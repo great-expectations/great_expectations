@@ -1,11 +1,11 @@
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.core.evaluation_parameters import EvaluationParameterDict
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -88,6 +88,11 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         [expect_column_value_lengths_to_equal](https://greatexpectations.io/expectations/expect_column_value_lengths_to_equal)
     """
 
+    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    strict_min: bool = False
+    strict_max: bool = False
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
@@ -123,58 +128,6 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "min_value",
         "max_value",
     )
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Validates the configuration of an Expectation.
-
-        For `expect_column_value_lengths_to_be_between` it is required that the `configuration.kwargs` contain
-        `min_value` and/or `max_value`; both cannot be None.  Both `min_value` and `max_value` may be either an integer
-        or a `dict`; if a `dict`, it must include `$PARAMETER` as a key.
-
-         The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
-         superclass hierarchy.
-
-        Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
-                from the configuration attribute of the Expectation instance.
-
-        Raises:
-            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                Expectation.
-        """
-        super().validate_configuration(configuration)
-
-        configuration = configuration or self.configuration
-
-        try:
-            assert (
-                configuration.kwargs.get("min_value") is not None
-                or configuration.kwargs.get("max_value") is not None
-            ), "min_value and max_value cannot both be None"
-            if configuration.kwargs.get("min_value"):
-                assert (
-                    isinstance(configuration.kwargs["min_value"], dict)
-                    or float(configuration.kwargs.get("min_value")).is_integer()
-                ), "min_value and max_value must be integers"
-                if isinstance(configuration.kwargs.get("min_value"), dict):
-                    assert "$PARAMETER" in configuration.kwargs.get(
-                        "min_value"
-                    ), 'Evaluation Parameter dict for min_value kwarg must have "$PARAMETER" key.'
-
-            if configuration.kwargs.get("max_value"):
-                assert (
-                    isinstance(configuration.kwargs["max_value"], dict)
-                    or float(configuration.kwargs.get("max_value")).is_integer()
-                ), "min_value and max_value must be integers"
-                if isinstance(configuration.kwargs.get("max_value"), dict):
-                    assert "$PARAMETER" in configuration.kwargs.get(
-                        "max_value"
-                    ), 'Evaluation Parameter dict for max_value kwarg must have "$PARAMETER" key.'
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
     def _prescriptive_template(  # noqa: PLR0912

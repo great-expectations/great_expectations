@@ -1,15 +1,12 @@
 import logging
 from abc import ABC
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.exceptions.exceptions import (
-    InvalidExpectationConfigurationError,
-)
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -105,13 +102,15 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
     Args:
         set_camel_name (str): A name describing a set of values, in camel case.
-        set_ (str): A value set.
+        set_ (set | list | tuple): A value set.
         set_semantic_name (optional[str]): A name for the semantic type representing the set being validated..
         map_metric (str): The name of an ephemeral metric, as returned by `register_metric(...)`.
 
     ---Documentation---
         - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations
     """
+
+    set_: Union[set, list, tuple]
 
     @staticmethod
     def register_metric(
@@ -141,38 +140,6 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         )
 
         return map_metric
-
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Raise an exception if the configuration is not viable for an expectation.
-
-        Args:
-            configuration: An ExpectationConfiguration
-
-        Raises:
-            InvalidExpectationConfigurationError: If no `set_` or `column` specified, or if `mostly` parameter
-                incorrectly defined.
-        """
-        super().validate_configuration(configuration)
-        try:
-            assert (
-                getattr(self, "set_", None) is not None
-            ), "set_ is required for SetBasedColumnMap Expectations"
-
-            assert (
-                "column" in configuration.kwargs
-            ), "'column' parameter is required for ColumnMap expectations"
-
-            if "mostly" in configuration.kwargs:
-                mostly = configuration.kwargs["mostly"]
-                assert isinstance(
-                    mostly, (int, float)
-                ), "'mostly' parameter must be an integer or float"
-                assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
-
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     # question, descriptive, prescriptive, diagnostic
     @classmethod

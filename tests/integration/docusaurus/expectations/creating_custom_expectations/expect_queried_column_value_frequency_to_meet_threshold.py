@@ -4,7 +4,7 @@ For detailed information on QueryExpectations, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
 """
 
-from typing import Optional, Union
+from typing import Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
@@ -56,10 +56,9 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         "query": query,
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        super().validate_configuration(configuration)
+    def validate_configuration(self) -> None:
+        super().validate_configuration()
+        configuration = self.configuration
         value = configuration["kwargs"].get("value")
         threshold = configuration["kwargs"].get("threshold")
 

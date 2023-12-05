@@ -216,7 +216,7 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
             `InvalidExpectationConfigurationError`: The configuration does \
                 not contain the values required by the Expectation."
         """
-        super().validate_configuration(configuration)
+        super().validate_configuration()
 
         try:
             assert "column_list" in configuration.kwargs, "column_list is required"

@@ -46,7 +46,7 @@ class ExpectQueriedColumnPairValuesToHaveDiff(QueryExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        super().validate_configuration(configuration)
+        super().validate_configuration()
         diff = configuration["kwargs"].get("diff")
         mostly = configuration["kwargs"].get("mostly")
 

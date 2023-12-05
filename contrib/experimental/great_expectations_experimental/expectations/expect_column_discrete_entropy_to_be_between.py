@@ -279,7 +279,7 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
         Returns:
             None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
-        super().validate_configuration(configuration)
+        super().validate_configuration()
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod

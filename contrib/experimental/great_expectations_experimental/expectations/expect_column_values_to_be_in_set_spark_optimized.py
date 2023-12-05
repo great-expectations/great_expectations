@@ -96,7 +96,7 @@ class ExpectColumnValuesToBeInSetSparkOptimized(ColumnAggregateExpectation):
             None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
 
-        super().validate_configuration(configuration)
+        super().validate_configuration()
         configuration = configuration or self.configuration
         value_set = configuration.kwargs.get("value_set") or self._get_default_value(
             "value_set"

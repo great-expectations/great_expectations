@@ -7,9 +7,6 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.exceptions.exceptions import (
-    InvalidExpectationConfigurationError,
-)
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -122,6 +119,8 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         map_metric (str): The name of an ephemeral metric, as returned by `register_metric(...)`.
     """
 
+    regex: str
+
     @staticmethod
     def register_metric(
         regex_camel_name: str,
@@ -150,36 +149,6 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         )
 
         return map_metric
-
-    @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        """Raise an exception if the configuration is not viable for an expectation.
-
-        Args:
-            configuration: An ExpectationConfiguration
-
-        Raises:
-            InvalidExpectationConfigurationError: If no `regex` or `column` specified, or if `mostly` parameter
-                incorrectly defined.
-        """
-        super().validate_configuration(configuration)
-        try:
-            assert (
-                getattr(self, "regex", None) is not None
-            ), "regex is required for RegexBasedColumnMap Expectations"
-            assert (
-                "column" in configuration.kwargs
-            ), "'column' parameter is required for column map expectations"
-            if "mostly" in configuration.kwargs:
-                mostly = configuration.kwargs["mostly"]
-                assert isinstance(
-                    mostly, (int, float)
-                ), "'mostly' parameter must be an integer or float"
-                assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     # question, descriptive, prescriptive, diagnostic
     @classmethod

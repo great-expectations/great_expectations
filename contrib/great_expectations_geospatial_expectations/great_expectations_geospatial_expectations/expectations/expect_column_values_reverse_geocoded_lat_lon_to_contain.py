@@ -85,7 +85,7 @@ class ExpectColumnValuesReverseGeocodedLatLonToContain(ColumnMapExpectation):
         """
 
         # Setting up a configuration
-        super().validate_configuration(configuration)
+        super().validate_configuration()
         if configuration is None:
             configuration = cls.configuration
 

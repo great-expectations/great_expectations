@@ -217,7 +217,7 @@ class ExpectTableBinaryLabelModelBias(BatchExpectation):
             None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
 
-        super().validate_configuration(configuration)
+        super().validate_configuration()
         configuration = configuration or self.configuration
 
         #        columns = configuration.kwargs.get("important_columns")
@@ -244,7 +244,7 @@ class ExpectTableBinaryLabelModelBias(BatchExpectation):
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        super().validate_configuration(configuration)
+        super().validate_configuration()
 
     def _validate(
         self,

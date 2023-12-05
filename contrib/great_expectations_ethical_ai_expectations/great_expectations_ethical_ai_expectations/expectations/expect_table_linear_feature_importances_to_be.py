@@ -149,7 +149,7 @@ class ExpectTableLinearFeatureImportancesToBe(BatchExpectation):
             None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
 
-        super().validate_configuration(configuration)
+        super().validate_configuration()
         configuration = configuration or self.configuration
 
         n_features = configuration.kwargs.get("n_features")
@@ -177,7 +177,7 @@ class ExpectTableLinearFeatureImportancesToBe(BatchExpectation):
             assert isinstance(y_column, str), "y_column must be a string column name"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        super().validate_configuration(configuration)
+        super().validate_configuration()
 
     def _validate(
         self,

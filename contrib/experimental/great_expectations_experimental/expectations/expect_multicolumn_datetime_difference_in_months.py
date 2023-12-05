@@ -187,7 +187,7 @@ class ExpectMulticolumnDatetimeDifferenceInMonths(MulticolumnMapExpectation):
             None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
 
-        super().validate_configuration(configuration)
+        super().validate_configuration()
         configuration = configuration or self.configuration
 
         start_datetime = configuration.kwargs["start_datetime"]

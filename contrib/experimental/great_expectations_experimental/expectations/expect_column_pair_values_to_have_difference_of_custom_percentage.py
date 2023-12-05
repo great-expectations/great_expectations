@@ -113,7 +113,7 @@ class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(
         Returns:
             None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
-        super().validate_configuration(configuration)
+        super().validate_configuration()
 
         mostly = configuration.kwargs["mostly"]
         percentage = configuration.kwargs["percentage"]

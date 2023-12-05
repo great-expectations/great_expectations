@@ -46,7 +46,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        super().validate_configuration(configuration)
+        super().validate_configuration()
         value = configuration["kwargs"].get("value")
 
         try:

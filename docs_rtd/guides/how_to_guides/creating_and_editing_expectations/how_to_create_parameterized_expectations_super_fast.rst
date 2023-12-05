@@ -43,7 +43,7 @@ Additional Notes
 .. code-block:: python
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-        super().validate_configuration(configuration)
+        super().validate_configuration()
         assert "min_value" not in configuration.kwargs, "min_value cannot be altered"
         assert "max_value" not in configuration.kwargs, "max_value cannot be altered"
         assert "strict_min" not in configuration.kwargs, "strict_min cannot be altered"

@@ -112,7 +112,7 @@ class ExpectColumnPairValuesLatLngMatchesGeohash(ColumnPairMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
-        super().validate_configuration(configuration)
+        super().validate_configuration()
         configuration = configuration or self.configuration
         try:
             assert (

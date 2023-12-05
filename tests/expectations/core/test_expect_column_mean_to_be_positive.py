@@ -18,8 +18,9 @@ class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
 
     # </snippet>
     # <snippet name="tests/expectations/core/test_expect_column_mean_to_be_positive.py validate_config">
-    def validate_configuration(self, configuration):
-        super().validate_configuration(configuration)
+    def validate_configuration(self):
+        super().validate_configuration()
+        configuration = self.configuration
         assert "min_value" not in configuration.kwargs, "min_value cannot be altered"
         assert "max_value" not in configuration.kwargs, "max_value cannot be altered"
         assert "strict_min" not in configuration.kwargs, "strict_min cannot be altered"

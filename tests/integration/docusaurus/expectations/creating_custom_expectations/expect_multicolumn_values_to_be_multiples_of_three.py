@@ -1,7 +1,4 @@
-from typing import Optional
-
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -104,11 +101,9 @@ class ExpectMulticolumnValuesToBeMultiplesOfThree(MulticolumnMapExpectation):
     }
     args_keys = ("column_list",)
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
-        super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
+    def validate_configuration(self) -> None:
+        super().validate_configuration()
+        configuration = self.configuration
 
         try:
             assert "column_list" in configuration.kwargs, "column_list must be provided"

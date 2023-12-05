@@ -216,7 +216,7 @@ class ExpectColumnValuesToMatchPowersOfBase(ColumnMapExpectation):
             None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
 
-        super().validate_configuration(configuration)
+        super().validate_configuration()
         configuration = configuration or self.configuration
 
         base_integer = configuration.kwargs["base_integer"]

@@ -1048,13 +1048,11 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     def metrics_validate(
         self,
         metrics: dict,
-        configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         **kwargs: dict,
     ) -> ExpectationValidationResult:
-        if not configuration:
-            configuration = self.configuration
+        configuration = self.configuration
 
         if runtime_configuration is None:
             runtime_configuration = {}
@@ -1176,17 +1174,14 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         return domain_kwargs
 
     @public_api
-    def get_success_kwargs(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> Dict[str, Any]:
+    def get_success_kwargs(self) -> Dict[str, Any]:
         """Retrieve the success kwargs.
 
         Args:
             configuration: The `ExpectationConfiguration` that contains the kwargs. If no configuration arg is provided,
                 the success kwargs from the configuration attribute of the Expectation instance will be returned.
         """
-        if not configuration:
-            configuration = self.configuration
+        configuration = self.configuration
 
         domain_kwargs: Dict[str, Optional[str]] = self.get_domain_kwargs(
             configuration=configuration
@@ -1200,11 +1195,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     def get_runtime_kwargs(
         self,
-        configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> dict:
-        if not configuration:
-            configuration = self.configuration
+        configuration = self.configuration
 
         configuration = deepcopy(configuration)
 
@@ -1244,9 +1237,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         return result_format
 
     @public_api
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
+    def validate_configuration(self) -> None:
         pass  # no-op
 
     # Renamed from validate due to collision with Pydantic method of the same name
@@ -1254,7 +1245,6 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     def validate_(  # noqa: PLR0913
         self,
         validator: Validator,
-        configuration: Optional[ExpectationConfiguration] = None,
         evaluation_parameters: Optional[dict] = None,
         interactive_evaluation: bool = True,
         data_context: Optional[AbstractDataContext] = None,
@@ -1275,8 +1265,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         Returns:
             An ExpectationValidationResult object
         """
-        if not configuration:
-            configuration = deepcopy(self.configuration)
+        configuration = deepcopy(self.configuration)
 
         # issue warnings if necessary
         self._warn_if_result_format_config_in_runtime_configuration(
@@ -2463,9 +2452,7 @@ class QueryExpectation(BatchExpectation, ABC):
     )
 
     @override
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ) -> None:
+    def validate_configuration(self) -> None:
         """Raises an exception if the configuration is not viable for an expectation.
 
         Args:
@@ -2475,9 +2462,8 @@ class QueryExpectation(BatchExpectation, ABC):
               InvalidExpectationConfigurationError: If no `query` is specified
               UserWarning: If query is not parameterized, and/or row_condition is passed.
         """
-        super().validate_configuration(configuration=configuration)
-        if not configuration:
-            configuration = self.configuration
+        super().validate_configuration()
+        configuration = self.configuration
 
         query: Optional[Any] = configuration.kwargs.get(
             "query"
