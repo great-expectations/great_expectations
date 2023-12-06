@@ -113,18 +113,6 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "mostly",
     )
 
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "min_value": None,
-        "max_value": None,
-        "strict_min": False,
-        "strict_max": False,  # tolerance=1e-9,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-        "meta": None,
-    }
     args_keys = (
         "column",
         "min_value",

@@ -73,13 +73,6 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         "column_set",
         "exact_match",
     )
-
-    default_kwarg_values = {
-        "column_set": None,
-        "exact_match": True,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
     args_keys = (
         "column_set",
         "exact_match",

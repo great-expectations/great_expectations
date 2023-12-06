@@ -89,14 +89,6 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
         "min_value",
         "max_value",
     )
-
-    default_kwarg_values = {
-        "min_value": None,
-        "max_value": None,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-        "meta": None,
-    }
     args_keys = (
         "min_value",
         "max_value",

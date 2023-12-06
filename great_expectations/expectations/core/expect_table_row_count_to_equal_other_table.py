@@ -79,11 +79,6 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
 
     metric_dependencies = ("table.row_count",)
     success_keys = ("other_table_name",)
-    default_kwarg_values = {
-        "other_table_name": None,
-        "result_format": "BASIC",
-        "catch_exceptions": False,
-    }
     args_keys = ("other_table_name",)
 
     @classmethod

@@ -146,15 +146,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         "allow_relative_error",
     )
 
-    default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,
-        "quantile_ranges": None,
-        "result_format": "BASIC",
-        "allow_relative_error": False,
-        "catch_exceptions": False,
-        "meta": None,
-    }
     args_keys = (
         "column",
         "quantile_ranges",
