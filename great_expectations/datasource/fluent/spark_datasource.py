@@ -65,14 +65,6 @@ class SparkDatasourceError(Exception):
     pass
 
 
-@deprecated_argument(
-    argument_name="force_reuse_spark_context",
-    version="1.0",
-    message="force_reuse_spark_context is deprecated and will be removed in version 1.0. "
-    "In environments that allow it, the existing Spark context will be reused, adding the "
-    "spark_config options that have been passed. If the Spark context cannot be updated with "
-    "the spark_config, the context will be stopped and restarted with the new spark_config.",
-)
 class _SparkDatasource(Datasource):
     # instance attributes
     spark_config: Union[SparkConfig, None] = None
