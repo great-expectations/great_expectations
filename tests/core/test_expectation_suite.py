@@ -372,16 +372,9 @@ class TestCRUDMethods:
             expectation_suite_name=self.expectation_suite_name,
             expectations=[old_expectation_configuration],
         )
-        store_key = context.expectations_store.get_key.return_value
 
-        # todo: this is the correct pattern, but depends on PR 9040
-        # expectation = suite.expectations[0]
-        # expectation.column = "b"
-        expectation = ExpectColumnValuesToBeInSet(
-            column="b",
-            value_set=[1, 2, 3],
-            result_format="BASIC",
-        )
+        expectation = suite.expectations[0]
+        expectation.column = "b"
 
         expectation = suite.update_by_identity(
             identity=id(old_expectation_configuration), expectation=expectation
@@ -389,10 +382,6 @@ class TestCRUDMethods:
 
         assert len(suite.expectations) == 1, "Method must replace expectation"
         assert suite.expectations[0].column == expectation.column
-        # expect that the data context is kept in sync
-        context.expectations_store.add_or_update.assert_called_once_with(
-            key=store_key, value=suite
-        )
 
     @pytest.mark.unit
     def test_update_by_identity_persists_saved_suite(self, expectation):
@@ -406,14 +395,8 @@ class TestCRUDMethods:
         )
         store_key = context.expectations_store.get_key.return_value
 
-        # todo: this is the correct pattern, but depends on PR 9040
-        # expectation = suite.expectations[0]
-        # expectation.column = "b"
-        expectation = ExpectColumnValuesToBeInSet(
-            column="b",
-            value_set=[1, 2, 3],
-            result_format="BASIC",
-        )
+        expectation = suite.expectations[0]
+        expectation.column = "b"
 
         suite.update_by_identity(
             identity=id(old_expectation_configuration), expectation=expectation
@@ -435,14 +418,8 @@ class TestCRUDMethods:
             expectations=[old_expectation_configuration],
         )
 
-        # todo: this is the correct pattern, but depends on PR 9040
-        # expectation = suite.expectations[0]
-        # expectation.column = "b"
-        expectation = ExpectColumnValuesToBeInSet(
-            column="b",
-            value_set=[1, 2, 3],
-            result_format="BASIC",
-        )
+        expectation = suite.expectations[0]
+        expectation.column = "b"
 
         suite.update_by_identity(
             identity=id(old_expectation_configuration), expectation=expectation
@@ -460,14 +437,8 @@ class TestCRUDMethods:
             expectations=[],
         )
 
-        # todo: this is the correct pattern, but depends on PR 9040
-        # expectation = suite.expectations[0]
-        # expectation.column = "b"
-        expectation = ExpectColumnValuesToBeInSet(
-            column="b",
-            value_set=[1, 2, 3],
-            result_format="BASIC",
-        )
+        expectation = suite.expectations[0]
+        expectation.column = "b"
 
         with pytest.raises(
             KeyError, match="Cannot update Expectation because it was not found."
@@ -510,14 +481,8 @@ class TestCRUDMethods:
             ConnectionError()
         )  # arbitrary exception
 
-        # todo: this is the correct pattern, but depends on PR 9040
-        # expectation = suite.expectations[0]
-        # expectation.column = "b"
-        expectation = ExpectColumnValuesToBeInSet(
-            column="b",
-            value_set=[1, 2, 3],
-            result_format="BASIC",
-        )
+        expectation = suite.expectations[0]
+        expectation.column = "b"
 
         with pytest.raises(ConnectionError):
             suite.update_by_identity(
@@ -536,34 +501,19 @@ class TestCRUDMethods:
         suite = ExpectationSuite(expectation_suite_name=self.expectation_suite_name)
         context.expectations_store.has_key.return_value = True
 
-        expectation_a = suite.add(expectation=expectation)
+        expectation = suite.add(expectation=expectation)
 
-        # todo: this is the correct pattern, but depends on PR 9040
-        # expectation = suite.expectations[0]
-        # expectation.column = "b"
-        expectation_b = ExpectColumnValuesToBeInSet(
-            column="b",
-            value_set=[1, 2, 3],
-            result_format="BASIC",
-        )
-        expectation_b = expectation_a.transfer_save_callback(expectation_b)
+        expectation.column = "b"
 
         assert suite.expectations[0].column == "a"
-        expectation_b.save()
+        expectation.save()
         assert suite.expectations[0].column == "b"
 
-        # todo: this is the correct pattern, but depends on PR 9040
-        # expectation = suite.expectations[0]
-        # expectation.column = "b"
-        expectation_c = ExpectColumnValuesToBeInSet(
-            column="c",
-            value_set=[1, 2, 3],
-            result_format="BASIC",
-        )
-        expectation_c = expectation_b.transfer_save_callback(expectation_c)
+        expectation = suite.expectations[0]
+        expectation.column = "b"
 
         assert suite.expectations[0].column == "b"
-        expectation_c.save()
+        expectation.save()
         assert suite.expectations[0].column == "c"
 
 
