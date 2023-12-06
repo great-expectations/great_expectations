@@ -340,6 +340,8 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     expectation_type: ClassVar[str]
     examples: ClassVar[List[dict]] = []
 
+    _save_callback: Union[Callable[[Expectation], None], None] = None
+
     def __init__(
         self,
         id: str | None = None,
@@ -2280,6 +2282,21 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             maturity = Maturity.EXPERIMENTAL
 
         return maturity
+
+    def register_save_callback(self, callback: Callable[[Expectation], None]) -> None:
+        """Provide the Expectation with a callback used to save the Expectation configuration."""
+        if self._save_callback:
+            raise RuntimeError("Expectation already has a `save_callback` registered.")
+        self._save_callback = callback
+
+    @public_api
+    def save(self):
+        """Save this Expectation."""
+        if not self._save_callback:
+            raise RuntimeError(
+                "Expectation must be added to an ExpectationSuite before it can be saved."
+            )
+        self._save_callback(self)
 
 
 @public_api
