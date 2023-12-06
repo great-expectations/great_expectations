@@ -168,8 +168,8 @@ def test_instantiation_via_fluent_data_sources_with_kwargs(
 
     execution_engine = datasource.get_execution_engine()
     assert execution_engine.connection_string == connection_string
-    # kwargs should be passed through as keyword arguments to create_engine
-    assert execution_engine.config["connect_args"] == {"check_same_thread": False}
+    # the execution engine should have the same engine as the datasource
+    assert execution_engine.engine is engine
     assert execution_engine.config["class_name"] == "SqlAlchemyExecutionEngine"
     assert execution_engine.config["connection_string"] == connection_string
     assert execution_engine.engine
